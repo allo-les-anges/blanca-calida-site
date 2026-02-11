@@ -1,0 +1,21 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-primary: #1a2a3a;
+  --color-brand-secondary: #c5a358;
+  --font-serif: "Playfair Display", serif;
+}
+
+:root {
+  --brand-primary: #1a2a3a;
+  --brand-secondary: #c5a358;
+}
+
+body {
+  background-color: white;
+  color: #0f172a; /* slate-900 */
+}
+
+h1, h2, h3, .font-serif {
+  font-family: var(--font-serif);
+}
