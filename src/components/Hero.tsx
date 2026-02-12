@@ -7,9 +7,24 @@ export default function Hero({ onSearch }: { onSearch: (f: any) => void }) {
 
   return (
     <section className="relative h-[90vh] w-full flex items-center justify-center overflow-hidden">
-      <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover brightness-[0.5]">
-        <source src="https://res.cloudinary.com/dcbofid9h/video/upload/v1615471900/luxury-villa_znd6sq.mp4" type="video/mp4" />
-      </video>
+      <video 
+  autoPlay 
+  muted 
+  loop 
+  playsInline 
+  preload="auto"
+  className="absolute inset-0 w-full h-full object-cover brightness-[0.5]"
+>
+  <source 
+    src="https://res.cloudinary.com/dcbofid9h/video/upload/v1615471900/luxury-villa_znd6sq.mp4" 
+    type="video/mp4" 
+  />
+  {/* Option de secours si le lien Cloudinary est capricieux */}
+  <source 
+    src="https://assets.mixkit.co/videos/preview/mixkit-modern-villa-with-a-swimming-pool-at-sunset-28543-large.mp4" 
+    type="video/mp4" 
+  />
+</video>
 
       <div className="relative z-10 text-center px-4">
         <h1 className="text-white text-4xl md:text-7xl font-serif mb-6 tracking-tight leading-tight">
@@ -31,6 +46,7 @@ export default function Hero({ onSearch }: { onSearch: (f: any) => void }) {
           </select>
           
           <input 
+            suppressHydrationWarning
             type="text" 
             placeholder="DESTINATION" 
             onChange={(e) => setLocalFilters({...localFilters, town: e.target.value})}
@@ -38,6 +54,7 @@ export default function Hero({ onSearch }: { onSearch: (f: any) => void }) {
           />
 
           <select 
+            suppressHydrationWarning
             onChange={(e) => setLocalFilters({...localFilters, maxPrice: e.target.value})}
             className="p-4 bg-gray-50 text-[11px] font-bold uppercase tracking-widest outline-none border-l border-gray-100"
           >
@@ -48,6 +65,7 @@ export default function Hero({ onSearch }: { onSearch: (f: any) => void }) {
           </select>
 
           <button 
+            suppressHydrationWarning
             onClick={() => onSearch(localFilters)}
             className="bg-brand-primary text-white p-4 font-bold uppercase text-[11px] tracking-[0.2em] hover:bg-brand-secondary transition-all"
           >
