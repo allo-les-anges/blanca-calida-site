@@ -23,6 +23,7 @@ export default function PropertyGrid({ activeFilters }: { activeFilters: any }) 
   }, []);
 
   useEffect(() => {
+    console.log("Filtres reçus:", activeFilters);
     let result = [...allProperties];
 
     // 1. FILTRE PAR TYPE (Version souple)
@@ -71,7 +72,7 @@ export default function PropertyGrid({ activeFilters }: { activeFilters: any }) 
     setFilteredProps(result);
     setVisibleCount(12);
   }, [activeFilters, allProperties]);
-  
+
   if (loading) return <div className="text-center py-40 font-serif uppercase tracking-widest text-brand-primary animate-pulse">Curating your selection...</div>;
 
   const displayedProps = filteredProps.slice(0, visibleCount);
