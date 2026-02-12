@@ -5,23 +5,19 @@ interface RegionGridProps {
   onRegionClick: (townName: string) => void;
 }
 
-// Images par défaut si la ville n'est pas dans notre liste prédéfinie
-const cityImages: { [key: string]: string } = {
-  "javea": "https://images.unsplash.com/photo-1506158669146-619067262a00?q=80&w=800",
-  "moraira": "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=800",
-  "benissa": "https://images.unsplash.com/photo-1613490493576-7fde63acd811?q=80&w=800",
-  "denia": "https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?q=80&w=800",
-  "calpe": "https://images.unsplash.com/photo-1589779261092-903f362898ad?q=80&w=800",
-  "altea": "https://images.unsplash.com/photo-1544085311-11a028465b03?q=80&w=800"
-};
+// Sélection d'images de paysages méditerranéens génériques mais luxueux
+const landscapeImages = [
+  "https://images.unsplash.com/photo-1506158669146-619067262a00?q=80&w=1200", // Vue mer & falaise
+  "https://images.unsplash.com/photo-1515238152791-8216bfdf89a7?q=80&w=1200", // Plage paradisiaque
+  "https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?q=80&w=1200", // Architecture blanche & mer
+  "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?q=80&w=1200", // Piscine à débordement au coucher du soleil
+];
 
 export default function RegionGrid({ properties, onRegionClick }: RegionGridProps) {
   
-  // --- LOGIQUE D'EXTRACTION DES TOPS RÉGIONS ---
   const getTopRegions = () => {
     const counts: { [key: string]: number } = {};
     
-    // 1. On compte les occurrences de chaque ville
     properties.forEach(p => {
       if (p.town) {
         const name = p.town.trim();
@@ -29,14 +25,14 @@ export default function RegionGrid({ properties, onRegionClick }: RegionGridProp
       }
     });
 
-    // 2. On transforme en tableau, on trie par le plus grand nombre, et on prend les 4 premiers
     return Object.entries(counts)
       .sort(([, a], [, b]) => b - a)
       .slice(0, 4)
-      .map(([name, count]) => ({
+      .map(([name, count], index) => ({
         name,
         count,
-        img: cityImages[name.toLowerCase()] || "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=800"
+        // On attribue une image de paysage différente pour chaque index (0 à 3)
+        img: landscapeImages[index]
       }));
   };
 
@@ -44,27 +40,31 @@ export default function RegionGrid({ properties, onRegionClick }: RegionGridProp
 
   return (
     <section className="py-20 px-4 max-w-7xl mx-auto">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
         {topRegions.map((region) => (
           <div 
             key={region.name} 
             className="group cursor-pointer"
             onClick={() => onRegionClick(region.name)}
           >
-            <div className="relative h-[400px] overflow-hidden mb-4 shadow-sm">
+            <div className="relative h-[500px] overflow-hidden mb-6 shadow-2xl">
               <img 
                 src={region.img} 
                 alt={region.name}
                 className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
               />
-              <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors flex items-center justify-center">
-                 <span className="text-white text-[10px] uppercase tracking-[0.3em] font-bold opacity-0 group-hover:opacity-100 transition-opacity border border-white/40 px-4 py-2 backdrop-blur-sm">
+              <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                 <span className="text-white text-[10px] uppercase tracking-[0.4em] font-bold opacity-0 group-hover:opacity-100 transition-opacity border border-white/40 px-6 py-3 backdrop-blur-md">
                     Voir les propriétés
                  </span>
               </div>
             </div>
-            <h3 className="text-center font-serif text-2xl text-slate-800 italic">Villas à {region.name}</h3>
-            <p className="text-center text-slate-400 text-[10px] mt-2 tracking-widest uppercase font-bold">
+            
+            {/* Style Typographique Luxueux */}
+            <h3 className="text-center font-serif text-3xl text-brand-primary">
+              Villas à {region.name}
+            </h3>
+            <p className="text-center text-slate-400 text-[10px] mt-3 tracking-[0.3em] uppercase font-bold">
               {region.count} {region.count > 1 ? 'propriétés' : 'propriété'}
             </p>
           </div>
