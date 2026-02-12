@@ -18,12 +18,18 @@ export default function Navbar() {
 </Link>
       
       {/* MENU CENTRAL */}
-      <div className="hidden md:flex space-x-10 font-bold uppercase text-[10px] tracking-[0.4em] text-white/90 group-hover:text-slate-600 transition-colors">
-        <Link href="/" className="hover:text-brand-secondary transition">Accueil</Link>
-        <a href="#" className="hover:text-brand-secondary transition">Vente</a>
-        <a href="#" className="hover:text-brand-secondary transition">Neuf</a>
-        <a href="#" className="hover:text-brand-secondary transition">Contact</a>
-      </div>
+      <div className="hidden md:flex space-x-8 font-serif uppercase text-[11px] tracking-[0.2em] text-white/90 group-hover:text-slate-800 transition-colors">
+  <Link href="/proprietes" className="hover:text-brand-secondary transition">Propriétés</Link>
+  <Link href="/confidentiel" className="hover:text-brand-secondary transition">Confidentiel</Link>
+  <Link href="/investissement" className="hover:text-brand-secondary transition">Investissement</Link>
+  <div className="flex items-center cursor-pointer hover:text-brand-secondary transition">
+    SERVICES <span className="ml-1 text-[8px]">▼</span>
+  </div>
+  <div className="flex items-center cursor-pointer hover:text-brand-secondary transition">
+    À PROPOS <span className="ml-1 text-[8px]">▼</span>
+  </div>
+  <Link href="/contact" className="hover:text-brand-secondary transition">Contact</Link>
+</div>
 
       {/* ACTIONS DROITE */}
       <div className="flex items-center space-x-6 text-white group-hover:text-slate-900 transition-colors">
