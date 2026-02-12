@@ -19,3 +19,22 @@ body {
 h1, h2, h3, .font-serif {
   font-family: var(--font-serif);
 }
+
+/* Cacher la bannière Google en haut */
+.goog-te-banner-frame.skiptranslate { display: none !important; }
+body { top: 0px !important; }
+
+/* Style du widget pour correspondre à Blanca Calida */
+#google_translate_element {
+  font-family: serif;
+}
+
+.goog-te-gadget-simple {
+  background-color: transparent !important;
+  border: none !important;
+  font-size: 10px !important;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+}
+
+.goog-te-gadget-icon { display: none; }
