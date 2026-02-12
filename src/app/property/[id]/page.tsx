@@ -2,7 +2,7 @@
 
 import { useEffect, useState, use } from "react";
 import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer"; // Ajout du footer pour la cohérence
+import Footer from "@/components/Footer";
 import { Bed, Bath, Maximize, MapPin, ChevronLeft, ChevronRight, MessageCircle, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
@@ -50,43 +50,29 @@ export default function PropertyDetail({ params }: { params: Promise<{ id: strin
   return (
     <main className="bg-white min-h-screen">
       <Navbar />
-      
-      {/* ESPACE NAVBAR */}
       <div className="h-24 md:h-28"></div>
 
-      {/* BOUTON RETOUR DISCRET */}
       <div className="max-w-7xl mx-auto px-6 py-4">
         <Link href="/" className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.3em] text-gray-400 hover:text-brand-primary transition-colors group">
           <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform"/> Retour à la collection
         </Link>
       </div>
 
-      {/* GALERIE PHOTO STYLE LUXE */}
+      {/* GALERIE PHOTO */}
       <section className="relative h-[65vh] md:h-[80vh] bg-black overflow-hidden group/gallery">
         <img 
           src={property.images[activeImage]} 
           className="w-full h-full object-contain md:object-cover"
           alt={property.title}
         />
-        
-        {/* Overlays de navigation */}
         <div className="absolute inset-0 flex items-center justify-between px-4 md:px-8 opacity-0 group-hover/gallery:opacity-100 transition-opacity duration-500">
-          <button 
-            suppressHydrationWarning
-            onClick={() => setActiveImage(prev => prev > 0 ? prev - 1 : property.images.length - 1)}
-            className="p-4 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full text-white hover:bg-white hover:text-brand-primary transition-all shadow-2xl"
-          >
+          <button onClick={() => setActiveImage(prev => prev > 0 ? prev - 1 : property.images.length - 1)} className="p-4 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full text-white hover:bg-white hover:text-brand-primary transition-all shadow-2xl">
             <ChevronLeft size={28} />
           </button>
-          <button 
-            suppressHydrationWarning
-            onClick={() => setActiveImage(prev => prev < property.images.length - 1 ? prev + 1 : 0)}
-            className="p-4 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full text-white hover:bg-white hover:text-brand-primary transition-all shadow-2xl"
-          >
+          <button onClick={() => setActiveImage(prev => prev < property.images.length - 1 ? prev + 1 : 0)} className="p-4 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full text-white hover:bg-white hover:text-brand-primary transition-all shadow-2xl">
             <ChevronRight size={28} />
           </button>
         </div>
-
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 bg-black/40 backdrop-blur-md text-white px-5 py-2 text-[9px] tracking-[0.3em] font-bold border border-white/10 uppercase">
            {activeImage + 1} / {property.images.length} Photos
         </div>
@@ -127,19 +113,40 @@ export default function PropertyDetail({ params }: { params: Promise<{ id: strin
             </div>
           </div>
 
-          <div className="space-y-8">
-            <h2 className="text-2xl font-serif text-brand-primary uppercase tracking-widest border-l-2 border-brand-secondary pl-6">Description</h2>
-            <div className="text-gray-600 leading-relaxed text-lg font-light space-y-6">
-              <p>
-                Découvrez cette perle rare située à <strong>{property.town}</strong>. Ce bien de type {property.type.toLowerCase()} 
-                a été sélectionné par nos experts pour sa situation privilégiée et son potentiel exceptionnel.
-              </p>
-              <p className="text-sm text-gray-400 font-medium">Référence : {property.ref}</p>
+          <div className="space-y-16">
+            <div className="space-y-8">
+              <h2 className="text-2xl font-serif text-brand-primary uppercase tracking-widest border-l-2 border-brand-secondary pl-6">Description</h2>
+              <div className="text-gray-600 leading-relaxed text-lg font-light space-y-6">
+                <p>Découvrez cette perle rare située à <strong>{property.town}</strong>. Ce bien de type {property.type.toLowerCase()} a été sélectionné pour sa situation privilégiée.</p>
+                <p className="text-sm text-gray-400 font-medium">Référence : {property.ref}</p>
+              </div>
             </div>
+
+            {/* CARTE DE LOCALISATION (Nouvelle Section) */}
+            {property.coordinates && property.coordinates.lat && (
+              <div className="pt-16 border-t border-gray-100">
+                <h2 className="text-2xl font-serif text-brand-primary uppercase tracking-widest border-l-2 border-brand-secondary pl-6 mb-8">Localisation</h2>
+                <div className="h-[400px] w-full bg-gray-100 grayscale contrast-125 border border-gray-200">
+                  <iframe 
+                    width="100%" 
+                    height="100%" 
+                    frameBorder="0" 
+                    scrolling="no" 
+                    marginHeight={0} 
+                    marginWidth={0} 
+                    src={`https://maps.google.com/maps?q=${property.coordinates.lat},${property.coordinates.lng}&z=14&output=embed`}
+                    className="filter saturate-0 contrast-110"
+                  />
+                </div>
+                <p className="mt-4 text-[9px] text-gray-400 uppercase tracking-widest text-center">
+                  * Localisation approximative pour la confidentialité du bien
+                </p>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* BARRE LATÉRALE DE CONTACT (Sticky) */}
+        {/* BARRE LATÉRALE */}
         <div className="lg:col-span-1">
           <div className="sticky top-32 bg-white border border-gray-100 p-10 shadow-xl shadow-gray-100/50">
             <div className="mb-10 text-center lg:text-left">
@@ -150,26 +157,24 @@ export default function PropertyDetail({ params }: { params: Promise<{ id: strin
             </div>
 
             <div className="space-y-4">
-              <button 
-                suppressHydrationWarning
-                className="w-full bg-brand-primary text-white py-5 uppercase text-[10px] tracking-[0.3em] font-bold hover:bg-brand-secondary transition duration-500"
-              >
-                Planifier une visite
-              </button>
-              
-              <a 
-                suppressHydrationWarning
-                href={`https://wa.me/34600000000?text=Je suis intéressé par : ${property.title} (Ref: ${property.ref})`}
-                target="_blank"
-                className="w-full border border-gray-200 text-brand-primary py-5 uppercase text-[10px] tracking-[0.3em] font-bold hover:bg-brand-primary hover:text-white transition duration-500 flex items-center justify-center gap-3"
-              >
-                <MessageCircle size={18} /> WhatsApp
-              </a>
-            </div>
-            
-            <p className="mt-8 text-center text-[9px] text-gray-400 uppercase tracking-widest leading-loose">
-              Contactez un agent Blanca Calida <br/> pour plus d'informations
-            </p>
+  {/* Bouton Principal de Visite */}
+  <button className="w-full bg-brand-primary text-white py-5 uppercase text-[10px] tracking-[0.3em] font-bold hover:bg-brand-secondary transition duration-500 shadow-lg shadow-gray-200">
+    Planifier une visite
+  </button>
+  
+  {/* Lien WhatsApp avec votre numéro officiel */}
+  <a 
+    href={`https://wa.me/34627768233?text=${encodeURIComponent(
+      `Bonjour Blanca Calida, je souhaite obtenir plus d'informations sur la propriété : ${property.title} (Référence : ${property.ref}).`
+    )}`}
+    target="_blank"
+    rel="noopener noreferrer"
+    className="w-full border border-gray-200 text-brand-primary py-5 uppercase text-[10px] tracking-[0.3em] font-bold hover:bg-brand-primary hover:text-white transition duration-500 flex items-center justify-center gap-3 group"
+  >
+    <MessageCircle size={18} className="text-green-500 group-hover:text-white transition-colors" /> 
+    Contacter via WhatsApp
+  </a>
+</div>
           </div>
         </div>
       </section>

@@ -13,12 +13,12 @@ export default function Home() {
   // 1. L'état pour stocker toutes les propriétés du XML
   const [allProperties, setAllProperties] = useState([]);
   
-  // 2. L'état pour les filtres (avec les bons champs)
+  // 2. L'état pour les filtres
   const [filters, setFilters] = useState({
     type: "",
     town: "",
     beds: "",
-    minPrice: "",  // Ajouté
+    minPrice: "",
     maxPrice: "",
     reference: "" 
   });
@@ -27,7 +27,7 @@ export default function Home() {
   useEffect(() => {
     async function loadData() {
       try {
-        const res = await fetch("/api/properties"); // Ton API qui lit le XML
+        const res = await fetch("/api/properties"); 
         const data = await res.json();
         setAllProperties(data);
       } catch (err) {
@@ -41,10 +41,9 @@ export default function Home() {
     <main className="bg-white">
       <Navbar />
       
-      {/* SECTION HERO (Vidéo seule) */}
       <Hero />
       
-      {/* BARRE DE RECHERCHE (On lui passe les propriétés pour qu'elle soit dynamique) */}
+      {/* 4. Barre de recherche dynamique */}
       <AdvancedSearch 
         properties={allProperties} 
         onSearch={(newFilters) => {
@@ -62,9 +61,10 @@ export default function Home() {
         </h3>
       </section>
 
-      <RegionGrid />
+      {/* 5. MISE À JOUR ICI : On passe les propriétés pour les compteurs dynamiques */}
+      <RegionGrid properties={allProperties} />
 
-      {/* GRILLE DE BIENS (Elle reçoit les filtres pour filtrer l'affichage) */}
+      {/* 6. Grille de biens avec filtres actifs */}
       <div id="collection" className="bg-white py-20">
         <PropertyGrid activeFilters={filters} />
       </div>
