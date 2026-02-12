@@ -10,20 +10,11 @@ import Testimonials from "@/components/Testimonials";
 import Footer from "@/components/Footer";
 
 export default function Home() {
-  // 1. L'état pour stocker toutes les propriétés du XML
   const [allProperties, setAllProperties] = useState([]);
-  
-  // 2. L'état pour les filtres
   const [filters, setFilters] = useState({
-    type: "",
-    town: "",
-    beds: "",
-    minPrice: "",
-    maxPrice: "",
-    reference: "" 
+    type: "", town: "", beds: "", minPrice: "", maxPrice: "", reference: "" 
   });
 
-  // 3. Récupération des données au chargement de la page
   useEffect(() => {
     async function loadData() {
       try {
@@ -37,19 +28,24 @@ export default function Home() {
     loadData();
   }, []);
 
+  // 1. Cette fonction centralise la recherche et le scroll
+  const handleSearch = (newFilters: any) => {
+    setFilters(prev => ({ ...prev, ...newFilters }));
+    // Petit délai pour laisser React mettre à jour les filtres avant de scroller
+    setTimeout(() => {
+      document.getElementById('collection')?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+  };
+
   return (
     <main className="bg-white">
       <Navbar />
-      
       <Hero />
       
-      {/* 4. Barre de recherche dynamique */}
+      {/* 2. On branche la recherche */}
       <AdvancedSearch 
         properties={allProperties} 
-        onSearch={(newFilters) => {
-          setFilters(newFilters);
-          document.getElementById('collection')?.scrollIntoView({ behavior: 'smooth' });
-        }} 
+        onSearch={handleSearch} 
       />
 
       <section className="max-w-4xl mx-auto text-center py-24 px-6">
@@ -61,10 +57,12 @@ export default function Home() {
         </h3>
       </section>
 
-      {/* 5. MISE À JOUR ICI : On passe les propriétés pour les compteurs dynamiques */}
-      <RegionGrid properties={allProperties} />
+      {/* 3. On branche les régions : on lui donne les données ET la fonction de clic */}
+      <RegionGrid 
+        properties={allProperties} 
+        onRegionClick={(townName) => handleSearch({ town: townName })} 
+      />
 
-      {/* 6. Grille de biens avec filtres actifs */}
       <div id="collection" className="bg-white py-20">
         <PropertyGrid activeFilters={filters} />
       </div>
