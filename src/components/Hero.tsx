@@ -8,6 +8,7 @@ export default function Hero({ onSearch }: { onSearch: (f: any) => void }) {
   return (
     <section className="relative h-[90vh] w-full flex items-center justify-center overflow-hidden">
       <video 
+  key="hero-video-fixed" // Ajoute cette ligne
   autoPlay 
   muted 
   loop 
