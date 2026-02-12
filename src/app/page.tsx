@@ -28,13 +28,12 @@ export default function Home() {
     loadData();
   }, []);
 
-  // 1. Extraire les types de propriétés uniques dynamiquement
+  // Extraire les types dynamiquement pour les boutons
   const propertyTypes = useMemo(() => {
     const types = allProperties.map((p: any) => p.type).filter(Boolean);
     return Array.from(new Set(types)).sort();
   }, [allProperties]);
 
-  // 2. Gérer la recherche et le scroll
   const handleSearch = (newFilters: any) => {
     setFilters(prev => ({ ...prev, ...newFilters }));
     setTimeout(() => {
@@ -48,10 +47,10 @@ export default function Home() {
       <Hero />
       
       <AdvancedSearch 
-  properties={allProperties} 
-  onSearch={handleSearch} 
-  activeFilters={filters} // <-- C'est ici que la magie opère
-/>
+        properties={allProperties} 
+        onSearch={handleSearch} 
+        activeFilters={filters} 
+      />
 
       <section className="max-w-4xl mx-auto text-center py-24 px-6">
         <h2 className="text-brand-secondary text-[10px] uppercase tracking-[0.5em] font-bold mb-6">
@@ -62,13 +61,12 @@ export default function Home() {
         </h3>
       </section>
 
-      {/* Régions les plus populaires */}
       <RegionGrid 
         properties={allProperties} 
         onRegionClick={(townName) => handleSearch({ town: townName, type: "" })} 
       />
 
-      {/* --- NOUVEAU : FILTRES PAR TYPES DE PROPRIÉTÉS --- */}
+      {/* FILTRES RAPIDES PAR TYPE */}
       <div className="max-w-7xl mx-auto px-6 pt-20 border-t border-slate-100">
         <div className="flex flex-wrap justify-center gap-4 md:gap-8">
           <button
@@ -84,17 +82,16 @@ export default function Home() {
               key={type}
               onClick={() => handleSearch({ type: type })}
               className={`pb-2 text-[10px] uppercase tracking-[0.3em] font-bold transition-all border-b-2 ${
-                filters.type === type ? "border-brand-primary text-brand-primary" : "border-transparent text-slate-400 hover:text-brand-primary"
+                filters.type.toLowerCase() === type.toLowerCase() ? "border-brand-primary text-brand-primary" : "border-transparent text-slate-400 hover:text-brand-primary"
               }`}
             >
-              {type}s
+              {type}{type.toLowerCase().endsWith('s') ? '' : 's'}
             </button>
           ))}
         </div>
       </div>
 
       <div id="collection" className="bg-white py-20">
-        {/* On passe les filtres actifs à la grille qui gère déjà l'affichage filtré */}
         <PropertyGrid activeFilters={filters} />
       </div>
 
