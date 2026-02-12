@@ -10,7 +10,7 @@ export default function AdvancedSearch({ onSearch, properties = [], activeFilter
     setLocalFilters(activeFilters);
   }, [activeFilters]);
 
-  // 1. GÉNÉRATION DE LA LISTE DES VILLES
+  // 1. GÉNÉRATION DE LA LISTE DES VILLES (Basé sur le champ <town> du XML)
   const towns = useMemo(() => {
     if (!properties) return [];
     return Array.from(new Set(properties.map((p: any) => p.town)))
@@ -18,14 +18,14 @@ export default function AdvancedSearch({ onSearch, properties = [], activeFilter
       .sort();
   }, [properties]);
 
-  // 2. GÉNÉRATION DE LA LISTE DES TYPES (VILLA, APPARTEMENT, ETC.)
-  // On cherche dans tous les champs possibles car "type" renvoie souvent "Propriété" par défaut
+  // 2. GÉNÉRATION DE LA LISTE DES TYPES (Basé sur <type_name_fr> de ton XML Habihub)
   const types = useMemo(() => {
     if (!properties) return [];
     return Array.from(new Set(properties.map((p: any) => {
-      return p.type_name_fr || p.type_fr || p.category_name || p.property_type || p.type;
+      // Ton XML utilise type_name_fr pour "Villa", "Appartement", etc.
+      return p.type_name_fr || p.type_fr || p.category_name;
     })))
-    .filter(t => t && t !== "Propriété" && t !== "Property" && t !== "Indifférent")
+    .filter(t => t && t !== "Propriété" && t !== "Property")
     .sort();
   }, [properties]);
 
@@ -124,6 +124,7 @@ export default function AdvancedSearch({ onSearch, properties = [], activeFilter
 
         <div className="flex justify-between items-center">
           <button 
+            type="button"
             onClick={() => onSearch({ town: '', type: '', beds: '', minPrice: '', maxPrice: '', reference: '' })}
             className="flex items-center gap-2 text-gray-400 text-[10px] uppercase font-bold hover:text-gray-600 transition-colors"
           >
@@ -131,6 +132,7 @@ export default function AdvancedSearch({ onSearch, properties = [], activeFilter
           </button>
 
           <button 
+            type="button"
             onClick={() => onSearch(localFilters)} 
             className="bg-slate-900 text-white px-16 py-4 uppercase text-[10px] tracking-widest font-bold hover:bg-slate-800 transition-all flex items-center gap-3"
           >
