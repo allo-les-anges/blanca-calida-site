@@ -18,15 +18,24 @@ export default function AdvancedSearch({ onSearch, properties = [], activeFilter
       .sort();
   }, [properties]);
 
-  // 2. GÉNÉRATION DE LA LISTE DES TYPES (Basé sur <type_name_fr> de ton XML Habihub)
+  // GÉNÉRATION DE LA LISTE DES TYPES (MÉTHODE FORCE BRUTE)
   const types = useMemo(() => {
-    if (!properties) return [];
-    return Array.from(new Set(properties.map((p: any) => {
-      // Ton XML utilise type_name_fr pour "Villa", "Appartement", etc.
-      return p.type_name_fr || p.type_fr || p.category_name;
-    })))
-    .filter(t => t && t !== "Propriété" && t !== "Property")
-    .sort();
+    if (!properties || properties.length === 0) return [];
+    
+    const foundTypes = new Set<string>();
+
+    properties.forEach((p: any) => {
+      // On récupère toutes les valeurs texte du bien
+      const allValues = Object.values(p).map(v => String(v).toLowerCase());
+      
+      // On cherche si l'un des mots clés est présent dans n'importe quel champ
+      if (allValues.some(v => v.includes('villa'))) foundTypes.add("Villa");
+      if (allValues.some(v => v.includes('appartement') || v.includes('apartment'))) foundTypes.add("Appartement");
+      if (allValues.some(v => v.includes('terrain') || v.includes('plot'))) foundTypes.add("Terrain");
+      if (allValues.some(v => v.includes('finca') || v.includes('maison'))) foundTypes.add("Maison de campagne");
+    });
+
+    return Array.from(foundTypes).sort();
   }, [properties]);
 
   return (
