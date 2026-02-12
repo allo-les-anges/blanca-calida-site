@@ -12,18 +12,9 @@ export default function Hero({ onSearch }: { onSearch: (f: any) => void }) {
   muted 
   loop 
   playsInline 
-  preload="auto"
   className="absolute inset-0 w-full h-full object-cover brightness-[0.5]"
 >
-  <source 
-    src="https://res.cloudinary.com/dcbofid9h/video/upload/v1615471900/luxury-villa_znd6sq.mp4" 
-    type="video/mp4" 
-  />
-  {/* Option de secours si le lien Cloudinary est capricieux */}
-  <source 
-    src="https://assets.mixkit.co/videos/preview/mixkit-modern-villa-with-a-swimming-pool-at-sunset-28543-large.mp4" 
-    type="video/mp4" 
-  />
+  <source src="/hero-video.mp4" type="video/mp4" />
 </video>
 
       <div className="relative z-10 text-center px-4">
