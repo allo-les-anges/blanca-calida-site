@@ -15,19 +15,14 @@ export async function GET() {
     });
     
     const result = parser.parse(response.data);
-    
-    // --- LOGIQUE DE SCANNER ---
-    // On cherche le tableau 'property' peu importe où il est (kyero.property ou root.property)
     const rawProperties = result?.kyero?.property || result?.root?.property || result?.property || []; 
 
-    console.log("🔍 Nombre de biens bruts détectés :", rawProperties.length);
-
     if (rawProperties.length === 0) {
-      return NextResponse.json([]); // On renvoie un tableau vide proprement
+      return NextResponse.json([]);
     }
 
     const formattedProperties = rawProperties.map((p: any) => {
-      // Extraction des images : on cherche p.images.image
+      // Extraction des images
       let images: string[] = [];
       if (p.images?.image) {
         images = p.images.image.map((img: any) => typeof img === 'string' ? img : img.url).filter(Boolean);
@@ -36,11 +31,16 @@ export async function GET() {
       return {
         id: p.id || Math.random().toString(),
         ref: p.ref || "N/A",
-        // Gestion multilingue simplifiée (Prio FR > EN > ES)
         title: p.title?.fr || p.title?.en || p.title?.es || p.title || "Villa de Luxe",
         price: p.price || 0,
         town: p.town || "Costa Blanca",
         type: p.type?.fr || p.type?.en || "Propriété",
+        
+        // --- NOUVEAU : EXTRACTION DES COORDONNÉES ---
+        // Dans Kyero, c'est souvent p.location.latitude / longitude
+        lat: p.location?.latitude || p.latitude || null,
+        lng: p.location?.longitude || p.longitude || null,
+
         features: {
           beds: p.beds || 0,
           baths: p.baths || 0,

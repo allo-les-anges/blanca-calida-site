@@ -22,7 +22,7 @@ export default function PropertyDetail({ params }: { params: Promise<{ id: strin
         
         if (found) {
           setProperty(found);
-          console.log("Données de la villa :", found);
+          console.log("Données de la villa chargées :", found);
         }
       } catch (err) {
         console.error("Erreur detail:", err);
@@ -75,7 +75,7 @@ export default function PropertyDetail({ params }: { params: Promise<{ id: strin
           </button>
         </div>
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 bg-black/40 backdrop-blur-md text-white px-5 py-2 text-[9px] tracking-[0.3em] font-bold border border-white/10 uppercase">
-           {activeImage + 1} / {property.images.length} Photos
+            {activeImage + 1} / {property.images.length} Photos
         </div>
       </section>
 
@@ -123,27 +123,28 @@ export default function PropertyDetail({ params }: { params: Promise<{ id: strin
               </div>
             </div>
 
-            {/* CARTE DE LOCALISATION (Nouvelle Section) */}
-            {property.coordinates && property.coordinates.lat && (
-              <div className="pt-16 border-t border-gray-100">
-                <h2 className="text-2xl font-serif text-brand-primary uppercase tracking-widest border-l-2 border-brand-secondary pl-6 mb-8">Localisation</h2>
-                <div className="h-[400px] w-full bg-gray-100 grayscale contrast-125 border border-gray-200">
-                  <iframe 
-                    width="100%" 
-                    height="100%" 
-                    frameBorder="0" 
-                    scrolling="no" 
-                    marginHeight={0} 
-                    marginWidth={0} 
-                    src={`https://maps.google.com/maps?q=${property.coordinates.lat},${property.coordinates.lng}&z=14&output=embed`}
-                    className="filter saturate-0 contrast-110"
-                  />
-                </div>
-                <p className="mt-4 text-[9px] text-gray-400 uppercase tracking-widest text-center">
-                  * Localisation approximative pour la confidentialité du bien
-                </p>
+            {/* CARTE DE LOCALISATION (Corrigée et Robuste) */}
+            <div className="pt-16 border-t border-gray-100">
+              <h2 className="text-2xl font-serif text-brand-primary uppercase tracking-widest border-l-2 border-brand-secondary pl-6 mb-8">Localisation</h2>
+              <div className="h-[400px] w-full bg-gray-100 grayscale contrast-125 border border-gray-200 shadow-inner overflow-hidden">
+                <iframe 
+                  width="100%" 
+                  height="100%" 
+                  frameBorder="0" 
+                  scrolling="no" 
+                  // Utilise lat/lng si dispos, sinon utilise le nom de la ville
+                  src={
+                    property.lat && property.lng 
+                    ? `https://maps.google.com/maps?q=${property.lat},${property.lng}&z=14&output=embed`
+                    : `https://maps.google.com/maps?q=${encodeURIComponent(property.town + ", Spain")}&z=13&output=embed`
+                  }
+                  className="filter saturate-0 contrast-110"
+                />
               </div>
-            )}
+              <p className="mt-4 text-[9px] text-gray-400 uppercase tracking-widest text-center italic">
+                {property.lat ? "* Localisation exacte du bien" : `* Zone de ${property.town} (Localisation précise sur demande)`}
+              </p>
+            </div>
           </div>
         </div>
 
@@ -158,24 +159,22 @@ export default function PropertyDetail({ params }: { params: Promise<{ id: strin
             </div>
 
             <div className="space-y-4">
-  {/* Bouton Principal de Visite */}
-  <button className="w-full bg-brand-primary text-white py-5 uppercase text-[10px] tracking-[0.3em] font-bold hover:bg-brand-secondary transition duration-500 shadow-lg shadow-gray-200">
-    Planifier une visite
-  </button>
-  
-  {/* Lien WhatsApp avec votre numéro officiel */}
-  <a 
-    href={`https://wa.me/34627768233?text=${encodeURIComponent(
-      `Bonjour Blanca Calida, je souhaite obtenir plus d'informations sur la propriété : ${property.title} (Référence : ${property.ref}).`
-    )}`}
-    target="_blank"
-    rel="noopener noreferrer"
-    className="w-full border border-gray-200 text-brand-primary py-5 uppercase text-[10px] tracking-[0.3em] font-bold hover:bg-brand-primary hover:text-white transition duration-500 flex items-center justify-center gap-3 group"
-  >
-    <MessageCircle size={18} className="text-green-500 group-hover:text-white transition-colors" /> 
-    Contacter via WhatsApp
-  </a>
-</div>
+              <button className="w-full bg-brand-primary text-white py-5 uppercase text-[10px] tracking-[0.3em] font-bold hover:bg-brand-secondary transition duration-500 shadow-lg shadow-gray-200">
+                Planifier une visite
+              </button>
+              
+              <a 
+                href={`https://wa.me/34627768233?text=${encodeURIComponent(
+                  `Bonjour Blanca Calida, je souhaite obtenir plus d'informations sur la propriété : ${property.title} (Référence : ${property.ref}).`
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full border border-gray-200 text-brand-primary py-5 uppercase text-[10px] tracking-[0.3em] font-bold hover:bg-brand-primary hover:text-white transition duration-500 flex items-center justify-center gap-3 group"
+              >
+                <MessageCircle size={18} className="text-green-500 group-hover:text-white transition-colors" /> 
+                Contacter via WhatsApp
+              </a>
+            </div>
           </div>
         </div>
       </section>
