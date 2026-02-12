@@ -18,11 +18,19 @@ export default function AdvancedSearch({ onSearch, properties = [], activeFilter
   }, [properties]);
 
   // Extraction unique des types (vérifie plusieurs noms de champs possibles)
+  // Génération ultra-robuste de la liste des types
   const types = useMemo(() => {
-    return Array.from(new Set(properties.map((p: any) => 
-      p.type || p.property_type || p.category 
-    )))
-    .filter(Boolean)
+    if (!properties || properties.length === 0) return [];
+    
+    return Array.from(new Set(properties.map((p: any) => {
+      // On cherche le type dans cet ordre de priorité :
+      return p.type_FR ||          // Souvent utilisé pour le français
+             p.property_type ||    // Standard API
+             p.category ||         // Alternative courante
+             p.kind ||             // Parfois utilisé
+             p.type;               // Ta valeur actuelle qui renvoie "Propriété"
+    })))
+    .filter(t => t && t !== "Propriété" && t !== "Indifférent") // On enlève les valeurs inutiles
     .sort();
   }, [properties]);
 
