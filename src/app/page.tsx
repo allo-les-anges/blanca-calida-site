@@ -23,7 +23,11 @@ export default function Home() {
       <Navbar />
       
       {/* 1. HERO (Vidéo) */}
-      <Hero />
+      {/* 1. HERO (Vidéo) */}
+<Hero onSearch={(newFilters) => {
+  setFilters(newFilters);
+  document.getElementById('collection')?.scrollIntoView({ behavior: 'smooth' });
+}} />
       
       {/* 2. RECHERCHE AVANCÉE (À cheval sur le Hero) */}
       <AdvancedSearch onSearch={(newFilters) => {
