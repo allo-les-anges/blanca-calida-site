@@ -1,13 +1,14 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react'; // Ajout de useEffect
 import { RotateCcw, Search } from 'lucide-react';
 
 interface AdvancedSearchProps {
   onSearch: (filters: any) => void;
   properties: any[];
+  activeFilters?: any; // Ajout pour recevoir les filtres de la page parente
 }
 
-export default function AdvancedSearch({ onSearch, properties }: AdvancedSearchProps) {
+export default function AdvancedSearch({ onSearch, properties, activeFilters }: AdvancedSearchProps) {
   const [localFilters, setLocalFilters] = useState({
     town: '',
     type: '',
@@ -16,6 +17,13 @@ export default function AdvancedSearch({ onSearch, properties }: AdvancedSearchP
     maxPrice: '',
     reference: ''
   });
+
+  // NOUVEAU : Met à jour le formulaire si on clique sur une région ou un type ailleurs sur la page
+  useEffect(() => {
+    if (activeFilters) {
+      setLocalFilters(prev => ({ ...prev, ...activeFilters }));
+    }
+  }, [activeFilters]);
 
   // Extraction dynamique des données
   const towns = Array.from(new Set(properties.map(p => p.town))).filter(Boolean).sort();
@@ -31,7 +39,6 @@ export default function AdvancedSearch({ onSearch, properties }: AdvancedSearchP
     <div className="max-w-7xl mx-auto px-4 -mt-16 relative z-30">
       <div className="bg-white shadow-[0_20px_50px_rgba(0,0,0,0.1)] p-4 md:p-8 rounded-none border border-gray-100">
         
-        {/* LIGNE 1 : FILTRES */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-6 mb-8">
           
           {/* Destination / Ville */}
@@ -91,6 +98,7 @@ export default function AdvancedSearch({ onSearch, properties }: AdvancedSearchP
               <option value="">0 €</option>
               <option value="500000">500k €</option>
               <option value="1000000">1M €</option>
+              <option value="2000000">2M €</option>
             </select>
           </div>
 
@@ -106,6 +114,7 @@ export default function AdvancedSearch({ onSearch, properties }: AdvancedSearchP
               <option value="1500000">1.5M €</option>
               <option value="3000000">3M €</option>
               <option value="5000000">5M €</option>
+              <option value="10000000">10M €</option>
             </select>
           </div>
 
@@ -122,7 +131,6 @@ export default function AdvancedSearch({ onSearch, properties }: AdvancedSearchP
           </div>
         </div>
 
-        {/* LIGNE 2 : ACTIONS */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <button 
             onClick={handleReset}
