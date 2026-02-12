@@ -5,8 +5,8 @@ import { Bed, Bath, Maximize, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 
 export default function PropertyGrid({ activeFilters }: { activeFilters: any }) {
-  const [allProperties, setAllProperties] = useState([]);
-  const [filteredProps, setFilteredProps] = useState([]);
+  const [allProperties, setAllProperties] = useState<any[]>([]);
+const [filteredProps, setFilteredProps] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   
   // PAGINATION : On commence par afficher 12 biens
