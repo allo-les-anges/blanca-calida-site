@@ -9,9 +9,13 @@ export default function Navbar() {
     <nav className="fixed w-full z-50 flex justify-between items-center px-10 py-6 transition-all duration-500 bg-black/20 backdrop-blur-sm hover:bg-white group border-b border-transparent hover:border-gray-100">
       
       {/* LOGO avec lien retour Home */}
-      <Link href="/" className="text-2xl font-serif tracking-widest uppercase text-white group-hover:text-brand-primary transition-colors">
-        BLANCA <span className="text-brand-secondary italic font-light">CALIDA</span>
-      </Link>
+      <Link href="/" className="flex items-center">
+  <img 
+    src="https://res.cloudinary.com/drn6w4nab/image/upload/v1770539678/website-logo-footer_2x_1_iq0njc.png" 
+    alt="Blanca Calida Logo" 
+    className="h-10 md:h-14 w-auto object-contain transition-all duration-500 group-hover:brightness-0"
+  />
+</Link>
       
       {/* MENU CENTRAL */}
       <div className="hidden md:flex space-x-10 font-bold uppercase text-[10px] tracking-[0.4em] text-white/90 group-hover:text-slate-600 transition-colors">
@@ -28,9 +32,12 @@ export default function Navbar() {
           <span className="text-[10px] font-bold tracking-widest uppercase">FR</span>
         </div>
         
-        <button className="hidden md:block border border-white/30 group-hover:border-slate-200 px-6 py-2 text-[9px] font-bold uppercase tracking-[0.2em] hover:bg-brand-primary hover:text-white transition-all">
-          Estimation
-        </button>
+        <button
+  suppressHydrationWarning // <--- AJOUTE ÇA ICI
+  className="hidden md:block border border-white/30 group-hover:border-slate-200 px-6 py-2 text-[9px] font-bold uppercase tracking-[0.2em] hover:bg-brand-primary hover:text-white transition-all"
+>
+  Estimation
+</button>
       </div>
     </nav>
   );
