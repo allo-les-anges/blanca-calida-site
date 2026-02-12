@@ -25,30 +25,53 @@ export default function PropertyGrid({ activeFilters }: { activeFilters: any }) 
   useEffect(() => {
     let result = [...allProperties];
 
-    // Filtrage robuste
+    // 1. FILTRE PAR TYPE (Version souple)
     if (activeFilters.type) {
-      result = result.filter((p: any) => p.type.toLowerCase().trim() === activeFilters.type.toLowerCase().trim());
+      const searchType = activeFilters.type.toLowerCase().trim();
+      result = result.filter((p: any) => {
+        const pType = (p.type || "").toLowerCase().trim();
+        // On vérifie si l'un contient l'autre pour gérer "Villa" vs "Villas"
+        return pType.includes(searchType) || searchType.includes(pType);
+      });
     }
+
+    // 2. FILTRE PAR VILLE (Exact mais nettoyé)
     if (activeFilters.town) {
-      result = result.filter((p: any) => p.town.toLowerCase().trim() === activeFilters.town.toLowerCase().trim());
+      const searchTown = activeFilters.town.toLowerCase().trim();
+      result = result.filter((p: any) => 
+        (p.town || "").toLowerCase().trim() === searchTown
+      );
     }
+
+    // 3. FILTRE PAR CHAMBRES (Sécurisé)
     if (activeFilters.beds) {
-      result = result.filter((p: any) => (p.features?.beds || 0) >= parseInt(activeFilters.beds));
+      const minBeds = parseInt(activeFilters.beds);
+      result = result.filter((p: any) => {
+        const pBeds = p.features?.beds || p.beds || 0;
+        return parseInt(pBeds) >= minBeds;
+      });
     }
+
+    // 4. FILTRES DE PRIX
     if (activeFilters.minPrice) {
-      result = result.filter((p: any) => p.price >= parseInt(activeFilters.minPrice));
+      result = result.filter((p: any) => Number(p.price) >= Number(activeFilters.minPrice));
     }
     if (activeFilters.maxPrice) {
-      result = result.filter((p: any) => p.price <= parseInt(activeFilters.maxPrice));
+      result = result.filter((p: any) => Number(p.price) <= Number(activeFilters.maxPrice));
     }
+
+    // 5. FILTRE PAR RÉFÉRENCE
     if (activeFilters.reference) {
-      result = result.filter((p: any) => p.ref?.toLowerCase().includes(activeFilters.reference.toLowerCase().trim()));
+      const ref = activeFilters.reference.toLowerCase().trim();
+      result = result.filter((p: any) => 
+        (p.ref || "").toLowerCase().includes(ref)
+      );
     }
 
     setFilteredProps(result);
     setVisibleCount(12);
   }, [activeFilters, allProperties]);
-
+  
   if (loading) return <div className="text-center py-40 font-serif uppercase tracking-widest text-brand-primary animate-pulse">Curating your selection...</div>;
 
   const displayedProps = filteredProps.slice(0, visibleCount);
