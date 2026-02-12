@@ -20,8 +20,16 @@ export default function AdvancedSearch({ onSearch, properties = [], activeFilter
 
   // GÉNÉRATION DE LA LISTE DES TYPES (MÉTHODE FORCE BRUTE)
   const types = useMemo(() => {
-    if (!properties || properties.length === 0) return [];
+    if (!properties || properties.length === 0) return ["AUCUNE DONNEE"];
     
+    // On prend la toute première propriété et on affiche TOUTES ses clés
+    // pour comprendre comment elles s'appellent après le passage du parseur
+    const keys = Object.keys(properties[0]);
+    console.log("Clés disponibles :", keys);
+    
+    return keys.slice(0, 5); // Affiche les 5 premières clés dans ton menu
+  }, [properties]);
+  
     const foundTypes = new Set<string>();
 
     properties.forEach((p: any) => {
