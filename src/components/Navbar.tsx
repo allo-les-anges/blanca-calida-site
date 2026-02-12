@@ -18,17 +18,28 @@ export default function Navbar() {
 </Link>
       
       {/* MENU CENTRAL */}
-      <div className="hidden md:flex space-x-8 font-serif uppercase text-[11px] tracking-[0.2em] text-white/90 group-hover:text-slate-800 transition-colors">
-  <Link href="/proprietes" className="hover:text-brand-secondary transition">Propriétés</Link>
-  <Link href="/confidentiel" className="hover:text-brand-secondary transition">Confidentiel</Link>
-  <Link href="/investissement" className="hover:text-brand-secondary transition">Investissement</Link>
+      <div className="hidden md:flex space-x-8 uppercase text-[10px] tracking-[0.4em] text-white/90 group-hover:text-slate-600 transition-colors">
+  <Link href="/proprietes" className="hover:text-brand-secondary transition">
+    Propriétés
+  </Link>
+  <Link href="/confidentiel" className="hover:text-brand-secondary transition">
+    Confidentiel
+  </Link>
+  <Link href="/investissement" className="hover:text-brand-secondary transition">
+    Investissement
+  </Link>
+  
+  {/* Dropdowns Services & À Propos */}
   <div className="flex items-center cursor-pointer hover:text-brand-secondary transition">
-    SERVICES <span className="ml-1 text-[8px]">▼</span>
+    SERVICES <span className="ml-2 text-[8px] opacity-70">▼</span>
   </div>
   <div className="flex items-center cursor-pointer hover:text-brand-secondary transition">
-    À PROPOS <span className="ml-1 text-[8px]">▼</span>
+    À PROPOS <span className="ml-2 text-[8px] opacity-70">▼</span>
   </div>
-  <Link href="/contact" className="hover:text-brand-secondary transition">Contact</Link>
+  
+  <Link href="/contact" className="hover:text-brand-secondary transition">
+    Contact
+  </Link>
 </div>
 
       {/* ACTIONS DROITE */}
