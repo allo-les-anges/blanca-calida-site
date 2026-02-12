@@ -22,6 +22,7 @@ export default function PropertyDetail({ params }: { params: Promise<{ id: strin
         
         if (found) {
           setProperty(found);
+          console.log("Données de la villa :", found);
         }
       } catch (err) {
         console.error("Erreur detail:", err);
