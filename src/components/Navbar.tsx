@@ -13,7 +13,7 @@ export default function Navbar() {
   <img 
     src="https://res.cloudinary.com/drn6w4nab/image/upload/v1770539678/website-logo-footer_2x_1_iq0njc.png" 
     alt="Blanca Calida Logo" 
-    className="h-10 md:h-14 w-auto object-contain transition-all duration-500 group-hover:brightness-0"
+    className="h-5 md:h-7 w-auto object-contain transition-all duration-500 group-hover:brightness-0"
   />
 </Link>
       
