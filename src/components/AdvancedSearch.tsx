@@ -5,24 +5,27 @@ import { RotateCcw, Search } from 'lucide-react';
 export default function AdvancedSearch({ onSearch, properties = [], activeFilters }: any) {
   const [localFilters, setLocalFilters] = useState(activeFilters);
 
-  // Synchronisation des filtres avec le parent
+  // Sync avec parent
   useEffect(() => {
     setLocalFilters(activeFilters);
   }, [activeFilters]);
 
-  // 1. GÉNÉRATION DE LA LISTE DES VILLES (Basé sur <town> dans le XML)
+  // Normalisation des types
+  const normalizeType = (t: any) => {
+    if (!t) return "";
+    if (Array.isArray(t)) t = t[0];
+    return String(t).trim().toLowerCase();
+  };
+
+  // Liste des villes
   const towns = useMemo(() => {
-    if (!properties) return [];
     return Array.from(new Set(properties.map((p: any) => p.town)))
       .filter(Boolean)
       .sort();
   }, [properties]);
 
-  // 2. GÉNÉRATION DE LA LISTE DES TYPES (Basé sur <type> dans le XML)
+  // Liste des types
   const types = useMemo(() => {
-    if (!properties || properties.length === 0) return [];
-    
-    // Traduction des termes du flux Kyero/Habihub vers le Français
     const translation: { [key: string]: string } = {
       'villa': 'Villa',
       'detached': 'Maison Individuelle',
@@ -33,13 +36,11 @@ export default function AdvancedSearch({ onSearch, properties = [], activeFilter
       'plot': 'Terrain'
     };
 
-    const uniqueTypes = Array.from(new Set(properties.map((p: any) => p.type)))
-      .filter(t => t && t.toLowerCase() !== "property" && t.toLowerCase() !== "propriété")
-      .map((t: any) => {
-        const lowerT = String(t).toLowerCase();
-        // Retourne la traduction si elle existe, sinon met une majuscule par défaut
-        return translation[lowerT] || lowerT.charAt(0).toUpperCase() + lowerT.slice(1);
-      });
+    const uniqueTypes = Array.from(
+      new Set(properties.map((p: any) => normalizeType(p.type)))
+    )
+      .filter(Boolean)
+      .map((t: string) => translation[t] || t.charAt(0).toUpperCase() + t.slice(1));
 
     return uniqueTypes.sort();
   }, [properties]);
@@ -48,7 +49,7 @@ export default function AdvancedSearch({ onSearch, properties = [], activeFilter
     <div className="max-w-7xl mx-auto px-4 -mt-16 relative z-30">
       <div className="bg-white shadow-2xl p-8 border border-gray-100">
         <div className="grid grid-cols-1 md:grid-cols-6 gap-6 mb-8">
-          
+
           {/* DESTINATION */}
           <div className="flex flex-col border-b border-gray-200 pb-2">
             <label className="text-[9px] uppercase font-bold text-gray-400 mb-1">Destination</label>
