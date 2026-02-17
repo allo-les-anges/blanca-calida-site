@@ -2,14 +2,24 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { RotateCcw, Search } from "lucide-react";
 
-export default function AdvancedSearch({ onSearch, properties, activeFilters }) {
+interface AdvancedSearchProps {
+  onSearch: (filters: any) => void;
+  properties: any[];
+  activeFilters: any;
+}
+
+export default function AdvancedSearch({
+  onSearch,
+  properties,
+  activeFilters,
+}: AdvancedSearchProps) {
   const [localFilters, setLocalFilters] = useState(activeFilters);
 
   useEffect(() => {
     setLocalFilters(activeFilters);
   }, [activeFilters]);
 
-  const getKindFromTitle = (p) => {
+  const getKindFromTitle = (p: any) => {
     if (!p?.title) return "";
     return p.title.split(" ")[0];
   };
