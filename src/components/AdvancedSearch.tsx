@@ -1,149 +1,167 @@
 "use client";
-import React, { useState, useEffect, useMemo } from 'react'; 
-import { RotateCcw, Search } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from "react";
+import { RotateCcw, Search } from "lucide-react";
 
-export default function AdvancedSearch({ onSearch, properties = [], activeFilters }: any) {
+export default function AdvancedSearch({ onSearch, properties, activeFilters }) {
   const [localFilters, setLocalFilters] = useState(activeFilters);
 
   useEffect(() => {
     setLocalFilters(activeFilters);
   }, [activeFilters]);
 
-  const normalize = (v: any) => {
-    if (!v) return "";
-    if (Array.isArray(v)) v = v[0];
-    return String(v).trim().toLowerCase();
-  };
-
-  const getKindFromTitle = (p: any) => {
+  const getKindFromTitle = (p) => {
     if (!p?.title) return "";
-    return String(p.title).split(" ")[0]; // "Appartement", "Villa", etc.
+    return p.title.split(" ")[0];
   };
 
   const towns = useMemo(() => {
-    return Array.from(new Set(properties.map((p: any) => p.town)))
+    return [...new Set(properties.map((p) => p.town))].filter(Boolean).sort();
+  }, [properties]);
+
+  const types = useMemo(() => {
+    return [...new Set(properties.map((p) => getKindFromTitle(p)))]
       .filter(Boolean)
       .sort();
   }, [properties]);
 
-  const types = useMemo(() => {
-    const list = Array.from(
-      new Set(
-        properties.map((p: any) => getKindFromTitle(p))
-      )
-    ).filter(Boolean).sort();
-
-    console.log("TYPES DÉDUITS POUR LE FILTRE :", list);
-    return list;
+  const developments = useMemo(() => {
+    return [...new Set(properties.map((p) => p.development_name))]
+      .filter(Boolean)
+      .sort();
   }, [properties]);
+
+  const reset = () => {
+    const empty = {
+      town: "",
+      type: "",
+      beds: "",
+      minPrice: "",
+      maxPrice: "",
+      reference: "",
+      development: "",
+      availableOnly: false,
+    };
+    setLocalFilters(empty);
+    onSearch(empty);
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 -mt-16 relative z-30">
       <div className="bg-white shadow-2xl p-8 border border-gray-100">
         <div className="grid grid-cols-1 md:grid-cols-6 gap-6 mb-8">
-          
+
           {/* DESTINATION */}
-          <div className="flex flex-col border-b border-gray-200 pb-2">
-            <label className="text-[9px] uppercase font-bold text-gray-400 mb-1">Destination</label>
-            <select 
-              value={localFilters.town || ""}
-              onChange={(e) => setLocalFilters({...localFilters, town: e.target.value})}
-              className="bg-transparent text-xs uppercase font-medium outline-none cursor-pointer"
+          <div>
+            <label>Destination</label>
+            <select
+              value={localFilters.town}
+              onChange={(e) =>
+                setLocalFilters({ ...localFilters, town: e.target.value })
+              }
             >
-              <option value="">Toutes les villes ({towns.length})</option>
-              {towns.map((town: any) => (
-                <option key={town} value={town}>{town}</option>
+              <option value="">Toutes les villes</option>
+              {towns.map((t) => (
+                <option key={t}>{t}</option>
               ))}
             </select>
           </div>
 
-          {/* TYPE DE BIEN */}
-          <div className="flex flex-col border-b border-gray-200 pb-2">
-            <label className="text-[9px] uppercase font-bold text-gray-400 mb-1">Type de bien</label>
-            <select 
-              value={localFilters.type || ""}
-              onChange={(e) => setLocalFilters({...localFilters, type: e.target.value})}
-              className="bg-transparent text-xs uppercase font-medium outline-none cursor-pointer"
+          {/* TYPE */}
+          <div>
+            <label>Type</label>
+            <select
+              value={localFilters.type}
+              onChange={(e) =>
+                setLocalFilters({ ...localFilters, type: e.target.value })
+              }
             >
-              <option value="">Tous les types ({types.length})</option>
-              {types.map((type: any) => (
-                <option key={type} value={type}>{type}</option>
+              <option value="">Tous les types</option>
+              {types.map((t) => (
+                <option key={t}>{t}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* DÉVELOPPEMENT */}
+          <div>
+            <label>Développement</label>
+            <select
+              value={localFilters.development}
+              onChange={(e) =>
+                setLocalFilters({ ...localFilters, development: e.target.value })
+              }
+            >
+              <option value="">Tous les développements</option>
+              {developments.map((d) => (
+                <option key={d}>{d}</option>
               ))}
             </select>
           </div>
 
           {/* CHAMBRES */}
-          <div className="flex flex-col border-b border-gray-200 pb-2">
-            <label className="text-[9px] uppercase font-bold text-gray-400 mb-1">Chambres</label>
-            <select 
-              value={localFilters.beds || ""}
-              onChange={(e) => setLocalFilters({...localFilters, beds: e.target.value})}
-              className="bg-transparent text-xs uppercase font-medium outline-none cursor-pointer"
+          <div>
+            <label>Chambres</label>
+            <select
+              value={localFilters.beds}
+              onChange={(e) =>
+                setLocalFilters({ ...localFilters, beds: e.target.value })
+              }
             >
               <option value="">Indifférent</option>
-              {[1, 2, 3, 4, 5].map(n => (
-                <option key={n} value={n.toString()}>{n}+ Chambres</option>
+              {[1, 2, 3, 4, 5].map((n) => (
+                <option key={n} value={n}>
+                  {n}+
+                </option>
               ))}
             </select>
           </div>
 
           {/* PRIX MIN */}
-          <div className="flex flex-col border-b border-gray-200 pb-2">
-            <label className="text-[9px] uppercase font-bold text-gray-400 mb-1">Prix Min</label>
-            <select 
-              value={localFilters.minPrice || ""}
-              onChange={(e) => setLocalFilters({...localFilters, minPrice: e.target.value})}
-              className="bg-transparent text-xs uppercase font-medium outline-none"
-            >
-              <option value="">0 €</option>
-              {[100000, 200000, 300000, 500000, 750000, 1000000].map(p => (
-                <option key={p} value={p.toString()}>{p.toLocaleString()} €</option>
-              ))}
-            </select>
+          <div>
+            <label>Prix min</label>
+            <input
+              type="number"
+              value={localFilters.minPrice}
+              onChange={(e) =>
+                setLocalFilters({ ...localFilters, minPrice: e.target.value })
+              }
+            />
           </div>
 
           {/* PRIX MAX */}
-          <div className="flex flex-col border-b border-gray-200 pb-2">
-            <label className="text-[9px] uppercase font-bold text-gray-400 mb-1">Prix Max</label>
-            <select 
-              value={localFilters.maxPrice || ""}
-              onChange={(e) => setLocalFilters({...localFilters, maxPrice: e.target.value})}
-              className="bg-transparent text-xs uppercase font-medium outline-none"
-            >
-              <option value="">Illimité</option>
-              {[200000, 400000, 600000, 800000, 1000000, 2000000].map(p => (
-                <option key={p} value={p.toString()}>{p.toLocaleString()} €</option>
-              ))}
-            </select>
-          </div>
-
-          {/* RÉFÉRENCE */}
-          <div className="flex flex-col border-b border-gray-200 pb-2">
-            <label className="text-[9px] uppercase font-bold text-gray-400 mb-1">Référence</label>
-            <input 
-              type="text"
-              placeholder="EX: BC-102"
-              value={localFilters.reference || ""}
-              onChange={(e) => setLocalFilters({...localFilters, reference: e.target.value})}
-              className="bg-transparent text-xs uppercase font-medium outline-none placeholder:text-gray-300"
+          <div>
+            <label>Prix max</label>
+            <input
+              type="number"
+              value={localFilters.maxPrice}
+              onChange={(e) =>
+                setLocalFilters({ ...localFilters, maxPrice: e.target.value })
+              }
             />
           </div>
         </div>
 
-        <div className="flex justify-between items-center">
-          <button 
-            type="button"
-            onClick={() => onSearch({ town: '', type: '', beds: '', minPrice: '', maxPrice: '', reference: '' })}
-            className="flex items-center gap-2 text-gray-400 text-[10px] uppercase font-bold hover:text-gray-600 transition-colors"
-          >
+        {/* DISPONIBLE UNIQUEMENT */}
+        <div className="flex items-center gap-2 mb-4">
+          <input
+            type="checkbox"
+            checked={localFilters.availableOnly}
+            onChange={(e) =>
+              setLocalFilters({
+                ...localFilters,
+                availableOnly: e.target.checked,
+              })
+            }
+          />
+          <label>Disponible uniquement</label>
+        </div>
+
+        <div className="flex justify-between">
+          <button onClick={reset}>
             <RotateCcw size={12} /> Reset
           </button>
 
-          <button 
-            type="button"
-            onClick={() => onSearch(localFilters)} 
-            className="bg-slate-900 text-white px-16 py-4 uppercase text-[10px] tracking-widest font-bold hover:bg-slate-800 transition-all flex items-center gap-3"
-          >
+          <button onClick={() => onSearch(localFilters)}>
             <Search size={14} /> Lancer la recherche
           </button>
         </div>
