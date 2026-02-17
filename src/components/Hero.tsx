@@ -19,7 +19,7 @@ export default function Hero() {
           Villas de Luxe & <br/> Propriétés d'Exception
         </h1>
         <p className="text-white/80 text-sm md:text-base uppercase tracking-[0.4em] font-light">
-          COSTA BLANCA | ALICANTE | VALENCIA
+          COSTA BLANCA | COSTA DEL SOL
         </p>
       </div>
     </section>
