@@ -2,146 +2,216 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import { Bed, Bath, Maximize, ArrowLeft } from "lucide-react";
+import Link from "next/link";
 
 export default function DevelopmentPage() {
-  const { id } = useParams(); // ID du développement
-  const [properties, setProperties] = useState([]);
+  const { id } = useParams();
+  const [properties, setProperties] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   useEffect(() => {
-    fetch("/api/properties")
-      .then((res) => res.json())
-      .then((data) => {
+    async function load() {
+      try {
+        const res = await fetch("/api/properties");
+        const data = await res.json();
         setProperties(data);
+      } catch (err) {
+        console.error("Erreur API:", err);
+      } finally {
         setLoading(false);
-      });
+      }
+    }
+    load();
   }, []);
 
-  if (loading) return <div className="p-10 text-center">Chargement…</div>;
+  // --- LOADER GLOBAL ---
+  if (loading) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-white">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-brand-primary"></div>
+      </div>
+    );
+  }
 
-  // Toutes les unités de ce développement
   const devUnits = properties.filter(
     (p) => String(p.development_id) === String(id)
   );
 
-  if (devUnits.length === 0)
+  if (!devUnits.length) {
     return (
-      <div className="p-10 text-center">
-        Aucun développement trouvé pour l’ID {id}
+      <div className="h-screen flex flex-col items-center justify-center space-y-6">
+        <p className="font-serif text-3xl text-brand-primary">
+          Développement introuvable
+        </p>
+        <Link
+          href="/"
+          className="px-8 py-3 bg-brand-primary text-white text-[10px] uppercase tracking-widest font-bold"
+        >
+          Retour à l'accueil
+        </Link>
       </div>
     );
+  }
 
-  // Infos générales du développement (identiques pour toutes les unités)
   const dev = devUnits[0];
-
-  const availableUnits = devUnits.filter((u) => u.availability === "available");
-  const soldUnits = devUnits.filter((u) => u.availability !== "available");
+  const available = devUnits.filter((u) => u.availability === "available");
+  const sold = devUnits.filter((u) => u.availability !== "available");
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-16">
-      {/* TITRE DU DÉVELOPPEMENT */}
-      <h1 className="text-4xl font-bold mb-2">{dev.development_name}</h1>
-      <p className="text-gray-600 mb-6">{dev.development_location}</p>
+    <main className="bg-white min-h-screen">
+      <Navbar />
+      <div className="h-24 md:h-28"></div>
 
-      {/* DESCRIPTION */}
-      {dev.development_description && (
-        <p className="text-lg text-gray-700 mb-10">
-          {dev.development_description}
-        </p>
-      )}
+      {/* RETOUR */}
+      <div className="max-w-7xl mx-auto px-6 py-4">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.3em] text-gray-400 hover:text-brand-primary transition-colors group"
+        >
+          <ArrowLeft
+            size={14}
+            className="group-hover:-translate-x-1 transition-transform"
+          />
+          Retour à la collection
+        </Link>
+      </div>
+
+      {/* TITRE */}
+      <section className="max-w-7xl mx-auto px-6 py-10">
+        <h1 className="text-4xl md:text-6xl font-serif text-brand-primary mb-2">
+          {dev.development_name}
+        </h1>
+        <p className="text-gray-600 text-lg">{dev.development_location}</p>
+
+        {dev.development_description && (
+          <p className="text-gray-600 leading-relaxed text-lg font-light mt-8 max-w-3xl">
+            {dev.development_description}
+          </p>
+        )}
+      </section>
 
       {/* IMAGES DU DÉVELOPPEMENT */}
       {dev.development_images?.length > 0 && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-16">
-          {dev.development_images.map((img, i) => (
-            <img
-              key={i}
-              src={img}
-              alt={dev.development_name}
-              className="rounded-lg object-cover w-full h-40"
-            />
-          ))}
-        </div>
+        <section className="max-w-7xl mx-auto px-6 py-10">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {dev.development_images.map((img: string, i: number) => (
+              <div key={i} className="relative h-40 bg-gray-200 overflow-hidden rounded-lg">
+                {!imageLoaded && (
+                  <div className="absolute inset-0 bg-gray-200 animate-pulse" />
+                )}
+                <img
+                  src={img}
+                  alt={dev.development_name}
+                  onLoad={() => setImageLoaded(true)}
+                  className={`w-full h-full object-cover transition-all duration-700 ${
+                    imageLoaded ? "opacity-100 scale-100" : "opacity-0 scale-105"
+                  }`}
+                />
+              </div>
+            ))}
+          </div>
+        </section>
       )}
 
       {/* UNITÉS DISPONIBLES */}
-      <h2 className="text-2xl font-bold mb-4">
-        Unités disponibles ({availableUnits.length})
-      </h2>
+      <section className="max-w-7xl mx-auto px-6 py-16">
+        <h2 className="text-3xl font-serif text-brand-primary mb-10">
+          Unités disponibles ({available.length})
+        </h2>
 
-      {availableUnits.length === 0 && (
-        <p className="text-gray-500 mb-10">Aucune unité disponible.</p>
-      )}
+        {available.length === 0 && (
+          <p className="text-gray-500 mb-10">Aucune unité disponible.</p>
+        )}
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-20">
-        {availableUnits.map((unit) => (
-          <div key={unit.id} className="border rounded-lg p-4 shadow-sm">
-            {unit.images?.[0] && (
-              <img
-                src={unit.images[0]}
-                className="w-full h-40 object-cover rounded mb-3"
-              />
-            )}
-
-            <h3 className="font-bold text-lg mb-1">{unit.title}</h3>
-            <p className="text-gray-600 mb-2">{unit.town}</p>
-
-            <p className="font-semibold text-xl mb-2">
-              {unit.price.toLocaleString()} €
-            </p>
-
-            <p className="text-sm text-gray-500 mb-1">
-              {unit.features.beds} ch · {unit.features.baths} sdb ·{" "}
-              {unit.features.surface} m²
-            </p>
-
-            <p className="text-xs text-gray-400">Ref : {unit.ref}</p>
-
-            <p className="text-green-600 text-xs font-bold mt-2 uppercase">
-              Disponible
-            </p>
-          </div>
-        ))}
-      </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+          {available.map((unit) => (
+            <UnitCard key={unit.id} unit={unit} available />
+          ))}
+        </div>
+      </section>
 
       {/* UNITÉS VENDUES */}
-      <h2 className="text-2xl font-bold mb-4">
-        Unités vendues ({soldUnits.length})
-      </h2>
+      <section className="max-w-7xl mx-auto px-6 pb-20">
+        <h2 className="text-3xl font-serif text-brand-primary mb-10">
+          Unités vendues ({sold.length})
+        </h2>
 
-      {soldUnits.length === 0 && (
-        <p className="text-gray-500">Aucune unité vendue.</p>
-      )}
+        {sold.length === 0 && (
+          <p className="text-gray-500">Aucune unité vendue.</p>
+        )}
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-        {soldUnits.map((unit) => (
-          <div key={unit.id} className="border rounded-lg p-4 opacity-60">
-            {unit.images?.[0] && (
-              <img
-                src={unit.images[0]}
-                className="w-full h-40 object-cover rounded mb-3"
-              />
-            )}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+          {sold.map((unit) => (
+            <UnitCard key={unit.id} unit={unit} available={false} />
+          ))}
+        </div>
+      </section>
 
-            <h3 className="font-bold text-lg mb-1">{unit.title}</h3>
-            <p className="text-gray-600 mb-2">{unit.town}</p>
+      <Footer />
+    </main>
+  );
+}
 
-            <p className="font-semibold text-xl mb-2">
-              {unit.price.toLocaleString()} €
-            </p>
+/* --- CARTE D’UNITÉ (DISPONIBLE / VENDUE) --- */
+function UnitCard({ unit, available }: { unit: any; available: boolean }) {
+  const [loaded, setLoaded] = useState(false);
 
-            <p className="text-sm text-gray-500 mb-1">
-              {unit.features.beds} ch · {unit.features.baths} sdb ·{" "}
-              {unit.features.surface} m²
-            </p>
+  return (
+    <div
+      className={`border rounded-xl overflow-hidden shadow-sm transition-all ${
+        available ? "opacity-100" : "opacity-60"
+      }`}
+    >
+      <div className="relative h-48 bg-gray-200 overflow-hidden">
+        {!loaded && <div className="absolute inset-0 bg-gray-200 animate-pulse" />}
 
-            <p className="text-xs text-gray-400">Ref : {unit.ref}</p>
+        <img
+          src={unit.images?.[0]}
+          onLoad={() => setLoaded(true)}
+          className={`w-full h-full object-cover transition-all duration-700 ${
+            loaded ? "opacity-100 scale-100" : "opacity-0 scale-105"
+          }`}
+        />
+      </div>
 
-            <p className="text-red-600 text-xs font-bold mt-2 uppercase">
-              Non disponible
-            </p>
-          </div>
-        ))}
+      <div className="p-6 space-y-3">
+        <h3 className="font-serif text-xl text-brand-primary leading-tight">
+          {unit.title}
+        </h3>
+
+        <p className="text-gray-500">{unit.town}</p>
+
+        <p className="text-2xl font-serif text-brand-primary">
+          {Number(unit.price).toLocaleString("fr-FR")} €
+        </p>
+
+        <div className="flex items-center gap-6 text-gray-500 text-sm pt-2">
+          <span className="flex items-center gap-2">
+            <Bed size={16} /> {unit.features.beds}
+          </span>
+          <span className="flex items-center gap-2">
+            <Bath size={16} /> {unit.features.baths}
+          </span>
+          <span className="flex items-center gap-2">
+            <Maximize size={16} /> {unit.features.surface} m²
+          </span>
+        </div>
+
+        <p className="text-[10px] uppercase tracking-[0.2em] text-gray-400 pt-2">
+          Ref : {unit.ref}
+        </p>
+
+        <p
+          className={`text-[10px] uppercase font-bold mt-2 ${
+            available ? "text-green-600" : "text-red-600"
+          }`}
+        >
+          {available ? "Disponible" : "Non disponible"}
+        </p>
       </div>
     </div>
   );
