@@ -12,6 +12,11 @@ export default function PropertyGrid({ activeFilters }: { activeFilters: any }) 
     return String(v).trim().toLowerCase();
   };
 
+  const getKindFromTitle = (p: any) => {
+    if (!p?.title) return "";
+    return String(p.title).split(" ")[0]; // "Appartement", "Villa", etc.
+  };
+
   useEffect(() => {
     fetch('/api/properties')
       .then(res => res.json())
@@ -27,8 +32,8 @@ export default function PropertyGrid({ activeFilters }: { activeFilters: any }) 
 
     const result = allProperties.filter((p: any) => {
       const pTown = normalize(p.town);
-      const pType = normalize(p.type_fr);   // 🔥 LE BON CHAMP
-      const pRef  = normalize(p.reference);
+      const pType = normalize(getKindFromTitle(p));
+      const pRef  = normalize(p.ref);          // ton JSON utilise `ref`
       const pPrice = Number(p.price) || 0;
 
       const fTown = normalize(activeFilters.town);
@@ -37,7 +42,7 @@ export default function PropertyGrid({ activeFilters }: { activeFilters: any }) 
 
       if (fTown && pTown !== fTown) return false;
       if (fType && pType !== fType) return false;
-      if (activeFilters.beds && Number(p.beds) < Number(activeFilters.beds)) return false;
+      if (activeFilters.beds && Number(p.features?.beds) < Number(activeFilters.beds)) return false;
       if (activeFilters.minPrice && pPrice < Number(activeFilters.minPrice)) return false;
       if (activeFilters.maxPrice && pPrice > Number(activeFilters.maxPrice)) return false;
       if (fRef && !pRef.includes(fRef)) return false;
@@ -66,10 +71,10 @@ export default function PropertyGrid({ activeFilters }: { activeFilters: any }) 
         {filteredProps.map((prop: any) => (
           <div key={prop.id} className="border p-4">
             <p className="font-bold">
-              {prop.town} - {prop.type_fr}
+              {prop.town} - {getKindFromTitle(prop)}
             </p>
             <p>{prop.price} €</p>
-            <p>Ref : {prop.reference}</p>
+            <p>Ref : {prop.ref}</p>
           </div>
         ))}
       </div>

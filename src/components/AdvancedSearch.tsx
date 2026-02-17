@@ -15,18 +15,24 @@ export default function AdvancedSearch({ onSearch, properties = [], activeFilter
     return String(v).trim().toLowerCase();
   };
 
-  // Villes
+  // Récupère le "type" à partir du titre (ex: "Appartement à X" → "Appartement")
+  const getKindFromTitle = (p: any) => {
+    if (!p?.title) return "";
+    const firstWord = String(p.title).split(" ")[0]; // "Appartement", "Villa", etc.
+    return firstWord;
+  };
+
   const towns = useMemo(() => {
     return Array.from(new Set(properties.map((p: any) => p.town)))
       .filter(Boolean)
       .sort();
   }, [properties]);
 
-  // TYPES (basé sur type_fr)
   const types = useMemo(() => {
     return Array.from(
       new Set(
-        properties.map((p: any) => p.type_fr) // 🔥 LE BON CHAMP
+        properties
+          .map((p: any) => getKindFromTitle(p))
       )
     )
       .filter(Boolean)
@@ -37,7 +43,7 @@ export default function AdvancedSearch({ onSearch, properties = [], activeFilter
     <div className="max-w-7xl mx-auto px-4 -mt-16 relative z-30">
       <div className="bg-white shadow-2xl p-8 border border-gray-100">
         <div className="grid grid-cols-1 md:grid-cols-6 gap-6 mb-8">
-
+          
           {/* DESTINATION */}
           <div className="flex flex-col border-b border-gray-200 pb-2">
             <label className="text-[9px] uppercase font-bold text-gray-400 mb-1">Destination</label>
