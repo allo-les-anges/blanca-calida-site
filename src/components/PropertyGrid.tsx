@@ -6,14 +6,12 @@ export default function PropertyGrid({ activeFilters }: { activeFilters: any }) 
   const [filteredProps, setFilteredProps] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Normalisation (clé du problème)
   const normalize = (v: any) => {
     if (!v) return "";
     if (Array.isArray(v)) v = v[0];
     return String(v).trim().toLowerCase();
   };
 
-  // Chargement initial
   useEffect(() => {
     fetch('/api/properties')
       .then(res => res.json())
@@ -24,22 +22,12 @@ export default function PropertyGrid({ activeFilters }: { activeFilters: any }) 
       });
   }, []);
 
-  // 👇 AJOUTE ÇA ICI 
-  useEffect(() => { 
-    if (allProperties.length) { 
-      console.log("EXEMPLE PROPERTY :", allProperties[0]); 
-    } 
-  }, [allProperties]); 
-  
-  // 👆 FIN DE L'AJOUT
-
-  // Logique de filtrage
   useEffect(() => {
     if (allProperties.length === 0) return;
 
     const result = allProperties.filter((p: any) => {
       const pTown = normalize(p.town);
-      const pType = normalize(p.subtype);     // 🔥 CORRECTION ICI : subtype
+      const pType = normalize(p.type_fr);   // 🔥 LE BON CHAMP
       const pRef  = normalize(p.reference);
       const pPrice = Number(p.price) || 0;
 
@@ -47,22 +35,11 @@ export default function PropertyGrid({ activeFilters }: { activeFilters: any }) 
       const fType = normalize(activeFilters.type);
       const fRef  = normalize(activeFilters.reference);
 
-      // 1. Ville
       if (fTown && pTown !== fTown) return false;
-
-      // 2. Type (match strict)
       if (fType && pType !== fType) return false;
-
-      // 3. Chambres
       if (activeFilters.beds && Number(p.beds) < Number(activeFilters.beds)) return false;
-
-      // 4. Prix min
       if (activeFilters.minPrice && pPrice < Number(activeFilters.minPrice)) return false;
-
-      // 5. Prix max
       if (activeFilters.maxPrice && pPrice > Number(activeFilters.maxPrice)) return false;
-
-      // 6. Référence
       if (fRef && !pRef.includes(fRef)) return false;
 
       return true;
@@ -89,7 +66,7 @@ export default function PropertyGrid({ activeFilters }: { activeFilters: any }) 
         {filteredProps.map((prop: any) => (
           <div key={prop.id} className="border p-4">
             <p className="font-bold">
-              {prop.town} - {prop.subtype /* 🔥 AFFICHAGE CORRIGÉ */}
+              {prop.town} - {prop.type_fr}
             </p>
             <p>{prop.price} €</p>
             <p>Ref : {prop.reference}</p>

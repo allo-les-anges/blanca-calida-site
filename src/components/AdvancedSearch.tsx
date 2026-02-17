@@ -5,60 +5,39 @@ import { RotateCcw, Search } from 'lucide-react';
 export default function AdvancedSearch({ onSearch, properties = [], activeFilters }: any) {
   const [localFilters, setLocalFilters] = useState(activeFilters);
 
-  // Synchronisation des filtres avec le parent
   useEffect(() => {
     setLocalFilters(activeFilters);
   }, [activeFilters]);
 
-  // Normalisation
   const normalize = (v: any) => {
     if (!v) return "";
     if (Array.isArray(v)) v = v[0];
     return String(v).trim().toLowerCase();
   };
 
-  // 1. GÉNÉRATION DE LA LISTE DES VILLES
+  // Villes
   const towns = useMemo(() => {
-    if (!properties) return [];
     return Array.from(new Set(properties.map((p: any) => p.town)))
       .filter(Boolean)
       .sort();
   }, [properties]);
 
-  // 2. GÉNÉRATION DE LA LISTE DES TYPES (basé sur <subtype>)
+  // TYPES (basé sur type_fr)
   const types = useMemo(() => {
-    if (!properties || properties.length === 0) return [];
-
-    const translation: { [key: string]: string } = {
-      'villa': 'Villa',
-      'detached': 'Maison Individuelle',
-      'apartment': 'Appartement',
-      'penthouse': 'Penthouse',
-      'bungalow': 'Bungalow',
-      'townhouse': 'Maison de ville',
-      'plot': 'Terrain'
-    };
-
-    const uniqueTypes = Array.from(
+    return Array.from(
       new Set(
-        properties
-          .map((p: any) => p.subtype) // 🔥 ON UTILISE subtype
+        properties.map((p: any) => p.type_fr) // 🔥 LE BON CHAMP
       )
     )
       .filter(Boolean)
-      .map((t: any) => {
-        const lower = normalize(t);
-        return translation[lower] || lower.charAt(0).toUpperCase() + lower.slice(1);
-      });
-
-    return uniqueTypes.sort();
+      .sort();
   }, [properties]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 -mt-16 relative z-30">
       <div className="bg-white shadow-2xl p-8 border border-gray-100">
         <div className="grid grid-cols-1 md:grid-cols-6 gap-6 mb-8">
-          
+
           {/* DESTINATION */}
           <div className="flex flex-col border-b border-gray-200 pb-2">
             <label className="text-[9px] uppercase font-bold text-gray-400 mb-1">Destination</label>
