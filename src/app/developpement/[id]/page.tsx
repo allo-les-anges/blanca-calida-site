@@ -7,9 +7,14 @@ import Footer from "@/components/Footer";
 import { Bed, Bath, Maximize, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
+// 👉 On importe le type Property
+import { Property } from "@/types/property";
+
 export default function DevelopmentPage() {
   const { id } = useParams();
-  const [properties, setProperties] = useState<any[]>([]);
+
+  // 👉 On typage correctement le tableau
+  const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [imageLoaded, setImageLoaded] = useState(false);
 
@@ -28,7 +33,6 @@ export default function DevelopmentPage() {
     load();
   }, []);
 
-  // --- LOADER GLOBAL ---
   if (loading) {
     return (
       <div className="h-screen flex items-center justify-center bg-white">
@@ -37,6 +41,7 @@ export default function DevelopmentPage() {
     );
   }
 
+  // 👉 TypeScript comprend maintenant development_id
   const devUnits = properties.filter(
     (p) => String(p.development_id) === String(id)
   );
@@ -157,7 +162,13 @@ export default function DevelopmentPage() {
 }
 
 /* --- CARTE D’UNITÉ (DISPONIBLE / VENDUE) --- */
-function UnitCard({ unit, available }: { unit: any; available: boolean }) {
+function UnitCard({
+  unit,
+  available,
+}: {
+  unit: Property;
+  available: boolean;
+}) {
   const [loaded, setLoaded] = useState(false);
 
   return (
