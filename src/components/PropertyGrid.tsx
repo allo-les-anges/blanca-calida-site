@@ -30,8 +30,8 @@ export default function PropertyGrid({ activeFilters }: { activeFilters: any }) 
 
     const result = allProperties.filter((p: any) => {
       const pTown = normalize(p.town);
-      const pType = normalize(p.type);
-      const pRef  = normalize(p.reference); // CORRECTION IMPORTANTE
+      const pType = normalize(p.subtype);     // 🔥 CORRECTION ICI : subtype
+      const pRef  = normalize(p.reference);
       const pPrice = Number(p.price) || 0;
 
       const fTown = normalize(activeFilters.town);
@@ -79,7 +79,9 @@ export default function PropertyGrid({ activeFilters }: { activeFilters: any }) 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
         {filteredProps.map((prop: any) => (
           <div key={prop.id} className="border p-4">
-            <p className="font-bold">{prop.town} - {prop.type}</p>
+            <p className="font-bold">
+              {prop.town} - {prop.subtype /* 🔥 AFFICHAGE CORRIGÉ */}
+            </p>
             <p>{prop.price} €</p>
             <p>Ref : {prop.reference}</p>
           </div>
