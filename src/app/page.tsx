@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import AdvancedSearch from "@/components/AdvancedSearch";
@@ -8,16 +8,26 @@ import RegionGrid from "@/components/RegionGrid";
 import PropertyGrid from "@/components/PropertyGrid";
 import Footer from "@/components/Footer";
 
+// 👉 On importe le type Property
+import { Property } from "@/types/property";
+
 export default function Home() {
-  const [allProperties, setAllProperties] = useState([]);
+  // 👉 On typage correctement le tableau
+  const [allProperties, setAllProperties] = useState<Property[]>([]);
+
   const [filters, setFilters] = useState({
-    type: "", town: "", beds: "", minPrice: "", maxPrice: "", reference: "" 
+    type: "",
+    town: "",
+    beds: "",
+    minPrice: "",
+    maxPrice: "",
+    reference: "",
   });
 
   useEffect(() => {
     async function loadData() {
       try {
-        const res = await fetch("/api/properties"); 
+        const res = await fetch("/api/properties");
         const data = await res.json();
         setAllProperties(data);
       } catch (err) {
@@ -28,25 +38,22 @@ export default function Home() {
   }, []);
 
   const handleSearch = (newFilters: any) => {
-    // LE LOG INDISPENSABLE
     console.log("=== ACTION: RECHERCHE LANCÉE ===", newFilters);
-    setFilters({ ...newFilters }); // On crée un nouvel objet pour forcer React à réagir
-    
-    // Scroll fluide vers les résultats
-    const section = document.getElementById('collection');
-    if (section) section.scrollIntoView({ behavior: 'smooth' });
+    setFilters({ ...newFilters });
+
+    const section = document.getElementById("collection");
+    if (section) section.scrollIntoView({ behavior: "smooth" });
   };
 
   return (
     <main className="bg-white">
       <Navbar />
       <Hero />
-      
-      {/* Passage des props avec vérification */}
-      <AdvancedSearch 
-        properties={allProperties} 
-        onSearch={handleSearch} 
-        activeFilters={filters} 
+
+      <AdvancedSearch
+        properties={allProperties}
+        onSearch={handleSearch}
+        activeFilters={filters}
       />
 
       <section className="max-w-4xl mx-auto text-center py-20 px-6">
@@ -59,7 +66,6 @@ export default function Home() {
       </section>
 
       <div id="collection" className="bg-white pb-20">
-        {/* On passe filters ici, PropertyGrid réagira à chaque changement */}
         <PropertyGrid activeFilters={filters} />
       </div>
 
