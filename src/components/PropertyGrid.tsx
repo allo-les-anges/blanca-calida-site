@@ -24,6 +24,15 @@ export default function PropertyGrid({ activeFilters }: { activeFilters: any }) 
       });
   }, []);
 
+  // 👇 AJOUTE ÇA ICI 
+  useEffect(() => { 
+    if (allProperties.length) { 
+      console.log("EXEMPLE PROPERTY :", allProperties[0]); 
+    } 
+  }, [allProperties]); 
+  
+  // 👆 FIN DE L'AJOUT
+
   // Logique de filtrage
   useEffect(() => {
     if (allProperties.length === 0) return;
