@@ -14,13 +14,14 @@ export default function PropertyGrid({ activeFilters }: { activeFilters: any }) 
 
   const getKindFromTitle = (p: any) => {
     if (!p?.title) return "";
-    return String(p.title).split(" ")[0]; // "Appartement", "Villa", etc.
+    return String(p.title).split(" ")[0];
   };
 
   useEffect(() => {
     fetch('/api/properties')
       .then(res => res.json())
       .then(data => {
+        console.log("EXEMPLE PROPERTY :", data[0]);
         setAllProperties(data);
         setFilteredProps(data);
         setLoading(false);
@@ -33,7 +34,7 @@ export default function PropertyGrid({ activeFilters }: { activeFilters: any }) 
     const result = allProperties.filter((p: any) => {
       const pTown = normalize(p.town);
       const pType = normalize(getKindFromTitle(p));
-      const pRef  = normalize(p.ref);          // ton JSON utilise `ref`
+      const pRef  = normalize(p.ref);
       const pPrice = Number(p.price) || 0;
 
       const fTown = normalize(activeFilters.town);

@@ -15,11 +15,9 @@ export default function AdvancedSearch({ onSearch, properties = [], activeFilter
     return String(v).trim().toLowerCase();
   };
 
-  // Récupère le "type" à partir du titre (ex: "Appartement à X" → "Appartement")
   const getKindFromTitle = (p: any) => {
     if (!p?.title) return "";
-    const firstWord = String(p.title).split(" ")[0]; // "Appartement", "Villa", etc.
-    return firstWord;
+    return String(p.title).split(" ")[0]; // "Appartement", "Villa", etc.
   };
 
   const towns = useMemo(() => {
@@ -29,14 +27,14 @@ export default function AdvancedSearch({ onSearch, properties = [], activeFilter
   }, [properties]);
 
   const types = useMemo(() => {
-    return Array.from(
+    const list = Array.from(
       new Set(
-        properties
-          .map((p: any) => getKindFromTitle(p))
+        properties.map((p: any) => getKindFromTitle(p))
       )
-    )
-      .filter(Boolean)
-      .sort();
+    ).filter(Boolean).sort();
+
+    console.log("TYPES DÉDUITS POUR LE FILTRE :", list);
+    return list;
   }, [properties]);
 
   return (
