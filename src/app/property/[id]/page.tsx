@@ -27,14 +27,12 @@ export default function PropertyDetail({
   const [activeImage, setActiveImage] = useState(0);
   const [imageLoaded, setImageLoaded] = useState(false);
 
-  // --- CHARGEMENT DES DONNÉES ---
   useEffect(() => {
     async function fetchProperty() {
       try {
         const res = await fetch("/api/properties");
         const data = await res.json();
         const found = data.find((p: any) => String(p.id) === String(id));
-
         if (found) setProperty(found);
       } catch (err) {
         console.error("Erreur detail:", err);
@@ -45,11 +43,14 @@ export default function PropertyDetail({
     fetchProperty();
   }, [id]);
 
-  // --- RESET SLIDER ---
   useEffect(() => {
     setActiveImage(0);
     setImageLoaded(false);
   }, [property]);
+
+  useEffect(() => {
+    setImageLoaded(false);
+  }, [activeImage]);
 
   if (loading) {
     return (
@@ -75,33 +76,35 @@ export default function PropertyDetail({
     );
   }
 
-  const images = property.images ?? [];
+  const images: string[] = property.images ?? [];
   const beds = property.beds ?? "—";
   const baths = property.baths ?? "—";
   const built = property.surface_area?.built ?? "—";
   const useful = property.surface_area?.useful ?? built;
-  const plot = property.surface_area?.plot ?? "—";
 
   return (
     <main className="bg-white min-h-screen">
       <Navbar />
-      <div className="h-24 md:h-28"></div>
+      <div className="h-24 md:h-28" />
 
-      {/* RETOUR */}
       <div className="max-w-7xl mx-auto px-6 py-4">
         <Link
           href="/"
           className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.3em] text-gray-400 hover:text-brand-primary transition-colors group"
         >
-          <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
+          <ArrowLeft
+            size={14}
+            className="group-hover:-translate-x-1 transition-transform"
+          />
           Retour à la collection
         </Link>
       </div>
 
-      {/* GALERIE */}
       {images.length > 0 && (
         <section className="relative h-[65vh] md:h-[80vh] bg-black group/gallery">
-          {!imageLoaded && <div className="absolute inset-0 bg-gray-200 animate-pulse" />}
+          {!imageLoaded && (
+            <div className="absolute inset-0 bg-gray-200 animate-pulse" />
+          )}
 
           <img
             src={images[activeImage]}
@@ -112,12 +115,12 @@ export default function PropertyDetail({
             }`}
           />
 
-          {/* NAVIGATION */}
           <div className="absolute inset-0 flex items-center justify-between px-4 md:px-8 opacity-0 group-hover/gallery:opacity-100 transition-opacity duration-500">
             <button
               onClick={() => {
-                setImageLoaded(false);
-                setActiveImage((prev) => (prev > 0 ? prev - 1 : images.length - 1));
+                setActiveImage((prev) =>
+                  prev > 0 ? prev - 1 : images.length - 1
+                );
               }}
               className="p-4 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full text-white hover:bg-white hover:text-brand-primary transition-all shadow-2xl"
             >
@@ -126,8 +129,9 @@ export default function PropertyDetail({
 
             <button
               onClick={() => {
-                setImageLoaded(false);
-                setActiveImage((prev) => (prev < images.length - 1 ? prev + 1 : 0));
+                setActiveImage((prev) =>
+                  prev < images.length - 1 ? prev + 1 : 0
+                );
               }}
               className="p-4 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full text-white hover:bg-white hover:text-brand-primary transition-all shadow-2xl"
             >
@@ -135,16 +139,13 @@ export default function PropertyDetail({
             </button>
           </div>
 
-          {/* COMPTEUR */}
           <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-black/40 backdrop-blur-md text-white px-5 py-2 text-[9px] tracking-[0.3em] font-bold border border-white/10 uppercase rounded-full">
             {activeImage + 1} / {images.length} Photos
           </div>
         </section>
       )}
 
-      {/* CONTENU */}
       <section className="max-w-7xl mx-auto px-6 py-16 grid grid-cols-1 lg:grid-cols-3 gap-20">
-        {/* COLONNE GAUCHE */}
         <div className="lg:col-span-2">
           <span className="text-brand-secondary text-[10px] font-bold uppercase tracking-[0.4em] mb-4 block">
             {property.type} en vente
@@ -161,14 +162,16 @@ export default function PropertyDetail({
             </span>
           </div>
 
-          {/* FEATURES */}
           <div className="grid grid-cols-3 gap-1 md:gap-4 mb-16">
             <FeatureCard icon={<Bed />} label="Chambres" value={beds} />
             <FeatureCard icon={<Bath />} label="Bains" value={baths} />
-            <FeatureCard icon={<Maximize />} label="Habitable" value={`${useful} m²`} />
+            <FeatureCard
+              icon={<Maximize />}
+              label="Habitable"
+              value={`${useful} m²`}
+            />
           </div>
 
-          {/* DESCRIPTION */}
           <div className="space-y-16">
             <div className="space-y-8">
               <h2 className="text-2xl font-serif text-brand-primary uppercase tracking-widest border-l-2 border-brand-secondary pl-6">
@@ -185,7 +188,6 @@ export default function PropertyDetail({
               </p>
             </div>
 
-            {/* CARTE */}
             <div className="pt-16 border-t border-gray-100">
               <h2 className="text-2xl font-serif text-brand-primary uppercase tracking-widest border-l-2 border-brand-secondary pl-6 mb-8">
                 Localisation
@@ -205,7 +207,6 @@ export default function PropertyDetail({
           </div>
         </div>
 
-        {/* COLONNE DROITE */}
         <div className="lg:col-span-1">
           <div className="sticky top-32 bg-white border border-gray-100 p-10 shadow-xl shadow-gray-100/50">
             <div className="mb-10 text-center lg:text-left">
@@ -230,7 +231,10 @@ export default function PropertyDetail({
                 rel="noopener noreferrer"
                 className="w-full border border-gray-200 text-brand-primary py-5 uppercase text-[10px] tracking-[0.3em] font-bold hover:bg-brand-primary hover:text-white transition duration-500 flex items-center justify-center gap-3 group"
               >
-                <MessageCircle size={18} className="text-green-500 group-hover:text-white transition-colors" />
+                <MessageCircle
+                  size={18}
+                  className="text-green-500 group-hover:text-white transition-colors"
+                />
                 Contacter via WhatsApp
               </a>
             </div>
@@ -243,8 +247,15 @@ export default function PropertyDetail({
   );
 }
 
-/* --- FEATURE CARD --- */
-function FeatureCard({ icon, label, value }: { icon: any; label: string; value: any }) {
+function FeatureCard({
+  icon,
+  label,
+  value,
+}: {
+  icon: any;
+  label: string;
+  value: any;
+}) {
   return (
     <div className="bg-gray-50/50 p-8 border border-gray-100 text-center">
       <div className="mx-auto mb-4 text-brand-primary">{icon}</div>

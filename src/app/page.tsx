@@ -12,7 +12,8 @@ import { Property } from "@/types/property";
 
 export default function Home() {
   const [allProperties, setAllProperties] = useState<Property[]>([]);
-  const [visibleCount, setVisibleCount] = useState(12); // 👉 nombre de propriétés visibles
+  const [visibleCount, setVisibleCount] = useState(12);
+  const [loading, setLoading] = useState(true); // ← AJOUT
 
   const [filters, setFilters] = useState({
     type: "",
@@ -33,6 +34,8 @@ export default function Home() {
         setAllProperties(data);
       } catch (err) {
         console.error("Erreur API:", err);
+      } finally {
+        setLoading(false); // ← AJOUT
       }
     }
     loadData();
@@ -40,13 +43,12 @@ export default function Home() {
 
   const handleSearch = (newFilters: any) => {
     setFilters({ ...newFilters });
-    setVisibleCount(12); // 👉 reset du compteur lors d’une recherche
+    setVisibleCount(12);
 
     const section = document.getElementById("collection");
     if (section) section.scrollIntoView({ behavior: "smooth" });
   };
 
-  // 👉 Détection correcte des filtres actifs
   const hasActiveFilters =
     filters.type !== "" ||
     filters.town !== "" ||
@@ -54,12 +56,21 @@ export default function Home() {
     filters.minPrice !== "" ||
     filters.maxPrice !== "" ||
     filters.reference !== "" ||
-    filters.development !== "";
+    filters.development !== "" ||
+    filters.availableOnly === true;
 
-  // 👉 Propriétés affichées (12, puis +12, etc.)
   const propertiesToShow = hasActiveFilters
-    ? allProperties // si filtres → tout
-    : allProperties.slice(0, visibleCount); // sinon → pagination
+    ? allProperties
+    : allProperties.slice(0, visibleCount);
+
+  // --- LOADER GLOBAL ---
+  if (loading) {
+    return (
+      <main className="bg-white min-h-screen flex items-center justify-center">
+        <div className="animate-spin h-12 w-12 rounded-full border-t-2 border-brand-primary"></div>
+      </main>
+    );
+  }
 
   return (
     <main className="bg-white">
@@ -72,7 +83,6 @@ export default function Home() {
         activeFilters={filters}
       />
 
-      {/* RégionGrid toujours basé sur les 12 premières */}
       <RegionGrid
         properties={allProperties.slice(0, 12)}
         onRegionClick={(town) =>
@@ -95,7 +105,6 @@ export default function Home() {
           properties={propertiesToShow} 
         />
 
-        {/* 👉 Bouton SHOW MORE (uniquement si pas de filtres) */}
         {!hasActiveFilters && visibleCount < allProperties.length && (
           <div className="text-center mt-12">
             <button
