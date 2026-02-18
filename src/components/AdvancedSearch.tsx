@@ -19,19 +19,12 @@ export default function AdvancedSearch({
     setLocalFilters(activeFilters);
   }, [activeFilters]);
 
-  const getKindFromTitle = (p: any) => {
-    if (!p?.title) return "";
-    return p.title.split(" ")[0];
-  };
-
   const towns = useMemo(() => {
     return [...new Set(properties.map((p) => p.town))].filter(Boolean).sort();
   }, [properties]);
 
   const types = useMemo(() => {
-    return [...new Set(properties.map((p) => getKindFromTitle(p)))]
-      .filter(Boolean)
-      .sort();
+    return [...new Set(properties.map((p) => p.type))].filter(Boolean).sort();
   }, [properties]);
 
   const developments = useMemo(() => {
@@ -58,16 +51,21 @@ export default function AdvancedSearch({
   return (
     <div className="max-w-7xl mx-auto px-4 -mt-16 relative z-30">
       <div className="bg-white shadow-2xl p-8 border border-gray-100">
+
+        {/* GRID */}
         <div className="grid grid-cols-1 md:grid-cols-6 gap-6 mb-8">
 
           {/* DESTINATION */}
-          <div>
-            <label>Destination</label>
+          <div className="flex flex-col border-b border-gray-200 pb-2">
+            <label className="text-[9px] uppercase font-bold text-gray-400 mb-1">
+              Destination
+            </label>
             <select
               value={localFilters.town}
               onChange={(e) =>
                 setLocalFilters({ ...localFilters, town: e.target.value })
               }
+              className="bg-transparent text-xs uppercase font-medium outline-none cursor-pointer"
             >
               <option value="">Toutes les villes</option>
               {towns.map((t) => (
@@ -77,13 +75,16 @@ export default function AdvancedSearch({
           </div>
 
           {/* TYPE */}
-          <div>
-            <label>Type</label>
+          <div className="flex flex-col border-b border-gray-200 pb-2">
+            <label className="text-[9px] uppercase font-bold text-gray-400 mb-1">
+              Type
+            </label>
             <select
               value={localFilters.type}
               onChange={(e) =>
                 setLocalFilters({ ...localFilters, type: e.target.value })
               }
+              className="bg-transparent text-xs uppercase font-medium outline-none cursor-pointer"
             >
               <option value="">Tous les types</option>
               {types.map((t) => (
@@ -93,13 +94,16 @@ export default function AdvancedSearch({
           </div>
 
           {/* DÉVELOPPEMENT */}
-          <div>
-            <label>Développement</label>
+          <div className="flex flex-col border-b border-gray-200 pb-2">
+            <label className="text-[9px] uppercase font-bold text-gray-400 mb-1">
+              Développement
+            </label>
             <select
               value={localFilters.development}
               onChange={(e) =>
                 setLocalFilters({ ...localFilters, development: e.target.value })
               }
+              className="bg-transparent text-xs uppercase font-medium outline-none cursor-pointer"
             >
               <option value="">Tous les développements</option>
               {developments.map((d) => (
@@ -109,13 +113,16 @@ export default function AdvancedSearch({
           </div>
 
           {/* CHAMBRES */}
-          <div>
-            <label>Chambres</label>
+          <div className="flex flex-col border-b border-gray-200 pb-2">
+            <label className="text-[9px] uppercase font-bold text-gray-400 mb-1">
+              Chambres
+            </label>
             <select
               value={localFilters.beds}
               onChange={(e) =>
                 setLocalFilters({ ...localFilters, beds: e.target.value })
               }
+              className="bg-transparent text-xs uppercase font-medium outline-none cursor-pointer"
             >
               <option value="">Indifférent</option>
               {[1, 2, 3, 4, 5].map((n) => (
@@ -127,26 +134,32 @@ export default function AdvancedSearch({
           </div>
 
           {/* PRIX MIN */}
-          <div>
-            <label>Prix min</label>
+          <div className="flex flex-col border-b border-gray-200 pb-2">
+            <label className="text-[9px] uppercase font-bold text-gray-400 mb-1">
+              Prix min
+            </label>
             <input
               type="number"
               value={localFilters.minPrice}
               onChange={(e) =>
                 setLocalFilters({ ...localFilters, minPrice: e.target.value })
               }
+              className="bg-transparent text-xs uppercase font-medium outline-none"
             />
           </div>
 
           {/* PRIX MAX */}
-          <div>
-            <label>Prix max</label>
+          <div className="flex flex-col border-b border-gray-200 pb-2">
+            <label className="text-[9px] uppercase font-bold text-gray-400 mb-1">
+              Prix max
+            </label>
             <input
               type="number"
               value={localFilters.maxPrice}
               onChange={(e) =>
                 setLocalFilters({ ...localFilters, maxPrice: e.target.value })
               }
+              className="bg-transparent text-xs uppercase font-medium outline-none"
             />
           </div>
         </div>
@@ -163,15 +176,24 @@ export default function AdvancedSearch({
               })
             }
           />
-          <label>Disponible uniquement</label>
+          <label className="text-xs uppercase font-medium text-gray-600">
+            Disponible uniquement
+          </label>
         </div>
 
-        <div className="flex justify-between">
-          <button onClick={reset}>
+        {/* ACTIONS */}
+        <div className="flex justify-between items-center">
+          <button
+            onClick={reset}
+            className="flex items-center gap-2 text-gray-400 text-[10px] uppercase font-bold hover:text-gray-600 transition-colors"
+          >
             <RotateCcw size={12} /> Reset
           </button>
 
-          <button onClick={() => onSearch(localFilters)}>
+          <button
+            onClick={() => onSearch(localFilters)}
+            className="bg-slate-900 text-white px-16 py-4 uppercase text-[10px] tracking-widest font-bold hover:bg-slate-800 transition-all flex items-center gap-3"
+          >
             <Search size={14} /> Lancer la recherche
           </button>
         </div>
@@ -179,4 +201,3 @@ export default function AdvancedSearch({
     </div>
   );
 }
-
