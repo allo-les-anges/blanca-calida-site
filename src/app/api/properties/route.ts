@@ -32,10 +32,12 @@ export async function GET() {
       let images: string[] = [];
 
       if (p.images?.image) {
-        if (Array.isArray(p.images.image)) {
-          images = p.images.image.map((img: any) => img.url);
-        } else {
-          images = [p.images.image.url];
+        const raw = p.images.image;
+
+        if (Array.isArray(raw)) {
+          images = raw.map((img: any) => img.url);
+        } else if (raw.url) {
+          images = [raw.url];
         }
       }
 
@@ -91,11 +93,25 @@ export async function GET() {
           green_areas: Number(p.distances?.green_areas),
         },
 
-        urls: p.url,
+        // --- FIX : URLs correctement parsées ---
+        urls: p.urls || {},
+
         development_name: p.development_name,
 
-        title: p.title?.fr || p.title?.en || p.title?.es || "",
-        description: p.desc?.fr || p.desc?.en || "",
+        // --- FIX : titres et descriptions correctement parsés ---
+        title:
+          p.title?.fr ||
+          p.title?.en ||
+          p.title?.es ||
+          p.title ||
+          "",
+
+        description:
+          p.desc?.fr ||
+          p.desc?.en ||
+          p.desc?.es ||
+          p.desc ||
+          "",
 
         features: p.features?.feature || [],
         tags: p.tags?.tag || [],
