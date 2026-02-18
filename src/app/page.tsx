@@ -47,8 +47,15 @@ export default function Home() {
     if (section) section.scrollIntoView({ behavior: "smooth" });
   };
 
-  // 👉 Détection si un filtre est actif
-  const hasActiveFilters = Object.values(filters).some((v) => v !== "");
+  // 👉 Détection correcte des filtres actifs
+  const hasActiveFilters =
+    filters.type !== "" ||
+    filters.town !== "" ||
+    filters.beds !== "" ||
+    filters.minPrice !== "" ||
+    filters.maxPrice !== "" ||
+    filters.reference !== "" ||
+    filters.development !== "";
 
   // 👉 Propriétés à afficher
   const propertiesToShow = hasActiveFilters
