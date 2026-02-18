@@ -79,12 +79,11 @@ export default function PropertyDetail({
   }
 
   const images: string[] = property.images || [];
-  const beds = property.features?.beds ?? "—";
-  const baths = property.features?.baths ?? "—";
+  const beds = property.beds ?? "—";
+  const baths = property.baths ?? "—";
   const habitable =
-    property.features?.surface_area?.useful ??
-    property.features?.surface_area?.built ??
-    property.features?.surface ??
+    property.surface_area?.useful ??
+    property.surface_area?.built ??
     "—";
 
   return (
@@ -171,7 +170,7 @@ export default function PropertyDetail({
           <div className="flex items-center gap-3 text-gray-500 mb-12 border-b border-gray-100 pb-10">
             <MapPin size={18} className="text-brand-secondary" />
             <span className="uppercase tracking-[0.2em] text-[11px] font-medium">
-              {property.town} • Costa Blanca
+              {property.town} • {property.location?.area ?? "Costa Blanca"}
             </span>
           </div>
 
@@ -182,7 +181,9 @@ export default function PropertyDetail({
             <FeatureCard
               icon={<Maximize />}
               label="Habitable"
-              value={`${habitable} m²`}
+              value={
+                habitable !== "—" ? `${habitable} m²` : "—"
+              }
             />
           </div>
 
@@ -197,7 +198,7 @@ export default function PropertyDetail({
                 <p>
                   Découvrez cette propriété située à{" "}
                   <strong>{property.town}</strong>. Ce bien de type{" "}
-                  {property.title?.split(" ")[0].toLowerCase()} a été sélectionné
+                  {property.type} a été sélectionné
                   pour sa situation privilégiée.
                 </p>
 
@@ -220,8 +221,9 @@ export default function PropertyDetail({
                   frameBorder="0"
                   scrolling="no"
                   src={
-                    property.lat && property.lng
-                      ? `https://maps.google.com/maps?q=${property.lat},${property.lng}&z=14&output=embed`
+                    property.location?.latitude &&
+                    property.location?.longitude
+                      ? `https://maps.google.com/maps?q=${property.location.latitude},${property.location.longitude}&z=14&output=embed`
                       : `https://maps.google.com/maps?q=${encodeURIComponent(
                           property.town + ", Spain"
                         )}&z=13&output=embed`
@@ -231,7 +233,7 @@ export default function PropertyDetail({
               </div>
 
               <p className="mt-4 text-[9px] text-gray-400 uppercase tracking-widest text-center italic">
-                {property.lat
+                {property.location?.latitude
                   ? "* Localisation exacte du bien"
                   : `* Zone de ${property.town} (Localisation précise sur demande)`}
               </p>
