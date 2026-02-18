@@ -14,13 +14,21 @@ export async function GET() {
         Accept: "application/xml,text/xml",
       },
       timeout: 15000,
+      responseType: "text", // 🔥 IMPORTANT pour éviter les flux vides
+      decompress: true,      // 🔥 IMPORTANT si le flux est compressé
     });
 
+    // 🔥 LOGS POUR COMPRENDRE CE QUE VERCEL REÇOIT
+    console.log("STATUS:", response.status);
+    console.log("HEADERS:", response.headers);
+    console.log("LENGTH:", response.data?.length);
+    console.log("FIRST 200 CHARS:", response.data?.slice(0, 200));
+
     console.log("RAW XML START >>>");
-    console.log(response.data.slice(0, 500));
+    console.log(response.data?.slice(0, 500));
     console.log("<<< RAW XML END");
 
-
+    // --- PARSING XML ---
     const parser = new XMLParser({
       ignoreAttributes: false,
       attributeNamePrefix: "",
@@ -29,11 +37,9 @@ export async function GET() {
     });
 
     const result = parser.parse(response.data);
-
     const properties = result?.root?.property || [];
 
     const allProperties = properties.map((p: any) => {
-      // --- FIX CRITIQUE : gestion 1 image OU plusieurs images ---
       let images: string[] = [];
 
       if (p.images?.image) {
@@ -98,12 +104,9 @@ export async function GET() {
           green_areas: Number(p.distances?.green_areas),
         },
 
-        // --- FIX : URLs correctement parsées ---
         urls: p.urls || {},
-
         development_name: p.development_name,
 
-        // --- FIX : titres et descriptions correctement parsés ---
         title:
           p.title?.fr ||
           p.title?.en ||
@@ -120,7 +123,6 @@ export async function GET() {
 
         features: p.features?.feature || [],
         tags: p.tags?.tag || [],
-
         images,
       };
     });
