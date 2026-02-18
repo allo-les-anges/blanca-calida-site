@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, use } from "react";
+import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import {
@@ -18,9 +18,9 @@ import Link from "next/link";
 export default function PropertyDetail({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: { id: string };
 }) {
-  const { id } = use(params);
+  const id = params.id;
 
   const [property, setProperty] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -41,8 +41,27 @@ export default function PropertyDetail({
         setLoading(false);
       }
     }
+
     fetchProperty();
   }, [id]);
+
+  // --- RESET SLIDER QUAND LA PROPRIÉTÉ CHANGE ---
+  useEffect(() => {
+    if (!property) return;
+    setActiveImage(0);
+    setImageLoaded(false);
+  }, [property]);
+
+  // --- FORCE IMAGE LOAD EVEN IF CACHED ---
+  useEffect(() => {
+    if (!property?.images?.length) return;
+
+    setImageLoaded(false);
+
+    const img = new Image();
+    img.src = property.images[activeImage];
+    img.onload = () => setImageLoaded(true);
+  }, [activeImage, property]);
 
   if (loading) {
     return (
@@ -68,29 +87,11 @@ export default function PropertyDetail({
     );
   }
 
-  // --- DÉFINIR LES IMAGES AVANT LES useEffect ---
   const images: string[] = property.images ?? [];
   const beds = property.beds ?? "—";
   const baths = property.baths ?? "—";
   const built = property.surface_area?.built ?? "—";
   const useful = property.surface_area?.useful ?? built;
-
-  // --- RESET SLIDER QUAND LA PROPRIÉTÉ CHANGE ---
-  useEffect(() => {
-    setActiveImage(0);
-    setImageLoaded(false);
-  }, [property]);
-
-  // --- FORCE IMAGE LOAD EVEN IF CACHED ---
-  useEffect(() => {
-    if (!images || images.length === 0) return;
-
-    setImageLoaded(false);
-
-    const img = new Image();
-    img.src = images[activeImage];
-    img.onload = () => setImageLoaded(true);
-  }, [activeImage, images]);
 
   return (
     <main className="bg-white min-h-screen">
@@ -107,7 +108,6 @@ export default function PropertyDetail({
         </Link>
       </div>
 
-      {/* --- SLIDER --- */}
       {images.length > 0 && (
         <section className="relative h-[65vh] md:h-[80vh] bg-black group/gallery">
           {!imageLoaded && (
@@ -152,7 +152,6 @@ export default function PropertyDetail({
         </section>
       )}
 
-      {/* --- CONTENU --- */}
       <section className="max-w-7xl mx-auto px-6 py-16 grid grid-cols-1 lg:grid-cols-3 gap-20">
         <div className="lg:col-span-2">
           <span className="text-brand-secondary text-[10px] font-bold uppercase tracking-[0.4em] mb-4 block">
@@ -203,7 +202,7 @@ export default function PropertyDetail({
                   height="100%"
                   frameBorder="0"
                   scrolling="no"
-                  src={`https://maps.google.com/maps?q=${property.location.latitude},${property.location.longitude}&z=14&output=embed`}
+                  src={`https://maps.google.com/maps?q=${property.location?.latitude},${property.location?.longitude}&z=14&output=embed`}
                   className="filter saturate-0 contrast-110"
                 />
               </div>
@@ -248,7 +247,15 @@ export default function PropertyDetail({
   );
 }
 
-function FeatureCard({ icon, label, value }: { icon: any; label: string; value: any }) {
+function FeatureCard({
+  icon,
+  label,
+  value,
+}: {
+  icon: any;
+  label: string;
+  value: any;
+}) {
   return (
     <div className="bg-gray-50/50 p-8 border border-gray-100 text-center">
       <div className="mx-auto mb-4 text-brand-primary">{icon}</div>
