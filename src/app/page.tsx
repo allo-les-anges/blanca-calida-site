@@ -8,11 +8,9 @@ import RegionGrid from "@/components/RegionGrid";
 import PropertyGrid from "@/components/PropertyGrid";
 import Footer from "@/components/Footer";
 
-// 👉 On importe le type Property
 import { Property } from "@/types/property";
 
 export default function Home() {
-  // 👉 On typage correctement le tableau
   const [allProperties, setAllProperties] = useState<Property[]>([]);
 
   const [filters, setFilters] = useState({
@@ -22,6 +20,8 @@ export default function Home() {
     minPrice: "",
     maxPrice: "",
     reference: "",
+    development: "",
+    availableOnly: false,
   });
 
   useEffect(() => {
@@ -38,7 +38,6 @@ export default function Home() {
   }, []);
 
   const handleSearch = (newFilters: any) => {
-    console.log("=== ACTION: RECHERCHE LANCÉE ===", newFilters);
     setFilters({ ...newFilters });
 
     const section = document.getElementById("collection");
@@ -50,12 +49,22 @@ export default function Home() {
       <Navbar />
       <Hero />
 
+      {/* 🔍 BARRE DE RECHERCHE */}
       <AdvancedSearch
         properties={allProperties}
         onSearch={handleSearch}
         activeFilters={filters}
       />
 
+      {/* 🗺️ GRID DES RÉGIONS (comme avant) */}
+      <RegionGrid
+        properties={allProperties}
+        onRegionClick={(town) =>
+          setFilters((prev) => ({ ...prev, town }))
+        }
+      />
+
+      {/* SECTION TITRE */}
       <section className="max-w-4xl mx-auto text-center py-20 px-6">
         <h2 className="text-brand-secondary text-[10px] uppercase tracking-[0.5em] font-bold mb-4">
           Sélection Exclusive
@@ -65,6 +74,7 @@ export default function Home() {
         </h3>
       </section>
 
+      {/* COLLECTION */}
       <div id="collection" className="bg-white pb-20">
         <PropertyGrid activeFilters={filters} />
       </div>
