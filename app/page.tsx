@@ -7,13 +7,12 @@ import AdvancedSearch from "@/components/AdvancedSearch";
 import RegionGrid from "@/components/RegionGrid";
 import PropertyGrid from "@/components/PropertyGrid";
 import Footer from "@/components/Footer";
-
 import { Property } from "@/types/property";
 
 export default function Home() {
   const [allProperties, setAllProperties] = useState<Property[]>([]);
   const [visibleCount, setVisibleCount] = useState(12);
-  const [loading, setLoading] = useState(true); // ← AJOUT
+  const [loading, setLoading] = useState(true);
 
   const [filters, setFilters] = useState({
     type: "",
@@ -35,11 +34,19 @@ export default function Home() {
       } catch (err) {
         console.error("Erreur API:", err);
       } finally {
-        setLoading(false); // ← AJOUT
+        setLoading(false);
       }
     }
     loadData();
   }, []);
+
+  const hasActiveFilters = Object.values(filters).some(
+    (v) => v !== "" && v !== false
+  );
+
+  const propertiesToShow = hasActiveFilters
+    ? allProperties
+    : allProperties.slice(0, visibleCount);
 
   const handleSearch = (newFilters: any) => {
     setFilters({ ...newFilters });
@@ -49,21 +56,22 @@ export default function Home() {
     if (section) section.scrollIntoView({ behavior: "smooth" });
   };
 
-  const hasActiveFilters =
-    filters.type !== "" ||
-    filters.town !== "" ||
-    filters.beds !== "" ||
-    filters.minPrice !== "" ||
-    filters.maxPrice !== "" ||
-    filters.reference !== "" ||
-    filters.development !== "" ||
-    filters.availableOnly === true;
+  const handleRegionClick = (town: string) => {
+    setFilters({
+      type: "",
+      town,
+      beds: "",
+      minPrice: "",
+      maxPrice: "",
+      reference: "",
+      development: "",
+      availableOnly: false,
+    });
 
-  const propertiesToShow = hasActiveFilters
-    ? allProperties
-    : allProperties.slice(0, visibleCount);
+    const section = document.getElementById("collection");
+    if (section) section.scrollIntoView({ behavior: "smooth" });
+  };
 
-  // --- LOADER GLOBAL ---
   if (loading) {
     return (
       <main className="bg-white min-h-screen flex items-center justify-center">
@@ -84,10 +92,8 @@ export default function Home() {
       />
 
       <RegionGrid
-        properties={allProperties.slice(0, 12)}
-        onRegionClick={(town) =>
-          setFilters((prev) => ({ ...prev, town }))
-        }
+        properties={allProperties}
+        onRegionClick={handleRegionClick}
       />
 
       <section className="max-w-4xl mx-auto text-center py-20 px-6">
@@ -100,10 +106,7 @@ export default function Home() {
       </section>
 
       <div id="collection" className="bg-white pb-20">
-        <PropertyGrid 
-          activeFilters={filters} 
-          properties={propertiesToShow} 
-        />
+        <PropertyGrid activeFilters={filters} properties={propertiesToShow} />
 
         {!hasActiveFilters && visibleCount < allProperties.length && (
           <div className="text-center mt-12">

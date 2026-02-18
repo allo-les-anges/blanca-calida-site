@@ -3,7 +3,7 @@ export default function Footer() {
     <footer className="bg-brand-primary text-white py-20 px-10">
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12">
         <div className="col-span-1 md:col-span-2">
-          <h3 className="font-serif text-3xl mb-6">BLANCA CALIDA</h3>
+          <h3 className="font-serif text-3xl mb-6">Your Page</h3>
           <p className="text-gray-400 font-light max-w-sm leading-relaxed">
             Spécialiste de l'immobilier d'exception sur la Costa Blanca. 
             Nous sélectionnons pour vous les villas les plus exclusives entre Altea et Dénia.

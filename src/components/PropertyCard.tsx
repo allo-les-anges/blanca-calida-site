@@ -37,7 +37,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
 
         {/* VILLE + TYPE */}
         <p className="text-[10px] uppercase tracking-[0.3em] text-gray-400 font-bold">
-          {property.town} — {property.title?.split(" ")[0]}
+          {property.town} — {property.type}
         </p>
 
         {/* TITRE */}
@@ -53,13 +53,13 @@ export default function PropertyCard({ property }: PropertyCardProps) {
         {/* FEATURES */}
         <div className="flex items-center gap-6 text-gray-500 text-sm pt-2">
           <span className="flex items-center gap-2">
-            <Bed size={16} /> {property.features.beds}
+            <Bed size={16} /> {property.beds}
           </span>
           <span className="flex items-center gap-2">
-            <Bath size={16} /> {property.features.baths}
+            <Bath size={16} /> {property.baths}
           </span>
           <span className="flex items-center gap-2">
-            <Maximize size={16} /> {property.features.surface} m²
+            <Maximize size={16} /> {property.surface_area?.built} m²
           </span>
         </div>
 

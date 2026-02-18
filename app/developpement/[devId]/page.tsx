@@ -6,14 +6,12 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Bed, Bath, Maximize, ArrowLeft } from "lucide-react";
 import Link from "next/link";
-
-// 👉 On importe le type Property
 import { Property } from "@/types/property";
 
 export default function DevelopmentPage() {
-  const { id } = useParams();
+  // 👉 On récupère devId (et non plus id)
+  const { devId } = useParams();
 
-  // 👉 On typage correctement le tableau
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -41,9 +39,9 @@ export default function DevelopmentPage() {
     );
   }
 
-  // 👉 TypeScript comprend maintenant development_id
+  // 👉 On filtre avec devId
   const devUnits = properties.filter(
-    (p) => String(p.development_id) === String(id)
+    (p) => String(p.development_id) === String(devId)
   );
 
   if (!devUnits.length) {
@@ -71,7 +69,6 @@ export default function DevelopmentPage() {
       <Navbar />
       <div className="h-24 md:h-28"></div>
 
-      {/* RETOUR */}
       <div className="max-w-7xl mx-auto px-6 py-4">
         <Link
           href="/"
@@ -99,7 +96,7 @@ export default function DevelopmentPage() {
         )}
       </section>
 
-      {/* IMAGES DU DÉVELOPPEMENT */}
+      {/* IMAGES */}
       {dev.development_images?.length > 0 && (
         <section className="max-w-7xl mx-auto px-6 py-10">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -161,7 +158,6 @@ export default function DevelopmentPage() {
   );
 }
 
-/* --- CARTE D’UNITÉ (DISPONIBLE / VENDUE) --- */
 function UnitCard({
   unit,
   available,

@@ -15,26 +15,24 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
-export default function PropertyDetail({
-  params,
-}: {
-  params: { id: string };
-}) {
-  const id = params.id;
-
+export default function PropertyDetailClient({ id }: { id: string }) {
   const [property, setProperty] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [activeImage, setActiveImage] = useState(0);
   const [imageLoaded, setImageLoaded] = useState(false);
 
-  // --- CHARGEMENT DES DONNÉES ---
   useEffect(() => {
     async function fetchProperty() {
       try {
         const res = await fetch("/api/properties");
         const data = await res.json();
+        
+        console.log("ID reçu dans PropertyDetailClient =", id); 
+        console.log("IDs disponibles =", data.map((p: any) => p.id));
+
+
         const found = data.find((p: any) => String(p.id) === String(id));
-        if (found) setProperty(found);
+        setProperty(found || null);
       } catch (err) {
         console.error("Erreur detail:", err);
       } finally {
@@ -44,24 +42,6 @@ export default function PropertyDetail({
 
     fetchProperty();
   }, [id]);
-
-  // --- RESET SLIDER QUAND LA PROPRIÉTÉ CHANGE ---
-  useEffect(() => {
-    if (!property) return;
-    setActiveImage(0);
-    setImageLoaded(false);
-  }, [property]);
-
-  // --- FORCE IMAGE LOAD EVEN IF CACHED ---
-  useEffect(() => {
-    if (!property?.images?.length) return;
-
-    setImageLoaded(false);
-
-    const img = new Image();
-    img.src = property.images[activeImage];
-    img.onload = () => setImageLoaded(true);
-  }, [activeImage, property]);
 
   if (loading) {
     return (
@@ -87,7 +67,7 @@ export default function PropertyDetail({
     );
   }
 
-  const images: string[] = property.images ?? [];
+  const images = property.images ?? [];
   const beds = property.beds ?? "—";
   const baths = property.baths ?? "—";
   const built = property.surface_area?.built ?? "—";
@@ -120,6 +100,7 @@ export default function PropertyDetail({
             className={`w-full h-full object-cover transition-all duration-700 ${
               imageLoaded ? "opacity-100 scale-100" : "opacity-0 scale-105"
             }`}
+            onLoad={() => setImageLoaded(true)}
           />
 
           <div className="absolute inset-0 flex items-center justify-between px-4 md:px-8 opacity-0 group-hover/gallery:opacity-100 transition-opacity duration-500">
