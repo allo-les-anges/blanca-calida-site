@@ -7,7 +7,14 @@ export async function GET() {
     "https://medianewbuild.com/file/hh-media-bucket/agents/6d5cb68a-3636-4095-b0ce-7dc9ec2df2d2/feed_blanca_calida.xml";
 
   try {
-    const response = await axios.get(XML_URL);
+    const response = await axios.get(XML_URL, {
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        Accept: "application/xml,text/xml",
+      },
+      timeout: 15000,
+    });
 
     const parser = new XMLParser({
       ignoreAttributes: false,
