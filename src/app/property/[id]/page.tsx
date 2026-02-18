@@ -35,9 +35,7 @@ export default function PropertyDetail({
         const data = await res.json();
         const found = data.find((p: any) => String(p.id) === String(id));
 
-        if (found) {
-          setProperty(found);
-        }
+        if (found) setProperty(found);
       } catch (err) {
         console.error("Erreur detail:", err);
       } finally {
@@ -47,13 +45,12 @@ export default function PropertyDetail({
     fetchProperty();
   }, [id]);
 
-  // --- RESET SLIDER QUAND LA PROPRIÉTÉ CHANGE ---
+  // --- RESET SLIDER ---
   useEffect(() => {
     setActiveImage(0);
     setImageLoaded(false);
   }, [property]);
 
-  // --- LOADER GLOBAL ---
   if (loading) {
     return (
       <div className="h-screen flex items-center justify-center bg-white">
@@ -78,13 +75,12 @@ export default function PropertyDetail({
     );
   }
 
-  const images: string[] = property.images || [];
+  const images = property.images ?? [];
   const beds = property.beds ?? "—";
   const baths = property.baths ?? "—";
-  const habitable =
-    property.surface_area?.useful ??
-    property.surface_area?.built ??
-    "—";
+  const built = property.surface_area?.built ?? "—";
+  const useful = property.surface_area?.useful ?? built;
+  const plot = property.surface_area?.plot ?? "—";
 
   return (
     <main className="bg-white min-h-screen">
@@ -97,10 +93,7 @@ export default function PropertyDetail({
           href="/"
           className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.3em] text-gray-400 hover:text-brand-primary transition-colors group"
         >
-          <ArrowLeft
-            size={14}
-            className="group-hover:-translate-x-1 transition-transform"
-          />
+          <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
           Retour à la collection
         </Link>
       </div>
@@ -108,9 +101,7 @@ export default function PropertyDetail({
       {/* GALERIE */}
       {images.length > 0 && (
         <section className="relative h-[65vh] md:h-[80vh] bg-black group/gallery">
-          {!imageLoaded && (
-            <div className="absolute inset-0 bg-gray-200 animate-pulse" />
-          )}
+          {!imageLoaded && <div className="absolute inset-0 bg-gray-200 animate-pulse" />}
 
           <img
             src={images[activeImage]}
@@ -126,9 +117,7 @@ export default function PropertyDetail({
             <button
               onClick={() => {
                 setImageLoaded(false);
-                setActiveImage((prev) =>
-                  prev > 0 ? prev - 1 : images.length - 1
-                );
+                setActiveImage((prev) => (prev > 0 ? prev - 1 : images.length - 1));
               }}
               className="p-4 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full text-white hover:bg-white hover:text-brand-primary transition-all shadow-2xl"
             >
@@ -138,9 +127,7 @@ export default function PropertyDetail({
             <button
               onClick={() => {
                 setImageLoaded(false);
-                setActiveImage((prev) =>
-                  prev < images.length - 1 ? prev + 1 : 0
-                );
+                setActiveImage((prev) => (prev < images.length - 1 ? prev + 1 : 0));
               }}
               className="p-4 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full text-white hover:bg-white hover:text-brand-primary transition-all shadow-2xl"
             >
@@ -160,7 +147,7 @@ export default function PropertyDetail({
         {/* COLONNE GAUCHE */}
         <div className="lg:col-span-2">
           <span className="text-brand-secondary text-[10px] font-bold uppercase tracking-[0.4em] mb-4 block">
-            {property.title?.split(" ")[0]} en vente
+            {property.type} en vente
           </span>
 
           <h1 className="text-4xl md:text-6xl font-serif text-brand-primary mb-8 leading-tight">
@@ -170,7 +157,7 @@ export default function PropertyDetail({
           <div className="flex items-center gap-3 text-gray-500 mb-12 border-b border-gray-100 pb-10">
             <MapPin size={18} className="text-brand-secondary" />
             <span className="uppercase tracking-[0.2em] text-[11px] font-medium">
-              {property.town} • {property.location?.area ?? "Costa Blanca"}
+              {property.town} • {property.location?.area}
             </span>
           </div>
 
@@ -178,13 +165,7 @@ export default function PropertyDetail({
           <div className="grid grid-cols-3 gap-1 md:gap-4 mb-16">
             <FeatureCard icon={<Bed />} label="Chambres" value={beds} />
             <FeatureCard icon={<Bath />} label="Bains" value={baths} />
-            <FeatureCard
-              icon={<Maximize />}
-              label="Habitable"
-              value={
-                habitable !== "—" ? `${habitable} m²` : "—"
-              }
-            />
+            <FeatureCard icon={<Maximize />} label="Habitable" value={`${useful} m²`} />
           </div>
 
           {/* DESCRIPTION */}
@@ -194,18 +175,14 @@ export default function PropertyDetail({
                 Description
               </h2>
 
-              <div className="text-gray-600 leading-relaxed text-lg font-light space-y-6">
-                <p>
-                  Découvrez cette propriété située à{" "}
-                  <strong>{property.town}</strong>. Ce bien de type{" "}
-                  {property.type} a été sélectionné
-                  pour sa situation privilégiée.
-                </p>
+              <div
+                className="text-gray-600 leading-relaxed text-lg font-light space-y-6"
+                dangerouslySetInnerHTML={{ __html: property.description }}
+              />
 
-                <p className="text-sm text-gray-400 font-medium">
-                  Référence : {property.ref}
-                </p>
-              </div>
+              <p className="text-sm text-gray-400 font-medium">
+                Référence : {property.ref}
+              </p>
             </div>
 
             {/* CARTE */}
@@ -220,23 +197,10 @@ export default function PropertyDetail({
                   height="100%"
                   frameBorder="0"
                   scrolling="no"
-                  src={
-                    property.location?.latitude &&
-                    property.location?.longitude
-                      ? `https://maps.google.com/maps?q=${property.location.latitude},${property.location.longitude}&z=14&output=embed`
-                      : `https://maps.google.com/maps?q=${encodeURIComponent(
-                          property.town + ", Spain"
-                        )}&z=13&output=embed`
-                  }
+                  src={`https://maps.google.com/maps?q=${property.location.latitude},${property.location.longitude}&z=14&output=embed`}
                   className="filter saturate-0 contrast-110"
                 />
               </div>
-
-              <p className="mt-4 text-[9px] text-gray-400 uppercase tracking-widest text-center italic">
-                {property.location?.latitude
-                  ? "* Localisation exacte du bien"
-                  : `* Zone de ${property.town} (Localisation précise sur demande)`}
-              </p>
             </div>
           </div>
         </div>
@@ -266,10 +230,7 @@ export default function PropertyDetail({
                 rel="noopener noreferrer"
                 className="w-full border border-gray-200 text-brand-primary py-5 uppercase text-[10px] tracking-[0.3em] font-bold hover:bg-brand-primary hover:text-white transition duration-500 flex items-center justify-center gap-3 group"
               >
-                <MessageCircle
-                  size={18}
-                  className="text-green-500 group-hover:text-white transition-colors"
-                />
+                <MessageCircle size={18} className="text-green-500 group-hover:text-white transition-colors" />
                 Contacter via WhatsApp
               </a>
             </div>
@@ -282,16 +243,8 @@ export default function PropertyDetail({
   );
 }
 
-/* --- PETIT COMPOSANT POUR LES FEATURES --- */
-function FeatureCard({
-  icon,
-  label,
-  value,
-}: {
-  icon: any;
-  label: string;
-  value: any;
-}) {
+/* --- FEATURE CARD --- */
+function FeatureCard({ icon, label, value }: { icon: any; label: string; value: any }) {
   return (
     <div className="bg-gray-50/50 p-8 border border-gray-100 text-center">
       <div className="mx-auto mb-4 text-brand-primary">{icon}</div>
