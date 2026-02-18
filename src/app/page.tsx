@@ -32,10 +32,7 @@ export default function Home() {
         const data = await res.json();
 
         setAllProperties(data);
-
-        // 👉 On limite à 12 propriétés pour l'affichage initial
-        setInitialProperties(data.slice(0, 12));
-
+        setInitialProperties(data.slice(0, 12)); // 👉 Limite à 12
       } catch (err) {
         console.error("Erreur API:", err);
       }
@@ -50,27 +47,32 @@ export default function Home() {
     if (section) section.scrollIntoView({ behavior: "smooth" });
   };
 
+  // 👉 Détection si un filtre est actif
+  const hasActiveFilters = Object.values(filters).some((v) => v !== "");
+
+  // 👉 Propriétés à afficher
+  const propertiesToShow = hasActiveFilters
+    ? allProperties
+    : initialProperties;
+
   return (
     <main className="bg-white">
       <Navbar />
       <Hero />
 
-      {/* 🔍 BARRE DE RECHERCHE */}
       <AdvancedSearch
         properties={allProperties}
         onSearch={handleSearch}
         activeFilters={filters}
       />
 
-      {/* 🗺️ GRID DES RÉGIONS */}
       <RegionGrid
-        properties={initialProperties} // 👉 seulement 12 propriétés
+        properties={initialProperties}
         onRegionClick={(town) =>
           setFilters((prev) => ({ ...prev, town }))
         }
       />
 
-      {/* SECTION TITRE */}
       <section className="max-w-4xl mx-auto text-center py-20 px-6">
         <h2 className="text-brand-secondary text-[10px] uppercase tracking-[0.5em] font-bold mb-4">
           Sélection Exclusive
@@ -80,9 +82,11 @@ export default function Home() {
         </h3>
       </section>
 
-      {/* COLLECTION */}
       <div id="collection" className="bg-white pb-20">
-        <PropertyGrid activeFilters={filters} />
+        <PropertyGrid 
+          activeFilters={filters} 
+          properties={propertiesToShow} 
+        />
       </div>
 
       <Footer />
