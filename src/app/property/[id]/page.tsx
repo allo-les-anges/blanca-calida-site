@@ -27,6 +27,7 @@ export default function PropertyDetail({
   const [activeImage, setActiveImage] = useState(0);
   const [imageLoaded, setImageLoaded] = useState(false);
 
+  // --- CHARGEMENT DES DONNÉES ---
   useEffect(() => {
     async function fetchProperty() {
       try {
@@ -42,24 +43,6 @@ export default function PropertyDetail({
     }
     fetchProperty();
   }, [id]);
-
-  useEffect(() => {
-    setActiveImage(0);
-    setImageLoaded(false);
-  }, [property]);
-
-  useEffect(() => {
-    setImageLoaded(false);
-  }, [activeImage]);
-
-  // --- FORCE IMAGE LOAD EVEN IF CACHED ---
-  useEffect(() => {
-  if (!images || images.length === 0) return;
-
-  const img = new Image();
-  img.src = images[activeImage];
-  img.onload = () => setImageLoaded(true);
-  }, [activeImage, images]);
 
   if (loading) {
     return (
@@ -85,11 +68,29 @@ export default function PropertyDetail({
     );
   }
 
+  // --- DÉFINIR LES IMAGES AVANT LES useEffect ---
   const images: string[] = property.images ?? [];
   const beds = property.beds ?? "—";
   const baths = property.baths ?? "—";
   const built = property.surface_area?.built ?? "—";
   const useful = property.surface_area?.useful ?? built;
+
+  // --- RESET SLIDER QUAND LA PROPRIÉTÉ CHANGE ---
+  useEffect(() => {
+    setActiveImage(0);
+    setImageLoaded(false);
+  }, [property]);
+
+  // --- FORCE IMAGE LOAD EVEN IF CACHED ---
+  useEffect(() => {
+    if (!images || images.length === 0) return;
+
+    setImageLoaded(false);
+
+    const img = new Image();
+    img.src = images[activeImage];
+    img.onload = () => setImageLoaded(true);
+  }, [activeImage, images]);
 
   return (
     <main className="bg-white min-h-screen">
@@ -101,59 +102,57 @@ export default function PropertyDetail({
           href="/"
           className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.3em] text-gray-400 hover:text-brand-primary transition-colors group"
         >
-          <ArrowLeft
-            size={14}
-            className="group-hover:-translate-x-1 transition-transform"
-          />
+          <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
           Retour à la collection
         </Link>
       </div>
 
+      {/* --- SLIDER --- */}
       {images.length > 0 && (
-  <section className="relative h-[65vh] md:h-[80vh] bg-black group/gallery">
-    {!imageLoaded && (
-      <div className="absolute inset-0 bg-gray-200 animate-pulse" />
-    )}
+        <section className="relative h-[65vh] md:h-[80vh] bg-black group/gallery">
+          {!imageLoaded && (
+            <div className="absolute inset-0 bg-gray-200 animate-pulse" />
+          )}
 
-    <img
-      src={images[activeImage]}
-      alt={property.title}
-      className={`w-full h-full object-cover transition-all duration-700 ${
-        imageLoaded ? "opacity-100 scale-100" : "opacity-0 scale-105"
-      }`}
-    />
+          <img
+            src={images[activeImage]}
+            alt={property.title}
+            className={`w-full h-full object-cover transition-all duration-700 ${
+              imageLoaded ? "opacity-100 scale-100" : "opacity-0 scale-105"
+            }`}
+          />
 
-    <div className="absolute inset-0 flex items-center justify-between px-4 md:px-8 opacity-0 group-hover/gallery:opacity-100 transition-opacity duration-500">
-      <button
-        onClick={() => {
-          setActiveImage((prev) =>
-            prev > 0 ? prev - 1 : images.length - 1
-          );
-        }}
-        className="p-4 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full text-white hover:bg-white hover:text-brand-primary transition-all shadow-2xl"
-      >
-        <ChevronLeft size={28} />
-      </button>
+          <div className="absolute inset-0 flex items-center justify-between px-4 md:px-8 opacity-0 group-hover/gallery:opacity-100 transition-opacity duration-500">
+            <button
+              onClick={() =>
+                setActiveImage((prev) =>
+                  prev > 0 ? prev - 1 : images.length - 1
+                )
+              }
+              className="p-4 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full text-white hover:bg-white hover:text-brand-primary transition-all shadow-2xl"
+            >
+              <ChevronLeft size={28} />
+            </button>
 
-      <button
-        onClick={() => {
-          setActiveImage((prev) =>
-            prev < images.length - 1 ? prev + 1 : 0
-          );
-        }}
-        className="p-4 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full text-white hover:bg-white hover:text-brand-primary transition-all shadow-2xl"
-      >
-        <ChevronRight size={28} />
-      </button>
-    </div>
+            <button
+              onClick={() =>
+                setActiveImage((prev) =>
+                  prev < images.length - 1 ? prev + 1 : 0
+                )
+              }
+              className="p-4 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full text-white hover:bg-white hover:text-brand-primary transition-all shadow-2xl"
+            >
+              <ChevronRight size={28} />
+            </button>
+          </div>
 
-    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-black/40 backdrop-blur-md text-white px-5 py-2 text-[9px] tracking-[0.3em] font-bold border border-white/10 uppercase rounded-full">
-      {activeImage + 1} / {images.length} Photos
-    </div>
-  </section>
-)}
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-black/40 backdrop-blur-md text-white px-5 py-2 text-[9px] tracking-[0.3em] font-bold border border-white/10 uppercase rounded-full">
+            {activeImage + 1} / {images.length} Photos
+          </div>
+        </section>
+      )}
 
-
+      {/* --- CONTENU --- */}
       <section className="max-w-7xl mx-auto px-6 py-16 grid grid-cols-1 lg:grid-cols-3 gap-20">
         <div className="lg:col-span-2">
           <span className="text-brand-secondary text-[10px] font-bold uppercase tracking-[0.4em] mb-4 block">
@@ -174,11 +173,7 @@ export default function PropertyDetail({
           <div className="grid grid-cols-3 gap-1 md:gap-4 mb-16">
             <FeatureCard icon={<Bed />} label="Chambres" value={beds} />
             <FeatureCard icon={<Bath />} label="Bains" value={baths} />
-            <FeatureCard
-              icon={<Maximize />}
-              label="Habitable"
-              value={`${useful} m²`}
-            />
+            <FeatureCard icon={<Maximize />} label="Habitable" value={`${useful} m²`} />
           </div>
 
           <div className="space-y-16">
@@ -240,10 +235,7 @@ export default function PropertyDetail({
                 rel="noopener noreferrer"
                 className="w-full border border-gray-200 text-brand-primary py-5 uppercase text-[10px] tracking-[0.3em] font-bold hover:bg-brand-primary hover:text-white transition duration-500 flex items-center justify-center gap-3 group"
               >
-                <MessageCircle
-                  size={18}
-                  className="text-green-500 group-hover:text-white transition-colors"
-                />
+                <MessageCircle size={18} className="text-green-500 group-hover:text-white transition-colors" />
                 Contacter via WhatsApp
               </a>
             </div>
@@ -256,15 +248,7 @@ export default function PropertyDetail({
   );
 }
 
-function FeatureCard({
-  icon,
-  label,
-  value,
-}: {
-  icon: any;
-  label: string;
-  value: any;
-}) {
+function FeatureCard({ icon, label, value }: { icon: any; label: string; value: any }) {
   return (
     <div className="bg-gray-50/50 p-8 border border-gray-100 text-center">
       <div className="mx-auto mb-4 text-brand-primary">{icon}</div>
