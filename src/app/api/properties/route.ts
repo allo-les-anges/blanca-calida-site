@@ -16,6 +16,11 @@ export async function GET() {
       timeout: 15000,
     });
 
+    console.log("RAW XML START >>>");
+    console.log(response.data.slice(0, 500));
+    console.log("<<< RAW XML END");
+
+
     const parser = new XMLParser({
       ignoreAttributes: false,
       attributeNamePrefix: "",
