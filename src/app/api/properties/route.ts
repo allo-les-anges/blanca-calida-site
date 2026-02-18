@@ -25,15 +25,22 @@ export async function GET() {
 
     const result = parser.parse(response.data);
 
-    // Liste directe des propriétés
     const properties = result?.root?.property || [];
 
     const allProperties = properties.map((p: any) => {
-      const images =
-        p.images?.image?.map((img: any) => img.url) || [];
+      // --- FIX CRITIQUE : gestion 1 image OU plusieurs images ---
+      let images: string[] = [];
+
+      if (p.images?.image) {
+        if (Array.isArray(p.images.image)) {
+          images = p.images.image.map((img: any) => img.url);
+        } else {
+          images = [p.images.image.url];
+        }
+      }
 
       return {
-        id: p.id,
+        id: Number(p.id),
         ref: p.ref,
         date: p.date,
         key_date: p.key_date,
