@@ -12,7 +12,7 @@ import { Property } from "@/types/property";
 
 export default function Home() {
   const [allProperties, setAllProperties] = useState<Property[]>([]);
-  const [initialProperties, setInitialProperties] = useState<Property[]>([]);
+  const [visibleCount, setVisibleCount] = useState(12); // 👉 nombre de propriétés visibles
 
   const [filters, setFilters] = useState({
     type: "",
@@ -30,9 +30,7 @@ export default function Home() {
       try {
         const res = await fetch("/api/properties");
         const data = await res.json();
-
         setAllProperties(data);
-        setInitialProperties(data.slice(0, 12)); // 👉 Limite à 12
       } catch (err) {
         console.error("Erreur API:", err);
       }
@@ -42,6 +40,7 @@ export default function Home() {
 
   const handleSearch = (newFilters: any) => {
     setFilters({ ...newFilters });
+    setVisibleCount(12); // 👉 reset du compteur lors d’une recherche
 
     const section = document.getElementById("collection");
     if (section) section.scrollIntoView({ behavior: "smooth" });
@@ -57,10 +56,10 @@ export default function Home() {
     filters.reference !== "" ||
     filters.development !== "";
 
-  // 👉 Propriétés à afficher
+  // 👉 Propriétés affichées (12, puis +12, etc.)
   const propertiesToShow = hasActiveFilters
-    ? allProperties
-    : initialProperties;
+    ? allProperties // si filtres → tout
+    : allProperties.slice(0, visibleCount); // sinon → pagination
 
   return (
     <main className="bg-white">
@@ -73,8 +72,9 @@ export default function Home() {
         activeFilters={filters}
       />
 
+      {/* RégionGrid toujours basé sur les 12 premières */}
       <RegionGrid
-        properties={initialProperties}
+        properties={allProperties.slice(0, 12)}
         onRegionClick={(town) =>
           setFilters((prev) => ({ ...prev, town }))
         }
@@ -94,6 +94,18 @@ export default function Home() {
           activeFilters={filters} 
           properties={propertiesToShow} 
         />
+
+        {/* 👉 Bouton SHOW MORE (uniquement si pas de filtres) */}
+        {!hasActiveFilters && visibleCount < allProperties.length && (
+          <div className="text-center mt-12">
+            <button
+              onClick={() => setVisibleCount((prev) => prev + 12)}
+              className="px-10 py-4 bg-slate-900 text-white uppercase text-[10px] tracking-[0.3em] font-bold hover:bg-slate-800 transition-all"
+            >
+              Voir plus
+            </button>
+          </div>
+        )}
       </div>
 
       <Footer />
