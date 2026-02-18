@@ -19,51 +19,82 @@ export async function GET() {
     const parser = new XMLParser({
       ignoreAttributes: false,
       attributeNamePrefix: "",
-      isArray: (name) => ["development", "property", "image"].includes(name),
+      isArray: (name) =>
+        ["property", "image", "feature", "tag"].includes(name),
     });
 
     const result = parser.parse(response.data);
 
-    const developments =
-      result?.root?.developments?.development ||
-      result?.developments?.development ||
-      [];
+    // Liste directe des propriétés
+    const properties = result?.root?.property || [];
 
-    const allProperties = developments.flatMap((dev: any) => {
-      const devId = dev.id;
-      const devName = dev.name;
-      const devLocation = dev.location || "";
-      const devDescription = dev.description || "";
-      const devImages = dev.images?.image || [];
+    const allProperties = properties.map((p: any) => {
+      const images =
+        p.images?.image?.map((img: any) => img.url) || [];
 
-      const properties = dev.properties?.property || [];
+      return {
+        id: p.id,
+        ref: p.ref,
+        date: p.date,
+        key_date: p.key_date,
+        price: Number(p.price),
+        price_to: Number(p.price_to),
+        currency: p.currency,
+        price_freq: p.price_freq,
+        new_build: p.new_build === "1",
+        type: p.type,
+        units: Number(p.units),
 
-      return properties.map((p: any) => {
-        const images = p.images?.image || [];
+        town: p.town,
+        province: p.province,
+        country: p.country,
 
-        return {
-          id: p.id,
-          ref: p.ref || p.reference,
-          title: p.title,
-          town: p.town,
-          price: Number(p.price) || 0,
-          availability: p.availability || "unknown",
+        location: {
+          latitude: Number(p.location?.latitude),
+          longitude: Number(p.location?.longitude),
+          address: p.location?.address,
+          area: p.location?.environment?.areas?.area,
+          subarea: p.location?.environment?.subareas?.subarea,
+        },
 
-          features: {
-            beds: Number(p.features?.beds) || 0,
-            baths: Number(p.features?.baths) || 0,
-            surface: Number(p.features?.surface) || 0,
-          },
+        beds: Number(p.beds),
+        baths: Number(p.baths),
+        pool: Number(p.pool),
 
-          images,
+        surface_area: {
+          built: Number(p.surface_area?.built),
+          plot: Number(p.surface_area?.plot),
+          useful: Number(p.surface_area?.useful),
+        },
 
-          development_id: devId,
-          development_name: devName,
-          development_location: devLocation,
-          development_description: devDescription,
-          development_images: devImages,
-        };
-      });
+        wc: Number(p.wc),
+        terraces: Number(p.terraces),
+
+        energy_rating: {
+          consumption: p.energy_rating?.consumption,
+          emissions: p.energy_rating?.emissions,
+        },
+
+        kitchen_type: p.kitchen_type,
+
+        distances: {
+          beach: Number(p.distances?.beach),
+          airport: Number(p.distances?.airport),
+          golf: Number(p.distances?.golf),
+          green_areas: Number(p.distances?.green_areas),
+        },
+
+        urls: p.url,
+        development_name: p.development_name,
+
+        title: p.title?.fr || p.title?.en || p.title?.es || "",
+        description: p.desc?.fr || p.desc?.en || "",
+
+        features: p.features?.feature || [],
+        tags: p.tags?.tag || [],
+
+        images,
+      };
     });
 
     return NextResponse.json(allProperties);
