@@ -12,6 +12,7 @@ import { Property } from "@/types/property";
 
 export default function Home() {
   const [allProperties, setAllProperties] = useState<Property[]>([]);
+  const [initialProperties, setInitialProperties] = useState<Property[]>([]);
 
   const [filters, setFilters] = useState({
     type: "",
@@ -29,7 +30,12 @@ export default function Home() {
       try {
         const res = await fetch("/api/properties");
         const data = await res.json();
+
         setAllProperties(data);
+
+        // 👉 On limite à 12 propriétés pour l'affichage initial
+        setInitialProperties(data.slice(0, 12));
+
       } catch (err) {
         console.error("Erreur API:", err);
       }
@@ -56,9 +62,9 @@ export default function Home() {
         activeFilters={filters}
       />
 
-      {/* 🗺️ GRID DES RÉGIONS (comme avant) */}
+      {/* 🗺️ GRID DES RÉGIONS */}
       <RegionGrid
-        properties={allProperties}
+        properties={initialProperties} // 👉 seulement 12 propriétés
         onRegionClick={(town) =>
           setFilters((prev) => ({ ...prev, town }))
         }
