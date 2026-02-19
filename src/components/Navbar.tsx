@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { Globe, ChevronDown, Menu, X } from "lucide-react"; // Ajout de Menu et X pour le mobile
+import { Globe, ChevronDown, Menu, X, ArrowRight } from "lucide-react";
 
 export default function Navbar() {
   const [showLangMenu, setShowLangMenu] = useState(false);
@@ -16,6 +16,15 @@ export default function Navbar() {
     { code: "NL", label: "Nederlands" },
   ];
 
+  // Bloquer le scroll quand le menu est ouvert
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+  }, [isMobileMenuOpen]);
+
   const changeLanguage = (langCode: string) => {
     const googleCode = langCode.toLowerCase();
     const googleSelect = document.querySelector('.goog-te-combo') as HTMLSelectElement;
@@ -25,7 +34,7 @@ export default function Navbar() {
       googleSelect.dispatchEvent(new Event('change'));
       setCurrentLang(langCode);
       setShowLangMenu(false);
-      setIsMobileMenuOpen(false); // Ferme aussi le menu mobile si ouvert
+      setIsMobileMenuOpen(false);
     } else {
       window.location.hash = `#googtrans(fr|${googleCode})`;
       window.location.reload();
@@ -39,13 +48,13 @@ export default function Navbar() {
 
       {/* LOGO */}
       <Link href="/" className="flex items-center z-[110]">
-        <span className="text-white text-lg font-semibold tracking-wide transition-all duration-500 group-hover:text-slate-900">
-          Your Page
+        <span className="text-white text-lg font-serif italic tracking-wide transition-all duration-500 group-hover:text-slate-900">
+          Luxury Estates
         </span>
       </Link>
 
-      {/* MENU CENTRAL (Caché sur mobile, visible sur Desktop) */}
-      <div className="hidden md:flex space-x-8 uppercase text-[10px] tracking-[0.4em] text-white/90 group-hover:text-slate-600 transition-colors">
+      {/* MENU DESKTOP */}
+      <div className="hidden md:flex space-x-8 uppercase text-[10px] tracking-[0.4em] text-white/90 group-hover:text-slate-600 transition-colors font-bold">
         <Link href="/proprietes" className="hover:text-slate-900 transition">Propriétés</Link>
         <Link href="/confidentiel" className="hover:text-slate-900 transition">Confidentiel</Link>
         <Link href="/investissement" className="hover:text-slate-900 transition">Investissement</Link>
@@ -53,61 +62,82 @@ export default function Navbar() {
       </div>
 
       {/* ACTIONS DROITE */}
-      <div className="flex items-center space-x-4 md:space-x-6 text-white group-hover:text-slate-900 transition-colors z-[110]">
+      <div className="flex items-center space-x-4 md:space-x-8 text-white group-hover:text-slate-900 transition-colors z-[110]">
         
-        {/* Sélecteur de langue - Visible partout */}
+        {/* Sélecteur de langue */}
         <div className="relative">
           <button 
             onClick={() => setShowLangMenu(!showLangMenu)}
-            className="flex items-center space-x-1 md:space-x-2 text-[10px] font-bold uppercase tracking-widest outline-none"
+            className="flex items-center space-x-2 text-[10px] font-bold uppercase tracking-widest outline-none bg-black/10 group-hover:bg-slate-50 px-3 py-2 rounded-full transition-colors"
           >
             <Globe size={14} className="text-white/70 group-hover:text-slate-400" />
             <span>{currentLang}</span>
-            <ChevronDown size={10} className={`transition-transform ${showLangMenu ? 'rotate-180' : ''}`} />
+            <ChevronDown size={10} className={`transition-transform duration-300 ${showLangMenu ? 'rotate-180' : ''}`} />
           </button>
 
           {showLangMenu && (
-            <>
-              <div className="fixed inset-0 z-[-1]" onClick={() => setShowLangMenu(false)}></div>
-              <div className="absolute right-0 mt-4 py-2 w-32 bg-white shadow-2xl border border-gray-100 rounded-lg text-slate-900">
-                {languages.map((lang) => (
-                  <button
-                    key={lang.code}
-                    onClick={() => changeLanguage(lang.code)}
-                    className={`block w-full text-left px-4 py-2 text-[10px] hover:bg-slate-50 uppercase font-bold transition-colors ${currentLang === lang.code ? 'text-emerald-600' : ''}`}
-                  >
-                    {lang.label}
-                  </button>
-                ))}
-              </div>
-            </>
+            <div className="absolute right-0 mt-4 py-2 w-36 bg-white shadow-2xl rounded-2xl text-slate-900 border border-slate-50 animate-in fade-in zoom-in duration-200">
+              {languages.map((lang) => (
+                <button
+                  key={lang.code}
+                  onClick={() => changeLanguage(lang.code)}
+                  className={`block w-full text-left px-5 py-3 text-[10px] hover:bg-slate-50 uppercase font-bold transition-colors ${currentLang === lang.code ? 'text-emerald-600' : 'text-slate-500'}`}
+                >
+                  {lang.label}
+                </button>
+              ))}
+            </div>
           )}
         </div>
 
-        {/* Bouton Mobile Menu (Hamburger) */}
+        {/* Bouton Mobile (Hamburger) */}
         <button 
-          className="md:hidden text-white group-hover:text-slate-900"
+          className="md:hidden p-2 -mr-2 outline-none"
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         >
-          {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          {isMobileMenuOpen ? <X size={28} className="text-slate-900" /> : <Menu size={28} />}
         </button>
 
-        {/* Bouton Estimation (Desktop uniquement) */}
-        <button className="hidden md:block border border-white/30 group-hover:border-slate-200 px-6 py-2 text-[9px] font-bold uppercase tracking-[0.2em] hover:bg-slate-900 hover:text-white transition-all text-white group-hover:text-slate-900">
+        <button className="hidden md:block border border-white/30 group-hover:border-slate-200 px-8 py-3 text-[9px] font-bold uppercase tracking-[0.2em] hover:bg-slate-900 hover:text-white transition-all text-white group-hover:text-slate-900 rounded-full">
           Estimation
         </button>
       </div>
 
-      {/* OVERLAY MENU MOBILE */}
-      {isMobileMenuOpen && (
-        <div className="fixed inset-0 bg-white z-[105] flex flex-col items-center justify-center space-y-8 text-slate-900">
-           <Link onClick={() => setIsMobileMenuOpen(false)} href="/proprietes" className="text-sm uppercase tracking-widest font-bold">Propriétés</Link>
-           <Link onClick={() => setIsMobileMenuOpen(false)} href="/confidentiel" className="text-sm uppercase tracking-widest font-bold">Confidentiel</Link>
-           <Link onClick={() => setIsMobileMenuOpen(false)} href="/investissement" className="text-sm uppercase tracking-widest font-bold">Investissement</Link>
-           <Link onClick={() => setIsMobileMenuOpen(false)} href="/contact" className="text-sm uppercase tracking-widest font-bold">Contact</Link>
-           <button className="mt-4 border border-slate-200 px-10 py-4 text-[10px] font-bold uppercase tracking-widest">Estimation</button>
+      {/* OVERLAY MENU MOBILE (ANIMÉ) */}
+      <div className={`fixed inset-0 bg-white z-[105] transition-all duration-500 ease-in-out ${isMobileMenuOpen ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-full pointer-events-none'}`}>
+        <div className="flex flex-col h-full px-10 pt-32 pb-12 justify-between">
+          <div className="flex flex-col space-y-8">
+            <p className="text-[10px] uppercase tracking-[0.5em] text-slate-400 font-bold mb-4">Menu</p>
+            {[
+              { name: "Propriétés", href: "/proprietes" },
+              { name: "Confidentiel", href: "/confidentiel" },
+              { name: "Investissement", href: "/investissement" },
+              { name: "Contact", href: "/contact" }
+            ].map((item) => (
+              <Link 
+                key={item.name}
+                onClick={() => setIsMobileMenuOpen(false)} 
+                href={item.href} 
+                className="text-3xl font-serif text-slate-900 flex items-center justify-between group"
+              >
+                {item.name}
+                <ArrowRight className="opacity-0 group-hover:opacity-100 -translate-x-4 group-hover:translate-x-0 transition-all text-emerald-500" />
+              </Link>
+            ))}
+          </div>
+
+          <div className="flex flex-col space-y-6">
+            <button className="w-full bg-slate-900 text-white py-5 rounded-2xl font-bold uppercase text-[10px] tracking-widest shadow-xl shadow-slate-200">
+              Obtenir une estimation
+            </button>
+            <div className="flex justify-center space-x-4 text-[10px] text-slate-400 font-bold tracking-widest uppercase">
+              <span>Costa Blanca</span>
+              <span>•</span>
+              <span>Espagne</span>
+            </div>
+          </div>
         </div>
-      )}
+      </div>
     </nav>
   );
 }
