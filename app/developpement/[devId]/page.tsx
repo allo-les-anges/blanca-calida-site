@@ -6,15 +6,11 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Bed, Bath, Maximize, ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import { Property } from "@/types/property";
 
 export default function DevelopmentPage() {
-  // 👉 On récupère devId (et non plus id)
   const { devId } = useParams();
-
-  const [properties, setProperties] = useState<Property[]>([]);
+  const [properties, setProperties] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [imageLoaded, setImageLoaded] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -31,195 +27,91 @@ export default function DevelopmentPage() {
     load();
   }, []);
 
-  if (loading) {
-    return (
-      <div className="h-screen flex items-center justify-center bg-white">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-brand-primary"></div>
-      </div>
-    );
-  }
+  // Fonction de comparaison ultra-robuste
+  const slugify = (text: string) =>
+    text
+      ?.toString()
+      .toLowerCase()
+      .trim()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/\s+/g, "-")
+      .replace(/[^\w-]+/g, "");
 
-  // 👉 On filtre avec devId
-  const devUnits = properties.filter(
-    (p) => String(p.development_id) === String(devId)
-  );
+  // FILTRAGE : On cherche Adhara
+  const devUnits = properties.filter((p) => {
+    const nameInJson = slugify(p.development_name || "");
+    const idInUrl = String(devId).toLowerCase();
+    return nameInJson === idInUrl;
+  });
+
+  if (loading) return <div className="h-screen flex items-center justify-center">Chargement...</div>;
 
   if (!devUnits.length) {
     return (
-      <div className="h-screen flex flex-col items-center justify-center space-y-6">
-        <p className="font-serif text-3xl text-brand-primary">
-          Développement introuvable
-        </p>
-        <Link
-          href="/"
-          className="px-8 py-3 bg-brand-primary text-white text-[10px] uppercase tracking-widest font-bold"
-        >
-          Retour à l'accueil
-        </Link>
+      <div className="h-screen flex flex-col items-center justify-center">
+        <p>Projet "{devId}" non trouvé.</p>
+        <Link href="/">Retour</Link>
       </div>
     );
   }
 
   const dev = devUnits[0];
-  const available = devUnits.filter((u) => u.availability === "available");
-  const sold = devUnits.filter((u) => u.availability !== "available");
 
   return (
     <main className="bg-white min-h-screen">
       <Navbar />
-      <div className="h-24 md:h-28"></div>
+      <div className="h-24 md:h-32"></div>
 
-      <div className="max-w-7xl mx-auto px-6 py-4">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.3em] text-gray-400 hover:text-brand-primary transition-colors group"
-        >
-          <ArrowLeft
-            size={14}
-            className="group-hover:-translate-x-1 transition-transform"
-          />
-          Retour à la collection
-        </Link>
-      </div>
-
-      {/* TITRE */}
-      <section className="max-w-7xl mx-auto px-6 py-10">
-        <h1 className="text-4xl md:text-6xl font-serif text-brand-primary mb-2">
-          {dev.development_name}
-        </h1>
-        <p className="text-gray-600 text-lg">{dev.development_location}</p>
-
-        {dev.development_description && (
-          <p className="text-gray-600 leading-relaxed text-lg font-light mt-8 max-w-3xl">
-            {dev.development_description}
-          </p>
-        )}
-      </section>
-
-      {/* IMAGES */}
-      {dev.development_images?.length > 0 && (
-        <section className="max-w-7xl mx-auto px-6 py-10">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {dev.development_images.map((img: string, i: number) => (
-              <div key={i} className="relative h-40 bg-gray-200 overflow-hidden rounded-lg">
-                {!imageLoaded && (
-                  <div className="absolute inset-0 bg-gray-200 animate-pulse" />
-                )}
-                <img
-                  src={img}
-                  alt={dev.development_name}
-                  onLoad={() => setImageLoaded(true)}
-                  className={`w-full h-full object-cover transition-all duration-700 ${
-                    imageLoaded ? "opacity-100 scale-100" : "opacity-0 scale-105"
-                  }`}
-                />
-              </div>
-            ))}
+      <div className="max-w-7xl mx-auto px-6">
+        {/* EN-TÊTE DYNAMIQUE */}
+        <section className="mb-12">
+          <h1 className="text-5xl font-serif text-slate-900">{dev.development_name}</h1>
+          <p className="text-gray-500">{dev.town}, {dev.province}</p>
+          
+          <div className="mt-4 bg-emerald-50 text-emerald-700 px-4 py-2 rounded-full inline-block text-xs font-bold uppercase">
+             {dev.units} unités disponibles
           </div>
         </section>
-      )}
 
-      {/* UNITÉS DISPONIBLES */}
-      <section className="max-w-7xl mx-auto px-6 py-16">
-        <h2 className="text-3xl font-serif text-brand-primary mb-10">
-          Unités disponibles ({available.length})
-        </h2>
+        {/* GRILLE DES UNITÉS */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-20">
+          {devUnits.map((unit) => (
+            <div key={unit.id} className="border border-gray-100 rounded-3xl overflow-hidden shadow-sm">
+              <img 
+                src={unit.images?.[0]} 
+                alt={unit.title} 
+                className="w-full h-64 object-cover"
+              />
+              <div className="p-6">
+                <h3 className="text-xl font-serif mb-2">{unit.title}</h3>
+                
+                {/* PRIX (Basé sur ton JSON) */}
+                <div className="mb-4">
+                  <p className="text-2xl font-serif text-slate-900">
+                    {unit.price.toLocaleString("fr-FR")} €
+                  </p>
+                  {unit.price_to && (
+                    <p className="text-sm text-gray-400">
+                      jusqu'à {unit.price_to.toLocaleString("fr-FR")} €
+                    </p>
+                  )}
+                </div>
 
-        {available.length === 0 && (
-          <p className="text-gray-500 mb-10">Aucune unité disponible.</p>
-        )}
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-          {available.map((unit) => (
-            <UnitCard key={unit.id} unit={unit} available />
+                {/* FEATURES (Basé sur ton JSON) */}
+                <div className="flex justify-between border-t border-gray-50 pt-4 text-gray-500">
+                  <span className="flex items-center gap-1"><Bed size={16}/> {unit.beds}</span>
+                  <span className="flex items-center gap-1"><Bath size={16}/> {unit.baths}</span>
+                  <span className="flex items-center gap-1">
+                    <Maximize size={16}/> {unit.surface_area?.built} m²
+                  </span>
+                </div>
+              </div>
+            </div>
           ))}
         </div>
-      </section>
-
-      {/* UNITÉS VENDUES */}
-      <section className="max-w-7xl mx-auto px-6 pb-20">
-        <h2 className="text-3xl font-serif text-brand-primary mb-10">
-          Unités vendues ({sold.length})
-        </h2>
-
-        {sold.length === 0 && (
-          <p className="text-gray-500">Aucune unité vendue.</p>
-        )}
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-          {sold.map((unit) => (
-            <UnitCard key={unit.id} unit={unit} available={false} />
-          ))}
-        </div>
-      </section>
-
+      </div>
       <Footer />
     </main>
-  );
-}
-
-function UnitCard({
-  unit,
-  available,
-}: {
-  unit: Property;
-  available: boolean;
-}) {
-  const [loaded, setLoaded] = useState(false);
-
-  return (
-    <div
-      className={`border rounded-xl overflow-hidden shadow-sm transition-all ${
-        available ? "opacity-100" : "opacity-60"
-      }`}
-    >
-      <div className="relative h-48 bg-gray-200 overflow-hidden">
-        {!loaded && <div className="absolute inset-0 bg-gray-200 animate-pulse" />}
-
-        <img
-          src={unit.images?.[0]}
-          onLoad={() => setLoaded(true)}
-          className={`w-full h-full object-cover transition-all duration-700 ${
-            loaded ? "opacity-100 scale-100" : "opacity-0 scale-105"
-          }`}
-        />
-      </div>
-
-      <div className="p-6 space-y-3">
-        <h3 className="font-serif text-xl text-brand-primary leading-tight">
-          {unit.title}
-        </h3>
-
-        <p className="text-gray-500">{unit.town}</p>
-
-        <p className="text-2xl font-serif text-brand-primary">
-          {Number(unit.price).toLocaleString("fr-FR")} €
-        </p>
-
-        <div className="flex items-center gap-6 text-gray-500 text-sm pt-2">
-          <span className="flex items-center gap-2">
-            <Bed size={16} /> {unit.features.beds}
-          </span>
-          <span className="flex items-center gap-2">
-            <Bath size={16} /> {unit.features.baths}
-          </span>
-          <span className="flex items-center gap-2">
-            <Maximize size={16} /> {unit.features.surface} m²
-          </span>
-        </div>
-
-        <p className="text-[10px] uppercase tracking-[0.2em] text-gray-400 pt-2">
-          Ref : {unit.ref}
-        </p>
-
-        <p
-          className={`text-[10px] uppercase font-bold mt-2 ${
-            available ? "text-green-600" : "text-red-600"
-          }`}
-        >
-          {available ? "Disponible" : "Non disponible"}
-        </p>
-      </div>
-    </div>
   );
 }

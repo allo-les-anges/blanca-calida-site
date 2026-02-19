@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import AdvancedSearch from "@/components/AdvancedSearch";
@@ -40,20 +40,59 @@ export default function Home() {
     loadData();
   }, []);
 
+  // --- LOGIQUE DE FILTRAGE CALCULÉE (Inclut la gestion des unités) ---
+  const filteredProperties = useMemo(() => {
+    return allProperties.filter((p) => {
+      // 1. Développement (ex: Adhara)
+      const matchDev = !filters.development || 
+        p.development_name?.toLowerCase().trim() === filters.development.toLowerCase().trim();
+
+      // 2. Disponibilité (Basé sur le champ 'units' du JSON)
+      const hasUnits = p.units !== undefined && Number(p.units) > 0;
+      const matchAvailable = !filters.availableOnly || hasUnits;
+
+      // 3. Ville
+      const matchTown = !filters.town || p.town === filters.town;
+
+      // 4. Type (Villa, Appartement...)
+      const matchType = !filters.type || 
+        p.type?.toLowerCase().includes(filters.type.toLowerCase());
+
+      // 5. Chambres (Minimum)
+      const matchBeds = !filters.beds || Number(p.beds) >= Number(filters.beds);
+
+      // 6. Prix
+      const price = Number(p.price);
+      const matchMin = !filters.minPrice || price >= Number(filters.minPrice);
+      const matchMax = !filters.maxPrice || price <= Number(filters.maxPrice);
+
+      // 7. Référence
+      const matchRef = !filters.reference || 
+        p.ref?.toLowerCase().includes(filters.reference.toLowerCase());
+
+      return matchDev && matchAvailable && matchTown && matchType && matchBeds && matchMin && matchMax && matchRef;
+    });
+  }, [allProperties, filters]);
+
   const hasActiveFilters = Object.values(filters).some(
     (v) => v !== "" && v !== false
   );
 
+  // Détermine ce qu'on affiche
   const propertiesToShow = hasActiveFilters
-    ? allProperties
-    : allProperties.slice(0, visibleCount);
+    ? filteredProperties
+    : filteredProperties.slice(0, visibleCount);
 
   const handleSearch = (newFilters: any) => {
     setFilters({ ...newFilters });
     setVisibleCount(12);
 
     const section = document.getElementById("collection");
-    if (section) section.scrollIntoView({ behavior: "smooth" });
+    if (section) {
+      setTimeout(() => {
+        section.scrollIntoView({ behavior: "smooth" });
+      }, 100);
+    }
   };
 
   const handleRegionClick = (town: string) => {
@@ -69,13 +108,17 @@ export default function Home() {
     });
 
     const section = document.getElementById("collection");
-    if (section) section.scrollIntoView({ behavior: "smooth" });
+    if (section) {
+      setTimeout(() => {
+        section.scrollIntoView({ behavior: "smooth" });
+      }, 100);
+    }
   };
 
   if (loading) {
     return (
       <main className="bg-white min-h-screen flex items-center justify-center">
-        <div className="animate-spin h-12 w-12 rounded-full border-t-2 border-brand-primary"></div>
+        <div className="animate-spin h-12 w-12 rounded-full border-t-2 border-slate-900"></div>
       </main>
     );
   }
@@ -97,10 +140,10 @@ export default function Home() {
       />
 
       <section className="max-w-4xl mx-auto text-center py-20 px-6">
-        <h2 className="text-brand-secondary text-[10px] uppercase tracking-[0.5em] font-bold mb-4">
+        <h2 className="text-gray-400 text-[10px] uppercase tracking-[0.5em] font-bold mb-4">
           Sélection Exclusive
         </h2>
-        <h3 className="text-4xl md:text-5xl font-serif text-brand-primary leading-tight">
+        <h3 className="text-4xl md:text-5xl font-serif text-slate-900 leading-tight">
           Propriétés sur la Costa Blanca
         </h3>
       </section>
@@ -108,7 +151,7 @@ export default function Home() {
       <div id="collection" className="bg-white pb-20">
         <PropertyGrid activeFilters={filters} properties={propertiesToShow} />
 
-        {!hasActiveFilters && visibleCount < allProperties.length && (
+        {!hasActiveFilters && visibleCount < filteredProperties.length && (
           <div className="text-center mt-12">
             <button
               onClick={() => setVisibleCount((prev) => prev + 12)}

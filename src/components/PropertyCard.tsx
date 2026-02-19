@@ -14,6 +14,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
   return (
     <Link
       href={`/property/${property.id}`}
+      prefetch={false} // Empêche l'erreur de prefetch _rsc dans la console
       className="group block border border-gray-100 rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 bg-white"
     >
       {/* IMAGE */}
@@ -34,7 +35,6 @@ export default function PropertyCard({ property }: PropertyCardProps) {
 
       {/* CONTENU */}
       <div className="p-6 space-y-4">
-
         {/* VILLE + TYPE */}
         <p className="text-[10px] uppercase tracking-[0.3em] text-gray-400 font-bold">
           {property.town} — {property.type}
