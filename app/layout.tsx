@@ -24,74 +24,98 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr">
+    <html lang="fr" className="scroll-smooth">
       <head>
         <style>{`
-  /* 1. Masquer la barre Google Translate et ses conteneurs sous tous les noms possibles */
-  .goog-te-banner-frame, 
-  .goog-te-banner-frame.skiptranslate,
-  .goog-te-banner,
-  #goog-gt-tt,
-  .goog-te-balloon-frame { 
-    display: none !important; 
-    visibility: hidden !important;
-  }
-  
-  /* 2. Forcer le corps de la page à rester en haut (Google injecte souvent un padding-top de 40px) */
-  body { 
-    top: 0px !important; 
-    position: static !important;
-  }
+          /* 1. CACHER TOUS LES ÉLÉMENTS GOOGLE TRANSLATE */
+          .goog-te-banner-frame, 
+          .goog-te-banner-frame.skiptranslate,
+          .goog-te-banner,
+          .skiptranslate,
+          #goog-gt-tt,
+          .goog-te-balloon-frame,
+          iframe.goog-te-banner-frame { 
+            display: none !important; 
+            visibility: hidden !important;
+            opacity: 0 !important;
+            height: 0 !important;
+          }
+          
+          /* 2. FORCER LE CONTENU À RESTER EN HAUT */
+          html {
+            margin-top: 0px !important;
+          }
+          body { 
+            top: 0px !important; 
+            position: static !important;
+          }
 
-  /* 3. Masquer le widget original et tout gadget Google */
-  #google_translate_element, .goog-te-gadget {
-    display: none !important;
-  }
-  
-  /* 4. Supprimer le surlignage bleu/jaune sur les textes traduits */
-  .goog-text-highlight {
-    background-color: transparent !important;
-    box-shadow: none !important;
-  }
+          /* 3. NETTOYAGE DES EFFETS DE SURVOL */
+          .goog-text-highlight {
+            background-color: transparent !important;
+            box-shadow: none !important;
+          }
 
-  /* 5. Cacher spécifiquement l'iframe de la barre qui s'injecte en fin de body */
-  iframe.goog-te-banner-frame {
-    display: none !important;
-  }
-`}</style>
+          /* 4. MASQUER LE WIDGET ORIGINAL */
+          #google_translate_element {
+            display: none !important;
+          }
+        `}</style>
       </head>
       <body
         className={`${inter.variable} ${playfair.variable} font-sans antialiased bg-white text-slate-900`}
       >
+        {/* Point d'ancrage Google obligatoire mais caché */}
         <div id="google_translate_element"></div>
 
         {children}
 
-        <Script id="google-translate-init" strategy="afterInteractive">
+        {/* SCRIPT DE NETTOYAGE ET INITIALISATION */}
+        <Script id="google-translate-logic" strategy="afterInteractive">
           {`
-            function googleTranslateElementInit() {
-              // Détection automatique de la langue du visiteur
-              const userLang = navigator.language.split('-')[0];
-              const supportedLangs = ['en', 'es', 'nl', 'de', 'fr'];
-              
-              // On vérifie si l'utilisateur n'a pas déjà un cookie de traduction
-              const hasCookie = document.cookie.includes('googtrans');
-              
-              // Si c'est un nouveau visiteur et que sa langue est supportée (et pas fr)
-              if (!hasCookie && supportedLangs.includes(userLang) && userLang !== 'fr') {
-                document.cookie = "googtrans=/fr/" + userLang + "; path=/";
-                // On recharge discrètement pour appliquer la langue détectée
-                window.location.reload();
-              }
+            // Fonction pour supprimer les traces de la barre Google
+            function cleanGoogleTranslate() {
+              document.documentElement.style.marginTop = '0px';
+              document.body.style.top = '0px';
+              const frame = document.querySelector('.goog-te-banner-frame');
+              if (frame) frame.remove();
+            }
 
+            // Initialisation Google Translate
+            function googleTranslateElementInit() {
               new google.translate.TranslateElement({
                 pageLanguage: 'fr',
                 includedLanguages: 'en,es,nl,de,fr',
                 autoDisplay: false
               }, 'google_translate_element');
+
+              // Détection automatique de la langue du navigateur
+              const userLang = navigator.language.split('-')[0];
+              const supportedLangs = ['en', 'es', 'nl', 'de', 'fr'];
+              const hasCookie = document.cookie.includes('googtrans');
+              
+              if (!hasCookie && supportedLangs.includes(userLang) && userLang !== 'fr') {
+                document.cookie = "googtrans=/fr/" + userLang + "; path=/";
+                window.location.reload();
+              }
             }
+
+            // Surveillance active du DOM pour bloquer la barre dès qu'elle apparaît
+            const observer = new MutationObserver(() => {
+              cleanGoogleTranslate();
+            });
+
+            observer.observe(document.documentElement, { 
+              attributes: true, 
+              attributeFilter: ['style'] 
+            });
+
+            // Sécurité supplémentaire : intervalle régulier
+            setInterval(cleanGoogleTranslate, 1000);
           `}
         </Script>
+
+        {/* CHARGEMENT DU SCRIPT GOOGLE */}
         <Script
           src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
           strategy="afterInteractive"
