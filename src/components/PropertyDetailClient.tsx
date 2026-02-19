@@ -93,20 +93,23 @@ export default function PropertyDetailClient({ id }: { id: string }) {
             <div 
               ref={scrollContainerRef}
               onScroll={handleScroll}
-              className="flex md:block h-full overflow-x-auto md:overflow-x-hidden snap-x snap-mandatory scrollbar-hide"
+              className="flex md:block h-full overflow-x-auto md:overflow-x-hidden snap-x snap-mandatory scrollbar-hide touch-pan-x"
             >
               {images.map((img: string, idx: number) => (
                 <div 
                   key={idx} 
                   className="min-w-full h-full snap-center md:absolute md:inset-0 md:transition-opacity md:duration-500"
                   style={{ 
-                    opacity: mounted && window.innerWidth >= 768 ? (activeImage === idx ? 1 : 0) : 1,
-                    zIndex: activeImage === idx ? 10 : 0
+                    // Sur mobile : on garde l'opacité à 1 pour voir toutes les images du flex
+                    // Sur desktop : on utilise l'opacité pour l'effet de fondu
+                    opacity: typeof window !== 'undefined' && window.innerWidth < 768 ? 1 : (activeImage === idx ? 1 : 0),
+                    zIndex: activeImage === idx ? 10 : 0,
+                    position: typeof window !== 'undefined' && window.innerWidth < 768 ? 'relative' : 'absolute'
                   }}
                 >
                   <img 
                     src={img} 
-                    className="w-full h-full object-cover" 
+                    className="w-full h-full object-cover pointer-events-none" 
                     alt={`${property.title} - ${idx + 1}`} 
                   />
                 </div>
@@ -126,7 +129,10 @@ export default function PropertyDetailClient({ id }: { id: string }) {
                 key={idx}
                 onClick={() => {
                   setActiveImage(idx);
-                  scrollContainerRef.current?.scrollTo({ left: idx * scrollContainerRef.current.clientWidth, behavior: 'smooth' });
+                  scrollContainerRef.current?.scrollTo({ 
+                    left: idx * scrollContainerRef.current.clientWidth, 
+                    behavior: 'smooth' 
+                  });
                 }}
                 className={`relative h-24 min-h-[96px] rounded-2xl overflow-hidden border-2 transition-all ${activeImage === idx ? 'border-emerald-500 scale-95' : 'border-transparent opacity-50 hover:opacity-100'}`}
               >
