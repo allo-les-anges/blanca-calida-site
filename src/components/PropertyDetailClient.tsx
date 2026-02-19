@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Bed, Bath, Maximize, MapPin, MessageCircle, ArrowLeft, Loader2, Image as ImageIcon } from "lucide-react";
@@ -12,6 +12,7 @@ export default function PropertyDetailClient({ id }: { id: string }) {
   const [loading, setLoading] = useState(true);
   const [activeImage, setActiveImage] = useState(0);
   const [mounted, setMounted] = useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -38,6 +39,15 @@ export default function PropertyDetailClient({ id }: { id: string }) {
     }
     fetchData();
   }, [id]);
+
+  // Gérer la mise à jour de l'index au scroll sur mobile
+  const handleScroll = () => {
+    if (scrollContainerRef.current) {
+      const { scrollLeft, clientWidth } = scrollContainerRef.current;
+      const newIndex = Math.round(scrollLeft / clientWidth);
+      if (newIndex !== activeImage) setActiveImage(newIndex);
+    }
+  };
 
   if (!mounted) return null;
 
@@ -72,25 +82,52 @@ export default function PropertyDetailClient({ id }: { id: string }) {
         </Link>
       </div>
 
-      {/* GALERIE PHOTOS */}
+      {/* GALERIE PHOTOS MOBILE SWIPE & DESKTOP GRID */}
       <section className="max-w-7xl mx-auto px-6 mb-16">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 h-[500px]">
-          <div className="md:col-span-3 relative rounded-[2.5rem] overflow-hidden group shadow-2xl bg-slate-100">
-            <img 
-              src={images[activeImage]} 
-              className="w-full h-full object-cover" 
-              alt={property.title}
-              key={activeImage}
-            />
-            <div className="absolute bottom-6 left-6 bg-black/50 backdrop-blur-md text-white px-4 py-2 rounded-full text-[10px] uppercase tracking-widest flex items-center gap-2">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:h-[550px]">
+          
+          {/* Conteneur Principal */}
+          <div className="md:col-span-3 relative rounded-[2rem] md:rounded-[2.5rem] overflow-hidden group shadow-2xl bg-slate-100 h-[400px] md:h-full">
+            
+            {/* Slider Mobile (Scroll horizontal) + Desktop (Fixe) */}
+            <div 
+              ref={scrollContainerRef}
+              onScroll={handleScroll}
+              className="flex md:block h-full overflow-x-auto md:overflow-x-hidden snap-x snap-mandatory scrollbar-hide"
+            >
+              {images.map((img: string, idx: number) => (
+                <div 
+                  key={idx} 
+                  className="min-w-full h-full snap-center md:absolute md:inset-0 md:transition-opacity md:duration-500"
+                  style={{ 
+                    opacity: mounted && window.innerWidth >= 768 ? (activeImage === idx ? 1 : 0) : 1,
+                    zIndex: activeImage === idx ? 10 : 0
+                  }}
+                >
+                  <img 
+                    src={img} 
+                    className="w-full h-full object-cover" 
+                    alt={`${property.title} - ${idx + 1}`} 
+                  />
+                </div>
+              ))}
+            </div>
+
+            {/* Compteur d'images */}
+            <div className="absolute bottom-6 left-6 bg-black/50 backdrop-blur-md text-white px-4 py-2 rounded-full text-[10px] uppercase tracking-widest flex items-center gap-2 z-20">
               <ImageIcon size={14} /> {activeImage + 1} / {images.length}
             </div>
           </div>
+
+          {/* Vignettes (Desktop uniquement) */}
           <div className="hidden md:flex flex-col gap-4 overflow-y-auto pr-2 custom-scrollbar">
             {images.map((img: string, idx: number) => (
               <button 
                 key={idx}
-                onClick={() => setActiveImage(idx)}
+                onClick={() => {
+                  setActiveImage(idx);
+                  scrollContainerRef.current?.scrollTo({ left: idx * scrollContainerRef.current.clientWidth, behavior: 'smooth' });
+                }}
                 className={`relative h-24 min-h-[96px] rounded-2xl overflow-hidden border-2 transition-all ${activeImage === idx ? 'border-emerald-500 scale-95' : 'border-transparent opacity-50 hover:opacity-100'}`}
               >
                 <img src={img} className="w-full h-full object-cover" alt="" />
@@ -103,7 +140,7 @@ export default function PropertyDetailClient({ id }: { id: string }) {
       {/* INFOS PRINCIPALES */}
       <section className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-3 gap-16 pb-24">
         <div className="lg:col-span-2">
-          <h1 className="text-5xl md:text-6xl font-serif mb-8 text-slate-900 leading-[1.1]">
+          <h1 className="text-4xl md:text-6xl font-serif mb-8 text-slate-900 leading-[1.1]">
             {property.title}
           </h1>
           
@@ -134,32 +171,34 @@ export default function PropertyDetailClient({ id }: { id: string }) {
           <div className="mb-20">
             <h2 className="text-3xl font-serif italic mb-8">Configurations disponibles</h2>
             <div className="border border-slate-100 rounded-[2rem] overflow-hidden shadow-xl">
-              <table className="w-full text-left bg-white text-sm">
-                <thead className="bg-slate-900 text-white text-[9px] uppercase tracking-widest">
-                  <tr>
-                    <th className="py-5 px-8">Modèle</th>
-                    <th className="py-5 px-4 text-center">Chambres</th>
-                    <th className="py-5 px-8 text-right">Dès</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-50">
-                  {relatedUnits.map((unit: any) => (
-                    <tr key={unit.id} className={unit.id === property.id ? 'bg-emerald-50/50' : ''}>
-                      <td className="py-6 px-8 font-medium">{unit.title}</td>
-                      <td className="py-6 px-4 text-center text-gray-600">{unit.beds}</td>
-                      <td className="py-6 px-8 text-right font-serif text-lg">
-                        {unit.id === property.id ? (
-                          <span className="text-emerald-600 font-bold">Sélectionné</span>
-                        ) : (
-                          <Link href={`/property/${unit.id}`} className="text-slate-900 underline decoration-slate-200">
-                            {Number(unit.price).toLocaleString("fr-FR")} €
-                          </Link>
-                        )}
-                      </td>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left bg-white text-sm">
+                  <thead className="bg-slate-900 text-white text-[9px] uppercase tracking-widest">
+                    <tr>
+                      <th className="py-5 px-8">Modèle</th>
+                      <th className="py-5 px-4 text-center">Chambres</th>
+                      <th className="py-5 px-8 text-right">Dès</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y divide-slate-50">
+                    {relatedUnits.map((unit: any) => (
+                      <tr key={unit.id} className={unit.id === property.id ? 'bg-emerald-50/50' : ''}>
+                        <td className="py-6 px-8 font-medium">{unit.title}</td>
+                        <td className="py-6 px-4 text-center text-gray-600">{unit.beds}</td>
+                        <td className="py-6 px-8 text-right font-serif text-lg">
+                          {unit.id === property.id ? (
+                            <span className="text-emerald-600 font-bold">Sélectionné</span>
+                          ) : (
+                            <Link href={`/property/${unit.id}`} className="text-slate-900 underline decoration-slate-200">
+                              {Number(unit.price).toLocaleString("fr-FR")} €
+                            </Link>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
 
