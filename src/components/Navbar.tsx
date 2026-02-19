@@ -16,7 +16,7 @@ export default function Navbar() {
     { code: "NL", label: "Nederlands" },
   ];
 
-  // Bloquer le scroll du corps de la page quand le menu mobile est ouvert
+  // Bloquer le scroll quand le menu mobile est ouvert pour une expérience propre
   useEffect(() => {
     if (isMobileMenuOpen) {
       document.body.style.overflow = "hidden";
@@ -44,6 +44,7 @@ export default function Navbar() {
   return (
     <nav className="fixed w-full z-[100] flex justify-between items-center px-6 md:px-10 py-6 transition-all duration-500 bg-black/20 backdrop-blur-sm hover:bg-white group border-b border-transparent hover:border-gray-100">
       
+      {/* Point d'ancrage Google Translate (caché) */}
       <div id="google_translate_element" style={{ display: 'none' }}></div>
 
       {/* LOGO */}
@@ -53,7 +54,7 @@ export default function Navbar() {
         </span>
       </Link>
 
-      {/* MENU DESKTOP */}
+      {/* MENU DESKTOP (Masqué sur Mobile) */}
       <div className="hidden md:flex space-x-8 uppercase text-[10px] tracking-[0.4em] text-white/90 group-hover:text-slate-600 transition-colors font-bold">
         <Link href="/proprietes" className="hover:text-slate-900 transition">Propriétés</Link>
         <Link href="/confidentiel" className="hover:text-slate-900 transition">Confidentiel</Link>
@@ -64,8 +65,8 @@ export default function Navbar() {
       {/* ACTIONS DROITE */}
       <div className="flex items-center space-x-4 md:space-x-8 text-white group-hover:text-slate-900 transition-colors z-[110]">
         
-        {/* Sélecteur de langue */}
-        <div className="relative">
+        {/* Sélecteur de langue (Desktop) */}
+        <div className="relative hidden md:block">
           <button 
             onClick={() => setShowLangMenu(!showLangMenu)}
             className="flex items-center space-x-2 text-[10px] font-bold uppercase tracking-widest outline-none bg-black/10 group-hover:bg-slate-50 px-3 py-2 rounded-full transition-colors"
@@ -76,7 +77,7 @@ export default function Navbar() {
           </button>
 
           {showLangMenu && (
-            <div className="absolute right-0 mt-4 py-2 w-36 bg-white shadow-2xl rounded-2xl text-slate-900 border border-slate-50 animate-in fade-in zoom-in duration-200 z-[120]">
+            <div className="absolute right-0 mt-4 py-2 w-36 bg-white shadow-2xl rounded-2xl text-slate-900 border border-slate-50 animate-in fade-in zoom-in duration-200">
               {languages.map((lang) => (
                 <button
                   key={lang.code}
@@ -92,7 +93,7 @@ export default function Navbar() {
 
         {/* Bouton Hamburger Mobile */}
         <button 
-          className="md:hidden p-2 -mr-2 outline-none"
+          className="md:hidden p-2 -mr-2 outline-none text-white group-hover:text-slate-900"
           onClick={() => setIsMobileMenuOpen(true)}
         >
           <Menu size={28} />
@@ -104,10 +105,10 @@ export default function Navbar() {
         </button>
       </div>
 
-      {/* OVERLAY MENU MOBILE (FOND OPAQUE) */}
+      {/* OVERLAY MENU MOBILE COMPLET */}
       <div className={`fixed inset-0 bg-white z-[150] transition-all duration-500 ease-in-out ${isMobileMenuOpen ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-full pointer-events-none'}`}>
         
-        {/* En-tête du menu mobile avec bouton fermer */}
+        {/* Header : Titre + Fermeture */}
         <div className="flex justify-between items-center px-6 py-6 border-b border-slate-50">
            <span className="text-slate-900 text-lg font-serif italic">Menu</span>
            <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 text-slate-900">
@@ -115,8 +116,12 @@ export default function Navbar() {
           </button>
         </div>
 
-        <div className="flex flex-col h-[calc(100%-80px)] px-10 pt-12 pb-12 justify-between overflow-y-auto">
-          <div className="flex flex-col space-y-8">
+        {/* Contenu du menu avec Scroll interne */}
+        <div className="flex flex-col h-[calc(100%-80px)] px-10 pt-8 pb-10 justify-between overflow-y-auto">
+          
+          {/* 1. Navigation */}
+          <div className="flex flex-col space-y-6">
+            <p className="text-[10px] uppercase tracking-[0.5em] text-slate-400 font-bold mb-2">Navigation</p>
             {[
               { name: "Propriétés", href: "/proprietes" },
               { name: "Confidentiel", href: "/confidentiel" },
@@ -127,7 +132,7 @@ export default function Navbar() {
                 key={item.name}
                 onClick={() => setIsMobileMenuOpen(false)} 
                 href={item.href} 
-                className={`text-4xl font-serif text-slate-900 flex items-center justify-between group transition-all duration-700 ${isMobileMenuOpen ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}
+                className={`text-3xl font-serif text-slate-900 flex items-center justify-between transition-all duration-700 ${isMobileMenuOpen ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}
                 style={{ transitionDelay: `${idx * 100}ms` }}
               >
                 {item.name}
@@ -136,14 +141,30 @@ export default function Navbar() {
             ))}
           </div>
 
-          <div className="flex flex-col space-y-6 mt-12">
-            <button className="w-full bg-slate-900 text-white py-5 rounded-2xl font-bold uppercase text-[10px] tracking-widest shadow-xl shadow-slate-200 active:scale-95 transition-transform">
+          {/* 2. Langues & Action */}
+          <div className="flex flex-col space-y-8 mt-10">
+            
+            <div className="border-t border-slate-100 pt-8">
+              <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-4">Langue</p>
+              <div className="grid grid-cols-2 gap-3">
+                {languages.map((lang) => (
+                  <button
+                    key={lang.code}
+                    onClick={() => changeLanguage(lang.code)}
+                    className={`text-[11px] font-bold uppercase tracking-widest py-3 px-4 rounded-xl border transition-colors ${currentLang === lang.code ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-500 border-slate-100'}`}
+                  >
+                    {lang.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <button className="w-full bg-slate-900 text-white py-5 rounded-2xl font-bold uppercase text-[11px] tracking-widest shadow-xl shadow-slate-200 active:scale-95 transition-transform">
               Obtenir une estimation
             </button>
-            <div className="flex justify-center space-x-4 text-[10px] text-slate-400 font-bold tracking-widest uppercase">
-              <span>Costa Blanca</span>
-              <span>•</span>
-              <span>Espagne</span>
+
+            <div className="text-center text-[10px] text-slate-400 font-bold tracking-widest uppercase pb-2">
+              Costa Blanca • Espagne
             </div>
           </div>
         </div>
