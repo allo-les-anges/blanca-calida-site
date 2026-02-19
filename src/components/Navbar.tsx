@@ -16,7 +16,7 @@ export default function Navbar() {
     { code: "NL", label: "Nederlands" },
   ];
 
-  // Bloquer le scroll quand le menu est ouvert
+  // Bloquer le scroll du corps de la page quand le menu mobile est ouvert
   useEffect(() => {
     if (isMobileMenuOpen) {
       document.body.style.overflow = "hidden";
@@ -76,7 +76,7 @@ export default function Navbar() {
           </button>
 
           {showLangMenu && (
-            <div className="absolute right-0 mt-4 py-2 w-36 bg-white shadow-2xl rounded-2xl text-slate-900 border border-slate-50 animate-in fade-in zoom-in duration-200">
+            <div className="absolute right-0 mt-4 py-2 w-36 bg-white shadow-2xl rounded-2xl text-slate-900 border border-slate-50 animate-in fade-in zoom-in duration-200 z-[120]">
               {languages.map((lang) => (
                 <button
                   key={lang.code}
@@ -90,44 +90,54 @@ export default function Navbar() {
           )}
         </div>
 
-        {/* Bouton Mobile (Hamburger) */}
+        {/* Bouton Hamburger Mobile */}
         <button 
           className="md:hidden p-2 -mr-2 outline-none"
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          onClick={() => setIsMobileMenuOpen(true)}
         >
-          {isMobileMenuOpen ? <X size={28} className="text-slate-900" /> : <Menu size={28} />}
+          <Menu size={28} />
         </button>
 
+        {/* Bouton Estimation Desktop */}
         <button className="hidden md:block border border-white/30 group-hover:border-slate-200 px-8 py-3 text-[9px] font-bold uppercase tracking-[0.2em] hover:bg-slate-900 hover:text-white transition-all text-white group-hover:text-slate-900 rounded-full">
           Estimation
         </button>
       </div>
 
-      {/* OVERLAY MENU MOBILE (ANIMÉ) */}
-      <div className={`fixed inset-0 bg-white z-[105] transition-all duration-500 ease-in-out ${isMobileMenuOpen ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-full pointer-events-none'}`}>
-        <div className="flex flex-col h-full px-10 pt-32 pb-12 justify-between">
+      {/* OVERLAY MENU MOBILE (FOND OPAQUE) */}
+      <div className={`fixed inset-0 bg-white z-[150] transition-all duration-500 ease-in-out ${isMobileMenuOpen ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-full pointer-events-none'}`}>
+        
+        {/* En-tête du menu mobile avec bouton fermer */}
+        <div className="flex justify-between items-center px-6 py-6 border-b border-slate-50">
+           <span className="text-slate-900 text-lg font-serif italic">Menu</span>
+           <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 text-slate-900">
+            <X size={32} />
+          </button>
+        </div>
+
+        <div className="flex flex-col h-[calc(100%-80px)] px-10 pt-12 pb-12 justify-between overflow-y-auto">
           <div className="flex flex-col space-y-8">
-            <p className="text-[10px] uppercase tracking-[0.5em] text-slate-400 font-bold mb-4">Menu</p>
             {[
               { name: "Propriétés", href: "/proprietes" },
               { name: "Confidentiel", href: "/confidentiel" },
               { name: "Investissement", href: "/investissement" },
               { name: "Contact", href: "/contact" }
-            ].map((item) => (
+            ].map((item, idx) => (
               <Link 
                 key={item.name}
                 onClick={() => setIsMobileMenuOpen(false)} 
                 href={item.href} 
-                className="text-3xl font-serif text-slate-900 flex items-center justify-between group"
+                className={`text-4xl font-serif text-slate-900 flex items-center justify-between group transition-all duration-700 ${isMobileMenuOpen ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}
+                style={{ transitionDelay: `${idx * 100}ms` }}
               >
                 {item.name}
-                <ArrowRight className="opacity-0 group-hover:opacity-100 -translate-x-4 group-hover:translate-x-0 transition-all text-emerald-500" />
+                <ArrowRight className="text-emerald-500 opacity-50" size={24} />
               </Link>
             ))}
           </div>
 
-          <div className="flex flex-col space-y-6">
-            <button className="w-full bg-slate-900 text-white py-5 rounded-2xl font-bold uppercase text-[10px] tracking-widest shadow-xl shadow-slate-200">
+          <div className="flex flex-col space-y-6 mt-12">
+            <button className="w-full bg-slate-900 text-white py-5 rounded-2xl font-bold uppercase text-[10px] tracking-widest shadow-xl shadow-slate-200 active:scale-95 transition-transform">
               Obtenir une estimation
             </button>
             <div className="flex justify-center space-x-4 text-[10px] text-slate-400 font-bold tracking-widest uppercase">
