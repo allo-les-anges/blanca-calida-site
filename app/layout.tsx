@@ -27,16 +27,28 @@ export default function RootLayout({
     <html lang="fr">
       <head>
         <style>{`
-          /* Masquer la bannière de traduction Google */
-          .goog-te-banner-frame.skiptranslate { display: none !important; }
-          body { top: 0px !important; }
+          /* 1. Suppression radicale de la barre grise Google Translate */
+          .goog-te-banner-frame.skiptranslate, .goog-te-banner-frame { 
+            display: none !important; 
+            visibility: hidden !important;
+          }
           
-          /* Masquer le widget Google d'origine pour garder votre Navbar propre */
+          /* 2. Empêcher le décalage du haut de page */
+          body { 
+            top: 0px !important; 
+            position: static !important;
+          }
+
+          /* 3. Cacher le widget original */
           #google_translate_element, .goog-te-gadget {
             display: none !important;
           }
           
-          /* Supprimer l'infobulle Google au survol des textes traduits */
+          /* 4. Supprimer l'infobulle et le surlignage au survol */
+          #goog-gt-tt, .goog-te-balloon-frame {
+            display: none !important;
+            visibility: hidden !important;
+          }
           .goog-text-highlight {
             background-color: transparent !important;
             box-shadow: none !important;
@@ -46,15 +58,27 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${playfair.variable} font-sans antialiased bg-white text-slate-900`}
       >
-        {/* Le point d'ancrage doit exister quelque part dans le body */}
         <div id="google_translate_element"></div>
 
         {children}
 
-        {/* Initialisation sécurisée */}
         <Script id="google-translate-init" strategy="afterInteractive">
           {`
             function googleTranslateElementInit() {
+              // Détection automatique de la langue du visiteur
+              const userLang = navigator.language.split('-')[0];
+              const supportedLangs = ['en', 'es', 'nl', 'de', 'fr'];
+              
+              // On vérifie si l'utilisateur n'a pas déjà un cookie de traduction
+              const hasCookie = document.cookie.includes('googtrans');
+              
+              // Si c'est un nouveau visiteur et que sa langue est supportée (et pas fr)
+              if (!hasCookie && supportedLangs.includes(userLang) && userLang !== 'fr') {
+                document.cookie = "googtrans=/fr/" + userLang + "; path=/";
+                // On recharge discrètement pour appliquer la langue détectée
+                window.location.reload();
+              }
+
               new google.translate.TranslateElement({
                 pageLanguage: 'fr',
                 includedLanguages: 'en,es,nl,de,fr',
