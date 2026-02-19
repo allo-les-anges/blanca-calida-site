@@ -27,33 +27,38 @@ export default function RootLayout({
     <html lang="fr">
       <head>
         <style>{`
-          /* 1. Suppression radicale de la barre grise Google Translate */
-          .goog-te-banner-frame.skiptranslate, .goog-te-banner-frame { 
-            display: none !important; 
-            visibility: hidden !important;
-          }
-          
-          /* 2. Empêcher le décalage du haut de page */
-          body { 
-            top: 0px !important; 
-            position: static !important;
-          }
+  /* 1. Masquer la barre Google Translate et ses conteneurs sous tous les noms possibles */
+  .goog-te-banner-frame, 
+  .goog-te-banner-frame.skiptranslate,
+  .goog-te-banner,
+  #goog-gt-tt,
+  .goog-te-balloon-frame { 
+    display: none !important; 
+    visibility: hidden !important;
+  }
+  
+  /* 2. Forcer le corps de la page à rester en haut (Google injecte souvent un padding-top de 40px) */
+  body { 
+    top: 0px !important; 
+    position: static !important;
+  }
 
-          /* 3. Cacher le widget original */
-          #google_translate_element, .goog-te-gadget {
-            display: none !important;
-          }
-          
-          /* 4. Supprimer l'infobulle et le surlignage au survol */
-          #goog-gt-tt, .goog-te-balloon-frame {
-            display: none !important;
-            visibility: hidden !important;
-          }
-          .goog-text-highlight {
-            background-color: transparent !important;
-            box-shadow: none !important;
-          }
-        `}</style>
+  /* 3. Masquer le widget original et tout gadget Google */
+  #google_translate_element, .goog-te-gadget {
+    display: none !important;
+  }
+  
+  /* 4. Supprimer le surlignage bleu/jaune sur les textes traduits */
+  .goog-text-highlight {
+    background-color: transparent !important;
+    box-shadow: none !important;
+  }
+
+  /* 5. Cacher spécifiquement l'iframe de la barre qui s'injecte en fin de body */
+  iframe.goog-te-banner-frame {
+    display: none !important;
+  }
+`}</style>
       </head>
       <body
         className={`${inter.variable} ${playfair.variable} font-sans antialiased bg-white text-slate-900`}
