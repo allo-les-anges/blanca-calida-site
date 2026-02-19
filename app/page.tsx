@@ -40,25 +40,26 @@ export default function Home() {
     loadData();
   }, []);
 
-  // --- LOGIQUE DE FILTRAGE CALCULÉE (Inclut la gestion des unités) ---
+  // --- LOGIQUE DE FILTRAGE CALCULÉE ---
   const filteredProperties = useMemo(() => {
     return allProperties.filter((p) => {
-      // 1. Développement (ex: Adhara)
+      // 1. Développement
       const matchDev = !filters.development || 
         p.development_name?.toLowerCase().trim() === filters.development.toLowerCase().trim();
 
-      // 2. Disponibilité (Basé sur le champ 'units' du JSON)
-      const hasUnits = p.units !== undefined && Number(p.units) > 0;
+      // 2. Disponibilité (CORRECTION TYPE ERROR VERCEL)
+      // On utilise (p as any) pour éviter l'erreur de propriété manquante sur le type Property
+      const hasUnits = (p as any).units !== undefined && Number((p as any).units) > 0;
       const matchAvailable = !filters.availableOnly || hasUnits;
 
       // 3. Ville
       const matchTown = !filters.town || p.town === filters.town;
 
-      // 4. Type (Villa, Appartement...)
+      // 4. Type
       const matchType = !filters.type || 
         p.type?.toLowerCase().includes(filters.type.toLowerCase());
 
-      // 5. Chambres (Minimum)
+      // 5. Chambres
       const matchBeds = !filters.beds || Number(p.beds) >= Number(filters.beds);
 
       // 6. Prix
@@ -78,7 +79,6 @@ export default function Home() {
     (v) => v !== "" && v !== false
   );
 
-  // Détermine ce qu'on affiche
   const propertiesToShow = hasActiveFilters
     ? filteredProperties
     : filteredProperties.slice(0, visibleCount);
