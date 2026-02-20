@@ -2,9 +2,11 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation"; // Ajout pour la navigation
 import { Globe, ChevronDown, Menu, X, ArrowRight, User } from "lucide-react";
 
 export default function Navbar() {
+  const router = useRouter(); // Initialisation du router
   const [showLangMenu, setShowLangMenu] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [currentLang, setCurrentLang] = useState("FR");
@@ -17,15 +19,19 @@ export default function Navbar() {
     { code: "NL", label: "Nederlands" },
   ];
 
-  // --- MOCK ACTIONS ---
+  // --- ACTIONS MISES À JOUR ---
+  
   const handleCashbackClick = () => {
-    alert("Redirection vers le formulaire Zoho CRM pour le Cashback...");
-    // window.open('TON_LIEN_ZOHO_FORM', '_blank');
+    // Ici, tu pourras insérer ton lien Zoho Form plus tard
+    alert("Connexion sécurisée à Zoho CRM en cours...");
+    // window.open('https://forms.zohopublic.com/...', '_blank');
   };
 
   const handleLoginClick = () => {
-    alert("Ouverture du portail Project Tracker (Accès Client)...");
-    // window.location.href = '/dashboard-client';
+    // On ferme le menu mobile par sécurité
+    setIsMobileMenuOpen(false);
+    // Redirection directe vers la page de mocking
+    router.push('/project-tracker');
   };
 
   // Fermer le menu langue si on clique en dehors
@@ -39,6 +45,7 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Gestion du scroll body lors de l'ouverture du menu mobile
   useEffect(() => {
     if (isMobileMenuOpen) {
       document.body.style.overflow = "hidden";
@@ -111,7 +118,7 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* LOGIN CLIENT (PROJECT TRACKER) */}
+          {/* LOGIN CLIENT (Redirige vers /project-tracker) */}
           <button 
             onClick={handleLoginClick}
             className="hidden md:flex items-center space-x-2 text-[10px] font-bold uppercase tracking-widest border border-white/20 group-hover:border-slate-200 px-4 py-2 rounded-full hover:bg-slate-100 transition-all"
@@ -120,7 +127,7 @@ export default function Navbar() {
             <span>Login</span>
           </button>
 
-          {/* BOUTON CASHBACK */}
+          {/* BOUTON CASHBACK (LIÉ À ZOHO) */}
           <button 
             onClick={handleCashbackClick}
             className="hidden sm:block bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 text-[9px] font-bold uppercase tracking-[0.2em] transition-all rounded-full"
@@ -165,6 +172,7 @@ export default function Navbar() {
               <User size={16} />
               <span>Accès Client (Project Tracker)</span>
             </button>
+            
             {/* Cashback Mobile */}
             <button 
               onClick={handleCashbackClick}
