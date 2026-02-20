@@ -70,6 +70,28 @@ export default function ProjectTrackerMockup() {
             </div>
           </div>
 
+          {/* SECTION PHOTOS DU CHANTIER */}
+<div className="mt-12">
+  <h2 className="text-xl font-serif text-slate-900 flex items-center gap-2 mb-6">
+    <Camera size={20} className="text-emerald-600" />
+    Photos de l'avancement (Février 2026)
+  </h2>
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className="group relative overflow-hidden rounded-2xl aspect-video bg-slate-200">
+      <img src="http://googleusercontent.com/image_collection/image_retrieval/9269450623673928046_0" alt="Chantier 1" className="object-cover w-full h-full group-hover:scale-110 transition duration-500" />
+      <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/60 to-transparent text-white text-[10px] font-bold">STRUCTURE GROS OEUVRE - SEMAINE 06</div>
+    </div>
+    <div className="group relative overflow-hidden rounded-2xl aspect-video bg-slate-200">
+      <img src="http://googleusercontent.com/image_collection/image_retrieval/9269450623673928046_1" alt="Chantier 2" className="object-cover w-full h-full group-hover:scale-110 transition duration-500" />
+      <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/60 to-transparent text-white text-[10px] font-bold">DALLE ÉTAGE TERMINÉE</div>
+    </div>
+    <div className="group relative overflow-hidden rounded-2xl aspect-video bg-slate-200">
+      <img src="http://googleusercontent.com/image_collection/image_retrieval/9269450623673928046_2" alt="Chantier 3" className="object-cover w-full h-full group-hover:scale-110 transition duration-500" />
+      <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/60 to-transparent text-white text-[10px] font-bold">ZONE PISCINE - TERRASSEMENT</div>
+    </div>
+  </div>
+</div>
+
           {/* SIDEBAR : BLOCKCHAIN & DOCUMENTS */}
           <div className="space-y-8">
             {/* WIDGET BLOCKCHAIN */}

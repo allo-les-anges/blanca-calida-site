@@ -2,13 +2,15 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation"; // Ajout pour la navigation
-import { Globe, ChevronDown, Menu, X, ArrowRight, User } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Globe, ChevronDown, Menu, X, ArrowRight, User, Lock } from "lucide-react";
 
 export default function Navbar() {
-  const router = useRouter(); // Initialisation du router
+  const router = useRouter();
   const [showLangMenu, setShowLangMenu] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false); // État pour la modal
+  const [passwordInput, setPasswordInput] = useState(""); // Pour le test "123"
   const [currentLang, setCurrentLang] = useState("FR");
   const langMenuRef = useRef<HTMLDivElement>(null);
 
@@ -19,19 +21,25 @@ export default function Navbar() {
     { code: "NL", label: "Nederlands" },
   ];
 
-  // --- ACTIONS MISES À JOUR ---
+  // --- ACTIONS ---
   
   const handleCashbackClick = () => {
-    // Ici, tu pourras insérer ton lien Zoho Form plus tard
     alert("Connexion sécurisée à Zoho CRM en cours...");
-    // window.open('https://forms.zohopublic.com/...', '_blank');
   };
 
-  const handleLoginClick = () => {
-    // On ferme le menu mobile par sécurité
+  const openLoginModal = () => {
     setIsMobileMenuOpen(false);
-    // Redirection directe vers la page de mocking
-    router.push('/project-tracker');
+    setIsLoginModalOpen(true);
+  };
+
+  const handleAuthSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (passwordInput === "123") {
+      setIsLoginModalOpen(false);
+      router.push('/project-tracker');
+    } else {
+      alert("Mot de passe incorrect. (Indice pour la démo: 123)");
+    }
   };
 
   // Fermer le menu langue si on clique en dehors
@@ -45,14 +53,14 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Gestion du scroll body lors de l'ouverture du menu mobile
+  // Gestion du scroll body
   useEffect(() => {
-    if (isMobileMenuOpen) {
+    if (isMobileMenuOpen || isLoginModalOpen) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "unset";
     }
-  }, [isMobileMenuOpen]);
+  }, [isMobileMenuOpen, isLoginModalOpen]);
 
   const changeLanguage = (langCode: string) => {
     const googleCode = langCode.toLowerCase();
@@ -92,7 +100,6 @@ export default function Navbar() {
         {/* ACTIONS DROITE */}
         <div className="flex items-center space-x-3 md:space-x-6 text-white group-hover:text-slate-900 transition-colors z-[110]">
           
-          {/* SÉLECTEUR DE LANGUE */}
           <div className="relative hidden md:block" ref={langMenuRef}>
             <button 
               onClick={() => setShowLangMenu(!showLangMenu)}
@@ -118,16 +125,15 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* LOGIN CLIENT (Redirige vers /project-tracker) */}
+          {/* LOGIN - DÉCLENCHE LA MODAL */}
           <button 
-            onClick={handleLoginClick}
+            onClick={openLoginModal}
             className="hidden md:flex items-center space-x-2 text-[10px] font-bold uppercase tracking-widest border border-white/20 group-hover:border-slate-200 px-4 py-2 rounded-full hover:bg-slate-100 transition-all"
           >
             <User size={14} />
             <span>Login</span>
           </button>
 
-          {/* BOUTON CASHBACK (LIÉ À ZOHO) */}
           <button 
             onClick={handleCashbackClick}
             className="hidden sm:block bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 text-[9px] font-bold uppercase tracking-[0.2em] transition-all rounded-full"
@@ -135,7 +141,6 @@ export default function Navbar() {
             Cashback
           </button>
 
-          {/* Hamburger Mobile */}
           <button 
             className="lg:hidden p-2 text-white group-hover:text-slate-900 transition-colors"
             onClick={() => setIsMobileMenuOpen(true)}
@@ -144,6 +149,55 @@ export default function Navbar() {
           </button>
         </div>
       </nav>
+
+      {/* --- MODAL DE LOGIN (MOCKUP) --- */}
+      {isLoginModalOpen && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-md p-6">
+          <div className="bg-white w-full max-w-md rounded-3xl p-10 shadow-2xl relative animate-in zoom-in duration-300">
+            <button 
+              onClick={() => setIsLoginModalOpen(false)} 
+              className="absolute top-6 right-6 text-slate-400 hover:text-slate-900 transition-colors"
+            >
+              <X size={24}/>
+            </button>
+            
+            <div className="text-center mb-8">
+              <div className="w-16 h-16 bg-slate-900 text-white rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-xl">
+                <Lock size={28}/>
+              </div>
+              <h2 className="text-2xl font-serif text-slate-900">Project Tracker</h2>
+              <p className="text-slate-500 text-sm mt-2">Identifiez-vous pour suivre votre chantier</p>
+            </div>
+
+            <form onSubmit={handleAuthSubmit} className="space-y-4">
+              <div>
+                <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-2">Utilisateur</label>
+                <input 
+                  type="text" 
+                  defaultValue="admin@luxury.com"
+                  className="w-full mt-1 px-6 py-4 rounded-xl border border-slate-100 bg-slate-50 outline-none focus:ring-2 focus:ring-slate-900/5 transition" 
+                />
+              </div>
+              <div>
+                <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-2">Mot de passe</label>
+                <input 
+                  type="password" 
+                  value={passwordInput} 
+                  onChange={(e) => setPasswordInput(e.target.value)}
+                  placeholder="Tapez 123" 
+                  className="w-full mt-1 px-6 py-4 rounded-xl border border-slate-100 bg-slate-50 outline-none focus:ring-2 focus:ring-slate-900/5 transition" 
+                />
+              </div>
+              <button 
+                type="submit" 
+                className="w-full bg-slate-900 text-white py-4 rounded-xl font-bold uppercase text-[11px] tracking-widest hover:bg-slate-800 transition-all active:scale-95 mt-4"
+              >
+                Se connecter
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* MENU MOBILE */}
       <div className={`fixed inset-0 bg-white z-[999] transition-all duration-500 ease-in-out transform ${isMobileMenuOpen ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'}`}>
@@ -164,16 +218,13 @@ export default function Navbar() {
           </div>
 
           <div className="flex flex-col space-y-4">
-            {/* Login Mobile */}
             <button 
-              onClick={handleLoginClick}
+              onClick={openLoginModal}
               className="w-full border border-slate-200 text-slate-900 py-4 rounded-xl font-bold uppercase text-[11px] tracking-widest flex items-center justify-center space-x-2"
             >
               <User size={16} />
-              <span>Accès Client (Project Tracker)</span>
+              <span>Accès Client</span>
             </button>
-            
-            {/* Cashback Mobile */}
             <button 
               onClick={handleCashbackClick}
               className="w-full bg-emerald-600 text-white py-4 rounded-xl font-bold uppercase text-[11px] tracking-widest"
