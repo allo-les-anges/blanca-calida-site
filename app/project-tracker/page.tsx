@@ -11,9 +11,25 @@ export default function ProjectTrackerMockup() {
     { title: "Toiture & Étanchéité", date: "Prévu Mars 2026", status: "pending" },
   ];
 
+  // Chemins mis à jour selon ton dossier public/images/
+  const constructionPhotos = [
+    { 
+      url: "/images/view-modern-construction-site.jpg", 
+      label: "STRUCTURE GROS OEUVRE - SEMAINE 06" 
+    },
+    { 
+      url: "/images/real-estate-agents-checking-construction-works.jpg", 
+      label: "DALLE ÉTAGE TERMINÉE" 
+    },
+    { 
+      url: "/images/african-american-lady-safety-helmet-with-papers-near-building-.jpg", 
+      label: "ZONE PISCINE - TERRASSEMENT" 
+    },
+  ];
+
   return (
     <div className="min-h-screen bg-slate-50 pt-32 pb-20 px-6">
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         
         {/* HEADER DU PROJET */}
         <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100 mb-8">
@@ -23,7 +39,7 @@ export default function ProjectTrackerMockup() {
               <h1 className="text-3xl font-serif text-slate-900 mt-2">Villa Serenity - Lot 14</h1>
               <p className="text-slate-500 text-sm mt-1">Marbella, Costa del Sol, Espagne</p>
             </div>
-            <div className="bg-slate-900 text-white px-6 py-4 rounded-2xl text-center">
+            <div className="bg-slate-900 text-white px-6 py-4 rounded-2xl text-center shadow-lg">
               <p className="text-[10px] uppercase tracking-widest opacity-70">Avancement Global</p>
               <p className="text-3xl font-bold">65%</p>
             </div>
@@ -37,62 +53,64 @@ export default function ProjectTrackerMockup() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
-          {/* TIMELINE (Gillian va adorer ce côté visuel) */}
-          <div className="lg:col-span-2 space-y-6">
-            <h2 className="text-xl font-serif text-slate-900 flex items-center gap-2">
-              <Clock size={20} className="text-emerald-600" />
-              Suivi du Chantier
-            </h2>
-            <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100">
-              {milestones.map((step, idx) => (
-                <div key={idx} className="flex gap-4 mb-8 last:mb-0">
-                  <div className="flex flex-col items-center">
-                    {step.status === 'completed' ? (
-                      <CheckCircle2 className="text-emerald-500" size={24} />
-                    ) : step.status === 'current' ? (
-                      <div className="w-6 h-6 rounded-full border-4 border-emerald-200 border-t-emerald-500 animate-spin"></div>
-                    ) : (
-                      <div className="w-6 h-6 rounded-full border-2 border-slate-200"></div>
-                    )}
-                    {idx !== milestones.length - 1 && <div className="w-0.5 h-12 bg-slate-100 mt-2"></div>}
+          {/* COLONNE GAUCHE : TIMELINE & PHOTOS */}
+          <div className="lg:col-span-2 space-y-8">
+            
+            {/* TIMELINE */}
+            <section className="space-y-6">
+              <h2 className="text-xl font-serif text-slate-900 flex items-center gap-2">
+                <Clock size={20} className="text-emerald-600" />
+                Suivi du Chantier
+              </h2>
+              <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100">
+                {milestones.map((step, idx) => (
+                  <div key={idx} className="flex gap-4 mb-8 last:mb-0">
+                    <div className="flex flex-col items-center">
+                      {step.status === 'completed' ? (
+                        <CheckCircle2 className="text-emerald-500" size={24} />
+                      ) : step.status === 'current' ? (
+                        <div className="w-6 h-6 rounded-full border-4 border-emerald-200 border-t-emerald-500 animate-spin"></div>
+                      ) : (
+                        <div className="w-6 h-6 rounded-full border-2 border-slate-200"></div>
+                      )}
+                      {idx !== milestones.length - 1 && <div className="w-0.5 h-12 bg-slate-100 mt-2"></div>}
+                    </div>
+                    <div>
+                      <p className={`font-bold ${step.status === 'pending' ? 'text-slate-400' : 'text-slate-900'}`}>{step.title}</p>
+                      <p className="text-xs text-slate-500 mt-1">{step.date}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className={`font-bold ${step.status === 'pending' ? 'text-slate-400' : 'text-slate-900'}`}>{step.title}</p>
-                    <p className="text-xs text-slate-500 mt-1">{step.date}</p>
-                    {step.status === 'current' && (
-                      <button className="mt-3 flex items-center gap-2 text-[10px] font-bold uppercase text-emerald-600 bg-emerald-50 px-3 py-2 rounded-lg">
-                        <Camera size={14} /> Voir les dernières photos
-                      </button>
-                    )}
+                ))}
+              </div>
+            </section>
+
+            {/* GALERIE PHOTOS */}
+            <section className="space-y-6">
+              <h2 className="text-xl font-serif text-slate-900 flex items-center gap-2">
+                <Camera size={20} className="text-emerald-600" />
+                Photos de l'avancement
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {constructionPhotos.map((photo, index) => (
+                  <div key={index} className="group relative overflow-hidden rounded-2xl aspect-video bg-slate-200 border border-slate-200">
+                    <img 
+                      src={photo.url} 
+                      alt={photo.label} 
+                      className="object-cover w-full h-full group-hover:scale-110 transition duration-700" 
+                    />
+                    <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                        <span className="text-white text-[10px] font-bold uppercase tracking-widest">{photo.label}</span>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            </section>
           </div>
 
-          {/* SECTION PHOTOS DU CHANTIER */}
-<div className="mt-12">
-  <h2 className="text-xl font-serif text-slate-900 flex items-center gap-2 mb-6">
-    <Camera size={20} className="text-emerald-600" />
-    Photos de l'avancement (Février 2026)
-  </h2>
-  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-    <div className="group relative overflow-hidden rounded-2xl aspect-video bg-slate-200">
-      <img src="http://googleusercontent.com/image_collection/image_retrieval/9269450623673928046_0" alt="Chantier 1" className="object-cover w-full h-full group-hover:scale-110 transition duration-500" />
-      <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/60 to-transparent text-white text-[10px] font-bold">STRUCTURE GROS OEUVRE - SEMAINE 06</div>
-    </div>
-    <div className="group relative overflow-hidden rounded-2xl aspect-video bg-slate-200">
-      <img src="http://googleusercontent.com/image_collection/image_retrieval/9269450623673928046_1" alt="Chantier 2" className="object-cover w-full h-full group-hover:scale-110 transition duration-500" />
-      <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/60 to-transparent text-white text-[10px] font-bold">DALLE ÉTAGE TERMINÉE</div>
-    </div>
-    <div className="group relative overflow-hidden rounded-2xl aspect-video bg-slate-200">
-      <img src="http://googleusercontent.com/image_collection/image_retrieval/9269450623673928046_2" alt="Chantier 3" className="object-cover w-full h-full group-hover:scale-110 transition duration-500" />
-      <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/60 to-transparent text-white text-[10px] font-bold">ZONE PISCINE - TERRASSEMENT</div>
-    </div>
-  </div>
-</div>
-
-          {/* SIDEBAR : BLOCKCHAIN & DOCUMENTS */}
+          {/* COLONNE DROITE : BLOCKCHAIN & DOCUMENTS */}
           <div className="space-y-8">
             {/* WIDGET BLOCKCHAIN */}
             <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl p-6 text-white shadow-xl">
@@ -117,9 +135,9 @@ export default function ProjectTrackerMockup() {
               </h3>
               <div className="space-y-3">
                 {['Titre_de_propriété.pdf', 'Plans_Architecte.zip', 'Facture_Acompte_01.pdf'].map((doc, i) => (
-                  <div key={i} className="p-3 border border-slate-50 rounded-xl hover:bg-slate-50 cursor-pointer transition flex items-center justify-between">
-                    <span className="text-[11px] text-slate-600 truncate">{doc}</span>
-                    <FileText size={14} className="text-slate-400" />
+                  <div key={i} className="p-3 border border-slate-50 rounded-xl hover:bg-slate-50 cursor-pointer transition flex items-center justify-between group">
+                    <span className="text-[11px] text-slate-600 truncate group-hover:text-slate-900">{doc}</span>
+                    <FileText size={14} className="text-slate-400 group-hover:text-emerald-500" />
                   </div>
                 ))}
               </div>
