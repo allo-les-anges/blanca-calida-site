@@ -33,7 +33,7 @@ export default function Navbar() {
 
   const propertyId = params?.id ? String(params.id) : "General_Interest";
   // Remplacez par votre lien réel Zoho si nécessaire
-  const zohoBaseUrl = "https://forms.zohopublic.com/VOTRE_LIEN_ZOHO";
+  const zohoBaseUrl = "/contact-cashback";
   const zohoFullLink = `${zohoBaseUrl}?Property_ID=${propertyId}`;
 
   const openLoginModal = () => {
