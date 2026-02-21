@@ -24,10 +24,10 @@ export default function Navbar() {
   ];
 
   // --- CONFIGURATION ZOHO ---
-  // On récupère l'ID si on est sur une page projet, sinon on met "General"
+  // On utilise l'ID de l'URL s'il existe, sinon la valeur par défaut configurée dans Zoho
   const propertyId = params?.id ? String(params.id) : "General_Interest";
   const zohoBaseUrl = "https://forms.zohopublic.com/VOTRE_LIEN_ZOHO";
-  // On construit le lien avec le paramètre Property_ID (à configurer dans Zoho Forms)
+  // Lien direct avec injection de l'ID pour le bouton Sticky
   const zohoFullLink = `${zohoBaseUrl}?Property_ID=${propertyId}`;
 
   const openLoginModal = () => {
@@ -45,7 +45,6 @@ export default function Navbar() {
     }
   };
 
-  // Fermer le menu langue si on clique en dehors (Laptop)
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (langMenuRef.current && !langMenuRef.current.contains(event.target as Node)) {
@@ -56,7 +55,6 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Gestion du scroll body
   useEffect(() => {
     if (isMobileMenuOpen || isLoginModalOpen) {
       document.body.style.overflow = "hidden";
@@ -83,7 +81,7 @@ export default function Navbar() {
 
   return (
     <>
-      {/* --- BOUTON STICKY CASHBACK (CÔTÉ DROIT) --- */}
+      {/* --- BOUTON STICKY CASHBACK (LIEN DIRECT FORMULAIRE) --- */}
       <a 
         href={zohoFullLink}
         target="_blank"
@@ -92,7 +90,7 @@ export default function Navbar() {
         style={{ writingMode: 'vertical-rl' }}
       >
         <Gift size={18} className="rotate-90 mb-2 group-hover:scale-110 transition-transform" />
-        <span className="text-[9px] uppercase font-bold tracking-[0.2em]">Claim Cashback</span>
+        <span className="text-[9px] uppercase font-bold tracking-[0.2em]">Réclamer mon Cashback</span>
       </a>
 
       <nav className="fixed w-full z-[100] flex justify-between items-center px-6 md:px-10 py-6 transition-all duration-500 bg-black/20 backdrop-blur-sm hover:bg-white group border-b border-transparent hover:border-gray-100">
@@ -148,6 +146,14 @@ export default function Navbar() {
             <User size={14} />
             <span>Login</span>
           </button>
+
+          {/* BOUTON NAVBAR (VERS PAGE EXPLICATION) */}
+          <Link 
+            href="/cashback-info"
+            className="hidden sm:block bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 text-[9px] font-bold uppercase tracking-[0.2em] transition-all rounded-full"
+          >
+            Cashback
+          </Link>
 
           <button 
             className="lg:hidden p-2 text-white group-hover:text-slate-900 transition-colors"
@@ -228,14 +234,13 @@ export default function Navbar() {
               <User size={16} />
               <span>Accès Client Area</span>
             </button>
-            <a 
-              href={zohoFullLink}
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link 
+              href="/cashback-info"
+              onClick={() => setIsMobileMenuOpen(false)}
               className="w-full bg-emerald-600 text-white py-5 rounded-2xl font-bold uppercase text-[11px] tracking-widest text-center"
             >
-              Claim Cashback {params?.id ? `#${params.id}` : ''}
-            </a>
+              Découvrir le Cashback
+            </Link>
           </div>
         </div>
       </div>
