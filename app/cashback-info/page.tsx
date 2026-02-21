@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Gift, ShieldCheck, PieChart, ArrowLeft, Sofa, Banknote, CheckCircle2 } from 'lucide-react';
+import { Gift, ShieldCheck, PieChart, ArrowLeft, Sofa, Banknote, CheckCircle2, Home } from 'lucide-react';
 
 export default function CashbackInfo() {
   return (
@@ -10,7 +10,7 @@ export default function CashbackInfo() {
           href="/" 
           className="inline-flex items-center gap-2 text-slate-400 hover:text-slate-900 transition-colors mb-12 uppercase text-[10px] tracking-widest font-bold"
         >
-          <ArrowLeft size={14} /> Retour à la collection
+          <ArrowLeft size={14} /> Retour à l'accueil
         </Link>
 
         <h1 className="text-5xl font-serif text-slate-900 mb-6">Le Programme Cashback</h1>
@@ -55,7 +55,7 @@ export default function CashbackInfo() {
           <div className="space-y-4">
             <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center"><Sofa /></div>
             <h3 className="font-bold uppercase text-[11px] tracking-widest">Mobilier & Déco</h3>
-            <p className="text-sm text-slate-500">Transformez votre cashback en un bon d'achat pour l'aménagement complet de votre villa par nos partenaires designers.</p>
+            <p className="text-sm text-slate-500">Transformez votre cashback en crédit pour l'aménagement complet (mobilier de designer, cuisine d'été, etc.).</p>
           </div>
           <div className="space-y-4">
             <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center"><ShieldCheck /></div>
@@ -72,15 +72,17 @@ export default function CashbackInfo() {
                 Le programme Cashback est une exclusivité **Luxury Estates**. Il est activé dès lors que vous manifestez votre intérêt via le bouton "Réclamer mon Cashback" sur la fiche d'une propriété.
               </p>
               <p>
-                Vous avez le choix de la forme de votre avantage : que ce soit pour financer vos frais de notaire, installer une cuisine d'été ou équiper votre salon avec du mobilier de designer, nous adaptons le versement à vos besoins réels.
+                Vous avez la liberté de choisir la forme de votre avantage : que ce soit pour financer vos frais de notaire ou équiper votre nouveau salon avec du mobilier haut de gamme, nous adaptons le versement à votre projet.
               </p>
             </div>
 
+            {/* BOUTON RETOUR HOME PAGE */}
             <Link 
-                href="/proprietes" 
-                className="inline-block bg-slate-900 text-white px-10 py-5 rounded-2xl font-bold uppercase text-[11px] tracking-[0.2em] hover:bg-slate-800 transition-all shadow-xl shadow-slate-900/20"
+                href="/" 
+                className="inline-flex items-center gap-3 bg-slate-900 text-white px-10 py-5 rounded-2xl font-bold uppercase text-[11px] tracking-[0.2em] hover:bg-slate-800 transition-all shadow-xl shadow-slate-900/20"
             >
-                Explorer les propriétés
+                <Home size={16} />
+                Retour à l'accueil
             </Link>
         </div>
       </div>
