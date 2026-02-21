@@ -34,7 +34,7 @@ export default function ContactCashback() {
 
           {/* --- DÉBUT DU FORMULAIRE ZOHO --- */}
           <div id="crmWebToEntityForm" className="zcwf_lblLeft crmWebToEntityForm">
-            <form id="webform926137000000620001" action="https://crm.zoho.eu/crm/WebToLeadForm" name="WebToLeads926137000000620001" method="POST" onSubmitCapture={() => { document.charset = "UTF-8"; }} acceptCharset="UTF-8" className="space-y-4">
+            <form id="webform926137000000620001" action="https://crm.zoho.eu/crm/WebToLeadForm" name="WebToLeads926137000000620001" method="POST" acceptCharset="UTF-8" className="space-y-4">
               <input type="text" style={{ display: 'none' }} name="xnQsjsdp" value="89dec12b0f4964ef48eb1146afdf728288b1067dc6b63cb582637ae5b06a02fb" />
               <input type="hidden" name="zc_gad" id="zc_gad" value="" />
               <input type="text" style={{ display: 'none' }} name="xmIwtLD" value="a31c3c626df8e3bd4a030929931d95f293b65e415d7072f7b6a8cb68d029701b7626c355eb89a4275cd16caebd9c7c40" />
