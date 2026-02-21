@@ -8,7 +8,7 @@ import { Globe, ChevronDown, Menu, X, ArrowRight, User, Lock, Gift } from "lucid
 export default function Navbar() {
   const router = useRouter();
   const params = useParams();
-  const pathname = usePathname(); // Détecte la page actuelle pour la logique de visibilité
+  const pathname = usePathname(); 
   
   const [showLangMenu, setShowLangMenu] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -18,12 +18,10 @@ export default function Navbar() {
   const langMenuRef = useRef<HTMLDivElement>(null);
 
   // --- LOGIQUE DE VISIBILITÉ DYNAMIQUE ---
-  // On identifie si on est sur l'accueil ou la page d'info
   const isHomePage = pathname === "/";
   const isCashbackPage = pathname === "/cashback-info";
   
-  // CONDITION DE SÉCURITÉ : On masque le bouton sticky sur la Home et la page Info
-  // Cela évite l'erreur 404 Zoho car il n'y a pas d'ID de propriété sur ces pages
+  // Masquer le bouton sticky uniquement sur Home et Info (Sécurité Zoho)
   const showStickyCashback = !isHomePage && !isCashbackPage;
 
   const languages = [
@@ -33,10 +31,8 @@ export default function Navbar() {
     { code: "NL", label: "Nederlands" },
   ];
 
-  // Extraction de l'ID pour Zoho
   const propertyId = params?.id ? String(params.id) : "General_Interest";
-  
-  // ATTENTION : Remplacez 'VOTRE_LIEN_ZOHO' par l'URL réelle de votre formulaire Zoho
+  // Remplacez par votre lien réel Zoho si nécessaire
   const zohoBaseUrl = "https://forms.zohopublic.com/VOTRE_LIEN_ZOHO";
   const zohoFullLink = `${zohoBaseUrl}?Property_ID=${propertyId}`;
 
@@ -85,7 +81,7 @@ export default function Navbar() {
 
   return (
     <>
-      {/* --- BOUTON STICKY CASHBACK (Masqué sur Home via showStickyCashback) --- */}
+      {/* --- BOUTON STICKY CASHBACK --- */}
       {showStickyCashback && (
         <a 
           href={zohoFullLink}
@@ -147,28 +143,19 @@ export default function Navbar() {
           {/* LOGIN BUTTON */}
           <button 
             onClick={openLoginModal}
-            className="flex items-center space-x-2 text-[10px] font-bold uppercase tracking-widest bg-white/10 group-hover:bg-slate-900 text-white group-hover:text-white px-5 py-2.5 rounded-full transition-all border border-white/10 group-hover:border-slate-900 active:scale-95"
+            className="flex items-center space-x-2 text-[10px] font-bold uppercase tracking-widest bg-white/10 group-hover:bg-slate-900 text-white px-5 py-2.5 rounded-full transition-all border border-white/10 group-hover:border-slate-900"
           >
             <User size={14} />
             <span>Login</span>
           </button>
 
-          {/* BOUTON NAVBAR DYNAMIQUE : Devient 'Investir' sur la Home Page */}
-          {isHomePage ? (
-            <Link 
-              href="/investissement"
-              className="hidden sm:block border border-white/20 group-hover:border-slate-900 bg-white/10 group-hover:bg-slate-900 text-white px-6 py-2.5 text-[9px] font-bold uppercase tracking-[0.2em] transition-all rounded-full"
-            >
-              Investir
-            </Link>
-          ) : (
-            <Link 
-              href="/cashback-info"
-              className="hidden sm:block bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 text-[9px] font-bold uppercase tracking-[0.2em] transition-all rounded-full"
-            >
-              Cashback
-            </Link>
-          )}
+          {/* BOUTON CASHBACK FIXE (Apparaît partout) */}
+          <Link 
+            href="/cashback-info"
+            className="hidden sm:block bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 text-[9px] font-bold uppercase tracking-[0.2em] transition-all rounded-full shadow-lg shadow-emerald-900/10"
+          >
+            Cashback
+          </Link>
 
           <button 
             className="lg:hidden p-2 text-white group-hover:text-slate-900 transition-colors"
@@ -190,7 +177,7 @@ export default function Navbar() {
               <p className="text-slate-500 text-xs mt-2 uppercase tracking-widest">Suivi sécurisé</p>
             </div>
             <form onSubmit={handleAuthSubmit} className="space-y-4">
-              <input type="text" defaultValue="client@luxury-estates.com" className="w-full px-6 py-4 rounded-xl border border-slate-100 bg-slate-50 outline-none text-sm" />
+              <input type="text" defaultValue="client@luxury-estates.com" className="w-full px-6 py-4 rounded-xl border border-slate-100 bg-slate-50 outline-none text-sm" readOnly />
               <input type="password" value={passwordInput} onChange={(e) => setPasswordInput(e.target.value)} placeholder="Mot de passe (123)" className="w-full px-6 py-4 rounded-xl border border-slate-100 bg-slate-50 outline-none text-sm" />
               <button type="submit" className="w-full bg-slate-900 text-white py-4 rounded-xl font-bold uppercase text-[11px] tracking-widest hover:bg-slate-800 transition-all">Accéder au Dashboard</button>
             </form>
@@ -216,11 +203,11 @@ export default function Navbar() {
           <div className="flex flex-col space-y-4">
             <button onClick={openLoginModal} className="w-full border border-slate-200 text-slate-900 py-5 rounded-2xl font-bold uppercase text-[11px] tracking-widest flex items-center justify-center gap-2"><User size={16} /><span>Accès Client</span></button>
             <Link 
-              href={isHomePage ? "/investissement" : "/cashback-info"}
+              href="/cashback-info" 
               onClick={() => setIsMobileMenuOpen(false)}
-              className={`w-full py-5 rounded-2xl font-bold uppercase text-[11px] tracking-widest text-center ${isHomePage ? 'bg-slate-900 text-white' : 'bg-emerald-600 text-white'}`}
+              className="w-full py-5 rounded-2xl font-bold uppercase text-[11px] tracking-widest text-center bg-emerald-600 text-white"
             >
-              {isHomePage ? "Opportunités d'Investissement" : "Découvrir le Cashback"}
+              Découvrir le Cashback
             </Link>
           </div>
         </div>
