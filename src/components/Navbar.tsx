@@ -8,7 +8,7 @@ import { Globe, ChevronDown, Menu, X, ArrowRight, User, Lock, Gift } from "lucid
 export default function Navbar() {
   const router = useRouter();
   const params = useParams();
-  const pathname = usePathname(); // Détecte la page actuelle
+  const pathname = usePathname(); // Détecte la page actuelle pour la logique de visibilité
   
   const [showLangMenu, setShowLangMenu] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -18,9 +18,12 @@ export default function Navbar() {
   const langMenuRef = useRef<HTMLDivElement>(null);
 
   // --- LOGIQUE DE VISIBILITÉ DYNAMIQUE ---
+  // On identifie si on est sur l'accueil ou la page d'info
   const isHomePage = pathname === "/";
   const isCashbackPage = pathname === "/cashback-info";
-  // On masque le bouton latéral sur la Home et sur la page d'info elle-même
+  
+  // CONDITION DE SÉCURITÉ : On masque le bouton sticky sur la Home et la page Info
+  // Cela évite l'erreur 404 Zoho car il n'y a pas d'ID de propriété sur ces pages
   const showStickyCashback = !isHomePage && !isCashbackPage;
 
   const languages = [
@@ -30,7 +33,10 @@ export default function Navbar() {
     { code: "NL", label: "Nederlands" },
   ];
 
+  // Extraction de l'ID pour Zoho
   const propertyId = params?.id ? String(params.id) : "General_Interest";
+  
+  // ATTENTION : Remplacez 'VOTRE_LIEN_ZOHO' par l'URL réelle de votre formulaire Zoho
   const zohoBaseUrl = "https://forms.zohopublic.com/VOTRE_LIEN_ZOHO";
   const zohoFullLink = `${zohoBaseUrl}?Property_ID=${propertyId}`;
 
@@ -70,7 +76,6 @@ export default function Navbar() {
   const changeLanguage = (langCode: string) => {
     setCurrentLang(langCode);
     setShowLangMenu(false);
-    // Logique Google Translate simplifiée pour l'exemple
     const googleSelect = document.querySelector('.goog-te-combo') as HTMLSelectElement;
     if (googleSelect) {
       googleSelect.value = langCode.toLowerCase();
@@ -80,7 +85,7 @@ export default function Navbar() {
 
   return (
     <>
-      {/* --- BOUTON STICKY CASHBACK (Masqué sur Home) --- */}
+      {/* --- BOUTON STICKY CASHBACK (Masqué sur Home via showStickyCashback) --- */}
       {showStickyCashback && (
         <a 
           href={zohoFullLink}
@@ -148,7 +153,7 @@ export default function Navbar() {
             <span>Login</span>
           </button>
 
-          {/* BOUTON NAVBAR DYNAMIQUE */}
+          {/* BOUTON NAVBAR DYNAMIQUE : Devient 'Investir' sur la Home Page */}
           {isHomePage ? (
             <Link 
               href="/investissement"
@@ -174,7 +179,7 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* --- MODAL DE LOGIN (Identique) --- */}
+      {/* --- MODAL DE LOGIN --- */}
       {isLoginModalOpen && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-md p-6">
           <div className="bg-white w-full max-w-md rounded-[2.5rem] p-10 shadow-2xl relative animate-in zoom-in duration-300">
