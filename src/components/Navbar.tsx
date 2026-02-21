@@ -2,15 +2,17 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { Globe, ChevronDown, Menu, X, ArrowRight, User, Lock } from "lucide-react";
+import { useRouter, useParams } from "next/navigation";
+import { Globe, ChevronDown, Menu, X, ArrowRight, User, Lock, Gift } from "lucide-react";
 
 export default function Navbar() {
   const router = useRouter();
+  const params = useParams(); // Récupère l'ID de la propriété depuis l'URL
+  
   const [showLangMenu, setShowLangMenu] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false); // État pour la modal
-  const [passwordInput, setPasswordInput] = useState(""); // Pour le test "123"
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [passwordInput, setPasswordInput] = useState("");
   const [currentLang, setCurrentLang] = useState("FR");
   const langMenuRef = useRef<HTMLDivElement>(null);
 
@@ -21,11 +23,12 @@ export default function Navbar() {
     { code: "NL", label: "Nederlands" },
   ];
 
-  // --- ACTIONS ---
-  
-  const handleCashbackClick = () => {
-    alert("Connexion sécurisée à Zoho CRM en cours...");
-  };
+  // --- CONFIGURATION ZOHO ---
+  // On récupère l'ID si on est sur une page projet, sinon on met "General"
+  const propertyId = params?.id ? String(params.id) : "General_Interest";
+  const zohoBaseUrl = "https://forms.zohopublic.com/VOTRE_LIEN_ZOHO";
+  // On construit le lien avec le paramètre Property_ID (à configurer dans Zoho Forms)
+  const zohoFullLink = `${zohoBaseUrl}?Property_ID=${propertyId}`;
 
   const openLoginModal = () => {
     setIsMobileMenuOpen(false);
@@ -42,7 +45,7 @@ export default function Navbar() {
     }
   };
 
-  // Fermer le menu langue si on clique en dehors
+  // Fermer le menu langue si on clique en dehors (Laptop)
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (langMenuRef.current && !langMenuRef.current.contains(event.target as Node)) {
@@ -80,6 +83,18 @@ export default function Navbar() {
 
   return (
     <>
+      {/* --- BOUTON STICKY CASHBACK (CÔTÉ DROIT) --- */}
+      <a 
+        href={zohoFullLink}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="fixed right-0 top-1/2 -translate-y-1/2 z-[90] bg-emerald-600 text-white px-3 py-6 rounded-l-2xl shadow-2xl hover:bg-emerald-700 transition-all flex flex-col items-center gap-3 group border-l border-t border-b border-emerald-500/20"
+        style={{ writingMode: 'vertical-rl' }}
+      >
+        <Gift size={18} className="rotate-90 mb-2 group-hover:scale-110 transition-transform" />
+        <span className="text-[9px] uppercase font-bold tracking-[0.2em]">Claim Cashback</span>
+      </a>
+
       <nav className="fixed w-full z-[100] flex justify-between items-center px-6 md:px-10 py-6 transition-all duration-500 bg-black/20 backdrop-blur-sm hover:bg-white group border-b border-transparent hover:border-gray-100">
         
         {/* LOGO */}
@@ -103,7 +118,7 @@ export default function Navbar() {
           <div className="relative hidden md:block" ref={langMenuRef}>
             <button 
               onClick={() => setShowLangMenu(!showLangMenu)}
-              className="flex items-center space-x-2 text-[10px] font-bold uppercase tracking-widest outline-none bg-black/10 group-hover:bg-slate-50 px-3 py-2 rounded-full transition-colors"
+              className="flex items-center space-x-2 text-[10px] font-bold uppercase tracking-widest outline-none bg-black/10 group-hover:bg-slate-50 px-4 py-2 rounded-full transition-colors"
             >
               <Globe size={14} className="text-white/70 group-hover:text-slate-400" />
               <span>{currentLang}</span>
@@ -111,12 +126,12 @@ export default function Navbar() {
             </button>
 
             {showLangMenu && (
-              <div className="absolute right-0 mt-2 w-40 bg-white border border-slate-100 rounded-xl shadow-xl py-2 overflow-hidden">
+              <div className="absolute right-0 mt-3 w-44 bg-white border border-slate-100 rounded-2xl shadow-2xl py-2 overflow-hidden animate-in fade-in slide-in-from-top-2">
                 {languages.map((lang) => (
                   <button
                     key={lang.code}
                     onClick={() => changeLanguage(lang.code)}
-                    className="w-full text-left px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors"
+                    className="w-full text-left px-5 py-3 text-[10px] font-bold uppercase tracking-widest text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors"
                   >
                     {lang.label}
                   </button>
@@ -125,20 +140,13 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* LOGIN - DÉCLENCHE LA MODAL */}
+          {/* LOGIN BUTTON */}
           <button 
             onClick={openLoginModal}
-            className="hidden md:flex items-center space-x-2 text-[10px] font-bold uppercase tracking-widest border border-white/20 group-hover:border-slate-200 px-4 py-2 rounded-full hover:bg-slate-100 transition-all"
+            className="flex items-center space-x-2 text-[10px] font-bold uppercase tracking-widest bg-white/10 group-hover:bg-slate-900 text-white group-hover:text-white px-5 py-2.5 rounded-full transition-all border border-white/10 group-hover:border-slate-900 active:scale-95"
           >
             <User size={14} />
             <span>Login</span>
-          </button>
-
-          <button 
-            onClick={handleCashbackClick}
-            className="hidden sm:block bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 text-[9px] font-bold uppercase tracking-[0.2em] transition-all rounded-full"
-          >
-            Cashback
           </button>
 
           <button 
@@ -153,10 +161,10 @@ export default function Navbar() {
       {/* --- MODAL DE LOGIN (MOCKUP) --- */}
       {isLoginModalOpen && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-md p-6">
-          <div className="bg-white w-full max-w-md rounded-3xl p-10 shadow-2xl relative animate-in zoom-in duration-300">
+          <div className="bg-white w-full max-w-md rounded-[2.5rem] p-10 shadow-2xl relative animate-in zoom-in duration-300">
             <button 
               onClick={() => setIsLoginModalOpen(false)} 
-              className="absolute top-6 right-6 text-slate-400 hover:text-slate-900 transition-colors"
+              className="absolute top-8 right-8 text-slate-400 hover:text-slate-900 transition-colors"
             >
               <X size={24}/>
             </button>
@@ -166,53 +174,48 @@ export default function Navbar() {
                 <Lock size={28}/>
               </div>
               <h2 className="text-2xl font-serif text-slate-900">Project Tracker</h2>
-              <p className="text-slate-500 text-sm mt-2">Identifiez-vous pour suivre votre chantier</p>
+              <p className="text-slate-500 text-xs mt-2 uppercase tracking-widest">Suivi de chantier sécurisé</p>
             </div>
 
             <form onSubmit={handleAuthSubmit} className="space-y-4">
-              <div>
-                <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-2">Utilisateur</label>
-                <input 
-                  type="text" 
-                  defaultValue="admin@luxury.com"
-                  className="w-full mt-1 px-6 py-4 rounded-xl border border-slate-100 bg-slate-50 outline-none focus:ring-2 focus:ring-slate-900/5 transition" 
-                />
-              </div>
-              <div>
-                <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 ml-2">Mot de passe</label>
-                <input 
-                  type="password" 
-                  value={passwordInput} 
-                  onChange={(e) => setPasswordInput(e.target.value)}
-                  placeholder="Tapez 123" 
-                  className="w-full mt-1 px-6 py-4 rounded-xl border border-slate-100 bg-slate-50 outline-none focus:ring-2 focus:ring-slate-900/5 transition" 
-                />
-              </div>
+              <input 
+                type="text" 
+                defaultValue="client@luxury-estates.com"
+                className="w-full px-6 py-4 rounded-xl border border-slate-100 bg-slate-50 outline-none focus:ring-2 focus:ring-slate-900/5 text-sm" 
+              />
+              <input 
+                type="password" 
+                value={passwordInput} 
+                onChange={(e) => setPasswordInput(e.target.value)}
+                placeholder="Mot de passe (Tapez 123)" 
+                className="w-full px-6 py-4 rounded-xl border border-slate-100 bg-slate-50 outline-none focus:ring-2 focus:ring-slate-900/5 text-sm" 
+              />
               <button 
                 type="submit" 
                 className="w-full bg-slate-900 text-white py-4 rounded-xl font-bold uppercase text-[11px] tracking-widest hover:bg-slate-800 transition-all active:scale-95 mt-4"
               >
-                Se connecter
+                Accéder au Dashboard
               </button>
             </form>
           </div>
         </div>
       )}
 
-      {/* MENU MOBILE */}
+      {/* --- MENU MOBILE --- */}
       <div className={`fixed inset-0 bg-white z-[999] transition-all duration-500 ease-in-out transform ${isMobileMenuOpen ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'}`}>
         <div className="flex justify-between items-center px-6 py-6 border-b border-slate-50">
-           <span className="text-slate-900 text-lg font-serif italic">Menu</span>
+           <span className="text-slate-900 text-lg font-serif italic tracking-wide">Luxury Estates</span>
            <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 text-slate-900">
             <X size={32} />
           </button>
         </div>
 
-        <div className="flex flex-col h-[calc(100vh-80px)] px-10 pt-10 pb-10 justify-between">
-          <div className="flex flex-col space-y-7">
+        <div className="flex flex-col h-[calc(100vh-80px)] px-10 pt-12 pb-10 justify-between">
+          <div className="flex flex-col space-y-8">
+            <p className="text-[10px] uppercase tracking-[0.5em] text-slate-400 font-bold">Navigation</p>
             {["Propriétés", "Confidentiel", "Investissement", "Contact"].map((item) => (
-              <Link key={item} href="#" className="text-3xl font-serif text-slate-900 flex items-center justify-between">
-                {item} <ArrowRight className="text-emerald-500 opacity-50" size={24} />
+              <Link key={item} href={`/${item.toLowerCase()}`} onClick={() => setIsMobileMenuOpen(false)} className="text-4xl font-serif text-slate-900 flex items-center justify-between">
+                {item} <ArrowRight className="text-emerald-500 opacity-30" size={24} />
               </Link>
             ))}
           </div>
@@ -220,17 +223,19 @@ export default function Navbar() {
           <div className="flex flex-col space-y-4">
             <button 
               onClick={openLoginModal}
-              className="w-full border border-slate-200 text-slate-900 py-4 rounded-xl font-bold uppercase text-[11px] tracking-widest flex items-center justify-center space-x-2"
+              className="w-full border border-slate-200 text-slate-900 py-5 rounded-2xl font-bold uppercase text-[11px] tracking-widest flex items-center justify-center space-x-2"
             >
               <User size={16} />
-              <span>Accès Client</span>
+              <span>Accès Client Area</span>
             </button>
-            <button 
-              onClick={handleCashbackClick}
-              className="w-full bg-emerald-600 text-white py-4 rounded-xl font-bold uppercase text-[11px] tracking-widest"
+            <a 
+              href={zohoFullLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full bg-emerald-600 text-white py-5 rounded-2xl font-bold uppercase text-[11px] tracking-widest text-center"
             >
-              Obtenir mon Cashback
-            </button>
+              Claim Cashback {params?.id ? `#${params.id}` : ''}
+            </a>
           </div>
         </div>
       </div>
