@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { CheckCircle, ArrowRight, Home } from "lucide-react";
+import { CheckCircle, Home } from "lucide-react";
 
 export default function MerciPage() {
   return (
@@ -21,22 +21,16 @@ export default function MerciPage() {
         </h1>
         <p className="text-slate-500 text-lg mb-12 leading-relaxed">
           Votre demande de <span className="text-emerald-600 font-bold uppercase text-sm tracking-widest">Cashback</span> a bien été transmise. 
-          Gillian reviendra vers vous sous 24 heures pour vous présenter les détails de votre avantage.
+          Nous reviendrons vers vous sous 24 heures pour vous présenter les détails de votre avantage.
         </p>
 
-        {/* Actions */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+        {/* Action Unique */}
+        <div className="flex justify-center">
           <Link 
             href="/" 
-            className="flex items-center justify-center gap-3 bg-slate-900 text-white px-8 py-4 rounded-2xl font-bold uppercase text-[11px] tracking-[0.2em] hover:bg-slate-800 transition-all"
+            className="flex items-center justify-center gap-3 bg-slate-900 text-white px-10 py-4 rounded-2xl font-bold uppercase text-[11px] tracking-[0.2em] hover:bg-slate-800 transition-all shadow-lg"
           >
             <Home size={16} /> Retour à l'accueil
-          </Link>
-          <Link 
-            href="/proprietes" 
-            className="flex items-center justify-center gap-3 bg-slate-50 text-slate-600 px-8 py-4 rounded-2xl font-bold uppercase text-[11px] tracking-[0.2em] hover:bg-slate-100 transition-all"
-          >
-            Voir d'autres biens <ArrowRight size={16} />
           </Link>
         </div>
 
