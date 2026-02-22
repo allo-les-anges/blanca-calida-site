@@ -154,7 +154,7 @@ export default function PropertyDetailClient({ id }: { id: string }) {
             </div>
           </div>
 
-          {/* NOUVELLE SECTION : CARACTÉRISTIQUES DÉTAILLÉES */}
+          {/* CARACTÉRISTIQUES DÉTAILLÉES */}
           <div className="mb-20 pt-10 border-t border-slate-100">
             <h2 className="text-3xl font-serif italic mb-8 text-slate-800">Détails techniques</h2>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-y-10 gap-x-6">
@@ -162,7 +162,7 @@ export default function PropertyDetailClient({ id }: { id: string }) {
                 <div className="p-3 bg-emerald-50 rounded-xl text-emerald-600"><Waves size={20}/></div>
                 <div>
                   <p className="text-[9px] uppercase text-gray-400 font-bold tracking-widest mb-1">Piscine</p>
-                  <p className="font-medium">{property.pool ? "Privée" : "Disponible"}</p>
+                  <p className="font-medium">{property.pool === "Yes" || property.pool === true ? "Privée" : "Disponible"}</p>
                 </div>
               </div>
               <div className="flex items-start gap-4">
@@ -224,7 +224,7 @@ export default function PropertyDetailClient({ id }: { id: string }) {
             </div>
           </div>
 
-          {/* NOUVELLE SECTION : LOCALISATION */}
+          {/* SECTION : LOCALISATION (VERSION SANS CLÉ API) */}
           <div className="mb-20">
             <h2 className="text-3xl font-serif italic mb-8 text-slate-800 flex items-center gap-3">
               <MapIcon size={24} className="text-emerald-500" /> Localisation
@@ -235,10 +235,9 @@ export default function PropertyDetailClient({ id }: { id: string }) {
                 height="100%"
                 frameBorder="0"
                 style={{ border: 0, filter: 'grayscale(1) contrast(1.1) opacity(0.9)' }}
-                src={`https://www.google.com/maps/embed/v1/place?key=VOTRE_CLE_ICI&q=${property.town},${property.province}`}
-                // Note: Sans clé API, vous pouvez utiliser ce format simplifié :
-                // src={`https://maps.google.com/maps?q=${property.town}&t=&z=13&ie=UTF8&iwloc=&output=embed`}
+                src={`https://maps.google.com/maps?q=${encodeURIComponent(property.town + ', ' + property.province)}&t=&z=13&ie=UTF8&iwloc=&output=embed`}
                 allowFullScreen
+                loading="lazy"
               ></iframe>
             </div>
           </div>
