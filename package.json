@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.97.0",
     "axios": "^1.13.5",
     "fast-xml-parser": "^5.3.6",
     "framer-motion": "^12.34.0",
