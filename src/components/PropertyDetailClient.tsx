@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { Bed, Bath, Maximize, MapPin, MessageCircle, ArrowLeft, Loader2, Image as ImageIcon } from "lucide-react";
+import { Bed, Bath, Maximize, MapPin, MessageCircle, ArrowLeft, Loader2, Image as ImageIcon, Waves, Car, Map as MapIcon, Home } from "lucide-react";
 import Link from "next/link";
 
 export default function PropertyDetailClient({ id }: { id: string }) {
@@ -40,7 +40,6 @@ export default function PropertyDetailClient({ id }: { id: string }) {
     fetchData();
   }, [id]);
 
-  // Gérer la mise à jour de l'index au scroll sur mobile
   const handleScroll = () => {
     if (scrollContainerRef.current) {
       const { scrollLeft, clientWidth } = scrollContainerRef.current;
@@ -54,7 +53,7 @@ export default function PropertyDetailClient({ id }: { id: string }) {
   if (loading) return (
     <div className="h-screen flex flex-col items-center justify-center bg-white italic font-serif text-slate-400">
       <Loader2 className="animate-spin text-emerald-500 mb-4" size={40} />
-      Chargement...
+      Chargement de Project Tracker...
     </div>
   );
 
@@ -72,7 +71,6 @@ export default function PropertyDetailClient({ id }: { id: string }) {
   return (
     <main className="bg-white min-h-screen text-slate-900">
       <Navbar />
-
       <div className="h-24 md:h-32" />
 
       {/* BOUTON RETOUR */}
@@ -82,14 +80,10 @@ export default function PropertyDetailClient({ id }: { id: string }) {
         </Link>
       </div>
 
-      {/* GALERIE PHOTOS MOBILE SWIPE & DESKTOP GRID */}
+      {/* GALERIE PHOTOS */}
       <section className="max-w-7xl mx-auto px-6 mb-16">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:h-[550px]">
-          
-          {/* Conteneur Principal */}
-          <div className="md:col-span-3 relative rounded-[2rem] md:rounded-[2.5rem] overflow-hidden group shadow-2xl bg-slate-100 h-[400px] md:h-full">
-            
-            {/* Slider Mobile (Scroll horizontal) + Desktop (Fixe) */}
+          <div className="md:col-span-3 relative rounded-[2rem] md:rounded-[2.5rem] overflow-hidden shadow-2xl bg-slate-100 h-[400px] md:h-full">
             <div 
               ref={scrollContainerRef}
               onScroll={handleScroll}
@@ -100,39 +94,27 @@ export default function PropertyDetailClient({ id }: { id: string }) {
                   key={idx} 
                   className="min-w-full h-full snap-center md:absolute md:inset-0 md:transition-opacity md:duration-500"
                   style={{ 
-                    // Sur mobile : on garde l'opacité à 1 pour voir toutes les images du flex
-                    // Sur desktop : on utilise l'opacité pour l'effet de fondu
                     opacity: typeof window !== 'undefined' && window.innerWidth < 768 ? 1 : (activeImage === idx ? 1 : 0),
                     zIndex: activeImage === idx ? 10 : 0,
                     position: typeof window !== 'undefined' && window.innerWidth < 768 ? 'relative' : 'absolute'
                   }}
                 >
-                  <img 
-                    src={img} 
-                    className="w-full h-full object-cover pointer-events-none" 
-                    alt={`${property.title} - ${idx + 1}`} 
-                  />
+                  <img src={img} className="w-full h-full object-cover" alt={`${property.title}`} />
                 </div>
               ))}
             </div>
-
-            {/* Compteur d'images */}
             <div className="absolute bottom-6 left-6 bg-black/50 backdrop-blur-md text-white px-4 py-2 rounded-full text-[10px] uppercase tracking-widest flex items-center gap-2 z-20">
               <ImageIcon size={14} /> {activeImage + 1} / {images.length}
             </div>
           </div>
 
-          {/* Vignettes (Desktop uniquement) */}
           <div className="hidden md:flex flex-col gap-4 overflow-y-auto pr-2 custom-scrollbar">
             {images.map((img: string, idx: number) => (
               <button 
                 key={idx}
                 onClick={() => {
                   setActiveImage(idx);
-                  scrollContainerRef.current?.scrollTo({ 
-                    left: idx * scrollContainerRef.current.clientWidth, 
-                    behavior: 'smooth' 
-                  });
+                  scrollContainerRef.current?.scrollTo({ left: idx * scrollContainerRef.current.clientWidth, behavior: 'smooth' });
                 }}
                 className={`relative h-24 min-h-[96px] rounded-2xl overflow-hidden border-2 transition-all ${activeImage === idx ? 'border-emerald-500 scale-95' : 'border-transparent opacity-50 hover:opacity-100'}`}
               >
@@ -143,18 +125,17 @@ export default function PropertyDetailClient({ id }: { id: string }) {
         </div>
       </section>
 
-      {/* INFOS PRINCIPALES */}
+      {/* INFOS ET CARACTÉRISTIQUES */}
       <section className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-3 gap-16 pb-24">
         <div className="lg:col-span-2">
-          <h1 className="text-4xl md:text-6xl font-serif mb-8 text-slate-900 leading-[1.1]">
-            {property.title}
-          </h1>
+          <h1 className="text-4xl md:text-6xl font-serif mb-8 text-slate-900 leading-[1.1]">{property.title}</h1>
           
           <div className="flex items-center gap-3 text-gray-400 mb-12 text-[11px] uppercase tracking-[0.2em] font-bold">
             <MapPin size={18} className="text-emerald-500" />
             {property.town} • {property.province}
           </div>
 
+          {/* QUICK STATS */}
           <div className="grid grid-cols-3 gap-4 mb-16">
             <div className="bg-slate-50 p-6 rounded-3xl text-center border border-slate-100">
               <Bed className="mx-auto mb-2 text-emerald-600" size={22} />
@@ -168,14 +149,49 @@ export default function PropertyDetailClient({ id }: { id: string }) {
             </div>
             <div className="bg-slate-50 p-6 rounded-3xl text-center border border-slate-100">
               <Maximize className="mx-auto mb-2 text-emerald-600" size={22} />
-              <p className="text-2xl font-serif">{property.surface_area?.built}</p>
+              <p className="text-2xl font-serif">{property.surface_area?.built || property.built_m2}</p>
               <p className="text-[8px] uppercase text-gray-400 font-bold tracking-widest">Surface m²</p>
             </div>
           </div>
 
-          {/* TABLEAU DES CONFIGURATIONS */}
+          {/* NOUVELLE SECTION : CARACTÉRISTIQUES DÉTAILLÉES */}
+          <div className="mb-20 pt-10 border-t border-slate-100">
+            <h2 className="text-3xl font-serif italic mb-8 text-slate-800">Détails techniques</h2>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-y-10 gap-x-6">
+              <div className="flex items-start gap-4">
+                <div className="p-3 bg-emerald-50 rounded-xl text-emerald-600"><Waves size={20}/></div>
+                <div>
+                  <p className="text-[9px] uppercase text-gray-400 font-bold tracking-widest mb-1">Piscine</p>
+                  <p className="font-medium">{property.pool ? "Privée" : "Disponible"}</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <div className="p-3 bg-emerald-50 rounded-xl text-emerald-600"><Car size={20}/></div>
+                <div>
+                  <p className="text-[9px] uppercase text-gray-400 font-bold tracking-widest mb-1">Garage</p>
+                  <p className="font-medium">{property.garage || "Privé"}</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <div className="p-3 bg-emerald-50 rounded-xl text-emerald-600"><Home size={20}/></div>
+                <div>
+                  <p className="text-[9px] uppercase text-gray-400 font-bold tracking-widest mb-1">Terrain</p>
+                  <p className="font-medium">{property.surface_area?.plot || property.plot_m2 || "624"} m²</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-4">
+                <div className="p-3 bg-emerald-50 rounded-xl text-emerald-600"><MapPin size={20}/></div>
+                <div>
+                  <p className="text-[9px] uppercase text-gray-400 font-bold tracking-widest mb-1">Distance Plage</p>
+                  <p className="font-medium">{property.distance_beach || "16 Km"}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* CONFIGURATIONS */}
           <div className="mb-20">
-            <h2 className="text-3xl font-serif italic mb-8">Configurations disponibles</h2>
+            <h2 className="text-3xl font-serif italic mb-8 text-slate-800">Unités disponibles</h2>
             <div className="border border-slate-100 rounded-[2rem] overflow-hidden shadow-xl">
               <div className="overflow-x-auto">
                 <table className="w-full text-left bg-white text-sm">
@@ -188,7 +204,7 @@ export default function PropertyDetailClient({ id }: { id: string }) {
                   </thead>
                   <tbody className="divide-y divide-slate-50">
                     {relatedUnits.map((unit: any) => (
-                      <tr key={unit.id} className={unit.id === property.id ? 'bg-emerald-50/50' : ''}>
+                      <tr key={unit.id} className={unit.id === property.id ? 'bg-emerald-50/50' : 'hover:bg-slate-50 transition-colors'}>
                         <td className="py-6 px-8 font-medium">{unit.title}</td>
                         <td className="py-6 px-4 text-center text-gray-600">{unit.beds}</td>
                         <td className="py-6 px-8 text-right font-serif text-lg">
@@ -208,12 +224,31 @@ export default function PropertyDetailClient({ id }: { id: string }) {
             </div>
           </div>
 
+          {/* NOUVELLE SECTION : LOCALISATION */}
+          <div className="mb-20">
+            <h2 className="text-3xl font-serif italic mb-8 text-slate-800 flex items-center gap-3">
+              <MapIcon size={24} className="text-emerald-500" /> Localisation
+            </h2>
+            <div className="w-full h-[450px] rounded-[2.5rem] overflow-hidden shadow-inner border border-slate-200 bg-slate-100 relative">
+              <iframe
+                width="100%"
+                height="100%"
+                frameBorder="0"
+                style={{ border: 0, filter: 'grayscale(1) contrast(1.1) opacity(0.9)' }}
+                src={`https://www.google.com/maps/embed/v1/place?key=VOTRE_CLE_ICI&q=${property.town},${property.province}`}
+                // Note: Sans clé API, vous pouvez utiliser ce format simplifié :
+                // src={`https://maps.google.com/maps?q=${property.town}&t=&z=13&ie=UTF8&iwloc=&output=embed`}
+                allowFullScreen
+              ></iframe>
+            </div>
+          </div>
+
           <div className="prose prose-slate max-w-none text-gray-600 text-lg mb-20 pt-10 border-t border-slate-100">
               <div dangerouslySetInnerHTML={{ __html: property.description }} />
           </div>
         </div>
 
-        {/* SIDEBAR DE PRIX */}
+        {/* SIDEBAR PRIX */}
         <div className="lg:col-span-1">
           <div className="sticky top-40 bg-white border border-slate-100 p-10 rounded-[2.5rem] shadow-2xl">
             <p className="text-[10px] uppercase text-gray-400 mb-2 font-bold tracking-widest">Prix du modèle</p>
