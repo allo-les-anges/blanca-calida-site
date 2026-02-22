@@ -4,39 +4,46 @@ import React, { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { CheckCircle2, Clock, FileText, Link as LinkIcon, Camera } from 'lucide-react';
 
-// INITIALISATION SUPABASE
+// INITIALISATION SUPABASE AVEC PROTECTION TYPESCRIPT
+// Le "!" confirme à TypeScript que ces variables existent dans Vercel
 const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
 export default function ProjectTracker() {
-  const [chantier, setChantier] = useState(null);
+  // On utilise <any> ici pour que TypeScript ne bloque pas sur la structure de l'objet chantier
+  const [chantier, setChantier] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchChantierData() {
-      // On récupère la ligne du client (on prend la première pour le test)
-      const { data, error } = await supabase
-        .from('suivi_chantier')
-        .select('*')
-        .single();
+      try {
+        // On récupère la ligne du client
+        const { data, error } = await supabase
+          .from('suivi_chantier')
+          .select('*')
+          .single();
 
-      if (data) setChantier(data);
-      setLoading(false);
+        if (data) setChantier(data);
+      } catch (err) {
+        console.error("Erreur de récupération:", err);
+      } finally {
+        setLoading(false);
+      }
     }
     fetchChantierData();
   }, []);
 
   if (loading) return <div className="min-h-screen flex items-center justify-center">Chargement de votre projet...</div>;
-  if (!chantier) return <div className="min-h-screen flex items-center justify-center">Aucune donnée trouvée.</div>;
+  if (!chantier) return <div className="min-h-screen flex items-center justify-center">Aucune donnée trouvée. Vérifiez votre table Supabase.</div>;
 
   // CALCULS DYNAMIQUES
-  const etape = chantier.etape_actuelle; // Le chiffre (ex: 3)
+  const etape = chantier.etape_actuelle || 0; 
   const totalEtapes = 12;
   const progressionPourcent = Math.round((etape / totalEtapes) * 100);
 
-  // LOGIQUE DES JALONS (Basée sur votre base de données)
+  // LOGIQUE DES JALONS
   const milestones = [
     { title: "Signature du contrat", date: "12 Jan 2026", status: etape >= 1 ? "completed" : "pending" },
     { title: "Fondations & Terrassement", date: "05 Feb 2026", status: etape >= 2 ? "completed" : (etape === 1 ? "current" : "pending") },
@@ -102,7 +109,7 @@ export default function ProjectTracker() {
               </div>
             </section>
 
-            {/* GALERIE PHOTO (Utilise le lien de la DB) */}
+            {/* GALERIE PHOTO */}
             <section className="space-y-6">
               <h2 className="text-xl font-serif text-slate-900 flex items-center gap-2">
                 <Camera size={20} className="text-emerald-600" />
@@ -110,15 +117,15 @@ export default function ProjectTracker() {
               </h2>
               <div className="group relative overflow-hidden rounded-2xl aspect-video bg-slate-200 border border-slate-200">
                 <img 
-                  src={chantier.lien_photo || "/images/placeholder.jpg"} 
+                  src={chantier.lien_photo || "https://images.unsplash.com/photo-1541888946425-d81bb19480c5?q=80&w=2070&auto=format&fit=crop"} 
                   className="object-cover w-full h-full group-hover:scale-105 transition duration-700" 
-                  alt="Avancement"
+                  alt="Avancement du chantier"
                 />
               </div>
             </section>
           </div>
 
-          {/* COLONNE DROITE (BLOCKCHAIN/DOCS) */}
+          {/* COLONNE DROITE */}
           <div className="space-y-8">
             <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl p-6 text-white shadow-xl">
               <h3 className="text-sm font-bold uppercase tracking-widest flex items-center gap-2">
@@ -131,7 +138,6 @@ export default function ProjectTracker() {
               </div>
             </div>
           </div>
-
         </div>
       </div>
     </div>
