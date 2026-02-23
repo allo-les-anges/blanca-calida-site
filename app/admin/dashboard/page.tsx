@@ -1,186 +1,165 @@
 "use client";
+
 import React, { useEffect, useState } from 'react';
-import { createBrowserClient } from '@supabase/ssr';
-import { 
-  Plus, UserPlus, Loader2, Edit3, X, CheckCircle2, Home, Users
-} from 'lucide-react';
+import { createClient } from '@supabase/supabase-js';
+import { Plus, Loader2, X, Search, Layout, User, Mail, Home } from 'lucide-react';
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 export default function AdminDashboard() {
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
-
-  const [projects, setProjects] = useState<any[]>([]);
+  const [projets, setProjets] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showClientModal, setShowClientModal] = useState(false);
-  const [newClientEmail, setNewClientEmail] = useState("");
-  const [isCreating, setIsCreating] = useState(false);
-  const [editingProject, setEditingProject] = useState<any>(null);
+  const [showModal, setShowModal] = useState(false);
+  const [creating, setCreating] = useState(false);
 
-  useEffect(() => { fetchProjects(); }, []);
+  // Formulaire simplifié pour l'agence
+  const [formData, setFormData] = useState({
+    email: "", 
+    nom: "", 
+    prenom: "", 
+    nom_villa: ""
+  });
 
-  async function fetchProjects() {
+  const loadData = async () => {
+    setLoading(true);
     const { data } = await supabase.from('suivi_chantier').select('*').order('created_at', { ascending: false });
-    if (data) setProjects(data);
+    if (data) setProjets(data);
     setLoading(false);
-  }
+  };
 
-  // --- LOGIQUE 1 : CRÉER UN CLIENT D'ABORD ---
-  const handleCreatePureClient = async () => {
-    if (!newClientEmail) return alert("Email requis");
-    setIsCreating(true);
+  useEffect(() => { loadData(); }, []);
+
+  const handleCreateProject = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setCreating(true);
     try {
+      // 1. Appel API pour créer l'accès client et générer le PIN
       const res = await fetch('/api/admin/create-client', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: newClientEmail }) // On crée juste l'utilisateur
+        body: JSON.stringify({ email: formData.email })
       });
-      const result = await res.json();
-      if (!res.ok) throw new Error(result.error);
+      const authData = await res.json();
+      if (!res.ok) throw new Error(authData.error);
 
-      alert(`✅ COMPTE CLIENT CRÉÉ\nPIN: ${result.pin}\nEmail: ${newClientEmail}\n\nVous pouvez maintenant l'associer à une villa.`);
-      setShowClientModal(false);
-      setNewClientEmail("");
+      // 2. Création de la fiche Villa liée
+      const { error: dbError } = await supabase.from('suivi_chantier').insert([{
+        nom_client: formData.email,
+        client_nom: formData.nom,
+        client_prenom: formData.prenom,
+        reference_interne: formData.nom_villa,
+        pin_code: authData.pin,
+        etape_actuelle: 0
+      }]);
+
+      if (dbError) throw dbError;
+
+      alert(`Succès ! Le dossier est créé. PIN Client : ${authData.pin}`);
+      setShowModal(false);
+      loadData();
     } catch (err: any) {
-      alert(err.message);
+      alert("Erreur: " + err.message);
     } finally {
-      setIsCreating(false);
+      setCreating(false);
     }
   };
-
-  // --- LOGIQUE 2 : ASSOCIER UN CLIENT EXISTANT À UNE VILLA ---
-  const handleSaveProject = async () => {
-    const { error } = await supabase.from('suivi_chantier').update({
-        nom_villa: editingProject.nom_villa,
-        nom_client: editingProject.nom_client, // On lie l'email ici
-        etape_actuelle: editingProject.etape_actuelle,
-    }).eq('id', editingProject.id);
-
-    if (!error) {
-      setEditingProject(null);
-      fetchProjects();
-    }
-  };
-
-  if (loading) return <div className="h-screen flex items-center justify-center font-serif italic text-slate-400">Blanca Calida...</div>;
 
   return (
-    <div className="min-h-screen bg-[#FDFDFD] pt-12 pb-12 px-6 font-sans text-left">
+    <div className="min-h-screen bg-[#F9FAFB] p-8 md:p-12">
       <div className="max-w-7xl mx-auto">
         
-        {/* BARRE D'ACTIONS SUPÉRIEURE */}
-        <div className="flex flex-col md:flex-row justify-between items-center mb-12 gap-6 bg-white p-6 rounded-[2rem] shadow-sm border border-slate-50">
-          <div className="text-left">
-            <h1 className="text-3xl font-serif italic text-slate-900">Administration</h1>
-            <p className="text-slate-400 font-bold uppercase tracking-widest text-[9px]">Gestion Clients & Patrimoine</p>
+        {/* En-tête simplifié */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6">
+          <div>
+            <h1 className="text-3xl font-serif italic text-slate-900">Blanca Calida</h1>
+            <p className="text-slate-500 text-sm mt-1 uppercase tracking-widest">Console Administration</p>
           </div>
           
-          <div className="flex gap-3">
-            {/* BOUTON CRÉER CLIENT (SANS VILLA) */}
-            <button 
-              onClick={() => setShowClientModal(true)}
-              className="bg-emerald-50 text-emerald-600 px-6 py-3 rounded-2xl flex items-center gap-2 font-bold text-[10px] uppercase tracking-widest hover:bg-emerald-100 transition-all"
-            >
-              <UserPlus size={16} /> Nouveau Client
-            </button>
-
-            {/* BOUTON CRÉER VILLA */}
-            <button 
-              onClick={async () => {
-                const { data } = await supabase.from('suivi_chantier').insert([{ nom_villa: "Nouveau Projet", etape_actuelle: 1 }]).select();
-                if (data) fetchProjects();
-              }}
-              className="bg-slate-900 text-white px-6 py-3 rounded-2xl flex items-center gap-2 font-bold text-[10px] uppercase tracking-widest hover:bg-slate-800 transition-all"
-            >
-              <Plus size={16} /> Nouvelle Villa
-            </button>
-          </div>
+          <button 
+            onClick={() => setShowModal(true)}
+            className="bg-slate-900 text-white px-8 py-4 rounded-2xl flex items-center gap-3 font-bold text-xs uppercase tracking-tighter hover:bg-emerald-700 transition-all shadow-xl shadow-slate-200"
+          >
+            <Plus size={18} /> Créer un nouveau dossier
+          </button>
         </div>
 
-        {/* GRILLE DES VILLAS */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {projects.map((p) => (
-            <div key={p.id} className="bg-white border border-slate-100 rounded-[2.5rem] p-8 shadow-sm hover:shadow-md transition-all">
-              <div className="flex justify-between items-start mb-4">
-                <div className="text-left">
-                  <h3 className="text-xl font-serif italic text-slate-800">{p.nom_villa}</h3>
-                  <p className="text-[10px] text-slate-400 font-bold uppercase mt-1">
-                    {p.nom_client ? `Client: ${p.nom_client}` : "🚫 Aucun client associé"}
-                  </p>
-                </div>
-                <button onClick={() => setEditingProject(p)} className="p-2 bg-slate-50 rounded-xl text-slate-400 hover:text-emerald-600">
-                  <Edit3 size={16} />
-                </button>
-              </div>
+        {/* Liste des Dossiers */}
+        {loading ? (
+          <div className="flex justify-center p-20"><Loader2 className="animate-spin text-slate-300" size={40} /></div>
+        ) : projets.length === 0 ? (
+          <div className="bg-white border-2 border-dashed border-slate-200 rounded-[2.5rem] p-20 text-center">
+            <div className="bg-slate-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-300">
+               <Home size={32} />
             </div>
-          ))}
-        </div>
+            <p className="text-slate-400 font-serif italic text-lg">Aucun dossier actif pour le moment.</p>
+            <button onClick={() => setShowModal(true)} className="text-emerald-600 font-bold text-xs uppercase mt-4 underline">Commencer maintenant</button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {projets.map((p) => (
+              <div key={p.id} className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm hover:shadow-md transition-all">
+                <div className="flex justify-between items-start mb-6">
+                  <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest bg-emerald-50 px-3 py-1 rounded-full">Villa</span>
+                  <span className="text-[10px] font-mono font-bold text-slate-400">PIN: {p.pin_code}</span>
+                </div>
+                <h3 className="text-xl font-bold text-slate-800 mb-2">{p.reference_interne}</h3>
+                <p className="text-slate-400 text-sm italic mb-6">{p.client_prenom} {p.client_nom}</p>
+                <div className="border-t pt-6 flex justify-between items-center">
+                   <span className="text-[10px] text-slate-300 uppercase font-bold tracking-tighter">Accès: {p.nom_client}</span>
+                   <button className="text-slate-900 font-bold text-[10px] uppercase border-b-2 border-slate-900">Gérer</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
 
-        {/* MODAL : CRÉATION CLIENT SEUL */}
-        {showClientModal && (
-          <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-            <div className="bg-white w-full max-w-md rounded-[2.5rem] p-10 shadow-2xl animate-in zoom-in-95 duration-200 text-left">
+        {/* Modal "User Friendly" - Tout en un */}
+        {showModal && (
+          <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-50 flex items-center justify-center p-4">
+            <form onSubmit={handleCreateProject} className="bg-white w-full max-w-lg rounded-[3rem] p-10 shadow-2xl">
               <div className="flex justify-between items-center mb-8">
-                <h2 className="text-2xl font-serif italic">Nouveau Compte Client</h2>
-                <button onClick={() => setShowClientModal(false)}><X /></button>
+                <h2 className="text-2xl font-serif italic text-slate-900">Nouveau Dossier</h2>
+                <button type="button" onClick={() => setShowModal(false)} className="text-slate-300 hover:text-slate-900 transition-colors"><X /></button>
               </div>
-              <div className="space-y-6">
-                <div>
-                  <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Email de connexion</label>
-                  <input 
-                    type="email" 
-                    className="w-full p-4 bg-slate-50 rounded-2xl mt-2 outline-none border-none" 
-                    placeholder="exemple@email.com"
-                    value={newClientEmail}
-                    onChange={(e) => setNewClientEmail(e.target.value)}
-                  />
+
+              <div className="space-y-5">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Nom de la Villa</label>
+                  <div className="relative">
+                    <Home className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
+                    <input required placeholder="ex: Villa Blanca" className="w-full pl-12 p-5 bg-slate-50 rounded-2xl outline-none focus:ring-2 focus:ring-slate-900/5" onChange={e => setFormData({...formData, nom_villa: e.target.value})} />
+                  </div>
                 </div>
-                <button 
-                  onClick={handleCreatePureClient}
-                  disabled={isCreating}
-                  className="w-full bg-emerald-600 text-white py-5 rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-emerald-700 transition-all flex justify-center"
-                >
-                  {isCreating ? <Loader2 className="animate-spin" /> : "Générer les accès (PIN)"}
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Prénom Client</label>
+                    <input required className="w-full p-5 bg-slate-50 rounded-2xl outline-none" onChange={e => setFormData({...formData, prenom: e.target.value})} />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Nom Client</label>
+                    <input required className="w-full p-5 bg-slate-50 rounded-2xl outline-none" onChange={e => setFormData({...formData, nom: e.target.value})} />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Email (Identifiant de connexion)</label>
+                  <div className="relative">
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
+                    <input type="email" required placeholder="client@email.com" className="w-full pl-12 p-5 bg-slate-50 rounded-2xl outline-none" onChange={e => setFormData({...formData, email: e.target.value})} />
+                  </div>
+                </div>
+
+                <button type="submit" disabled={creating} className="w-full bg-slate-900 text-white py-6 rounded-2xl font-bold uppercase tracking-[0.2em] text-[10px] hover:bg-emerald-600 transition-all flex justify-center items-center gap-4 shadow-xl shadow-slate-200 mt-4">
+                  {creating ? <Loader2 className="animate-spin" /> : "Générer le dossier & le code PIN"}
                 </button>
               </div>
-            </div>
+            </form>
           </div>
         )}
-
-        {/* PANEL : ÉDITION VILLA (POUR ASSOCIER UN CLIENT) */}
-        {editingProject && (
-          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 flex justify-end">
-            <div className="w-full max-w-xl bg-white h-full shadow-2xl p-12 overflow-y-auto text-left">
-              <div className="flex justify-between items-center mb-12">
-                <h2 className="text-3xl font-serif italic">Détails du Dossier</h2>
-                <button onClick={() => setEditingProject(null)}><X /></button>
-              </div>
-              <div className="space-y-8">
-                <div>
-                  <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Associer à l'email client</label>
-                  <input 
-                    className="w-full p-4 bg-slate-50 rounded-2xl mt-2 outline-none" 
-                    placeholder="Saisissez l'email du client créé"
-                    value={editingProject.nom_client || ""} 
-                    onChange={e => setEditingProject({...editingProject, nom_client: e.target.value})} 
-                  />
-                  <p className="text-[9px] text-slate-400 mt-2 px-2 italic">L'association se fait par l'email. Une fois associé, le client verra cette villa dans son application.</p>
-                </div>
-
-                <div>
-                  <label className="text-[10px] font-black uppercase text-slate-400 ml-2">Nom de la Villa</label>
-                  <input className="w-full p-4 bg-slate-50 rounded-2xl mt-2 outline-none" value={editingProject.nom_villa} onChange={e => setEditingProject({...editingProject, nom_villa: e.target.value})} />
-                </div>
-
-                <button onClick={handleSaveProject} className="w-full bg-slate-900 text-white py-5 rounded-2xl font-bold text-xs uppercase tracking-widest">
-                  Enregistrer l'association
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
       </div>
     </div>
   );
