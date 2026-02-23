@@ -3,7 +3,8 @@ import React, { useEffect, useState } from 'react';
 import { createBrowserClient } from '@supabase/ssr';
 import { 
   Search, Edit3, X, Save, Plus, FileText, 
-  Upload, Loader2, Calendar, HardHat, Euro, CheckCircle2 
+  Upload, Loader2, Calendar, HardHat, Euro, CheckCircle2,
+  Home, Users 
 } from 'lucide-react';
 
 export default function AdminDashboard() {
