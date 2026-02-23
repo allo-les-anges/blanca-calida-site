@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { createBrowserClient } from '@supabase/ssr';
 import { useRouter } from 'next/navigation';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Lock, Mail } from 'lucide-react';
 
 export default function ProfessionalLoginPage() {
   const [email, setEmail] = useState("");
@@ -27,63 +27,60 @@ export default function ProfessionalLoginPage() {
       return;
     }
 
-    // On récupère le rôle et le nom de l'entreprise
+    // Récupération sécurisée du profil
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('role')
+      .select('role, company_name')
       .eq('id', data.user.id)
       .single();
 
     if (profileError || !profile) {
-      alert("Profil non trouvé. Vérifiez que votre UID est bien dans la table 'profiles'.");
+      alert("Profil non trouvé. Assurez-vous d'avoir ajouté votre UID dans la table 'profiles' sur Supabase.");
       setLoading(false);
       return;
     }
 
-    // REDIRECTION INTELLIGENTE
+    // Système de redirection
     if (profile.role === 'super_admin') {
       router.push('/super-admin');
     } else if (profile.role === 'admin') {
       router.push('/admin/dashboard');
-    } else if (profile.role === 'admin_chantier') {
-      router.push('/admin-chantier');
     } else {
-      // Sécurité : évite le 404 si la page projet n'existe pas encore
-      alert(`Bienvenue. Rôle détecté : ${profile.role}. (Redirection vers l'accueil)`);
+      alert(`Bienvenue ${profile.company_name || ""}. Rôle : ${profile.role}.`);
       router.push('/'); 
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 flex items-center justify-center p-6 text-white">
-      <div className="w-full max-w-md bg-slate-800 rounded-[2.5rem] p-10 border border-slate-700 shadow-2xl">
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-serif italic">Blanca Calida</h1>
-          <p className="text-slate-500 text-[10px] uppercase tracking-widest mt-2 font-bold">Accès Professionnel</p>
+    <div className="min-h-screen bg-[#020617] flex items-center justify-center p-6 text-white">
+      <div className="w-full max-w-md bg-[#0f172a] rounded-[2.5rem] p-10 border border-slate-800 shadow-2xl">
+        <div className="text-center mb-10">
+          <h1 className="text-3xl font-serif italic text-white">Blanca Calida</h1>
+          <p className="text-slate-500 text-[10px] uppercase tracking-[0.3em] mt-2 font-bold">Professional Access</p>
         </div>
 
-        <form onSubmit={handleLogin} className="space-y-4">
-          <div className="space-y-1">
-            <label className="text-[10px] uppercase text-slate-500 ml-2">Email</label>
+        <form onSubmit={handleLogin} className="space-y-5">
+          <div className="relative">
+            <Mail className="absolute left-4 top-4 text-slate-500" size={18} />
             <input 
-              type="email" placeholder="votre@email.com" required
-              className="w-full bg-slate-900 border border-slate-700 rounded-xl p-4 text-white outline-none focus:border-emerald-500 transition-all text-sm"
+              type="email" placeholder="Email Address" required
+              className="w-full bg-[#020617] border border-slate-800 rounded-2xl p-4 pl-12 text-sm outline-none focus:border-emerald-500 transition-all"
               onChange={(e) => setEmail(e.target.value)}
             />
           </div>
-          <div className="space-y-1">
-            <label className="text-[10px] uppercase text-slate-500 ml-2">Mot de passe</label>
+          <div className="relative">
+            <Lock className="absolute left-4 top-4 text-slate-500" size={18} />
             <input 
-              type="password" placeholder="••••••••" required
-              className="w-full bg-slate-900 border border-slate-700 rounded-xl p-4 text-white outline-none focus:border-emerald-500 transition-all text-sm"
+              type="password" placeholder="Password" required
+              className="w-full bg-[#020617] border border-slate-800 rounded-2xl p-4 pl-12 text-sm outline-none focus:border-emerald-500 transition-all"
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
           <button 
             type="submit" disabled={loading}
-            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-4 mt-4 rounded-xl font-bold uppercase text-[10px] tracking-widest transition-all flex items-center justify-center gap-2"
+            className="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-4 rounded-2xl font-bold uppercase text-[10px] tracking-widest transition-all flex items-center justify-center gap-3"
           >
-            {loading ? <Loader2 className="animate-spin" size={18} /> : "Se connecter"}
+            {loading ? <Loader2 className="animate-spin" size={20} /> : "Log In"}
           </button>
         </form>
       </div>
