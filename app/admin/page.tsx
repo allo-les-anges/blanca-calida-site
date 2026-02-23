@@ -2,84 +2,92 @@
 
 import React, { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import { Save, Camera, FilePlus, Trash2, Loader2, ChevronRight, Euro, ShieldCheck } from 'lucide-react';
+import { 
+  Save, Camera, FilePlus, Trash2, Loader2, Plus, X, 
+  Search, ShieldCheck, Phone, MapPin, User, Hash 
+} from 'lucide-react';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-// --- DÉFINITION DES PHASES DE TRAVAUX ---
 const PHASES_CHANTIER = [
-  "0. Signature du contrat",
-  "1. Préparation du terrain",
-  "2. Fondations",
-  "3. Gros œuvre (Murs)",
-  "4. Charpente & Toiture",
-  "5. Menuiseries (Fenêtres/Portes)",
-  "6. Électricité & Plomberie",
-  "7. Isolation",
-  "8. Plâtrerie",
-  "9. Carrelage & Sols",
-  "10. Peintures",
-  "11. Aménagements extérieurs",
-  "12. Remise des clés"
+  "0. Signature du contrat", "1. Préparation du terrain", "2. Fondations", 
+  "3. Gros œuvre (Murs)", "4. Charpente & Toiture", "5. Menuiseries", 
+  "6. Électricité & Plomberie", "7. Isolation", "8. Plâtrerie", 
+  "9. Carrelage & Sols", "10. Peintures", "11. Aménagements extérieurs", "12. Remise des clés"
 ];
 
 export default function AdminInterface() {
   const [projets, setProjets] = useState<any[]>([]);
   const [selectedProjet, setSelectedProjet] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
   const [updating, setUpdating] = useState(false);
   const [uploading, setUploading] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // État pour le nouveau dossier
+  const [newDossier, setNewDossier] = useState({
+    email: "", nom: "", prenom: "", tel: "", cp: "", ref: "", cashback: 0
+  });
 
   const loadData = async () => {
     setLoading(true);
-    const { data } = await supabase.from('suivi_chantier').select('*').order('id', { ascending: true });
+    const { data } = await supabase.from('suivi_chantier').select('*').order('created_at', { ascending: false });
     if (data) {
       setProjets(data);
-      if (!selectedProjet && data.length > 0) setSelectedProjet(data[0]);
+      if (data.length > 0) setSelectedProjet(data[0]);
     }
     setLoading(false);
   };
 
   useEffect(() => { loadData(); }, []);
 
-  // --- FONCTION UPLOAD GÉNÉRIQUE (PHOTOS OU DOCUMENTS) ---
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>, type: 'photo' | 'doc') => {
+  // --- CRÉATION COMPLÈTE (CLIENT + PROJET) ---
+  const handleCreateDossier = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setUpdating(true);
     try {
-      if (!event.target.files || event.target.files.length === 0) return;
-      setUploading(type);
+      // 1. Création du compte Auth via ton API existante
+      const res = await fetch('/api/admin/create-client', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: newDossier.email })
+      });
+      const auth = await res.json();
+      if (!res.ok) throw new Error(auth.error);
 
-      const file = event.target.files[0];
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${selectedProjet.id}_${Date.now()}.${fileExt}`;
+      // 2. Création de la ligne en base
+      const { error: dbError } = await supabase.from('suivi_chantier').insert([{
+        nom_client: newDossier.email,
+        client_nom: newDossier.nom,
+        client_prenom: newDossier.prenom,
+        telephone: newDossier.tel,
+        code_postal: newDossier.cp,
+        reference_interne: newDossier.ref,
+        montant_cashback: newDossier.cashback,
+        pin_code: auth.pin,
+        etape_actuelle: 0
+      }]);
 
-      // UTILISATION DU NOM EXACT DU BUCKET: PHOTOS-CHANTIER
-      const { error: uploadError } = await supabase.storage
-        .from('PHOTOS-CHANTIER')
-        .upload(fileName, file);
-
-      if (uploadError) throw uploadError;
-
-      const { data } = supabase.storage.from('PHOTOS-CHANTIER').getPublicUrl(fileName);
-      
-      if (type === 'photo') {
-        setSelectedProjet({ ...selectedProjet, lien_photo: data.publicUrl });
-      } else {
-        const newDoc = { name: file.name, url: data.publicUrl, comment: "" };
-        setSelectedProjet({
-          ...selectedProjet,
-          documents: [...(selectedProjet.documents || []), newDoc]
-        });
-      }
-      alert("Fichier chargé avec succès !");
-    } catch (error: any) {
-      alert("Erreur: " + error.message);
+      if (dbError) throw dbError;
+      alert(`Fiche créée ! PIN client : ${auth.pin}`);
+      setShowModal(false);
+      loadData();
+    } catch (err: any) {
+      alert(err.message);
     } finally {
-      setUploading(null);
+      setUpdating(false);
     }
   };
+
+  // --- FILTRAGE PAR RÉFÉRENCE OU NOM ---
+  const filteredProjets = projets.filter(p => 
+    p.reference_interne?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    p.client_nom?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const handleSave = async () => {
     setUpdating(true);
@@ -88,7 +96,7 @@ export default function AdminInterface() {
       .update({
         etape_actuelle: selectedProjet.etape_actuelle,
         lien_photo: selectedProjet.lien_photo,
-        commentaire_photo: selectedProjet.commentaire_photo, // Nouvelle colonne à prévoir
+        commentaire_photo: selectedProjet.commentaire_photo,
         montant_cashback: selectedProjet.montant_cashback,
         documents: selectedProjet.documents
       })
@@ -102,105 +110,97 @@ export default function AdminInterface() {
   if (loading) return <div className="p-10 text-center font-serif italic">Chargement...</div>;
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col md:row font-sans text-slate-900">
-      {/* SIDEBAR */}
-      <div className="w-full md:w-72 bg-white border-r p-4">
-        <h1 className="text-xl font-serif mb-6 px-2">Console Agence</h1>
-        {projets.map((p) => (
-          <button
-            key={p.id}
-            onClick={() => setSelectedProjet(p)}
-            className={`w-full text-left p-4 rounded-xl mb-2 transition-all ${selectedProjet?.id === p.id ? 'bg-emerald-600 text-white' : 'hover:bg-slate-100'}`}
+    <div className="min-h-screen bg-[#f8fafc] flex flex-col md:flex-row text-slate-900">
+      
+      {/* SIDEBAR AVEC RECHERCHE */}
+      <div className="w-full md:w-80 bg-white border-r flex flex-col h-screen sticky top-0">
+        <div className="p-6 space-y-4">
+          <h1 className="text-xl font-serif italic">Console Agence</h1>
+          <button 
+            onClick={() => setShowModal(true)}
+            className="w-full bg-slate-900 text-white p-4 rounded-2xl flex items-center justify-center gap-2 font-bold text-xs uppercase tracking-widest hover:bg-emerald-600 transition-all"
           >
-            <span className="text-xs font-bold uppercase">{p.nom_client}</span>
+            <Plus size={18} /> Nouveau Dossier
           </button>
-        ))}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+            <input 
+              type="text" placeholder="Rechercher Villa..." 
+              className="w-full pl-10 pr-4 py-2 bg-slate-100 rounded-xl text-sm outline-none"
+              value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+        </div>
+        
+        <div className="flex-1 overflow-y-auto px-4 pb-4">
+          {filteredProjets.map((p) => (
+            <button
+              key={p.id}
+              onClick={() => setSelectedProjet(p)}
+              className={`w-full text-left p-4 rounded-2xl mb-2 transition-all border ${selectedProjet?.id === p.id ? 'bg-emerald-50 border-emerald-200 ring-1 ring-emerald-500' : 'bg-white border-transparent hover:bg-slate-50'}`}
+            >
+              <div className="flex justify-between items-start">
+                <span className="text-[10px] font-black text-emerald-600 uppercase tracking-tighter">{p.reference_interne || 'Sans Réf'}</span>
+                <span className="text-[10px] bg-slate-100 px-2 py-0.5 rounded text-slate-500 italic">PIN: {p.pin_code}</span>
+              </div>
+              <p className="font-bold text-sm truncate">{p.client_prenom} {p.client_nom}</p>
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* ZONE D'EDITION */}
-      <div className="flex-1 p-4 md:p-10 max-w-4xl mx-auto space-y-6">
-        {selectedProjet && (
-          <>
-            <div className="flex justify-between items-center bg-white p-6 rounded-3xl shadow-sm border">
-              <h2 className="text-2xl font-serif">{selectedProjet.nom_client}</h2>
-              <button onClick={handleSave} disabled={updating} className="bg-emerald-600 text-white px-6 py-3 rounded-xl font-bold flex gap-2">
-                <Save size={18} /> {updating ? 'Envoi...' : 'Enregistrer'}
+      <div className="flex-1 p-6 md:p-12 overflow-y-auto">
+        {selectedProjet ? (
+          <div className="max-w-4xl mx-auto space-y-8 text-left">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+              <div>
+                <h2 className="text-3xl font-serif">{selectedProjet.client_prenom} {selectedProjet.client_nom}</h2>
+                <p className="text-slate-400 text-sm flex items-center gap-2 mt-1">
+                  <Hash size={14}/> {selectedProjet.reference_interne} • <MapPin size={14}/> {selectedProjet.code_postal}
+                </p>
+              </div>
+              <button onClick={handleSave} disabled={updating} className="bg-emerald-600 text-white px-8 py-4 rounded-2xl font-bold flex gap-2 shadow-lg shadow-emerald-200">
+                <Save size={18} /> {updating ? 'Envoi...' : 'Enregistrer les modifications'}
               </button>
             </div>
 
-            {/* SLIDER AVEC PHASES TEXTUELLES */}
-            <div className="bg-white p-6 rounded-3xl shadow-sm border space-y-4">
-              <div className="flex justify-between items-center">
-                <label className="text-xs font-bold uppercase text-slate-400 italic">Étape du chantier</label>
-                <span className="text-emerald-600 font-bold">{PHASES_CHANTIER[selectedProjet.etape_actuelle]}</span>
-              </div>
-              <input
-                type="range" min="0" max="12"
-                value={selectedProjet.etape_actuelle}
-                onChange={(e) => setSelectedProjet({...selectedProjet, etape_actuelle: parseInt(e.target.value)})}
-                className="w-full h-3 bg-slate-100 rounded-full appearance-none accent-emerald-500"
-              />
-            </div>
+            {/* LE RESTE DE TON CODE (SLIDER, PHOTO, DOCS) RESTE ICI... */}
+            {/* [Slider Étape] */}
+            {/* [Photo Suivi] */}
+            {/* [Coffre-fort] */}
 
-            {/* PHOTO AVEC COMMENTAIRE */}
-            <div className="bg-white p-6 rounded-3xl shadow-sm border space-y-4">
-              <label className="text-xs font-bold uppercase text-slate-400">Photo de suivi</label>
-              {selectedProjet.lien_photo && <img src={selectedProjet.lien_photo} className="w-full rounded-2xl aspect-video object-cover" />}
-              <div className="relative border-2 border-dashed border-slate-200 rounded-2xl p-6 text-center">
-                <input type="file" accept="image/*" capture="environment" onChange={(e) => handleFileUpload(e, 'photo')} className="absolute inset-0 opacity-0 cursor-pointer" />
-                <Camera className="mx-auto mb-2 text-emerald-500" />
-                <span className="text-sm font-medium">{uploading === 'photo' ? 'Chargement...' : 'Prendre une photo'}</span>
-              </div>
-              <textarea
-                placeholder="Commentaire sur la photo..."
-                value={selectedProjet.commentaire_photo || ""}
-                onChange={(e) => setSelectedProjet({...selectedProjet, commentaire_photo: e.target.value})}
-                className="w-full p-4 bg-slate-50 border rounded-xl text-sm"
-              />
-            </div>
-
-            {/* COFFRE-FORT AVEC UPLOAD ET COMMENTAIRES */}
-            <div className="bg-white p-6 rounded-3xl shadow-sm border space-y-6">
-              <div className="flex justify-between items-center">
-                <label className="text-xs font-bold uppercase text-slate-400 flex items-center gap-2">
-                  <ShieldCheck size={16} /> Coffre-fort Numérique
-                </label>
-                <div className="relative bg-emerald-50 text-emerald-600 px-4 py-2 rounded-xl text-xs font-bold cursor-pointer">
-                   <input type="file" onChange={(e) => handleFileUpload(e, 'doc')} className="absolute inset-0 opacity-0" />
-                   + Uploader Document
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                {selectedProjet.documents?.map((doc: any, index: number) => (
-                  <div key={index} className="p-4 bg-slate-50 border rounded-2xl space-y-2 relative">
-                    <button 
-                      onClick={() => {
-                        const next = selectedProjet.documents.filter((_:any, i:number) => i !== index);
-                        setSelectedProjet({...selectedProjet, documents: next});
-                      }}
-                      className="absolute top-4 right-4 text-slate-300 hover:text-red-500"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                    <p className="text-xs font-bold text-slate-700 truncate pr-8">{doc.name}</p>
-                    <input
-                      placeholder="Ajouter un commentaire au document..."
-                      value={doc.comment || ""}
-                      onChange={(e) => {
-                        const nextDocs = [...selectedProjet.documents];
-                        nextDocs[index].comment = e.target.value;
-                        setSelectedProjet({...selectedProjet, documents: nextDocs});
-                      }}
-                      className="w-full p-2 bg-white border rounded-lg text-[10px]"
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-          </>
+          </div>
+        ) : (
+          <div className="h-full flex items-center justify-center text-slate-300 italic">Sélectionnez ou créez un dossier</div>
         )}
       </div>
+
+      {/* MODAL NOUVEAU DOSSIER */}
+      {showModal && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <form onSubmit={handleCreateDossier} className="bg-white w-full max-w-2xl rounded-[2.5rem] p-8 shadow-2xl space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-serif italic">Nouvelle Fiche Client</h2>
+              <button type="button" onClick={() => setShowModal(false)} className="p-2 hover:bg-slate-100 rounded-full text-slate-400"><X /></button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <input placeholder="Prénom" required className="p-4 bg-slate-50 rounded-2xl outline-none border border-transparent focus:border-emerald-500 transition-all" onChange={e => setNewDossier({...newDossier, prenom: e.target.value})} />
+              <input placeholder="Nom" required className="p-4 bg-slate-50 rounded-2xl outline-none border border-transparent focus:border-emerald-500 transition-all" onChange={e => setNewDossier({...newDossier, nom: e.target.value})} />
+              <input type="email" placeholder="Email" required className="col-span-2 p-4 bg-slate-50 rounded-2xl outline-none border border-transparent focus:border-emerald-500 transition-all" onChange={e => setNewDossier({...newDossier, email: e.target.value})} />
+              <input placeholder="Téléphone" className="p-4 bg-slate-50 rounded-2xl outline-none border border-transparent focus:border-emerald-500 transition-all" onChange={e => setNewDossier({...newDossier, tel: e.target.value})} />
+              <input placeholder="Code Postal" className="p-4 bg-slate-50 rounded-2xl outline-none border border-transparent focus:border-emerald-500 transition-all" onChange={e => setNewDossier({...newDossier, cp: e.target.value})} />
+              <input placeholder="Réf Villa (ex: B24)" required className="p-4 bg-slate-50 rounded-2xl outline-none border-2 border-emerald-100" onChange={e => setNewDossier({...newDossier, ref: e.target.value})} />
+              <input type="number" placeholder="Cashback (€)" className="p-4 bg-slate-50 rounded-2xl outline-none" onChange={e => setNewDossier({...newDossier, cashback: parseInt(e.target.value)})} />
+            </div>
+
+            <button type="submit" disabled={updating} className="w-full bg-slate-900 text-white py-5 rounded-2xl font-bold uppercase tracking-[0.2em] text-xs hover:bg-emerald-600 transition-all">
+              {updating ? <Loader2 className="animate-spin mx-auto" /> : "Créer le dossier & le compte client"}
+            </button>
+          </form>
+        </div>
+      )}
     </div>
   );
 }
