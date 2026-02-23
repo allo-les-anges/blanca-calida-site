@@ -27,7 +27,7 @@ export default function ProfessionalLoginPage() {
       return;
     }
 
-    // On récupère le rôle dans la table profiles
+    // On récupère le rôle et le nom de l'entreprise
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('role')
@@ -35,7 +35,7 @@ export default function ProfessionalLoginPage() {
       .single();
 
     if (profileError || !profile) {
-      alert("Profil non trouvé dans la base de données. Vérifiez la table 'profiles'.");
+      alert("Profil non trouvé. Vérifiez que votre UID est bien dans la table 'profiles'.");
       setLoading(false);
       return;
     }
@@ -48,9 +48,8 @@ export default function ProfessionalLoginPage() {
     } else if (profile.role === 'admin_chantier') {
       router.push('/admin-chantier');
     } else {
-      // CORRECTION : Si le dossier /mon-projet n'existe pas, on redirige vers l'accueil
-      // On affiche une alerte pour comprendre ce qui se passe
-      alert("Rôle détecté : " + profile.role + ". Redirection vers l'accueil car la page projet n'existe pas.");
+      // Sécurité : évite le 404 si la page projet n'existe pas encore
+      alert(`Bienvenue. Rôle détecté : ${profile.role}. (Redirection vers l'accueil)`);
       router.push('/'); 
     }
   };
@@ -68,7 +67,7 @@ export default function ProfessionalLoginPage() {
             <label className="text-[10px] uppercase text-slate-500 ml-2">Email</label>
             <input 
               type="email" placeholder="votre@email.com" required
-              className="w-full bg-slate-900 border border-slate-700 rounded-xl p-4 outline-none focus:border-emerald-500 transition-all text-sm"
+              className="w-full bg-slate-900 border border-slate-700 rounded-xl p-4 text-white outline-none focus:border-emerald-500 transition-all text-sm"
               onChange={(e) => setEmail(e.target.value)}
             />
           </div>
@@ -76,7 +75,7 @@ export default function ProfessionalLoginPage() {
             <label className="text-[10px] uppercase text-slate-500 ml-2">Mot de passe</label>
             <input 
               type="password" placeholder="••••••••" required
-              className="w-full bg-slate-900 border border-slate-700 rounded-xl p-4 outline-none focus:border-emerald-500 transition-all text-sm"
+              className="w-full bg-slate-900 border border-slate-700 rounded-xl p-4 text-white outline-none focus:border-emerald-500 transition-all text-sm"
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
