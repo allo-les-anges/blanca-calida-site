@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { 
   Save, Camera, Trash2, Loader2, Plus, X, 
-  Search, ShieldCheck, Phone, MapPin, User, Calendar, HardHat, Globe, Mail, FileText, Download
+  Search, ShieldCheck, Phone, MapPin, User, Calendar, HardHat, Globe, Mail, FileText, Download, Upload
 } from 'lucide-react';
 
 // Initialisation du client Supabase
@@ -13,7 +13,6 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-// Liste officielle des 12 étapes (plus étape 0)
 const PHASES_CHANTIER = [
   "0. Signature & Réservation", "1. Terrain / Terrassement", "2. Fondations", 
   "3. Murs / Élévation", "4. Toiture / Charpente", "5. Menuiseries", 
@@ -25,12 +24,13 @@ const PHASES_CHANTIER = [
 export default function AdminDashboard() {
   const [projets, setProjets] = useState<any[]>([]);
   const [selectedProjet, setSelectedProjet] = useState<any>(null);
+  const [documents, setDocuments] = useState<any[]>([]); // État pour les docs du projet
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [updating, setUpdating] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
-  // État initial aligné sur ta structure SQL finale
   const [newDossier, setNewDossier] = useState({
     client_prenom: "",
     client_nom: "",
@@ -38,51 +38,87 @@ export default function AdminDashboard() {
     date_naissance: "",
     rue: "",
     ville: "",
-    pays: "Belgique",
+    pays: "Belgique", // Valeur par défaut
     nom_villa: "",
     date_livraison_prevue: "",
     montant_cashback: 0,
-    commentaires_etape: "", // Mémo Admin
-    etape_actuelle: PHASES_CHANTIER[0] // Sélection de l'étape à la création
+    commentaires_etape: "",
+    etape_actuelle: PHASES_CHANTIER[0]
   });
 
-  // Chargement des données au démarrage
   const loadData = async () => {
     setLoading(true);
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from('suivi_chantier')
       .select('*')
       .order('created_at', { ascending: false });
-    
     if (data) setProjets(data);
     setLoading(false);
   };
 
-  useEffect(() => { loadData(); }, []);
+  // Charger les documents quand un projet est sélectionné
+  const loadDocuments = async (projetId: string) => {
+    const { data } = await supabase
+      .from('documents_projets')
+      .select('*')
+      .eq('projet_id', projetId);
+    if (data) setDocuments(data);
+  };
 
-  // Création du dossier client avec appel API pour le PIN
+  useEffect(() => { loadData(); }, []);
+  
+  useEffect(() => {
+    if (selectedProjet) loadDocuments(selectedProjet.id);
+  }, [selectedProjet]);
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || !selectedProjet) return;
+    setUploading(true);
+    const file = e.target.files[0];
+    const filePath = `${selectedProjet.id}/${Date.now()}_${file.name}`;
+
+    try {
+      const { error: uploadError } = await supabase.storage
+        .from('documents')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage.from('documents').getPublicUrl(filePath);
+
+      const { error: dbError } = await supabase.from('documents_projets').insert([{
+        projet_id: selectedProjet.id,
+        nom_fichier: file.name,
+        url_fichier: publicUrl
+      }]);
+
+      if (dbError) throw dbError;
+      loadDocuments(selectedProjet.id);
+    } catch (err: any) {
+      alert("Erreur upload : " + err.message);
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleCreateDossier = async (e: React.FormEvent) => {
     e.preventDefault();
     setUpdating(true);
     try {
-      // 1. Appel API pour générer le PIN et créer l'auth (si configuré)
       const res = await fetch('/api/admin/create-client', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: newDossier.email_client })
       });
       const auth = await res.json();
-      if (!res.ok) throw new Error(auth.error || "Erreur lors de la génération du PIN");
+      if (!res.ok) throw new Error(auth.error || "Erreur PIN");
 
-      // 2. Insertion dans la table suivi_chantier
       const { error: dbError } = await supabase.from('suivi_chantier').insert([{
         ...newDossier,
         pin_code: auth.pin,
       }]);
 
       if (dbError) throw dbError;
-      
-      alert(`Dossier créé ! PIN Client : ${auth.pin}`);
       setShowModal(false);
       loadData();
     } catch (err: any) {
@@ -105,7 +141,7 @@ export default function AdminDashboard() {
         <div className="p-6 space-y-4">
           <div className="flex items-center gap-2 text-emerald-600">
             <ShieldCheck size={20} />
-            <h1 className="text-xl font-serif italic tracking-tight text-slate-900">Blanca Calida</h1>
+            <h1 className="text-xl font-serif italic tracking-tight text-slate-900 text-left">Blanca Calida</h1>
           </div>
           <button onClick={() => setShowModal(true)} className="w-full bg-slate-900 text-white p-4 rounded-2xl flex items-center justify-center gap-2 font-bold text-[10px] uppercase tracking-widest hover:bg-emerald-600 transition-all shadow-lg">
             <Plus size={16} /> Nouveau Dossier
@@ -165,11 +201,9 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            {/* Grid Construction & Documents */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* Infos Chantier */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 text-left">
               <div className="lg:col-span-2 space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
                     <h3 className="text-[10px] font-black uppercase text-slate-400 mb-4 flex items-center gap-2"><HardHat size={14} className="text-blue-500"/> Projet Villa</h3>
                     <p className="text-lg font-bold text-slate-800">{selectedProjet.nom_villa}</p>
@@ -181,100 +215,91 @@ export default function AdminDashboard() {
                   <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
                     <h3 className="text-[10px] font-black uppercase text-slate-400 mb-4 flex items-center gap-2"><Calendar size={14} className="text-orange-500"/> Calendrier</h3>
                     <p className="text-lg font-bold text-slate-800 italic">{selectedProjet.date_livraison_prevue || "Non définie"}</p>
-                    <p className="text-[10px] text-slate-400 mt-1 uppercase font-bold tracking-tighter">Date de livraison estimée</p>
                   </div>
                 </div>
 
-                {/* Mémo Admin */}
-                <div className="bg-slate-900 p-8 rounded-[2.5rem] text-left">
+                <div className="bg-slate-900 p-8 rounded-[2.5rem]">
                   <h3 className="text-[10px] font-black uppercase text-emerald-400 mb-4 tracking-[0.2em]">Mémo Personnel Blanca Calida</h3>
                   <p className="text-lg text-slate-300 italic font-serif leading-relaxed">
-                    "{selectedProjet.commentaires_etape || "Aucun mémo interne pour ce dossier."}"
+                    "{selectedProjet.commentaires_etape || "Aucun mémo interne."}"
                   </p>
                 </div>
               </div>
 
-              {/* Documents Partagés */}
-              <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm text-left flex flex-col">
+              {/* SECTION DOCUMENTS MISE À JOUR */}
+              <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-col">
                 <h3 className="text-[10px] font-black uppercase text-slate-400 mb-6 flex items-center gap-2">
                   <FileText size={14} className="text-purple-500"/> Documents Clients
                 </h3>
-                <div className="space-y-3 flex-1">
-                  {/* Exemple d'un doc */}
-                  <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-dashed border-slate-200">
-                    <div className="flex items-center gap-3 truncate">
-                      <div className="p-2 bg-purple-100 text-purple-600 rounded-lg"><Download size={14}/></div>
-                      <span className="text-xs font-bold text-slate-700 truncate">Plan_Architecture.pdf</span>
+                <div className="space-y-3 flex-1 overflow-y-auto max-h-64 pr-2">
+                  {documents.length > 0 ? documents.map((doc) => (
+                    <div key={doc.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                      <div className="flex items-center gap-3 truncate">
+                        <div className="p-2 bg-purple-100 text-purple-600 rounded-lg"><FileText size={14}/></div>
+                        <a href={doc.url_fichier} target="_blank" rel="noreferrer" className="text-xs font-bold text-slate-700 truncate hover:underline">{doc.nom_fichier}</a>
+                      </div>
+                      <a href={doc.url_fichier} download className="text-slate-300 hover:text-emerald-500"><Download size={14}/></a>
                     </div>
-                    <Trash2 size={12} className="text-slate-300 hover:text-red-500 cursor-pointer"/>
-                  </div>
-                  <p className="text-[10px] text-slate-400 text-center py-4 italic">Zone d'upload sécurisée bientôt disponible</p>
+                  )) : (
+                    <p className="text-[10px] text-slate-400 text-center py-4 italic">Aucun document.</p>
+                  )}
                 </div>
-                <button className="w-full mt-4 bg-slate-50 border border-slate-100 py-3 rounded-xl text-[9px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-100 transition-colors">
-                  Uploader un document
-                </button>
+                
+                <label className="w-full mt-4 bg-slate-900 text-white py-4 rounded-xl text-[9px] font-black uppercase tracking-widest cursor-pointer hover:bg-emerald-600 transition-all flex items-center justify-center gap-2">
+                  {uploading ? <Loader2 className="animate-spin" size={16}/> : <><Upload size={16}/> Uploader un PDF / Plan</>}
+                  <input type="file" className="hidden" onChange={handleFileUpload} accept="application/pdf,image/*" />
+                </label>
               </div>
             </div>
           </div>
         ) : (
           <div className="h-full flex flex-col items-center justify-center text-slate-300 gap-4">
-            <div className="w-24 h-24 bg-white rounded-[2rem] flex items-center justify-center shadow-sm border border-slate-100">
-              <Search size={40} className="text-slate-100"/>
-            </div>
-            <p className="font-serif italic text-2xl text-slate-400">Administration Blanca Calida</p>
-            <p className="text-[10px] uppercase tracking-[0.3em] font-black">Sélectionnez un projet pour commencer</p>
+             <p className="font-serif italic text-2xl text-slate-400">Administration Blanca Calida</p>
           </div>
         )}
       </div>
 
-      {/* --- MODAL DE CRÉATION --- */}
+      {/* --- MODAL DE CRÉATION AVEC CHAMP PAYS --- */}
       {showModal && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
           <form onSubmit={handleCreateDossier} className="bg-white w-full max-w-4xl rounded-[3rem] p-10 shadow-2xl space-y-8 text-left max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center border-b pb-6">
               <div>
                 <h2 className="text-2xl font-serif italic">Nouveau Dossier Client</h2>
-                <p className="text-slate-400 text-[10px] uppercase mt-1 tracking-widest font-bold tracking-tighter">Identité, Localisation & Phase Initiale</p>
               </div>
-              <button type="button" onClick={() => setShowModal(false)} className="p-3 bg-slate-50 rounded-2xl hover:bg-red-50 hover:text-red-500 transition-colors"><X /></button>
+              <button type="button" onClick={() => setShowModal(false)} className="p-3 bg-slate-50 rounded-2xl transition-colors"><X /></button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-              {/* Profil & Adresse */}
               <div className="space-y-5">
                 <h3 className="text-[10px] font-black uppercase text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full w-fit">Informations Personnelles</h3>
                 <div className="grid grid-cols-2 gap-4">
                   <input required placeholder="Prénom" className="w-full p-4 bg-slate-50 rounded-xl outline-none" onChange={e => setNewDossier({...newDossier, client_prenom: e.target.value})} />
                   <input required placeholder="Nom" className="w-full p-4 bg-slate-50 rounded-xl outline-none" onChange={e => setNewDossier({...newDossier, client_nom: e.target.value})} />
                 </div>
-                <input type="email" required placeholder="Email (Identifiant de connexion)" className="w-full p-4 bg-white border border-slate-100 rounded-xl outline-none" onChange={e => setNewDossier({...newDossier, email_client: e.target.value})} />
+                <input type="email" required placeholder="Email" className="w-full p-4 bg-white border border-slate-100 rounded-xl outline-none" onChange={e => setNewDossier({...newDossier, email_client: e.target.value})} />
                 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="text-[8px] font-bold text-slate-400 ml-2 uppercase">Naissance</label>
-                    <input type="date" className="w-full p-4 bg-slate-50 rounded-xl outline-none text-xs" onChange={e => setNewDossier({...newDossier, date_naissance: e.target.value})} />
+                    <label className="text-[8px] font-bold text-slate-400 ml-2 uppercase tracking-widest">Ville</label>
+                    <input placeholder="Ville" className="w-full p-4 bg-slate-50 rounded-xl outline-none" onChange={e => setNewDossier({...newDossier, ville: e.target.value})} />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[8px] font-bold text-slate-400 ml-2 uppercase">Ville</label>
-                    <input placeholder="Ville" className="w-full p-4 bg-slate-50 rounded-xl outline-none" onChange={e => setNewDossier({...newDossier, ville: e.target.value})} />
+                    <label className="text-[8px] font-bold text-emerald-600 ml-2 uppercase tracking-widest">Pays</label>
+                    <input defaultValue="Belgique" className="w-full p-4 bg-emerald-50 border border-emerald-100 text-emerald-900 font-bold rounded-xl outline-none" onChange={e => setNewDossier({...newDossier, pays: e.target.value})} />
                   </div>
                 </div>
                 <input placeholder="Adresse (Rue et Numéro)" className="w-full p-4 bg-slate-50 rounded-xl outline-none" onChange={e => setNewDossier({...newDossier, rue: e.target.value})} />
               </div>
 
-              {/* Dossier Chantier & Cashback */}
               <div className="space-y-5">
                 <h3 className="text-[10px] font-black uppercase text-blue-600 bg-blue-50 px-3 py-1 rounded-full w-fit">Données de Construction</h3>
-                <input required placeholder="Nom de la Villa (ex: VILLA-CORTES 08)" className="w-full p-4 bg-slate-900 text-white rounded-xl outline-none placeholder:text-slate-500" onChange={e => setNewDossier({...newDossier, nom_villa: e.target.value})} />
+                <input required placeholder="Nom de la Villa" className="w-full p-4 bg-slate-900 text-white rounded-xl outline-none placeholder:text-slate-500" onChange={e => setNewDossier({...newDossier, nom_villa: e.target.value})} />
                 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <label className="text-[8px] font-black text-orange-600 ml-2 uppercase">État initial</label>
-                    <select 
-                      className="w-full p-4 bg-orange-50 border border-orange-100 rounded-xl outline-none text-[10px] font-bold"
-                      value={newDossier.etape_actuelle}
-                      onChange={e => setNewDossier({...newDossier, etape_actuelle: e.target.value})}
-                    >
+                    <select className="w-full p-4 bg-orange-50 border border-orange-100 rounded-xl outline-none text-[10px] font-bold cursor-pointer" onChange={e => setNewDossier({...newDossier, etape_actuelle: e.target.value})}>
                       {PHASES_CHANTIER.map(p => <option key={p} value={p}>{p}</option>)}
                     </select>
                   </div>
@@ -286,17 +311,12 @@ export default function AdminDashboard() {
 
                 <div className="space-y-1">
                   <label className="text-[8px] font-black text-emerald-600 ml-2 uppercase">Cashback Promis (€)</label>
-                  <input type="number" placeholder="0" className="w-full p-4 bg-emerald-50 text-emerald-700 font-bold rounded-xl outline-none border border-emerald-100" onChange={e => setNewDossier({...newDossier, montant_cashback: parseInt(e.target.value)})} />
-                </div>
-
-                <div className="space-y-1 pt-2">
-                  <label className="text-[8px] font-bold text-slate-400 ml-2 uppercase">Mémo Admin (Privé)</label>
-                  <textarea placeholder="Notes sur le client, options spécifiques..." className="w-full p-4 bg-slate-50 rounded-xl outline-none h-24 text-xs border border-transparent focus:border-slate-100" onChange={e => setNewDossier({...newDossier, commentaires_etape: e.target.value})} />
+                  <input type="number" placeholder="0" className="w-full p-4 bg-emerald-50 text-emerald-700 font-bold rounded-xl outline-none" onChange={e => setNewDossier({...newDossier, montant_cashback: parseInt(e.target.value)})} />
                 </div>
               </div>
             </div>
 
-            <button type="submit" disabled={updating} className="w-full bg-slate-900 text-white py-6 rounded-2xl font-bold uppercase tracking-[0.3em] text-[10px] hover:bg-emerald-600 transition-all flex justify-center items-center gap-4 shadow-xl">
+            <button type="submit" disabled={updating} className="w-full bg-slate-900 text-white py-6 rounded-2xl font-bold uppercase tracking-[0.3em] text-[10px] hover:bg-emerald-600 transition-all flex justify-center items-center gap-4">
               {updating ? <Loader2 className="animate-spin" /> : "Générer le dossier & Créer le PIN"}
             </button>
           </form>
