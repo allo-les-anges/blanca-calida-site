@@ -128,13 +128,11 @@ export default function AdminDashboard() {
       const auth = await res.json();
       if (!res.ok) throw new Error(auth.error || "Erreur Auth/PIN");
 
-      // Préparation propre des données SQL
       const dataToInsert: any = {
         ...newDossier,
         pin_code: auth.pin,
       };
 
-      // Suppression des dates vides pour éviter l'erreur PostgreSQL Date Syntax
       if (!dataToInsert.date_naissance || dataToInsert.date_naissance === "") delete dataToInsert.date_naissance;
       if (!dataToInsert.date_livraison_prevue || dataToInsert.date_livraison_prevue === "") delete dataToInsert.date_livraison_prevue;
       
@@ -146,20 +144,26 @@ export default function AdminDashboard() {
 
       if (dbError) throw dbError;
       
-      setUpdating(false);
-      setShowModal(false);
-      loadData();
+      // --- SEQUENCE DE FERMETURE CRITIQUE POUR EVITER LE CRASH ---
+      setShowModal(false); // 1. On demande à la modale de disparaître
+      setUpdating(false);  // 2. On arrête le spinner
+      loadData();          // 3. On rafraîchit la liste en arrière-plan
       
+      // 4. On attend 300ms que React ait fini de retirer les éléments du DOM 
+      // avant d'ouvrir l'alerte qui fige le navigateur.
       setTimeout(() => {
-        alert(`Dossier créé !\nClient : ${dataToInsert.client_prenom}\nPIN : ${auth.pin}`);
-      }, 100);
+        alert(`Dossier créé avec succès !\nClient : ${dataToInsert.client_prenom}\nPIN : ${auth.pin}`);
+      }, 300);
       
     } catch (err: any) {
       setUpdating(false);
-      alert("Erreur : " + err.message);
+      // Pour les erreurs, on peut aussi utiliser un setTimeout pour être safe
+      setTimeout(() => {
+        alert("Erreur : " + err.message);
+      }, 100);
     }
   };
-
+  
   const filteredProjets = useMemo(() => {
     return projets.filter(p => 
       `${p.client_prenom} ${p.client_nom}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
