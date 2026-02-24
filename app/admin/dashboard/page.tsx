@@ -7,7 +7,7 @@ import {
   Search, ShieldCheck, Phone, MapPin, User, Calendar, HardHat, Globe, Mail, FileText, Download, Upload
 } from 'lucide-react';
 
-// Initialisation unique du client Supabase pour éviter les instances multiples
+// Initialisation unique du client Supabase
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
@@ -59,6 +59,7 @@ export default function AdminDashboard() {
   };
 
   const loadDocuments = async (projetId: string) => {
+    if (!projetId) return;
     const { data } = await supabase
       .from('documents_projets')
       .select('*')
@@ -70,17 +71,19 @@ export default function AdminDashboard() {
   useEffect(() => { loadData(); }, []);
   
   useEffect(() => {
-    if (selectedProjet) loadDocuments(selectedProjet.id);
+    if (selectedProjet?.id) {
+      loadDocuments(selectedProjet.id);
+    } else {
+      setDocuments([]);
+    }
   }, [selectedProjet]);
 
-  // LOGIQUE UPLOAD STABILISÉE (CORRIGÉE)
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
-    // On capture l'ID immédiatement pour ne plus dépendre de l'état global pendant l'upload
-    const currentProjetId = selectedProjet?.id;
+    const currentProjetId = selectedProjet?.id; // Capture stable
 
     if (!files || !files[0] || !currentProjetId) {
-        alert("Erreur : Aucun projet sélectionné.");
+        alert("Erreur : Aucun projet sélectionné ou fichier manquant.");
         return;
     }
     
@@ -105,31 +108,24 @@ export default function AdminDashboard() {
 
       if (dbError) throw dbError;
       
-      // On rafraîchit les documents SEULEMENT si l'ID est toujours le même
-      if (selectedProjet?.id === currentProjetId) {
-        await loadDocuments(currentProjetId);
-      }
+      // Rafraîchissement sécurisé
+      await loadDocuments(currentProjetId);
       
-      // FIN DE L'OPÉRATION
+      // Nettoyage de l'interface avant l'alerte
       setUploading(false);
-      e.target.value = ""; 
+      if (e.target) e.target.value = ""; 
 
-      // TEST SANS ALERTE : On utilise console.log d'abord pour voir si ça crash encore
-      console.log("Upload réussi");
-      
-      // Si tu veux vraiment l'alerte, on met un délai énorme pour être sûr
       setTimeout(() => {
-        alert("Document ajouté !");
-      }, 800);
+        alert("Document ajouté avec succès !");
+      }, 500);
 
     } catch (err: any) {
       console.error("Erreur Upload:", err);
       setUploading(false);
-      setTimeout(() => alert("Erreur : " + err.message), 200);
+      setTimeout(() => alert("Erreur upload : " + err.message), 200);
     }
   };
 
-  // LOGIQUE CRÉATION STABILISÉE
   const handleCreateDossier = async (e: React.FormEvent) => {
     e.preventDefault();
     setUpdating(true);
@@ -149,9 +145,8 @@ export default function AdminDashboard() {
         pin_code: auth.pin,
       };
 
-      if (!dataToInsert.date_naissance || dataToInsert.date_naissance === "") delete dataToInsert.date_naissance;
-      if (!dataToInsert.date_livraison_prevue || dataToInsert.date_livraison_prevue === "") delete dataToInsert.date_livraison_prevue;
-      
+      if (!dataToInsert.date_naissance) delete dataToInsert.date_naissance;
+      if (!dataToInsert.date_livraison_prevue) delete dataToInsert.date_livraison_prevue;
       dataToInsert.montant_cashback = Number(dataToInsert.montant_cashback) || 0;
 
       const { error: dbError } = await supabase
@@ -160,23 +155,18 @@ export default function AdminDashboard() {
 
       if (dbError) throw dbError;
       
-      // --- SEQUENCE DE FERMETURE CRITIQUE POUR EVITER LE CRASH ---
-      setShowModal(false); // 1. On demande à la modale de disparaître
-      setUpdating(false);  // 2. On arrête le spinner
-      loadData();          // 3. On rafraîchit la liste en arrière-plan
+      // Fermeture propre
+      setUpdating(false);
+      setShowModal(false);
+      loadData();
       
-      // 4. On attend 300ms que React ait fini de retirer les éléments du DOM 
-      // avant d'ouvrir l'alerte qui fige le navigateur.
       setTimeout(() => {
-        alert(`Dossier créé avec succès !\nClient : ${dataToInsert.client_prenom}\nPIN : ${auth.pin}`);
-      }, 300);
+        alert(`Dossier créé !\nClient : ${dataToInsert.client_prenom}\nPIN : ${auth.pin}`);
+      }, 500);
       
     } catch (err: any) {
       setUpdating(false);
-      // Pour les erreurs, on peut aussi utiliser un setTimeout pour être safe
-      setTimeout(() => {
-        alert("Erreur : " + err.message);
-      }, 100);
+      setTimeout(() => alert("Erreur : " + err.message), 200);
     }
   };
 
@@ -242,16 +232,16 @@ export default function AdminDashboard() {
             <div className="bg-white p-8 rounded-[3rem] shadow-sm border border-slate-100 flex flex-col md:flex-row justify-between items-center gap-6">
               <div className="text-left w-full">
                 <span className="text-[10px] font-black uppercase text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full tracking-widest">Dossier Administré</span>
-                <h2 className="text-4xl font-serif italic mt-4">{selectedProjet.client_prenom} {selectedProjet.client_nom}</h2>
+                <h2 className="text-4xl font-serif italic mt-4">{selectedProjet?.client_prenom} {selectedProjet?.client_nom}</h2>
                 <div className="flex flex-wrap gap-4 mt-6">
-                  <div className="flex items-center gap-2 text-xs text-slate-500 bg-slate-50 px-4 py-2 rounded-xl border border-slate-100"><Mail size={14}/> {selectedProjet.email_client}</div>
-                  <div className="flex items-center gap-2 text-xs text-slate-500 bg-slate-50 px-4 py-2 rounded-xl border border-slate-100"><MapPin size={14}/> {selectedProjet.ville}, {selectedProjet.pays}</div>
-                  <div className="flex items-center gap-2 text-xs text-slate-500 bg-slate-50 px-4 py-2 rounded-xl border border-slate-100"><Calendar size={14}/> PIN: {selectedProjet.pin_code}</div>
+                  <div className="flex items-center gap-2 text-xs text-slate-500 bg-slate-50 px-4 py-2 rounded-xl border border-slate-100"><Mail size={14}/> {selectedProjet?.email_client}</div>
+                  <div className="flex items-center gap-2 text-xs text-slate-500 bg-slate-50 px-4 py-2 rounded-xl border border-slate-100"><MapPin size={14}/> {selectedProjet?.ville}, {selectedProjet?.pays}</div>
+                  <div className="flex items-center gap-2 text-xs text-slate-500 bg-slate-50 px-4 py-2 rounded-xl border border-slate-100"><Calendar size={14}/> PIN: {selectedProjet?.pin_code}</div>
                 </div>
               </div>
               <div className="flex flex-col items-end gap-2 shrink-0">
                 <p className="text-[9px] font-black uppercase text-slate-400 tracking-widest">Cashback Accordé</p>
-                <p className="text-3xl font-bold text-emerald-600">{selectedProjet.montant_cashback?.toLocaleString()} €</p>
+                <p className="text-3xl font-bold text-emerald-600">{selectedProjet?.montant_cashback?.toLocaleString()} €</p>
               </div>
             </div>
 
@@ -260,22 +250,22 @@ export default function AdminDashboard() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
                     <h3 className="text-[10px] font-black uppercase text-slate-400 mb-4 flex items-center gap-2"><HardHat size={14} className="text-blue-500"/> Projet Villa</h3>
-                    <p className="text-lg font-bold text-slate-800">{selectedProjet.nom_villa}</p>
+                    <p className="text-lg font-bold text-slate-800">{selectedProjet?.nom_villa}</p>
                     <div className="mt-4 p-3 bg-blue-50 rounded-xl">
                       <p className="text-[10px] text-blue-600 font-bold uppercase tracking-tighter">Étape Actuelle</p>
-                      <p className="text-sm font-bold text-blue-900">{selectedProjet.etape_actuelle}</p>
+                      <p className="text-sm font-bold text-blue-900">{selectedProjet?.etape_actuelle}</p>
                     </div>
                   </div>
                   <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
                     <h3 className="text-[10px] font-black uppercase text-slate-400 mb-4 flex items-center gap-2"><Calendar size={14} className="text-orange-500"/> Calendrier</h3>
-                    <p className="text-lg font-bold text-slate-800 italic">{selectedProjet.date_livraison_prevue || "Non définie"}</p>
+                    <p className="text-lg font-bold text-slate-800 italic">{selectedProjet?.date_livraison_prevue || "Non définie"}</p>
                   </div>
                 </div>
 
                 <div className="bg-slate-900 p-8 rounded-[2.5rem]">
                   <h3 className="text-[10px] font-black uppercase text-emerald-400 mb-4 tracking-[0.2em]">Mémo Personnel Blanca Calida</h3>
                   <p className="text-lg text-slate-300 italic font-serif leading-relaxed">
-                    "{selectedProjet.commentaires_etape || "Aucun mémo interne."}"
+                    "{selectedProjet?.commentaires_etape || "Aucun mémo interne."}"
                   </p>
                 </div>
               </div>
@@ -300,8 +290,18 @@ export default function AdminDashboard() {
                 </div>
                 
                 <label className="w-full mt-4 bg-slate-900 text-white py-4 rounded-xl text-[9px] font-black uppercase tracking-widest cursor-pointer hover:bg-emerald-600 transition-all flex items-center justify-center gap-2">
-                  {uploading ? <Loader2 className="animate-spin" size={16}/> : <><Upload size={16}/> Ajouter un document</>}
-                  <input type="file" className="hidden" onChange={handleFileUpload} accept="application/pdf,image/*" disabled={uploading} />
+                  {uploading ? (
+                    <Loader2 className="animate-spin" size={16}/>
+                  ) : (
+                    <><Upload size={16}/> Ajouter un document</>
+                  )}
+                  <input 
+                    type="file" 
+                    className="hidden" 
+                    onChange={handleFileUpload} 
+                    accept="application/pdf,image/*" 
+                    disabled={uploading} 
+                  />
                 </label>
               </div>
             </div>
