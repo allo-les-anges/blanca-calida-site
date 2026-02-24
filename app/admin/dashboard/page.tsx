@@ -112,31 +112,52 @@ export default function AdminDashboard() {
   const handleCreateDossier = async (e: React.FormEvent) => {
     e.preventDefault();
     setUpdating(true);
+    
     try {
+      // 1. Appel à l'API pour créer l'utilisateur Auth et générer le PIN
       const res = await fetch('/api/admin/create-client', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: newDossier.email_client })
       });
+      
       const auth = await res.json();
-      if (!res.ok) throw new Error(auth.error || "Erreur PIN");
+      if (!res.ok) throw new Error(auth.error || "Erreur lors de la génération du PIN");
 
-      // FIX DES DATES : On ne les envoie que si elles sont remplies
+      // 2. Préparation des données pour la table 'suivi_chantier'
+      // On crée une copie pour ne pas modifier l'état du formulaire directement
       const dataToInsert: any = {
         ...newDossier,
         pin_code: auth.pin,
       };
-      if (!dataToInsert.date_naissance) delete dataToInsert.date_naissance;
-      if (!dataToInsert.date_livraison_prevue) delete dataToInsert.date_livraison_prevue;
 
-      const { error: dbError } = await supabase.from('suivi_chantier').insert([dataToInsert]);
+      // FIX DES DATES : Si le champ est une chaîne vide "", on le supprime 
+      // pour que Supabase utilise NULL au lieu de planter.
+      if (!dataToInsert.date_naissance || dataToInsert.date_naissance === "") {
+        delete dataToInsert.date_naissance;
+      }
+      
+      if (!dataToInsert.date_livraison_prevue || dataToInsert.date_livraison_prevue === "") {
+        delete dataToInsert.date_livraison_prevue;
+      }
+
+      // SÉCURITÉ NOMBRE : S'assurer que le cashback est un nombre valide
+      dataToInsert.montant_cashback = Number(dataToInsert.montant_cashback) || 0;
+
+      // 3. Insertion dans la base de données
+      const { error: dbError } = await supabase
+        .from('suivi_chantier')
+        .insert([dataToInsert]);
 
       if (dbError) throw dbError;
       
-      alert("Dossier créé avec succès ! Le PIN client est : " + auth.pin);
+      // 4. Succès et réinitialisation
+      alert(`Dossier créé avec succès !\nClient : ${dataToInsert.client_prenom}\nPIN : ${auth.pin}`);
       setShowModal(false);
-      loadData();
+      loadData(); // Recharge la liste de gauche
+      
     } catch (err: any) {
+      console.error("Erreur complète:", err);
       alert("Erreur : " + err.message);
     } finally {
       setUpdating(false);
