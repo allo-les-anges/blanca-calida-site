@@ -1,17 +1,19 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { 
   Save, Camera, Trash2, Loader2, Plus, X, 
   Search, ShieldCheck, Phone, MapPin, User, Calendar, HardHat, Globe, Mail, FileText, Download, Upload
 } from 'lucide-react';
 
-// Initialisation du client Supabase
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+// Initialisation unique du client Supabase pour éviter les instances multiples
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+
+const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: { persistSession: false }
+});
 
 const PHASES_CHANTIER = [
   "0. Signature & Réservation", "1. Terrain / Terrassement", "2. Fondations", 
@@ -71,17 +73,16 @@ export default function AdminDashboard() {
     if (selectedProjet) loadDocuments(selectedProjet.id);
   }, [selectedProjet]);
 
-  // LOGIQUE UPLOAD UNIFIÉE
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, targetId?: string) => {
-    const id = targetId || selectedProjet?.id;
-    if (!e.target.files || !id) {
-        alert("Veuillez d'abord sélectionner ou créer un dossier.");
+  // LOGIQUE UPLOAD STABILISÉE
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || !selectedProjet) {
+        alert("Sélectionnez un dossier client avant d'ajouter un document.");
         return;
     }
     
     setUploading(true);
     const file = e.target.files[0];
-    const filePath = `${id}/${Date.now()}_${file.name}`;
+    const filePath = `${selectedProjet.id}/${Date.now()}_${file.name}`;
 
     try {
       const { error: uploadError } = await supabase.storage
@@ -93,28 +94,31 @@ export default function AdminDashboard() {
       const { data: { publicUrl } } = supabase.storage.from('documents-clients').getPublicUrl(filePath);
 
       const { error: dbError } = await supabase.from('documents_projets').insert([{
-        projet_id: id,
+        projet_id: selectedProjet.id,
         nom_fichier: file.name,
         url_fichier: publicUrl
       }]);
 
       if (dbError) throw dbError;
       
-      if (selectedProjet) loadDocuments(id);
-      alert("Fichier ajouté avec succès !");
-    } catch (err: any) {
-      alert("Erreur upload : " + err.message);
-    } finally {
+      await loadDocuments(selectedProjet.id);
+      
+      // On réinitialise l'état avant l'alerte pour éviter le crash React
       setUploading(false);
+      setTimeout(() => alert("Document ajouté avec succès !"), 100);
+
+    } catch (err: any) {
+      setUploading(false);
+      alert("Erreur upload : " + err.message);
     }
   };
 
+  // LOGIQUE CRÉATION STABILISÉE
   const handleCreateDossier = async (e: React.FormEvent) => {
     e.preventDefault();
     setUpdating(true);
     
     try {
-      // 1. Appel à l'API pour créer l'utilisateur Auth et générer le PIN
       const res = await fetch('/api/admin/create-client', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -122,52 +126,46 @@ export default function AdminDashboard() {
       });
       
       const auth = await res.json();
-      if (!res.ok) throw new Error(auth.error || "Erreur lors de la génération du PIN");
+      if (!res.ok) throw new Error(auth.error || "Erreur Auth/PIN");
 
-      // 2. Préparation des données pour la table 'suivi_chantier'
-      // On crée une copie pour ne pas modifier l'état du formulaire directement
+      // Préparation propre des données SQL
       const dataToInsert: any = {
         ...newDossier,
         pin_code: auth.pin,
       };
 
-      // FIX DES DATES : Si le champ est une chaîne vide "", on le supprime 
-      // pour que Supabase utilise NULL au lieu de planter.
-      if (!dataToInsert.date_naissance || dataToInsert.date_naissance === "") {
-        delete dataToInsert.date_naissance;
-      }
+      // Suppression des dates vides pour éviter l'erreur PostgreSQL Date Syntax
+      if (!dataToInsert.date_naissance || dataToInsert.date_naissance === "") delete dataToInsert.date_naissance;
+      if (!dataToInsert.date_livraison_prevue || dataToInsert.date_livraison_prevue === "") delete dataToInsert.date_livraison_prevue;
       
-      if (!dataToInsert.date_livraison_prevue || dataToInsert.date_livraison_prevue === "") {
-        delete dataToInsert.date_livraison_prevue;
-      }
-
-      // SÉCURITÉ NOMBRE : S'assurer que le cashback est un nombre valide
       dataToInsert.montant_cashback = Number(dataToInsert.montant_cashback) || 0;
 
-      // 3. Insertion dans la base de données
       const { error: dbError } = await supabase
         .from('suivi_chantier')
         .insert([dataToInsert]);
 
       if (dbError) throw dbError;
       
-      // 4. Succès et réinitialisation
-      alert(`Dossier créé avec succès !\nClient : ${dataToInsert.client_prenom}\nPIN : ${auth.pin}`);
+      setUpdating(false);
       setShowModal(false);
-      loadData(); // Recharge la liste de gauche
+      loadData();
+      
+      setTimeout(() => {
+        alert(`Dossier créé !\nClient : ${dataToInsert.client_prenom}\nPIN : ${auth.pin}`);
+      }, 100);
       
     } catch (err: any) {
-      console.error("Erreur complète:", err);
-      alert("Erreur : " + err.message);
-    } finally {
       setUpdating(false);
+      alert("Erreur : " + err.message);
     }
   };
 
-  const filteredProjets = projets.filter(p => 
-    `${p.client_prenom} ${p.client_nom}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    p.nom_villa?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredProjets = useMemo(() => {
+    return projets.filter(p => 
+      `${p.client_prenom} ${p.client_nom}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      p.nom_villa?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [projets, searchTerm]);
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] flex flex-col md:flex-row text-slate-900 font-sans">
@@ -296,7 +294,7 @@ export default function AdminDashboard() {
         )}
       </div>
 
-      {/* MODAL CRÉATION - BOUTON UPLOAD AJOUTÉ ICI AUSSI */}
+      {/* MODAL CRÉATION */}
       {showModal && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
           <form onSubmit={handleCreateDossier} className="bg-white w-full max-w-4xl rounded-[3rem] p-10 shadow-2xl space-y-8 text-left max-h-[90vh] overflow-y-auto relative">
@@ -308,24 +306,24 @@ export default function AdminDashboard() {
               <div className="space-y-5">
                 <h3 className="text-[10px] font-black uppercase text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full w-fit">Informations Personnelles</h3>
                 <div className="grid grid-cols-2 gap-4">
-                  <input required placeholder="Prénom" className="w-full p-4 bg-slate-50 rounded-xl outline-none" onChange={e => setNewDossier({...newDossier, client_prenom: e.target.value})} />
-                  <input required placeholder="Nom" className="w-full p-4 bg-slate-50 rounded-xl outline-none" onChange={e => setNewDossier({...newDossier, client_nom: e.target.value})} />
+                  <input required placeholder="Prénom" className="w-full p-4 bg-slate-50 rounded-xl outline-none text-sm" onChange={e => setNewDossier({...newDossier, client_prenom: e.target.value})} />
+                  <input required placeholder="Nom" className="w-full p-4 bg-slate-50 rounded-xl outline-none text-sm" onChange={e => setNewDossier({...newDossier, client_nom: e.target.value})} />
                 </div>
-                <input type="email" required placeholder="Email" className="w-full p-4 bg-slate-50 rounded-xl outline-none" onChange={e => setNewDossier({...newDossier, email_client: e.target.value})} />
+                <input type="email" required placeholder="Email" className="w-full p-4 bg-slate-50 rounded-xl outline-none text-sm" onChange={e => setNewDossier({...newDossier, email_client: e.target.value})} />
                 
                 <div className="grid grid-cols-2 gap-4">
-                  <input placeholder="Ville" className="w-full p-4 bg-slate-50 rounded-xl outline-none" onChange={e => setNewDossier({...newDossier, ville: e.target.value})} />
-                  <input defaultValue="Belgique" className="w-full p-4 bg-emerald-50 text-emerald-900 font-bold rounded-xl outline-none" onChange={e => setNewDossier({...newDossier, pays: e.target.value})} />
+                  <input placeholder="Ville" className="w-full p-4 bg-slate-50 rounded-xl outline-none text-sm" onChange={e => setNewDossier({...newDossier, ville: e.target.value})} />
+                  <input defaultValue="Belgique" className="w-full p-4 bg-emerald-50 text-emerald-900 font-bold rounded-xl outline-none text-sm" onChange={e => setNewDossier({...newDossier, pays: e.target.value})} />
                 </div>
                 <div className="space-y-1">
                     <label className="text-[8px] font-bold text-slate-400 ml-2">DATE DE NAISSANCE (OPTIONNEL)</label>
-                    <input type="date" className="w-full p-4 bg-slate-50 rounded-xl outline-none" onChange={e => setNewDossier({...newDossier, date_naissance: e.target.value})} />
+                    <input type="date" className="w-full p-4 bg-slate-50 rounded-xl outline-none text-sm" onChange={e => setNewDossier({...newDossier, date_naissance: e.target.value})} />
                 </div>
               </div>
 
               <div className="space-y-5">
                 <h3 className="text-[10px] font-black uppercase text-blue-600 bg-blue-50 px-3 py-1 rounded-full w-fit">Données de Construction</h3>
-                <input required placeholder="Nom de la Villa (ex: VILLA-CORTEZ 08)" className="w-full p-4 bg-slate-900 text-white rounded-xl outline-none" onChange={e => setNewDossier({...newDossier, nom_villa: e.target.value})} />
+                <input required placeholder="Nom de la Villa (ex: VILLA-CORTEZ 08)" className="w-full p-4 bg-slate-900 text-white rounded-xl outline-none text-sm" onChange={e => setNewDossier({...newDossier, nom_villa: e.target.value})} />
                 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
@@ -342,7 +340,7 @@ export default function AdminDashboard() {
 
                 <div className="space-y-1">
                   <label className="text-[8px] font-black text-emerald-600 ml-2 uppercase">Cashback Promis (€)</label>
-                  <input type="number" placeholder="0" className="w-full p-4 bg-emerald-50 text-emerald-700 font-bold rounded-xl outline-none" onChange={e => setNewDossier({...newDossier, montant_cashback: parseInt(e.target.value) || 0})} />
+                  <input type="number" placeholder="0" className="w-full p-4 bg-emerald-50 text-emerald-700 font-bold rounded-xl outline-none text-sm" onChange={e => setNewDossier({...newDossier, montant_cashback: parseInt(e.target.value) || 0})} />
                 </div>
               </div>
             </div>
