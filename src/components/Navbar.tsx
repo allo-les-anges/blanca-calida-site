@@ -18,15 +18,16 @@ import {
 } from "lucide-react";
 import { createBrowserClient } from '@supabase/ssr';
 
+// CORRECTIF 1 : Initialisation HORS du composant pour éviter les instances multiples
+const supabase = createBrowserClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
+
 export default function Navbar() {
   const router = useRouter();
   const pathname = usePathname(); 
   
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
-
   // --- STATES ---
   const [showLangMenu, setShowLangMenu] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -40,7 +41,7 @@ export default function Navbar() {
   const langMenuRef = useRef<HTMLDivElement>(null);
 
   // --- CONFIGURATION ---
-  const ADMIN_EMAIL = "ton-email@exemple.com"; // À remplacer par ton email admin
+  const ADMIN_EMAIL = "ton-email@exemple.com"; 
   const languages = [
     { code: "fr", label: "Français" },
     { code: "en", label: "English" },
@@ -54,7 +55,6 @@ export default function Navbar() {
     addScript.setAttribute("src", "//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit");
     document.body.appendChild(addScript);
     
-    // Correction Type Error : Utilisation de (window as any) pour bypasser TypeScript
     (window as any).googleTranslateElementInit = () => {
       // @ts-ignore
       if (window.google && window.google.translate) {
@@ -80,20 +80,20 @@ export default function Navbar() {
     }
   };
 
-  // --- AUTH LOGIC ---
+  // --- AUTH LOGIC (Stabilisée) ---
   useEffect(() => {
-    const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
+    const checkUser = async () => {
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      setUser(currentUser);
     };
-    getUser();
+    checkUser();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
     });
 
     return () => subscription.unsubscribe();
-  }, [supabase]);
+  }, []);
 
   const handleAuthSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -102,17 +102,20 @@ export default function Navbar() {
       email: emailInput,
       password: passwordInput,
     });
+    
     if (error) {
       alert("Erreur : " + error.message);
     } else {
       setIsLoginModalOpen(false);
       router.push('/project-tracker');
+      router.refresh(); // Force la mise à jour de l'état
     }
     setAuthLoading(false);
   };
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
+    setUser(null);
     router.push('/');
   };
 
@@ -209,7 +212,7 @@ export default function Navbar() {
                 <LayoutDashboard size={14} />
                 <span>Mon Projet</span>
               </Link>
-              <button onClick={handleLogout} className="p-2 hover:text-red-500 transition-colors">
+              <button onClick={handleLogout} className="p-2 hover:text-red-500 transition-colors text-white group-hover:text-slate-900">
                 <LogOut size={16} />
               </button>
             </div>
@@ -231,7 +234,7 @@ export default function Navbar() {
 
       <div id="google_translate_element" style={{ display: 'none' }}></div>
 
-      {/* --- MODAL DE LOGIN --- */}
+      {/* --- MODAL DE LOGIN (CORRIGÉ DOM) --- */}
       {isLoginModalOpen && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-md p-6">
           <div className="bg-white w-full max-w-md rounded-[2.5rem] p-10 shadow-2xl relative animate-in zoom-in duration-300">
@@ -242,9 +245,31 @@ export default function Navbar() {
               <p className="text-slate-500 text-[10px] mt-2 uppercase tracking-[0.2em]">Accès sécurisé propriétaire</p>
             </div>
             <form onSubmit={handleAuthSubmit} className="space-y-4">
-              <input type="email" value={emailInput} onChange={(e) => setEmailInput(e.target.value)} placeholder="Email" className="w-full px-6 py-4 rounded-xl border border-slate-100 bg-slate-50 outline-none text-sm text-slate-900 focus:border-emerald-500 transition-colors" required />
-              <input type="password" value={passwordInput} onChange={(e) => setPasswordInput(e.target.value)} placeholder="Mot de passe" className="w-full px-6 py-4 rounded-xl border border-slate-100 bg-slate-50 outline-none text-sm text-slate-900 focus:border-emerald-500 transition-colors" required />
-              <button type="submit" disabled={authLoading} className="w-full bg-slate-900 text-white py-4 rounded-xl font-bold uppercase text-[11px] tracking-widest hover:bg-slate-800 transition-all flex items-center justify-center gap-2">
+              <input 
+                type="email" 
+                name="email"
+                autoComplete="email"
+                value={emailInput} 
+                onChange={(e) => setEmailInput(e.target.value)} 
+                placeholder="Email" 
+                className="w-full px-6 py-4 rounded-xl border border-slate-100 bg-slate-50 outline-none text-sm text-slate-900 focus:border-emerald-500 transition-colors" 
+                required 
+              />
+              <input 
+                type="password" 
+                name="password"
+                autoComplete="current-password"
+                value={passwordInput} 
+                onChange={(e) => setPasswordInput(e.target.value)} 
+                placeholder="Mot de passe" 
+                className="w-full px-6 py-4 rounded-xl border border-slate-100 bg-slate-50 outline-none text-sm text-slate-900 focus:border-emerald-500 transition-colors" 
+                required 
+              />
+              <button 
+                type="submit" 
+                disabled={authLoading} 
+                className="w-full bg-slate-900 text-white py-4 rounded-xl font-bold uppercase text-[11px] tracking-widest hover:bg-slate-800 transition-all flex items-center justify-center gap-2"
+              >
                 {authLoading ? "Vérification..." : "Accéder à mon suivi"}
                 {!authLoading && <ArrowRight size={14} />}
               </button>
