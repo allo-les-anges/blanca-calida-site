@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { useRouter } from 'next/navigation';
-import { Loader2, ShieldCheck } from 'lucide-react'; // CORRIGÉ ICI
+import { Loader2, ShieldCheck } from 'lucide-react';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -18,27 +18,31 @@ export default function ProfessionalLoginPage() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Tentative de connexion pour :", email);
     setLoading(true);
 
     try {
+      // 1. Authentification
       const { data: authData, error: authError } = await supabase.auth.signInWithPassword({ 
         email, 
         password 
       });
 
-      if (authError) throw authError;
-
-      if (authData?.user) {
-        const { data: profile, error: profileError } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', authData.user.id)
-          .single();
-
-        // Redirection vers ton dashboard admin
-        router.push('/admin/dashboard');
+      if (authError) {
+        console.error("Erreur Auth Supabase:", authError.message);
+        throw authError;
       }
+
+      console.log("Authentification réussie ! Utilisateur ID:", authData?.user?.id);
+
+      // 2. Redirection directe
+      // On simplifie : on redirige d'abord pour vérifier si la page existe
+      // Vérifie bien que ton dossier est app/admin/page.tsx -> donc le lien est /admin
+      console.log("Redirection vers /admin...");
+      router.push('/admin'); 
+
     } catch (error: any) {
+      console.error("Erreur complète capturée:", error);
       alert("Accès refusé : " + (error.message === "Invalid login credentials" ? "Identifiants incorrects" : error.message));
     } finally {
       setLoading(false);
@@ -64,9 +68,11 @@ export default function ProfessionalLoginPage() {
             <label className="text-[9px] uppercase text-slate-500 ml-4 font-bold tracking-widest">Identifiant Pro</label>
             <input 
               type="email" 
+              name="email"
+              autoComplete="username"
               placeholder="votre@email.com" 
               required
-              className="w-full bg-[#020617] border border-slate-800 rounded-2xl p-4 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all placeholder:text-slate-700 text-white"
+              className="w-full bg-[#020617] border border-slate-800 rounded-2xl p-4 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all text-white"
               onChange={(e) => setEmail(e.target.value)}
             />
           </div>
@@ -75,9 +81,11 @@ export default function ProfessionalLoginPage() {
             <label className="text-[9px] uppercase text-slate-500 ml-4 font-bold tracking-widest">Mot de passe</label>
             <input 
               type="password" 
+              name="password"
+              autoComplete="current-password"
               placeholder="••••••••" 
               required
-              className="w-full bg-[#020617] border border-slate-800 rounded-2xl p-4 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all placeholder:text-slate-700 text-white"
+              className="w-full bg-[#020617] border border-slate-800 rounded-2xl p-4 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all text-white"
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
@@ -85,17 +93,11 @@ export default function ProfessionalLoginPage() {
           <button 
             type="submit" 
             disabled={loading}
-            className="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-5 rounded-2xl font-black uppercase text-[10px] tracking-[0.2em] transition-all flex items-center justify-center gap-3 shadow-lg shadow-emerald-900/20 active:scale-95 disabled:opacity-50"
+            className="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-5 rounded-2xl font-black uppercase text-[10px] tracking-[0.2em] transition-all flex items-center justify-center gap-3 disabled:opacity-50"
           >
             {loading ? <Loader2 className="animate-spin" size={20} /> : "Connexion au Système"}
           </button>
         </form>
-
-        <div className="mt-10 pt-6 border-t border-slate-800/50">
-            <p className="text-center text-slate-600 text-[8px] uppercase tracking-widest leading-relaxed">
-              Accès réservé au personnel autorisé<br/>Blanca Calida & Partners
-            </p>
-        </div>
       </div>
     </div>
   );
