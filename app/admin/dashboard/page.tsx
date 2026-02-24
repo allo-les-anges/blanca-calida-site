@@ -76,55 +76,56 @@ export default function AdminDashboard() {
   // LOGIQUE UPLOAD STABILISÉE (CORRIGÉE)
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
-    if (!files || !files[0] || !selectedProjet) {
-        alert("Sélectionnez un dossier client avant d'ajouter un document.");
+    // On capture l'ID immédiatement pour ne plus dépendre de l'état global pendant l'upload
+    const currentProjetId = selectedProjet?.id;
+
+    if (!files || !files[0] || !currentProjetId) {
+        alert("Erreur : Aucun projet sélectionné.");
         return;
     }
     
     setUploading(true);
     const file = files[0];
-    const filePath = `${selectedProjet.id}/${Date.now()}_${file.name}`;
+    const filePath = `${currentProjetId}/${Date.now()}_${file.name}`;
 
     try {
-      // 1. Upload du fichier physique
       const { error: uploadError } = await supabase.storage
         .from('documents-clients')
         .upload(filePath, file);
 
       if (uploadError) throw uploadError;
 
-      // 2. Récupération de l'URL publique
       const { data: { publicUrl } } = supabase.storage.from('documents-clients').getPublicUrl(filePath);
 
-      // 3. Enregistrement en base de données SQL
       const { error: dbError } = await supabase.from('documents_projets').insert([{
-        projet_id: selectedProjet.id,
+        projet_id: currentProjetId,
         nom_fichier: file.name,
         url_fichier: publicUrl
       }]);
 
       if (dbError) throw dbError;
       
-      // 4. On rafraîchit la liste des documents
-      await loadDocuments(selectedProjet.id);
+      // On rafraîchit les documents SEULEMENT si l'ID est toujours le même
+      if (selectedProjet?.id === currentProjetId) {
+        await loadDocuments(currentProjetId);
+      }
       
-      // 5. PHASE CRITIQUE : Nettoyage de l'interface
-      setUploading(false); // Stop le loader
-      e.target.value = ""; // Vide l'input file pour permettre de ré-uploader le même fichier
-
-      // 6. Délai de sécurité plus long (400ms) pour laisser React supprimer le loader du DOM
-      setTimeout(() => {
-        alert("Document ajouté avec succès !");
-      }, 400);
-
-    } catch (err: any) {
-      // En cas d'erreur, on nettoie aussi l'état
+      // FIN DE L'OPÉRATION
       setUploading(false);
       e.target.value = ""; 
+
+      // TEST SANS ALERTE : On utilise console.log d'abord pour voir si ça crash encore
+      console.log("Upload réussi");
       
+      // Si tu veux vraiment l'alerte, on met un délai énorme pour être sûr
       setTimeout(() => {
-        alert("Erreur upload : " + err.message);
-      }, 200);
+        alert("Document ajouté !");
+      }, 800);
+
+    } catch (err: any) {
+      console.error("Erreur Upload:", err);
+      setUploading(false);
+      setTimeout(() => alert("Erreur : " + err.message), 200);
     }
   };
 
