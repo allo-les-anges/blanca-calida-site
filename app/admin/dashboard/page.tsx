@@ -59,18 +59,18 @@ export default function AdminDashboard() {
   };
 
   const loadDocuments = async (projetId: string) => {
-  if (!projetId) return;
-  const { data, error } = await supabase
-    .from('documents_projets')
-    .select('*')
-    .eq('projet_id', projetId)
-    .order('created_at', { ascending: false });
+    if (!projetId) return;
+    const { data, error } = await supabase
+      .from('documents_projets')
+      .select('*')
+      .eq('projet_id', projetId)
+      .order('created_at', { ascending: false });
 
-  console.log("Documents chargés pour", projetId, ":", data); // <--- AJOUTE CECI
-  if (error) console.error("Erreur de lecture :", error); // <--- ET CECI
+    console.log("Documents chargés pour", projetId, ":", data);
+    if (error) console.error("Erreur de lecture :", error);
 
-  if (data) setDocuments(data);
-};
+    if (data) setDocuments(data);
+  };
 
   useEffect(() => { loadData(); }, []);
   
@@ -264,6 +264,12 @@ export default function AdminDashboard() {
                 <h3 className="text-[10px] font-black uppercase text-slate-400 mb-6 flex items-center gap-2">
                   <FileText size={14} className="text-purple-500"/> Documents Clients
                 </h3>
+                
+                {/* --- BLOC DE DEBUG TEMPORAIRE --- */}
+                <p className="text-[9px] text-red-500 font-mono mb-4 bg-red-50 p-2 rounded border border-red-100">
+                  DEBUG ID: {selectedProjet?.id}
+                </p>
+
                 <div className="space-y-3 flex-1 overflow-y-auto max-h-64 pr-2">
                   {documents.length > 0 ? documents.map((doc) => (
                     <div key={doc.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-dashed border-slate-200">
@@ -274,7 +280,7 @@ export default function AdminDashboard() {
                       <a href={doc.url_fichier} download className="text-slate-300 hover:text-emerald-500"><Download size={14}/></a>
                     </div>
                   )) : (
-                    <div className="py-8 text-center text-slate-400 italic text-[10px]">Aucun document.</div>
+                    <div className="py-8 text-center text-slate-400 italic text-[10px]">Aucun document trouvé pour cet ID.</div>
                   )}
                 </div>
                 
