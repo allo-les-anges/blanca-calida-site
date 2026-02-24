@@ -71,37 +71,37 @@ export default function AdminDashboard() {
     if (selectedProjet) loadDocuments(selectedProjet.id);
   }, [selectedProjet]);
 
-  // --- LOGIQUE UPLOAD CORRIGÉE AVEC LE NOM DE TON BUCKET ---
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || !selectedProjet) return;
+  // LOGIQUE UPLOAD UNIFIÉE
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, targetId?: string) => {
+    const id = targetId || selectedProjet?.id;
+    if (!e.target.files || !id) {
+        alert("Veuillez d'abord sélectionner ou créer un dossier.");
+        return;
+    }
+    
     setUploading(true);
     const file = e.target.files[0];
-    const filePath = `${selectedProjet.id}/${Date.now()}_${file.name}`;
+    const filePath = `${id}/${Date.now()}_${file.name}`;
 
     try {
-      // 1. Upload vers ton bucket "documents-clients"
       const { error: uploadError } = await supabase.storage
-        .from('documents-clients') // <--- NOM CORRIGÉ ICI
+        .from('documents-clients')
         .upload(filePath, file);
 
       if (uploadError) throw uploadError;
 
-      // 2. Récupération de l'URL publique
-      const { data: { publicUrl } } = supabase.storage
-        .from('documents-clients') // <--- NOM CORRIGÉ ICI
-        .getPublicUrl(filePath);
+      const { data: { publicUrl } } = supabase.storage.from('documents-clients').getPublicUrl(filePath);
 
-      // 3. Enregistrement dans ta table SQL
       const { error: dbError } = await supabase.from('documents_projets').insert([{
-        projet_id: selectedProjet.id,
+        projet_id: id,
         nom_fichier: file.name,
         url_fichier: publicUrl
       }]);
 
       if (dbError) throw dbError;
       
-      // Rafraîchir la liste immédiatement
-      loadDocuments(selectedProjet.id);
+      if (selectedProjet) loadDocuments(id);
+      alert("Fichier ajouté avec succès !");
     } catch (err: any) {
       alert("Erreur upload : " + err.message);
     } finally {
@@ -121,12 +121,19 @@ export default function AdminDashboard() {
       const auth = await res.json();
       if (!res.ok) throw new Error(auth.error || "Erreur PIN");
 
-      const { error: dbError } = await supabase.from('suivi_chantier').insert([{
+      // FIX DES DATES : On ne les envoie que si elles sont remplies
+      const dataToInsert: any = {
         ...newDossier,
         pin_code: auth.pin,
-      }]);
+      };
+      if (!dataToInsert.date_naissance) delete dataToInsert.date_naissance;
+      if (!dataToInsert.date_livraison_prevue) delete dataToInsert.date_livraison_prevue;
+
+      const { error: dbError } = await supabase.from('suivi_chantier').insert([dataToInsert]);
 
       if (dbError) throw dbError;
+      
+      alert("Dossier créé avec succès ! Le PIN client est : " + auth.pin);
       setShowModal(false);
       loadData();
     } catch (err: any) {
@@ -179,7 +186,7 @@ export default function AdminDashboard() {
                 <p className="text-[9px] uppercase font-black mb-1 opacity-60">{p.nom_villa || "Sans Nom"}</p>
                 <p className="font-bold text-sm truncate">{p.client_prenom} {p.client_nom}</p>
                 <div className="flex justify-between items-center mt-2 opacity-50 text-[9px]">
-                  <span className="font-mono">PIN: {p.pin_code}</span>
+                  <span className="font-mono font-bold">PIN: {p.pin_code}</span>
                   <span className="truncate max-w-[100px]">{p.etape_actuelle?.split('.')[0]}...</span>
                 </div>
               </button>
@@ -234,7 +241,7 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
-              {/* SECTION DOCUMENTS FONCTIONNELLE */}
+              {/* SECTION DOCUMENTS */}
               <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-col">
                 <h3 className="text-[10px] font-black uppercase text-slate-400 mb-6 flex items-center gap-2">
                   <FileText size={14} className="text-purple-500"/> Documents Clients
@@ -249,14 +256,12 @@ export default function AdminDashboard() {
                       <a href={doc.url_fichier} download className="text-slate-300 hover:text-emerald-500"><Download size={14}/></a>
                     </div>
                   )) : (
-                    <div className="py-8 text-center">
-                      <p className="text-[10px] text-slate-400 italic">Aucun document partagé.</p>
-                    </div>
+                    <div className="py-8 text-center text-slate-400 italic text-[10px]">Aucun document.</div>
                   )}
                 </div>
                 
                 <label className="w-full mt-4 bg-slate-900 text-white py-4 rounded-xl text-[9px] font-black uppercase tracking-widest cursor-pointer hover:bg-emerald-600 transition-all flex items-center justify-center gap-2">
-                  {uploading ? <Loader2 className="animate-spin" size={16}/> : <><Upload size={16}/> Uploader un PDF / Plan</>}
+                  {uploading ? <Loader2 className="animate-spin" size={16}/> : <><Upload size={16}/> Ajouter un document</>}
                   <input type="file" className="hidden" onChange={handleFileUpload} accept="application/pdf,image/*" disabled={uploading} />
                 </label>
               </div>
@@ -270,14 +275,13 @@ export default function AdminDashboard() {
         )}
       </div>
 
-      {/* MODAL CRÉATION */}
+      {/* MODAL CRÉATION - BOUTON UPLOAD AJOUTÉ ICI AUSSI */}
       {showModal && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
-          <form onSubmit={handleCreateDossier} className="bg-white w-full max-w-4xl rounded-[3rem] p-10 shadow-2xl space-y-8 text-left max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center border-b pb-6">
-              <h2 className="text-2xl font-serif italic">Nouveau Dossier Client</h2>
-              <button type="button" onClick={() => setShowModal(false)} className="p-3 bg-slate-50 rounded-2xl hover:bg-red-50 hover:text-red-500 transition-colors"><X /></button>
-            </div>
+          <form onSubmit={handleCreateDossier} className="bg-white w-full max-w-4xl rounded-[3rem] p-10 shadow-2xl space-y-8 text-left max-h-[90vh] overflow-y-auto relative">
+            <button type="button" onClick={() => setShowModal(false)} className="absolute top-8 right-8 p-3 bg-slate-50 rounded-2xl hover:bg-red-50 hover:text-red-500 transition-colors"><X /></button>
+            
+            <h2 className="text-2xl font-serif italic border-b pb-4">Nouveau Dossier Client</h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
               <div className="space-y-5">
@@ -286,29 +290,26 @@ export default function AdminDashboard() {
                   <input required placeholder="Prénom" className="w-full p-4 bg-slate-50 rounded-xl outline-none" onChange={e => setNewDossier({...newDossier, client_prenom: e.target.value})} />
                   <input required placeholder="Nom" className="w-full p-4 bg-slate-50 rounded-xl outline-none" onChange={e => setNewDossier({...newDossier, client_nom: e.target.value})} />
                 </div>
-                <input type="email" required placeholder="Email" className="w-full p-4 bg-white border border-slate-100 rounded-xl outline-none" onChange={e => setNewDossier({...newDossier, email_client: e.target.value})} />
+                <input type="email" required placeholder="Email" className="w-full p-4 bg-slate-50 rounded-xl outline-none" onChange={e => setNewDossier({...newDossier, email_client: e.target.value})} />
                 
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <label className="text-[8px] font-bold text-slate-400 ml-2 uppercase tracking-widest">Ville</label>
-                    <input placeholder="Ville" className="w-full p-4 bg-slate-50 rounded-xl outline-none" onChange={e => setNewDossier({...newDossier, ville: e.target.value})} />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[8px] font-bold text-emerald-600 ml-2 uppercase tracking-widest">Pays</label>
-                    <input defaultValue="Belgique" className="w-full p-4 bg-emerald-50 border border-emerald-100 text-emerald-900 font-bold rounded-xl outline-none" onChange={e => setNewDossier({...newDossier, pays: e.target.value})} />
-                  </div>
+                  <input placeholder="Ville" className="w-full p-4 bg-slate-50 rounded-xl outline-none" onChange={e => setNewDossier({...newDossier, ville: e.target.value})} />
+                  <input defaultValue="Belgique" className="w-full p-4 bg-emerald-50 text-emerald-900 font-bold rounded-xl outline-none" onChange={e => setNewDossier({...newDossier, pays: e.target.value})} />
                 </div>
-                <input placeholder="Adresse (Rue et Numéro)" className="w-full p-4 bg-slate-50 rounded-xl outline-none" onChange={e => setNewDossier({...newDossier, rue: e.target.value})} />
+                <div className="space-y-1">
+                    <label className="text-[8px] font-bold text-slate-400 ml-2">DATE DE NAISSANCE (OPTIONNEL)</label>
+                    <input type="date" className="w-full p-4 bg-slate-50 rounded-xl outline-none" onChange={e => setNewDossier({...newDossier, date_naissance: e.target.value})} />
+                </div>
               </div>
 
               <div className="space-y-5">
                 <h3 className="text-[10px] font-black uppercase text-blue-600 bg-blue-50 px-3 py-1 rounded-full w-fit">Données de Construction</h3>
-                <input required placeholder="Nom de la Villa" className="w-full p-4 bg-slate-900 text-white rounded-xl outline-none placeholder:text-slate-500" onChange={e => setNewDossier({...newDossier, nom_villa: e.target.value})} />
+                <input required placeholder="Nom de la Villa (ex: VILLA-CORTEZ 08)" className="w-full p-4 bg-slate-900 text-white rounded-xl outline-none" onChange={e => setNewDossier({...newDossier, nom_villa: e.target.value})} />
                 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <label className="text-[8px] font-black text-orange-600 ml-2 uppercase">État initial</label>
-                    <select className="w-full p-4 bg-orange-50 border border-orange-100 rounded-xl outline-none text-[10px] font-bold cursor-pointer" onChange={e => setNewDossier({...newDossier, etape_actuelle: e.target.value})}>
+                    <select className="w-full p-4 bg-orange-50 border border-orange-100 rounded-xl outline-none font-bold text-xs" onChange={e => setNewDossier({...newDossier, etape_actuelle: e.target.value})}>
                       {PHASES_CHANTIER.map(p => <option key={p} value={p}>{p}</option>)}
                     </select>
                   </div>
@@ -320,13 +321,13 @@ export default function AdminDashboard() {
 
                 <div className="space-y-1">
                   <label className="text-[8px] font-black text-emerald-600 ml-2 uppercase">Cashback Promis (€)</label>
-                  <input type="number" placeholder="0" className="w-full p-4 bg-emerald-50 text-emerald-700 font-bold rounded-xl outline-none" onChange={e => setNewDossier({...newDossier, montant_cashback: parseInt(e.target.value)})} />
+                  <input type="number" placeholder="0" className="w-full p-4 bg-emerald-50 text-emerald-700 font-bold rounded-xl outline-none" onChange={e => setNewDossier({...newDossier, montant_cashback: parseInt(e.target.value) || 0})} />
                 </div>
               </div>
             </div>
 
-            <button type="submit" disabled={updating} className="w-full bg-slate-900 text-white py-6 rounded-2xl font-bold uppercase tracking-[0.3em] text-[10px] hover:bg-emerald-600 transition-all flex justify-center items-center gap-4">
-              {updating ? <Loader2 className="animate-spin" /> : "Générer le dossier & Créer le PIN"}
+            <button type="submit" disabled={updating} className="w-full bg-slate-900 text-white py-6 rounded-2xl font-bold uppercase tracking-[0.3em] text-[10px] hover:bg-emerald-600 transition-all flex justify-center items-center">
+              {updating ? <Loader2 className="animate-spin" /> : "CRÉER LE DOSSIER CLIENT"}
             </button>
           </form>
         </div>
