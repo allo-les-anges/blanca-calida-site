@@ -7,7 +7,6 @@ import {
   Search, ShieldCheck, Phone, MapPin, User, Calendar, HardHat, Globe, Mail, FileText, Download, Upload
 } from 'lucide-react';
 
-// Initialisation unique du client Supabase
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
@@ -31,6 +30,7 @@ export default function AdminDashboard() {
   const [showModal, setShowModal] = useState(false);
   const [updating, setUpdating] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadSuccess, setUploadSuccess] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
   const [newDossier, setNewDossier] = useState({
@@ -80,14 +80,12 @@ export default function AdminDashboard() {
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
-    const currentProjetId = selectedProjet?.id; // Capture stable
+    const currentProjetId = selectedProjet?.id;
 
-    if (!files || !files[0] || !currentProjetId) {
-        alert("Erreur : Aucun projet sélectionné ou fichier manquant.");
-        return;
-    }
+    if (!files || !files[0] || !currentProjetId) return;
     
     setUploading(true);
+    setUploadSuccess(false);
     const file = files[0];
     const filePath = `${currentProjetId}/${Date.now()}_${file.name}`;
 
@@ -108,21 +106,17 @@ export default function AdminDashboard() {
 
       if (dbError) throw dbError;
       
-      // Rafraîchissement sécurisé
       await loadDocuments(currentProjetId);
       
-      // Nettoyage de l'interface avant l'alerte
       setUploading(false);
+      setUploadSuccess(true);
       if (e.target) e.target.value = ""; 
 
-      setTimeout(() => {
-        alert("Document ajouté avec succès !");
-      }, 500);
+      setTimeout(() => setUploadSuccess(false), 3000);
 
     } catch (err: any) {
       console.error("Erreur Upload:", err);
       setUploading(false);
-      setTimeout(() => alert("Erreur upload : " + err.message), 200);
     }
   };
 
@@ -138,7 +132,7 @@ export default function AdminDashboard() {
       });
       
       const auth = await res.json();
-      if (!res.ok) throw new Error(auth.error || "Erreur Auth/PIN");
+      if (!res.ok) throw new Error(auth.error || "Erreur Auth");
 
       const dataToInsert: any = {
         ...newDossier,
@@ -155,18 +149,13 @@ export default function AdminDashboard() {
 
       if (dbError) throw dbError;
       
-      // Fermeture propre
       setUpdating(false);
       setShowModal(false);
       loadData();
       
-      setTimeout(() => {
-        alert(`Dossier créé !\nClient : ${dataToInsert.client_prenom}\nPIN : ${auth.pin}`);
-      }, 500);
-      
     } catch (err: any) {
       setUpdating(false);
-      setTimeout(() => alert("Erreur : " + err.message), 200);
+      console.error(err);
     }
   };
 
@@ -180,7 +169,6 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-[#F8FAFC] flex flex-col md:flex-row text-slate-900 font-sans">
       
-      {/* SIDEBAR */}
       <div className="w-full md:w-80 bg-white border-r h-screen sticky top-0 flex flex-col shadow-sm">
         <div className="p-6 space-y-4 text-left">
           <div className="flex items-center gap-2 text-emerald-600">
@@ -224,11 +212,9 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* MAIN CONTENT */}
       <div className="flex-1 p-6 md:p-12 overflow-y-auto bg-slate-50/50">
         {selectedProjet ? (
           <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in duration-500">
-            {/* Header Profil */}
             <div className="bg-white p-8 rounded-[3rem] shadow-sm border border-slate-100 flex flex-col md:flex-row justify-between items-center gap-6">
               <div className="text-left w-full">
                 <span className="text-[10px] font-black uppercase text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full tracking-widest">Dossier Administré</span>
@@ -270,7 +256,6 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
-              {/* SECTION DOCUMENTS */}
               <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-col">
                 <h3 className="text-[10px] font-black uppercase text-slate-400 mb-6 flex items-center gap-2">
                   <FileText size={14} className="text-purple-500"/> Documents Clients
@@ -289,29 +274,20 @@ export default function AdminDashboard() {
                   )}
                 </div>
                 
-                <label className="w-full mt-4 bg-slate-900 text-white py-4 rounded-xl text-[9px] font-black uppercase tracking-widest cursor-pointer hover:bg-emerald-600 transition-all flex items-center justify-center gap-2">
-  {/* On utilise une div fixe pour l'icône pour que React ne perde pas le fil du DOM */}
-  <div className="flex items-center justify-center w-4 h-4">
-    {uploading ? (
-      <Loader2 key="l1" className="animate-spin" size={16}/>
-    ) : (
-      <Upload key="l2" size={16}/>
-    )}
-  </div>
-
-  {/* On évite les fragments <> </> ici, on utilise un span fixe */}
-  <span>
-    {uploading ? "Chargement..." : "Ajouter un document"}
-  </span>
-
-  <input 
-    type="file" 
-    className="hidden" 
-    onChange={handleFileUpload} 
-    accept="application/pdf,image/*" 
-    disabled={uploading} 
-  />
-</label>
+                <div className="mt-4">
+                  {uploadSuccess && (
+                    <p className="text-[10px] text-emerald-600 font-bold text-center mb-2 animate-pulse uppercase">
+                      ✓ Document ajouté
+                    </p>
+                  )}
+                  <label className="w-full bg-slate-900 text-white py-4 rounded-xl text-[9px] font-black uppercase tracking-widest cursor-pointer hover:bg-emerald-600 transition-all flex items-center justify-center gap-2">
+                    <div className="flex items-center justify-center w-4 h-4">
+                      {uploading ? <Loader2 key="l1" className="animate-spin" size={16}/> : <Upload key="l2" size={16}/>}
+                    </div>
+                    <span>{uploading ? "Chargement..." : "Ajouter un document"}</span>
+                    <input type="file" className="hidden" onChange={handleFileUpload} accept="application/pdf,image/*" disabled={uploading} />
+                  </label>
+                </div>
               </div>
             </div>
           </div>
@@ -323,14 +299,11 @@ export default function AdminDashboard() {
         )}
       </div>
 
-      {/* MODAL CRÉATION */}
       {showModal && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
           <form onSubmit={handleCreateDossier} className="bg-white w-full max-w-4xl rounded-[3rem] p-10 shadow-2xl space-y-8 text-left max-h-[90vh] overflow-y-auto relative">
             <button type="button" onClick={() => setShowModal(false)} className="absolute top-8 right-8 p-3 bg-slate-50 rounded-2xl hover:bg-red-50 hover:text-red-500 transition-colors"><X /></button>
-            
             <h2 className="text-2xl font-serif italic border-b pb-4">Nouveau Dossier Client</h2>
-
             <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
               <div className="space-y-5">
                 <h3 className="text-[10px] font-black uppercase text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full w-fit">Informations Personnelles</h3>
@@ -339,41 +312,32 @@ export default function AdminDashboard() {
                   <input required placeholder="Nom" className="w-full p-4 bg-slate-50 rounded-xl outline-none text-sm" onChange={e => setNewDossier({...newDossier, client_nom: e.target.value})} />
                 </div>
                 <input type="email" required placeholder="Email" className="w-full p-4 bg-slate-50 rounded-xl outline-none text-sm" onChange={e => setNewDossier({...newDossier, email_client: e.target.value})} />
-                
                 <div className="grid grid-cols-2 gap-4">
                   <input placeholder="Ville" className="w-full p-4 bg-slate-50 rounded-xl outline-none text-sm" onChange={e => setNewDossier({...newDossier, ville: e.target.value})} />
                   <input defaultValue="Belgique" className="w-full p-4 bg-emerald-50 text-emerald-900 font-bold rounded-xl outline-none text-sm" onChange={e => setNewDossier({...newDossier, pays: e.target.value})} />
                 </div>
-                <div className="space-y-1">
-                    <label className="text-[8px] font-bold text-slate-400 ml-2">DATE DE NAISSANCE (OPTIONNEL)</label>
-                    <input type="date" className="w-full p-4 bg-slate-50 rounded-xl outline-none text-sm" onChange={e => setNewDossier({...newDossier, date_naissance: e.target.value})} />
-                </div>
               </div>
-
               <div className="space-y-5">
                 <h3 className="text-[10px] font-black uppercase text-blue-600 bg-blue-50 px-3 py-1 rounded-full w-fit">Données de Construction</h3>
-                <input required placeholder="Nom de la Villa (ex: VILLA-CORTEZ 08)" className="w-full p-4 bg-slate-900 text-white rounded-xl outline-none text-sm" onChange={e => setNewDossier({...newDossier, nom_villa: e.target.value})} />
-                
+                <input required placeholder="Nom de la Villa" className="w-full p-4 bg-slate-900 text-white rounded-xl outline-none text-sm" onChange={e => setNewDossier({...newDossier, nom_villa: e.target.value})} />
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="text-[8px] font-black text-orange-600 ml-2 uppercase">État initial</label>
-                    <select className="w-full p-4 bg-orange-50 border border-orange-100 rounded-xl outline-none font-bold text-xs" onChange={e => setNewDossier({...newDossier, etape_actuelle: e.target.value})}>
+                    <label className="text-[8px] font-black text-orange-600 ml-2">État initial</label>
+                    <select className="w-full p-4 bg-orange-50 rounded-xl outline-none font-bold text-xs" onChange={e => setNewDossier({...newDossier, etape_actuelle: e.target.value})}>
                       {PHASES_CHANTIER.map(p => <option key={p} value={p}>{p}</option>)}
                     </select>
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[8px] font-bold text-slate-400 ml-2 uppercase">Livraison prévue</label>
+                    <label className="text-[8px] font-bold text-slate-400 ml-2">Livraison prévue</label>
                     <input type="date" className="w-full p-4 bg-slate-50 rounded-xl outline-none text-xs" onChange={e => setNewDossier({...newDossier, date_livraison_prevue: e.target.value})} />
                   </div>
                 </div>
-
                 <div className="space-y-1">
-                  <label className="text-[8px] font-black text-emerald-600 ml-2 uppercase">Cashback Promis (€)</label>
+                  <label className="text-[8px] font-black text-emerald-600 ml-2">Cashback Promis (€)</label>
                   <input type="number" placeholder="0" className="w-full p-4 bg-emerald-50 text-emerald-700 font-bold rounded-xl outline-none text-sm" onChange={e => setNewDossier({...newDossier, montant_cashback: parseInt(e.target.value) || 0})} />
                 </div>
               </div>
             </div>
-
             <button type="submit" disabled={updating} className="w-full bg-slate-900 text-white py-6 rounded-2xl font-bold uppercase tracking-[0.3em] text-[10px] hover:bg-emerald-600 transition-all flex justify-center items-center">
               {updating ? <Loader2 className="animate-spin" /> : "CRÉER LE DOSSIER CLIENT"}
             </button>
