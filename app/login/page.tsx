@@ -39,7 +39,7 @@ export default function ProfessionalLoginPage() {
       // On simplifie : on redirige d'abord pour vérifier si la page existe
       // Vérifie bien que ton dossier est app/admin/page.tsx -> donc le lien est /admin
       console.log("Redirection vers /admin...");
-      router.push('/admin'); 
+      router.push('/admin/dashboard'); 
 
     } catch (error: any) {
       console.error("Erreur complète capturée:", error);
