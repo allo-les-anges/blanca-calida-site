@@ -73,26 +73,30 @@ export default function AdminDashboard() {
     if (selectedProjet) loadDocuments(selectedProjet.id);
   }, [selectedProjet]);
 
-  // LOGIQUE UPLOAD STABILISÉE
+  // LOGIQUE UPLOAD STABILISÉE (CORRIGÉE)
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || !selectedProjet) {
+    const files = e.target.files;
+    if (!files || !files[0] || !selectedProjet) {
         alert("Sélectionnez un dossier client avant d'ajouter un document.");
         return;
     }
     
     setUploading(true);
-    const file = e.target.files[0];
+    const file = files[0];
     const filePath = `${selectedProjet.id}/${Date.now()}_${file.name}`;
 
     try {
+      // 1. Upload du fichier physique
       const { error: uploadError } = await supabase.storage
         .from('documents-clients')
         .upload(filePath, file);
 
       if (uploadError) throw uploadError;
 
+      // 2. Récupération de l'URL publique
       const { data: { publicUrl } } = supabase.storage.from('documents-clients').getPublicUrl(filePath);
 
+      // 3. Enregistrement en base de données SQL
       const { error: dbError } = await supabase.from('documents_projets').insert([{
         projet_id: selectedProjet.id,
         nom_fichier: file.name,
@@ -101,15 +105,26 @@ export default function AdminDashboard() {
 
       if (dbError) throw dbError;
       
+      // 4. On rafraîchit la liste des documents
       await loadDocuments(selectedProjet.id);
       
-      // On réinitialise l'état avant l'alerte pour éviter le crash React
-      setUploading(false);
-      setTimeout(() => alert("Document ajouté avec succès !"), 100);
+      // 5. PHASE CRITIQUE : Nettoyage de l'interface
+      setUploading(false); // Stop le loader
+      e.target.value = ""; // Vide l'input file pour permettre de ré-uploader le même fichier
+
+      // 6. Délai de sécurité plus long (400ms) pour laisser React supprimer le loader du DOM
+      setTimeout(() => {
+        alert("Document ajouté avec succès !");
+      }, 400);
 
     } catch (err: any) {
+      // En cas d'erreur, on nettoie aussi l'état
       setUploading(false);
-      alert("Erreur upload : " + err.message);
+      e.target.value = ""; 
+      
+      setTimeout(() => {
+        alert("Erreur upload : " + err.message);
+      }, 200);
     }
   };
 
@@ -163,7 +178,7 @@ export default function AdminDashboard() {
       }, 100);
     }
   };
-  
+
   const filteredProjets = useMemo(() => {
     return projets.filter(p => 
       `${p.client_prenom} ${p.client_nom}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
