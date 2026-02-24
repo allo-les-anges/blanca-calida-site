@@ -38,8 +38,16 @@ export async function middleware(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
 
   // 4. Définition des routes protégées
-  const pathname = request.nextUrl.pathname
-  const isProtectedRoute = pathname.startsWith('/admin') || pathname.startsWith('/super-admin')
+  const isProtectedRoute = pathname.startsWith('/admin')
+
+  if (isProtectedRoute && !user) {
+    return NextResponse.redirect(new URL('/login', request.url))
+}
+
+// Vérifie que ton email a bien l'accès au sous-dossier dashboard
+if (pathname.startsWith('/admin') && user?.email !== 'gaetan@amaru-homes.com') {
+    return NextResponse.redirect(new URL('/project-tracker', request.url))
+}
 
   // 5. Logique de redirection
   if (isProtectedRoute && !user) {
