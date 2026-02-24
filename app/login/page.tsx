@@ -36,10 +36,8 @@ export default function ProfessionalLoginPage() {
       console.log("Authentification réussie ! Utilisateur ID:", authData?.user?.id);
 
       // 2. Redirection directe
-      // On simplifie : on redirige d'abord pour vérifier si la page existe
-      // Vérifie bien que ton dossier est app/admin/page.tsx -> donc le lien est /admin
-      console.log("Redirection vers /admin...");
-      router.push('/admin'); 
+      console.log("Authentification réussie !");
+      window.location.href = '/admin/dashboard'; 
 
     } catch (error: any) {
       console.error("Erreur complète capturée:", error);
