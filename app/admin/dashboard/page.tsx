@@ -52,21 +52,19 @@ export default function AdminDashboard() {
     setLoading(true);
     const { data } = await supabase
       .from('suivi_chantier')
-      .select('*')
-      .order('created_at', { ascending: false });
+      .select('*');
     if (data) setProjets(data);
     setLoading(false);
   };
 
-  // VERSION SÉCURISÉE DE CHARGEMENT
   const loadDocuments = async (projetId: string) => {
     if (!projetId) return;
     
+    // Correction ici : suppression du .order('created_at') qui causait l'erreur
     const { data, error } = await supabase
       .from('documents_projets')
       .select('*')
-      .eq('projet_id', projetId)
-      .order('created_at', { ascending: false });
+      .eq('projet_id', projetId);
 
     if (error) {
       console.error("Erreur lecture documents:", error.message);
@@ -114,7 +112,6 @@ export default function AdminDashboard() {
 
       if (dbError) throw dbError;
       
-      // Rafraîchir la liste
       await loadDocuments(currentProjetId);
       
       setUploading(false);
@@ -124,9 +121,8 @@ export default function AdminDashboard() {
       setTimeout(() => setUploadSuccess(false), 3000);
 
     } catch (err: any) {
-      console.error("Erreur Upload détaillée:", err);
+      console.error("Erreur Upload:", err);
       setUploading(false);
-      alert("Erreur lors de l'upload : " + err.message);
     }
   };
 
@@ -179,7 +175,6 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-[#F8FAFC] flex flex-col md:flex-row text-slate-900 font-sans text-left">
       
-      {/* SIDEBAR */}
       <div className="w-full md:w-80 bg-white border-r h-screen sticky top-0 flex flex-col shadow-sm">
         <div className="p-6 space-y-4 text-left">
           <div className="flex items-center gap-2 text-emerald-600">
@@ -223,18 +218,17 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* CONTENT */}
       <div className="flex-1 p-6 md:p-12 overflow-y-auto bg-slate-50/50">
         {selectedProjet ? (
-          <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in duration-500 text-left">
-            {/* Header Client */}
-            <div className="bg-white p-8 rounded-[3rem] shadow-sm border border-slate-100 flex flex-col md:flex-row justify-between items-center gap-6 text-left">
-              <div className="w-full">
+          <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in duration-500">
+            <div className="bg-white p-8 rounded-[3rem] shadow-sm border border-slate-100 flex flex-col md:flex-row justify-between items-center gap-6">
+              <div className="text-left w-full">
                 <span className="text-[10px] font-black uppercase text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full tracking-widest">Dossier Administré</span>
                 <h2 className="text-4xl font-serif italic mt-4">{selectedProjet?.client_prenom} {selectedProjet?.client_nom}</h2>
                 <div className="flex flex-wrap gap-4 mt-6">
                   <div className="flex items-center gap-2 text-xs text-slate-500 bg-slate-50 px-4 py-2 rounded-xl border border-slate-100"><Mail size={14}/> {selectedProjet?.email_client}</div>
                   <div className="flex items-center gap-2 text-xs text-slate-500 bg-slate-50 px-4 py-2 rounded-xl border border-slate-100"><MapPin size={14}/> {selectedProjet?.ville}, {selectedProjet?.pays}</div>
+                  <div className="flex items-center gap-2 text-xs text-slate-500 bg-slate-50 px-4 py-2 rounded-xl border border-slate-100"><Calendar size={14}/> PIN: {selectedProjet?.pin_code}</div>
                 </div>
               </div>
               <div className="flex flex-col items-end gap-2 shrink-0">
@@ -243,7 +237,7 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 text-left">
               <div className="lg:col-span-2 space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
@@ -254,13 +248,13 @@ export default function AdminDashboard() {
                       <p className="text-sm font-bold text-blue-900">{selectedProjet?.etape_actuelle}</p>
                     </div>
                   </div>
-                  <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm text-left">
+                  <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
                     <h3 className="text-[10px] font-black uppercase text-slate-400 mb-4 flex items-center gap-2"><Calendar size={14} className="text-orange-500"/> Calendrier</h3>
                     <p className="text-lg font-bold text-slate-800 italic">{selectedProjet?.date_livraison_prevue || "Non définie"}</p>
                   </div>
                 </div>
 
-                <div className="bg-slate-900 p-8 rounded-[2.5rem] text-left">
+                <div className="bg-slate-900 p-8 rounded-[2.5rem]">
                   <h3 className="text-[10px] font-black uppercase text-emerald-400 mb-4 tracking-[0.2em]">Mémo Personnel Blanca Calida</h3>
                   <p className="text-lg text-slate-300 italic font-serif leading-relaxed">
                     "{selectedProjet?.commentaires_etape || "Aucun mémo interne."}"
@@ -268,8 +262,7 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
-              {/* SECTION DOCUMENTS */}
-              <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-col text-left">
+              <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-col">
                 <h3 className="text-[10px] font-black uppercase text-slate-400 mb-6 flex items-center gap-2">
                   <FileText size={14} className="text-purple-500"/> Documents Clients
                 </h3>
@@ -284,18 +277,20 @@ export default function AdminDashboard() {
                       <a href={doc.url_fichier} download className="text-slate-300 hover:text-emerald-500"><Download size={14}/></a>
                     </div>
                   )) : (
-                    <div className="py-8 text-center text-slate-400 italic text-[10px]">Aucun document chargé.</div>
+                    <div className="py-8 text-center text-slate-400 italic text-[10px]">Aucun document trouvé.</div>
                   )}
                 </div>
                 
                 <div className="mt-4">
                   {uploadSuccess && (
                     <p className="text-[10px] text-emerald-600 font-bold text-center mb-2 animate-pulse uppercase">
-                      ✓ Ajouté avec succès
+                      ✓ Document ajouté
                     </p>
                   )}
                   <label className="w-full bg-slate-900 text-white py-4 rounded-xl text-[9px] font-black uppercase tracking-widest cursor-pointer hover:bg-emerald-600 transition-all flex items-center justify-center gap-2">
-                    {uploading ? <Loader2 className="animate-spin" size={16}/> : <Upload size={16}/>}
+                    <div className="flex items-center justify-center w-4 h-4">
+                      {uploading ? <Loader2 className="animate-spin" size={16}/> : <Upload size={16}/>}
+                    </div>
                     <span>{uploading ? "Chargement..." : "Ajouter un document"}</span>
                     <input type="file" className="hidden" onChange={handleFileUpload} accept="application/pdf,image/*" disabled={uploading} />
                   </label>
@@ -311,10 +306,9 @@ export default function AdminDashboard() {
         )}
       </div>
 
-      {/* MODAL CRÉATION */}
       {showModal && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
-          <form onSubmit={handleCreateDossier} className="bg-white w-full max-w-4xl rounded-[3rem] p-10 shadow-2xl space-y-8 text-left max-h-[90vh] overflow-y-auto relative text-left">
+          <form onSubmit={handleCreateDossier} className="bg-white w-full max-w-4xl rounded-[3rem] p-10 shadow-2xl space-y-8 text-left max-h-[90vh] overflow-y-auto relative">
             <button type="button" onClick={() => setShowModal(false)} className="absolute top-8 right-8 p-3 bg-slate-50 rounded-2xl hover:bg-red-50 hover:text-red-500 transition-colors"><X /></button>
             <h2 className="text-2xl font-serif italic border-b pb-4">Nouveau Dossier Client</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
@@ -331,18 +325,18 @@ export default function AdminDashboard() {
                 <input required placeholder="Nom de la Villa" className="w-full p-4 bg-slate-900 text-white rounded-xl outline-none text-sm" onChange={e => setNewDossier({...newDossier, nom_villa: e.target.value})} />
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="text-[8px] font-black text-orange-600 ml-2 uppercase">Étape</label>
+                    <label className="text-[8px] font-black text-orange-600 ml-2">État initial</label>
                     <select className="w-full p-4 bg-orange-50 rounded-xl outline-none font-bold text-xs" onChange={e => setNewDossier({...newDossier, etape_actuelle: e.target.value})}>
                       {PHASES_CHANTIER.map(p => <option key={p} value={p}>{p}</option>)}
                     </select>
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[8px] font-bold text-slate-400 ml-2 uppercase">Livraison</label>
+                    <label className="text-[8px] font-bold text-slate-400 ml-2">Livraison prévue</label>
                     <input type="date" className="w-full p-4 bg-slate-50 rounded-xl outline-none text-xs border border-slate-100" onChange={e => setNewDossier({...newDossier, date_livraison_prevue: e.target.value})} />
                   </div>
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[8px] font-black text-emerald-600 ml-2 uppercase">Cashback (€)</label>
+                  <label className="text-[8px] font-black text-emerald-600 ml-2">Cashback Promis (€)</label>
                   <input type="number" placeholder="0" className="w-full p-4 bg-emerald-50 text-emerald-700 font-bold rounded-xl outline-none text-sm border border-emerald-100" onChange={e => setNewDossier({...newDossier, montant_cashback: parseInt(e.target.value) || 0})} />
                 </div>
               </div>
