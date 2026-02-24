@@ -1,14 +1,9 @@
 "use client";
 
 import React, { useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
+import { createBrowserClient } from '@supabase/ssr'; // <-- CHANGEMENT ICI
 import { useRouter } from 'next/navigation';
 import { Loader2, ShieldCheck } from 'lucide-react';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
 
 export default function ProfessionalLoginPage() {
   const [email, setEmail] = useState("");
@@ -16,9 +11,14 @@ export default function ProfessionalLoginPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
+  // On initialise le client navigateur qui synchronise automatiquement les cookies
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Tentative de connexion pour :", email);
     setLoading(true);
 
     try {
@@ -28,20 +28,15 @@ export default function ProfessionalLoginPage() {
         password 
       });
 
-      if (authError) {
-        console.error("Erreur Auth Supabase:", authError.message);
-        throw authError;
-      }
+      if (authError) throw authError;
 
-      console.log("Authentification réussie ! Utilisateur ID:", authData?.user?.id);
-
-      // 2. Redirection directe
-      console.log("Authentification réussie !");
+      // 2. Redirection brute pour forcer le Middleware à lire les nouveaux cookies
+      console.log("Connexion OK, redirection forcée...");
       window.location.href = '/admin/dashboard'; 
 
     } catch (error: any) {
-      console.error("Erreur complète capturée:", error);
-      alert("Accès refusé : " + (error.message === "Invalid login credentials" ? "Identifiants incorrects" : error.message));
+      console.error("Erreur:", error.message);
+      alert("Erreur : " + error.message);
     } finally {
       setLoading(false);
     }
@@ -50,7 +45,6 @@ export default function ProfessionalLoginPage() {
   return (
     <div className="min-h-screen bg-[#020617] flex items-center justify-center p-6 text-white font-sans">
       <div className="w-full max-w-md bg-[#0f172a] rounded-[3rem] p-10 border border-slate-800 shadow-2xl relative overflow-hidden">
-        
         <div className="absolute -top-24 -right-24 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl"></div>
 
         <div className="text-center mb-10 relative z-10">
@@ -66,11 +60,9 @@ export default function ProfessionalLoginPage() {
             <label className="text-[9px] uppercase text-slate-500 ml-4 font-bold tracking-widest">Identifiant Pro</label>
             <input 
               type="email" 
-              name="email"
-              autoComplete="username"
               placeholder="votre@email.com" 
               required
-              className="w-full bg-[#020617] border border-slate-800 rounded-2xl p-4 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all text-white"
+              className="w-full bg-[#020617] border border-slate-800 rounded-2xl p-4 text-sm outline-none focus:border-emerald-500 text-white"
               onChange={(e) => setEmail(e.target.value)}
             />
           </div>
@@ -79,11 +71,9 @@ export default function ProfessionalLoginPage() {
             <label className="text-[9px] uppercase text-slate-500 ml-4 font-bold tracking-widest">Mot de passe</label>
             <input 
               type="password" 
-              name="password"
-              autoComplete="current-password"
               placeholder="••••••••" 
               required
-              className="w-full bg-[#020617] border border-slate-800 rounded-2xl p-4 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all text-white"
+              className="w-full bg-[#020617] border border-slate-800 rounded-2xl p-4 text-sm outline-none focus:border-emerald-500 text-white"
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
