@@ -31,24 +31,33 @@ export async function middleware(request: NextRequest) {
     }
   )
 
+  // 1. Récupération de l'utilisateur
   const { data: { user } } = await supabase.auth.getUser()
-
-  // --- LA LIGNE CORRIGÉE CI-DESSOUS ---
   const pathname = request.nextUrl.pathname 
-  
   const isProtectedRoute = pathname.startsWith('/admin') || pathname.startsWith('/super-admin')
 
+  // 2. Si route protégée et pas d'utilisateur -> Redirection Login
   if (isProtectedRoute && !user) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     return NextResponse.redirect(url)
   }
 
-  // Sécurité Gaétan
-  if (pathname.startsWith('/admin') && user && user.email !== 'gaetan@amaru-homes.com') {
-    const url = request.nextUrl.clone()
-    url.pathname = '/project-tracker'
-    return NextResponse.redirect(url)
+  // 3. Vérification du rôle dans la table 'profiles' (pour Gaétan et les futurs admins)
+  if (isProtectedRoute && user) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+
+    const isAdmin = profile?.role === 'admin' || profile?.role === 'super_admin' || user.email === 'gaetan@amaru-homes.com'
+
+    if (!isAdmin) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/project-tracker' // Rediriger les clients vers leur espace
+      return NextResponse.redirect(url)
+    }
   }
 
   return response
@@ -56,6 +65,13 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     */
     '/((?!api|_next/static|_next/image|favicon.ico|.*\\.png$|.*\\.jpg$).*)',
   ],
 }
