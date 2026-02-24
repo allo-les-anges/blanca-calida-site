@@ -1,11 +1,10 @@
 "use client";
 
 import React, { useState } from 'react';
-import { createClient } from '@supabase/supabase-js'; // Plus robuste pour le client-side simple
+import { createClient } from '@supabase/supabase-js';
 import { useRouter } from 'next/navigation';
-import { Loader2, ShieldCheck } from 'lucide-react';
+import { Loader2, ShieldCheck } from 'lucide-center';
 
-// Initialisation du client
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -22,7 +21,6 @@ export default function ProfessionalLoginPage() {
     setLoading(true);
 
     try {
-      // 1. Connexion Auth Supabase
       const { data: authData, error: authError } = await supabase.auth.signInWithPassword({ 
         email, 
         password 
@@ -31,23 +29,18 @@ export default function ProfessionalLoginPage() {
       if (authError) throw authError;
 
       if (authData?.user) {
-        // 2. Vérification du rôle dans la table 'profiles'
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('role')
           .eq('id', authData.user.id)
           .single();
 
-        // 3. Redirection basée sur le rôle
-        // Note : Ajuste les chemins ('/dashboard') selon ton architecture de dossiers réelle
-        if (profile?.role === 'super_admin') {
-          router.push('/dashboard'); // Ton nouveau dashboard admin
-        } else if (profile?.role === 'admin') {
-          router.push('/dashboard'); 
+        // REDIRECTION MISE À JOUR : On pointe vers /admin/dashboard
+        if (profile?.role === 'super_admin' || profile?.role === 'admin') {
+          router.push('/admin/dashboard');
         } else {
-          // Si c'est un profil sans rôle spécifique ou erreur de lecture
-          // On redirige par défaut vers le dashboard pro
-          router.push('/dashboard');
+          // Par défaut pour les autres profils partenaires
+          router.push('/admin/dashboard');
         }
       }
     } catch (error: any) {
@@ -61,7 +54,6 @@ export default function ProfessionalLoginPage() {
     <div className="min-h-screen bg-[#020617] flex items-center justify-center p-6 text-white font-sans">
       <div className="w-full max-w-md bg-[#0f172a] rounded-[3rem] p-10 border border-slate-800 shadow-2xl relative overflow-hidden">
         
-        {/* Décoration subtile en arrière-plan */}
         <div className="absolute -top-24 -right-24 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl"></div>
 
         <div className="text-center mb-10 relative z-10">
