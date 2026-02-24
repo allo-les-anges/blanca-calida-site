@@ -1,13 +1,17 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { createBrowserClient } from '@supabase/ssr';
+import { createClient } from '@supabase/supabase-js';
 import { 
   Camera, Lock, CheckCircle, Loader2, ArrowRight, 
   Search, MapPin, Info, HardHat, LogOut 
 } from 'lucide-react';
 
-// Les 12 phases métier pour Blanca Calida
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
+
 const PHASES_CHANTIER = [
   "Préparation & Terrassement", "Fondations", "Soubassement", "Dallage",
   "Élévation des murs", "Charpente", "Couverture / Toiture", "Menuiseries extérieures",
@@ -15,21 +19,11 @@ const PHASES_CHANTIER = [
 ];
 
 export default function AdminChantier() {
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
-
-  // Sécurité
   const [pin, setPin] = useState("");
   const [isAuthorized, setIsAuthorized] = useState(false);
-  
-  // Recherche et Projet
   const [searchRef, setSearchRef] = useState("");
   const [project, setProject] = useState<any>(null);
   const [loading, setLoading] = useState(false);
-  
-  // Upload et Contenu
   const [uploading, setUploading] = useState(false);
   const [status, setStatus] = useState("");
   const [comment, setComment] = useState("");
@@ -41,46 +35,42 @@ export default function AdminChantier() {
     else alert("Code PIN incorrect");
   };
 
-  // 1. Recherche dynamique par Référence ou ID
   const handleSearch = async () => {
     if (!searchRef) return;
     setLoading(true);
     const { data } = await supabase
       .from('suivi_chantier')
       .select('*')
-      .or(`reference_interne.ilike.%${searchRef}%,nom_villa.ilike.%${searchRef}%`)
+      .or(`nom_villa.ilike.%${searchRef}%,email_client.ilike.%${searchRef}%`)
       .maybeSingle();
 
     if (data) {
       setProject(data);
-      setSearchRef(""); // Reset recherche après succès
+      setSearchRef(""); 
     } else {
-      alert("Aucune villa trouvée pour cette référence");
+      alert("Aucune villa trouvée");
     }
     setLoading(false);
   };
 
-  // 2. Géolocalisation (Gage de confiance)
   const getGeoLocation = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((pos) => {
         setLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-      }, () => alert("Veuillez autoriser la localisation pour certifier la photo."));
+      }, () => alert("Veuillez autoriser la localisation."));
     }
   };
 
-  // 3. Logique d'envoi enrichie
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     try {
       if (!e.target.files || e.target.files.length === 0 || !project) return;
       
       setUploading(true);
-      setStatus("Certification GPS & Envoi...");
+      setStatus("Envoi en cours...");
 
       const file = e.target.files[0];
-      const fileName = `${project.id}/phase_${project.etape_actuelle}_${Date.now()}.jpg`;
+      const fileName = `${project.id}/phase_${project.etape_actuelle || 1}_${Date.now()}.jpg`;
 
-      // Upload image
       const { error: uploadError } = await supabase.storage
         .from('photos-chantier')
         .upload(fileName, file);
@@ -91,28 +81,29 @@ export default function AdminChantier() {
         .from('photos-chantier')
         .getPublicUrl(fileName);
 
-      // Création du nouvel update (Historique)
+      // Préparation du nouvel historique (Updates)
       const newUpdate = {
         url: publicUrl,
         commentaire: comment,
-        phase: PHASES_CHANTIER[project.etape_actuelle - 1],
+        phase: project.etape_actuelle,
         date: new Date().toISOString(),
         gps: location
       };
 
-      // Mise à jour de la table
       const { error: updateError } = await supabase
         .from('suivi_chantier')
         .update({ 
-          lien_photo: publicUrl, // Photo principale
-          updates: [...(project.updates || []), newUpdate], // Historique
+          lien_photo: publicUrl,
+          commentaire_etape_chantier: comment,
+          updates: [...(project.updates || []), newUpdate],
           derniere_mise_a_jour: new Date().toISOString()
         })
         .eq('id', project.id);
 
       if (updateError) throw updateError;
 
-      setStatus("Mise à jour publiée !");
+      setStatus("Publié avec succès !");
+      setProject({...project, lien_photo: publicUrl, updates: [...(project.updates || []), newUpdate]});
       setComment("");
       setLocation(null);
       setTimeout(() => setStatus(""), 3000);
@@ -132,11 +123,11 @@ export default function AdminChantier() {
             <Lock size={30} />
           </div>
           <h1 className="text-xl font-serif mb-2 italic">Accès Terrain</h1>
-          <p className="text-slate-400 text-[10px] uppercase tracking-[0.2em] mb-8 font-bold">Opérateur Blanca Calida</p>
+          <p className="text-slate-400 text-[10px] uppercase tracking-[0.2em] mb-8 font-bold">Blanca Calida Admin</p>
           <input 
             type="password" placeholder="CODE PIN" value={pin}
             onChange={(e) => setPin(e.target.value)}
-            className="w-full bg-slate-900 border border-slate-700 rounded-xl p-4 text-center mb-4 outline-none focus:border-emerald-500 transition-all tracking-[0.5em] font-bold"
+            className="w-full bg-slate-900 border border-slate-700 rounded-xl p-4 text-center mb-4 outline-none focus:border-emerald-500 tracking-[0.5em] font-bold"
           />
           <button type="submit" className="w-full bg-emerald-600 py-4 rounded-xl font-bold uppercase text-[10px] tracking-[0.2em] flex items-center justify-center gap-2">
             Entrer <ArrowRight size={14} />
@@ -147,14 +138,13 @@ export default function AdminChantier() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white pb-12 font-sans">
-      {/* Header & Recherche */}
-      <div className="bg-slate-800/50 backdrop-blur-md sticky top-0 z-10 p-6 border-b border-white/5">
-        <div className="max-w-md mx-auto space-y-4">
+    <div className="min-h-screen bg-slate-950 text-white pb-12 font-sans">
+      <div className="bg-slate-900/80 backdrop-blur-md sticky top-0 z-10 p-6 border-b border-white/5">
+        <div className="max-w-md mx-auto space-y-4 text-left">
           <div className="flex justify-between items-center">
              <div className="flex items-center gap-2">
                 <HardHat className="text-emerald-500" size={20}/>
-                <h1 className="text-xl font-serif italic">Administration Chantier</h1>
+                <h1 className="text-xl font-serif italic">Suivi de Chantier</h1>
              </div>
              <button onClick={() => setIsAuthorized(false)} className="p-2 text-slate-500"><LogOut size={18}/></button>
           </div>
@@ -163,8 +153,8 @@ export default function AdminChantier() {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
               <input 
-                className="w-full pl-10 pr-4 py-3 bg-slate-900 rounded-xl border-none text-sm focus:ring-1 focus:ring-emerald-500"
-                placeholder="Ex: EMERALD 08..."
+                className="w-full pl-10 pr-4 py-3 bg-slate-950 rounded-xl border border-slate-800 text-sm focus:ring-1 focus:ring-emerald-500"
+                placeholder="Nom villa ou Email..."
                 value={searchRef}
                 onChange={(e) => setSearchRef(e.target.value)}
               />
@@ -179,57 +169,42 @@ export default function AdminChantier() {
       {!project ? (
         <div className="flex flex-col items-center justify-center pt-24 text-slate-600 px-12 text-center">
           <Search size={48} className="mb-4 opacity-20" />
-          <p className="font-serif italic text-lg">Recherchez une villa par son nom ou sa référence pour commencer.</p>
+          <p className="font-serif italic text-lg">Recherchez une villa pour publier une photo.</p>
         </div>
       ) : (
-        <div className="max-w-md mx-auto p-6 space-y-6 animate-in fade-in slide-in-from-bottom-4">
+        <div className="max-w-md mx-auto p-6 space-y-6 animate-in fade-in slide-in-from-bottom-4 text-left">
           
-          {/* Fiche Projet */}
           <div className="bg-emerald-600 rounded-[2rem] p-6 shadow-xl relative overflow-hidden">
             <div className="relative z-10">
-              <span className="text-[10px] font-bold text-emerald-200 uppercase tracking-widest">{project.reference_interne}</span>
+              <span className="text-[10px] font-bold text-emerald-200 uppercase tracking-widest">Client: {project.client_nom}</span>
               <h2 className="text-2xl font-serif italic mb-2">{project.nom_villa}</h2>
-              <div className="flex items-center gap-2 text-emerald-100 text-[10px] uppercase font-bold tracking-tighter">
-                <MapPin size={12} /> Las Terrenas, Samaná
+              <div className="flex items-center gap-2 text-emerald-100 text-[10px] uppercase font-bold tracking-widest">
+                <MapPin size={12} /> {project.ville || "Chantier Local"}
               </div>
             </div>
-            <div className="absolute top-0 right-0 p-8 opacity-10"><HardHat size={80}/></div>
           </div>
 
-          {/* Slider 12 Phases */}
-          <div className="bg-slate-800 rounded-[2rem] p-6 border border-slate-700">
+          <div className="bg-slate-900 rounded-[2rem] p-6 border border-slate-800">
             <div className="flex justify-between items-end mb-4">
-              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Phase de construction</label>
-              <span className="text-2xl font-serif italic text-emerald-500">{project.etape_actuelle}/12</span>
+              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Progression</label>
+              <span className="text-2xl font-serif italic text-emerald-500">{project.etape_actuelle || "N/A"}</span>
             </div>
             
-            <input 
-              type="range" min="1" max="12" step="1"
-              className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500 mb-6"
-              value={project.etape_actuelle}
-              onChange={async (e) => {
-                const val = parseInt(e.target.value);
-                setProject({...project, etape_actuelle: val});
-                await supabase.from('suivi_chantier').update({ etape_actuelle: val }).eq('id', project.id);
-              }}
-            />
-            
-            <div className="p-4 bg-slate-900/50 rounded-2xl flex items-start gap-3 border border-slate-700">
+            <div className="p-4 bg-slate-950/50 rounded-2xl flex items-start gap-3 border border-slate-800">
               <Info className="w-4 h-4 text-emerald-500 mt-1" />
               <div>
-                <p className="text-xs font-bold text-white uppercase">{PHASES_CHANTIER[project.etape_actuelle - 1]}</p>
-                <p className="text-[10px] text-slate-500 mt-1">Le slider met à jour la progression du client.</p>
+                <p className="text-xs font-bold text-white uppercase">Étape Active</p>
+                <p className="text-[10px] text-slate-500 mt-1">L'étape est définie par l'administration centrale.</p>
               </div>
             </div>
           </div>
 
-          {/* Upload & Geo */}
-          <div className="bg-slate-800 rounded-[2rem] p-6 border border-slate-700 space-y-4">
-            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Mise à jour visuelle</label>
+          <div className="bg-slate-900 rounded-[2rem] p-6 border border-slate-800 space-y-4">
+            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Mise à jour Terrain</label>
             
             <textarea 
-              className="w-full p-4 bg-slate-900 rounded-2xl border-none text-sm min-h-[100px] focus:ring-1 focus:ring-emerald-500"
-              placeholder="Ajouter un commentaire pour le client..."
+              className="w-full p-4 bg-slate-950 rounded-2xl border border-slate-800 text-sm min-h-[100px] focus:ring-1 focus:ring-emerald-500 outline-none"
+              placeholder="Expliquez les travaux du jour..."
               value={comment}
               onChange={(e) => setComment(e.target.value)}
             />
@@ -237,10 +212,10 @@ export default function AdminChantier() {
             <button 
               onClick={getGeoLocation}
               className={`w-full flex items-center justify-center gap-2 p-3 rounded-xl border transition-all text-[10px] font-bold uppercase tracking-widest
-                ${location ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400' : 'bg-slate-900 border-slate-700 text-slate-400'}`}
+                ${location ? 'bg-emerald-500/10 border-emerald-500 text-emerald-400' : 'bg-slate-950 border-slate-800 text-slate-500'}`}
             >
               <MapPin size={14} />
-              {location ? 'Localisation GPS Certifiée' : 'Activer Géolocalisation'}
+              {location ? 'Position GPS Validée' : 'Certifier ma position'}
             </button>
 
             <div className="relative">
@@ -252,27 +227,26 @@ export default function AdminChantier() {
               />
               <label 
                 htmlFor="photo-up"
-                className={`w-full py-6 rounded-2xl font-bold flex flex-col items-center justify-center gap-3 shadow-lg transition-all cursor-pointer
-                  ${uploading ? 'bg-slate-700' : 'bg-white text-slate-900 active:scale-95'}`}
+                className={`w-full py-8 rounded-2xl font-bold flex flex-col items-center justify-center gap-3 shadow-lg transition-all cursor-pointer
+                  ${uploading ? 'bg-slate-800' : 'bg-white text-slate-900 active:scale-95'}`}
               >
                 {uploading ? (
                   <Loader2 className="animate-spin" />
                 ) : (
                   <>
                     <Camera className="w-8 h-8" />
-                    <span className="text-[10px] uppercase tracking-[0.2em]">Publier la Photo Terrain</span>
+                    <span className="text-[10px] uppercase tracking-[0.2em]">Prendre la photo</span>
                   </>
                 )}
               </label>
             </div>
             
             {status && (
-               <div className="flex items-center gap-2 text-emerald-400 justify-center animate-bounce pt-2">
+               <div className="flex items-center gap-2 text-emerald-400 justify-center animate-pulse pt-2">
                  <CheckCircle size={14} /> <span className="text-[10px] font-bold uppercase">{status}</span>
                </div>
             )}
           </div>
-
         </div>
       )}
     </div>
