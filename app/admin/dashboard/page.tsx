@@ -24,7 +24,7 @@ const PHASES_CHANTIER = [
 export default function AdminDashboard() {
   const [projets, setProjets] = useState<any[]>([]);
   const [selectedProjet, setSelectedProjet] = useState<any>(null);
-  const [documents, setDocuments] = useState<any[]>([]); // État pour les docs du projet
+  const [documents, setDocuments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [updating, setUpdating] = useState(false);
@@ -38,7 +38,7 @@ export default function AdminDashboard() {
     date_naissance: "",
     rue: "",
     ville: "",
-    pays: "Belgique", // Valeur par défaut
+    pays: "Belgique",
     nom_villa: "",
     date_livraison_prevue: "",
     montant_cashback: 0,
@@ -56,12 +56,12 @@ export default function AdminDashboard() {
     setLoading(false);
   };
 
-  // Charger les documents quand un projet est sélectionné
   const loadDocuments = async (projetId: string) => {
     const { data } = await supabase
       .from('documents_projets')
       .select('*')
-      .eq('projet_id', projetId);
+      .eq('projet_id', projetId)
+      .order('created_at', { ascending: false });
     if (data) setDocuments(data);
   };
 
@@ -71,6 +71,7 @@ export default function AdminDashboard() {
     if (selectedProjet) loadDocuments(selectedProjet.id);
   }, [selectedProjet]);
 
+  // --- LOGIQUE UPLOAD CORRIGÉE AVEC LE NOM DE TON BUCKET ---
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || !selectedProjet) return;
     setUploading(true);
@@ -78,14 +79,19 @@ export default function AdminDashboard() {
     const filePath = `${selectedProjet.id}/${Date.now()}_${file.name}`;
 
     try {
+      // 1. Upload vers ton bucket "documents-clients"
       const { error: uploadError } = await supabase.storage
-        .from('documents')
+        .from('documents-clients') // <--- NOM CORRIGÉ ICI
         .upload(filePath, file);
 
       if (uploadError) throw uploadError;
 
-      const { data: { publicUrl } } = supabase.storage.from('documents').getPublicUrl(filePath);
+      // 2. Récupération de l'URL publique
+      const { data: { publicUrl } } = supabase.storage
+        .from('documents-clients') // <--- NOM CORRIGÉ ICI
+        .getPublicUrl(filePath);
 
+      // 3. Enregistrement dans ta table SQL
       const { error: dbError } = await supabase.from('documents_projets').insert([{
         projet_id: selectedProjet.id,
         nom_fichier: file.name,
@@ -93,6 +99,8 @@ export default function AdminDashboard() {
       }]);
 
       if (dbError) throw dbError;
+      
+      // Rafraîchir la liste immédiatement
       loadDocuments(selectedProjet.id);
     } catch (err: any) {
       alert("Erreur upload : " + err.message);
@@ -136,12 +144,12 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-[#F8FAFC] flex flex-col md:flex-row text-slate-900 font-sans">
       
-      {/* --- SIDEBAR --- */}
+      {/* SIDEBAR */}
       <div className="w-full md:w-80 bg-white border-r h-screen sticky top-0 flex flex-col shadow-sm">
-        <div className="p-6 space-y-4">
+        <div className="p-6 space-y-4 text-left">
           <div className="flex items-center gap-2 text-emerald-600">
             <ShieldCheck size={20} />
-            <h1 className="text-xl font-serif italic tracking-tight text-slate-900 text-left">Blanca Calida</h1>
+            <h1 className="text-xl font-serif italic tracking-tight text-slate-900">Blanca Calida</h1>
           </div>
           <button onClick={() => setShowModal(true)} className="w-full bg-slate-900 text-white p-4 rounded-2xl flex items-center justify-center gap-2 font-bold text-[10px] uppercase tracking-widest hover:bg-emerald-600 transition-all shadow-lg">
             <Plus size={16} /> Nouveau Dossier
@@ -180,7 +188,7 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* --- MAIN CONTENT --- */}
+      {/* MAIN CONTENT */}
       <div className="flex-1 p-6 md:p-12 overflow-y-auto bg-slate-50/50">
         {selectedProjet ? (
           <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in duration-500">
@@ -192,7 +200,7 @@ export default function AdminDashboard() {
                 <div className="flex flex-wrap gap-4 mt-6">
                   <div className="flex items-center gap-2 text-xs text-slate-500 bg-slate-50 px-4 py-2 rounded-xl border border-slate-100"><Mail size={14}/> {selectedProjet.email_client}</div>
                   <div className="flex items-center gap-2 text-xs text-slate-500 bg-slate-50 px-4 py-2 rounded-xl border border-slate-100"><MapPin size={14}/> {selectedProjet.ville}, {selectedProjet.pays}</div>
-                  <div className="flex items-center gap-2 text-xs text-slate-500 bg-slate-50 px-4 py-2 rounded-xl border border-slate-100"><Calendar size={14}/> Né(e) le {selectedProjet.date_naissance || "N/C"}</div>
+                  <div className="flex items-center gap-2 text-xs text-slate-500 bg-slate-50 px-4 py-2 rounded-xl border border-slate-100"><Calendar size={14}/> PIN: {selectedProjet.pin_code}</div>
                 </div>
               </div>
               <div className="flex flex-col items-end gap-2 shrink-0">
@@ -226,7 +234,7 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
-              {/* SECTION DOCUMENTS MISE À JOUR */}
+              {/* SECTION DOCUMENTS FONCTIONNELLE */}
               <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-col">
                 <h3 className="text-[10px] font-black uppercase text-slate-400 mb-6 flex items-center gap-2">
                   <FileText size={14} className="text-purple-500"/> Documents Clients
@@ -241,13 +249,15 @@ export default function AdminDashboard() {
                       <a href={doc.url_fichier} download className="text-slate-300 hover:text-emerald-500"><Download size={14}/></a>
                     </div>
                   )) : (
-                    <p className="text-[10px] text-slate-400 text-center py-4 italic">Aucun document.</p>
+                    <div className="py-8 text-center">
+                      <p className="text-[10px] text-slate-400 italic">Aucun document partagé.</p>
+                    </div>
                   )}
                 </div>
                 
                 <label className="w-full mt-4 bg-slate-900 text-white py-4 rounded-xl text-[9px] font-black uppercase tracking-widest cursor-pointer hover:bg-emerald-600 transition-all flex items-center justify-center gap-2">
                   {uploading ? <Loader2 className="animate-spin" size={16}/> : <><Upload size={16}/> Uploader un PDF / Plan</>}
-                  <input type="file" className="hidden" onChange={handleFileUpload} accept="application/pdf,image/*" />
+                  <input type="file" className="hidden" onChange={handleFileUpload} accept="application/pdf,image/*" disabled={uploading} />
                 </label>
               </div>
             </div>
@@ -255,19 +265,18 @@ export default function AdminDashboard() {
         ) : (
           <div className="h-full flex flex-col items-center justify-center text-slate-300 gap-4">
              <p className="font-serif italic text-2xl text-slate-400">Administration Blanca Calida</p>
+             <p className="text-xs uppercase tracking-widest font-bold">Sélectionnez un client pour gérer son dossier</p>
           </div>
         )}
       </div>
 
-      {/* --- MODAL DE CRÉATION AVEC CHAMP PAYS --- */}
+      {/* MODAL CRÉATION */}
       {showModal && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
           <form onSubmit={handleCreateDossier} className="bg-white w-full max-w-4xl rounded-[3rem] p-10 shadow-2xl space-y-8 text-left max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center border-b pb-6">
-              <div>
-                <h2 className="text-2xl font-serif italic">Nouveau Dossier Client</h2>
-              </div>
-              <button type="button" onClick={() => setShowModal(false)} className="p-3 bg-slate-50 rounded-2xl transition-colors"><X /></button>
+              <h2 className="text-2xl font-serif italic">Nouveau Dossier Client</h2>
+              <button type="button" onClick={() => setShowModal(false)} className="p-3 bg-slate-50 rounded-2xl hover:bg-red-50 hover:text-red-500 transition-colors"><X /></button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
