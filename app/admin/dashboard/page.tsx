@@ -59,14 +59,18 @@ export default function AdminDashboard() {
   };
 
   const loadDocuments = async (projetId: string) => {
-    if (!projetId) return;
-    const { data } = await supabase
-      .from('documents_projets')
-      .select('*')
-      .eq('projet_id', projetId)
-      .order('created_at', { ascending: false });
-    if (data) setDocuments(data);
-  };
+  if (!projetId) return;
+  const { data, error } = await supabase
+    .from('documents_projets')
+    .select('*')
+    .eq('projet_id', projetId)
+    .order('created_at', { ascending: false });
+
+  console.log("Documents chargés pour", projetId, ":", data); // <--- AJOUTE CECI
+  if (error) console.error("Erreur de lecture :", error); // <--- ET CECI
+
+  if (data) setDocuments(data);
+};
 
   useEffect(() => { loadData(); }, []);
   
