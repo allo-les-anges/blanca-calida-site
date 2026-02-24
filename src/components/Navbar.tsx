@@ -50,20 +50,23 @@ export default function Navbar() {
 
   // --- GOOGLE TRANSLATE LOGIC ---
   useEffect(() => {
-    // Ajout du script Google Translate
     const addScript = document.createElement("script");
     addScript.setAttribute("src", "//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit");
     document.body.appendChild(addScript);
     
-    // @ts-ignore
-    window.googleTranslateElementInit = () => {
+    // Correction Type Error : Utilisation de (window as any) pour bypasser TypeScript
+    (window as any).googleTranslateElementInit = () => {
       // @ts-ignore
-      new window.google.translate.TranslateElement({
-        pageLanguage: 'fr',
-        includedLanguages: 'fr,en,es,nl',
-        layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE,
-        autoDisplay: false,
-      }, 'google_translate_element');
+      if (window.google && window.google.translate) {
+        // @ts-ignore
+        new window.google.translate.TranslateElement({
+          pageLanguage: 'fr',
+          includedLanguages: 'fr,en,es,nl',
+          // @ts-ignore
+          layout: (window as any).google.translate.TranslateElement.InlineLayout.SIMPLE,
+          autoDisplay: false,
+        }, 'google_translate_element');
+      }
     };
   }, []);
 
@@ -130,7 +133,7 @@ export default function Navbar() {
 
   return (
     <>
-      {/* CSS POUR MASQUER LA BARRE GOOGLE (Injecté ici ou dans globals.css) */}
+      {/* CSS POUR MASQUER LA BARRE GOOGLE */}
       <style jsx global>{`
         .goog-te-banner-frame.skiptranslate, .goog-te-gadget-icon { display: none !important; }
         body { top: 0px !important; }
@@ -226,7 +229,6 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* ELEMENT GOOGLE CACHÉ */}
       <div id="google_translate_element" style={{ display: 'none' }}></div>
 
       {/* --- MODAL DE LOGIN --- */}
