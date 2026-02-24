@@ -290,19 +290,28 @@ export default function AdminDashboard() {
                 </div>
                 
                 <label className="w-full mt-4 bg-slate-900 text-white py-4 rounded-xl text-[9px] font-black uppercase tracking-widest cursor-pointer hover:bg-emerald-600 transition-all flex items-center justify-center gap-2">
-                  {uploading ? (
-                    <Loader2 className="animate-spin" size={16}/>
-                  ) : (
-                    <><Upload size={16}/> Ajouter un document</>
-                  )}
-                  <input 
-                    type="file" 
-                    className="hidden" 
-                    onChange={handleFileUpload} 
-                    accept="application/pdf,image/*" 
-                    disabled={uploading} 
-                  />
-                </label>
+  {/* On utilise une div fixe pour l'icône pour que React ne perde pas le fil du DOM */}
+  <div className="flex items-center justify-center w-4 h-4">
+    {uploading ? (
+      <Loader2 key="l1" className="animate-spin" size={16}/>
+    ) : (
+      <Upload key="l2" size={16}/>
+    )}
+  </div>
+
+  {/* On évite les fragments <> </> ici, on utilise un span fixe */}
+  <span>
+    {uploading ? "Chargement..." : "Ajouter un document"}
+  </span>
+
+  <input 
+    type="file" 
+    className="hidden" 
+    onChange={handleFileUpload} 
+    accept="application/pdf,image/*" 
+    disabled={uploading} 
+  />
+</label>
               </div>
             </div>
           </div>
