@@ -10,9 +10,7 @@ import {
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
-const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: { persistSession: false }
-});
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 const PHASES_CHANTIER = [
   "0. Signature & Réservation", "1. Terrain / Terrassement", "2. Fondations", 
