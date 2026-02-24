@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { useRouter } from 'next/navigation';
-import { Loader2, ShieldCheck } from 'lucide-center';
+import { Loader2, ShieldCheck } from 'lucide-react'; // CORRIGÉ ICI
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -35,13 +35,8 @@ export default function ProfessionalLoginPage() {
           .eq('id', authData.user.id)
           .single();
 
-        // REDIRECTION MISE À JOUR : On pointe vers /admin/dashboard
-        if (profile?.role === 'super_admin' || profile?.role === 'admin') {
-          router.push('/admin/dashboard');
-        } else {
-          // Par défaut pour les autres profils partenaires
-          router.push('/admin/dashboard');
-        }
+        // Redirection vers ton dashboard admin
+        router.push('/admin/dashboard');
       }
     } catch (error: any) {
       alert("Accès refusé : " + (error.message === "Invalid login credentials" ? "Identifiants incorrects" : error.message));
@@ -71,7 +66,7 @@ export default function ProfessionalLoginPage() {
               type="email" 
               placeholder="votre@email.com" 
               required
-              className="w-full bg-[#020617] border border-slate-800 rounded-2xl p-4 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all placeholder:text-slate-700"
+              className="w-full bg-[#020617] border border-slate-800 rounded-2xl p-4 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all placeholder:text-slate-700 text-white"
               onChange={(e) => setEmail(e.target.value)}
             />
           </div>
@@ -82,7 +77,7 @@ export default function ProfessionalLoginPage() {
               type="password" 
               placeholder="••••••••" 
               required
-              className="w-full bg-[#020617] border border-slate-800 rounded-2xl p-4 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all placeholder:text-slate-700"
+              className="w-full bg-[#020617] border border-slate-800 rounded-2xl p-4 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all placeholder:text-slate-700 text-white"
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
