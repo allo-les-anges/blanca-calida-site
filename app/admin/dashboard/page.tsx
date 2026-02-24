@@ -378,7 +378,7 @@ export default function AdminDashboard() {
 
               <div className="space-y-5 text-left">
                 <h3 className="text-[10px] font-black uppercase text-blue-600 bg-blue-50 px-3 py-1 rounded-full w-fit text-left">Données de Construction</h3>
-                <input required placeholder="Nom de la Villa" className="w-full p-4 bg-slate-900 text-white rounded-xl outline-none text-sm text-left" onChange={e => setNewDossier({...newDossier, nom_villa: e.target.value})} />
+                <input required placeholder="Référence constructeur" className="w-full p-4 bg-slate-900 text-white rounded-xl outline-none text-sm text-left" onChange={e => setNewDossier({...newDossier, nom_villa: e.target.value})} />
                 
                 <div className="space-y-1 text-left">
                   <label className="text-[8px] font-black text-slate-400 ml-2 uppercase text-left">Note Interne (Mémo)</label>
