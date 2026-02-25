@@ -15,7 +15,8 @@ export default function SuperAdminDashboard() {
     auth: {
       persistSession: true,
       autoRefreshToken: true,
-      detectSessionInUrl: true
+      detectSessionInUrl: true,
+      // On NE spécifie PAS de storage : Supabase utilisera les cookies par défaut
     }
   }
 );

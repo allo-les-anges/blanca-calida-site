@@ -18,7 +18,8 @@ export default function LoginPage() {
     auth: {
       persistSession: true,
       autoRefreshToken: true,
-      detectSessionInUrl: true
+      detectSessionInUrl: true,
+      // On NE spécifie PAS de storage : Supabase utilisera les cookies par défaut
     }
   }
 );
@@ -37,18 +38,15 @@ export default function LoginPage() {
       if (error) throw error;
 
       if (data?.session) {
-        // On force une petite pause pour laisser le navigateur écrire les données
-        console.log("Connexion réussie, écriture de la session...");
-        
-        // On rafraîchit les cookies Next.js
-        router.refresh();
+  // On rafraîchit les routes Next.js
+  router.refresh();
+  
+  // On attend une demi-seconde pour être SÛR que le cookie est écrit
+  setTimeout(() => {
+    window.location.href = '/super-admin';
+  }, 500);
+}
 
-        // On attend 500ms avant de rediriger
-        setTimeout(() => {
-          window.location.assign('/super-admin');
-        }, 500);
-      }
-      
     } catch (error: any) {
       alert("Erreur d'authentification : " + error.message);
       setLoading(false);
