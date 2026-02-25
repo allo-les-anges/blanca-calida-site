@@ -1,7 +1,7 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { createBrowserClient } from '@supabase/ssr';
-import { ShieldAlert, UserPlus, Building2, Loader2, LogOut, CheckCircle } from 'lucide-react';
+import { ShieldAlert, Building2, Loader2, LogOut, ShieldCheck, XCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export default function SuperAdminDashboard() {
@@ -11,46 +11,18 @@ export default function SuperAdminDashboard() {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
 
-  const [authorized, setAuthorized] = useState(false); // État de sécurité
+  // États de l'interface
+  const [authStatus, setAuthStatus] = useState<'loading' | 'authorized' | 'denied'>('loading');
+  const [debugInfo, setDebugInfo] = useState("");
+  
+  // États du dashboard
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [companyName, setCompanyName] = useState("");
   const [loading, setLoading] = useState(false);
   const [admins, setAdmins] = useState<any[]>([]);
 
-useEffect(() => {
-  const checkUser = async () => {
-    try {
-      const { data: { session }, error } = await supabase.auth.getSession();
-      
-      if (error || !session) {
-        console.log("Pas de session, redirection...");
-        router.push('/login');
-        return;
-      }
-
-      // On force tout en minuscules pour éviter "Gaetan" vs "gaetan"
-      const userEmail = session.user.email?.toLowerCase();
-      const adminEmail = 'gaetan@amaru-homes.com'.toLowerCase();
-
-      if (userEmail === adminEmail) {
-        console.log("Accès accordé pour :", userEmail);
-        setAuthorized(true);
-        fetchAdmins();
-      } else {
-        console.log("Email non autorisé :", userEmail);
-        alert("Cet email n'a pas les droits Super Admin.");
-        router.push('/login');
-      }
-    } catch (err) {
-      console.error("Erreur checkUser:", err);
-    }
-  };
-  
-  checkUser();
-}, [router, supabase]);
-
-  async function fetchAdmins() {
+  const fetchAdmins = useCallback(async () => {
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
@@ -61,12 +33,48 @@ useEffect(() => {
     } else {
       setAdmins(data || []);
     }
-  }
+  }, [supabase]);
+
+  useEffect(() => {
+    const checkUser = async () => {
+      try {
+        setDebugInfo("Recherche de la session...");
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          setDebugInfo(`Erreur Supabase: ${error.message}`);
+          setAuthStatus('denied');
+          return;
+        }
+
+        if (!session) {
+          setDebugInfo("Aucune session trouvée. Connectez-vous d'abord.");
+          setAuthStatus('denied');
+          return;
+        }
+
+        const userEmail = session.user.email?.toLowerCase().trim();
+        const adminEmail = 'gaetan@amaru-homes.com'.toLowerCase().trim();
+
+        if (userEmail === adminEmail) {
+          setAuthStatus('authorized');
+          fetchAdmins();
+        } else {
+          setDebugInfo(`Email non autorisé: ${userEmail}`);
+          setAuthStatus('denied');
+        }
+      } catch (err: any) {
+        setDebugInfo(`Erreur critique: ${err.message}`);
+        setAuthStatus('denied');
+      }
+    };
+    
+    checkUser();
+  }, [supabase, fetchAdmins]);
 
   const createAdminAccount = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-
     try {
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
@@ -98,77 +106,100 @@ useEffect(() => {
     }
   };
 
-  // Tant que l'autorisation n'est pas confirmée, on affiche un écran noir ou un loader
-  if (!authorized) {
+  // --- ÉCRANS DE SÉCURITÉ ---
+
+  if (authStatus === 'loading') {
     return (
       <div className="min-h-screen bg-[#020617] flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="animate-spin text-emerald-500" size={40} />
-          <p className="text-slate-500 font-serif italic">Vérification du niveau d'accès...</p>
+          <p className="text-slate-500 font-serif italic tracking-widest">Initialisation sécurisée...</p>
         </div>
       </div>
     );
   }
+
+  if (authStatus === 'denied') {
+    return (
+      <div className="min-h-screen bg-[#020617] flex items-center justify-center p-6 text-center">
+        <div className="max-w-md w-full bg-slate-900/50 border border-red-500/20 p-10 rounded-[2.5rem]">
+          <XCircle size={60} className="text-red-500 mx-auto mb-6" />
+          <h2 className="text-2xl font-serif text-white mb-2">Accès restreint</h2>
+          <p className="text-slate-400 text-sm mb-8 leading-relaxed">{debugInfo}</p>
+          <button 
+            onClick={() => window.location.href = '/login'}
+            className="w-full bg-white text-black py-4 rounded-2xl font-bold uppercase text-[10px] tracking-widest hover:bg-slate-200 transition-all"
+          >
+            Retour au portail de connexion
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // --- DASHBOARD (AUTHORIZED) ---
 
   return (
     <div className="min-h-screen bg-[#020617] text-white p-8">
       <div className="max-w-6xl mx-auto">
         <header className="flex justify-between items-center mb-16">
           <div className="flex items-center gap-5">
-            <div className="p-4 bg-red-500/10 text-red-500 rounded-3xl border border-red-500/20">
-              <ShieldAlert size={36} />
+            <div className="p-4 bg-emerald-500/10 text-emerald-500 rounded-3xl border border-emerald-500/20">
+              <ShieldCheck size={36} />
             </div>
             <div>
-              <h1 className="text-4xl font-serif italic text-white text-left">Super Admin SaaS Console</h1>
-              <p className="text-slate-500 text-[10px] uppercase tracking-[0.4em] font-bold text-left">Blanca Calida License Management</p>
+              <h1 className="text-4xl font-serif italic text-white text-left">Super Admin Console</h1>
+              <p className="text-slate-500 text-[10px] uppercase tracking-[0.4em] font-bold text-left">Accès Maître : Gaëtan</p>
             </div>
           </div>
-          <button onClick={() => supabase.auth.signOut().then(() => router.push('/login'))} className="text-slate-500 hover:text-white flex items-center gap-2 text-xs uppercase tracking-widest font-bold">
-            <LogOut size={20} /> Deconnexion
+          <button onClick={() => supabase.auth.signOut().then(() => window.location.href = '/login')} className="text-slate-500 hover:text-white flex items-center gap-2 text-xs uppercase tracking-widest font-bold bg-slate-900 px-6 py-3 rounded-2xl border border-slate-800">
+            <LogOut size={18} /> Déconnexion
           </button>
         </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 text-left">
-          <section className="lg:col-span-4 bg-[#0f172a] border border-slate-800 rounded-[3rem] p-10 shadow-2xl h-fit text-left">
-            <h2 className="text-xl font-serif italic mb-8 text-left">Register a new customer</h2>
+          <section className="lg:col-span-4 bg-[#0f172a] border border-slate-800 rounded-[3rem] p-10 shadow-2xl h-fit">
+            <h2 className="text-xl font-serif italic mb-8">Nouveau Partenaire</h2>
             <form onSubmit={createAdminAccount} className="space-y-5">
               <input 
                 className="w-full bg-[#020617] border border-slate-800 rounded-2xl p-4 text-sm text-white outline-none focus:border-emerald-500 transition-all" 
-                placeholder="Agency Name" value={companyName} onChange={e => setCompanyName(e.target.value)} required 
+                placeholder="Nom de l'agence" value={companyName} onChange={e => setCompanyName(e.target.value)} required 
               />
               <input 
                 className="w-full bg-[#020617] border border-slate-800 rounded-2xl p-4 text-sm text-white outline-none focus:border-emerald-500 transition-all" 
-                placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} required 
+                placeholder="Email admin" value={email} onChange={e => setEmail(e.target.value)} required 
               />
               <input 
                 type="password" className="w-full bg-[#020617] border border-slate-800 rounded-2xl p-4 text-sm text-white outline-none focus:border-emerald-500 transition-all" 
-                placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} required 
+                placeholder="Mot de passe provisoire" value={password} onChange={e => setPassword(e.target.value)} required 
               />
-              <button type="submit" disabled={loading} className="w-full bg-white text-black py-5 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:bg-slate-200 transition-all flex justify-center shadow-xl shadow-white/5">
-                {loading ? <Loader2 className="animate-spin" /> : "Activate License"}
+              <button type="submit" disabled={loading} className="w-full bg-emerald-600 text-white py-5 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:bg-emerald-500 transition-all flex justify-center shadow-xl shadow-emerald-500/10">
+                {loading ? <Loader2 className="animate-spin" /> : "Activer la licence"}
               </button>
             </form>
           </section>
 
-          <section className="lg:col-span-8 text-left">
-            <h2 className="text-xl font-serif italic mb-8 ml-4 text-left">Contract agencies</h2>
+          <section className="lg:col-span-8">
+            <h2 className="text-xl font-serif italic mb-8 ml-4">Agences sous contrat</h2>
             <div className="grid grid-cols-1 gap-4">
               {admins.length === 0 ? (
-                <p className="text-slate-600 italic ml-4 text-left">No active licenses found.</p>
+                <div className="p-10 border border-dashed border-slate-800 rounded-[2rem] text-center text-slate-600 italic">
+                  Aucune licence active détectée.
+                </div>
               ) : (
                 admins.map((admin) => (
-                  <div key={admin.id} className="group bg-[#0f172a]/50 border border-slate-800 p-8 rounded-[2rem] flex items-center justify-between hover:border-slate-700 transition-all">
+                  <div key={admin.id} className="group bg-[#0f172a]/50 border border-slate-800 p-8 rounded-[2rem] flex items-center justify-between hover:border-emerald-500/30 transition-all">
                     <div className="flex items-center gap-6">
-                      <div className="p-3 bg-[#020617] rounded-2xl border border-slate-800 group-hover:border-emerald-500/50 transition-all">
-                        <Building2 size={24} className="text-emerald-500" />
+                      <div className="p-3 bg-[#020617] rounded-2xl border border-slate-800 text-emerald-500">
+                        <Building2 size={24} />
                       </div>
                       <div className="text-left">
-                        <p className="font-bold text-lg text-white text-left">{admin.company_name || "Agency"}</p>
-                        <p className="text-sm text-slate-500 text-left">{admin.email}</p>
+                        <p className="font-bold text-lg text-white">{admin.company_name || "Agence Sans Nom"}</p>
+                        <p className="text-sm text-slate-500">{admin.email}</p>
                       </div>
                     </div>
-                    <div className="bg-emerald-500/10 text-emerald-500 text-[10px] font-black px-4 py-2 rounded-full border border-emerald-500/20 uppercase tracking-tighter">
-                      Active
+                    <div className="bg-emerald-500/10 text-emerald-500 text-[9px] font-black px-4 py-2 rounded-full border border-emerald-500/20 uppercase tracking-widest">
+                      Licence Active
                     </div>
                   </div>
                 ))
