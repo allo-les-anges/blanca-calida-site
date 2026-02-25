@@ -20,29 +20,36 @@ export default function SuperAdminDashboard() {
 
 useEffect(() => {
     const checkUser = async () => {
-      console.log("Vérification en cours...");
-      const { data, error } = await supabase.auth.getSession();
-      
-      if (error) {
-        console.error("Erreur Supabase détectée:", error.message);
-        alert("Erreur Supabase : " + error.message);
-      }
+      try {
+        // On force un timeout : si après 5s Supabase ne répond pas, on affiche une erreur
+        const timeout = setTimeout(() => {
+          if (!authorized) alert("Supabase ne répond pas. Vérifie tes clés API dans Vercel.");
+        }, 5000);
 
-      console.log("Session trouvée :", data.session);
-      
-      if (!data.session) {
-        console.log("AUCUNE SESSION - Redirection dans 3 secondes...");
-        // On commente la redirection pour voir ce qui s'affiche à l'écran
-        // router.push('/login'); 
-      } else {
-        console.log("Utilisateur connecté :", data.session.user.email);
-        setAuthorized(true);
-        fetchAdmins();
+        const { data, error } = await supabase.auth.getSession();
+        clearTimeout(timeout);
+
+        if (error) {
+          alert("Erreur Supabase : " + error.message);
+          return;
+        }
+
+        if (data?.session?.user?.email === 'gaetan@amaru-homes.com') {
+          setAuthorized(true);
+          fetchAdmins();
+        } else {
+          // Si on est ici, c'est que soit pas de session, soit pas le bon email
+          console.log("Email trouvé :", data?.session?.user?.email);
+          router.push('/login');
+        }
+      } catch (err) {
+        alert("Erreur critique : " + err);
       }
     };
+    
     checkUser();
   }, [router, supabase]);
-  
+
   async function fetchAdmins() {
     const { data, error } = await supabase
       .from('profiles')
