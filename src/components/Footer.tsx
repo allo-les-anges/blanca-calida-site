@@ -30,14 +30,24 @@ export default function Footer() {
               </a>
             </li>
             {/* Lien pour toi (Gaëtan) */}
-            <li>
+<li>
   <a 
-    href="/super-admin" 
-    rel="external" 
+    href="/login"  /* CHANGE CECI : remplace /super-admin par /login */
     className="hover:text-white transition flex items-center gap-2"
   >
     <span className="w-1 h-1 bg-slate-500 rounded-full"></span>
     Superviseur
+  </a>
+</li>
+
+{/* Lien pour les agences partenaires */}
+<li>
+  <a 
+    href="/login" /* C'est déjà bon ici */
+    className="hover:text-white transition flex items-center gap-2"
+  >
+    <span className="w-1 h-1 bg-slate-500 rounded-full"></span>
+    Partenaires
   </a>
 </li>
             {/* Lien pour les agences partenaires */}
