@@ -25,33 +25,25 @@ export default function LoginPage() {
 );
 
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (loading) return;
-    setLoading(true);
+  e.preventDefault();
+  setLoading(true);
 
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
-      if (error) throw error;
+  if (error) {
+    alert("Erreur: " + error.message);
+    setLoading(false);
+    return;
+  }
 
-      if (data?.session) {
-  // On rafraîchit les routes Next.js
-  router.refresh();
-  
-  // On attend une demi-seconde pour être SÛR que le cookie est écrit
-  setTimeout(() => {
-    window.location.href = '/super-admin';
-  }, 500);
-}
-
-    } catch (error: any) {
-      alert("Erreur d'authentification : " + error.message);
-      setLoading(false);
-    }
-  };
+  if (data?.session) {
+    console.log("Session validée !");
+    // On attend 1 seconde pour être sûr que le navigateur a fini d'écrire
+    setTimeout(() => {
+      window.location.assign('/super-admin');
+    }, 1000);
+  }
+};
 
   return (
     <div className="min-h-screen bg-[#020617] flex items-center justify-center p-6 text-white">
