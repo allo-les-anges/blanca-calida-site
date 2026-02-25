@@ -34,12 +34,12 @@ export default function SuperAdminDashboard() {
 
   useEffect(() => {
     const checkUser = async (retryCount = 0) => {
-      // On récupère la session
-      const { data: { session }, error } = await supabase.auth.getSession();
+      // 1. On récupère l'utilisateur actuel directement (plus fiable que getSession)
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
 
-      if (!session) {
-        // Si pas de session, on réessaie une fois après 1 seconde (au cas où le cookie arrive tard)
-        if (retryCount < 1) {
+      if (authError || !user) {
+        if (retryCount < 2) {
+          console.log(`Tentative ${retryCount + 1}... Session non trouvée.`);
           setTimeout(() => checkUser(retryCount + 1), 1000);
           return;
         }
@@ -47,20 +47,32 @@ export default function SuperAdminDashboard() {
         return;
       }
 
-      const userEmail = session.user.email?.toLowerCase().trim();
-      const adminEmail = 'gaetan@amaru-homes.com'.toLowerCase().trim();
+      // 2. Nettoyage strict des emails pour la comparaison
+      const loggedInEmail = user.email?.toLowerCase().trim();
+      const targetEmail = 'gaetan@amaru-homes.com'.toLowerCase().trim();
 
-      if (userEmail === adminEmail) {
+      console.log("Email connecté:", loggedInEmail);
+      console.log("Email attendu:", targetEmail);
+
+      // 3. Vérification du rôle dans la table profiles (Sécurité supplémentaire)
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+
+      if (loggedInEmail === targetEmail || profile?.role === 'super_admin') {
         setAuthStatus('authorized');
         fetchAdmins();
       } else {
+        console.error("Accès refusé : Email ou rôle incorrect");
         setAuthStatus('denied');
       }
     };
     
     checkUser();
   }, [supabase, fetchAdmins]);
-
+  
   const createAdminAccount = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
