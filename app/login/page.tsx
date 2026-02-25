@@ -1,17 +1,22 @@
 "use client";
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import { createBrowserClient } from '@supabase/ssr';
-import { Building2, Loader2, LogOut, ShieldCheck, XCircle } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
-export default function SuperAdminDashboard() {
-  // CONFIGURATION RENFORCÉE POUR VERCEL
+export default function LoginPage() {
+  // 1. DÉCLARATION DES ÉTATS (Ce qui manquait)
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  // 2. CONFIGURATION SUPABASE (Identique au Super-Admin)
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       auth: {
         persistSession: true,
-        storageKey: 'supabase-auth-token', // Nom unique pour retrouver ta session
+        storageKey: 'supabase-auth-token', 
         autoRefreshToken: true,
         detectSessionInUrl: true,
       }
@@ -33,13 +38,8 @@ export default function SuperAdminDashboard() {
 
       if (data?.session) {
         console.log("Session validée !");
-        
-        // POINT CLÉ : On attend 1 seconde avant de changer de page.
-        // Cela laisse le temps au navigateur d'écrire les cookies/localStorage
-        // que l'on voit vides sur tes captures d'écran (image_167f7f.png).
+        // Délai de sécurité pour l'écriture des cookies
         setTimeout(() => {
-          // Utiliser assign force un rechargement complet de la page destination,
-          // ce qui oblige le Super-Admin à relire les nouveaux cookies.
           window.location.assign('/super-admin');
         }, 1000);
       }
@@ -59,14 +59,14 @@ export default function SuperAdminDashboard() {
         onSubmit={handleLogin} 
         className="w-full max-w-md bg-[#0f172a] p-10 rounded-[2rem] border border-slate-800 shadow-2xl relative z-10"
       >
-        <div className="text-center mb-10 text-left">
+        <div className="text-center mb-10">
           <h1 className="text-3xl font-serif italic text-emerald-500 tracking-tight">Blanca Calida</h1>
           <p className="text-slate-500 text-[10px] uppercase tracking-[0.3em] mt-2 font-bold">Espace Superviseur</p>
         </div>
 
-        <div className="space-y-5 text-left">
-          <div className="space-y-2">
-            <label className="text-[10px] uppercase text-slate-500 ml-2 font-bold tracking-widest">Identifiant</label>
+        <div className="space-y-5">
+          <div className="space-y-2 text-left">
+            <label className="text-[10px] uppercase text-slate-500 ml-2 font-bold tracking-widest text-left">Identifiant</label>
             <input 
               type="email" 
               className="w-full bg-[#020617] border border-slate-800 rounded-2xl p-4 text-sm outline-none focus:border-emerald-500 transition-colors text-white"
@@ -76,8 +76,8 @@ export default function SuperAdminDashboard() {
             />
           </div>
 
-          <div className="space-y-2">
-            <label className="text-[10px] uppercase text-slate-500 ml-2 font-bold tracking-widest">Mot de passe</label>
+          <div className="space-y-2 text-left">
+            <label className="text-[10px] uppercase text-slate-500 ml-2 font-bold tracking-widest text-left">Mot de passe</label>
             <input 
               type="password" 
               className="w-full bg-[#020617] border border-slate-800 rounded-2xl p-4 text-sm outline-none focus:border-emerald-500 transition-colors text-white"
@@ -90,9 +90,9 @@ export default function SuperAdminDashboard() {
           <button 
             type="submit" 
             disabled={loading}
-            className="w-full bg-emerald-600 hover:bg-emerald-500 py-5 rounded-2xl font-black uppercase text-[10px] tracking-[0.2em] transition-all disabled:opacity-50 mt-4"
+            className="w-full bg-emerald-600 hover:bg-emerald-500 py-5 rounded-2xl font-black uppercase text-[10px] tracking-[0.2em] transition-all disabled:opacity-50 mt-4 flex items-center justify-center"
           >
-            {loading ? "Vérification..." : "Entrer dans le système"}
+            {loading ? <Loader2 className="animate-spin" /> : "Entrer dans le système"}
           </button>
         </div>
       </form>
