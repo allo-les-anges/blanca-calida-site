@@ -18,8 +18,7 @@ export default function LoginPage() {
     auth: {
       persistSession: true,
       autoRefreshToken: true,
-      detectSessionInUrl: true,
-      flowType: 'pkce', 
+      detectSessionInUrl: true
     }
   }
 );
