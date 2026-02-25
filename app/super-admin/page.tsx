@@ -19,36 +19,36 @@ export default function SuperAdminDashboard() {
   const [admins, setAdmins] = useState<any[]>([]);
 
 useEffect(() => {
-    const checkUser = async () => {
-      try {
-        // On force un timeout : si après 5s Supabase ne répond pas, on affiche une erreur
-        const timeout = setTimeout(() => {
-          if (!authorized) alert("Supabase ne répond pas. Vérifie tes clés API dans Vercel.");
-        }, 5000);
-
-        const { data, error } = await supabase.auth.getSession();
-        clearTimeout(timeout);
-
-        if (error) {
-          alert("Erreur Supabase : " + error.message);
-          return;
-        }
-
-        if (data?.session?.user?.email === 'gaetan@amaru-homes.com') {
-          setAuthorized(true);
-          fetchAdmins();
-        } else {
-          // Si on est ici, c'est que soit pas de session, soit pas le bon email
-          console.log("Email trouvé :", data?.session?.user?.email);
-          router.push('/login');
-        }
-      } catch (err) {
-        alert("Erreur critique : " + err);
+  const checkUser = async () => {
+    try {
+      const { data: { session }, error } = await supabase.auth.getSession();
+      
+      if (error || !session) {
+        console.log("Pas de session, redirection...");
+        router.push('/login');
+        return;
       }
-    };
-    
-    checkUser();
-  }, [router, supabase]);
+
+      // On force tout en minuscules pour éviter "Gaetan" vs "gaetan"
+      const userEmail = session.user.email?.toLowerCase();
+      const adminEmail = 'gaetan@amaru-homes.com'.toLowerCase();
+
+      if (userEmail === adminEmail) {
+        console.log("Accès accordé pour :", userEmail);
+        setAuthorized(true);
+        fetchAdmins();
+      } else {
+        console.log("Email non autorisé :", userEmail);
+        alert("Cet email n'a pas les droits Super Admin.");
+        router.push('/login');
+      }
+    } catch (err) {
+      console.error("Erreur checkUser:", err);
+    }
+  };
+  
+  checkUser();
+}, [router, supabase]);
 
   async function fetchAdmins() {
     const { data, error } = await supabase
