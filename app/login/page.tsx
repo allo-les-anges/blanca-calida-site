@@ -4,12 +4,10 @@ import { createBrowserClient } from '@supabase/ssr';
 import { Loader2 } from 'lucide-react';
 
 export default function LoginPage() {
-  // 1. DÉCLARATION DES ÉTATS (Ce qui manquait)
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // 2. CONFIGURATION SUPABASE (Identique au Super-Admin)
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -37,12 +35,20 @@ export default function LoginPage() {
       if (error) throw error;
 
       if (data?.session) {
-        console.log("Session validée !");
-        // Délai de sécurité pour l'écriture des cookies
-        setTimeout(() => {
-          window.location.assign('/super-admin');
-        }, 1000);
-      }
+  const userEmail = data.session.user.email;
+  console.log("Connexion réussie pour :", userEmail);
+  
+  setTimeout(() => {
+    if (userEmail === 'gaetan@amaru-homes.com') {
+      // Gaëtan (Superviseur) va vers la gestion globale
+      window.location.assign('/super-admin');
+    } else {
+      // Les partenaires (Iris, etc.) vont vers leur dashboard spécifique
+      // On utilise le chemin que tu m'as donné : /admin/dashboard
+      window.location.assign('/admin/dashboard');
+    }
+  }, 800);
+}
     } catch (error: any) {
       alert("Erreur : " + error.message);
       setLoading(false);
@@ -61,7 +67,8 @@ export default function LoginPage() {
       >
         <div className="text-center mb-10">
           <h1 className="text-3xl font-serif italic text-emerald-500 tracking-tight">Blanca Calida</h1>
-          <p className="text-slate-500 text-[10px] uppercase tracking-[0.3em] mt-2 font-bold">Espace Superviseur</p>
+          {/* TITRE MIS À JOUR ICI */}
+          <p className="text-slate-500 text-[10px] uppercase tracking-[0.3em] mt-2 font-bold">Espace de Connexion</p>
         </div>
 
         <div className="space-y-5">
@@ -73,6 +80,7 @@ export default function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)} 
               required
+              placeholder="votre@email.com"
             />
           </div>
 
