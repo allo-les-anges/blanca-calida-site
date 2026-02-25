@@ -33,7 +33,7 @@ export default function Footer() {
             <li>
               <a href="/super-admin" className="hover:text-white transition flex items-center gap-2">
                 <span className="w-1 h-1 bg-slate-500 rounded-full"></span>
-                Console Console
+                Superviseur
               </a>
             </li>
             {/* Lien pour les agences partenaires */}

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { createBrowserClient } from '@supabase/ssr'; // <-- CHANGEMENT ICI
+import { createBrowserClient } from '@supabase/ssr';
 import { useRouter } from 'next/navigation';
 import { Loader2, ShieldCheck } from 'lucide-react';
 
@@ -11,31 +11,39 @@ export default function ProfessionalLoginPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  // On initialise le client navigateur qui synchronise automatiquement les cookies
+  // Initialisation avec les options de cookies pour forcer l'écriture
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookieOptions: {
+        name: 'sb-auth-token',
+        path: '/',
+        sameSite: 'lax',
+        secure: true,
+      },
+    }
   );
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return;
     setLoading(true);
 
     try {
-      // 1. Authentification
-      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({ 
+      const { data, error } = await supabase.auth.signInWithPassword({ 
         email, 
         password 
       });
 
-      if (authError) throw authError;
+      if (error) throw error;
 
-      // 2. Redirection brute pour forcer le Middleware à lire les nouveaux cookies
-      console.log("Connexion OK, redirection forcée...");
-      window.location.href = '/admin/dashboard'; 
+      if (data?.session) {
+        // Redirection forcée pour que le Middleware détecte le nouveau cookie
+        window.location.href = '/super-admin'; 
+      }
 
     } catch (error: any) {
-      console.error("Erreur:", error.message);
       alert("Erreur : " + error.message);
     } finally {
       setLoading(false);
@@ -45,19 +53,17 @@ export default function ProfessionalLoginPage() {
   return (
     <div className="min-h-screen bg-[#020617] flex items-center justify-center p-6 text-white font-sans">
       <div className="w-full max-w-md bg-[#0f172a] rounded-[3rem] p-10 border border-slate-800 shadow-2xl relative overflow-hidden">
-        <div className="absolute -top-24 -right-24 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl"></div>
-
-        <div className="text-center mb-10 relative z-10">
+        <div className="text-center mb-10">
           <div className="w-12 h-12 bg-emerald-500/10 text-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-emerald-500/20">
             <ShieldCheck size={24} />
           </div>
           <h1 className="text-3xl font-serif italic text-white tracking-tight">Blanca Calida</h1>
-          <p className="text-slate-500 text-[10px] uppercase tracking-[0.3em] mt-2 font-black">Espace Professionnel</p>
+          <p className="text-slate-500 text-[10px] uppercase tracking-[0.3em] mt-2 font-black">Accès Superviseur</p>
         </div>
 
-        <form onSubmit={handleLogin} className="space-y-6 relative z-10">
-          <div className="space-y-2 text-left">
-            <label className="text-[9px] uppercase text-slate-500 ml-4 font-bold tracking-widest">Identifiant Pro</label>
+        <form onSubmit={handleLogin} className="space-y-6">
+          <div className="space-y-2">
+            <label className="text-[9px] uppercase text-slate-500 ml-4 font-bold tracking-widest">Email</label>
             <input 
               type="email" 
               placeholder="votre@email.com" 
@@ -67,7 +73,7 @@ export default function ProfessionalLoginPage() {
             />
           </div>
           
-          <div className="space-y-2 text-left">
+          <div className="space-y-2">
             <label className="text-[9px] uppercase text-slate-500 ml-4 font-bold tracking-widest">Mot de passe</label>
             <input 
               type="password" 
@@ -81,9 +87,9 @@ export default function ProfessionalLoginPage() {
           <button 
             type="submit" 
             disabled={loading}
-            className="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-5 rounded-2xl font-black uppercase text-[10px] tracking-[0.2em] transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+            className="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-5 rounded-2xl font-black uppercase text-[10px] tracking-[0.2em] flex items-center justify-center gap-3 disabled:opacity-50"
           >
-            {loading ? <Loader2 className="animate-spin" size={20} /> : "Connexion au Système"}
+            {loading ? <Loader2 className="animate-spin" size={20} /> : "Connexion"}
           </button>
         </form>
       </div>
