@@ -50,13 +50,6 @@ export default function Footer() {
     Partenaires
   </a>
 </li>
-            {/* Lien pour les agences partenaires */}
-            <li>
-              <a href="/login" className="hover:text-white transition flex items-center gap-2">
-                <span className="w-1 h-1 bg-slate-500 rounded-full"></span>
-                Partenaires
-              </a>
-            </li>
           </ul>
         </div>
       </div>
