@@ -10,18 +10,19 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  // Initialisation optimisée pour le stockage des sessions
+  // Initialisation sécurisée pour le Build (SSR)
   const supabase = createBrowserClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  {
-    auth: {
-      persistSession: true,
-      storageKey: 'sb-blanca-calida-auth', // Clé unique pour éviter les conflits
-      storage: window.localStorage, // Force le stockage local
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      auth: {
+        persistSession: true,
+        storageKey: 'sb-blanca-calida-auth',
+        // On vérifie si window existe avant de l'utiliser
+        storage: typeof window !== 'undefined' ? window.localStorage : undefined,
+      }
     }
-  }
-);
+  );
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
