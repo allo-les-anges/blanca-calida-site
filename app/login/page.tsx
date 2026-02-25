@@ -1,20 +1,17 @@
 "use client";
-
+import React, { useState, useEffect, useCallback } from 'react';
 import { createBrowserClient } from '@supabase/ssr';
-import { useState } from 'react';
+import { Building2, Loader2, LogOut, ShieldCheck, XCircle } from 'lucide-react';
 
-export default function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  // Initialisation standard et robuste
+export default function SuperAdminDashboard() {
+  // CONFIGURATION RENFORCÉE POUR VERCEL
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       auth: {
-        persistSession: true, // Crucial pour garder la session active
+        persistSession: true,
+        storageKey: 'supabase-auth-token', // Nom unique pour retrouver ta session
         autoRefreshToken: true,
         detectSessionInUrl: true,
       }
