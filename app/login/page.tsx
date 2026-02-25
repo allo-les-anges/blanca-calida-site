@@ -12,17 +12,16 @@ export default function LoginPage() {
 
   // On initialise avec les options de cookies explicites
   const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookieOptions: {
-        name: 'sb-auth-token',
-        path: '/',
-        sameSite: 'lax',
-        secure: true,
-      },
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  {
+    auth: {
+      persistSession: true, // Force la sauvegarde de la session
+      autoRefreshToken: true,
+      detectSessionInUrl: true
     }
-  );
+  }
+);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
