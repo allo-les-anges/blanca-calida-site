@@ -2,19 +2,31 @@
 
 import { createBrowserClient } from '@supabase/ssr';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
+  // On initialise avec les options de cookies explicites
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookieOptions: {
+        name: 'sb-auth-token',
+        path: '/',
+        sameSite: 'lax',
+        secure: true,
+      },
+    }
   );
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return;
     setLoading(true);
 
     try {
@@ -26,13 +38,17 @@ export default function LoginPage() {
       if (error) throw error;
 
       if (data?.session) {
-        // On attend un tout petit peu pour laisser le temps au navigateur d'écrire le cookie
+        // 1. On rafraîchit les routes pour que Next.js sache qu'on est connecté
+        router.refresh();
+        
+        // 2. On attend un court instant que le cookie soit stabilisé
         setTimeout(() => {
+          // 3. Redirection brutale pour bypasser tout cache résiduel
           window.location.href = '/super-admin';
-        }, 500);
+        }, 800);
       }
     } catch (error: any) {
-      alert("Erreur : " + error.message);
+      alert("Erreur d'authentification : " + error.message);
     } finally {
       setLoading(false);
     }
@@ -40,29 +56,45 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-[#020617] flex items-center justify-center p-6 text-white">
-      <form onSubmit={handleLogin} className="w-full max-w-md bg-[#0f172a] p-10 rounded-[2rem] border border-slate-800 shadow-2xl">
-        <h1 className="text-2xl font-serif italic mb-8 text-center text-emerald-500">Blanca Calida</h1>
-        <div className="space-y-4">
-          <input 
-            type="email" 
-            placeholder="Email" 
-            className="w-full bg-[#020617] border border-slate-800 rounded-xl p-4 text-sm outline-none focus:border-emerald-500"
-            onChange={(e) => setEmail(e.target.value)} 
-            required
-          />
-          <input 
-            type="password" 
-            placeholder="Mot de passe" 
-            className="w-full bg-[#020617] border border-slate-800 rounded-xl p-4 text-sm outline-none focus:border-emerald-500"
-            onChange={(e) => setPassword(e.target.value)} 
-            required
-          />
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-24 -right-24 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl"></div>
+      </div>
+
+      <form onSubmit={handleLogin} className="w-full max-w-md bg-[#0f172a] p-10 rounded-[2rem] border border-slate-800 shadow-2xl relative z-10">
+        <div className="text-center mb-10">
+          <h1 className="text-3xl font-serif italic text-emerald-500 tracking-tight">Blanca Calida</h1>
+          <p className="text-slate-500 text-[10px] uppercase tracking-[0.3em] mt-2 font-bold">Espace Superviseur</p>
+        </div>
+
+        <div className="space-y-5">
+          <div className="space-y-2">
+            <label className="text-[10px] uppercase text-slate-500 ml-2 font-bold tracking-widest">Identifiant</label>
+            <input 
+              type="email" 
+              placeholder="votre@email.com" 
+              className="w-full bg-[#020617] border border-slate-800 rounded-2xl p-4 text-sm outline-none focus:border-emerald-500 transition-colors"
+              onChange={(e) => setEmail(e.target.value)} 
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-[10px] uppercase text-slate-500 ml-2 font-bold tracking-widest">Mot de passe</label>
+            <input 
+              type="password" 
+              placeholder="••••••••" 
+              className="w-full bg-[#020617] border border-slate-800 rounded-2xl p-4 text-sm outline-none focus:border-emerald-500 transition-colors"
+              onChange={(e) => setPassword(e.target.value)} 
+              required
+            />
+          </div>
+
           <button 
             type="submit" 
             disabled={loading}
-            className="w-full bg-emerald-600 hover:bg-emerald-500 py-4 rounded-xl font-bold uppercase text-xs tracking-widest transition-all disabled:opacity-50"
+            className="w-full bg-emerald-600 hover:bg-emerald-500 py-5 rounded-2xl font-black uppercase text-[10px] tracking-[0.2em] transition-all disabled:opacity-50 mt-4 shadow-lg shadow-emerald-900/20"
           >
-            {loading ? "Chargement..." : "Se connecter"}
+            {loading ? "Vérification..." : "Entrer dans le système"}
           </button>
         </div>
       </form>
