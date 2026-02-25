@@ -4,13 +4,14 @@ import { createBrowserClient } from '@supabase/ssr';
 import { Building2, Loader2, LogOut, ShieldCheck, XCircle } from 'lucide-react';
 
 export default function SuperAdminDashboard() {
-  // CONFIGURATION IDENTIQUE AU LOGIN
+  // CONFIGURATION RENFORCÉE POUR VERCEL
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       auth: {
         persistSession: true,
+        storageKey: 'supabase-auth-token', // Nom unique pour retrouver ta session
         autoRefreshToken: true,
         detectSessionInUrl: true,
       }
@@ -72,7 +73,7 @@ export default function SuperAdminDashboard() {
     
     checkUser();
   }, [supabase, fetchAdmins]);
-  
+
   const createAdminAccount = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
