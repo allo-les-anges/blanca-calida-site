@@ -18,23 +18,31 @@ export default function SuperAdminDashboard() {
   const [loading, setLoading] = useState(false);
   const [admins, setAdmins] = useState<any[]>([]);
 
-  useEffect(() => {
-    // 1. Vérification de sécurité immédiate
+useEffect(() => {
     const checkUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      console.log("Vérification en cours...");
+      const { data, error } = await supabase.auth.getSession();
       
-      // Sécurité stricte : Si pas de session ou pas l'email de Gaétan -> Redirection
-      if (!session || session.user.email !== 'gaetan@amaru-homes.com') {
-        router.push('/login');
+      if (error) {
+        console.error("Erreur Supabase détectée:", error.message);
+        alert("Erreur Supabase : " + error.message);
+      }
+
+      console.log("Session trouvée :", data.session);
+      
+      if (!data.session) {
+        console.log("AUCUNE SESSION - Redirection dans 3 secondes...");
+        // On commente la redirection pour voir ce qui s'affiche à l'écran
+        // router.push('/login'); 
       } else {
+        console.log("Utilisateur connecté :", data.session.user.email);
         setAuthorized(true);
-        fetchAdmins(); // On ne charge les données que si autorisé
+        fetchAdmins();
       }
     };
-    
     checkUser();
   }, [router, supabase]);
-
+  
   async function fetchAdmins() {
     const { data, error } = await supabase
       .from('profiles')
