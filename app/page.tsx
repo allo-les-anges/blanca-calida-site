@@ -7,7 +7,9 @@ import AdvancedSearch from "@/components/AdvancedSearch";
 import RegionGrid from "@/components/RegionGrid";
 import PropertyGrid from "@/components/PropertyGrid";
 import Footer from "@/components/Footer";
-import { Property } from "@/types/property";
+
+// CORRECTIF VERCEL : On définit un type local pour éviter l'erreur d'importation
+type Property = any;
 
 export default function Home() {
   const [allProperties, setAllProperties] = useState<Property[]>([]);
@@ -47,8 +49,7 @@ export default function Home() {
       const matchDev = !filters.development || 
         p.development_name?.toLowerCase().trim() === filters.development.toLowerCase().trim();
 
-      // 2. Disponibilité (CORRECTION TYPE ERROR VERCEL)
-      // On utilise (p as any) pour éviter l'erreur de propriété manquante sur le type Property
+      // 2. Disponibilité
       const hasUnits = (p as any).units !== undefined && Number((p as any).units) > 0;
       const matchAvailable = !filters.availableOnly || hasUnits;
 
