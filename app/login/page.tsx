@@ -10,18 +10,18 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  // On initialise avec les options de cookies explicites
+  // Initialisation optimisée pour le stockage des sessions
   const supabase = createBrowserClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  {
-    auth: {
-      persistSession: true, // Force la sauvegarde de la session
-      autoRefreshToken: true,
-      detectSessionInUrl: true
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true
+      }
     }
-  }
-);
+  );
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,41 +37,44 @@ export default function LoginPage() {
       if (error) throw error;
 
       if (data?.session) {
-        // 1. On rafraîchit les routes pour que Next.js sache qu'on est connecté
+        // 1. On informe Next.js que les données de session ont changé
         router.refresh();
         
-        // 2. On attend un court instant que le cookie soit stabilisé
-        setTimeout(() => {
-          // 3. Redirection brutale pour bypasser tout cache résiduel
-          window.location.href = '/super-admin';
-        }, 800);
+        // 2. Redirection "brutale" : window.location.assign force le navigateur 
+        // à recharger complètement la page cible, ce qui garantit la lecture du cookie.
+        // On n'utilise pas router.push ici pour éviter les conflits de cache.
+        window.location.assign('/super-admin');
       }
     } catch (error: any) {
       alert("Erreur d'authentification : " + error.message);
-    } finally {
       setLoading(false);
     }
   };
 
   return (
     <div className="min-h-screen bg-[#020617] flex items-center justify-center p-6 text-white">
+      {/* Effet visuel de fond */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-24 -right-24 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl"></div>
       </div>
 
-      <form onSubmit={handleLogin} className="w-full max-w-md bg-[#0f172a] p-10 rounded-[2rem] border border-slate-800 shadow-2xl relative z-10">
+      <form 
+        onSubmit={handleLogin} 
+        className="w-full max-w-md bg-[#0f172a] p-10 rounded-[2rem] border border-slate-800 shadow-2xl relative z-10"
+      >
         <div className="text-center mb-10">
           <h1 className="text-3xl font-serif italic text-emerald-500 tracking-tight">Blanca Calida</h1>
           <p className="text-slate-500 text-[10px] uppercase tracking-[0.3em] mt-2 font-bold">Espace Superviseur</p>
         </div>
 
-        <div className="space-y-5">
+        <div className="space-y-5 text-left">
           <div className="space-y-2">
             <label className="text-[10px] uppercase text-slate-500 ml-2 font-bold tracking-widest">Identifiant</label>
             <input 
               type="email" 
               placeholder="votre@email.com" 
-              className="w-full bg-[#020617] border border-slate-800 rounded-2xl p-4 text-sm outline-none focus:border-emerald-500 transition-colors"
+              className="w-full bg-[#020617] border border-slate-800 rounded-2xl p-4 text-sm outline-none focus:border-emerald-500 transition-colors text-white"
+              value={email}
               onChange={(e) => setEmail(e.target.value)} 
               required
             />
@@ -82,7 +85,8 @@ export default function LoginPage() {
             <input 
               type="password" 
               placeholder="••••••••" 
-              className="w-full bg-[#020617] border border-slate-800 rounded-2xl p-4 text-sm outline-none focus:border-emerald-500 transition-colors"
+              className="w-full bg-[#020617] border border-slate-800 rounded-2xl p-4 text-sm outline-none focus:border-emerald-500 transition-colors text-white"
+              value={password}
               onChange={(e) => setPassword(e.target.value)} 
               required
             />
