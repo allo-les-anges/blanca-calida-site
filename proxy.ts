@@ -2,9 +2,7 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function proxy(request: NextRequest) {
-  let response = NextResponse.next({
-    request: { headers: request.headers },
-  })
+  let response = NextResponse.next({ request })
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -14,7 +12,7 @@ export async function proxy(request: NextRequest) {
         getAll() { return request.cookies.getAll() },
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
-          response = NextResponse.next({ request: { headers: request.headers } })
+          response = NextResponse.next({ request })
           cookiesToSet.forEach(({ name, value, options }) =>
             response.cookies.set(name, value, options)
           )
@@ -23,21 +21,16 @@ export async function proxy(request: NextRequest) {
     }
   )
 
-  // On récupère la session
-  const { data: { session } } = await supabase.auth.getSession()
-  const user = session?.user
-  const pathname = request.nextUrl.pathname
+  // Utiliser getUser() au lieu de getSession() pour plus de sécurité avec Next.js 16
+  const { data: { user } } = await supabase.auth.getUser()
 
-  // LOGIQUE DE PROTECTION
-  if (pathname.startsWith('/super-admin') || pathname.startsWith('/admin')) {
-    
-    // 1. Si tu es Gaétan, on te laisse passer quoi qu'il arrive
-    if (user?.email === 'gaetan@amaru-homes.com') {
-      return response
-    }
+  // Protection simplifiée
+  const isProtectedRoute = request.nextUrl.pathname.startsWith('/super-admin') || 
+                         request.nextUrl.pathname.startsWith('/admin')
 
-    // 2. Si vraiment il n'y a personne de connecté, on renvoie au login
-    if (!user) {
+  if (isProtectedRoute && !user) {
+    // Si on n'est pas sur la page login, on y va
+    if (request.nextUrl.pathname !== '/login') {
       return NextResponse.redirect(new URL('/login', request.url))
     }
   }
@@ -46,6 +39,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // On applique ce filtre à tout le site sauf les images et l'api
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
+  matcher: ['/admin/:path*', '/super-admin/:path*'],
 }
