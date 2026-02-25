@@ -11,13 +11,13 @@ export default function ProfessionalLoginPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  // Initialisation avec les options de cookies pour forcer l'écriture
+  // Configuration critique pour que le cookie soit lisible par le Middleware
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookieOptions: {
-        name: 'sb-auth-token',
+        name: 'sb-auth-token', // Nom standard attendu
         path: '/',
         sameSite: 'lax',
         secure: true,
@@ -39,10 +39,10 @@ export default function ProfessionalLoginPage() {
       if (error) throw error;
 
       if (data?.session) {
-        // Redirection forcée pour que le Middleware détecte le nouveau cookie
+        // FORCE l'écriture immédiate et redirige vers la page souhaitée
+        console.log("Session OK, redirection...");
         window.location.href = '/super-admin'; 
       }
-
     } catch (error: any) {
       alert("Erreur : " + error.message);
     } finally {
@@ -52,7 +52,7 @@ export default function ProfessionalLoginPage() {
 
   return (
     <div className="min-h-screen bg-[#020617] flex items-center justify-center p-6 text-white font-sans">
-      <div className="w-full max-w-md bg-[#0f172a] rounded-[3rem] p-10 border border-slate-800 shadow-2xl relative overflow-hidden">
+      <div className="w-full max-w-md bg-[#0f172a] rounded-[3rem] p-10 border border-slate-800 shadow-2xl">
         <div className="text-center mb-10">
           <div className="w-12 h-12 bg-emerald-500/10 text-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-emerald-500/20">
             <ShieldCheck size={24} />
@@ -63,10 +63,10 @@ export default function ProfessionalLoginPage() {
 
         <form onSubmit={handleLogin} className="space-y-6">
           <div className="space-y-2">
-            <label className="text-[9px] uppercase text-slate-500 ml-4 font-bold tracking-widest">Email</label>
+            <label className="text-[9px] uppercase text-slate-500 ml-4 font-bold tracking-widest">Email Administrateur</label>
             <input 
               type="email" 
-              placeholder="votre@email.com" 
+              placeholder="gaetan@amaru-homes.com" 
               required
               className="w-full bg-[#020617] border border-slate-800 rounded-2xl p-4 text-sm outline-none focus:border-emerald-500 text-white"
               onChange={(e) => setEmail(e.target.value)}
@@ -89,7 +89,7 @@ export default function ProfessionalLoginPage() {
             disabled={loading}
             className="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-5 rounded-2xl font-black uppercase text-[10px] tracking-[0.2em] flex items-center justify-center gap-3 disabled:opacity-50"
           >
-            {loading ? <Loader2 className="animate-spin" size={20} /> : "Connexion"}
+            {loading ? <Loader2 className="animate-spin" size={20} /> : "Entrer dans le Système"}
           </button>
         </form>
       </div>
