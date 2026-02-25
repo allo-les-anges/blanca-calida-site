@@ -6,9 +6,18 @@ import { useRouter } from 'next/navigation';
 
 export default function SuperAdminDashboard() {
   const router = useRouter();
+  
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      auth: {
+        persistSession: true, // Crucial : maintient la session active
+        autoRefreshToken: true, // Rafraîchit le token en arrière-plan
+        detectSessionInUrl: true, // Utile si Supabase redirige avec des paramètres
+        storageKey: 'blanca-calida-auth-token', // Nom unique pour éviter les conflits
+      }
+    }
   );
 
   // États de l'interface
