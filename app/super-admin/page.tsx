@@ -140,9 +140,16 @@ export default function SuperAdminDashboard() {
               <p className="text-slate-500 text-[10px] uppercase tracking-[0.4em] font-bold">Gaëtan</p>
             </div>
           </div>
-          <button onClick={() => supabase.auth.signOut().then(() => window.location.assign('/login'))} className="text-slate-500 hover:text-white flex items-center gap-2 text-xs uppercase tracking-widest font-bold bg-slate-900 px-6 py-3 rounded-2xl border border-slate-800">
-            <LogOut size={18} /> Déconnexion
-          </button>
+          <button 
+  onClick={async () => {
+    await supabase.auth.signOut();
+    localStorage.clear(); // <--- Nettoie les traces de l'utilisateur précédent
+    window.location.assign('/login');
+  }} 
+  className="text-slate-500 hover:text-white flex items-center gap-2 text-xs uppercase tracking-widest font-bold bg-slate-900 px-6 py-3 rounded-2xl border border-slate-800"
+>
+  <LogOut size={18} /> Déconnexion
+</button>
         </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
