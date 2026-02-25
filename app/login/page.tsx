@@ -37,11 +37,18 @@ export default function LoginPage() {
       if (error) throw error;
 
       if (data?.session) {
-  // On donne 300ms au navigateur pour enregistrer la session
-  setTimeout(() => {
-    window.location.href = '/super-admin';
-  }, 300);
-}
+        // On force une petite pause pour laisser le navigateur écrire les données
+        console.log("Connexion réussie, écriture de la session...");
+        
+        // On rafraîchit les cookies Next.js
+        router.refresh();
+
+        // On attend 500ms avant de rediriger
+        setTimeout(() => {
+          window.location.assign('/super-admin');
+        }, 500);
+      }
+      
     } catch (error: any) {
       alert("Erreur d'authentification : " + error.message);
       setLoading(false);
