@@ -11,17 +11,18 @@ export default function LoginPage() {
   const router = useRouter();
 
   // Initialisation identique à l'admin avec protection pour le build Vercel
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      auth: {
-        persistSession: true,
-        storageKey: 'blanca-calida-auth-token', // Doit être le même partout
-        storage: typeof window !== 'undefined' ? window.localStorage : undefined,
-      }
+ const supabase = createBrowserClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+      flowType: 'pkce', 
     }
-  );
+  }
+);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,10 +38,11 @@ export default function LoginPage() {
       if (error) throw error;
 
       if (data?.session) {
-        router.refresh();
-        // Redirection forcée pour garantir la lecture de la nouvelle session
-        window.location.assign('/super-admin');
-      }
+  // On donne 300ms au navigateur pour enregistrer la session
+  setTimeout(() => {
+    window.location.href = '/super-admin';
+  }, 300);
+}
     } catch (error: any) {
       alert("Erreur d'authentification : " + error.message);
       setLoading(false);

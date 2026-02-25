@@ -9,18 +9,17 @@ export default function SuperAdminDashboard() {
   
   // Initialisation synchronisée avec la page login et sécurisée pour le build
   const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      auth: {
-        persistSession: true,
-        autoRefreshToken: true,
-        detectSessionInUrl: true,
-        storageKey: 'blanca-calida-auth-token', // Identique à la page login
-        storage: typeof window !== 'undefined' ? window.localStorage : undefined,
-      }
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+      flowType: 'pkce', 
     }
-  );
+  }
+);
 
   // États de l'interface
   const [authStatus, setAuthStatus] = useState<'loading' | 'authorized' | 'denied'>('loading');
