@@ -31,16 +31,10 @@ export default function AdminDashboard() {
   const [searchTerm, setSearchTerm] = useState("");
 
   const [newDossier, setNewDossier] = useState({
-    client_prenom: "",
-    client_nom: "",
-    email_client: "",
-    rue: "",
-    ville: "",
-    pays: "Belgique",
-    nom_villa: "",
-    date_livraison_prevue: "",
-    montant_cashback: 0,
-    commentaires_etape: "",
+    client_prenom: "", client_nom: "", email_client: "",
+    rue: "", ville: "", pays: "Belgique",
+    nom_villa: "", date_livraison_prevue: "",
+    montant_cashback: 0, commentaires_etape: "",
     etape_actuelle: PHASES_CHANTIER[0]
   });
 
@@ -67,7 +61,9 @@ export default function AdminDashboard() {
     if (!file || !selectedProjet) return;
     
     setUploading(true);
-    const filePath = `${selectedProjet.id}/${Date.now()}_${file.name}`;
+    // On garde le chemin relatif pour pouvoir le supprimer facilement plus tard
+    const fileName = `${Date.now()}_${file.name}`;
+    const filePath = `${selectedProjet.id}/${fileName}`;
 
     try {
       const { error: uploadError } = await supabase.storage.from('documents-clients').upload(filePath, file);
@@ -78,7 +74,8 @@ export default function AdminDashboard() {
       await supabase.from('documents_projets').insert([{
         projet_id: selectedProjet.id,
         nom_fichier: file.name,
-        url_fichier: publicUrl
+        url_fichier: publicUrl,
+        storage_path: filePath // On stocke le chemin pour la suppression
       }]);
 
       loadDocuments(selectedProjet.id);
@@ -91,27 +88,42 @@ export default function AdminDashboard() {
     }
   };
 
-  // --- FONCTION CORRIGÉE : PLUS D'APPEL API AUTH ---
+  // --- NOUVELLE FONCTION : SUPPRIMER UN FICHIER ---
+  const handleDeleteDocument = async (doc: any) => {
+    if (!confirm("Voulez-vous vraiment supprimer ce document ?")) return;
+
+    try {
+      // 1. Supprimer du Storage
+      if (doc.storage_path) {
+        await supabase.storage.from('documents-clients').remove([doc.storage_path]);
+      } else {
+        // Si storage_path n'existe pas, on essaie d'extraire le chemin depuis l'URL
+        const pathFromUrl = doc.url_fichier.split('documents-clients/')[1];
+        if (pathFromUrl) await supabase.storage.from('documents-clients').remove([pathFromUrl]);
+      }
+
+      // 2. Supprimer de la table SQL
+      const { error } = await supabase.from('documents_projets').delete().eq('id', doc.id);
+      if (error) throw error;
+
+      // 3. Rafraîchir la liste
+      loadDocuments(selectedProjet.id);
+    } catch (err) {
+      alert("Erreur lors de la suppression.");
+    }
+  };
+
   const handleCreateDossier = async (e: React.FormEvent) => {
     e.preventDefault();
     setUpdating(true);
     try {
-      // 1. Générer un PIN localement (4 chiffres)
       const generatedPin = Math.floor(1000 + Math.random() * 9000).toString();
-
-      // 2. Insérer directement dans la table des chantiers
-      const { error } = await supabase.from('suivi_chantier').insert([{
-        ...newDossier,
-        pin_code: generatedPin
-      }]);
-
+      const { error } = await supabase.from('suivi_chantier').insert([{ ...newDossier, pin_code: generatedPin }]);
       if (error) throw error;
 
       alert(`Dossier Client créé ! PIN : ${generatedPin}`);
       setShowModal(false);
       loadData();
-      
-      // Reset
       setNewDossier({
         client_prenom: "", client_nom: "", email_client: "",
         rue: "", ville: "", pays: "Belgique",
@@ -119,7 +131,6 @@ export default function AdminDashboard() {
         montant_cashback: 0, commentaires_etape: "",
         etape_actuelle: PHASES_CHANTIER[0]
       });
-
     } catch (err: any) {
       alert("Erreur de création : " + err.message);
     } finally {
@@ -134,7 +145,7 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-[#F8FAFC] flex flex-col md:flex-row text-slate-900 font-sans">
       
-      {/* SIDEBAR - Style Indigo SaaS */}
+      {/* SIDEBAR */}
       <div className="w-full md:w-80 bg-white border-r h-screen sticky top-0 flex flex-col shadow-sm z-20">
         <div className="p-6 space-y-4">
           <div className="flex items-center gap-2 text-indigo-600">
@@ -160,7 +171,7 @@ export default function AdminDashboard() {
                   <p className="text-[9px] font-mono bg-black/10 px-1 rounded">PIN: {p.pin_code}</p>
                 </div>
               </button>
-          ))}
+            ))}
         </div>
       </div>
 
@@ -186,23 +197,28 @@ export default function AdminDashboard() {
                 </div>
                 <h3 className="text-[10px] uppercase text-indigo-400 mb-6 font-black tracking-widest">Note de suivi</h3>
                 <p className="italic font-serif text-xl opacity-90 leading-relaxed">"{selectedProjet.commentaires_etape || "Aucune note pour le moment."}"</p>
-                <div className="mt-8 pt-8 border-t border-white/10 flex items-center gap-4">
-                   <div className="px-4 py-2 bg-indigo-500 rounded-full text-[10px] font-bold uppercase tracking-tighter">
+                <div className="mt-8 pt-8 border-t border-white/10">
+                   <div className="px-4 py-2 bg-indigo-500 rounded-full text-[10px] font-bold uppercase tracking-tighter w-fit">
                       Étape actuelle : {selectedProjet.etape_actuelle}
                    </div>
                 </div>
               </div>
 
-              {/* DOCUMENTS */}
+              {/* DOCUMENTS SECTION */}
               <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200/60 shadow-sm flex flex-col">
                 <h3 className="text-[10px] font-black uppercase text-slate-400 mb-6 flex items-center gap-2 tracking-widest">
                   <Camera size={14} className="text-indigo-500"/> Galerie & Pièces
                 </h3>
                 <div className="space-y-3 flex-1 overflow-y-auto max-h-60 pr-2 custom-scrollbar">
                   {documents.length > 0 ? documents.map((doc) => (
-                    <div key={doc.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl hover:bg-slate-100 transition-colors">
-                      <a href={doc.url_fichier} target="_blank" className="text-[10px] font-bold truncate text-slate-700 hover:text-indigo-600">{doc.nom_fichier}</a>
-                      <Download size={14} className="text-slate-400" />
+                    <div key={doc.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl hover:bg-slate-100 transition-colors group">
+                      <a href={doc.url_fichier} target="_blank" className="text-[10px] font-bold truncate text-slate-700 hover:text-indigo-600 flex-1">{doc.nom_fichier}</a>
+                      <div className="flex items-center gap-2">
+                         <button onClick={() => handleDeleteDocument(doc)} className="p-2 text-slate-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100">
+                            <Trash2 size={14} />
+                         </button>
+                         <Download size={14} className="text-slate-400" />
+                      </div>
                     </div>
                   )) : <p className="text-[10px] italic text-slate-300 text-center py-8">Aucun document chargé.</p>}
                 </div>
@@ -228,68 +244,64 @@ export default function AdminDashboard() {
         )}
       </div>
 
-      {/* MODALE - STYLE ÉPURÉ */}
+      {/* MODAL NOUVEAU DOSSIER */}
       {showModal && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <form onSubmit={handleCreateDossier} className="bg-white w-full max-w-4xl rounded-[3rem] p-12 shadow-2xl space-y-8 text-left max-h-[95vh] overflow-y-auto relative">
             <button type="button" onClick={() => setShowModal(false)} className="absolute top-8 right-8 p-3 bg-slate-50 hover:bg-red-50 hover:text-red-500 transition-colors rounded-2xl"><X /></button>
-            
             <div className="border-b pb-6">
-               <h2 className="text-3xl font-serif italic text-slate-900">Nouveau Dossier Client</h2>
-               <p className="text-[10px] text-slate-400 uppercase tracking-[0.2em] font-bold mt-1">Lancement de la procédure de suivi</p>
+                <h2 className="text-3xl font-serif italic text-slate-900">Nouveau Dossier Client</h2>
+                <p className="text-[10px] text-slate-400 uppercase tracking-[0.2em] font-bold mt-1">Lancement de la procédure de suivi</p>
             </div>
-            
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
               <div className="space-y-6">
                 <h3 className="text-[10px] font-black uppercase text-indigo-600 bg-indigo-50 px-4 py-1.5 rounded-full w-fit tracking-widest">Identité Client</h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <label className="text-[8px] font-bold text-slate-400 ml-2 uppercase tracking-tighter">Prénom</label>
-                    <input required className="w-full p-4 bg-slate-50 rounded-xl outline-none text-sm border border-slate-100 focus:border-indigo-300" onChange={e => setNewDossier({...newDossier, client_prenom: e.target.value})} />
+                    <input required className="w-full p-4 bg-slate-50 rounded-xl border border-slate-100 focus:border-indigo-300 outline-none text-sm" onChange={e => setNewDossier({...newDossier, client_prenom: e.target.value})} />
                   </div>
                   <div className="space-y-1">
                     <label className="text-[8px] font-bold text-slate-400 ml-2 uppercase tracking-tighter">Nom</label>
-                    <input required className="w-full p-4 bg-slate-50 rounded-xl outline-none text-sm border border-slate-100 focus:border-indigo-300" onChange={e => setNewDossier({...newDossier, client_nom: e.target.value})} />
+                    <input required className="w-full p-4 bg-slate-50 rounded-xl border border-slate-100 focus:border-indigo-300 outline-none text-sm" onChange={e => setNewDossier({...newDossier, client_nom: e.target.value})} />
                   </div>
                 </div>
                 <div className="space-y-1">
                   <label className="text-[8px] font-bold text-slate-400 ml-2 uppercase tracking-tighter">Email de contact</label>
-                  <input type="email" required className="w-full p-4 bg-slate-50 rounded-xl outline-none text-sm border border-slate-100 focus:border-indigo-300" onChange={e => setNewDossier({...newDossier, email_client: e.target.value})} />
+                  <input type="email" required className="w-full p-4 bg-slate-50 rounded-xl border border-slate-100 focus:border-indigo-300 outline-none text-sm" onChange={e => setNewDossier({...newDossier, email_client: e.target.value})} />
                 </div>
                 <div className="space-y-1">
                   <label className="text-[8px] font-bold text-slate-400 ml-2 uppercase tracking-tighter">Localisation du projet</label>
-                  <input placeholder="Rue et numéro" className="w-full p-4 bg-slate-50 rounded-xl outline-none text-sm border border-slate-100 focus:border-indigo-300" onChange={e => setNewDossier({...newDossier, rue: e.target.value})} />
+                  <input placeholder="Rue et numéro" className="w-full p-4 bg-slate-50 rounded-xl border border-slate-100 focus:border-indigo-300 outline-none text-sm" onChange={e => setNewDossier({...newDossier, rue: e.target.value})} />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
-                  <input placeholder="Ville" className="w-full p-4 bg-slate-50 rounded-xl outline-none text-sm border border-slate-100" onChange={e => setNewDossier({...newDossier, ville: e.target.value})} />
-                  <input defaultValue="Belgique" className="w-full p-4 bg-slate-100 text-slate-500 font-bold rounded-xl outline-none text-sm cursor-not-allowed" readOnly />
+                  <input placeholder="Ville" className="w-full p-4 bg-slate-50 rounded-xl border border-slate-100 text-sm outline-none" onChange={e => setNewDossier({...newDossier, ville: e.target.value})} />
+                  <input defaultValue="Belgique" className="w-full p-4 bg-slate-100 text-slate-500 font-bold rounded-xl text-sm cursor-not-allowed" readOnly />
                 </div>
               </div>
-
               <div className="space-y-6">
                 <h3 className="text-[10px] font-black uppercase text-amber-600 bg-amber-50 px-4 py-1.5 rounded-full w-fit tracking-widest">Détails Construction</h3>
                 <div className="space-y-1">
                   <label className="text-[8px] font-bold text-slate-400 ml-2 uppercase tracking-tighter">Nom du modèle / Villa</label>
-                  <input required className="w-full p-4 bg-indigo-900 text-white rounded-xl outline-none text-sm shadow-inner" placeholder="Ex: Villa Maria" onChange={e => setNewDossier({...newDossier, nom_villa: e.target.value})} />
+                  <input required className="w-full p-4 bg-indigo-900 text-white rounded-xl text-sm outline-none shadow-inner" placeholder="Ex: Villa Maria" onChange={e => setNewDossier({...newDossier, nom_villa: e.target.value})} />
                 </div>
                 <div className="space-y-1">
                   <label className="text-[8px] font-bold text-slate-400 ml-2 uppercase tracking-tighter">Note initiale</label>
-                  <textarea placeholder="Commentaires ou spécificités..." className="w-full p-4 bg-slate-50 rounded-xl outline-none text-xs border border-slate-100 h-24" onChange={e => setNewDossier({...newDossier, commentaires_etape: e.target.value})} />
+                  <textarea placeholder="Commentaires..." className="w-full p-4 bg-slate-50 rounded-xl border border-slate-100 h-24 outline-none text-xs" onChange={e => setNewDossier({...newDossier, commentaires_etape: e.target.value})} />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
-                  <select className="w-full p-4 bg-slate-900 text-white rounded-xl outline-none font-bold text-[10px] uppercase tracking-tighter" onChange={e => setNewDossier({...newDossier, etape_actuelle: e.target.value})}>
+                  <select className="w-full p-4 bg-slate-900 text-white rounded-xl font-bold text-[10px] uppercase outline-none" onChange={e => setNewDossier({...newDossier, etape_actuelle: e.target.value})}>
                     {PHASES_CHANTIER.map(p => <option key={p} value={p}>{p}</option>)}
                   </select>
-                  <input type="date" className="w-full p-4 bg-slate-50 rounded-xl outline-none text-xs border border-slate-100" onChange={e => setNewDossier({...newDossier, date_livraison_prevue: e.target.value})} />
+                  <input type="date" className="w-full p-4 bg-slate-50 rounded-xl border border-slate-100 text-xs outline-none" onChange={e => setNewDossier({...newDossier, date_livraison_prevue: e.target.value})} />
                 </div>
                 <div className="space-y-1">
                    <label className="text-[8px] font-bold text-slate-400 ml-2 uppercase tracking-tighter">Cashback Client (€)</label>
-                   <input type="number" placeholder="Montant" className="w-full p-4 bg-emerald-50 text-emerald-700 font-black rounded-xl outline-none text-sm border border-emerald-100" onChange={e => setNewDossier({...newDossier, montant_cashback: parseInt(e.target.value) || 0})} />
+                   <input type="number" placeholder="Montant" className="w-full p-4 bg-emerald-50 text-emerald-700 font-black rounded-xl border border-emerald-100 text-sm outline-none" onChange={e => setNewDossier({...newDossier, montant_cashback: parseInt(e.target.value) || 0})} />
                 </div>
               </div>
             </div>
-
-            <button type="submit" disabled={updating} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-6 rounded-2xl font-black uppercase tracking-[0.4em] text-[10px] shadow-xl shadow-indigo-100 transition-all transform active:scale-[0.98]">
+            <button type="submit" disabled={updating} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-6 rounded-2xl font-black uppercase tracking-[0.4em] text-[10px] shadow-xl transition-all active:scale-[0.98]">
               {updating ? <Loader2 className="animate-spin mx-auto" /> : "Générer le dossier et le PIN sécurisé"}
             </button>
           </form>
