@@ -89,11 +89,11 @@ export default function SuperAdminDashboard() {
       if (authError) throw authError;
       if (authData?.user) {
         await supabase.from('profiles').upsert({ 
-          id: authData.user.id, 
-          email: email, 
-          role: 'admin', 
-          company_name: companyName 
-        });
+  id: authData.user.id, 
+  email: email.toLowerCase().trim(), 
+  role: 'admin', 
+  company_name: companyName // Assure-toi que cette variable n'est pas vide ici
+}, { onConflict: 'id' });
         alert(`Licence activée pour ${companyName}`);
         setEmail(""); setPassword(""); setCompanyName("");
         fetchAdmins();
