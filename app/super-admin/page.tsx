@@ -26,12 +26,19 @@ export default function SuperAdminDashboard() {
   const [loading, setLoading] = useState(false);
 
   const fetchAdmins = useCallback(async () => {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .neq('role', 'super_admin');
-    if (!error) setAdmins(data || []);
-  }, [supabase]);
+  // On enlève temporairement le filtre pour vérifier que les données arrivent
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*'); 
+  
+  if (error) {
+    console.error("Erreur Fetch:", error);
+  } else {
+    // On filtre en JS pour plus de souplesse au début
+    const filtered = data?.filter(a => a.role !== 'super_admin');
+    setAdmins(filtered || []);
+  }
+}, [supabase]);
 
   useEffect(() => {
     const checkUser = async (retryCount = 0) => {
