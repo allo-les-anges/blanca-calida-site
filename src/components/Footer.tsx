@@ -24,11 +24,11 @@ export default function Footer() {
           <ul className="space-y-4 text-sm text-gray-500 font-light">
             {/* Lien pour ton équipe terrain */}
             <li>
-              <a href="/admin/chantier" className="hover:text-emerald-400 transition flex items-center gap-2">
-                <span className="w-1 h-1 bg-emerald-500 rounded-full"></span>
-                Suivi Terrain
-              </a>
-            </li>
+  <a href="/admin-chantier" className="hover:text-emerald-400 transition flex items-center gap-2">
+    <span className="w-1 h-1 bg-emerald-500 rounded-full"></span>
+    Suivi Terrain
+  </a>
+</li>
             {/* Lien pour toi (Gaëtan) */}
 <li>
   <a 
