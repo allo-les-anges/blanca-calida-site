@@ -5,7 +5,8 @@ import { createClient } from '@supabase/supabase-js';
 import { 
   Save, Camera, Trash2, Loader2, Plus, X, 
   Search, ShieldCheck, MapPin, Mail, FileText, 
-  Download, Upload, Key, AlertTriangle, Users, UserPlus, ChevronRight
+  Download, Upload, Key, AlertTriangle, Users, UserPlus, ChevronRight,
+  Home, LogOut 
 } from 'lucide-react';
 
 const supabase = createClient(
@@ -33,7 +34,6 @@ export default function AdminDashboard() {
   const [selectedProjet, setSelectedProjet] = useState<any>(null);
   const [documents, setDocuments] = useState<any[]>([]);
   const [showModal, setShowModal] = useState(false);
-  const [uploading, setUploading] = useState(false);
   const [newDossier, setNewDossier] = useState({
     client_prenom: "", client_nom: "", email_client: "",
     rue: "", ville: "", pays: "Belgique",
@@ -91,7 +91,7 @@ export default function AdminDashboard() {
     e.preventDefault();
     if (!newStaff.nom || !newStaff.prenom) return;
     setUpdating(true);
-    const generatedPin = Math.floor(100000 + Math.random() * 900000).toString(); // PIN à 6 chiffres
+    const generatedPin = Math.floor(100000 + Math.random() * 900000).toString();
     try {
       const { error } = await supabase.from('staff_prestataires').insert([{ ...newStaff, pin_code: generatedPin }]);
       if (error) throw error;
@@ -179,6 +179,24 @@ export default function AdminDashboard() {
             )
           }
         </div>
+
+        {/* PIED DE LA SIDEBAR (Navigation de retour) */}
+        <div className="p-4 border-t border-slate-50 bg-slate-50/50 space-y-2">
+          <button 
+            onClick={() => window.location.href = '/'} 
+            className="w-full flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-indigo-600 hover:bg-white rounded-xl transition-all group"
+          >
+            <Home size={18} className="group-hover:scale-110 transition-transform text-slate-400 group-hover:text-indigo-600" />
+            <span className="text-[10px] font-black uppercase tracking-widest">Retour Accueil</span>
+          </button>
+          <button 
+            onClick={() => window.location.href = '/'} 
+            className="w-full flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all group"
+          >
+            <LogOut size={18} />
+            <span className="text-[10px] font-black uppercase tracking-widest">Quitter</span>
+          </button>
+        </div>
       </div>
 
       {/* MAIN CONTENT */}
@@ -200,7 +218,6 @@ export default function AdminDashboard() {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 text-left">
               <div className="lg:col-span-2 space-y-8">
-                {/* Note Active */}
                 <div className="bg-slate-900 p-10 rounded-[3rem] text-white shadow-2xl relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full -mr-32 -mt-32 blur-3xl"></div>
                   <h3 className="text-[10px] uppercase text-indigo-400 mb-6 font-black tracking-widest">Dernier rapport terrain</h3>
@@ -212,7 +229,6 @@ export default function AdminDashboard() {
                   </div>
                 </div>
 
-                {/* Zone Danger */}
                 <div className="p-8 bg-red-50/50 border border-red-100 rounded-[2.5rem] flex items-center justify-between">
                   <div>
                     <h4 className="text-red-600 font-bold text-sm flex items-center gap-2 tracking-tight uppercase">Suppression du dossier</h4>
@@ -224,7 +240,6 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
-              {/* Galerie latérale */}
               <div className="bg-white p-8 rounded-[3rem] border border-slate-200/50 shadow-sm">
                 <h3 className="text-[10px] font-black uppercase text-slate-400 mb-6 flex items-center gap-2 tracking-widest">
                   <Camera size={14} className="text-indigo-500"/> Documents & Médias
@@ -236,7 +251,7 @@ export default function AdminDashboard() {
                         <p className="text-[10px] font-bold truncate text-slate-700">{doc.nom_fichier}</p>
                       </div>
                       <div className="flex gap-1 ml-2">
-                        <a href={doc.url_fichier} target="_blank" className="p-2 text-slate-400 hover:text-indigo-600"><Download size={14} /></a>
+                        <a href={doc.url_fichier} target="_blank" className="p-2 text-slate-400 hover:text-indigo-600 transition-colors"><Download size={14} /></a>
                       </div>
                     </div>
                   ))}
@@ -268,26 +283,26 @@ export default function AdminDashboard() {
               <div className="space-y-6">
                 <h3 className="text-[10px] font-black uppercase text-indigo-600 bg-indigo-50 px-4 py-2 rounded-xl w-fit">Informations Client</h3>
                 <div className="grid grid-cols-2 gap-4">
-                  <input required placeholder="Prénom" className="w-full p-4 bg-slate-50 rounded-2xl outline-none text-sm border border-slate-100 focus:border-indigo-300" onChange={e => setNewDossier({...newDossier, client_prenom: e.target.value})} />
-                  <input required placeholder="Nom" className="w-full p-4 bg-slate-50 rounded-2xl outline-none text-sm border border-slate-100 focus:border-indigo-300" onChange={e => setNewDossier({...newDossier, client_nom: e.target.value})} />
+                  <input required placeholder="Prénom" className="w-full p-4 bg-slate-50 rounded-2xl outline-none text-sm border border-slate-100 focus:border-indigo-300 transition-all" onChange={e => setNewDossier({...newDossier, client_prenom: e.target.value})} />
+                  <input required placeholder="Nom" className="w-full p-4 bg-slate-50 rounded-2xl outline-none text-sm border border-slate-100 focus:border-indigo-300 transition-all" onChange={e => setNewDossier({...newDossier, client_nom: e.target.value})} />
                 </div>
-                <input type="email" required placeholder="Email personnel" className="w-full p-4 bg-slate-50 rounded-2xl outline-none text-sm border border-slate-100 focus:border-indigo-300" onChange={e => setNewDossier({...newDossier, email_client: e.target.value})} />
+                <input type="email" required placeholder="Email personnel" className="w-full p-4 bg-slate-50 rounded-2xl outline-none text-sm border border-slate-100 focus:border-indigo-300 transition-all" onChange={e => setNewDossier({...newDossier, email_client: e.target.value})} />
                 <div className="grid grid-cols-2 gap-4">
-                  <input placeholder="Ville" className="w-full p-4 bg-slate-50 rounded-2xl outline-none text-sm border border-slate-100" onChange={e => setNewDossier({...newDossier, ville: e.target.value})} />
-                  <input placeholder="Pays" className="w-full p-4 bg-slate-50 rounded-2xl outline-none text-sm border border-slate-100" value={newDossier.pays} onChange={e => setNewDossier({...newDossier, pays: e.target.value})} />
+                  <input placeholder="Ville" className="w-full p-4 bg-slate-50 rounded-2xl outline-none text-sm border border-slate-100 focus:border-indigo-300 transition-all" onChange={e => setNewDossier({...newDossier, ville: e.target.value})} />
+                  <input placeholder="Pays" className="w-full p-4 bg-slate-50 rounded-2xl outline-none text-sm border border-slate-100 focus:border-indigo-300 transition-all" value={newDossier.pays} onChange={e => setNewDossier({...newDossier, pays: e.target.value})} />
                 </div>
               </div>
 
               <div className="space-y-6">
                 <h3 className="text-[10px] font-black uppercase text-amber-600 bg-amber-50 px-4 py-2 rounded-xl w-fit">Détails de Construction</h3>
-                <input required placeholder="Nom de la Villa (ex: Villa Albatros)" className="w-full p-4 bg-slate-900 text-white rounded-2xl outline-none text-sm shadow-xl" onChange={e => setNewDossier({...newDossier, nom_villa: e.target.value})} />
+                <input required placeholder="Nom de la Villa (ex: Villa Albatros)" className="w-full p-4 bg-slate-900 text-white rounded-2xl outline-none text-sm shadow-xl focus:ring-2 ring-indigo-500 transition-all" onChange={e => setNewDossier({...newDossier, nom_villa: e.target.value})} />
                 <div className="grid grid-cols-2 gap-4">
                   <select className="w-full p-4 bg-slate-100 rounded-2xl outline-none font-bold text-[10px] uppercase tracking-tighter" onChange={e => setNewDossier({...newDossier, etape_actuelle: e.target.value})}>
                     {PHASES_CHANTIER.map(p => <option key={p} value={p}>{p}</option>)}
                   </select>
                   <input type="date" className="w-full p-4 bg-slate-100 rounded-2xl outline-none text-[10px] font-bold" onChange={e => setNewDossier({...newDossier, date_livraison_prevue: e.target.value})} />
                 </div>
-                <input type="number" placeholder="Montant Cashback (€)" className="w-full p-4 bg-emerald-50 text-emerald-700 font-black rounded-2xl outline-none text-sm border border-emerald-100" onChange={e => setNewDossier({...newDossier, montant_cashback: parseInt(e.target.value) || 0})} />
+                <input type="number" placeholder="Montant Cashback (€)" className="w-full p-4 bg-emerald-50 text-emerald-700 font-black rounded-2xl outline-none text-sm border border-emerald-100 focus:border-emerald-300 transition-all" onChange={e => setNewDossier({...newDossier, montant_cashback: parseInt(e.target.value) || 0})} />
               </div>
             </div>
 

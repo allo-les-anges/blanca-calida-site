@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { 
   HardHat, Camera, Download, Calendar, 
-  MapPin, Loader2, ChevronRight, FileText, LogOut
+  MapPin, Loader2, ChevronRight, FileText, LogOut, ArrowLeft
 } from "lucide-react";
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -14,7 +14,6 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-// --- FONCTION UTILITAIRE (Extérieure au composant) ---
 const getBase64ImageFromURL = (url: string): Promise<string> => {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -36,7 +35,7 @@ export default function ClientDashboard() {
   const [projet, setProjet] = useState<any>(null);
   const [photos, setPhotos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isExporting, setIsExporting] = useState(false); // Pour le bouton PDF
+  const [isExporting, setIsExporting] = useState(false);
 
   useEffect(() => {
     const fetchInitialData = async () => {
@@ -80,12 +79,10 @@ export default function ClientDashboard() {
 
   const downloadPDF = async () => {
     if (!projet || photos.length === 0) return;
-    
     setIsExporting(true);
     const doc = new jsPDF();
     const dateExport = new Date().toLocaleDateString('fr-FR');
 
-    // Header
     doc.setFillColor(5, 150, 105);
     doc.rect(0, 0, 210, 40, 'F');
     doc.setTextColor(255, 255, 255);
@@ -93,14 +90,12 @@ export default function ClientDashboard() {
     doc.setFontSize(22);
     doc.text(`Rapport Photo : ${projet.nom_villa}`, 14, 25);
 
-    // Infos
     doc.setTextColor(100, 116, 139);
     doc.setFontSize(10);
     doc.setFont("helvetica", "normal");
     doc.text(`Date : ${dateExport}`, 14, 50);
     doc.text(`Propriétaire : ${projet.client_prenom} ${projet.client_nom}`, 14, 55);
 
-    // Préparation des données avec images
     const rows = await Promise.all(photos.map(async (p) => {
       try {
         const base64 = await getBase64ImageFromURL(p.url_image);
@@ -119,7 +114,6 @@ export default function ClientDashboard() {
       head: [['Aperçu', 'Date', 'Observations de l\'expert']],
       body: rows.map(r => ['', r.date, r.note]),
       columnStyles: { 0: { cellWidth: 40 } },
-      // ICI : on remplace verticalAlign par valign
       styles: { minCellHeight: 35, valign: 'middle' }, 
       didDrawCell: (data) => {
         if (data.section === 'body' && data.column.index === 0) {
@@ -152,12 +146,26 @@ export default function ClientDashboard() {
     <div className="min-h-screen bg-slate-50/50 pt-10 pb-20 px-6">
       <div className="max-w-7xl mx-auto space-y-10">
         
-        {/* NAV BAR */}
+        {/* NAV BAR CORRIGÉE AVEC LIEN ACCUEIL */}
         <div className="flex justify-between items-center bg-white p-4 rounded-3xl shadow-sm border border-slate-100">
-          <div className="flex items-center gap-3 ml-4">
-            <HardHat className="text-emerald-600" size={20} />
-            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Suivi Chantier Premium</span>
+          <div className="flex items-center gap-2">
+            {/* BOUTON RETOUR ACCUEIL */}
+            <button 
+              onClick={() => window.location.href = "/"} 
+              className="flex items-center gap-2 px-4 py-2 text-slate-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-2xl transition-all group"
+            >
+              <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
+              <span className="text-[10px] font-black uppercase tracking-widest">Accueil</span>
+            </button>
+            
+            <div className="h-4 w-[1px] bg-slate-200 mx-2" /> {/* Séparateur visuel */}
+
+            <div className="flex items-center gap-3">
+              <HardHat className="text-emerald-600" size={20} />
+              <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Suivi Chantier Premium</span>
+            </div>
           </div>
+
           <div className="flex gap-2">
             <button 
               onClick={downloadPDF}
@@ -167,15 +175,12 @@ export default function ClientDashboard() {
               {isExporting ? <Loader2 className="animate-spin" size={16} /> : <FileText size={16} />}
               {isExporting ? "Génération..." : "Rapport PDF"}
             </button>
-            <button onClick={handleLogout} className="p-2.5 text-slate-400 hover:text-red-500 rounded-2xl transition-all">
+            <button onClick={handleLogout} className="p-2.5 text-slate-400 hover:text-red-500 rounded-2xl transition-all" title="Se déconnecter">
               <LogOut size={20} />
             </button>
           </div>
         </div>
 
-        {/* ... RESTE DE TON CODE (Header & Journal) ... */}
-        {/* Assure-toi de garder ton code tel quel pour la section Header & Photos */}
-        
         {/* HEADER & PROGRESSION */}
         <div className="grid lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 bg-white rounded-[3rem] p-10 shadow-sm border border-slate-100 flex flex-col md:flex-row gap-10 items-center">
@@ -227,15 +232,15 @@ export default function ClientDashboard() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {photos.length > 0 ? photos.map((photo) => (
                 <div key={photo.id} className="bg-white rounded-[2.5rem] overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl transition-all group animate-in fade-in slide-in-from-bottom-4">
-                   <div className="h-64 overflow-hidden relative">
+                    <div className="h-64 overflow-hidden relative">
                       <img src={photo.url_image} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="Constat" />
                       <div className="absolute top-4 right-4">
                          <span className="text-[9px] font-bold text-white bg-black/50 backdrop-blur-md px-3 py-1.5 rounded-full uppercase tracking-widest">
                             Rapport Officiel
                          </span>
                       </div>
-                   </div>
-                   <div className="p-8 text-left">
+                    </div>
+                    <div className="p-8 text-left">
                       <div className="flex justify-between items-center mb-4">
                          <span className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
                            <Calendar size={12}/> {new Date(photo.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
@@ -244,7 +249,7 @@ export default function ClientDashboard() {
                       <p className="text-slate-600 italic text-sm leading-relaxed">
                         "{photo.note_expert || "L'expert n'a ajouté aucun commentaire pour ce constat."}"
                       </p>
-                   </div>
+                    </div>
                 </div>
               )) : (
                 <div className="col-span-full py-20 text-center bg-white rounded-[3rem] border border-dashed border-slate-200 text-slate-400 font-serif italic">

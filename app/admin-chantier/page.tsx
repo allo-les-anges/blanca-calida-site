@@ -5,7 +5,7 @@ import { createClient } from '@supabase/supabase-js';
 import { 
   Camera, Lock, Loader2, ArrowRight, 
   Search, MapPin, HardHat, LogOut, ChevronDown, 
-  Trash2, Send, X
+  Trash2, Send, X, Home // Import de Home ajouté
 } from 'lucide-react';
 
 const supabase = createClient(
@@ -109,19 +109,13 @@ export default function AdminChantier() {
     setStatus("Publication...");
 
     try {
-      // A. Mise à jour de la table principale
-      // On ne met à jour QUE le lien_photo et la date système
       const { error: updateError } = await supabase.from('suivi_chantier').update({ 
         lien_photo: sessionPhotos[sessionPhotos.length - 1].url,
         updated_at: new Date().toISOString() 
       }).eq('id', project.id);
 
-      if (updateError) {
-        console.error("Erreur Table Principale:", updateError);
-        throw updateError;
-      }
+      if (updateError) throw updateError;
 
-      // B. Sauvegarde individuelle (C'est ICI que Make est déclenché)
       const photosToInsert = sessionPhotos.map(p => ({
         id_projet: project.id,
         url_image: p.url,
@@ -131,18 +125,13 @@ export default function AdminChantier() {
 
       const { error: insertError } = await supabase.from('constats-photos').insert(photosToInsert);
       
-      if (insertError) {
-        console.error("Erreur Constats-Photos:", insertError);
-        throw insertError;
-      }
+      if (insertError) throw insertError;
 
-      // Mise à jour locale de l'interface
       setProject({...project, updates: [...(project.updates || []), ...sessionPhotos]});
       setSessionPhotos([]);
       setStatus("Rapport envoyé !");
       
     } catch (err: any) {
-      // En ajoutant ": any", TypeScript te laissera lire .message
       alert(`Erreur Database: ${err.message || "Une erreur inconnue est survenue"}`);
     } finally {
       setLoading(false);
@@ -150,10 +139,18 @@ export default function AdminChantier() {
     }
   };
 
-  // --- RENDU UI (Identique à ton design précédent) ---
+  // --- RENDU UI ---
   if (!isAuthorized) {
     return (
-      <div className="min-h-screen bg-[#050505] flex items-center justify-center p-8 text-white">
+      <div className="min-h-screen bg-[#050505] flex items-center justify-center p-8 text-white relative">
+        {/* BOUTON RETOUR ACCUEIL (HORS CONNEXION) */}
+        <button 
+          onClick={() => window.location.href = '/'}
+          className="absolute top-8 left-8 flex items-center gap-2 text-slate-500 hover:text-white transition-colors text-[10px] font-black uppercase tracking-widest"
+        >
+          <Home size={16} /> Retour Accueil
+        </button>
+
         <div className="w-full max-w-md space-y-12 text-center">
           <div className="space-y-4">
             <div className="w-24 h-24 bg-gradient-to-tr from-indigo-600 to-violet-500 rounded-[2.5rem] flex items-center justify-center mx-auto border border-white/10 shadow-[0_0_50px_rgba(79,70,229,0.3)]">
@@ -179,15 +176,26 @@ export default function AdminChantier() {
       <header className="sticky top-0 z-50 bg-black/60 backdrop-blur-2xl border-b border-white/5 px-6 py-5">
         <div className="max-w-xl mx-auto flex justify-between items-center">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-indigo-500 rounded-2xl flex items-center justify-center text-white italic font-serif text-xl">
-              {agentName.charAt(0)}
-            </div>
-            <div>
-              <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold">Agent Terrain</p>
-              <h2 className="text-sm font-bold tracking-tight">{agentName}</h2>
+            {/* BOUTON HOME DANS LE HEADER (CONNECTÉ) */}
+            <button 
+              onClick={() => window.location.href = '/'}
+              className="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center text-slate-400 hover:text-white border border-white/5 transition-colors"
+              title="Retour à l'accueil"
+            >
+              <Home size={18} />
+            </button>
+            <div className="h-8 w-[1px] bg-white/10 mx-1" />
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-indigo-500 rounded-xl flex items-center justify-center text-white italic font-serif text-lg">
+                {agentName.charAt(0)}
+              </div>
+              <div className="hidden sm:block">
+                <p className="text-[9px] uppercase tracking-widest text-slate-500 font-bold">Agent</p>
+                <h2 className="text-xs font-bold tracking-tight">{agentName}</h2>
+              </div>
             </div>
           </div>
-          <button onClick={() => setIsAuthorized(false)} className="p-3 bg-white/5 hover:text-red-500 rounded-2xl border border-white/5">
+          <button onClick={() => setIsAuthorized(false)} className="p-3 bg-white/5 hover:text-red-500 rounded-2xl border border-white/5 transition-colors">
             <LogOut size={20} />
           </button>
         </div>
@@ -195,8 +203,8 @@ export default function AdminChantier() {
 
       <main className="max-w-xl mx-auto p-6 space-y-8">
         {!project ? (
-          <div className="space-y-8 pt-10">
-            <div className="text-center space-y-2">
+          <div className="space-y-8 pt-10 text-left">
+            <div className="space-y-2">
               <h3 className="text-2xl font-serif italic text-slate-300">Quel chantier visitez-vous ?</h3>
             </div>
             <div className="relative group">
@@ -208,7 +216,7 @@ export default function AdminChantier() {
             </div>
           </div>
         ) : (
-          <div className="space-y-6">
+          <div className="space-y-6 text-left">
             <div className="relative overflow-hidden bg-indigo-600 rounded-[3rem] p-8 shadow-2xl shadow-indigo-900/20">
               <div className="absolute top-0 right-0 p-8 opacity-20"><HardHat size={80} /></div>
               <div className="relative z-10 space-y-1">
