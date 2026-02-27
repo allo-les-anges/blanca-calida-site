@@ -127,16 +127,18 @@ export default function AdminChantier() {
     setStatus("Publication...");
 
     try {
-      // A. Mise à jour de la table principale (Utilisation de updated_at)
+      // A. Mise à jour de la table principale
+      // On retire TOUTES les colonnes de date (derniere_mise_a_jour, updated_at)
+      // pour éviter toute erreur de schéma.
       const { error: updateError } = await supabase.from('suivi_chantier').update({ 
         lien_photo: sessionPhotos[sessionPhotos.length - 1].url,
-        updates: [...(project.updates || []), ...sessionPhotos],
-        updated_at: new Date().toISOString() 
+        updates: [...(project.updates || []), ...sessionPhotos]
       }).eq('id', project.id);
 
       if (updateError) throw updateError;
 
-      // B. Sauvegarde dans 'constats-photos' (Signal pour Make)
+      // B. Sauvegarde individuelle dans 'constats-photos'
+      // C'est ce qui déclenche ton Webhook Make !
       const photosToInsert = sessionPhotos.map(p => ({
         id_projet: project.id,
         url_image: p.url,
@@ -151,7 +153,7 @@ export default function AdminChantier() {
       setSessionPhotos([]);
       setStatus("Rapport envoyé !");
     } catch (err: any) {
-      console.error("Détails de l'erreur:", err);
+      console.error("Erreur Database:", err);
       alert(`Erreur Database: ${err.message}`);
     } finally {
       setLoading(false);
