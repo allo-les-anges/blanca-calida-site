@@ -8,14 +8,8 @@ const supabase = createClient(
 );
 
 const SOURCES = [
-  {
-    region: "Costa Calida",
-    url: "https://medianewbuild.com/file/hh-media-bucket/agents/6d5cb68a-3636-4095-b0ce-7dc9ec2df2d2/feed_blanca_calida.xml"
-  },
-  {
-    region: "Costa del Sol",
-    url: "https://medianewbuild.com/file/hh-media-bucket/agents/6d5cb68a-3636-4095-b0ce-7dc9ec2df2d2/feed_sol.xml"
-  }
+  { region: "Costa Calida", url: "https://medianewbuild.com/file/hh-media-bucket/agents/6d5cb68a-3636-4095-b0ce-7dc9ec2df2d2/feed_blanca_calida.xml" },
+  { region: "Costa del Sol", url: "https://medianewbuild.com/file/hh-media-bucket/agents/6d5cb68a-3636-4095-b0ce-7dc9ec2df2d2/feed_sol.xml" }
 ];
 
 export async function GET() {
@@ -23,78 +17,48 @@ export async function GET() {
     let totalSynced = 0;
 
     for (const source of SOURCES) {
-      console.log(`Début de synchro pour: ${source.region}`);
-      
       const response = await fetch(source.url, { cache: 'no-store' });
       const xmlText = await response.text();
       
-      const parser = new xml2js.Parser({ 
-        explicitArray: false, 
-        mergeAttrs: true 
-      });
-      
+      const parser = new xml2js.Parser({ explicitArray: true }); // Plus sûr pour parcourir
       const result = await parser.parseStringPromise(xmlText);
       
-      // Sécurité : Habihub peut avoir une racine <root> ou directement <properties>
-      const dataRoot = result.properties || result.root?.properties;
-      const properties = dataRoot?.property || [];
-      
-      // Forcer en tableau si un seul bien est présent
-      const propertyArray = Array.isArray(properties) ? properties : [properties];
+      // LOGIQUE DE RECHERCHE DYNAMIQUE :
+      // On cherche la balise 'property' peu importe où elle est (root, properties, etc.)
+      const rootKey = Object.keys(result)[0]; // Souvent 'root' ou 'properties'
+      const dataLevel = result[rootKey];
+      const properties = dataLevel.property || dataLevel.properties?.property || [];
 
-      if (propertyArray.length === 0 || !propertyArray[0]) {
-        console.warn(`Aucun bien trouvé pour ${source.region}`);
-        continue;
-      }
+      if (properties.length === 0) continue;
 
-      const updates = propertyArray.map((p: any) => {
-        // Normalisation des images
-        let imgList = [];
-        if (p.images?.image) {
-          imgList = Array.isArray(p.images.image) ? p.images.image : [p.images.image];
-        }
+      const updates = properties.map((p: any) => {
+        // Habihub met souvent les valeurs dans des tableaux [0] avec explicitArray: true
+        const getVal = (field: any) => Array.isArray(field) ? field[0] : field;
 
         return {
-          id_externe: String(p.id),
-          titre: p.title?.fr || p.title?.en || p.title || "Villa",
-          prix: parseFloat(p.price) || 0,
+          id_externe: String(getVal(p.id)),
+          titre: getVal(p.title)?.fr || getVal(p.title)?.en || "Villa",
+          prix: parseFloat(getVal(p.price)) || 0,
           region: source.region,
-          ville: p.location?.city || "",
-          images: imgList,
+          ville: getVal(p.location)?.city || "",
+          images: p.images?.[0]?.image || [], // Liste des images
           details: {
-            chambres: p.bedrooms || 0,
-            salles_de_bain: p.bathrooms || 0,
-            surface: p.size || 0,
-            type: p.type || "Bien",
-            reference: p.reference || ""
+            chambres: getVal(p.bedrooms),
+            bains: getVal(p.bathrooms),
+            surface: getVal(p.size),
+            ref: getVal(p.reference)
           },
           updated_at: new Date().toISOString()
         };
       });
 
-      // Envoi par paquets (batch) pour plus de fiabilité
-      const { error } = await supabase
-        .from('villas')
-        .upsert(updates, { 
-          onConflict: 'id_externe',
-          ignoreDuplicates: false 
-        });
-
-      if (error) {
-        console.error(`Erreur Supabase pour ${source.region}:`, error.message);
-      } else {
-        totalSynced += updates.length;
-      }
+      const { error } = await supabase.from('villas').upsert(updates, { onConflict: 'id_externe' });
+      if (!error) totalSynced += updates.length;
     }
 
-    return NextResponse.json({ 
-      success: true, 
-      totalSynced,
-      regions: SOURCES.map(s => s.region)
-    });
+    return NextResponse.json({ success: true, totalSynced });
 
   } catch (error: any) {
-    console.error("Erreur critique:", error.message);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
