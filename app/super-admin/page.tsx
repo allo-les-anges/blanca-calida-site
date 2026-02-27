@@ -26,12 +26,8 @@ export default function SuperAdminDashboard() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [companyName, setCompanyName] = useState("");
-  const [loading, setLoading] = {
-    action: useState(false)[0], // État global pour les actions
-    isDeleting: useState<string | null>(null) // État spécifique pour la suppression par ID
-  };
   
-  // Correction pour la gestion des états de chargement
+  // États de chargement corrigés (déclarations individuelles)
   const [isGlobalLoading, setIsGlobalLoading] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
@@ -85,7 +81,6 @@ export default function SuperAdminDashboard() {
     }
   };
 
-  // --- NOUVELLE FONCTION DE SUPPRESSION ---
   const deleteAdminAccount = async (adminId: string, company: string) => {
     if (!confirm(`ATTENTION : Voulez-vous vraiment révoquer définitivement l'accès de l'agence "${company}" ?`)) {
       return;
@@ -93,9 +88,6 @@ export default function SuperAdminDashboard() {
 
     setDeletingId(adminId);
     try {
-      // Note: On supprime le profil. Pour supprimer l'utilisateur du Auth Supabase,
-      // il faudrait une Edge Function (Service Role), mais supprimer le profil
-      // révoque l'accès si vos RLS sont bien configurées.
       const { error } = await supabase
         .from('profiles')
         .delete()
@@ -236,7 +228,6 @@ export default function SuperAdminDashboard() {
                           Active
                         </div>
                         
-                        {/* BOUTON SUPPRIMER CORRIGÉ */}
                         <button 
                           onClick={() => deleteAdminAccount(admin.id, admin.company_name)}
                           disabled={deletingId === admin.id}
