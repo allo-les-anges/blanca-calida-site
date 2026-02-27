@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { 
-  Camera, Lock, CheckCircle, Loader2, ArrowRight, 
+  Camera, Lock, Loader2, ArrowRight, 
   Search, MapPin, HardHat, LogOut, ChevronDown, 
   Trash2, Send, X
 } from 'lucide-react';
@@ -22,24 +22,18 @@ const PHASES_CHANTIER = [
 ];
 
 export default function AdminChantier() {
-  // --- AUTH & UI STATES ---
   const [pin, setPin] = useState("");
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [agentName, setAgentName] = useState("");
   const [loading, setLoading] = useState(false);
-  
-  // --- PROJECT STATES ---
   const [searchRef, setSearchRef] = useState("");
   const [project, setProject] = useState<any>(null);
-  
-  // --- SESSION STATES ---
   const [sessionPhotos, setSessionPhotos] = useState<any[]>([]);
   const [comment, setComment] = useState("");
   const [uploading, setUploading] = useState(false);
   const [status, setStatus] = useState("");
   const [location, setLocation] = useState<{lat: number, lng: number} | null>(null);
 
-  // --- 1. CONNEXION ---
   const checkPin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -54,7 +48,6 @@ export default function AdminChantier() {
     setLoading(false);
   };
 
-  // --- 2. RECHERCHE ---
   const handleSearch = async () => {
     if (!searchRef) return;
     setLoading(true);
@@ -68,15 +61,12 @@ export default function AdminChantier() {
     setLoading(false);
   };
 
-  // --- 3. MISE À JOUR PHASE ---
   const handleUpdatePhase = async (newPhase: string) => {
     if (!project) return;
-    // Correction : Ajout de updated_at pour la cohérence
     const { error } = await supabase.from('suivi_chantier').update({ 
       etape_actuelle: newPhase,
       updated_at: new Date().toISOString()
     }).eq('id', project.id);
-    
     if (!error) {
       setProject({ ...project, etape_actuelle: newPhase });
       setStatus("Étape mise à jour");
@@ -84,22 +74,16 @@ export default function AdminChantier() {
     }
   };
 
-  // --- 4. CAPTURE PHOTO ---
   const handleCapture = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || !project) return;
     setUploading(true);
     setStatus("Téléchargement...");
-
     try {
       const file = e.target.files[0];
       const fileName = `${project.id}/session_${Date.now()}.jpg`;
-
-      // Correction : 'photos-chantier' en minuscules
       const { error: uploadError } = await supabase.storage.from('photos-chantier').upload(fileName, file);
       if (uploadError) throw uploadError;
-
       const { data: { publicUrl } } = supabase.storage.from('photos-chantier').getPublicUrl(fileName);
-
       const newPhoto = {
         url: publicUrl,
         commentaire: comment || "Photo de suivi",
@@ -108,7 +92,6 @@ export default function AdminChantier() {
         agent: agentName,
         gps: location
       };
-
       setSessionPhotos([...sessionPhotos, newPhoto]);
       setComment(""); 
       setStatus("Photo ajoutée !");
@@ -120,32 +103,26 @@ export default function AdminChantier() {
     }
   };
 
-  // --- 5. PUBLICATION FINALE (DÉCLENCHE LE WEBHOOK) ---
   const handleFinalSubmit = async () => {
     if (sessionPhotos.length === 0) return;
     setLoading(true);
     setStatus("Publication...");
-
     try {
-      // A. Mise à jour de la table principale
-      // On retire TOUTES les colonnes de date (derniere_mise_a_jour, updated_at)
-      // pour éviter toute erreur de schéma.
+      // Mise à jour suivi_chantier
       const { error: updateError } = await supabase.from('suivi_chantier').update({ 
         lien_photo: sessionPhotos[sessionPhotos.length - 1].url,
-        updates: [...(project.updates || []), ...sessionPhotos]
+        updates: [...(project.updates || []), ...sessionPhotos],
+        updated_at: new Date().toISOString() 
       }).eq('id', project.id);
-
       if (updateError) throw updateError;
 
-      // B. Sauvegarde individuelle dans 'constats-photos'
-      // C'est ce qui déclenche ton Webhook Make !
+      // Insertion constats-photos (Déclencheur Make)
       const photosToInsert = sessionPhotos.map(p => ({
         id_projet: project.id,
         url_image: p.url,
         note_expert: p.commentaire,
         created_at: p.date
       }));
-
       const { error: insertError } = await supabase.from('constats-photos').insert(photosToInsert);
       if (insertError) throw insertError;
 
@@ -153,7 +130,6 @@ export default function AdminChantier() {
       setSessionPhotos([]);
       setStatus("Rapport envoyé !");
     } catch (err: any) {
-      console.error("Erreur Database:", err);
       alert(`Erreur Database: ${err.message}`);
     } finally {
       setLoading(false);
@@ -161,28 +137,22 @@ export default function AdminChantier() {
     }
   };
 
+  // --- RENDU UI (Identique à ton design précédent) ---
   if (!isAuthorized) {
     return (
       <div className="min-h-screen bg-[#050505] flex items-center justify-center p-8 text-white">
         <div className="w-full max-w-md space-y-12 text-center">
           <div className="space-y-4">
-            <div className="w-24 h-24 bg-gradient-to-tr from-indigo-600 to-violet-500 rounded-[2.5rem] flex items-center justify-center mx-auto shadow-[0_0_50px_rgba(79,70,229,0.3)] border border-white/10">
+            <div className="w-24 h-24 bg-gradient-to-tr from-indigo-600 to-violet-500 rounded-[2.5rem] flex items-center justify-center mx-auto border border-white/10 shadow-[0_0_50px_rgba(79,70,229,0.3)]">
               <Lock size={38} className="text-white" />
             </div>
             <h1 className="text-4xl font-serif italic tracking-tight">Luxury Staff</h1>
             <p className="text-slate-500 text-[10px] uppercase tracking-[0.4em] font-bold">Terrain & Reporting</p>
           </div>
-
           <form onSubmit={checkPin} className="space-y-6">
-            <input 
-              type="password" 
-              inputMode="numeric" 
-              placeholder="••••" 
-              value={pin} 
-              onChange={(e) => setPin(e.target.value)} 
-              className="w-full bg-white/5 border border-white/10 rounded-[2rem] py-6 text-center text-3xl tracking-[1em] font-black focus:border-indigo-500 focus:bg-white/10 transition-all outline-none"
-            />
-            <button className="w-full bg-white text-black py-6 rounded-[2rem] font-black uppercase text-xs tracking-widest flex items-center justify-center gap-3 active:scale-95 transition-transform">
+            <input type="password" inputMode="numeric" placeholder="••••" value={pin} onChange={(e) => setPin(e.target.value)} 
+              className="w-full bg-white/5 border border-white/10 rounded-[2rem] py-6 text-center text-3xl tracking-[1em] font-black focus:border-indigo-500 outline-none transition-all" />
+            <button className="w-full bg-white text-black py-6 rounded-[2rem] font-black uppercase text-xs tracking-widest flex items-center justify-center gap-3">
               Connecter <ArrowRight size={18} />
             </button>
           </form>
@@ -192,12 +162,11 @@ export default function AdminChantier() {
   }
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white font-sans selection:bg-indigo-500/30">
-      
+    <div className="min-h-screen bg-[#050505] text-white font-sans">
       <header className="sticky top-0 z-50 bg-black/60 backdrop-blur-2xl border-b border-white/5 px-6 py-5">
         <div className="max-w-xl mx-auto flex justify-between items-center">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-indigo-500 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-500/20 text-white italic font-serif text-xl">
+            <div className="w-12 h-12 bg-indigo-500 rounded-2xl flex items-center justify-center text-white italic font-serif text-xl">
               {agentName.charAt(0)}
             </div>
             <div>
@@ -205,7 +174,7 @@ export default function AdminChantier() {
               <h2 className="text-sm font-bold tracking-tight">{agentName}</h2>
             </div>
           </div>
-          <button onClick={() => setIsAuthorized(false)} className="p-3 bg-white/5 hover:bg-red-500/10 hover:text-red-500 rounded-2xl transition-all border border-white/5">
+          <button onClick={() => setIsAuthorized(false)} className="p-3 bg-white/5 hover:text-red-500 rounded-2xl border border-white/5">
             <LogOut size={20} />
           </button>
         </div>
@@ -216,26 +185,17 @@ export default function AdminChantier() {
           <div className="space-y-8 pt-10">
             <div className="text-center space-y-2">
               <h3 className="text-2xl font-serif italic text-slate-300">Quel chantier visitez-vous ?</h3>
-              <p className="text-slate-500 text-xs">Entrez le nom de la villa ou du client</p>
             </div>
             <div className="relative group">
-              <input 
-                className="w-full pl-8 pr-20 py-7 bg-white/5 rounded-[2.5rem] border border-white/10 text-lg outline-none focus:border-indigo-500 focus:ring-4 ring-indigo-500/10 transition-all" 
-                placeholder="Ex: Villa Bianca..." 
-                value={searchRef} 
-                onChange={(e) => setSearchRef(e.target.value)} 
-              />
-              <button 
-                onClick={handleSearch} 
-                className="absolute right-3 top-1/2 -translate-y-1/2 bg-indigo-600 p-4 rounded-full text-white shadow-xl active:scale-90 transition-all"
-              >
+              <input className="w-full pl-8 pr-20 py-7 bg-white/5 rounded-[2.5rem] border border-white/10 text-lg outline-none focus:border-indigo-500 transition-all" 
+                placeholder="Ex: Villa Bianca..." value={searchRef} onChange={(e) => setSearchRef(e.target.value)} />
+              <button onClick={handleSearch} className="absolute right-3 top-1/2 -translate-y-1/2 bg-indigo-600 p-4 rounded-full text-white">
                 {loading ? <Loader2 className="animate-spin" /> : <Search size={24} />}
               </button>
             </div>
           </div>
         ) : (
-          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            
+          <div className="space-y-6">
             <div className="relative overflow-hidden bg-indigo-600 rounded-[3rem] p-8 shadow-2xl shadow-indigo-900/20">
               <div className="absolute top-0 right-0 p-8 opacity-20"><HardHat size={80} /></div>
               <div className="relative z-10 space-y-1">
@@ -253,11 +213,8 @@ export default function AdminChantier() {
                 Phase de construction
               </label>
               <div className="relative">
-                <select 
-                  value={project.etape_actuelle} 
-                  onChange={(e) => handleUpdatePhase(e.target.value)}
-                  className="w-full bg-black border border-white/5 p-6 rounded-2xl text-sm font-bold text-white appearance-none outline-none focus:border-indigo-500 transition-all"
-                >
+                <select value={project.etape_actuelle} onChange={(e) => handleUpdatePhase(e.target.value)}
+                  className="w-full bg-black border border-white/5 p-6 rounded-2xl text-sm font-bold text-white appearance-none outline-none focus:border-indigo-500 transition-all">
                   {PHASES_CHANTIER.map(phase => <option key={phase} value={phase}>{phase}</option>)}
                 </select>
                 <ChevronDown className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" size={18} />
@@ -275,10 +232,8 @@ export default function AdminChantier() {
                   {sessionPhotos.map((p, i) => (
                     <div key={i} className="relative flex-shrink-0 w-24 h-24 rounded-2xl overflow-hidden border border-white/10 group">
                       <img src={p.url} className="w-full h-full object-cover" alt="Pre-upload" />
-                      <button 
-                        onClick={() => setSessionPhotos(sessionPhotos.filter((_, idx) => idx !== i))}
-                        className="absolute inset-0 bg-red-600/80 opacity-0 group-active:opacity-100 flex items-center justify-center transition-opacity"
-                      >
+                      <button onClick={() => setSessionPhotos(sessionPhotos.filter((_, idx) => idx !== i))}
+                        className="absolute inset-0 bg-red-600/80 opacity-0 group-active:opacity-100 flex items-center justify-center transition-opacity">
                         <Trash2 size={20} />
                       </button>
                     </div>
@@ -286,21 +241,14 @@ export default function AdminChantier() {
                 </div>
               )}
 
-              <textarea 
-                className="w-full p-6 bg-black rounded-3xl border border-white/5 text-sm min-h-[120px] focus:border-indigo-500 outline-none transition-all placeholder:text-slate-700" 
-                placeholder="Observations sur le terrain..." 
-                value={comment} 
-                onChange={(e) => setComment(e.target.value)} 
-              />
+              <textarea className="w-full p-6 bg-black rounded-3xl border border-white/5 text-sm min-h-[120px] focus:border-indigo-500 outline-none transition-all placeholder:text-slate-700" 
+                placeholder="Observations sur le terrain..." value={comment} onChange={(e) => setComment(e.target.value)} />
               
               <div className="grid grid-cols-2 gap-4">
-                <button 
-                  onClick={() => { if(navigator.geolocation) navigator.geolocation.getCurrentPosition(pos => setLocation({lat: pos.coords.latitude, lng: pos.coords.longitude})) }} 
-                  className={`flex items-center justify-center gap-3 p-5 rounded-2xl border text-[10px] font-bold uppercase tracking-widest transition-all ${location ? 'bg-emerald-500/10 border-emerald-500/50 text-emerald-400' : 'bg-black border-white/5 text-slate-500'}`}
-                >
+                <button onClick={() => { if(navigator.geolocation) navigator.geolocation.getCurrentPosition(pos => setLocation({lat: pos.coords.latitude, lng: pos.coords.longitude})) }} 
+                  className={`flex items-center justify-center gap-3 p-5 rounded-2xl border text-[10px] font-bold uppercase tracking-widest transition-all ${location ? 'bg-emerald-500/10 border-emerald-500/50 text-emerald-400' : 'bg-black border-white/5 text-slate-500'}`}>
                   <MapPin size={16} /> {location ? 'GPS OK' : 'Localiser'}
                 </button>
-
                 <label className={`flex items-center justify-center gap-3 p-5 rounded-2xl border text-[10px] font-bold uppercase tracking-widest cursor-pointer active:scale-95 transition-all ${uploading ? 'bg-white/5 text-slate-500 border-white/5' : 'bg-white text-black border-white'}`}>
                   <input type="file" accept="image/*" capture="environment" className="hidden" onChange={handleCapture} disabled={uploading} />
                   {uploading ? <Loader2 className="animate-spin" size={16} /> : <><Camera size={16} /> Photo</>}
@@ -308,11 +256,8 @@ export default function AdminChantier() {
               </div>
 
               {sessionPhotos.length > 0 && (
-                <button 
-                  onClick={handleFinalSubmit}
-                  disabled={loading}
-                  className="w-full bg-indigo-600 text-white py-6 rounded-[2rem] font-black uppercase text-xs tracking-[0.2em] flex items-center justify-center gap-3 shadow-xl shadow-indigo-600/20 active:bg-indigo-700 transition-all"
-                >
+                <button onClick={handleFinalSubmit} disabled={loading}
+                  className="w-full bg-indigo-600 text-white py-6 rounded-[2rem] font-black uppercase text-xs tracking-[0.2em] flex items-center justify-center gap-3 shadow-xl shadow-indigo-600/20 active:bg-indigo-700 transition-all">
                   {loading ? <Loader2 className="animate-spin" /> : <><Send size={18} /> Publier le rapport ({sessionPhotos.length})</>}
                 </button>
               )}
