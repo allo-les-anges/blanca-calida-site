@@ -66,7 +66,7 @@ export default function LoginPage() {
         className="w-full max-w-md bg-[#0f172a] p-10 rounded-[2rem] border border-slate-800 shadow-2xl relative z-10"
       >
         <div className="text-center mb-10">
-          <h1 className="text-3xl font-serif italic text-emerald-500 tracking-tight">Blanca Calida</h1>
+          <h1 className="text-3xl font-serif italic text-emerald-500 tracking-tight">Master Template</h1>
           {/* TITRE MIS À JOUR ICI */}
           <p className="text-slate-500 text-[10px] uppercase tracking-[0.3em] mt-2 font-bold">Espace de Connexion</p>
         </div>
