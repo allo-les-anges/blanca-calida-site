@@ -90,10 +90,10 @@ export default function AdminChantier() {
       const fileName = `${project.id}/session_${Date.now()}.jpg`;
 
       // Correction ici : Utilisation du nom en MAJUSCULES comme vu sur tes politiques
-      const { error: uploadError } = await supabase.storage.from('PHOTOS-CHANTIER').upload(fileName, file);
+      const { error: uploadError } = await supabase.storage.from('photos-chantier').upload(fileName, file);
       if (uploadError) throw uploadError;
 
-      const { data: { publicUrl } } = supabase.storage.from('PHOTOS-CHANTIER').getPublicUrl(fileName);
+      const { data: { publicUrl } } = supabase.storage.from('photos-chantier').getPublicUrl(fileName);
 
       const newPhoto = {
         url: publicUrl,
