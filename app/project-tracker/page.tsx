@@ -14,21 +14,35 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
+// --- FONCTION UTILITAIRE (Extérieure au composant) ---
+const getBase64ImageFromURL = (url: string): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.setAttribute("crossOrigin", "anonymous");
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext("2d");
+      ctx?.drawImage(img, 0, 0);
+      resolve(canvas.toDataURL("image/jpeg"));
+    };
+    img.onerror = (error) => reject(error);
+    img.src = url;
+  });
+};
+
 export default function ClientDashboard() {
   const [projet, setProjet] = useState<any>(null);
   const [photos, setPhotos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isExporting, setIsExporting] = useState(false); // Pour le bouton PDF
 
   useEffect(() => {
     const fetchInitialData = async () => {
       const savedPin = localStorage.getItem("client_access_pin");
-      
-      if (!savedPin) {
-        window.location.href = "/";
-        return;
-      }
+      if (!savedPin) { window.location.href = "/"; return; }
 
-      // 1. Récupérer les infos du projet
       const { data: projectData } = await supabase
         .from("suivi_chantier")
         .select("*")
@@ -37,8 +51,6 @@ export default function ClientDashboard() {
 
       if (projectData) {
         setProjet(projectData);
-
-        // 2. Récupérer l'historique des photos
         const { data: photosData } = await supabase
           .from("constats-photos")
           .select("*")
@@ -47,71 +59,80 @@ export default function ClientDashboard() {
 
         if (photosData) setPhotos(photosData);
 
-        // 3. Temps réel (Realtime)
         const channel = supabase
           .channel('realtime-constats')
-          .on(
-            'postgres_changes',
-            { 
-              event: 'INSERT', 
-              schema: 'public', 
-              table: 'constats-photos', 
-              filter: `id_projet=eq.${projectData.id}` 
-            },
-            (payload) => {
-              setPhotos((prev) => [payload.new, ...prev]);
-            }
-          )
-          .subscribe();
+          .on('postgres_changes', { 
+            event: 'INSERT', 
+            schema: 'public', 
+            table: 'constats-photos', 
+            filter: `id_projet=eq.${projectData.id}` 
+          }, (payload) => {
+            setPhotos((prev) => [payload.new, ...prev]);
+          }).subscribe();
 
         setLoading(false);
         return () => { supabase.removeChannel(channel); };
       }
       setLoading(false);
     };
-
     fetchInitialData();
   }, []);
 
-  // --- FONCTION GÉNÉRATION PDF ---
-  const downloadPDF = () => {
-    if (!projet) return;
+  const downloadPDF = async () => {
+    if (!projet || photos.length === 0) return;
     
+    setIsExporting(true);
     const doc = new jsPDF();
     const dateExport = new Date().toLocaleDateString('fr-FR');
 
-    // Design du Header
-    doc.setFillColor(5, 150, 105); // Vert Emerald
+    // Header
+    doc.setFillColor(5, 150, 105);
     doc.rect(0, 0, 210, 40, 'F');
-    
     doc.setTextColor(255, 255, 255);
     doc.setFont("serif", "italic");
-    doc.setFontSize(24);
-    doc.text(`Rapport de Suivi : ${projet.nom_villa}`, 14, 25);
-    
+    doc.setFontSize(22);
+    doc.text(`Rapport Photo : ${projet.nom_villa}`, 14, 25);
+
+    // Infos
     doc.setTextColor(100, 116, 139);
     doc.setFontSize(10);
     doc.setFont("helvetica", "normal");
-    doc.text(`Propriétaire : ${projet.client_prenom} ${projet.client_nom}`, 14, 50);
-    doc.text(`Date du rapport : ${dateExport}`, 14, 55);
-    doc.text(`Localisation : ${projet.ville}`, 14, 60);
+    doc.text(`Date : ${dateExport}`, 14, 50);
+    doc.text(`Propriétaire : ${projet.client_prenom} ${projet.client_nom}`, 14, 55);
 
-    // Tableau des constats
-    const tableRows = photos.map((p) => [
-      new Date(p.created_at).toLocaleDateString('fr-FR'),
-      p.note_expert || "RAS"
-    ]);
+    // Préparation des données avec images
+    const rows = await Promise.all(photos.map(async (p) => {
+      try {
+        const base64 = await getBase64ImageFromURL(p.url_image);
+        return {
+          date: new Date(p.created_at).toLocaleDateString('fr-FR'),
+          note: p.note_expert || "RAS",
+          img: base64
+        };
+      } catch (e) {
+        return { date: new Date(p.created_at).toLocaleDateString('fr-FR'), note: p.note_expert || "RAS", img: null };
+      }
+    }));
 
     autoTable(doc, {
-      startY: 70,
-      head: [['Date', 'Observations de l\'expert']],
-      body: tableRows,
-      theme: 'grid',
-      headStyles: { fillColor: [5, 150, 105], fontStyle: 'bold' },
-      styles: { fontSize: 10, cellPadding: 5 },
+      startY: 65,
+      head: [['Aperçu', 'Date', 'Observations de l\'expert']],
+      body: rows.map(r => ['', r.date, r.note]),
+      columnStyles: { 0: { cellWidth: 40 } },
+      styles: { minCellHeight: 35, verticalAlign: 'middle' },
+      didDrawCell: (data) => {
+        if (data.section === 'body' && data.column.index === 0) {
+          const rowIndex = data.row.index;
+          const base64Img = rows[rowIndex].img;
+          if (base64Img) {
+            doc.addImage(base64Img, 'JPEG', data.cell.x + 2, data.cell.y + 2, 36, 31);
+          }
+        }
+      },
     });
 
-    doc.save(`Rapport_${projet.nom_villa}_${dateExport}.pdf`);
+    doc.save(`Rapport_${projet.nom_villa}.pdf`);
+    setIsExporting(false);
   };
 
   const handleLogout = () => {
@@ -126,13 +147,11 @@ export default function ClientDashboard() {
     </div>
   );
 
-  if (!projet) return <div className="p-20 text-center">Projet introuvable.</div>;
-
   return (
     <div className="min-h-screen bg-slate-50/50 pt-10 pb-20 px-6">
       <div className="max-w-7xl mx-auto space-y-10">
         
-        {/* NAV BAR RAPIDE */}
+        {/* NAV BAR */}
         <div className="flex justify-between items-center bg-white p-4 rounded-3xl shadow-sm border border-slate-100">
           <div className="flex items-center gap-3 ml-4">
             <HardHat className="text-emerald-600" size={20} />
@@ -141,19 +160,21 @@ export default function ClientDashboard() {
           <div className="flex gap-2">
             <button 
               onClick={downloadPDF}
-              className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-2xl transition-all text-xs font-bold"
+              disabled={isExporting}
+              className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-2xl transition-all text-xs font-bold disabled:opacity-50"
             >
-              <FileText size={16} /> Rapport PDF
+              {isExporting ? <Loader2 className="animate-spin" size={16} /> : <FileText size={16} />}
+              {isExporting ? "Génération..." : "Rapport PDF"}
             </button>
-            <button 
-              onClick={handleLogout}
-              className="p-2.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-2xl transition-all"
-            >
+            <button onClick={handleLogout} className="p-2.5 text-slate-400 hover:text-red-500 rounded-2xl transition-all">
               <LogOut size={20} />
             </button>
           </div>
         </div>
 
+        {/* ... RESTE DE TON CODE (Header & Journal) ... */}
+        {/* Assure-toi de garder ton code tel quel pour la section Header & Photos */}
+        
         {/* HEADER & PROGRESSION */}
         <div className="grid lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 bg-white rounded-[3rem] p-10 shadow-sm border border-slate-100 flex flex-col md:flex-row gap-10 items-center">
@@ -179,7 +200,6 @@ export default function ClientDashboard() {
             </div>
           </div>
 
-          {/* CASHBACK CARD */}
           <div className="bg-slate-900 rounded-[3rem] p-10 text-white flex flex-col justify-center relative overflow-hidden shadow-2xl text-left">
             <div className="relative z-10">
                 <h3 className="text-emerald-400 text-[10px] font-black uppercase tracking-[0.4em] mb-6">Cashback Cumulé</h3>
