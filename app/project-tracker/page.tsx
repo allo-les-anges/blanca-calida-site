@@ -119,7 +119,8 @@ export default function ClientDashboard() {
       head: [['Aperçu', 'Date', 'Observations de l\'expert']],
       body: rows.map(r => ['', r.date, r.note]),
       columnStyles: { 0: { cellWidth: 40 } },
-      styles: { minCellHeight: 35, verticalAlign: 'middle' },
+      // ICI : on remplace verticalAlign par valign
+      styles: { minCellHeight: 35, valign: 'middle' }, 
       didDrawCell: (data) => {
         if (data.section === 'body' && data.column.index === 0) {
           const rowIndex = data.row.index;
