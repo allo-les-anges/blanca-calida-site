@@ -5,7 +5,7 @@ import { createClient } from '@supabase/supabase-js';
 import { 
   Camera, Lock, CheckCircle, Loader2, ArrowRight, 
   Search, MapPin, HardHat, LogOut, ChevronDown, 
-  Trash2, Send, imageConfigDefault, X
+  Trash2, Send, X
 } from 'lucide-react';
 
 const supabase = createClient(
@@ -32,7 +32,7 @@ export default function AdminChantier() {
   const [searchRef, setSearchRef] = useState("");
   const [project, setProject] = useState<any>(null);
   
-  // --- SESSION STATES (Multi-photos) ---
+  // --- SESSION STATES ---
   const [sessionPhotos, setSessionPhotos] = useState<any[]>([]);
   const [comment, setComment] = useState("");
   const [uploading, setUploading] = useState(false);
@@ -79,7 +79,7 @@ export default function AdminChantier() {
     }
   };
 
-  // --- 4. CAPTURE PHOTO (AJOUT À LA SESSION) ---
+  // --- 4. CAPTURE PHOTO (AJOUT AU BUCKET MAJUSCULE) ---
   const handleCapture = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || !project) return;
     setUploading(true);
@@ -89,10 +89,11 @@ export default function AdminChantier() {
       const file = e.target.files[0];
       const fileName = `${project.id}/session_${Date.now()}.jpg`;
 
-      const { error: uploadError } = await supabase.storage.from('photos-chantier').upload(fileName, file);
+      // Correction ici : Utilisation du nom en MAJUSCULES comme vu sur tes politiques
+      const { error: uploadError } = await supabase.storage.from('PHOTOS-CHANTIER').upload(fileName, file);
       if (uploadError) throw uploadError;
 
-      const { data: { publicUrl } } = supabase.storage.from('photos-chantier').getPublicUrl(fileName);
+      const { data: { publicUrl } } = supabase.storage.from('PHOTOS-CHANTIER').getPublicUrl(fileName);
 
       const newPhoto = {
         url: publicUrl,
@@ -107,41 +108,51 @@ export default function AdminChantier() {
       setComment(""); 
       setStatus("Photo ajoutée !");
     } catch (err: any) {
-      alert(err.message);
+      alert(`Erreur Storage: ${err.message}`);
     } finally {
       setUploading(false);
       setTimeout(() => setStatus(""), 2000);
     }
   };
 
-  // --- 5. PUBLICATION FINALE ---
+  // --- 5. PUBLICATION FINALE (AVEC SAUVEGARDE TABLE CONSTATS-PHOTOS) ---
   const handleFinalSubmit = async () => {
     if (sessionPhotos.length === 0) return;
     setLoading(true);
-    setStatus("Publication du rapport...");
+    setStatus("Publication...");
 
     try {
-      const { error } = await supabase.from('suivi_chantier').update({ 
-        lien_photo: sessionPhotos[sessionPhotos.length - 1].url, // Dernière photo en couverture
-        commentaires_etape: "Mise à jour multiple",
+      // A. Mise à jour de la table principale
+      const { error: updateError } = await supabase.from('suivi_chantier').update({ 
+        lien_photo: sessionPhotos[sessionPhotos.length - 1].url,
         updates: [...(project.updates || []), ...sessionPhotos],
         derniere_mise_a_jour: new Date().toISOString()
       }).eq('id', project.id);
 
-      if (error) throw error;
+      if (updateError) throw updateError;
+
+      // B. Sauvegarde individuelle dans 'constats-photos'
+      const photosToInsert = sessionPhotos.map(p => ({
+        id_projet: project.id,
+        url_image: p.url,
+        note_expert: p.commentaire,
+        created_at: p.date
+      }));
+
+      const { error: insertError } = await supabase.from('constats-photos').insert(photosToInsert);
+      if (insertError) throw insertError;
 
       setProject({...project, updates: [...(project.updates || []), ...sessionPhotos]});
       setSessionPhotos([]);
       setStatus("Rapport envoyé !");
     } catch (err: any) {
-      alert(err.message);
+      alert(`Erreur Database: ${err.message}`);
     } finally {
       setLoading(false);
       setTimeout(() => setStatus(""), 3000);
     }
   };
 
-  // Ecran de Login
   if (!isAuthorized) {
     return (
       <div className="min-h-screen bg-[#050505] flex items-center justify-center p-8 text-white">
@@ -175,7 +186,6 @@ export default function AdminChantier() {
   return (
     <div className="min-h-screen bg-[#050505] text-white font-sans selection:bg-indigo-500/30">
       
-      {/* HEADER PREMIUM */}
       <header className="sticky top-0 z-50 bg-black/60 backdrop-blur-2xl border-b border-white/5 px-6 py-5">
         <div className="max-w-xl mx-auto flex justify-between items-center">
           <div className="flex items-center gap-4">
@@ -194,8 +204,6 @@ export default function AdminChantier() {
       </header>
 
       <main className="max-w-xl mx-auto p-6 space-y-8">
-        
-        {/* RECHERCHE VILLA */}
         {!project ? (
           <div className="space-y-8 pt-10">
             <div className="text-center space-y-2">
@@ -220,7 +228,6 @@ export default function AdminChantier() {
         ) : (
           <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
             
-            {/* CARTE VILLA ACTUELLE */}
             <div className="relative overflow-hidden bg-indigo-600 rounded-[3rem] p-8 shadow-2xl shadow-indigo-900/20">
               <div className="absolute top-0 right-0 p-8 opacity-20"><HardHat size={80} /></div>
               <div className="relative z-10 space-y-1">
@@ -232,7 +239,6 @@ export default function AdminChantier() {
               </div>
             </div>
 
-            {/* SÉLECTEUR DE PHASE */}
             <div className="bg-[#111] rounded-[2.5rem] p-7 border border-white/5 space-y-4">
               <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
                 <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-pulse" />
@@ -250,19 +256,17 @@ export default function AdminChantier() {
               </div>
             </div>
 
-            {/* SECTION SESSION PHOTOS */}
             <div className="bg-[#111] rounded-[3rem] p-7 border border-white/5 space-y-6">
               <div className="flex justify-between items-center">
                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Nouveau Constat</label>
                 {status && <span className="text-[10px] font-bold text-indigo-400 animate-pulse uppercase tracking-tighter">{status}</span>}
               </div>
 
-              {/* Prévisualisation des photos de la session */}
               {sessionPhotos.length > 0 && (
                 <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar">
                   {sessionPhotos.map((p, i) => (
                     <div key={i} className="relative flex-shrink-0 w-24 h-24 rounded-2xl overflow-hidden border border-white/10 group">
-                      <img src={p.url} className="w-full h-full object-cover" />
+                      <img src={p.url} className="w-full h-full object-cover" alt="Pre-upload" />
                       <button 
                         onClick={() => setSessionPhotos(sessionPhotos.filter((_, idx) => idx !== i))}
                         className="absolute inset-0 bg-red-600/80 opacity-0 group-active:opacity-100 flex items-center justify-center transition-opacity"
@@ -309,7 +313,6 @@ export default function AdminChantier() {
         )}
       </main>
 
-      {/* Style additionnel pour masquer la scrollbar */}
       <style jsx global>{`
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
