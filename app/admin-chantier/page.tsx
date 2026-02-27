@@ -107,29 +107,41 @@ export default function AdminChantier() {
     if (sessionPhotos.length === 0) return;
     setLoading(true);
     setStatus("Publication...");
+
     try {
-      // Mise à jour suivi_chantier
+      // A. Mise à jour de la table principale
+      // On ne met à jour QUE le lien_photo et la date système
       const { error: updateError } = await supabase.from('suivi_chantier').update({ 
         lien_photo: sessionPhotos[sessionPhotos.length - 1].url,
-        updates: [...(project.updates || []), ...sessionPhotos],
         updated_at: new Date().toISOString() 
       }).eq('id', project.id);
-      if (updateError) throw updateError;
 
-      // Insertion constats-photos (Déclencheur Make)
+      if (updateError) {
+        console.error("Erreur Table Principale:", updateError);
+        throw updateError;
+      }
+
+      // B. Sauvegarde individuelle (C'est ICI que Make est déclenché)
       const photosToInsert = sessionPhotos.map(p => ({
         id_projet: project.id,
         url_image: p.url,
         note_expert: p.commentaire,
         created_at: p.date
       }));
-      const { error: insertError } = await supabase.from('constats-photos').insert(photosToInsert);
-      if (insertError) throw insertError;
 
+      const { error: insertError } = await supabase.from('constats-photos').insert(photosToInsert);
+      
+      if (insertError) {
+        console.error("Erreur Constats-Photos:", insertError);
+        throw insertError;
+      }
+
+      // Mise à jour locale de l'interface
       setProject({...project, updates: [...(project.updates || []), ...sessionPhotos]});
       setSessionPhotos([]);
       setStatus("Rapport envoyé !");
-    } catch (err: any) {
+      
+    } catch (err) {
       alert(`Erreur Database: ${err.message}`);
     } finally {
       setLoading(false);
