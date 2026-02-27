@@ -71,7 +71,12 @@ export default function AdminChantier() {
   // --- 3. MISE À JOUR PHASE ---
   const handleUpdatePhase = async (newPhase: string) => {
     if (!project) return;
-    const { error } = await supabase.from('suivi_chantier').update({ etape_actuelle: newPhase }).eq('id', project.id);
+    // Correction : Ajout de updated_at pour la cohérence
+    const { error } = await supabase.from('suivi_chantier').update({ 
+      etape_actuelle: newPhase,
+      updated_at: new Date().toISOString()
+    }).eq('id', project.id);
+    
     if (!error) {
       setProject({ ...project, etape_actuelle: newPhase });
       setStatus("Étape mise à jour");
@@ -79,7 +84,7 @@ export default function AdminChantier() {
     }
   };
 
-  // --- 4. CAPTURE PHOTO (AJOUT AU BUCKET MAJUSCULE) ---
+  // --- 4. CAPTURE PHOTO ---
   const handleCapture = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || !project) return;
     setUploading(true);
@@ -89,7 +94,7 @@ export default function AdminChantier() {
       const file = e.target.files[0];
       const fileName = `${project.id}/session_${Date.now()}.jpg`;
 
-      // Correction ici : Utilisation du nom en MAJUSCULES comme vu sur tes politiques
+      // Correction : 'photos-chantier' en minuscules
       const { error: uploadError } = await supabase.storage.from('photos-chantier').upload(fileName, file);
       if (uploadError) throw uploadError;
 
@@ -115,23 +120,23 @@ export default function AdminChantier() {
     }
   };
 
-  // --- 5. PUBLICATION FINALE (AVEC SAUVEGARDE TABLE CONSTATS-PHOTOS) ---
+  // --- 5. PUBLICATION FINALE (DÉCLENCHE LE WEBHOOK) ---
   const handleFinalSubmit = async () => {
     if (sessionPhotos.length === 0) return;
     setLoading(true);
     setStatus("Publication...");
 
     try {
-      // A. Mise à jour de la table principale
+      // A. Mise à jour de la table principale (Utilisation de updated_at)
       const { error: updateError } = await supabase.from('suivi_chantier').update({ 
         lien_photo: sessionPhotos[sessionPhotos.length - 1].url,
         updates: [...(project.updates || []), ...sessionPhotos],
-        derniere_mise_a_jour: new Date().toISOString()
+        updated_at: new Date().toISOString() 
       }).eq('id', project.id);
 
       if (updateError) throw updateError;
 
-      // B. Sauvegarde individuelle dans 'constats-photos'
+      // B. Sauvegarde dans 'constats-photos' (Signal pour Make)
       const photosToInsert = sessionPhotos.map(p => ({
         id_projet: project.id,
         url_image: p.url,
@@ -146,6 +151,7 @@ export default function AdminChantier() {
       setSessionPhotos([]);
       setStatus("Rapport envoyé !");
     } catch (err: any) {
+      console.error("Détails de l'erreur:", err);
       alert(`Erreur Database: ${err.message}`);
     } finally {
       setLoading(false);
