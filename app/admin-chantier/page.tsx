@@ -141,8 +141,9 @@ export default function AdminChantier() {
       setSessionPhotos([]);
       setStatus("Rapport envoyé !");
       
-    } catch (err) {
-      alert(`Erreur Database: ${err.message}`);
+    } catch (err: any) {
+      // En ajoutant ": any", TypeScript te laissera lire .message
+      alert(`Erreur Database: ${err.message || "Une erreur inconnue est survenue"}`);
     } finally {
       setLoading(false);
       setTimeout(() => setStatus(""), 3000);
