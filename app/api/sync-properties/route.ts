@@ -7,7 +7,6 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-// 1. Configuration des flux (Tu pourras plus tard mettre ça dans une table Supabase)
 const SOURCES = [
   {
     region: "Costa Calida",
@@ -24,44 +23,78 @@ export async function GET() {
     let totalSynced = 0;
 
     for (const source of SOURCES) {
-      const response = await fetch(source.url);
+      console.log(`Début de synchro pour: ${source.region}`);
+      
+      const response = await fetch(source.url, { cache: 'no-store' });
       const xmlText = await response.text();
       
-      const parser = new xml2js.Parser({ explicitArray: false });
+      const parser = new xml2js.Parser({ 
+        explicitArray: false, 
+        mergeAttrs: true 
+      });
+      
       const result = await parser.parseStringPromise(xmlText);
       
-      // Extraction des propriétés (vérifie si c'est result.properties.property)
-      const properties = result.properties?.property || [];
+      // Sécurité : Habihub peut avoir une racine <root> ou directement <properties>
+      const dataRoot = result.properties || result.root?.properties;
+      const properties = dataRoot?.property || [];
+      
+      // Forcer en tableau si un seul bien est présent
       const propertyArray = Array.isArray(properties) ? properties : [properties];
 
-      const updates = propertyArray.map((p: any) => ({
-        id_externe: p.id,
-        titre: p.title?.['fr'] || p.title?.['en'] || "Villa",
-        prix: parseFloat(p.price) || 0,
-        region: source.region, // <--- C'est ici qu'on marque la zone !
-        ville: p.location?.city || "",
-        images: Array.isArray(p.images?.image) ? p.images.image : [p.images?.image],
-        details: {
-          chambres: p.bedrooms,
-          salles_de_bain: p.bathrooms,
-          surface: p.size,
-          type: p.type
-        },
-        updated_at: new Date()
-      }));
+      if (propertyArray.length === 0 || !propertyArray[0]) {
+        console.warn(`Aucun bien trouvé pour ${source.region}`);
+        continue;
+      }
 
-      // Upsert dans Supabase
+      const updates = propertyArray.map((p: any) => {
+        // Normalisation des images
+        let imgList = [];
+        if (p.images?.image) {
+          imgList = Array.isArray(p.images.image) ? p.images.image : [p.images.image];
+        }
+
+        return {
+          id_externe: String(p.id),
+          titre: p.title?.fr || p.title?.en || p.title || "Villa",
+          prix: parseFloat(p.price) || 0,
+          region: source.region,
+          ville: p.location?.city || "",
+          images: imgList,
+          details: {
+            chambres: p.bedrooms || 0,
+            salles_de_bain: p.bathrooms || 0,
+            surface: p.size || 0,
+            type: p.type || "Bien",
+            reference: p.reference || ""
+          },
+          updated_at: new Date().toISOString()
+        };
+      });
+
+      // Envoi par paquets (batch) pour plus de fiabilité
       const { error } = await supabase
         .from('villas')
-        .upsert(updates, { onConflict: 'id_externe' });
+        .upsert(updates, { 
+          onConflict: 'id_externe',
+          ignoreDuplicates: false 
+        });
 
-      if (error) console.error(`Erreur pour ${source.region}:`, error);
-      totalSynced += updates.length;
+      if (error) {
+        console.error(`Erreur Supabase pour ${source.region}:`, error.message);
+      } else {
+        totalSynced += updates.length;
+      }
     }
 
-    return NextResponse.json({ success: true, totalSynced });
+    return NextResponse.json({ 
+      success: true, 
+      totalSynced,
+      regions: SOURCES.map(s => s.region)
+    });
 
   } catch (error: any) {
+    console.error("Erreur critique:", error.message);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
