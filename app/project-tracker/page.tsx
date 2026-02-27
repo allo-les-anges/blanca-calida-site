@@ -1,10 +1,13 @@
 "use client";
+
 import React, { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { 
   HardHat, Camera, Download, Calendar, 
-  MapPin, Loader2, ChevronRight 
+  MapPin, Loader2, ChevronRight, FileText, LogOut
 } from "lucide-react";
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!, 
@@ -35,7 +38,7 @@ export default function ClientDashboard() {
       if (projectData) {
         setProjet(projectData);
 
-        // 2. Récupérer l'historique des photos de la table dédiée
+        // 2. Récupérer l'historique des photos
         const { data: photosData } = await supabase
           .from("constats-photos")
           .select("*")
@@ -44,7 +47,7 @@ export default function ClientDashboard() {
 
         if (photosData) setPhotos(photosData);
 
-        // 3. Écouter les ajouts en temps réel (Realtime)
+        // 3. Temps réel (Realtime)
         const channel = supabase
           .channel('realtime-constats')
           .on(
@@ -70,19 +73,87 @@ export default function ClientDashboard() {
     fetchInitialData();
   }, []);
 
+  // --- FONCTION GÉNÉRATION PDF ---
+  const downloadPDF = () => {
+    if (!projet) return;
+    
+    const doc = new jsPDF();
+    const dateExport = new Date().toLocaleDateString('fr-FR');
+
+    // Design du Header
+    doc.setFillColor(5, 150, 105); // Vert Emerald
+    doc.rect(0, 0, 210, 40, 'F');
+    
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("serif", "italic");
+    doc.setFontSize(24);
+    doc.text(`Rapport de Suivi : ${projet.nom_villa}`, 14, 25);
+    
+    doc.setTextColor(100, 116, 139);
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.text(`Propriétaire : ${projet.client_prenom} ${projet.client_nom}`, 14, 50);
+    doc.text(`Date du rapport : ${dateExport}`, 14, 55);
+    doc.text(`Localisation : ${projet.ville}`, 14, 60);
+
+    // Tableau des constats
+    const tableRows = photos.map((p) => [
+      new Date(p.created_at).toLocaleDateString('fr-FR'),
+      p.note_expert || "RAS"
+    ]);
+
+    autoTable(doc, {
+      startY: 70,
+      head: [['Date', 'Observations de l\'expert']],
+      body: tableRows,
+      theme: 'grid',
+      headStyles: { fillColor: [5, 150, 105], fontStyle: 'bold' },
+      styles: { fontSize: 10, cellPadding: 5 },
+    });
+
+    doc.save(`Rapport_${projet.nom_villa}_${dateExport}.pdf`);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("client_access_pin");
+    window.location.href = "/";
+  };
+
   if (loading) return (
     <div className="h-screen flex flex-col items-center justify-center bg-slate-50">
       <Loader2 className="animate-spin mb-4 text-emerald-600" size={40} />
-      <span className="font-serif italic text-xl text-slate-900">Chargement de votre villa...</span>
+      <span className="font-serif italic text-xl text-slate-900">Préparation de votre visite...</span>
     </div>
   );
 
-  if (!projet) return <div className="p-20 text-center">Aucun projet trouvé.</div>;
+  if (!projet) return <div className="p-20 text-center">Projet introuvable.</div>;
 
   return (
-    <div className="min-h-screen bg-slate-50/50 pt-20 pb-20 px-6">
+    <div className="min-h-screen bg-slate-50/50 pt-10 pb-20 px-6">
       <div className="max-w-7xl mx-auto space-y-10">
         
+        {/* NAV BAR RAPIDE */}
+        <div className="flex justify-between items-center bg-white p-4 rounded-3xl shadow-sm border border-slate-100">
+          <div className="flex items-center gap-3 ml-4">
+            <HardHat className="text-emerald-600" size={20} />
+            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Suivi Chantier Premium</span>
+          </div>
+          <div className="flex gap-2">
+            <button 
+              onClick={downloadPDF}
+              className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-2xl transition-all text-xs font-bold"
+            >
+              <FileText size={16} /> Rapport PDF
+            </button>
+            <button 
+              onClick={handleLogout}
+              className="p-2.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-2xl transition-all"
+            >
+              <LogOut size={20} />
+            </button>
+          </div>
+        </div>
+
         {/* HEADER & PROGRESSION */}
         <div className="grid lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 bg-white rounded-[3rem] p-10 shadow-sm border border-slate-100 flex flex-col md:flex-row gap-10 items-center">
@@ -90,8 +161,8 @@ export default function ClientDashboard() {
                <img src={projet.lien_photo || "/placeholder-villa.jpg"} className="w-full h-full object-cover" alt="Villa" />
             </div>
             <div className="flex-1 w-full text-left">
-               <span className="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-600 mb-4 block">Espace Propriétaire</span>
-               <h1 className="text-5xl font-serif italic text-slate-900 mb-4 tracking-tight">{projet.nom_villa}</h1>
+               <span className="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-600 mb-4 block">Votre Propriété</span>
+               <h1 className="text-5xl font-serif italic text-slate-900 mb-2 tracking-tight">{projet.nom_villa}</h1>
                <div className="flex items-center text-slate-400 text-xs font-bold uppercase tracking-widest gap-2 mb-8">
                  <MapPin size={14} className="text-emerald-500"/> {projet.ville}
                </div>
@@ -102,15 +173,14 @@ export default function ClientDashboard() {
                     <span className="text-emerald-600">{projet.etape_actuelle}</span>
                   </div>
                   <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
-                    {/* On peut calculer dynamiquement le % ici plus tard */}
-                    <div className="h-full bg-emerald-500 transition-all duration-1000" style={{ width: '65%' }}></div>
+                    <div className="h-full bg-emerald-500 transition-all duration-1000" style={{ width: '75%' }}></div>
                   </div>
                </div>
             </div>
           </div>
 
           {/* CASHBACK CARD */}
-          <div className="bg-slate-950 rounded-[3rem] p-10 text-white flex flex-col justify-center relative overflow-hidden shadow-2xl text-left">
+          <div className="bg-slate-900 rounded-[3rem] p-10 text-white flex flex-col justify-center relative overflow-hidden shadow-2xl text-left">
             <div className="relative z-10">
                 <h3 className="text-emerald-400 text-[10px] font-black uppercase tracking-[0.4em] mb-6">Cashback Cumulé</h3>
                 <div className="text-6xl font-serif italic mb-4">
@@ -118,41 +188,46 @@ export default function ClientDashboard() {
                 </div>
                 <p className="text-slate-500 text-[10px] uppercase tracking-widest font-bold">Crédité à la livraison</p>
             </div>
-            <Download className="absolute -right-10 -bottom-10 opacity-10 rotate-12" size={200}/>
+            <Download className="absolute -right-10 -bottom-10 opacity-10 rotate-12 text-emerald-500" size={200}/>
           </div>
         </div>
 
-        {/* JOURNAL DE BORD (REALTIME) */}
+        {/* JOURNAL DE BORD */}
         <div className="space-y-8">
-            <h2 className="text-3xl font-serif italic flex items-center gap-4 text-left">
-               <Camera className="text-emerald-500" size={30} /> Journal du chantier
-            </h2>
+            <div className="flex justify-between items-end px-4">
+              <h2 className="text-3xl font-serif italic flex items-center gap-4 text-left">
+                  <Camera className="text-emerald-500" size={30} /> Journal du chantier
+              </h2>
+              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                {photos.length} Mises à jour
+              </span>
+            </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {photos.length > 0 ? photos.map((photo) => (
-                <div key={photo.id} className="bg-white rounded-[2.5rem] overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl transition-all group">
+                <div key={photo.id} className="bg-white rounded-[2.5rem] overflow-hidden border border-slate-100 shadow-sm hover:shadow-xl transition-all group animate-in fade-in slide-in-from-bottom-4">
                    <div className="h-64 overflow-hidden relative">
                       <img src={photo.url_image} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="Constat" />
                       <div className="absolute top-4 right-4">
                          <span className="text-[9px] font-bold text-white bg-black/50 backdrop-blur-md px-3 py-1.5 rounded-full uppercase tracking-widest">
-                            Officiel
+                            Rapport Officiel
                          </span>
                       </div>
                    </div>
                    <div className="p-8 text-left">
                       <div className="flex justify-between items-center mb-4">
                          <span className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
-                           <Calendar size={12}/> {new Date(photo.created_at).toLocaleDateString()}
+                           <Calendar size={12}/> {new Date(photo.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
                          </span>
                       </div>
                       <p className="text-slate-600 italic text-sm leading-relaxed">
-                        "{photo.note_expert || "Aucune observation particulière."}"
+                        "{photo.note_expert || "L'expert n'a ajouté aucun commentaire pour ce constat."}"
                       </p>
                    </div>
                 </div>
               )) : (
-                <div className="col-span-full py-20 text-center text-slate-400 font-serif italic">
-                  Le journal est vide pour le moment.
+                <div className="col-span-full py-20 text-center bg-white rounded-[3rem] border border-dashed border-slate-200 text-slate-400 font-serif italic">
+                  Aucune photo n'est disponible pour le moment.
                 </div>
               )}
             </div>
