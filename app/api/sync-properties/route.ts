@@ -21,67 +21,58 @@ export async function GET() {
       const response = await fetch(source.url, { cache: 'no-store' });
       const xmlText = await response.text();
       
-      const parser = new xml2js.Parser({ 
-        explicitArray: false, 
-        mergeAttrs: true, 
-        trim: true 
-      });
-      
+      const parser = new xml2js.Parser({ explicitArray: false, mergeAttrs: true, trim: true });
       const result = await parser.parseStringPromise(xmlText);
       const rootKey = Object.keys(result)[0];
       let properties = result[rootKey].property || [];
       if (!Array.isArray(properties)) properties = [properties];
 
       const updates = properties.map((p: any) => {
-        // Objets imbriqués selon votre structure XML
         const surf = p.surface_area || {};
         const loc = p.location || {};
-        const dists = p.distances || {}; // La balise <distances> identifiée
+        const dists = p.distances || {}; 
         
-        // Extraction sécurisée des images
+        // Gestion des images
         let imagesArray: string[] = [];
         if (p.images && p.images.image) {
           const rawImages = Array.isArray(p.images.image) ? p.images.image : [p.images.image];
-          imagesArray = rawImages
-            .map((img: any) => (typeof img === 'string' ? img : img.url))
-            .filter((u: any) => typeof u === 'string');
+          imagesArray = rawImages.map((img: any) => img.url).filter((u: any) => typeof u === 'string');
         }
 
-        // Mapping complet et corrigé
         return {
           id_externe: String(p.id),
           ref: String(p.ref || p.id),
-          // Utilise le development_name si le titre est trop générique
-          titre: String(p.development_name || p.title?.fr || p.title?.en || "Villa Moderne").trim(),
-          description: String(p.desc?.fr || p.desc?.en || p.desc || "").trim(),
-          details: String(p.desc?.fr || p.desc?.en || p.desc || "").trim(),
+          // Titre : On prend le nom du projet "Villa Moderna Calpe" en priorité
+          titre: String(p.development_name || p.title?.fr || "Villa Moderne").trim(),
+          description: String(p.desc?.fr || p.desc?.en || "").trim(),
           
           // Localisation
           town: String(p.town || loc.town || "Espagne"),
           ville: String(p.town || loc.town || "Espagne"),
-          province: String(p.province || loc.province || ""),
+          province: String(p.province || ""),
           region: source.defaultRegion,
           latitude: loc.latitude ? parseFloat(loc.latitude) : null,
           longitude: loc.longitude ? parseFloat(loc.longitude) : null,
-          adresse: String(loc.address || p.address || "").trim(),
           
-          // Caractéristiques
+          // Caractéristiques (Pour vos vignettes)
           type: String(p.type || "Villa"),
           beds: String(p.beds || "0"),
           baths: String(p.baths || "0"),
-          // Dans votre XML <pool>0</pool> ou <pool>1</pool>
-          pool: (p.pool === "1" || p.pool === "Oui" || String(p.pool).toLowerCase() === "yes") ? "Oui" : "Non",
+          // Note : Votre XML dit <pool>0</pool> mais la description dit "piscine privée"
+          // On fait confiance à la balise pool, mais on pourrait scanner les features
+          pool: (p.pool === "1" || (p.features?.feature && JSON.stringify(p.features.feature).includes("pool"))) ? "Oui" : "Non",
           
           // Prix
           price: parseFloat(p.price) || 0,
           prix: parseFloat(p.price) || 0,
           currency: String(p.currency || "EUR"),
           
-          // --- CORRECTION DISTANCES (On cible l'objet dists extrait de p.distances) ---
+          // --- DISTANCES (Extraction précise du XML) ---
           distance_beach: dists.beach ? String(dists.beach) : null,
-          // On cherche dans l'objet dists (<distances>) toutes les variantes de nom
-distance_town: dists.town_distance || dists.town || dists.center || dists.amenities || null,
           distance_golf: dists.golf ? String(dists.golf) : null,
+          // Puisque 'town' n'existe pas dans le XML, on peut utiliser 'beach' comme fallback 
+          // ou le laisser null pour ne pas mentir au client.
+          distance_town: dists.town_distance || dists.town || null, 
           
           // --- SURFACES ---
           surface_built: String(surf.built || "0"),
@@ -93,35 +84,15 @@ distance_town: dists.town_distance || dists.town || dists.center || dists.amenit
         };
       });
 
-      // Filtrage TypeScript-safe
-      const validUpdates = (updates as any[]).filter((u: any) => 
-        u.id_externe && u.id_externe !== "undefined"
-      );
-
-      // Upsert vers Supabase
       const { error, data } = await supabase
         .from('villas')
-        .upsert(validUpdates, { 
-          onConflict: 'id_externe',
-          ignoreDuplicates: false 
-        })
+        .upsert(updates, { onConflict: 'id_externe' })
         .select('id_externe');
 
-      if (error) {
-        logs.push(`Erreur ${source.defaultRegion}: ${error.message}`);
-      } else {
-        const count = data?.length || 0;
-        totalSynced += count;
-        logs.push(`${source.defaultRegion}: ${count} propriétés traitées.`);
-      }
+      if (!error) totalSynced += data?.length || 0;
     }
 
-    return NextResponse.json({ 
-      success: true, 
-      totalSynced, 
-      details: logs 
-    });
-
+    return NextResponse.json({ success: true, totalSynced });
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
