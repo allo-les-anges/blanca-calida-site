@@ -20,10 +20,10 @@ export async function GET() {
       const response = await fetch(source.url, { cache: 'no-store' });
       const xmlText = await response.text();
       
-      // On retire stripPrefix qui causait l'erreur
       const parser = new xml2js.Parser({ 
         explicitArray: false, 
-        mergeAttrs: true 
+        mergeAttrs: true,
+        trim: true 
       });
       
       const result = await parser.parseStringPromise(xmlText);
@@ -33,28 +33,34 @@ export async function GET() {
 
       const updates = properties.map((p: any) => {
         
-        // --- LOGIQUE DE DESCRIPTION (Basée sur ton JSON) ---
-        let descValue = "";
+        // --- LA SOLUTION POUR LA DESCRIPTION ---
+        let desc = "";
         
         if (p.description) {
-          if (typeof p.description === 'string') {
-            descValue = p.description;
-          } else if (p.description.fr) {
-            // Si c'est un objet { fr: "..." }
-            descValue = typeof p.description.fr === 'string' ? p.description.fr : (p.description.fr._ || "");
-          } else if (p.description._) {
-            descValue = p.description._;
-          }
+            // Si c'est un objet (ex: { fr: "...", en: "..." })
+            if (typeof p.description === 'object') {
+                // On cherche 'fr', sinon n'importe quelle première clé trouvée
+                desc = p.description.fr || p.description.en || Object.values(p.description)[0];
+            } 
+            // Si c'est directement du texte (cas du JSON)
+            else if (typeof p.description === 'string') {
+                desc = p.description;
+            }
         }
 
-        // --- LOGIQUE SURFACES ---
-        const built = p.surface_area?.built || p.surface_built || "0";
-        const plot = p.surface_area?.plot || p.surface_plot || "0";
+        // Si après ça c'est toujours un objet, on prend la valeur texte (_)
+        if (desc && typeof desc === 'object') {
+            desc = (desc as any)._ || JSON.stringify(desc);
+        }
+
+        // --- SURFACES ---
+        const built = p.surface_area?.built || "0";
+        const plot = p.surface_area?.plot || "0";
 
         return {
           id_externe: String(p.id),
           titre: p.title?.fr || p.title || "Villa Neuve",
-          description: descValue, // La colonne cible dans Supabase
+          description: String(desc), // On force en texte
           region: source.defaultRegion,
           town: p.town || p.city || "Espagne",
           price: parseFloat(p.price) || 0,
@@ -62,7 +68,6 @@ export async function GET() {
           baths: String(p.baths || "0"),
           surface_built: String(built),
           surface_plot: String(plot),
-          // Extraction propre des images
           images: p.images?.image ? (Array.isArray(p.images.image) ? p.images.image : [p.images.image]) : [],
           ref: p.ref || p.reference || String(p.id),
           updated_at: new Date().toISOString()
@@ -73,11 +78,8 @@ export async function GET() {
         .from('villas')
         .upsert(updates, { onConflict: 'id_externe' });
 
-      if (error) {
-        console.error("Erreur Supabase:", error.message);
-      } else {
-        totalSynced += updates.length;
-      }
+      if (error) console.error("Détail erreur Supabase:", error);
+      else totalSynced += updates.length;
     }
 
     return NextResponse.json({ success: true, totalSynced });
