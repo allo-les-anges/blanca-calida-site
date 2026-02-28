@@ -3,7 +3,6 @@
 import { useEffect, useState, useRef } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-// Ajout de Waves (piscine) et Car (parking) dans les imports
 import { 
   Bed, Bath, Maximize, MapPin, MessageCircle, ArrowLeft, 
   Loader2, Image as ImageIcon, Home, Map as MapIcon, 
@@ -49,6 +48,7 @@ export default function PropertyDetailClient({ id }: { id: string }) {
   };
 
   if (!mounted) return null;
+
   if (loading) return (
     <div className="h-screen flex flex-col items-center justify-center bg-white italic font-serif text-slate-400">
       <Loader2 className="animate-spin text-emerald-500 mb-4" size={40} />
@@ -66,6 +66,8 @@ export default function PropertyDetailClient({ id }: { id: string }) {
   );
 
   const images = property.images || [];
+  
+  // Correction de l'URL Google Maps
   const mapUrl = property.latitude && property.longitude 
     ? `https://maps.google.com/maps?q=${property.latitude},${property.longitude}&z=15&output=embed`
     : null;
@@ -98,7 +100,13 @@ export default function PropertyDetailClient({ id }: { id: string }) {
           </div>
           <div className="hidden md:flex flex-col gap-4 overflow-y-auto pr-2 custom-scrollbar">
             {images.map((img: string, idx: number) => (
-              <button key={idx} onClick={() => { setActiveImage(idx); scrollContainerRef.current?.scrollTo({ left: idx * scrollContainerRef.current.clientWidth, behavior: 'smooth' }); }} className={`relative h-24 min-h-[96px] rounded-2xl overflow-hidden border-2 transition-all ${activeImage === idx ? 'border-emerald-500 scale-95' : 'border-transparent opacity-50 hover:opacity-100'}`}><img src={img} className="w-full h-full object-cover" alt="" /></button>
+              <button 
+                key={idx} 
+                onClick={() => { setActiveImage(idx); scrollContainerRef.current?.scrollTo({ left: idx * scrollContainerRef.current.clientWidth, behavior: 'smooth' }); }} 
+                className={`relative h-24 min-h-[96px] rounded-2xl overflow-hidden border-2 transition-all ${activeImage === idx ? 'border-emerald-500 scale-95' : 'border-transparent opacity-50 hover:opacity-100'}`}
+              >
+                <img src={img} className="w-full h-full object-cover" alt="" />
+              </button>
             ))}
           </div>
         </div>
@@ -120,10 +128,19 @@ export default function PropertyDetailClient({ id }: { id: string }) {
                 <Waves size={14} /> Piscine Privée
               </div>
             )}
-            {/* Si distance plage > 0 */}
             {property.distance_beach && (
               <div className="flex items-center gap-2 bg-amber-50 text-amber-700 px-4 py-2 rounded-full border border-amber-100 text-[9px] uppercase font-bold tracking-wider">
-                <Ship size={14} /> Mer à {property.distance_beach}m
+                <Ship size={14} /> Plage à {property.distance_beach}m
+              </div>
+            )}
+            {property.distance_golf && (
+              <div className="flex items-center gap-2 bg-emerald-50 text-emerald-700 px-4 py-2 rounded-full border border-emerald-100 text-[9px] uppercase font-bold tracking-wider">
+                <Navigation size={14} className="rotate-45" /> Golf à {property.distance_golf}m
+              </div>
+            )}
+            {property.distance_town && (
+              <div className="flex items-center gap-2 bg-slate-50 text-slate-700 px-4 py-2 rounded-full border border-slate-100 text-[9px] uppercase font-bold tracking-wider">
+                <Home size={14} /> Centre à {property.distance_town}m
               </div>
             )}
             <div className="flex items-center gap-2 bg-slate-50 text-slate-700 px-4 py-2 rounded-full border border-slate-100 text-[9px] uppercase font-bold tracking-wider">
@@ -131,8 +148,8 @@ export default function PropertyDetailClient({ id }: { id: string }) {
             </div>
           </div>
 
-          {/* QUICK STATS (4 colonnes) */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-16">
+          {/* QUICK STATS (6 colonnes pour tout inclure) */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-16">
             <div className="bg-slate-50 p-6 rounded-3xl text-center border border-slate-100">
               <Bed className="mx-auto mb-2 text-emerald-600" size={22} />
               <p className="text-2xl font-serif">{property.beds || "0"}</p>
@@ -141,17 +158,27 @@ export default function PropertyDetailClient({ id }: { id: string }) {
             <div className="bg-slate-50 p-6 rounded-3xl text-center border border-slate-100">
               <Bath className="mx-auto mb-2 text-emerald-600" size={22} />
               <p className="text-2xl font-serif">{property.baths || "0"}</p>
-              <p className="text-[8px] uppercase text-gray-400 font-bold tracking-widest">Salles de bain</p>
+              <p className="text-[8px] uppercase text-gray-400 font-bold tracking-widest">Bains</p>
             </div>
             <div className="bg-slate-50 p-6 rounded-3xl text-center border border-slate-100">
               <Maximize className="mx-auto mb-2 text-emerald-600" size={22} />
               <p className="text-2xl font-serif">{property.surface_built || "0"}</p>
-              <p className="text-[8px] uppercase text-gray-400 font-bold tracking-widest">Surface m²</p>
+              <p className="text-[8px] uppercase text-gray-400 font-bold tracking-widest">Bâti m²</p>
             </div>
             <div className="bg-slate-50 p-6 rounded-3xl text-center border border-slate-100">
               <Home className="mx-auto mb-2 text-emerald-600" size={22} />
               <p className="text-2xl font-serif">{property.surface_plot || "0"}</p>
               <p className="text-[8px] uppercase text-gray-400 font-bold tracking-widest">Terrain m²</p>
+            </div>
+            <div className="bg-slate-50 p-6 rounded-3xl text-center border border-slate-100">
+              <Waves className="mx-auto mb-2 text-emerald-600" size={22} />
+              <p className="text-xl font-serif mt-1">{property.pool === "Oui" || property.pool === "1" ? "Privée" : "Non"}</p>
+              <p className="text-[8px] uppercase text-gray-400 font-bold tracking-widest">Piscine</p>
+            </div>
+            <div className="bg-slate-50 p-6 rounded-3xl text-center border border-slate-100">
+              <Car className="mx-auto mb-2 text-emerald-600" size={22} />
+              <p className="text-xl font-serif mt-1">Privé</p>
+              <p className="text-[8px] uppercase text-gray-400 font-bold tracking-widest">Parking</p>
             </div>
           </div>
 
