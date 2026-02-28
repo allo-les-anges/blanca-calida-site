@@ -20,7 +20,6 @@ export async function GET() {
       const response = await fetch(source.url, { cache: 'no-store' });
       const xmlText = await response.text();
       
-      // Configuration robuste du parser (TypeScript safe)
       const parser = new xml2js.Parser({ 
         explicitArray: false, 
         mergeAttrs: true,
@@ -33,14 +32,10 @@ export async function GET() {
       if (!Array.isArray(properties)) properties = [properties];
 
       const updates = properties.map((p: any) => {
-        
-        // 1. Extraction des surfaces (Nested tags)
         const surf = p.surface_area || {};
-        
-        // 2. Extraction localisation (Nested tags)
         const loc = p.location || {};
 
-        // 3. Gestion des images (Tableau d'URLs)
+        // Gestion des images
         let imagesArray: string[] = [];
         if (p.images && p.images.image) {
           const rawImages = Array.isArray(p.images.image) ? p.images.image : [p.images.image];
@@ -49,11 +44,10 @@ export async function GET() {
             .filter((url: any) => typeof url === 'string');
         }
 
-        // 4. Extraction Titre et Description (Gestion propre du CDATA par xml2js)
+        // Extraction Titre et Description
         const descFr = p.desc?.fr || p.desc?.en || "";
         const titleFr = p.title?.fr || p.title?.en || "Villa Moderne";
 
-        // 5. MAPPING COMPLET VERS SUPABASE
         return {
           id_externe: String(p.id),
           ref: String(p.ref || p.id),
@@ -61,7 +55,7 @@ export async function GET() {
           description: String(descFr).trim(),
           details: String(descFr).trim(),
           
-          // Géographie & Localisation
+          // Localisation
           town: String(p.town || "Espagne"),
           ville: String(p.town || "Espagne"),
           province: String(p.province || ""),
@@ -70,51 +64,57 @@ export async function GET() {
           longitude: loc.longitude ? parseFloat(loc.longitude) : null,
           adresse: String(loc.address || "").trim(),
           
-          // Caractéristiques techniques
+          // Caractéristiques
           type: String(p.type || "Villa"),
           beds: String(p.beds || "0"),
           baths: String(p.baths || "0"),
           pool: p.pool === "1" ? "Oui" : "Non",
           
-          // Prix (conversion en nombre)
+          // Prix
           price: parseFloat(p.price) || 0,
           prix: parseFloat(p.price) || 0,
-          currency: String(p.currency || "EUR"),
           
-          // Surfaces précises
-          surface_built: String(surf.built || "0"),
-          surface_plot: String(surf.plot || "0"),
-          surface_useful: String(surf.useful || "0"),
-          
-          // Distances (Points d'intérêt)
+          // Distances (Tout récupérer)
           distance_beach: p.beach ? String(p.beach) : null,
           distance_town: p.town_distance ? String(p.town_distance) : null,
           distance_golf: p.golf ? String(p.golf) : null,
+          
+          // Surfaces
+          surface_built: String(surf.built || "0"),
+          surface_plot: String(surf.plot || "0"),
+          surface_useful: String(surf.useful || "0"),
           
           images: imagesArray,
           updated_at: new Date().toISOString()
         };
       });
 
-      // Synchronisation avec Supabase (Upsert basé sur id_externe)
+      // Filtrer pour éviter les données corrompues
+      const validUpdates = updates.filter(u => u.id_externe && u.id_externe !== "undefined");
+
+      // UPSERT avec logs détaillés
       const { error } = await supabase
         .from('villas')
-        .upsert(updates, { onConflict: 'id_externe' });
+        .upsert(validUpdates, { 
+          onConflict: 'id_externe',
+          ignoreDuplicates: false // Obligatoire pour mettre à jour les existants
+        });
 
       if (error) {
-        console.error(`Erreur Supabase pour ${source.defaultRegion}:`, error.message);
+        console.error(`DÉTAIL ERREUR SUPABASE (${source.defaultRegion}):`, error);
       } else {
-        totalSynced += updates.length;
+        totalSynced += validUpdates.length;
       }
     }
 
     return NextResponse.json({ 
       success: true, 
-      message: `${totalSynced} propriétés synchronisées avec succès.` 
+      totalSynced, 
+      message: `Synchronisation réussie pour ${totalSynced} villas.`
     });
 
   } catch (error: any) {
-    console.error("Erreur fatale de synchronisation:", error.message);
+    console.error("ERREUR CRITIQUE API:", error.message);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
