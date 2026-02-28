@@ -21,7 +21,7 @@ export async function GET() {
       const xmlText = await response.text();
       
       const parser = new xml2js.Parser({ 
-        explicitArray: true, // Obligatoire pour gérer les balises répétées (images, descriptions)
+        explicitArray: false, // Plus simple pour naviguer dans votre structure
         mergeAttrs: true,
         trim: true 
       });
@@ -29,59 +29,49 @@ export async function GET() {
       const result = await parser.parseStringPromise(xmlText);
       const rootKey = Object.keys(result)[0];
       let properties = result[rootKey].property || [];
+      if (!Array.isArray(properties)) properties = [properties];
 
       const updates = properties.map((p: any) => {
         
-        // --- 1. EXTRACTION DE LA DESCRIPTION ---
-        // On cherche dans <descriptions> (pluriel) -> <description> (singulier)
-        let descFr = "";
-        const descriptionsWrapper = p.descriptions?.[0]; // Le bloc <descriptions>
-        const descriptionList = descriptionsWrapper?.description; // Le tableau <description>
+        // --- 1. DESCRIPTION (Balise <desc><fr>) ---
+        const descObj = p.desc || {};
+        const descriptionFr = descObj.fr || descObj.en || "";
 
-        if (Array.isArray(descriptionList)) {
-          // On cherche la version française
-          const frEntry = descriptionList.find((d: any) => d.lg === 'fr' || d.lg?.[0] === 'fr');
-          descFr = frEntry?._ || (typeof frEntry === 'string' ? frEntry : "");
-        }
+        // --- 2. TITRE (Balise <title><fr>) ---
+        const titleObj = p.title || {};
+        const titreFr = titleObj.fr || titleObj.en || "Villa Neuve";
 
-        // --- 2. EXTRACTION DU TITRE ---
-        let titreFr = "";
-        const titleList = p.titles?.[0]?.title;
-        if (Array.isArray(titleList)) {
-          const frTitle = titleList.find((t: any) => t.lg === 'fr' || t.lg?.[0] === 'fr');
-          titreFr = frTitle?._ || (typeof frTitle === 'string' ? frTitle : "");
-        }
-
-        // --- 3. SURFACES ---
-        const surf = p.surface_area?.[0] || {};
-        const built = surf.built?.[0] || surf.built || "0";
-        const plot = surf.plot?.[0] || surf.plot || "0";
-
-        // --- 4. IMAGES ---
+        // --- 3. IMAGES (Balise <images><image><url>) ---
         let imagesArray: string[] = [];
-        const imgs = p.images?.[0]?.image;
-        if (Array.isArray(imgs)) {
-          imagesArray = imgs.map(img => typeof img === 'string' ? img : img._);
+        if (p.images && p.images.image) {
+          const rawImages = Array.isArray(p.images.image) ? p.images.image : [p.images.image];
+          imagesArray = rawImages
+            .map((img: any) => img.url) // On prend l'URL dans la balise <url>
+            .filter((url: any) => typeof url === 'string');
         }
+
+        // --- 4. SURFACES (Balise <surface_area>) ---
+        const built = p.surface_area?.built || "0";
+        const plot = p.surface_area?.plot || "0";
 
         return {
-          id_externe: String(p.id?.[0] || p.id),
+          id_externe: String(p.id),
           
-          // On envoie vers vos colonnes Supabase (SANS S)
-          description: String(descFr).trim(),
-          details: String(descFr).trim(),
+          // Envoi vers vos colonnes Supabase
+          description: String(descriptionFr).trim(),
+          details: String(descriptionFr).trim(),
+          titre: String(titreFr).trim(),
           
-          titre: titreFr || "Villa Neuve",
-          town: String(p.town?.[0] || "Espagne"),
-          ville: String(p.town?.[0] || "Espagne"),
-          price: parseFloat(p.price?.[0]) || 0,
-          prix: parseFloat(p.price?.[0]) || 0,
-          beds: String(p.beds?.[0] || "0"),
-          baths: String(p.baths?.[0] || "0"),
+          town: String(p.town || "Espagne"),
+          ville: String(p.town || "Espagne"),
+          price: parseFloat(p.price) || 0,
+          prix: parseFloat(p.price) || 0,
+          beds: String(p.beds || "0"),
+          baths: String(p.baths || "0"),
           surface_built: String(built),
           surface_plot: String(plot),
-          type: String(p.type?.[0] || "Villa"),
-          ref: String(p.ref?.[0] || ""),
+          type: String(p.type || "villa"),
+          ref: String(p.ref || ""),
           region: source.defaultRegion,
           images: imagesArray,
           updated_at: new Date().toISOString()
@@ -92,8 +82,11 @@ export async function GET() {
         .from('villas')
         .upsert(updates, { onConflict: 'id_externe' });
 
-      if (error) console.error("Erreur Supabase:", error.message);
-      else totalSynced += updates.length;
+      if (error) {
+        console.error("Erreur Supabase:", error.message);
+      } else {
+        totalSynced += updates.length;
+      }
     }
 
     return NextResponse.json({ success: true, totalSynced });
