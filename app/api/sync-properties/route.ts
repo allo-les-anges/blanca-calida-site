@@ -33,53 +33,56 @@ export async function GET() {
 
       const updates = properties.map((p: any) => {
         
-        // --- 1. EXTRACTION DE LA DESCRIPTION ---
-        let finalDesc = "";
-        if (p.description) {
-          if (typeof p.description === 'string') {
-            finalDesc = p.description;
-          } else if (p.description.fr) {
-            finalDesc = typeof p.description.fr === 'string' ? p.description.fr : (p.description.fr._ || "");
-          } else if (p.description._) {
-            finalDesc = p.description._;
+        // --- LOGIQUE D'EXTRACTION DE TEXTE AMÉLIORÉE ---
+        const getText = (obj: any): string => {
+          if (!obj) return "";
+          if (typeof obj === 'string') return obj;
+          
+          // Cas 1: Le texte est dans une sous-langue fr
+          if (obj.fr) {
+            if (typeof obj.fr === 'string') return obj.fr;
+            if (obj.fr._) return obj.fr._; // Contenu CDATA dans fr
           }
-        }
+          
+          // Cas 2: Le texte est à la racine de la balise (_)
+          if (obj._) return obj._;
 
-        // Sécurité : conversion en texte pur et nettoyage des espaces
-        const cleanText = String(finalDesc || "").trim();
+          // Cas 3: Fallback anglais
+          if (obj.en) {
+            if (typeof obj.en === 'string') return obj.en;
+            if (obj.en._) return obj.en._;
+          }
 
-        // --- 2. SURFACES ---
+          return "";
+        };
+
+        const finalDesc = getText(p.description);
+
+        // --- SURFACES ---
         const built = p.surface_area?.built || p.surface_built || "0";
         const plot = p.surface_area?.plot || p.surface_plot || "0";
-
-        // --- 3. DÉTECTION VILLE ---
-        const townVal = p.town || p.city || p.location?.city || "Espagne";
+        const townVal = p.town || p.city || "Espagne";
 
         return {
           id_externe: String(p.id),
           
-          // On force l'envoi dans les deux colonnes
-          description: cleanText,
-          details: cleanText, 
+          // On force le String pour éviter d'envoyer un objet vide
+          description: String(finalDesc || "").trim(),
+          details: String(finalDesc || "").trim(),
           
           town: String(townVal),
           ville: String(townVal),
-          
           price: parseFloat(p.price) || 0,
           prix: parseFloat(p.price) || 0,
-          
           beds: String(p.beds || p.bedrooms || "0"),
           baths: String(p.baths || p.bathrooms || "0"),
-          
           surface_built: String(built),
           surface_plot: String(plot),
-          
-          titre: p.title?.fr || p.title || "Villa Neuve",
+          titre: getText(p.title) || "Villa Neuve",
           type: p.type || "Villa",
           ref: p.ref || p.reference || String(p.id),
           region: source.defaultRegion,
           images: p.images?.image ? (Array.isArray(p.images.image) ? p.images.image : [p.images.image]) : [],
-          development_name: p.development_name || "",
           updated_at: new Date().toISOString()
         };
       });
@@ -88,11 +91,8 @@ export async function GET() {
         .from('villas')
         .upsert(updates, { onConflict: 'id_externe' });
 
-      if (error) {
-        console.error("Détail erreur Supabase:", error.message);
-      } else {
-        totalSynced += updates.length;
-      }
+      if (error) console.error("Erreur Supabase:", error.message);
+      else totalSynced += updates.length;
     }
 
     return NextResponse.json({ success: true, totalSynced });
