@@ -41,8 +41,7 @@ export default function PropertyDetailPage() {
 
   if (!property) return <div className="h-screen flex items-center justify-center font-serif italic text-slate-400">Bien introuvable.</div>;
 
-  // --- EXTRACTION SÉCURISÉE DES DONNÉES JSONB ---
-  
+  // --- EXTRACTION SÉCURISÉE ---
   const allImages = Array.isArray(property.images) 
     ? property.images.map((img: any) => typeof img === 'object' ? img.url : img).filter(Boolean)
     : ["/placeholder.jpg"];
@@ -56,8 +55,10 @@ export default function PropertyDetailPage() {
       }).filter((url: any): url is string => Boolean(url)) 
     : [];
 
+  const whatsappUrl = `https://wa.me/34627768233?text=Bonjour, je souhaite plus d'informations sur le bien "${property.titre}" (Réf: ${property.reference || property.id})`;
+
   return (
-    <main className="bg-white min-h-screen">
+    <main className="bg-white min-h-screen pb-20 lg:pb-0">
       <Navbar />
 
       {/* GALERIE PHOTO */}
@@ -96,12 +97,8 @@ export default function PropertyDetailPage() {
           {/* COLONNE GAUCHE */}
           <div className="w-full lg:w-2/3">
             <div className="flex flex-wrap gap-3 mb-8">
-               <span className="flex items-center gap-2 bg-slate-50 px-4 py-2 rounded-xl text-slate-600 text-[10px] font-black uppercase tracking-tight">
-                 <Waves size={14} className="text-emerald-500"/> Mer à 5km
-               </span>
-               <span className="flex items-center gap-2 bg-slate-50 px-4 py-2 rounded-xl text-slate-600 text-[10px] font-black uppercase tracking-tight">
-                 <Flag size={14} className="text-emerald-500"/> Golf à 11km
-               </span>
+               <span className="flex items-center gap-2 bg-slate-50 px-4 py-2 rounded-xl text-slate-600 text-[10px] font-black uppercase"><Waves size={14} className="text-emerald-500"/> Mer à 5km</span>
+               <span className="flex items-center gap-2 bg-slate-50 px-4 py-2 rounded-xl text-slate-600 text-[10px] font-black uppercase"><Flag size={14} className="text-emerald-500"/> Golf à 11km</span>
             </div>
 
             <h1 className="text-4xl md:text-6xl font-serif italic text-slate-900 mb-8 leading-tight">{property.titre}</h1>
@@ -156,7 +153,7 @@ export default function PropertyDetailPage() {
             )}
           </div>
 
-          {/* COLONNE DROITE - SIDEBAR AVEC WHATSAPP */}
+          {/* SIDEBAR */}
           <div className="w-full lg:w-1/3">
             <div className="lg:sticky lg:top-32 bg-white border border-slate-100 shadow-[0_20px_60px_rgba(0,0,0,0.05)] rounded-[3rem] p-10">
               <p className="text-[10px] font-black uppercase text-emerald-600 mb-2 tracking-[0.2em] text-center">Prix de vente</p>
@@ -164,40 +161,52 @@ export default function PropertyDetailPage() {
                 {property.price ? Number(property.price).toLocaleString("fr-FR") : "--"} €
               </div>
               
-              <div className="space-y-4 mb-10">
+              <div className="space-y-4">
                 <button className="w-full bg-slate-950 text-white py-5 rounded-2xl font-black uppercase text-[10px] tracking-widest flex items-center justify-center gap-3 hover:bg-slate-800 transition-all">
-                  <Mail size={16} /> Recevoir la brochure
+                  <Mail size={16} /> Brochure PDF
                 </button>
                 
-                {/* BOUTON WHATSAPP RÉACTIVÉ */}
+                {/* WHATSAPP SIDEBAR (Hidden on mobile via lg:flex) */}
                 <a 
-                  href={`https://wa.me/34XXXXXXXXX?text=Bonjour, je souhaite plus d'informations sur le bien ${property.reference || property.id}`}
+                  href={whatsappUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full bg-[#25D366] text-white py-5 rounded-2xl font-black uppercase text-[10px] tracking-widest flex items-center justify-center gap-3 hover:bg-[#20ba5a] transition-all shadow-lg shadow-emerald-100"
+                  className="hidden lg:flex w-full bg-[#25D366] text-white py-5 rounded-2xl font-black uppercase text-[10px] tracking-widest items-center justify-center gap-3 hover:bg-[#20ba5a] transition-all"
                 >
                   <MessageCircle size={18} /> Contact WhatsApp
                 </a>
 
                 <button className="w-full border border-slate-200 text-slate-900 py-5 rounded-2xl font-black uppercase text-[10px] tracking-widest flex items-center justify-center gap-3 hover:bg-slate-50 transition-all">
-                  <Calendar size={16} /> Planifier une visite
+                  <Calendar size={16} /> Réserver Visite
                 </button>
               </div>
 
-              <div className="pt-8 border-t border-slate-50 flex items-center justify-between">
+              <div className="mt-8 pt-8 border-t border-slate-50 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-slate-50 rounded-full flex items-center justify-center text-slate-400">
                     <Phone size={18} />
                   </div>
-                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Conseiller dédié</span>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Conseiller</span>
                 </div>
-                <Share2 size={20} className="text-slate-300 hover:text-emerald-500 cursor-pointer transition-colors" />
+                <Share2 size={20} className="text-slate-300 hover:text-emerald-500 cursor-pointer" />
               </div>
             </div>
           </div>
-
         </div>
       </section>
+
+      {/* FLOATING WHATSAPP BUTTON MOBILE ONLY */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 p-4 bg-white/80 backdrop-blur-lg border-t border-slate-100 z-50">
+        <a 
+          href={whatsappUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="w-full bg-[#25D366] text-white py-4 rounded-2xl font-black uppercase text-[10px] tracking-[0.2em] flex items-center justify-center gap-3 shadow-lg"
+        >
+          <MessageCircle size={20} /> Discuter sur WhatsApp
+        </a>
+      </div>
+
       <Footer />
     </main>
   );
