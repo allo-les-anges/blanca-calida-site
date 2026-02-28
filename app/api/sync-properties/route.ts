@@ -79,7 +79,8 @@ export async function GET() {
           
           // --- CORRECTION DISTANCES (On cible l'objet dists extrait de p.distances) ---
           distance_beach: dists.beach ? String(dists.beach) : null,
-          distance_town: dists.town_distance || dists.town_dist ? String(dists.town_distance || dists.town_dist) : null,
+          // On cherche dans l'objet dists (<distances>) toutes les variantes de nom
+distance_town: dists.town_distance || dists.town || dists.center || dists.amenities || null,
           distance_golf: dists.golf ? String(dists.golf) : null,
           
           // --- SURFACES ---
