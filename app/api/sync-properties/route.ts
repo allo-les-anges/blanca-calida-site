@@ -27,36 +27,39 @@ export async function GET() {
 
       const updates = properties.map((p: any) => {
         const getVal = (field: any) => Array.isArray(field) ? field[0] : field;
-
-        // --- LOGIQUE DE DÉTECTION DE RÉGION AMÉLIORÉE ---
         const town = (getVal(p.location)?.city || getVal(p.city) || getVal(p.town) || "").toLowerCase();
+        
         let finalRegion = source.defaultRegion;
 
-        // Si on trouve des villes spécifiques dans le flux "Sol", on bascule sur Almeria
+        // --- CLASSIFICATION COSTA ALMERIA ---
+        const keywordsAlmeria = ["almeria", "mojacar", "vera", "cuevas", "pulpi", "turre", "garrucha", "arboleas", "albox"];
+        
+        // --- CLASSIFICATION COSTA CALIDA ---
+        const keywordsCalida = ["murcia", "mazarron", "aguilas", "pilar", "san pedro", "alcazares", "cartagena", "san javier", "la manga", "lo pagan"];
+
         if (source.defaultRegion === "Costa del Sol") {
-           if (town.includes("almeria") || town.includes("mojacar") || town.includes("vera")) {
+           if (keywordsAlmeria.some(word => town.includes(word))) {
              finalRegion = "Costa Almeria";
            }
-        } 
-        // Si on trouve des villes spécifiques dans le flux "Blanca", on sépare Blanca et Calida
-        else if (source.defaultRegion === "Costa Blanca") {
-           if (town.includes("murcia") || town.includes("mazarron") || town.includes("aguilas")) {
+        } else if (source.defaultRegion === "Costa Blanca") {
+           if (keywordsCalida.some(word => town.includes(word))) {
              finalRegion = "Costa Calida";
            }
+           // Par défaut, si rien ne match dans le flux Blanca/Calida, ça reste "Costa Blanca"
         }
 
-        // Nettoyage des images
+        // Nettoyage images
         let cleanImages: string[] = [];
         const imgsContainer = p.images?.[0]?.image;
         if (imgsContainer) {
           const imgs = Array.isArray(imgsContainer) ? imgsContainer : [imgsContainer];
-          cleanImages = imgs.map((i: any) => typeof i === 'string' ? i : (i.url || i._)).filter(Boolean);
+          cleanImages = imgs.map((i: any) => typeof i === 'string' ? i : (i.url || i._ || i.$?.url)).filter(img => typeof img === 'string' && img.startsWith('http'));
         }
 
         return {
           id_externe: String(getVal(p.id)),
-          titre: getVal(p.title)?.fr || getVal(p.title)?.en || getVal(p.title) || "Villa",
-          region: finalRegion, // La région détectée (Blanca, Calida, Sol ou Almeria)
+          titre: getVal(p.title)?.fr || getVal(p.title)?.en || getVal(p.title) || "Villa de luxe",
+          region: finalRegion,
           town: getVal(p.location)?.city || getVal(p.city) || getVal(p.town) || "Espagne",
           price: parseFloat(getVal(p.price)) || 0,
           type: getVal(p.type) || "Villa",
