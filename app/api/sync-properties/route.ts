@@ -7,9 +7,12 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
+// Configuration des 4 flux pour couvrir toutes tes vignettes
 const SOURCES = [
-  { region: "Costa Calida", url: "https://medianewbuild.com/file/hh-media-bucket/agents/6d5cb68a-3636-4095-b0ce-7dc9ec2df2d2/feed_blanca_calida.xml" },
-  { region: "Costa del Sol", url: "https://medianewbuild.com/file/hh-media-bucket/agents/6d5cb68a-3636-4095-b0ce-7dc9ec2df2d2/feed_sol.xml" }
+  { region: "Costa Blanca", url: "https://medianewbuild.com/file/hh-media-bucket/agents/6d5cb68a-3636-4095-b0ce-7dc9ec2df2d2/feed_blanca_calida.xml" }, 
+  { region: "Costa Calida", url: "https://medianewbuild.com/file/hh-media-bucket/agents/6d5cb68a-3636-4095-b0ce-7dc9ec2df2d2/feed_blanca_calida.xml" }, // À remplacer par l'URL Calida si différente
+  { region: "Costa del Sol", url: "https://medianewbuild.com/file/hh-media-bucket/agents/6d5cb68a-3636-4095-b0ce-7dc9ec2df2d2/feed_sol.xml" },
+  { region: "Costa Almeria", url: "https://medianewbuild.com/file/hh-media-bucket/agents/6d5cb68a-3636-4095-b0ce-7dc9ec2df2d2/feed_sol.xml" } // À remplacer par l'URL Almeria si différente
 ];
 
 export async function GET() {
@@ -19,19 +22,16 @@ export async function GET() {
     for (const source of SOURCES) {
       const response = await fetch(source.url, { cache: 'no-store' });
       const xmlText = await response.text();
-      const parser = new xml2js.Parser({ explicitArray: true, mergeAttrs: true }); 
+      const parser = new xml2js.Parser({ explicitArray: true, mergeAttrs: true });
       const result = await parser.parseStringPromise(xmlText);
       
-      const rootKey = Object.keys(result)[0]; 
-      const dataLevel = result[rootKey];
-      const properties = dataLevel.property || dataLevel.properties?.property || [];
-
-      if (properties.length === 0) continue;
+      const rootKey = Object.keys(result)[0];
+      const properties = result[rootKey].property || result[rootKey].properties?.property || [];
 
       const updates = properties.map((p: any) => {
         const getVal = (field: any) => Array.isArray(field) ? field[0] : field;
 
-        // Extraction robuste des images
+        // Extraction propre des images (Tableau de strings)
         let cleanImages: string[] = [];
         const imgsContainer = p.images?.[0]?.image;
         if (imgsContainer) {
@@ -39,22 +39,18 @@ export async function GET() {
           cleanImages = imgs.map((i: any) => typeof i === 'string' ? i : (i.url || i._)).filter(Boolean);
         }
 
-        const rawTitle = getVal(p.title);
-        const finalTitle = typeof rawTitle === 'object' ? (rawTitle.fr || rawTitle.en) : rawTitle;
-
         return {
           id_externe: String(getVal(p.id)),
-          titre: finalTitle || "Villa",
-          region: source.region,
+          titre: getVal(p.title)?.fr || getVal(p.title)?.en || getVal(p.title) || "Villa",
+          region: source.region, // On injecte la région définie plus haut
+          town: getVal(p.location)?.city || getVal(p.city) || getVal(p.town) || "Espagne",
           price: parseFloat(getVal(p.price)) || 0,
-          town: getVal(p.location)?.city || getVal(p.city) || "Espagne",
           type: getVal(p.type) || "Apartment",
           beds: String(getVal(p.bedrooms) || getVal(p.beds) || "0"),
-          ref: getVal(p.reference) || getVal(p.ref) || String(getVal(p.id)),
+          ref: getVal(p.reference) || String(getVal(p.id)),
           images: cleanImages,
           details: {
             bathrooms: getVal(p.bathrooms) || 0,
-            size: getVal(p.size) || 0,
             surface: getVal(p.size) || 0
           },
           updated_at: new Date().toISOString()
