@@ -19,7 +19,7 @@ export async function GET() {
     for (const source of SOURCES) {
       const response = await fetch(source.url, { cache: 'no-store' });
       const xmlText = await response.text();
-      const parser = new xml2js.Parser({ explicitArray: true }); 
+      const parser = new xml2js.Parser({ explicitArray: true, mergeAttrs: true }); 
       const result = await parser.parseStringPromise(xmlText);
       
       const rootKey = Object.keys(result)[0]; 
@@ -31,19 +31,12 @@ export async function GET() {
       const updates = properties.map((p: any) => {
         const getVal = (field: any) => Array.isArray(field) ? field[0] : field;
 
-        // --- LOGIQUE DE NETTOYAGE DES IMAGES ---
+        // Extraction robuste des images
         let cleanImages: string[] = [];
-        const rawImages = p.images?.[0]?.image || p.images?.image;
-
-        if (rawImages) {
-          const imageArray = Array.isArray(rawImages) ? rawImages : [rawImages];
-          cleanImages = imageArray
-            .map((img: any) => {
-              // On cherche l'URL soit dans l'attribut, soit dans l'objet, soit en string direct
-              const url = img?.$?.url || img?.url || (typeof img === 'string' ? img : null);
-              return url;
-            })
-            .filter(img => typeof img === 'string' && img.startsWith('http'));
+        const imgsContainer = p.images?.[0]?.image;
+        if (imgsContainer) {
+          const imgs = Array.isArray(imgsContainer) ? imgsContainer : [imgsContainer];
+          cleanImages = imgs.map((i: any) => typeof i === 'string' ? i : (i.url || i._)).filter(Boolean);
         }
 
         const rawTitle = getVal(p.title);
@@ -54,12 +47,16 @@ export async function GET() {
           titre: finalTitle || "Villa",
           region: source.region,
           price: parseFloat(getVal(p.price)) || 0,
-          town: getVal(p.location)?.city || getVal(p.city) || getVal(p.town) || "",
-          type: getVal(p.type) || "",
-          beds: getVal(p.bedrooms) || getVal(p.beds) || "0",
-          ref: getVal(p.reference) || getVal(p.ref) || getVal(p.id),
-          development_name: getVal(p.development_name) || "",
-          images: cleanImages, // Tableau de strings propres
+          town: getVal(p.location)?.city || getVal(p.city) || "Espagne",
+          type: getVal(p.type) || "Apartment",
+          beds: String(getVal(p.bedrooms) || getVal(p.beds) || "0"),
+          ref: getVal(p.reference) || getVal(p.ref) || String(getVal(p.id)),
+          images: cleanImages,
+          details: {
+            bathrooms: getVal(p.bathrooms) || 0,
+            size: getVal(p.size) || 0,
+            surface: getVal(p.size) || 0
+          },
           updated_at: new Date().toISOString()
         };
       });
