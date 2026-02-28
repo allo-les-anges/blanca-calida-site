@@ -20,45 +20,67 @@ export async function GET() {
       const response = await fetch(source.url, { cache: 'no-store' });
       const xmlText = await response.text();
       
-      const parser = new xml2js.Parser({ explicitArray: true }); // Plus sûr pour parcourir
+      const parser = new xml2js.Parser({ explicitArray: true }); 
       const result = await parser.parseStringPromise(xmlText);
       
-      // LOGIQUE DE RECHERCHE DYNAMIQUE :
-      // On cherche la balise 'property' peu importe où elle est (root, properties, etc.)
-      const rootKey = Object.keys(result)[0]; // Souvent 'root' ou 'properties'
+      const rootKey = Object.keys(result)[0]; 
       const dataLevel = result[rootKey];
       const properties = dataLevel.property || dataLevel.properties?.property || [];
 
       if (properties.length === 0) continue;
 
       const updates = properties.map((p: any) => {
-        // Habihub met souvent les valeurs dans des tableaux [0] avec explicitArray: true
-        const getVal = (field: any) => Array.isArray(field) ? field[0] : field;
+        const getVal = (field: any) => {
+            if (!field) return null;
+            return Array.isArray(field) ? field[0] : field;
+        };
+
+        // On extrait les titres selon la langue
+        const rawTitle = getVal(p.title);
+        const finalTitle = typeof rawTitle === 'object' ? (rawTitle.fr || rawTitle.en) : rawTitle;
 
         return {
           id_externe: String(getVal(p.id)),
-          titre: getVal(p.title)?.fr || getVal(p.title)?.en || "Villa",
-          prix: parseFloat(getVal(p.price)) || 0,
+          titre: finalTitle || "Villa",
           region: source.region,
-          ville: getVal(p.location)?.city || "",
-          images: p.images?.[0]?.image || [], // Liste des images
+          
+          // --- CHAMPS ALIGNÉS SUR TON DASHBOARD ---
+          price: parseFloat(getVal(p.price)) || 0,
+          town: getVal(p.location)?.city || getVal(p.city) || getVal(p.town) || "",
+          type: getVal(p.type) || "",
+          beds: getVal(p.bedrooms) || getVal(p.beds) || "0",
+          ref: getVal(p.reference) || getVal(p.ref) || getVal(p.id),
+          development_name: getVal(p.development_name) || "",
+          
+          // Images : on récupère le tableau proprement
+          images: p.images?.[0]?.image || [], 
+
+          // On garde quand même un objet details pour la sécurité
           details: {
-            chambres: getVal(p.bedrooms),
-            bains: getVal(p.bathrooms),
-            surface: getVal(p.size),
-            ref: getVal(p.reference)
+            bathrooms: getVal(p.bathrooms),
+            size: getVal(p.size),
+            surface: getVal(p.size)
           },
           updated_at: new Date().toISOString()
         };
       });
 
-      const { error } = await supabase.from('villas').upsert(updates, { onConflict: 'id_externe' });
-      if (!error) totalSynced += updates.length;
+      // Upsert vers Supabase
+      const { error } = await supabase
+        .from('villas')
+        .upsert(updates, { onConflict: 'id_externe' });
+
+      if (error) {
+        console.error(`Erreur Supabase (${source.region}):`, error.message);
+      } else {
+        totalSynced += updates.length;
+      }
     }
 
     return NextResponse.json({ success: true, totalSynced });
 
   } catch (error: any) {
+    console.error("Erreur critique:", error.message);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
