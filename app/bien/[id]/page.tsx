@@ -131,18 +131,19 @@ export default function PropertyDetailPage() {
 
             {/* SECTION PLANS (VOTRE DEMANDE) */}
             {plans.length > 0 && (
-              <div className="border-t border-slate-100 pt-16 mb-20">
-                <div className="flex items-center gap-3 mb-10">
-                  <Layout className="text-emerald-600" />
-                  <h2 className="text-3xl font-serif italic text-slate-900">Plans de l'unité</h2>
-                </div>
-                <div className="bg-slate-50 p-10 rounded-[3rem] border border-dashed border-slate-200">
-                  {plans.map((planUrl, idx) => (
-                    <img key={idx} src={planUrl} alt="Plan" className="w-full h-auto rounded-2xl" />
-                  ))}
-                </div>
-              </div>
-            )}
+  <div className="border-t border-slate-100 pt-16 mb-20">
+    <div className="flex items-center gap-3 mb-10">
+      <Layout className="text-emerald-600" />
+      <h2 className="text-3xl font-serif italic text-slate-900">Plans de l'unité</h2>
+    </div>
+    <div className="bg-slate-50 p-10 rounded-[3rem] border border-dashed border-slate-200">
+      {/* Ici la correction du type :string */}
+      {plans.map((planUrl: string, idx: number) => (
+        <img key={idx} src={planUrl} alt="Plan" className="w-full h-auto rounded-2xl mb-8 last:mb-0" />
+      ))}
+    </div>
+  </div>
+)}
           </div>
 
           {/* SIDEBAR STICKY */}
