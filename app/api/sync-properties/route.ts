@@ -33,8 +33,10 @@ export async function GET() {
       if (!Array.isArray(properties)) properties = [properties];
 
       const updates = properties.map((p: any) => {
+        // Objets imbriqués selon votre structure XML
         const surf = p.surface_area || {};
         const loc = p.location || {};
+        const dists = p.distances || {}; // La balise <distances> identifiée
         
         // Extraction sécurisée des images
         let imagesArray: string[] = [];
@@ -45,15 +47,16 @@ export async function GET() {
             .filter((u: any) => typeof u === 'string');
         }
 
-        // Mapping intelligent pour éviter les colonnes vides (NULL)
+        // Mapping complet et corrigé
         return {
           id_externe: String(p.id),
           ref: String(p.ref || p.id),
-          titre: String(p.title?.fr || p.title?.en || p.title || "Villa Moderne").trim(),
+          // Utilise le development_name si le titre est trop générique
+          titre: String(p.development_name || p.title?.fr || p.title?.en || "Villa Moderne").trim(),
           description: String(p.desc?.fr || p.desc?.en || p.desc || "").trim(),
           details: String(p.desc?.fr || p.desc?.en || p.desc || "").trim(),
           
-          // Localisation (Recherche à plusieurs niveaux)
+          // Localisation
           town: String(p.town || loc.town || "Espagne"),
           ville: String(p.town || loc.town || "Espagne"),
           province: String(p.province || loc.province || ""),
@@ -66,6 +69,7 @@ export async function GET() {
           type: String(p.type || "Villa"),
           beds: String(p.beds || "0"),
           baths: String(p.baths || "0"),
+          // Dans votre XML <pool>0</pool> ou <pool>1</pool>
           pool: (p.pool === "1" || p.pool === "Oui" || String(p.pool).toLowerCase() === "yes") ? "Oui" : "Non",
           
           // Prix
@@ -73,14 +77,14 @@ export async function GET() {
           prix: parseFloat(p.price) || 0,
           currency: String(p.currency || "EUR"),
           
-          // Distances (Points d'intérêt)
-          distance_beach: p.beach || loc.beach || null,
-          distance_town: p.town_distance || loc.town_distance || p.town_dist || null,
-          distance_golf: p.golf || loc.golf || null,
+          // --- CORRECTION DISTANCES (On cible l'objet dists extrait de p.distances) ---
+          distance_beach: dists.beach ? String(dists.beach) : null,
+          distance_town: dists.town_distance || dists.town_dist ? String(dists.town_distance || dists.town_dist) : null,
+          distance_golf: dists.golf ? String(dists.golf) : null,
           
-          // Surfaces
-          surface_built: String(surf.built || p.surface_built || "0"),
-          surface_plot: String(surf.plot || p.surface_plot || "0"),
+          // --- SURFACES ---
+          surface_built: String(surf.built || "0"),
+          surface_plot: String(surf.plot || "0"),
           surface_useful: String(surf.useful || "0"),
           
           images: imagesArray,
@@ -88,12 +92,12 @@ export async function GET() {
         };
       });
 
-      // Filtrage TypeScript-safe pour éviter les IDs invalides
+      // Filtrage TypeScript-safe
       const validUpdates = (updates as any[]).filter((u: any) => 
         u.id_externe && u.id_externe !== "undefined"
       );
 
-      // Upsert vers Supabase avec retour de données pour confirmation
+      // Upsert vers Supabase
       const { error, data } = await supabase
         .from('villas')
         .upsert(validUpdates, { 
@@ -104,7 +108,6 @@ export async function GET() {
 
       if (error) {
         logs.push(`Erreur ${source.defaultRegion}: ${error.message}`);
-        console.error(`Erreur Supabase:`, error);
       } else {
         const count = data?.length || 0;
         totalSynced += count;
@@ -119,7 +122,6 @@ export async function GET() {
     });
 
   } catch (error: any) {
-    console.error("Erreur critique:", error.message);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
