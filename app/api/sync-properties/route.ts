@@ -23,7 +23,8 @@ export async function GET() {
       const parser = new xml2js.Parser({ 
         explicitArray: false, 
         mergeAttrs: true,
-        trim: true 
+        trim: true,
+        cdata: true // Indispensable pour lire les descriptions <desc>
       });
       
       const result = await parser.parseStringPromise(xmlText);
@@ -33,76 +34,64 @@ export async function GET() {
 
       const updates = properties.map((p: any) => {
         
-        // --- 1. DESCRIPTION & TITRE (Chemin <desc><fr> et <title><fr>) ---
-        const descObj = p.desc || {};
-        const descriptionFr = descObj.fr || descObj.en || "";
-
-        const titleObj = p.title || {};
-        const titreFr = titleObj.fr || titleObj.en || "Villa Neuve";
-
-        // --- 2. LOCALISATION & COORDONNÉES (Chemin <location>) ---
+        // --- 1. LOCALISATION (Imbriqué dans <location>) ---
         const loc = p.location || {};
-        const lat = loc.latitude ? parseFloat(loc.latitude) : null;
-        const lng = loc.longitude ? parseFloat(loc.longitude) : null;
-        const address = loc.address || "";
+        
+        // --- 2. SURFACES (Imbriqué dans <surface_area>) ---
+        const surf = p.surface_area || {};
 
-        // --- 3. IMAGES (Chemin <images><image><url>) ---
+        // --- 3. IMAGES (Correction du chemin <image><url>) ---
         let imagesArray: string[] = [];
         if (p.images && p.images.image) {
           const rawImages = Array.isArray(p.images.image) ? p.images.image : [p.images.image];
           imagesArray = rawImages
-            .map((img: any) => img.url) 
+            .map((img: any) => img.url)
             .filter((url: any) => typeof url === 'string');
         }
 
-        // --- 4. SURFACES ---
-        const built = p.surface_area?.built || "0";
-        const plot = p.surface_area?.plot || "0";
+        // --- 4. TITRE & DESCRIPTION (Gestion du CDATA) ---
+        // Le parser avec cdata:true transforme le CDATA en string propre
+        const descFr = p.desc?.fr || p.desc?.en || "";
+        const titleFr = p.title?.fr || p.title?.en || "Villa Moderne";
 
         return {
           id_externe: String(p.id),
+          ref: String(p.ref || ""),
+          titre: String(titleFr).trim(),
+          description: String(descFr).trim(),
+          details: String(descFr).trim(),
           
-          // Textes
-          description: String(descriptionFr).trim(),
-          details: String(descriptionFr).trim(),
-          titre: String(titreFr).trim(),
-          
-          // Géolocalisation
-          latitude: lat,
-          longitude: lng,
-          adresse: String(address).trim(),
-          
-          // Localisation standard
+          // Localisation
           town: String(p.town || "Espagne"),
           ville: String(p.town || "Espagne"),
           region: source.defaultRegion,
+          latitude: loc.latitude ? parseFloat(loc.latitude) : null,
+          longitude: loc.longitude ? parseFloat(loc.longitude) : null,
+          adresse: String(loc.address || "").trim(),
           
-          // Prix et Caractéristiques
+          // Caractéristiques (Conversion des types)
           price: parseFloat(p.price) || 0,
           prix: parseFloat(p.price) || 0,
           beds: String(p.beds || "0"),
           baths: String(p.baths || "0"),
-          surface_built: String(built),
-          surface_plot: String(plot),
+          pool: p.pool === "1" ? "Oui" : "Non",
           
-          // Divers
-          type: String(p.type || "villa"),
-          ref: String(p.ref || ""),
+          // Surfaces distinctes
+          surface_built: String(surf.built || "0"),
+          surface_plot: String(surf.plot || "0"),
+          surface_useful: String(surf.useful || "0"),
+          
           images: imagesArray,
           updated_at: new Date().toISOString()
         };
       });
 
-      // Upsert dans Supabase
       const { error } = await supabase
         .from('villas')
         .upsert(updates, { onConflict: 'id_externe' });
 
-      if (error) {
-        console.error(`Erreur Supabase pour ${source.defaultRegion}:`, error.message);
-      } else {
-        totalSynced += updates.length;
-      }
+      if (error) console.error(`Erreur Supabase:`, error.message);
+      else totalSynced += updates.length;
     }
 
     return NextResponse.json({ success: true, totalSynced });
