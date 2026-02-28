@@ -20,11 +20,11 @@ export async function GET() {
       const response = await fetch(source.url, { cache: 'no-store' });
       const xmlText = await response.text();
       
+      // Configuration du parser sans l'option 'cdata' (non supportée par les types TS)
       const parser = new xml2js.Parser({ 
         explicitArray: false, 
         mergeAttrs: true,
-        trim: true,
-        cdata: true // Indispensable pour lire les descriptions <desc>
+        trim: true
       });
       
       const result = await parser.parseStringPromise(xmlText);
@@ -34,13 +34,13 @@ export async function GET() {
 
       const updates = properties.map((p: any) => {
         
-        // --- 1. LOCALISATION (Imbriqué dans <location>) ---
-        const loc = p.location || {};
-        
-        // --- 2. SURFACES (Imbriqué dans <surface_area>) ---
+        // 1. Extraction des surfaces (Imbriqué dans <surface_area>)
         const surf = p.surface_area || {};
+        
+        // 2. Extraction localisation (Imbriqué dans <location>)
+        const loc = p.location || {};
 
-        // --- 3. IMAGES (Correction du chemin <image><url>) ---
+        // 3. Gestion des images (<image><url>)
         let imagesArray: string[] = [];
         if (p.images && p.images.image) {
           const rawImages = Array.isArray(p.images.image) ? p.images.image : [p.images.image];
@@ -49,8 +49,7 @@ export async function GET() {
             .filter((url: any) => typeof url === 'string');
         }
 
-        // --- 4. TITRE & DESCRIPTION (Gestion du CDATA) ---
-        // Le parser avec cdata:true transforme le CDATA en string propre
+        // 4. Extraction Titre et Description (Priorité au Français)
         const descFr = p.desc?.fr || p.desc?.en || "";
         const titleFr = p.title?.fr || p.title?.en || "Villa Moderne";
 
@@ -61,22 +60,22 @@ export async function GET() {
           description: String(descFr).trim(),
           details: String(descFr).trim(),
           
-          // Localisation
-          town: String(p.town || "Espagne"),
-          ville: String(p.town || "Espagne"),
+          // Localisation & Ville
+          town: String(p.town || "Calpe"),
+          ville: String(p.town || "Calpe"),
           region: source.defaultRegion,
           latitude: loc.latitude ? parseFloat(loc.latitude) : null,
           longitude: loc.longitude ? parseFloat(loc.longitude) : null,
           adresse: String(loc.address || "").trim(),
           
-          // Caractéristiques (Conversion des types)
+          // Caractéristiques techniques
           price: parseFloat(p.price) || 0,
           prix: parseFloat(p.price) || 0,
           beds: String(p.beds || "0"),
           baths: String(p.baths || "0"),
           pool: p.pool === "1" ? "Oui" : "Non",
           
-          // Surfaces distinctes
+          // Nouveaux champs de surface
           surface_built: String(surf.built || "0"),
           surface_plot: String(surf.plot || "0"),
           surface_useful: String(surf.useful || "0"),
@@ -86,16 +85,21 @@ export async function GET() {
         };
       });
 
+      // Envoi vers Supabase (écrase si id_externe existe déjà)
       const { error } = await supabase
         .from('villas')
         .upsert(updates, { onConflict: 'id_externe' });
 
-      if (error) console.error(`Erreur Supabase:`, error.message);
-      else totalSynced += updates.length;
+      if (error) {
+        console.error(`Erreur Supabase pour ${source.defaultRegion}:`, error.message);
+      } else {
+        totalSynced += updates.length;
+      }
     }
 
     return NextResponse.json({ success: true, totalSynced });
   } catch (error: any) {
+    console.error("Erreur de synchronisation:", error.message);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
