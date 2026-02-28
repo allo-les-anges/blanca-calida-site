@@ -19,64 +19,65 @@ export async function GET() {
     for (const source of SOURCES) {
       const response = await fetch(source.url, { cache: 'no-store' });
       const xmlText = await response.text();
-      // On garde explicitArray: false pour simplifier l'accès si le XML le permet
-      const parser = new xml2js.Parser({ explicitArray: false, mergeAttrs: true });
-      const result = await parser.parseStringPromise(xmlText);
       
+      // On utilise explicitArray: false pour coller à la structure de votre feed.json
+      const parser = new xml2js.Parser({ 
+        explicitArray: false, 
+        mergeAttrs: true,
+        stripPrefix: true 
+      });
+      
+      const result = await parser.parseStringPromise(xmlText);
       const rootKey = Object.keys(result)[0];
-      // On s'adapte à la structure du XML
       let properties = result[rootKey].property || result[rootKey].properties?.property || [];
       if (!Array.isArray(properties)) properties = [properties];
 
       const updates = properties.map((p: any) => {
         
-        // --- EXTRACTION DESCRIPTION ---
-        // Dans ton JSON, c'est directement p.description. 
-        // Dans le XML parsé, ça peut être p.description._ ou p.description (si CDATA)
-        let desc = "";
+        // --- EXTRACTION DE LA DESCRIPTION (Basée sur votre feed.json) ---
+        // Dans votre JSON, la description est une string directe ou dans p.description.fr
+        let descValue = "";
         if (typeof p.description === 'string') {
-          desc = p.description;
-        } else if (p.description && p.description._) {
-          desc = p.description._;
-        } else if (p.description && p.description.fr) {
-          desc = typeof p.description.fr === 'string' ? p.description.fr : p.description.fr._;
+          descValue = p.description;
+        } else if (p.description?.fr) {
+          descValue = typeof p.description.fr === 'string' ? p.description.fr : p.description.fr._;
+        } else if (p.description?._) {
+          descValue = p.description._;
         }
 
-        // --- EXTRACTION SURFACES ---
-        const built = p.surface_area?.built || p.surface_built || "0";
-        const plot = p.surface_area?.plot || p.surface_plot || "0";
-
-        // --- EXTRACTION CHAMBRES / BAINS ---
-        const beds = p.beds || p.bedrooms || "0";
-        const baths = p.baths || p.bathrooms || "0";
-
-        // --- TITRE ---
-        let titre = "Villa";
-        if (typeof p.title === 'string') titre = p.title;
-        else if (p.title?.fr) titre = p.title.fr;
-        else if (p.title?._) titre = p.title._;
+        // --- SURFACES (Structure imbriquée du JSON) ---
+        const built = p.surface_area?.built || "0";
+        const plot = p.surface_area?.plot || "0";
 
         return {
           id_externe: String(p.id),
-          titre: titre,
-          description: desc, // C'est ici que le texte HTML va être injecté
+          titre: p.title?.fr || p.title || "Villa Neuve",
+          
+          // VERIFIEZ BIEN LE NOM DE CETTE COLONNE DANS SUPABASE :
+          description: descValue, 
+          
           region: source.defaultRegion,
-          town: p.town || p.city || "Espagne",
+          town: p.town || "Espagne",
           price: parseFloat(p.price) || 0,
-          type: p.type || "Villa",
-          beds: String(beds),
-          baths: String(baths),
+          beds: String(p.beds || "0"),
+          baths: String(p.baths || "0"),
           surface_built: String(built),
           surface_plot: String(plot),
-          ref: p.ref || p.reference || String(p.id),
           images: Array.isArray(p.images?.image) ? p.images.image : [],
           updated_at: new Date().toISOString()
         };
       });
 
-      const { error } = await supabase.from('villas').upsert(updates, { onConflict: 'id_externe' });
-      if (!error) totalSynced += updates.length;
-      else console.error("Erreur Supabase:", error.message);
+      // L'upsert force la mise à jour des colonnes même si la ligne existe
+      const { error } = await supabase
+        .from('villas')
+        .upsert(updates, { onConflict: 'id_externe' });
+
+      if (error) {
+        console.error("Erreur Supabase detaillee:", error);
+      } else {
+        totalSynced += updates.length;
+      }
     }
 
     return NextResponse.json({ success: true, totalSynced });
