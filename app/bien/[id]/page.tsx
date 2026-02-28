@@ -48,13 +48,13 @@ export default function PropertyDetailPage() {
     ? property.images.map((img: any) => typeof img === 'object' ? img.url : img).filter(Boolean)
     : ["/placeholder.jpg"];
 
-  // 2. Plans techniques (Correction pour l'absence d'affichage)
+  // 2. Plans techniques (Correction TypeScript pour Vercel)
   const plans = Array.isArray(property.plans) 
     ? property.plans.map((p: any) => {
         if (typeof p === 'string') return p;
         if (typeof p === 'object' && p !== null) return p.url || p.link;
         return null;
-      }).filter((url): url is string => !!url)
+      }).filter((url: any): url is string => Boolean(url)) // Correction ici : ajout de : any
     : [];
 
   return (
