@@ -22,73 +22,71 @@ export async function GET() {
       const parser = new xml2js.Parser({ explicitArray: true, mergeAttrs: true });
       const result = await parser.parseStringPromise(xmlText);
       
-      const root = result.properties || result;
-      const propertiesRaw = root.property || [];
+      const rootKey = Object.keys(result)[0];
+      const properties = result[rootKey].property || result[rootKey].properties?.property || [];
 
-      if (propertiesRaw.length === 0) continue;
+      const updates = properties.map((p: any) => {
+        const getVal = (field: any) => Array.isArray(field) ? field[0] : field;
 
-      const updates = propertiesRaw.map((p: any) => {
-        const getVal = (field: any) => (Array.isArray(field) ? field[0] : field);
-
-        // 1. Gestion de la région et ville
-        const town = (getVal(p.town) || "").toString();
-        const lowTown = town.toLowerCase();
+        // --- LOCALISATION ---
+        const townRaw = getVal(p.town) || getVal(p.city) || getVal(p.location)?.city || "";
+        const town = townRaw.toString().toLowerCase();
         let finalRegion = source.defaultRegion;
-        
+
         if (source.defaultRegion === "Costa del Sol") {
-          if (["almeria", "mojacar", "vera", "pulpi"].some(k => lowTown.includes(k))) {
-            finalRegion = "Costa Almeria";
-          }
-        } else {
-          if (["murcia", "mazarron", "pilar", "alcazares", "san javier", "aguilas"].some(k => lowTown.includes(k))) {
-            finalRegion = "Costa Calida";
-          }
+           if (town.includes("almeria") || town.includes("mojacar") || town.includes("vera")) {
+             finalRegion = "Costa Almeria";
+           }
+        } else if (source.defaultRegion === "Costa Blanca") {
+           if (town.includes("murcia") || town.includes("mazarron") || town.includes("aguilas")) {
+             finalRegion = "Costa Calida";
+           }
         }
 
-        // 2. Extraction des Images
+        // --- IMAGES ---
         let cleanImages: string[] = [];
-        const imgs = p.images?.[0]?.image;
-        if (imgs) {
-          cleanImages = (Array.isArray(imgs) ? imgs : [imgs])
-            .map(img => typeof img === 'string' ? img : (img.url || img._ || (img.$ && img.$.url)))
-            .filter(url => url && typeof url === 'string' && url.startsWith('http'));
+        const imgsContainer = p.images?.[0]?.image;
+        if (imgsContainer) {
+          const imgs = Array.isArray(imgsContainer) ? imgsContainer : [imgsContainer];
+          cleanImages = imgs.map((i: any) => typeof i === 'string' ? i : (i.url || i._)).filter(Boolean);
         }
 
-        // 3. Multilingue (Description & Titre)
+        // --- NOUVELLES EXTRACTIONS (Ce qui manquait) ---
+        
+        // 1. Description FR
         const descObj = p.description?.[0];
-        const descriptionFR = descObj?.fr?.[0] || descObj?.en?.[0] || "";
-        const titleObj = p.title?.[0];
-        const titreFR = titleObj?.fr?.[0] || titleObj?.en?.[0] || getVal(p.title) || "Villa";
+        const description = descObj?.fr?.[0] || descObj?.en?.[0] || "";
 
-        // 4. Caractéristiques (Salles de bain, Surfaces)
+        // 2. Surfaces (Objet surface_area dans le XML)
         const surfaceObj = p.surface_area?.[0];
+        const surfaceBuilt = surfaceObj?.built?.[0] || "0";
+        const surfacePlot = surfaceObj?.plot?.[0] || "0";
+
+        // 3. Salles de bain
+        const baths = getVal(p.baths) || getVal(p.bathrooms) || "0";
 
         return {
           id_externe: String(getVal(p.id)),
-          titre: titreFR,
-          description: descriptionFR,
+          titre: p.title?.[0]?.fr?.[0] || p.title?.[0]?.en?.[0] || getVal(p.title) || "Villa",
+          description: description, // Colonne description
           region: finalRegion,
-          town: town,
-          ville: town, // On remplit les deux par sécurité
+          town: townRaw || "Espagne",
           price: parseFloat(getVal(p.price)) || 0,
-          prix: parseFloat(getVal(p.price)) || 0,
           type: getVal(p.type) || "Villa",
-          ref: getVal(p.ref) || getVal(p.reference) || String(getVal(p.id)),
-          beds: String(getVal(p.beds) || "0"),
-          baths: String(getVal(p.baths) || "0"),
-          surface_built: String(surfaceObj?.built?.[0] || "0"),
-          surface_plot: String(surfaceObj?.plot?.[0] || "0"),
+          beds: String(getVal(p.bedrooms) || getVal(p.beds) || "0"),
+          baths: String(baths), // Colonne baths
+          surface_built: String(surfaceBuilt), // Colonne surface_built
+          surface_plot: String(surfacePlot), // Colonne surface_plot
+          ref: getVal(p.reference) || getVal(p.ref) || String(getVal(p.id)),
           images: cleanImages,
           updated_at: new Date().toISOString()
         };
       });
 
-      // L'upsert force la mise à jour des colonnes même si l'ID existe
-      const { error } = await supabase.from('villas').upsert(updates, { 
-        onConflict: 'id_externe' 
-      });
-
+      // L'upsert avec onConflict id_externe va mettre à jour les colonnes vides
+      const { error } = await supabase.from('villas').upsert(updates, { onConflict: 'id_externe' });
       if (!error) totalSynced += updates.length;
+      else console.error("Erreur Supabase:", error.message);
     }
 
     return NextResponse.json({ success: true, totalSynced });
