@@ -28,43 +28,41 @@ export async function GET() {
       const updates = properties.map((p: any) => {
         const getVal = (field: any) => Array.isArray(field) ? field[0] : field;
 
+        // --- LOGIQUE DE DÉTECTION DE RÉGION AMÉLIORÉE ---
         const town = (getVal(p.location)?.city || getVal(p.city) || getVal(p.town) || "").toLowerCase();
         let finalRegion = source.defaultRegion;
 
-        // --- AFFINAGE DES MOTS-CLÉS ---
+        // Si on trouve des villes spécifiques dans le flux "Sol", on bascule sur Almeria
         if (source.defaultRegion === "Costa del Sol") {
-           // Si c'est le flux SUD, on sépare Sol et Almeria
-           if (town.includes("almeria") || town.includes("mojacar") || town.includes("vera") || town.includes("cuevas") || town.includes("pulpi")) {
+           if (town.includes("almeria") || town.includes("mojacar") || town.includes("vera")) {
              finalRegion = "Costa Almeria";
            }
-        } else {
-           // Si c'est le flux EST, on sépare Blanca et Calida
-           if (town.includes("murcia") || town.includes("mazarron") || town.includes("aguilas") || town.includes("pilar") || town.includes("san pedro") || town.includes("alcazares")) {
+        } 
+        // Si on trouve des villes spécifiques dans le flux "Blanca", on sépare Blanca et Calida
+        else if (source.defaultRegion === "Costa Blanca") {
+           if (town.includes("murcia") || town.includes("mazarron") || town.includes("aguilas")) {
              finalRegion = "Costa Calida";
            }
         }
 
-        // Nettoyage des images (Extraction propre des URLs)
+        // Nettoyage des images
         let cleanImages: string[] = [];
         const imgsContainer = p.images?.[0]?.image;
         if (imgsContainer) {
           const imgs = Array.isArray(imgsContainer) ? imgsContainer : [imgsContainer];
-          cleanImages = imgs.map((i: any) => {
-             if (typeof i === 'string') return i;
-             return i.url || i._ || i.$?.url;
-          }).filter(img => typeof img === 'string' && img.startsWith('http'));
+          cleanImages = imgs.map((i: any) => typeof i === 'string' ? i : (i.url || i._)).filter(Boolean);
         }
 
         return {
           id_externe: String(getVal(p.id)),
-          titre: getVal(p.title)?.fr || getVal(p.title)?.en || getVal(p.title) || "Villa de standing",
-          region: finalRegion,
+          titre: getVal(p.title)?.fr || getVal(p.title)?.en || getVal(p.title) || "Villa",
+          region: finalRegion, // La région détectée (Blanca, Calida, Sol ou Almeria)
           town: getVal(p.location)?.city || getVal(p.city) || getVal(p.town) || "Espagne",
           price: parseFloat(getVal(p.price)) || 0,
           type: getVal(p.type) || "Villa",
           beds: String(getVal(p.bedrooms) || getVal(p.beds) || "0"),
           ref: getVal(p.reference) || String(getVal(p.id)),
-          images: cleanImages, // Stocké en tant que tableau d'URLs propres
+          images: cleanImages,
           updated_at: new Date().toISOString()
         };
       });
