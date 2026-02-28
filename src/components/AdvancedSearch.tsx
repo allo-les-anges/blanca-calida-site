@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect, useMemo } from "react";
 import { RotateCcw, Search, Map, Home, Euro, Hash, Bed, Building2 } from "lucide-react";
+import { useRouter } from "next/navigation"; // Importez le router
 
 interface AdvancedSearchProps {
   onSearch: (filters: any) => void;
@@ -14,10 +15,22 @@ export default function AdvancedSearch({
   activeFilters,
 }: AdvancedSearchProps) {
   const [localFilters, setLocalFilters] = useState(activeFilters);
+  const router = useRouter(); // Initialisez le router
 
   useEffect(() => {
     setLocalFilters(activeFilters);
   }, [activeFilters]);
+
+  // --- UTILITAIRE : slugify (doit être identique à celui de la page [devId]) ---
+  const slugify = (text: string) =>
+    text
+      ?.toString()
+      .toLowerCase()
+      .trim()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/\s+/g, "-")
+      .replace(/[^\w-]+/g, "");
 
   // --- LOGIQUE DE DONNÉES ---
   const regions = ["Costa Blanca", "Costa Calida", "Costa del Sol", "Costa Almeria"];
@@ -44,9 +57,17 @@ export default function AdvancedSearch({
       .map((t) => ({ id: t.toLowerCase(), label: translation[t.toLowerCase()] || t }));
   }, [properties]);
 
-  // --- ACTIONS ---
+  // --- ACTIONS MODIFIÉES ---
   const handleSearchClick = () => {
-    onSearch(localFilters);
+    // CONDITION DE REDIRECTION :
+    // Si un développement est sélectionné ET que c'est le seul critère majeur
+    if (localFilters.development && !localFilters.reference) {
+      const slug = slugify(localFilters.development);
+      router.push(`/developpement/${slug}`);
+    } else {
+      // Sinon, on exécute la recherche filtrée classique sur la page actuelle
+      onSearch(localFilters);
+    }
   };
 
   const reset = () => {
@@ -92,11 +113,10 @@ export default function AdvancedSearch({
           </div>
         </div>
 
-        {/* LIGNE 2 : CRITÈRES GÉOGRAPHIQUES ET TECHNIQUES */}
+        {/* LIGNE 2 : CRITÈRES (Région, Type, Prix, Chambres) */}
         <div className="flex flex-col lg:flex-row items-stretch">
           <div className="flex-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-0">
             
-            {/* Région */}
             <div className="p-6 border-b md:border-b-0 md:border-r border-slate-50">
               <label className="flex items-center gap-2 text-[9px] uppercase font-black tracking-[0.2em] text-slate-400 mb-2">
                 <Map size={12} /> Région
@@ -111,7 +131,6 @@ export default function AdvancedSearch({
               </select>
             </div>
 
-            {/* Type */}
             <div className="p-6 border-b md:border-b-0 md:border-r border-slate-50">
               <label className="flex items-center gap-2 text-[9px] uppercase font-black tracking-[0.2em] text-slate-400 mb-2">
                 <Home size={12} /> Type
@@ -126,7 +145,6 @@ export default function AdvancedSearch({
               </select>
             </div>
 
-            {/* Budget Min */}
             <div className="p-6 border-b md:border-b-0 md:border-r border-slate-50">
               <label className="flex items-center gap-2 text-[9px] uppercase font-black tracking-[0.2em] text-slate-400 mb-2">
                 <Euro size={12} /> Prix Min
@@ -141,7 +159,6 @@ export default function AdvancedSearch({
               </select>
             </div>
 
-            {/* Budget Max */}
             <div className="p-6 border-b md:border-b-0 md:border-r border-slate-50">
               <label className="flex items-center gap-2 text-[9px] uppercase font-black tracking-[0.2em] text-slate-400 mb-2">
                 <Euro size={12} /> Prix Max
@@ -156,7 +173,6 @@ export default function AdvancedSearch({
               </select>
             </div>
 
-            {/* Chambres */}
             <div className="p-6">
               <label className="flex items-center gap-2 text-[9px] uppercase font-black tracking-[0.2em] text-slate-400 mb-2">
                 <Bed size={12} /> Chambres
