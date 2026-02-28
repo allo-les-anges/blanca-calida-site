@@ -20,11 +20,10 @@ export async function GET() {
       const response = await fetch(source.url, { cache: 'no-store' });
       const xmlText = await response.text();
       
-      // On utilise explicitArray: false pour coller à la structure de votre feed.json
+      // On retire stripPrefix qui causait l'erreur
       const parser = new xml2js.Parser({ 
         explicitArray: false, 
-        mergeAttrs: true,
-        stripPrefix: true 
+        mergeAttrs: true 
       });
       
       const result = await parser.parseStringPromise(xmlText);
@@ -34,47 +33,48 @@ export async function GET() {
 
       const updates = properties.map((p: any) => {
         
-        // --- EXTRACTION DE LA DESCRIPTION (Basée sur votre feed.json) ---
-        // Dans votre JSON, la description est une string directe ou dans p.description.fr
+        // --- LOGIQUE DE DESCRIPTION (Basée sur ton JSON) ---
         let descValue = "";
-        if (typeof p.description === 'string') {
-          descValue = p.description;
-        } else if (p.description?.fr) {
-          descValue = typeof p.description.fr === 'string' ? p.description.fr : p.description.fr._;
-        } else if (p.description?._) {
-          descValue = p.description._;
+        
+        if (p.description) {
+          if (typeof p.description === 'string') {
+            descValue = p.description;
+          } else if (p.description.fr) {
+            // Si c'est un objet { fr: "..." }
+            descValue = typeof p.description.fr === 'string' ? p.description.fr : (p.description.fr._ || "");
+          } else if (p.description._) {
+            descValue = p.description._;
+          }
         }
 
-        // --- SURFACES (Structure imbriquée du JSON) ---
-        const built = p.surface_area?.built || "0";
-        const plot = p.surface_area?.plot || "0";
+        // --- LOGIQUE SURFACES ---
+        const built = p.surface_area?.built || p.surface_built || "0";
+        const plot = p.surface_area?.plot || p.surface_plot || "0";
 
         return {
           id_externe: String(p.id),
           titre: p.title?.fr || p.title || "Villa Neuve",
-          
-          // VERIFIEZ BIEN LE NOM DE CETTE COLONNE DANS SUPABASE :
-          description: descValue, 
-          
+          description: descValue, // La colonne cible dans Supabase
           region: source.defaultRegion,
-          town: p.town || "Espagne",
+          town: p.town || p.city || "Espagne",
           price: parseFloat(p.price) || 0,
           beds: String(p.beds || "0"),
           baths: String(p.baths || "0"),
           surface_built: String(built),
           surface_plot: String(plot),
-          images: Array.isArray(p.images?.image) ? p.images.image : [],
+          // Extraction propre des images
+          images: p.images?.image ? (Array.isArray(p.images.image) ? p.images.image : [p.images.image]) : [],
+          ref: p.ref || p.reference || String(p.id),
           updated_at: new Date().toISOString()
         };
       });
 
-      // L'upsert force la mise à jour des colonnes même si la ligne existe
       const { error } = await supabase
         .from('villas')
         .upsert(updates, { onConflict: 'id_externe' });
 
       if (error) {
-        console.error("Erreur Supabase detaillee:", error);
+        console.error("Erreur Supabase:", error.message);
       } else {
         totalSynced += updates.length;
       }
