@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect, useMemo } from "react";
-import { RotateCcw, Search, MapPin, Home, Euro, BedDouble } from "lucide-react";
+import { RotateCcw, Search, Map, Home, Euro, Hash, Bed } from "lucide-react";
 
 interface AdvancedSearchProps {
   onSearch: (filters: any) => void;
@@ -19,179 +19,141 @@ export default function AdvancedSearch({
     setLocalFilters(activeFilters);
   }, [activeFilters]);
 
-  // 1. Liste des Régions (Fixe selon demande)
+  // Données pour les menus
   const regions = ["Costa Blanca", "Costa Calida", "Costa del Sol", "Costa Almeria"];
+  
+  const priceOptions = useMemo(() => {
+    const opts = [];
+    for (let i = 0; i <= 20; i++) opts.push(200000 + i * 150000);
+    return opts;
+  }, []);
 
-  // 2. Génération des Villes (Dynamique)
-  const towns = useMemo(() => {
-    return [...new Set(properties.map((p) => p.town))].filter(Boolean).sort();
-  }, [properties]);
-
-  // 3. Génération des Types
   const types = useMemo(() => {
     const translation: { [key: string]: string } = {
-      villa: "Villa",
-      detached: "Maison Individuelle",
-      apartment: "Appartement",
-      penthouse: "Penthouse",
-      bungalow: "Bungalow",
-      townhouse: "Maison de ville",
+      villa: "Villa", apartment: "Appartement", penthouse: "Penthouse", bungalow: "Bungalow"
     };
-
     return [...new Set(properties.map((p) => p.type))]
       .filter((t) => t && t.toLowerCase() !== "property")
-      .map((t) => {
-        const val = t.toLowerCase();
-        return translation[val] || val.charAt(0).toUpperCase() + val.slice(1);
-      })
-      .sort();
+      .map((t) => ({ id: t.toLowerCase(), label: translation[t.toLowerCase()] || t }));
   }, [properties]);
-
-  const priceOptions = useMemo(() => {
-    const options = [];
-    for (let i = 0; i <= 30; i++) {
-      options.push(200000 + i * 100000); // Tranches plus larges pour le luxe
-    }
-    return options;
-  }, []);
 
   const handleSearchClick = () => {
     onSearch(localFilters);
   };
 
   const reset = () => {
-    const empty = {
-      region: "",
-      town: "",
-      type: "",
-      beds: "",
-      minPrice: "",
-      maxPrice: "",
-    };
+    const empty = { region: "", type: "", beds: "", minPrice: "", maxPrice: "", reference: "" };
     setLocalFilters(empty);
     onSearch(empty);
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-6 -mt-20 relative z-[40]">
-      <div className="bg-white/80 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] p-8 lg:p-12 rounded-[2rem] border border-white">
+    <div className="max-w-7xl mx-auto px-4 -mt-24 relative z-[50]">
+      {/* Container Principal Style "Luxe" */}
+      <div className="bg-white rounded-[2.5rem] shadow-[0_30px_100px_rgba(0,0,0,0.12)] border border-slate-100 p-2">
         
-        {/* GRILLE DE RECHERCHE */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-10 mb-12">
+        <div className="flex flex-col lg:flex-row items-stretch">
           
-          {/* RÉGION */}
-          <div className="flex flex-col group">
-            <label className="text-[9px] uppercase font-black text-slate-400 tracking-[0.3em] mb-4 flex items-center gap-2">
-              <MapPin size={12} className="text-slate-300" /> Région
+          {/* SECTION 1 : RÉFÉRENCE (Rapide et Stylisée) */}
+          <div className="flex-[0.8] border-b lg:border-b-0 lg:border-r border-slate-50 p-6 lg:p-8">
+            <label className="flex items-center gap-2 text-[9px] uppercase font-black tracking-[0.2em] text-emerald-600 mb-3">
+              <Hash size={12} /> ID Propriété
             </label>
-            <select
-              value={localFilters.region || ""}
-              onChange={(e) => setLocalFilters({ ...localFilters, region: e.target.value })}
-              className="bg-transparent border-b border-slate-200 py-3 text-sm font-medium outline-none focus:border-slate-900 transition-all cursor-pointer appearance-none uppercase tracking-wider"
-            >
-              <option value="">Toute l'Espagne</option>
-              {regions.map((r) => <option key={r} value={r}>{r}</option>)}
-            </select>
+            <input 
+              type="text"
+              placeholder="Ex: REF-2024..."
+              value={localFilters.reference || ""}
+              onChange={(e) => setLocalFilters({ ...localFilters, reference: e.target.value })}
+              className="w-full bg-transparent text-sm font-medium placeholder:text-slate-300 outline-none focus:ring-0"
+            />
           </div>
 
-          {/* DESTINATION (VILLE) */}
-          <div className="flex flex-col">
-            <label className="text-[9px] uppercase font-black text-slate-400 tracking-[0.3em] mb-4 flex items-center gap-2">
-              <MapPin size={12} className="text-slate-300" /> Ville
-            </label>
-            <select
-              value={localFilters.town || ""}
-              onChange={(e) => setLocalFilters({ ...localFilters, town: e.target.value })}
-              className="bg-transparent border-b border-slate-200 py-3 text-sm font-medium outline-none focus:border-slate-900 transition-all cursor-pointer appearance-none uppercase tracking-wider"
-            >
-              <option value="">Toutes les villes</option>
-              {towns.map((t) => <option key={t} value={t}>{t}</option>)}
-            </select>
+          {/* SECTION 2 : CRITÈRES PRINCIPAUX */}
+          <div className="flex-[3] grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-0 p-2">
+            
+            {/* Région */}
+            <div className="p-6 lg:p-8 border-r border-slate-50">
+              <label className="flex items-center gap-2 text-[9px] uppercase font-black tracking-[0.2em] text-slate-400 mb-3">
+                <Map size={12} /> Secteur
+              </label>
+              <select 
+                value={localFilters.region || ""}
+                onChange={(e) => setLocalFilters({ ...localFilters, region: e.target.value })}
+                className="w-full bg-transparent text-sm font-semibold outline-none cursor-pointer appearance-none"
+              >
+                <option value="">Toute l'Espagne</option>
+                {regions.map(r => <option key={r} value={r}>{r}</option>)}
+              </select>
+            </div>
+
+            {/* Type */}
+            <div className="p-6 lg:p-8 border-r border-slate-50">
+              <label className="flex items-center gap-2 text-[9px] uppercase font-black tracking-[0.2em] text-slate-400 mb-3">
+                <Home size={12} /> Type
+              </label>
+              <select 
+                value={localFilters.type || ""}
+                onChange={(e) => setLocalFilters({ ...localFilters, type: e.target.value })}
+                className="w-full bg-transparent text-sm font-semibold outline-none cursor-pointer appearance-none"
+              >
+                <option value="">Tous types</option>
+                {types.map(t => <option key={t.id} value={t.id}>{t.label}</option>)}
+              </select>
+            </div>
+
+            {/* Chambres */}
+            <div className="p-6 lg:p-8 border-r border-slate-50">
+              <label className="flex items-center gap-2 text-[9px] uppercase font-black tracking-[0.2em] text-slate-400 mb-3">
+                <Bed size={12} /> Chambres
+              </label>
+              <select 
+                value={localFilters.beds || ""}
+                onChange={(e) => setLocalFilters({ ...localFilters, beds: e.target.value })}
+                className="w-full bg-transparent text-sm font-semibold outline-none cursor-pointer appearance-none"
+              >
+                <option value="">Indifférent</option>
+                {[2, 3, 4, 5].map(n => <option key={n} value={n}>{n}+ chambres</option>)}
+              </select>
+            </div>
+
+            {/* Budget */}
+            <div className="p-6 lg:p-8">
+              <label className="flex items-center gap-2 text-[9px] uppercase font-black tracking-[0.2em] text-slate-400 mb-3">
+                <Euro size={12} /> Budget Max
+              </label>
+              <select 
+                value={localFilters.maxPrice || ""}
+                onChange={(e) => setLocalFilters({ ...localFilters, maxPrice: e.target.value })}
+                className="w-full bg-transparent text-sm font-semibold outline-none cursor-pointer appearance-none"
+              >
+                <option value="">Sans limite</option>
+                {priceOptions.map(p => <option key={p} value={p}>{p.toLocaleString()} €</option>)}
+              </select>
+            </div>
+
           </div>
 
-          {/* TYPE */}
-          <div className="flex flex-col">
-            <label className="text-[9px] uppercase font-black text-slate-400 tracking-[0.3em] mb-4 flex items-center gap-2">
-              <Home size={12} className="text-slate-300" /> Type de bien
-            </label>
-            <select
-              value={localFilters.type || ""}
-              onChange={(e) => setLocalFilters({ ...localFilters, type: e.target.value })}
-              className="bg-transparent border-b border-slate-200 py-3 text-sm font-medium outline-none focus:border-slate-900 transition-all cursor-pointer appearance-none uppercase tracking-wider"
+          {/* BOUTON RECHERCHE */}
+          <div className="p-4 flex items-center justify-center">
+            <button 
+              onClick={handleSearchClick}
+              className="w-full lg:w-20 h-16 lg:h-20 bg-slate-950 text-white rounded-3xl flex items-center justify-center hover:bg-emerald-600 hover:scale-105 transition-all duration-300 shadow-xl shadow-slate-200"
             >
-              <option value="">Tous les types</option>
-              {types.map((t) => <option key={t} value={t}>{t}</option>)}
-            </select>
+              <Search size={24} strokeWidth={2.5} />
+            </button>
           </div>
-
-          {/* PRIX MIN */}
-          <div className="flex flex-col">
-            <label className="text-[9px] uppercase font-black text-slate-400 tracking-[0.3em] mb-4 flex items-center gap-2">
-              <Euro size={12} className="text-slate-300" /> Budget Minimum
-            </label>
-            <select
-              value={localFilters.minPrice || ""}
-              onChange={(e) => setLocalFilters({ ...localFilters, minPrice: e.target.value })}
-              className="bg-transparent border-b border-slate-200 py-3 text-sm font-medium outline-none focus:border-slate-900 transition-all cursor-pointer appearance-none"
-            >
-              <option value="">Indifférent</option>
-              {priceOptions.map((p) => (
-                <option key={p} value={p}>{p.toLocaleString("fr-FR")} €</option>
-              ))}
-            </select>
-          </div>
-
-          {/* PRIX MAX */}
-          <div className="flex flex-col">
-            <label className="text-[9px] uppercase font-black text-slate-400 tracking-[0.3em] mb-4 flex items-center gap-2">
-              <Euro size={12} className="text-slate-300" /> Budget Maximum
-            </label>
-            <select
-              value={localFilters.maxPrice || ""}
-              onChange={(e) => setLocalFilters({ ...localFilters, maxPrice: e.target.value })}
-              className="bg-transparent border-b border-slate-200 py-3 text-sm font-medium outline-none focus:border-slate-900 transition-all cursor-pointer appearance-none"
-            >
-              <option value="">Indifférent</option>
-              {priceOptions.map((p) => (
-                <option key={p} value={p}>{p.toLocaleString("fr-FR")} €</option>
-              ))}
-            </select>
-          </div>
-
-          {/* CHAMBRES */}
-          <div className="flex flex-col">
-            <label className="text-[9px] uppercase font-black text-slate-400 tracking-[0.3em] mb-4 flex items-center gap-2">
-              <BedDouble size={12} className="text-slate-300" /> Chambres
-            </label>
-            <select
-              value={localFilters.beds || ""}
-              onChange={(e) => setLocalFilters({ ...localFilters, beds: e.target.value })}
-              className="bg-transparent border-b border-slate-200 py-3 text-sm font-medium outline-none focus:border-slate-900 transition-all cursor-pointer appearance-none"
-            >
-              <option value="">Nombre de chambres</option>
-              {[1, 2, 3, 4, 5, 6].map((n) => <option key={n} value={n}>{n}+ Chambres</option>)}
-            </select>
-          </div>
-
         </div>
 
-        {/* BARRE D'ACTIONS INFÉRIEURE */}
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-6 pt-6 border-t border-slate-50">
-          <button
-            onClick={reset}
-            className="flex items-center gap-3 text-slate-400 text-[10px] uppercase font-bold hover:text-slate-900 transition-all tracking-[0.2em]"
-          >
-            <RotateCcw size={14} strokeWidth={2.5} /> Réinitialiser
-          </button>
+      </div>
 
-          <button
-            onClick={handleSearchClick}
-            className="w-full sm:w-auto bg-slate-950 text-white px-14 py-5 uppercase text-[11px] tracking-[0.4em] font-bold hover:bg-slate-800 transition-all flex items-center justify-center gap-4 rounded-full shadow-2xl shadow-slate-300 active:scale-95"
-          >
-            <Search size={16} strokeWidth={2.5} /> Voir les propriétés
-          </button>
-        </div>
-
+      {/* RESET LINK */}
+      <div className="mt-6 flex justify-center">
+        <button 
+          onClick={reset}
+          className="flex items-center gap-2 text-[10px] uppercase font-bold text-slate-400 hover:text-slate-900 tracking-[0.2em] transition-colors"
+        >
+          <RotateCcw size={12} /> Réinitialiser les filtres
+        </button>
       </div>
     </div>
   );
