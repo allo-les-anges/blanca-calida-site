@@ -7,12 +7,9 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-// Configuration des 4 flux pour couvrir toutes tes vignettes
 const SOURCES = [
-  { region: "Costa Blanca", url: "https://medianewbuild.com/file/hh-media-bucket/agents/6d5cb68a-3636-4095-b0ce-7dc9ec2df2d2/feed_blanca_calida.xml" }, 
-  { region: "Costa Calida", url: "https://medianewbuild.com/file/hh-media-bucket/agents/6d5cb68a-3636-4095-b0ce-7dc9ec2df2d2/feed_blanca_calida.xml" }, // À remplacer par l'URL Calida si différente
-  { region: "Costa del Sol", url: "https://medianewbuild.com/file/hh-media-bucket/agents/6d5cb68a-3636-4095-b0ce-7dc9ec2df2d2/feed_sol.xml" },
-  { region: "Costa Almeria", url: "https://medianewbuild.com/file/hh-media-bucket/agents/6d5cb68a-3636-4095-b0ce-7dc9ec2df2d2/feed_sol.xml" } // À remplacer par l'URL Almeria si différente
+  { defaultRegion: "Costa Blanca", url: "https://medianewbuild.com/file/hh-media-bucket/agents/6d5cb68a-3636-4095-b0ce-7dc9ec2df2d2/feed_blanca_calida.xml" },
+  { defaultRegion: "Costa del Sol", url: "https://medianewbuild.com/file/hh-media-bucket/agents/6d5cb68a-3636-4095-b0ce-7dc9ec2df2d2/feed_sol.xml" }
 ];
 
 export async function GET() {
@@ -31,7 +28,24 @@ export async function GET() {
       const updates = properties.map((p: any) => {
         const getVal = (field: any) => Array.isArray(field) ? field[0] : field;
 
-        // Extraction propre des images (Tableau de strings)
+        // --- LOGIQUE DE DÉTECTION DE RÉGION AMÉLIORÉE ---
+        const town = (getVal(p.location)?.city || getVal(p.city) || getVal(p.town) || "").toLowerCase();
+        let finalRegion = source.defaultRegion;
+
+        // Si on trouve des villes spécifiques dans le flux "Sol", on bascule sur Almeria
+        if (source.defaultRegion === "Costa del Sol") {
+           if (town.includes("almeria") || town.includes("mojacar") || town.includes("vera")) {
+             finalRegion = "Costa Almeria";
+           }
+        } 
+        // Si on trouve des villes spécifiques dans le flux "Blanca", on sépare Blanca et Calida
+        else if (source.defaultRegion === "Costa Blanca") {
+           if (town.includes("murcia") || town.includes("mazarron") || town.includes("aguilas")) {
+             finalRegion = "Costa Calida";
+           }
+        }
+
+        // Nettoyage des images
         let cleanImages: string[] = [];
         const imgsContainer = p.images?.[0]?.image;
         if (imgsContainer) {
@@ -42,17 +56,13 @@ export async function GET() {
         return {
           id_externe: String(getVal(p.id)),
           titre: getVal(p.title)?.fr || getVal(p.title)?.en || getVal(p.title) || "Villa",
-          region: source.region, // On injecte la région définie plus haut
+          region: finalRegion, // La région détectée (Blanca, Calida, Sol ou Almeria)
           town: getVal(p.location)?.city || getVal(p.city) || getVal(p.town) || "Espagne",
           price: parseFloat(getVal(p.price)) || 0,
-          type: getVal(p.type) || "Apartment",
+          type: getVal(p.type) || "Villa",
           beds: String(getVal(p.bedrooms) || getVal(p.beds) || "0"),
           ref: getVal(p.reference) || String(getVal(p.id)),
           images: cleanImages,
-          details: {
-            bathrooms: getVal(p.bathrooms) || 0,
-            surface: getVal(p.size) || 0
-          },
           updated_at: new Date().toISOString()
         };
       });
