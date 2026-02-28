@@ -27,45 +27,44 @@ export async function GET() {
 
       const updates = properties.map((p: any) => {
         const getVal = (field: any) => Array.isArray(field) ? field[0] : field;
+
         const town = (getVal(p.location)?.city || getVal(p.city) || getVal(p.town) || "").toLowerCase();
-        
         let finalRegion = source.defaultRegion;
 
-        // --- CLASSIFICATION COSTA ALMERIA ---
-        const keywordsAlmeria = ["almeria", "mojacar", "vera", "cuevas", "pulpi", "turre", "garrucha", "arboleas", "albox"];
-        
-        // --- CLASSIFICATION COSTA CALIDA ---
-        const keywordsCalida = ["murcia", "mazarron", "aguilas", "pilar", "san pedro", "alcazares", "cartagena", "san javier", "la manga", "lo pagan"];
-
+        // --- AFFINAGE DES MOTS-CLÉS ---
         if (source.defaultRegion === "Costa del Sol") {
-           if (keywordsAlmeria.some(word => town.includes(word))) {
+           // Si c'est le flux SUD, on sépare Sol et Almeria
+           if (town.includes("almeria") || town.includes("mojacar") || town.includes("vera") || town.includes("cuevas") || town.includes("pulpi")) {
              finalRegion = "Costa Almeria";
            }
-        } else if (source.defaultRegion === "Costa Blanca") {
-           if (keywordsCalida.some(word => town.includes(word))) {
+        } else {
+           // Si c'est le flux EST, on sépare Blanca et Calida
+           if (town.includes("murcia") || town.includes("mazarron") || town.includes("aguilas") || town.includes("pilar") || town.includes("san pedro") || town.includes("alcazares")) {
              finalRegion = "Costa Calida";
            }
-           // Par défaut, si rien ne match dans le flux Blanca/Calida, ça reste "Costa Blanca"
         }
 
-        // Nettoyage images
+        // Nettoyage des images (Extraction propre des URLs)
         let cleanImages: string[] = [];
         const imgsContainer = p.images?.[0]?.image;
         if (imgsContainer) {
           const imgs = Array.isArray(imgsContainer) ? imgsContainer : [imgsContainer];
-          cleanImages = imgs.map((i: any) => typeof i === 'string' ? i : (i.url || i._ || i.$?.url)).filter(img => typeof img === 'string' && img.startsWith('http'));
+          cleanImages = imgs.map((i: any) => {
+             if (typeof i === 'string') return i;
+             return i.url || i._ || i.$?.url;
+          }).filter(img => typeof img === 'string' && img.startsWith('http'));
         }
 
         return {
           id_externe: String(getVal(p.id)),
-          titre: getVal(p.title)?.fr || getVal(p.title)?.en || getVal(p.title) || "Villa de luxe",
+          titre: getVal(p.title)?.fr || getVal(p.title)?.en || getVal(p.title) || "Villa de standing",
           region: finalRegion,
           town: getVal(p.location)?.city || getVal(p.city) || getVal(p.town) || "Espagne",
           price: parseFloat(getVal(p.price)) || 0,
           type: getVal(p.type) || "Villa",
           beds: String(getVal(p.bedrooms) || getVal(p.beds) || "0"),
           ref: getVal(p.reference) || String(getVal(p.id)),
-          images: cleanImages,
+          images: cleanImages, // Stocké en tant que tableau d'URLs propres
           updated_at: new Date().toISOString()
         };
       });
