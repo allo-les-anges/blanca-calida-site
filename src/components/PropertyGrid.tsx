@@ -1,81 +1,62 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import PropertyCard from "./PropertyCard";
+import Link from "next/link";
+import { Bed, Bath, Maximize, MapPin } from "lucide-react";
 
-interface PropertyGridProps {
-  activeFilters: any;
-  properties: any[];
-}
-
-export default function PropertyGrid({ activeFilters, properties }: PropertyGridProps) {
-  const [filtered, setFiltered] = useState<any[]>([]);
-
-  // Fonction pour nettoyer les chaînes de caractères (casse et espaces)
-  const normalize = (v: any) =>
-    typeof v === "string" ? v.trim().toLowerCase() : "";
-
-  useEffect(() => {
-    if (!properties.length) {
-      setFiltered([]);
-      return;
-    }
-
-    const f = activeFilters;
-
-    const result = properties.filter((p) => {
-      // Préparation des données de la propriété
-      const pTown = normalize(p.town || p.ville);
-      const pType = normalize(p.type);
-      const pRef = normalize(p.ref || p.id_externe);
-      const pPrice = Number(p.price || p.prix);
-      const pBeds = Number(p.beds || 0);
-      // On s'assure que la surface est traitée comme un nombre pour d'éventuels filtres
-      const pSurface = Number(p.surface_built || 0);
-
-      // Préparation des filtres actifs
-      const fTown = normalize(f.town);
-      const fType = normalize(f.type);
-      const fRef = normalize(f.reference);
-
-      // Logique de filtrage
-      if (fTown && !pTown.includes(fTown)) return false;
-      if (fType && pType !== fType) return false;
-      if (fRef && !pRef.includes(fRef)) return false;
-
-      // Filtre Chambres
-      if (f.beds && pBeds < Number(f.beds)) return false;
-
-      // Filtre Prix (Min/Max)
-      if (f.minPrice && pPrice < Number(f.minPrice)) return false;
-      if (f.maxPrice && pPrice > Number(f.maxPrice)) return false;
-
-      // Optionnel : Si vous ajoutez un filtre de surface dans le futur
-      if (f.minSurface && pSurface < Number(f.minSurface)) return false;
-
-      return true;
-    });
-
-    setFiltered(result);
-  }, [activeFilters, properties]);
-
-  // État vide si aucun résultat ne correspond aux filtres
-  if (!filtered.length) {
-    return (
-      <div className="text-center py-20 text-gray-500">
-        <p className="font-serif text-2xl text-slate-800 mb-4">
-          Aucun résultat trouvé
-        </p>
-        <p className="text-sm">Essayez de modifier vos critères de recherche ou d'élargir la zone géographique.</p>
-      </div>
-    );
-  }
+export default function PropertyCard({ property }: { property: any }) {
+  // On récupère la surface construite
+  const surface = property.surface_built || "0";
+  const prix = Number(property.price || property.prix || 0);
 
   return (
-    <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 pb-20">
-      {filtered.map((p) => (
-        <PropertyCard key={p.id || p.id_externe} property={p} />
-      ))}
-    </div>
+    <Link href={`/villas/${property.id_externe || property.id}`}>
+      <div className="group bg-white rounded-[2rem] overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-slate-100">
+        
+        {/* IMAGE */}
+        <div className="relative h-72 overflow-hidden">
+          <img 
+            src={property.images?.[0] || "/images/placeholder.jpg"} 
+            alt={property.titre}
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+          />
+        </div>
+
+        {/* CONTENU */}
+        <div className="p-8">
+          <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-emerald-600 font-bold mb-3">
+            <MapPin size={12} /> {property.town || property.ville}
+          </div>
+
+          <h3 className="font-serif text-2xl text-slate-900 mb-6 line-clamp-1">
+            {property.titre || "Villa Neuve"}
+          </h3>
+
+          <p className="text-3xl font-serif text-slate-900 mb-8">
+            {prix.toLocaleString("fr-FR")} €
+          </p>
+
+          {/* SECTION DES CARACTÉRISTIQUES - C'EST ICI QUE ÇA SE PASSE */}
+          <div className="flex items-center justify-between pt-6 border-t border-slate-50">
+            <div className="flex items-center gap-2">
+              <Bed size={18} className="text-slate-300" />
+              <span className="text-sm font-medium text-slate-600">{property.beds || 0}</span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Bath size={18} className="text-slate-300" />
+              <span className="text-sm font-medium text-slate-600">{property.baths || 0}</span>
+            </div>
+
+            {/* LA LIGNE CI-DESSOUS COMMANDE L'AFFICHAGE DES M2 */}
+            <div className="flex items-center gap-2">
+              <Maximize size={18} className="text-slate-300" />
+              <span className="text-sm font-medium text-slate-600">
+                {surface} m²
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Link>
   );
 }
