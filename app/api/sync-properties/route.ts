@@ -73,8 +73,9 @@ export async function GET() {
           // Prix
           price: parseFloat(p.price) || 0,
           prix: parseFloat(p.price) || 0,
+          currency: String(p.currency || "EUR"),
           
-          // Distances (Tout récupérer)
+          // Distances
           distance_beach: p.beach ? String(p.beach) : null,
           distance_town: p.town_distance ? String(p.town_distance) : null,
           distance_golf: p.golf ? String(p.golf) : null,
@@ -89,19 +90,21 @@ export async function GET() {
         };
       });
 
-      // Filtrer pour éviter les données corrompues
-      const validUpdates = updates.filter(u => u.id_externe && u.id_externe !== "undefined");
+      // Correction TypeScript : Ajout du type 'any' au paramètre 'u' pour le filtre
+      const validUpdates = (updates as any[]).filter((u: any) => 
+        u.id_externe && u.id_externe !== "undefined"
+      );
 
-      // UPSERT avec logs détaillés
+      // Envoi vers Supabase
       const { error } = await supabase
         .from('villas')
         .upsert(validUpdates, { 
           onConflict: 'id_externe',
-          ignoreDuplicates: false // Obligatoire pour mettre à jour les existants
+          ignoreDuplicates: false 
         });
 
       if (error) {
-        console.error(`DÉTAIL ERREUR SUPABASE (${source.defaultRegion}):`, error);
+        console.error(`Erreur Supabase (${source.defaultRegion}):`, error.message);
       } else {
         totalSynced += validUpdates.length;
       }
@@ -109,12 +112,12 @@ export async function GET() {
 
     return NextResponse.json({ 
       success: true, 
-      totalSynced, 
-      message: `Synchronisation réussie pour ${totalSynced} villas.`
+      totalSynced,
+      message: `${totalSynced} villas synchronisées avec toutes les données (m², distances, types).`
     });
 
   } catch (error: any) {
-    console.error("ERREUR CRITIQUE API:", error.message);
+    console.error("Erreur API:", error.message);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
