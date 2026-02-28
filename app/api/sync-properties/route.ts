@@ -35,7 +35,21 @@ export async function GET() {
             return Array.isArray(field) ? field[0] : field;
         };
 
-        // On extrait les titres selon la langue
+        // --- NETTOYAGE DES IMAGES ---
+        let cleanImages: string[] = [];
+        const rawImages = p.images?.[0]?.image || p.images?.image;
+
+        if (rawImages) {
+          const imageArray = Array.isArray(rawImages) ? rawImages : [rawImages];
+          cleanImages = imageArray
+            .map((img: any) => {
+              // Si c'est un objet { url: '...' }, on prend l'url. Si c'est une string, on la prend.
+              const url = typeof img === 'object' ? (img.url || img._) : img;
+              return typeof url === 'string' ? url : null;
+            })
+            .filter(Boolean) as string[];
+        }
+
         const rawTitle = getVal(p.title);
         const finalTitle = typeof rawTitle === 'object' ? (rawTitle.fr || rawTitle.en) : rawTitle;
 
@@ -43,8 +57,6 @@ export async function GET() {
           id_externe: String(getVal(p.id)),
           titre: finalTitle || "Villa",
           region: source.region,
-          
-          // --- CHAMPS ALIGNÉS SUR TON DASHBOARD ---
           price: parseFloat(getVal(p.price)) || 0,
           town: getVal(p.location)?.city || getVal(p.city) || getVal(p.town) || "",
           type: getVal(p.type) || "",
@@ -52,10 +64,9 @@ export async function GET() {
           ref: getVal(p.reference) || getVal(p.ref) || getVal(p.id),
           development_name: getVal(p.development_name) || "",
           
-          // Images : on récupère le tableau proprement
-          images: p.images?.[0]?.image || [], 
+          // On envoie maintenant le tableau d'URLs propres
+          images: cleanImages, 
 
-          // On garde quand même un objet details pour la sécurité
           details: {
             bathrooms: getVal(p.bathrooms),
             size: getVal(p.size),
@@ -65,22 +76,13 @@ export async function GET() {
         };
       });
 
-      // Upsert vers Supabase
-      const { error } = await supabase
-        .from('villas')
-        .upsert(updates, { onConflict: 'id_externe' });
-
-      if (error) {
-        console.error(`Erreur Supabase (${source.region}):`, error.message);
-      } else {
-        totalSynced += updates.length;
-      }
+      const { error } = await supabase.from('villas').upsert(updates, { onConflict: 'id_externe' });
+      if (!error) totalSynced += updates.length;
     }
 
     return NextResponse.json({ success: true, totalSynced });
 
   } catch (error: any) {
-    console.error("Erreur critique:", error.message);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
