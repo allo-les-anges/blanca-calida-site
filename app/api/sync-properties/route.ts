@@ -27,48 +27,55 @@ export async function GET() {
 
       const updates = properties.map((p: any) => {
         const getVal = (field: any) => Array.isArray(field) ? field[0] : field;
-
-        // --- LOGIQUE DE DÉTECTION DE RÉGION AMÉLIORÉE ---
         const town = (getVal(p.location)?.city || getVal(p.city) || getVal(p.town) || "").toLowerCase();
+        
+        // 1. Détection Région
         let finalRegion = source.defaultRegion;
+        const keywordsAlmeria = ["almeria", "mojacar", "vera", "cuevas", "pulpi"];
+        const keywordsCalida = ["murcia", "mazarron", "aguilas", "pilar", "alcazares", "cartagena"];
 
-        // Si on trouve des villes spécifiques dans le flux "Sol", on bascule sur Almeria
-        if (source.defaultRegion === "Costa del Sol") {
-           if (town.includes("almeria") || town.includes("mojacar") || town.includes("vera")) {
+        if (source.defaultRegion === "Costa del Sol" && keywordsAlmeria.some(word => town.includes(word))) {
              finalRegion = "Costa Almeria";
-           }
-        } 
-        // Si on trouve des villes spécifiques dans le flux "Blanca", on sépare Blanca et Calida
-        else if (source.defaultRegion === "Costa Blanca") {
-           if (town.includes("murcia") || town.includes("mazarron") || town.includes("aguilas")) {
+        } else if (source.defaultRegion === "Costa Blanca" && keywordsCalida.some(word => town.includes(word))) {
              finalRegion = "Costa Calida";
-           }
         }
 
-        // Nettoyage des images
+        // 2. Extraction Images (Correction XML profonde)
         let cleanImages: string[] = [];
-        const imgsContainer = p.images?.[0]?.image;
-        if (imgsContainer) {
-          const imgs = Array.isArray(imgsContainer) ? imgsContainer : [imgsContainer];
-          cleanImages = imgs.map((i: any) => typeof i === 'string' ? i : (i.url || i._)).filter(Boolean);
+        const rawImages = p.images?.[0]?.image || p.images?.image;
+        if (rawImages) {
+          const imageArray = Array.isArray(rawImages) ? rawImages : [rawImages];
+          cleanImages = imageArray.map((img: any) => {
+            if (typeof img === 'string') return img;
+            // On vérifie les attributs (@url) ou le contenu texte (_)
+            return img.url || img._ || (img.$ && img.$.url);
+          }).filter(url => typeof url === 'string' && url.startsWith('http'));
         }
+
+        // 3. Extraction Description
+        const descObj = getVal(p.description);
+        const description = typeof descObj === 'object' 
+          ? (descObj.fr || descObj.en || descObj._ || "") 
+          : (descObj || "");
 
         return {
           id_externe: String(getVal(p.id)),
-          titre: getVal(p.title)?.fr || getVal(p.title)?.en || getVal(p.title) || "Villa",
-          region: finalRegion, // La région détectée (Blanca, Calida, Sol ou Almeria)
+          titre: getVal(p.title)?.fr || getVal(p.title)?.en || getVal(p.title) || "Villa de luxe",
+          description: description, // Envoyé vers la nouvelle colonne
+          region: finalRegion,
           town: getVal(p.location)?.city || getVal(p.city) || getVal(p.town) || "Espagne",
           price: parseFloat(getVal(p.price)) || 0,
           type: getVal(p.type) || "Villa",
           beds: String(getVal(p.bedrooms) || getVal(p.beds) || "0"),
           ref: getVal(p.reference) || String(getVal(p.id)),
-          images: cleanImages,
+          images: cleanImages, // Stocké en JSONB
           updated_at: new Date().toISOString()
         };
       });
 
       const { error } = await supabase.from('villas').upsert(updates, { onConflict: 'id_externe' });
-      if (!error) totalSynced += updates.length;
+      if (error) console.error("Erreur Supabase:", error);
+      else totalSynced += updates.length;
     }
 
     return NextResponse.json({ success: true, totalSynced });
