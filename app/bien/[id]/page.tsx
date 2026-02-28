@@ -48,13 +48,17 @@ export default function PropertyDetailPage() {
     ? property.images.map((img: any) => typeof img === 'object' ? img.url : img).filter(Boolean)
     : ["/placeholder.jpg"];
 
-  // 2. Plans techniques (Correction TypeScript pour Vercel)
+  // 2. Plans techniques (Correction pour structure <plans><plan><url>)
   const plans = Array.isArray(property.plans) 
-    ? property.plans.map((p: any) => {
-        if (typeof p === 'string') return p;
-        if (typeof p === 'object' && p !== null) return p.url || p.link;
+    ? property.plans.map((item: any) => {
+        // Gère la structure imbriquée item.plan.url issue du XML
+        if (item?.plan?.url) return item.plan.url;
+        // Gère le cas où l'url est directe
+        if (item?.url) return item.url;
+        // Gère le cas où c'est une string directe
+        if (typeof item === 'string') return item;
         return null;
-      }).filter((url: any): url is string => Boolean(url)) // Correction ici : ajout de : any
+      }).filter((url: any): url is string => Boolean(url)) 
     : [];
 
   return (
@@ -69,7 +73,7 @@ export default function PropertyDetailPage() {
           </Link>
 
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 h-[400px] lg:h-[600px]">
-            <div className="lg:col-span-3 rounded-[2.5rem] overflow-hidden relative">
+            <div className="lg:col-span-3 rounded-[2.5rem] overflow-hidden relative shadow-sm border border-slate-100">
               <img src={allImages[activeImage]} alt={property.titre} className="w-full h-full object-cover" />
               <div className="absolute top-6 left-6 bg-black/50 backdrop-blur-md px-4 py-2 rounded-full text-white text-[9px] font-black uppercase tracking-widest">
                 Réf: {property.reference || "UNIT-" + property.id}
@@ -77,7 +81,11 @@ export default function PropertyDetailPage() {
             </div>
             <div className="hidden lg:flex flex-col gap-4 overflow-y-auto pr-2 custom-scrollbar">
               {allImages.map((img: string, index: number) => (
-                <button key={index} onClick={() => setActiveImage(index)} className={`relative h-28 rounded-2xl overflow-hidden border-2 transition-all ${activeImage === index ? 'border-emerald-500' : 'border-transparent opacity-60 hover:opacity-100'}`}>
+                <button 
+                  key={index} 
+                  onClick={() => setActiveImage(index)} 
+                  className={`relative h-28 flex-shrink-0 rounded-2xl overflow-hidden border-2 transition-all ${activeImage === index ? 'border-emerald-500 scale-[0.98]' : 'border-transparent opacity-60 hover:opacity-100'}`}
+                >
                   <img src={img} className="w-full h-full object-cover" alt="thumbnail" />
                 </button>
               ))}
@@ -90,56 +98,74 @@ export default function PropertyDetailPage() {
       <section className="max-w-7xl mx-auto px-6 py-16">
         <div className="flex flex-col lg:flex-row gap-16">
           
-          {/* COLONNE GAUCHE (70% Largeur) */}
+          {/* COLONNE GAUCHE (Contenu) */}
           <div className="w-full lg:w-2/3">
             <div className="flex flex-wrap gap-3 mb-8">
-               <span className="flex items-center gap-2 bg-slate-50 px-4 py-2 rounded-xl text-slate-600 text-[10px] font-black uppercase"><Waves size={14} className="text-emerald-500"/> Mer à 5km</span>
-               <span className="flex items-center gap-2 bg-slate-50 px-4 py-2 rounded-xl text-slate-600 text-[10px] font-black uppercase"><Flag size={14} className="text-emerald-500"/> Golf à 11km</span>
+               <span className="flex items-center gap-2 bg-slate-50 px-4 py-2 rounded-xl text-slate-600 text-[10px] font-black uppercase tracking-tight">
+                 <Waves size={14} className="text-emerald-500"/> Mer à 5km
+               </span>
+               <span className="flex items-center gap-2 bg-slate-50 px-4 py-2 rounded-xl text-slate-600 text-[10px] font-black uppercase tracking-tight">
+                 <Flag size={14} className="text-emerald-500"/> Golf à 11km
+               </span>
             </div>
 
-            <h1 className="text-4xl md:text-6xl font-serif italic text-slate-900 mb-8">{property.titre}</h1>
+            <h1 className="text-4xl md:text-6xl font-serif italic text-slate-900 mb-8 leading-tight">{property.titre}</h1>
 
-            {/* SPECS */}
-            <div className="grid grid-cols-4 gap-4 p-8 bg-slate-50 rounded-[2.5rem] mb-12 border border-slate-100">
+            {/* CARACTÉRISTIQUES */}
+            <div className="grid grid-cols-4 gap-2 md:gap-4 p-6 md:p-8 bg-slate-50 rounded-[2.5rem] mb-12 border border-slate-100">
               <div className="flex flex-col items-center border-r border-slate-200">
                 <Bed size={20} className="text-slate-400 mb-2" />
-                <span className="text-lg font-bold">{property.beds}</span>
+                <span className="text-lg font-bold text-slate-900">{property.beds}</span>
                 <p className="text-[8px] uppercase font-black text-slate-400">Chambres</p>
               </div>
               <div className="flex flex-col items-center border-r border-slate-200">
                 <Bath size={20} className="text-slate-400 mb-2" />
-                <span className="text-lg font-bold">{property.baths}</span>
+                <span className="text-lg font-bold text-slate-900">{property.baths}</span>
                 <p className="text-[8px] uppercase font-black text-slate-400">Bains</p>
               </div>
               <div className="flex flex-col items-center border-r border-slate-200">
                 <Maximize size={20} className="text-slate-400 mb-2" />
-                <span className="text-lg font-bold">{property.surface_area?.built || property.sqft}</span>
+                <span className="text-lg font-bold text-slate-900">{property.surface_area?.built || property.sqft || "--"}</span>
                 <p className="text-[8px] uppercase font-black text-slate-400">m² Bâti</p>
               </div>
               <div className="flex flex-col items-center">
                 <Sun size={20} className="text-slate-400 mb-2" />
-                <span className="text-lg font-bold">Privée</span>
+                <span className="text-lg font-bold text-slate-900">Privée</span>
                 <p className="text-[8px] uppercase font-black text-slate-400">Piscine</p>
               </div>
             </div>
 
             {/* DESCRIPTION */}
-            <div className="prose prose-slate max-w-none mb-16 text-slate-600 leading-relaxed">
+            <div className="prose prose-slate max-w-none mb-16 text-slate-600">
               <h2 className="text-3xl font-serif italic text-slate-900 mb-6">L'Art de Vivre</h2>
-              <div dangerouslySetInnerHTML={{ __html: property.description_fr || property.description || "Description à venir..." }} />
+              <div 
+                className="text-lg leading-relaxed"
+                dangerouslySetInnerHTML={{ __html: property.description_fr || property.description || "Description en attente de mise à jour..." }} 
+              />
             </div>
 
-            {/* SECTION PLANS (CORRIGÉE) */}
+            {/* SECTION PLANS */}
             {plans.length > 0 && (
-              <div className="border-t border-slate-100 pt-16">
-                <div className="flex items-center gap-3 mb-8">
-                  <Layout className="text-emerald-600" size={24} />
-                  <h2 className="text-3xl font-serif italic">Plans de l'unité</h2>
+              <div className="border-t border-slate-100 pt-16 mt-16">
+                <div className="flex items-center gap-4 mb-10">
+                  <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600">
+                    <Layout size={24} />
+                  </div>
+                  <div>
+                    <h2 className="text-3xl font-serif italic text-slate-900">Plans Techniques</h2>
+                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Configuration de l'unité</p>
+                  </div>
                 </div>
-                <div className="grid gap-8 bg-slate-50 p-6 md:p-10 rounded-[3rem]">
+                
+                <div className="grid gap-12 bg-slate-50 p-6 md:p-12 rounded-[3rem] border border-slate-100">
                   {plans.map((url: string, idx: number) => (
-                    <div key={idx} className="bg-white p-4 rounded-2xl shadow-sm">
-                      <img src={url} alt={`Plan ${idx+1}`} className="w-full h-auto" />
+                    <div key={idx} className="bg-white p-4 md:p-8 rounded-3xl shadow-sm border border-slate-100">
+                      <img 
+                        src={url} 
+                        alt={`Plan de l'unité ${idx + 1}`} 
+                        className="w-full h-auto"
+                        loading="lazy" 
+                      />
                     </div>
                   ))}
                 </div>
@@ -147,20 +173,42 @@ export default function PropertyDetailPage() {
             )}
           </div>
 
-          {/* COLONNE DROITE (30% Largeur - Sidebar) */}
+          {/* COLONNE DROITE (Sidebar Sticky) */}
           <div className="w-full lg:w-1/3">
-            <div className="lg:sticky lg:top-32 bg-white border border-slate-100 shadow-2xl rounded-[3rem] p-10">
-              <p className="text-[10px] font-black uppercase text-emerald-600 mb-2 tracking-widest text-center">Prix de vente</p>
+            <div className="lg:sticky lg:top-32 bg-white border border-slate-100 shadow-[0_20px_60px_rgba(0,0,0,0.05)] rounded-[3rem] p-10">
+              <p className="text-[10px] font-black uppercase text-emerald-600 mb-2 tracking-[0.2em] text-center">Prix de vente</p>
               <div className="text-5xl font-serif text-slate-900 mb-10 text-center">
-                {Number(property.price).toLocaleString("fr-FR")} €
+                {property.price ? Number(property.price).toLocaleString("fr-FR") : "--"} €
               </div>
+              
+              <div className="space-y-4 mb-8">
+                <div className="flex items-center gap-3 text-slate-600 text-sm italic">
+                  <CheckCircle2 size={16} className="text-emerald-500" />
+                  <span>Frais de notaire réduits</span>
+                </div>
+                <div className="flex items-center gap-3 text-slate-600 text-sm italic">
+                  <CheckCircle2 size={16} className="text-emerald-500" />
+                  <span>Prêt à emménager</span>
+                </div>
+              </div>
+
               <div className="space-y-4">
-                <button className="w-full bg-slate-950 text-white py-5 rounded-2xl font-black uppercase text-[10px] tracking-widest flex items-center justify-center gap-3 hover:bg-emerald-600 transition-colors">
+                <button className="w-full bg-slate-950 text-white py-5 rounded-2xl font-black uppercase text-[10px] tracking-widest flex items-center justify-center gap-3 hover:bg-emerald-600 transition-all duration-300">
                   <Mail size={16} /> Demander la brochure
                 </button>
-                <button className="w-full border border-slate-200 text-slate-900 py-5 rounded-2xl font-black uppercase text-[10px] tracking-widest flex items-center justify-center gap-3 hover:bg-slate-50 transition-colors">
-                  <Calendar size={16} /> Réserver une visite
+                <button className="w-full border border-slate-200 text-slate-900 py-5 rounded-2xl font-black uppercase text-[10px] tracking-widest flex items-center justify-center gap-3 hover:bg-slate-50 transition-all">
+                  <Calendar size={16} /> Visite privée
                 </button>
+              </div>
+
+              <div className="mt-8 pt-8 border-t border-slate-50 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-600">
+                    <Phone size={18} />
+                  </div>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Contact Expert</span>
+                </div>
+                <Share2 size={20} className="text-slate-300 hover:text-emerald-500 cursor-pointer transition-colors" />
               </div>
             </div>
           </div>
