@@ -3,8 +3,12 @@
 import { useEffect, useState, useRef } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-// Ajout de MapIcon et Navigation pour le style
-import { Bed, Bath, Maximize, MapPin, MessageCircle, ArrowLeft, Loader2, Image as ImageIcon, Home, Map as MapIcon, Navigation } from "lucide-react";
+// Ajout de Waves (piscine) et Car (parking) dans les imports
+import { 
+  Bed, Bath, Maximize, MapPin, MessageCircle, ArrowLeft, 
+  Loader2, Image as ImageIcon, Home, Map as MapIcon, 
+  Navigation, Waves, Car, Ship 
+} from "lucide-react";
 import Link from "next/link";
 
 export default function PropertyDetailClient({ id }: { id: string }) {
@@ -23,7 +27,7 @@ export default function PropertyDetailClient({ id }: { id: string }) {
         const propertiesArray = Array.isArray(data) ? data : (data.properties || []);
         
         const current = propertiesArray.find((p: any) => 
-          String(p.id) === String(id) || String(p.id_externe) === String(id)
+          String(p.id_externe) === String(id) || String(p.id) === String(id)
         );
         
         if (current) setProperty(current);
@@ -62,9 +66,8 @@ export default function PropertyDetailClient({ id }: { id: string }) {
   );
 
   const images = property.images || [];
-  // Préparation de l'URL Google Maps
   const mapUrl = property.latitude && property.longitude 
-    ? `https://www.google.com/maps?q=${property.latitude},${property.longitude}&z=15&output=embed`
+    ? `https://maps.google.com/maps?q=${property.latitude},${property.longitude}&z=15&output=embed`
     : null;
 
   return (
@@ -78,7 +81,7 @@ export default function PropertyDetailClient({ id }: { id: string }) {
         </Link>
       </div>
 
-      {/* GALERIE PHOTOS (Identique) */}
+      {/* GALERIE PHOTOS */}
       <section className="max-w-7xl mx-auto px-6 mb-16">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:h-[550px]">
           <div className="md:col-span-3 relative rounded-[2rem] md:rounded-[2.5rem] overflow-hidden shadow-2xl bg-slate-100 h-[400px] md:h-full">
@@ -103,15 +106,33 @@ export default function PropertyDetailClient({ id }: { id: string }) {
 
       <section className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-3 gap-16 pb-24">
         <div className="lg:col-span-2">
-          <h1 className="text-4xl md:text-6xl font-serif mb-8 text-slate-900 leading-[1.1]">{property.titre || property.title}</h1>
+          <h1 className="text-4xl md:text-6xl font-serif mb-8 text-slate-900 leading-[1.1]">{property.titre || "Villa Moderne"}</h1>
           
-          <div className="flex items-center gap-3 text-gray-400 mb-12 text-[11px] uppercase tracking-[0.2em] font-bold">
+          <div className="flex items-center gap-3 text-gray-400 mb-8 text-[11px] uppercase tracking-[0.2em] font-bold">
             <MapPin size={18} className="text-emerald-500" />
             {property.town || property.ville} • {property.region}
           </div>
 
-          {/* QUICK STATS */}
-          <div className="grid grid-cols-3 gap-4 mb-16">
+          {/* BADGES ÉQUIPEMENTS DYNAMIQUES */}
+          <div className="flex flex-wrap gap-3 mb-12">
+            {property.pool === "Oui" && (
+              <div className="flex items-center gap-2 bg-sky-50 text-sky-700 px-4 py-2 rounded-full border border-sky-100 text-[9px] uppercase font-bold tracking-wider">
+                <Waves size={14} /> Piscine Privée
+              </div>
+            )}
+            {/* Si distance plage > 0 */}
+            {property.distance_beach && (
+              <div className="flex items-center gap-2 bg-amber-50 text-amber-700 px-4 py-2 rounded-full border border-amber-100 text-[9px] uppercase font-bold tracking-wider">
+                <Ship size={14} /> Mer à {property.distance_beach}m
+              </div>
+            )}
+            <div className="flex items-center gap-2 bg-slate-50 text-slate-700 px-4 py-2 rounded-full border border-slate-100 text-[9px] uppercase font-bold tracking-wider">
+              <Car size={14} /> Parking inclus
+            </div>
+          </div>
+
+          {/* QUICK STATS (4 colonnes) */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-16">
             <div className="bg-slate-50 p-6 rounded-3xl text-center border border-slate-100">
               <Bed className="mx-auto mb-2 text-emerald-600" size={22} />
               <p className="text-2xl font-serif">{property.beds || "0"}</p>
@@ -127,59 +148,59 @@ export default function PropertyDetailClient({ id }: { id: string }) {
               <p className="text-2xl font-serif">{property.surface_built || "0"}</p>
               <p className="text-[8px] uppercase text-gray-400 font-bold tracking-widest">Surface m²</p>
             </div>
+            <div className="bg-slate-50 p-6 rounded-3xl text-center border border-slate-100">
+              <Home className="mx-auto mb-2 text-emerald-600" size={22} />
+              <p className="text-2xl font-serif">{property.surface_plot || "0"}</p>
+              <p className="text-[8px] uppercase text-gray-400 font-bold tracking-widest">Terrain m²</p>
+            </div>
           </div>
 
           {/* DESCRIPTION */}
           <div className="prose prose-slate max-w-none text-gray-600 text-lg mb-20 pt-10 border-t border-slate-100">
-            <h2 className="text-3xl font-serif italic mb-8 text-slate-800">Description</h2>
-            <div dangerouslySetInnerHTML={{ __html: property.description || "Aucune description disponible." }} />
+            <h2 className="text-3xl font-serif italic mb-8 text-slate-800">L'Art de Vivre</h2>
+            <div dangerouslySetInnerHTML={{ __html: property.description || "Description en cours de rédaction..." }} />
           </div>
 
-          {/* NOUVELLE SECTION : LOCALISATION */}
+          {/* LOCALISATION */}
           <div className="mb-20 pt-10 border-t border-slate-100">
             <h2 className="text-3xl font-serif italic mb-8 text-slate-800">Localisation</h2>
-            
             {property.adresse && (
               <div className="flex items-center gap-4 mb-8 p-6 bg-slate-50 rounded-2xl border border-slate-100">
                 <div className="p-3 bg-white rounded-full shadow-sm text-emerald-600"><Navigation size={20}/></div>
                 <div>
-                  <p className="text-[9px] uppercase text-gray-400 font-bold tracking-widest mb-1">Adresse exacte</p>
+                  <p className="text-[9px] uppercase text-gray-400 font-bold tracking-widest mb-1">Situation</p>
                   <p className="font-medium text-slate-700">{property.adresse}</p>
                 </div>
               </div>
             )}
-
             {mapUrl ? (
               <div className="w-full h-[400px] rounded-[2.5rem] overflow-hidden shadow-inner bg-slate-100 border border-slate-200">
-                <iframe 
-                  width="100%" 
-                  height="100%" 
-                  style={{ border: 0 }} 
-                  loading="lazy" 
-                  allowFullScreen 
-                  src={mapUrl}
-                ></iframe>
+                <iframe width="100%" height="100%" style={{ border: 0 }} loading="lazy" allowFullScreen src={mapUrl}></iframe>
               </div>
             ) : (
               <div className="h-40 flex flex-col items-center justify-center bg-slate-50 rounded-[2.5rem] border border-dashed border-slate-200 text-slate-400">
                 <MapIcon size={32} className="mb-2 opacity-20" />
-                <p className="text-sm italic">Carte indisponible pour cette propriété</p>
+                <p className="text-sm italic">Carte indisponible</p>
               </div>
             )}
           </div>
         </div>
 
-        {/* SIDEBAR PRIX (Identique) */}
+        {/* SIDEBAR PRIX */}
         <div className="lg:col-span-1">
           <div className="sticky top-40 bg-white border border-slate-100 p-10 rounded-[2.5rem] shadow-2xl">
             <p className="text-[10px] uppercase text-gray-400 mb-2 font-bold tracking-widest">Prix du modèle</p>
             <p className="text-5xl font-serif text-slate-900 leading-none mb-10">
-              {Number(property.price || property.prix).toLocaleString("fr-FR")} €
+              {Number(property.price || property.prix || 0).toLocaleString("fr-FR")} €
             </p>
             <button className="w-full bg-slate-900 text-white py-6 rounded-2xl font-bold uppercase text-[11px] tracking-widest hover:bg-emerald-800 transition-all mb-4">
               Réserver une visite
             </button>
-            <a href={`https://wa.me/34627768233?text=Information: ${property.titre || property.title}`} target="_blank" className="w-full border border-slate-200 flex items-center justify-center gap-3 py-6 rounded-2xl font-bold uppercase text-[11px] text-slate-700 hover:bg-slate-50 transition-all">
+            <a 
+              href={`https://wa.me/34627768233?text=Information sur la villa ref: ${property.ref || property.id_externe}`} 
+              target="_blank" 
+              className="w-full border border-slate-200 flex items-center justify-center gap-3 py-6 rounded-2xl font-bold uppercase text-[11px] text-slate-700 hover:bg-slate-50 transition-all"
+            >
               <MessageCircle size={20} className="text-green-500" /> WhatsApp
             </a>
           </div>
