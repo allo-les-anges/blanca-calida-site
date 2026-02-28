@@ -8,7 +8,6 @@ import RegionGrid from "@/components/RegionGrid";
 import PropertyGrid from "@/components/PropertyGrid";
 import Footer from "@/components/Footer";
 
-// CORRECTIF VERCEL : On définit un type local pour éviter l'erreur d'importation
 type Property = any;
 
 export default function Home() {
@@ -19,6 +18,7 @@ export default function Home() {
   const [filters, setFilters] = useState({
     type: "",
     town: "",
+    region: "", // Ajout du filtre par région
     beds: "",
     minPrice: "",
     maxPrice: "",
@@ -30,6 +30,7 @@ export default function Home() {
   useEffect(() => {
     async function loadData() {
       try {
+        // Appelle ton API qui est maintenant branchée sur Supabase
         const res = await fetch("/api/properties");
         const data = await res.json();
         setAllProperties(data);
@@ -50,29 +51,32 @@ export default function Home() {
         p.development_name?.toLowerCase().trim() === filters.development.toLowerCase().trim();
 
       // 2. Disponibilité
-      const hasUnits = (p as any).units !== undefined && Number((p as any).units) > 0;
+      const hasUnits = p.units !== undefined ? Number(p.units) > 0 : true;
       const matchAvailable = !filters.availableOnly || hasUnits;
 
       // 3. Ville
       const matchTown = !filters.town || p.town === filters.town;
 
-      // 4. Type
+      // 4. Région (Nouveau : pour gérer le clic sur les vignettes)
+      const matchRegion = !filters.region || p.region === filters.region;
+
+      // 5. Type
       const matchType = !filters.type || 
         p.type?.toLowerCase().includes(filters.type.toLowerCase());
 
-      // 5. Chambres
+      // 6. Chambres
       const matchBeds = !filters.beds || Number(p.beds) >= Number(filters.beds);
 
-      // 6. Prix
+      // 7. Prix
       const price = Number(p.price);
       const matchMin = !filters.minPrice || price >= Number(filters.minPrice);
       const matchMax = !filters.maxPrice || price <= Number(filters.maxPrice);
 
-      // 7. Référence
+      // 8. Référence
       const matchRef = !filters.reference || 
         p.ref?.toLowerCase().includes(filters.reference.toLowerCase());
 
-      return matchDev && matchAvailable && matchTown && matchType && matchBeds && matchMin && matchMax && matchRef;
+      return matchDev && matchAvailable && matchTown && matchRegion && matchType && matchBeds && matchMin && matchMax && matchRef;
     });
   }, [allProperties, filters]);
 
@@ -85,21 +89,17 @@ export default function Home() {
     : filteredProperties.slice(0, visibleCount);
 
   const handleSearch = (newFilters: any) => {
-    setFilters({ ...newFilters });
+    setFilters({ ...filters, ...newFilters, region: "" }); // Reset région si recherche globale
     setVisibleCount(12);
-
-    const section = document.getElementById("collection");
-    if (section) {
-      setTimeout(() => {
-        section.scrollIntoView({ behavior: "smooth" });
-      }, 100);
-    }
+    scrollToCollection();
   };
 
-  const handleRegionClick = (town: string) => {
+  // Gestion du clic sur une région (vignettes)
+  const handleRegionClick = (regionName: string) => {
     setFilters({
       type: "",
-      town,
+      town: "",
+      region: regionName, // On filtre par la région cliquée
       beds: "",
       minPrice: "",
       maxPrice: "",
@@ -107,7 +107,11 @@ export default function Home() {
       development: "",
       availableOnly: false,
     });
+    setVisibleCount(12);
+    scrollToCollection();
+  };
 
+  const scrollToCollection = () => {
     const section = document.getElementById("collection");
     if (section) {
       setTimeout(() => {
@@ -129,12 +133,14 @@ export default function Home() {
       <Navbar />
       <Hero />
 
+      {/* Barre de recherche avancée */}
       <AdvancedSearch
         properties={allProperties}
         onSearch={handleSearch}
         activeFilters={filters}
       />
 
+      {/* Tes 4 vignettes de régions avec compteurs dynamiques */}
       <RegionGrid
         properties={allProperties}
         onRegionClick={handleRegionClick}
@@ -145,7 +151,7 @@ export default function Home() {
           Sélection Exclusive
         </h2>
         <h3 className="text-4xl md:text-5xl font-serif text-slate-900 leading-tight">
-          Propriétés sur la Costa Blanca
+          {filters.region ? `Propriétés : ${filters.region}` : "Nos Propriétés d'Exception"}
         </h3>
       </section>
 
