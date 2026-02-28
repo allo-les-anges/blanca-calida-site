@@ -19,66 +19,50 @@ export async function GET() {
     for (const source of SOURCES) {
       const response = await fetch(source.url, { cache: 'no-store' });
       const xmlText = await response.text();
-      
-      // Configuration pour gérer les CDATA et les attributs
-      const parser = new xml2js.Parser({ 
-        explicitArray: true, 
-        mergeAttrs: true,
-        trim: true 
-      });
-      
+      const parser = new xml2js.Parser({ explicitArray: true, mergeAttrs: true });
       const result = await parser.parseStringPromise(xmlText);
       
-      // Correction de l'accès à la racine (gère result.properties ou result)
-      const root = result.properties || result;
-      const propertiesRaw = root.property || [];
-      
-      if (propertiesRaw.length === 0) {
-        console.log(`Aucune propriété trouvée pour ${source.url}`);
-        continue;
-      }
+      // Accès ultra-sécurisé à la liste des propriétés
+      const root = result.properties || result.result || result;
+      const properties = root.property || [];
 
-      const updates = propertiesRaw.map((p: any) => {
+      console.log(`Source: ${source.defaultRegion} | Trouvé: ${properties.length} propriétés`);
+
+      if (properties.length === 0) continue;
+
+      const updates = properties.map((p: any) => {
         const getVal = (field: any) => (Array.isArray(field) ? field[0] : field);
 
-        // 1. Localisation & Tri des régions
-        const town = (getVal(p.town) || "").toString().toLowerCase();
+        // Extraction Ville et Région
+        const town = (getVal(p.town) || getVal(p.city) || "").toString();
         let finalRegion = source.defaultRegion;
-        
+        const lowTown = town.toLowerCase();
+
         if (source.defaultRegion === "Costa del Sol") {
-          if (["almeria", "mojacar", "vera", "pulpi"].some(k => town.includes(k))) {
-            finalRegion = "Costa Almeria";
-          }
-        } else if (source.defaultRegion === "Costa Blanca") {
-          if (["murcia", "mazarron", "pilar", "alcazares", "san javier", "aguilas"].some(k => town.includes(k))) {
-            finalRegion = "Costa Calida";
-          }
+          if (["almeria", "mojacar", "vera", "pulpi", "cuevas"].some(k => lowTown.includes(k))) finalRegion = "Costa Almeria";
+        } else {
+          if (["murcia", "mazarron", "pilar", "alcazares", "san javier", "aguilas", "lo pagan"].some(k => lowTown.includes(k))) finalRegion = "Costa Calida";
         }
 
-        // 2. Images (Extraction propre des URLs Medianewbuild)
+        // Extraction Images (Medianewbuild style)
         let cleanImages: string[] = [];
         const imgs = p.images?.[0]?.image;
         if (imgs) {
           cleanImages = (Array.isArray(imgs) ? imgs : [imgs])
-            .map(img => {
-              if (typeof img === 'string') return img;
-              return img.url || img._ || (img.$ && img.$.url);
-            })
+            .map(img => (typeof img === 'string' ? img : (img._ || img.url || (img.$ && img.$.url))))
             .filter(url => url && typeof url === 'string' && url.startsWith('http'));
         }
 
-        // 3. Multilingue : Description & Titre (Extraction des balises <fr>)
+        // Extraction Multilingue (FR)
         const descObj = p.description?.[0];
-        const description = descObj?.fr?.[0] || descObj?.en?.[0] || (typeof descObj === 'string' ? descObj : "");
+        const description = descObj?.fr?.[0] || descObj?.en?.[0] || "";
 
         const titleObj = p.title?.[0];
         const titre = titleObj?.fr?.[0] || titleObj?.en?.[0] || getVal(p.title) || "Villa Neuve";
 
-        // 4. Caractéristiques (Salles de bain, Surface, Chambres)
+        // Caractéristiques Techniques
         const baths = getVal(p.baths) || getVal(p.bathrooms) || "0";
         const beds = getVal(p.beds) || getVal(p.bedrooms) || "0";
-        
-        // Structure: <surface_area><built>...</built></surface_area>
         const surfaceObj = p.surface_area?.[0];
         const surfaceBuilt = surfaceObj?.built?.[0] || getVal(p.surface) || "0";
         const surfacePlot = surfaceObj?.plot?.[0] || "0";
@@ -88,7 +72,7 @@ export async function GET() {
           titre: titre,
           description: description,
           region: finalRegion,
-          town: getVal(p.town) || "Espagne",
+          town: town || "Espagne",
           price: parseFloat(getVal(p.price)) || 0,
           type: getVal(p.type) || "Villa",
           beds: String(beds),
@@ -97,32 +81,21 @@ export async function GET() {
           surface_plot: String(surfacePlot),
           ref: getVal(p.ref) || getVal(p.reference) || String(getVal(p.id)),
           images: cleanImages,
-          details: {
-            bathrooms: baths,
-            surface: surfaceBuilt,
-            plot: surfacePlot,
-            beds: beds
-          },
           updated_at: new Date().toISOString()
         };
       });
 
-      // Upsert dans Supabase
+      // L'upsert va mettre à jour les colonnes vides si id_externe existe déjà
       const { error } = await supabase.from('villas').upsert(updates, { 
-        onConflict: 'id_externe',
-        ignoreDuplicates: false 
+        onConflict: 'id_externe' 
       });
 
-      if (!error) {
-        totalSynced += updates.length;
-      } else {
-        console.error("Erreur Supabase lors de l'insertion:", error.message);
-      }
+      if (!error) totalSynced += updates.length;
+      else console.error("Erreur Supabase:", error.message);
     }
 
     return NextResponse.json({ success: true, totalSynced });
   } catch (error: any) {
-    console.error("Erreur critique synchronisation:", error.message);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
