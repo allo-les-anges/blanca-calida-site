@@ -37,6 +37,7 @@ export default function DevelopmentPage() {
       .replace(/\s+/g, "-")
       .replace(/[^\w-]+/g, "");
 
+  // FILTRAGE : On récupère toutes les unités appartenant au développement de l'URL
   const devUnits = properties.filter((p) => {
     const nameInJson = slugify(p.development_name || "");
     const idInUrl = String(devId).toLowerCase();
@@ -70,7 +71,7 @@ export default function DevelopmentPage() {
       <Navbar />
       
       {/* SECTION HERO DYNAMIQUE */}
-      <section className="relative pt-32 pb-20 bg-slate-950 overflow-hidden">
+      <section className="relative pt-40 pb-24 bg-slate-950 overflow-hidden">
         <div className="absolute top-0 right-0 w-1/3 h-full bg-emerald-600/10 blur-[120px] rounded-full pointer-events-none" />
         <div className="max-w-7xl mx-auto px-6 relative z-10">
           <Link href="/" className="inline-flex items-center gap-2 text-slate-500 hover:text-white transition-colors mb-12 text-[10px] uppercase font-black tracking-[0.2em]">
@@ -93,8 +94,8 @@ export default function DevelopmentPage() {
             </div>
             
             <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-8 rounded-[2.5rem]">
-               <p className="text-emerald-400 text-[10px] font-black uppercase tracking-widest mb-2 text-center">Disponibilité</p>
-               <p className="text-4xl font-serif italic text-white text-center">{devUnits.length} <span className="text-lg text-slate-400">Unités</span></p>
+               <p className="text-emerald-400 text-[10px] font-black uppercase tracking-widest mb-2 text-center">Unités disponibles</p>
+               <p className="text-4xl font-serif italic text-white text-center">{devUnits.length}</p>
             </div>
           </div>
         </div>
@@ -103,68 +104,73 @@ export default function DevelopmentPage() {
       <div className="max-w-7xl mx-auto px-6 -mt-12 relative z-20">
         {/* GRILLE DES UNITÉS */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-32">
-          {devUnits.map((unit) => (
-            <div key={unit.id} className="group bg-white rounded-[2.5rem] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.05)] border border-slate-100 hover:shadow-2xl transition-all duration-500">
-              {/* Image avec Overlay Référence */}
-              <div className="relative h-72 overflow-hidden">
-                <img 
-                  src={unit.images?.[0] || "/placeholder.jpg"} 
-                  alt={unit.title} 
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                />
-                <div className="absolute top-6 left-6 bg-slate-900/80 backdrop-blur-md px-4 py-2 rounded-full flex items-center gap-2">
-                  <Hash size={12} className="text-emerald-400" />
-                  <span className="text-[9px] font-black uppercase tracking-widest text-white">
-                    {unit.reference || "REF-DEVA"}
-                  </span>
-                </div>
-              </div>
+          {devUnits.map((unit) => {
+            // Logique d'extraction d'image robuste pour JSONB
+            const imageUrl = Array.isArray(unit.images) 
+              ? (typeof unit.images[0] === 'object' ? unit.images[0].url : unit.images[0])
+              : "/placeholder.jpg";
 
-              <div className="p-8">
-                <h3 className="text-2xl font-serif italic mb-4 text-slate-900">{unit.title}</h3>
-                
-                <div className="flex items-end justify-between mb-8">
-                  <div className="space-y-1">
-                    <p className="text-emerald-600 text-[9px] font-black uppercase tracking-widest">À partir de</p>
-                    <p className="text-3xl font-serif text-slate-900">
-                      {unit.price.toLocaleString("fr-FR")} €
-                    </p>
+            return (
+              <div key={unit.id} className="group bg-white rounded-[2.5rem] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.05)] border border-slate-100 hover:shadow-2xl transition-all duration-500">
+                <div className="relative h-72 overflow-hidden">
+                  <img 
+                    src={imageUrl} 
+                    alt={unit.titre} 
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                  />
+                  <div className="absolute top-6 left-6 bg-slate-900/80 backdrop-blur-md px-4 py-2 rounded-full flex items-center gap-2 border border-white/10">
+                    <Hash size={12} className="text-emerald-400" />
+                    <span className="text-[9px] font-black uppercase tracking-widest text-white">
+                      {unit.reference || "UNIT-" + unit.id.toString().slice(0,4)}
+                    </span>
                   </div>
-                  {unit.price_to && (
-                    <div className="text-right pb-1">
-                      <p className="text-[10px] text-slate-400 uppercase font-bold tracking-tighter">Max: {unit.price_to.toLocaleString("fr-FR")} €</p>
+                </div>
+
+                <div className="p-8">
+                  {/* Utilisation de unit.titre (ta colonne DB) */}
+                  <h3 className="text-2xl font-serif italic mb-4 text-slate-900 line-clamp-1">{unit.titre}</h3>
+                  
+                  <div className="flex items-end justify-between mb-8">
+                    <div className="space-y-1">
+                      <p className="text-emerald-600 text-[9px] font-black uppercase tracking-widest">À partir de</p>
+                      <p className="text-3xl font-serif text-slate-900">
+                        {Number(unit.price).toLocaleString("fr-FR")} €
+                      </p>
                     </div>
-                  )}
-                </div>
+                  </div>
 
-                {/* FEATURES PREMIUM */}
-                <div className="grid grid-cols-3 border-t border-slate-50 pt-6 text-slate-500">
-                  <div className="flex flex-col items-center border-r border-slate-50">
-                    <Bed size={18} className="mb-2 text-slate-400" />
-                    <span className="text-sm font-bold text-slate-900">{unit.beds}</span>
-                    <span className="text-[8px] uppercase font-black text-slate-400">Lits</span>
+                  {/* Caractéristiques */}
+                  <div className="grid grid-cols-3 border-t border-slate-50 pt-6 text-slate-500">
+                    <div className="flex flex-col items-center border-r border-slate-50">
+                      <Bed size={18} className="mb-2 text-slate-400" />
+                      <span className="text-sm font-bold text-slate-900">{unit.beds}</span>
+                      <span className="text-[8px] uppercase font-black text-slate-400">Lits</span>
+                    </div>
+                    <div className="flex flex-col items-center border-r border-slate-50">
+                      <Bath size={18} className="mb-2 text-slate-400" />
+                      <span className="text-sm font-bold text-slate-900">{unit.baths}</span>
+                      <span className="text-[8px] uppercase font-black text-slate-400">Bains</span>
+                    </div>
+                    <div className="flex flex-col items-center">
+                      <Maximize size={18} className="mb-2 text-slate-400" />
+                      <span className="text-sm font-bold text-slate-900">
+                        {unit.surface_area?.built || unit.sqft || "--"}
+                      </span>
+                      <span className="text-[8px] uppercase font-black text-slate-400">m²</span>
+                    </div>
                   </div>
-                  <div className="flex flex-col items-center border-r border-slate-50">
-                    <Bath size={18} className="mb-2 text-slate-400" />
-                    <span className="text-sm font-bold text-slate-900">{unit.baths}</span>
-                    <span className="text-[8px] uppercase font-black text-slate-400">Bains</span>
-                  </div>
-                  <div className="flex flex-col items-center">
-                    <Maximize size={18} className="mb-2 text-slate-400" />
-                    <span className="text-sm font-bold text-slate-900">{unit.surface_area?.built || unit.sqft}</span>
-                    <span className="text-[8px] uppercase font-black text-slate-400">m²</span>
-                  </div>
-                </div>
 
-                <Link href={`/bien/${unit.id}`} className="mt-8 w-full flex items-center justify-between bg-slate-50 hover:bg-emerald-600 hover:text-white p-4 rounded-2xl transition-all group/btn">
-                  <span className="text-[10px] font-black uppercase tracking-widest ml-2">Voir les détails</span>
-                  <div className="h-8 w-8 rounded-xl bg-white flex items-center justify-center text-slate-900 group-hover/btn:scale-90 transition-transform">
-                    <ChevronRight size={16} />
-                  </div>
-                </Link>
+                  {/* Bouton vers la page détail du bien spécifique */}
+                  <Link href={`/bien/${unit.id}`} className="mt-8 w-full flex items-center justify-between bg-slate-50 hover:bg-emerald-600 hover:text-white p-4 rounded-2xl transition-all group/btn">
+                    <span className="text-[10px] font-black uppercase tracking-widest ml-2">Détails de l'unité</span>
+                    <div className="h-8 w-8 rounded-xl bg-white flex items-center justify-center text-slate-900 group-hover/btn:scale-90 transition-transform shadow-sm">
+                      <ChevronRight size={16} />
+                    </div>
+                  </Link>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
       <Footer />
