@@ -21,75 +21,77 @@ export async function GET() {
       const xmlText = await response.text();
       
       const parser = new xml2js.Parser({ 
-        explicitArray: false, 
+        explicitArray: true, // Crucial pour itérer sur les descriptions
         mergeAttrs: true,
         trim: true 
       });
       
       const result = await parser.parseStringPromise(xmlText);
       const rootKey = Object.keys(result)[0];
-      let properties = result[rootKey].property || result[rootKey].properties?.property || [];
-      if (!Array.isArray(properties)) properties = [properties];
+      // Dans votre XML, c'est result.root.property
+      let properties = result[rootKey].property || [];
 
       const updates = properties.map((p: any) => {
         
-        // --- MÉTHODE RADICALE : EXTRACTION PAR REGEX ---
-        // On cherche le contenu entre <description> et </description>
-        // Cela évite tous les problèmes de parsing d'objets
-        let desc = "";
-        
-        // Si le parser a trouvé quelque chose
-        if (p.description) {
-          if (typeof p.description === 'string') {
-            desc = p.description;
-          } else if (p.description.fr) {
-            desc = typeof p.description.fr === 'string' ? p.description.fr : (p.description.fr._ || "");
-          } else if (p.description._) {
-            desc = p.description._;
-          }
+        // --- 1. EXTRACTION DE LA DESCRIPTION (LA VRAIE LOGIQUE XML) ---
+        let descFr = "";
+        // Dans le XML, c'est p.descriptions[0].description qui est un tableau
+        const descList = p.descriptions?.[0]?.description;
+        if (Array.isArray(descList)) {
+          // On cherche l'entrée où lg == 'fr'
+          const frEntry = descList.find((d: any) => d.lg === 'fr' || d.lg?.[0] === 'fr');
+          descFr = frEntry?._ || frEntry || "";
+        } else if (descList) {
+          descFr = descList._ || descList;
         }
 
-        // --- SÉCURITÉ SUPPLÉMENTAIRE ---
-        // Si la description est toujours vide ou trop courte, on nettoie les résidus d'objets
-        const cleanDesc = (typeof desc === 'string') ? desc.trim() : "";
+        // --- 2. EXTRACTION DU TITRE ---
+        let titreFr = "";
+        const titleList = p.titles?.[0]?.title;
+        if (Array.isArray(titleList)) {
+          const frTitle = titleList.find((t: any) => t.lg === 'fr' || t.lg?.[0] === 'fr');
+          titreFr = frTitle?._ || frTitle || "";
+        }
 
-        // Mapping des surfaces (basé sur ton feed.json)
-        const built = p.surface_area?.built || p.surface_built || "0";
-        const plot = p.surface_area?.plot || p.surface_plot || "0";
+        // --- 3. SURFACES (p.surface_area est un tableau dans ce parser) ---
+        const surf = p.surface_area?.[0] || {};
+        const built = surf.built || "0";
+        const plot = surf.plot || "0";
+
+        // --- 4. IMAGES ---
+        let imagesArray: string[] = [];
+        const imgs = p.images?.[0]?.image;
+        if (Array.isArray(imgs)) {
+          imagesArray = imgs.map(img => typeof img === 'string' ? img : img._);
+        }
 
         return {
-          id_externe: String(p.id),
-          
-          // On force l'envoi en String pur
-          description: String(cleanDesc),
-          details: String(cleanDesc), 
-          
-          titre: p.title?.fr || p.title || "Villa Neuve",
-          town: String(p.town || p.city || "Espagne"),
-          ville: String(p.town || p.city || "Espagne"),
-          price: parseFloat(p.price) || 0,
-          prix: parseFloat(p.price) || 0,
-          beds: String(p.beds || p.bedrooms || "0"),
-          baths: String(p.baths || p.bathrooms || "0"),
+          id_externe: String(p.id?.[0] || p.id),
+          description: String(descFr).trim(),
+          details: String(descFr).trim(),
+          titre: titreFr || "Villa Neuve",
+          town: String(p.town?.[0] || p.town || "Espagne"),
+          ville: String(p.town?.[0] || p.town || "Espagne"),
+          price: parseFloat(p.price?.[0] || p.price) || 0,
+          prix: parseFloat(p.price?.[0] || p.price) || 0,
+          beds: String(p.beds?.[0] || "0"),
+          baths: String(p.baths?.[0] || "0"),
           surface_built: String(built),
           surface_plot: String(plot),
-          ref: p.ref || p.reference || String(p.id),
+          type: String(p.type?.[0] || "Villa"),
+          ref: String(p.ref?.[0] || p.ref || ""),
           region: source.defaultRegion,
-          images: p.images?.image ? (Array.isArray(p.images.image) ? p.images.image : [p.images.image]) : [],
+          images: imagesArray,
           updated_at: new Date().toISOString()
         };
       });
 
-      // Tentative d'insertion
       const { error } = await supabase
         .from('villas')
         .upsert(updates, { onConflict: 'id_externe' });
 
-      if (error) {
-        console.error("Erreur détaillée Supabase:", error);
-      } else {
-        totalSynced += updates.length;
-      }
+      if (error) console.error("Erreur Supabase:", error.message);
+      else totalSynced += updates.length;
     }
 
     return NextResponse.json({ success: true, totalSynced });
