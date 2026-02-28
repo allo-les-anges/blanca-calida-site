@@ -19,62 +19,56 @@ export async function GET() {
     for (const source of SOURCES) {
       const response = await fetch(source.url, { cache: 'no-store' });
       const xmlText = await response.text();
-      const parser = new xml2js.Parser({ explicitArray: true, mergeAttrs: true });
+      const parser = new xml2js.Parser({ explicitArray: false, mergeAttrs: true }); // Plus simple sans tableaux partout
       const result = await parser.parseStringPromise(xmlText);
       
       const rootKey = Object.keys(result)[0];
-      const properties = result[rootKey].property || result[rootKey].properties?.property || [];
+      const propertiesData = result[rootKey].property || result[rootKey].properties?.property || [];
+      const properties = Array.isArray(propertiesData) ? propertiesData : [propertiesData];
 
       const updates = properties.map((p: any) => {
-        const getVal = (field: any) => Array.isArray(field) ? field[0] : field;
-        const town = (getVal(p.location)?.city || getVal(p.city) || getVal(p.town) || "").toLowerCase();
-        
-        // 1. Détection Région
+        // Extraction ville et région
+        const town = (p.location?.city || p.city || p.town || "").toString().toLowerCase();
         let finalRegion = source.defaultRegion;
-        const keywordsAlmeria = ["almeria", "mojacar", "vera", "cuevas", "pulpi"];
-        const keywordsCalida = ["murcia", "mazarron", "aguilas", "pilar", "alcazares", "cartagena"];
-
-        if (source.defaultRegion === "Costa del Sol" && keywordsAlmeria.some(word => town.includes(word))) {
-             finalRegion = "Costa Almeria";
-        } else if (source.defaultRegion === "Costa Blanca" && keywordsCalida.some(word => town.includes(word))) {
-             finalRegion = "Costa Calida";
+        
+        if (source.defaultRegion === "Costa del Sol" && ["almeria", "mojacar", "vera", "pulpi"].some(k => town.includes(k))) {
+          finalRegion = "Costa Almeria";
+        } else if (source.defaultRegion === "Costa Blanca" && ["murcia", "mazarron", "aguilas", "pilar", "alcazares"].some(k => town.includes(k))) {
+          finalRegion = "Costa Calida";
         }
 
-        // 2. Extraction Images (Correction XML profonde)
+        // Extraction Images (Tricky part)
         let cleanImages: string[] = [];
-        const rawImages = p.images?.[0]?.image || p.images?.image;
-        if (rawImages) {
-          const imageArray = Array.isArray(rawImages) ? rawImages : [rawImages];
-          cleanImages = imageArray.map((img: any) => {
-            if (typeof img === 'string') return img;
-            // On vérifie les attributs (@url) ou le contenu texte (_)
-            return img.url || img._ || (img.$ && img.$.url);
+        const rawImgs = p.images?.image;
+        if (rawImgs) {
+          const imgArray = Array.isArray(rawImgs) ? rawImgs : [rawImgs];
+          cleanImages = imgArray.map((i: any) => {
+            if (typeof i === 'string') return i;
+            return i.url || i._ || (i.$ && i.$.url);
           }).filter(url => typeof url === 'string' && url.startsWith('http'));
         }
 
-        // 3. Extraction Description
-        const descObj = getVal(p.description);
-        const description = typeof descObj === 'object' 
-          ? (descObj.fr || descObj.en || descObj._ || "") 
-          : (descObj || "");
+        // Extraction Description
+        const desc = p.description?.fr || p.description?.en || p.description || "";
+        const finalDescription = typeof desc === 'object' ? (desc._ || "") : desc;
 
         return {
-          id_externe: String(getVal(p.id)),
-          titre: getVal(p.title)?.fr || getVal(p.title)?.en || getVal(p.title) || "Villa de luxe",
-          description: description, // Envoyé vers la nouvelle colonne
+          id_externe: String(p.id),
+          titre: p.title?.fr || p.title?.en || p.title || "Villa d'exception",
+          description: String(finalDescription),
           region: finalRegion,
-          town: getVal(p.location)?.city || getVal(p.city) || getVal(p.town) || "Espagne",
-          price: parseFloat(getVal(p.price)) || 0,
-          type: getVal(p.type) || "Villa",
-          beds: String(getVal(p.bedrooms) || getVal(p.beds) || "0"),
-          ref: getVal(p.reference) || String(getVal(p.id)),
-          images: cleanImages, // Stocké en JSONB
+          town: p.location?.city || p.city || p.town || "Espagne",
+          price: parseFloat(p.price) || 0,
+          type: p.type || "Villa",
+          beds: String(p.bedrooms || p.beds || "0"),
+          ref: p.reference || String(p.id),
+          images: cleanImages, // Supabase accepte le tableau JSONB
           updated_at: new Date().toISOString()
         };
       });
 
       const { error } = await supabase.from('villas').upsert(updates, { onConflict: 'id_externe' });
-      if (error) console.error("Erreur Supabase:", error);
+      if (error) console.error("Erreur Supabase:", error.message);
       else totalSynced += updates.length;
     }
 
