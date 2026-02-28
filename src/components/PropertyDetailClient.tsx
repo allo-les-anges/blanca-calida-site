@@ -22,7 +22,11 @@ export default function PropertyDetailClient({ id }: { id: string }) {
         const res = await fetch("/api/properties");
         const data = await res.json();
         const propertiesArray = Array.isArray(data) ? data : (data.properties || []);
-        const current = propertiesArray.find((p: any) => String(p.id) === String(id));
+        
+        // On compare avec l'id_externe ou l'id classique
+        const current = propertiesArray.find((p: any) => 
+          String(p.id) === String(id) || String(p.id_externe) === String(id)
+        );
         
         if (current) {
           setProperty(current);
@@ -53,7 +57,7 @@ export default function PropertyDetailClient({ id }: { id: string }) {
   if (loading) return (
     <div className="h-screen flex flex-col items-center justify-center bg-white italic font-serif text-slate-400">
       <Loader2 className="animate-spin text-emerald-500 mb-4" size={40} />
-      Chargement de Project Tracker...
+      Chargement de la villa...
     </div>
   );
 
@@ -94,12 +98,11 @@ export default function PropertyDetailClient({ id }: { id: string }) {
                   key={idx} 
                   className="min-w-full h-full snap-center md:absolute md:inset-0 md:transition-opacity md:duration-500"
                   style={{ 
-                    opacity: typeof window !== 'undefined' && window.innerWidth < 768 ? 1 : (activeImage === idx ? 1 : 0),
+                    opacity: activeImage === idx ? 1 : 0,
                     zIndex: activeImage === idx ? 10 : 0,
-                    position: typeof window !== 'undefined' && window.innerWidth < 768 ? 'relative' : 'absolute'
                   }}
                 >
-                  <img src={img} className="w-full h-full object-cover" alt={`${property.title}`} />
+                  <img src={img} className="w-full h-full object-cover" alt={property.titre || property.title} />
                 </div>
               ))}
             </div>
@@ -128,28 +131,28 @@ export default function PropertyDetailClient({ id }: { id: string }) {
       {/* INFOS ET CARACTÉRISTIQUES */}
       <section className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-3 gap-16 pb-24">
         <div className="lg:col-span-2">
-          <h1 className="text-4xl md:text-6xl font-serif mb-8 text-slate-900 leading-[1.1]">{property.title}</h1>
+          <h1 className="text-4xl md:text-6xl font-serif mb-8 text-slate-900 leading-[1.1]">{property.titre || property.title}</h1>
           
           <div className="flex items-center gap-3 text-gray-400 mb-12 text-[11px] uppercase tracking-[0.2em] font-bold">
             <MapPin size={18} className="text-emerald-500" />
-            {property.town} • {property.province}
+            {property.town || property.ville} • {property.region}
           </div>
 
-          {/* QUICK STATS */}
+          {/* QUICK STATS - CORRIGÉ ICI */}
           <div className="grid grid-cols-3 gap-4 mb-16">
             <div className="bg-slate-50 p-6 rounded-3xl text-center border border-slate-100">
               <Bed className="mx-auto mb-2 text-emerald-600" size={22} />
-              <p className="text-2xl font-serif">{property.beds}</p>
+              <p className="text-2xl font-serif">{property.beds || "0"}</p>
               <p className="text-[8px] uppercase text-gray-400 font-bold tracking-widest">Chambres</p>
             </div>
             <div className="bg-slate-50 p-6 rounded-3xl text-center border border-slate-100">
               <Bath className="mx-auto mb-2 text-emerald-600" size={22} />
-              <p className="text-2xl font-serif">{property.baths}</p>
+              <p className="text-2xl font-serif">{property.baths || "0"}</p>
               <p className="text-[8px] uppercase text-gray-400 font-bold tracking-widest">Salles de bain</p>
             </div>
             <div className="bg-slate-50 p-6 rounded-3xl text-center border border-slate-100">
               <Maximize className="mx-auto mb-2 text-emerald-600" size={22} />
-              <p className="text-2xl font-serif">{property.surface_area?.built || property.built_m2}</p>
+              <p className="text-2xl font-serif">{property.surface_built || "0"}</p>
               <p className="text-[8px] uppercase text-gray-400 font-bold tracking-widest">Surface m²</p>
             </div>
           </div>
@@ -159,91 +162,26 @@ export default function PropertyDetailClient({ id }: { id: string }) {
             <h2 className="text-3xl font-serif italic mb-8 text-slate-800">Détails techniques</h2>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-y-10 gap-x-6">
               <div className="flex items-start gap-4">
-                <div className="p-3 bg-emerald-50 rounded-xl text-emerald-600"><Waves size={20}/></div>
-                <div>
-                  <p className="text-[9px] uppercase text-gray-400 font-bold tracking-widest mb-1">Piscine</p>
-                  <p className="font-medium">{property.pool === "Yes" || property.pool === true ? "Privée" : "Disponible"}</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-4">
-                <div className="p-3 bg-emerald-50 rounded-xl text-emerald-600"><Car size={20}/></div>
-                <div>
-                  <p className="text-[9px] uppercase text-gray-400 font-bold tracking-widest mb-1">Garage</p>
-                  <p className="font-medium">{property.garage || "Privé"}</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-4">
                 <div className="p-3 bg-emerald-50 rounded-xl text-emerald-600"><Home size={20}/></div>
                 <div>
                   <p className="text-[9px] uppercase text-gray-400 font-bold tracking-widest mb-1">Terrain</p>
-                  <p className="font-medium">{property.surface_area?.plot || property.plot_m2 || "624"} m²</p>
+                  <p className="font-medium">{property.surface_plot || "0"} m²</p>
                 </div>
               </div>
               <div className="flex items-start gap-4">
                 <div className="p-3 bg-emerald-50 rounded-xl text-emerald-600"><MapPin size={20}/></div>
                 <div>
-                  <p className="text-[9px] uppercase text-gray-400 font-bold tracking-widest mb-1">Distance Plage</p>
-                  <p className="font-medium">{property.distance_beach || "16 Km"}</p>
+                  <p className="text-[9px] uppercase text-gray-400 font-bold tracking-widest mb-1">Réf.</p>
+                  <p className="font-medium">{property.ref || property.id_externe}</p>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* CONFIGURATIONS */}
-          <div className="mb-20">
-            <h2 className="text-3xl font-serif italic mb-8 text-slate-800">Unités disponibles</h2>
-            <div className="border border-slate-100 rounded-[2rem] overflow-hidden shadow-xl">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left bg-white text-sm">
-                  <thead className="bg-slate-900 text-white text-[9px] uppercase tracking-widest">
-                    <tr>
-                      <th className="py-5 px-8">Modèle</th>
-                      <th className="py-5 px-4 text-center">Chambres</th>
-                      <th className="py-5 px-8 text-right">Dès</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-50">
-                    {relatedUnits.map((unit: any) => (
-                      <tr key={unit.id} className={unit.id === property.id ? 'bg-emerald-50/50' : 'hover:bg-slate-50 transition-colors'}>
-                        <td className="py-6 px-8 font-medium">{unit.title}</td>
-                        <td className="py-6 px-4 text-center text-gray-600">{unit.beds}</td>
-                        <td className="py-6 px-8 text-right font-serif text-lg">
-                          {unit.id === property.id ? (
-                            <span className="text-emerald-600 font-bold">Sélectionné</span>
-                          ) : (
-                            <Link href={`/property/${unit.id}`} className="text-slate-900 underline decoration-slate-200">
-                              {Number(unit.price).toLocaleString("fr-FR")} €
-                            </Link>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-
-          {/* SECTION : LOCALISATION (VERSION SANS CLÉ API) */}
-          <div className="mb-20">
-            <h2 className="text-3xl font-serif italic mb-8 text-slate-800 flex items-center gap-3">
-              <MapIcon size={24} className="text-emerald-500" /> Localisation
-            </h2>
-            <div className="w-full h-[450px] rounded-[2.5rem] overflow-hidden shadow-inner border border-slate-200 bg-slate-100 relative">
-              <iframe
-                width="100%"
-                height="100%"
-                frameBorder="0"
-                style={{ border: 0, filter: 'grayscale(1) contrast(1.1) opacity(0.9)' }}
-                src={`https://maps.google.com/maps?q=${encodeURIComponent(property.town + ', ' + property.province)}&t=&z=13&ie=UTF8&iwloc=&output=embed`}
-                allowFullScreen
-                loading="lazy"
-              ></iframe>
-            </div>
-          </div>
-
+          {/* DESCRIPTION - CORRIGÉ ICI */}
           <div className="prose prose-slate max-w-none text-gray-600 text-lg mb-20 pt-10 border-t border-slate-100">
-              <div dangerouslySetInnerHTML={{ __html: property.description }} />
+              <h2 className="text-3xl font-serif italic mb-8 text-slate-800">Description</h2>
+              <div dangerouslySetInnerHTML={{ __html: property.description || "Aucune description disponible pour le moment." }} />
           </div>
         </div>
 
@@ -252,22 +190,18 @@ export default function PropertyDetailClient({ id }: { id: string }) {
           <div className="sticky top-40 bg-white border border-slate-100 p-10 rounded-[2.5rem] shadow-2xl">
             <p className="text-[10px] uppercase text-gray-400 mb-2 font-bold tracking-widest">Prix du modèle</p>
             <p className="text-5xl font-serif text-slate-900 leading-none mb-10">
-              {Number(property.price).toLocaleString("fr-FR")} €
+              {Number(property.price || property.prix).toLocaleString("fr-FR")} €
             </p>
             <button className="w-full bg-slate-900 text-white py-6 rounded-2xl font-bold uppercase text-[11px] tracking-widest hover:bg-emerald-800 transition-all mb-4">
               Réserver une visite
             </button>
             <a 
-              href={`https://wa.me/34627768233?text=Information: ${property.title}`}
+              href={`https://wa.me/34627768233?text=Information: ${property.titre || property.title}`}
               target="_blank" 
               className="w-full border border-slate-200 flex items-center justify-center gap-3 py-6 rounded-2xl font-bold uppercase text-[11px] text-slate-700 hover:bg-slate-50 transition-all"
             >
               <MessageCircle size={20} className="text-green-500" /> WhatsApp
             </a>
-            <div className="mt-8 pt-8 border-t border-slate-50 flex justify-between items-center text-[10px] uppercase tracking-widest">
-                <span className="text-gray-300">Livraison</span>
-                <span className="text-slate-900 font-bold">{property.key_date}</span>
-            </div>
           </div>
         </div>
       </section>
