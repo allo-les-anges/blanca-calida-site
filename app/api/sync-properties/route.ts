@@ -19,82 +19,57 @@ export async function GET() {
     for (const source of SOURCES) {
       const response = await fetch(source.url, { cache: 'no-store' });
       const xmlText = await response.text();
-      const parser = new xml2js.Parser({ explicitArray: true, mergeAttrs: true });
+      // On garde explicitArray: false pour simplifier l'accès si le XML le permet
+      const parser = new xml2js.Parser({ explicitArray: false, mergeAttrs: true });
       const result = await parser.parseStringPromise(xmlText);
       
       const rootKey = Object.keys(result)[0];
-      const properties = result[rootKey].property || result[rootKey].properties?.property || [];
+      // On s'adapte à la structure du XML
+      let properties = result[rootKey].property || result[rootKey].properties?.property || [];
+      if (!Array.isArray(properties)) properties = [properties];
 
       const updates = properties.map((p: any) => {
-        const getVal = (field: any) => Array.isArray(field) ? field[0] : field;
-
-        // --- 1. LOCALISATION ---
-        const townRaw = getVal(p.town) || getVal(p.city) || getVal(p.location)?.city || "";
-        const town = townRaw.toString().toLowerCase();
-        let finalRegion = source.defaultRegion;
-
-        if (source.defaultRegion === "Costa del Sol") {
-           if (town.includes("almeria") || town.includes("mojacar") || town.includes("vera")) {
-             finalRegion = "Costa Almeria";
-           }
-        } else if (source.defaultRegion === "Costa Blanca") {
-           if (town.includes("murcia") || town.includes("mazarron") || town.includes("aguilas")) {
-             finalRegion = "Costa Calida";
-           }
+        
+        // --- EXTRACTION DESCRIPTION ---
+        // Dans ton JSON, c'est directement p.description. 
+        // Dans le XML parsé, ça peut être p.description._ ou p.description (si CDATA)
+        let desc = "";
+        if (typeof p.description === 'string') {
+          desc = p.description;
+        } else if (p.description && p.description._) {
+          desc = p.description._;
+        } else if (p.description && p.description.fr) {
+          desc = typeof p.description.fr === 'string' ? p.description.fr : p.description.fr._;
         }
 
-        // --- 2. IMAGES ---
-        let cleanImages: string[] = [];
-        const imgsContainer = p.images?.[0]?.image;
-        if (imgsContainer) {
-          const imgs = Array.isArray(imgsContainer) ? imgsContainer : [imgsContainer];
-          cleanImages = imgs.map((i: any) => typeof i === 'string' ? i : (i.url || i._)).filter(Boolean);
-        }
+        // --- EXTRACTION SURFACES ---
+        const built = p.surface_area?.built || p.surface_built || "0";
+        const plot = p.surface_area?.plot || p.surface_plot || "0";
 
-        // --- 3. EXTRACTION ROBUSTE DE LA DESCRIPTION ---
-        const extractDescription = (node: any) => {
-          if (!node) return "";
-          const d = node[0] || node;
-          
-          // Test 1: fr est un tableau de string ou d'objets
-          if (d.fr) {
-            const frVal = d.fr[0] || d.fr;
-            return typeof frVal === 'string' ? frVal : (frVal._ || "");
-          }
-          // Test 2: direct string (cas CDATA simple)
-          if (typeof d === 'string') return d;
-          // Test 3: contenu texte brut dans l'objet
-          if (d._) return d._;
-          // Test 4: fallback sur l'anglais
-          if (d.en) {
-            const enVal = d.en[0] || d.en;
-            return typeof enVal === 'string' ? enVal : (enVal._ || "");
-          }
-          return "";
-        };
+        // --- EXTRACTION CHAMBRES / BAINS ---
+        const beds = p.beds || p.bedrooms || "0";
+        const baths = p.baths || p.bathrooms || "0";
 
-        const finalDescription = extractDescription(p.description);
-
-        // --- 4. SURFACES & CARACTÉRISTIQUES ---
-        const surfaceObj = p.surface_area?.[0] || {};
-        const surfaceBuilt = surfaceObj.built?.[0] || getVal(p.surface_built) || "0";
-        const surfacePlot = surfaceObj.plot?.[0] || getVal(p.surface_plot) || "0";
-        const baths = getVal(p.baths) || getVal(p.bathrooms) || "0";
+        // --- TITRE ---
+        let titre = "Villa";
+        if (typeof p.title === 'string') titre = p.title;
+        else if (p.title?.fr) titre = p.title.fr;
+        else if (p.title?._) titre = p.title._;
 
         return {
-          id_externe: String(getVal(p.id)),
-          titre: p.title?.[0]?.fr?.[0] || p.title?.[0]?.en?.[0] || getVal(p.title) || "Villa",
-          description: finalDescription, 
-          region: finalRegion,
-          town: townRaw || "Espagne",
-          price: parseFloat(getVal(p.price)) || 0,
-          type: getVal(p.type) || "Villa",
-          beds: String(getVal(p.bedrooms) || getVal(p.beds) || "0"),
+          id_externe: String(p.id),
+          titre: titre,
+          description: desc, // C'est ici que le texte HTML va être injecté
+          region: source.defaultRegion,
+          town: p.town || p.city || "Espagne",
+          price: parseFloat(p.price) || 0,
+          type: p.type || "Villa",
+          beds: String(beds),
           baths: String(baths),
-          surface_built: String(surfaceBuilt),
-          surface_plot: String(surfacePlot),
-          ref: getVal(p.reference) || getVal(p.ref) || String(getVal(p.id)),
-          images: cleanImages,
+          surface_built: String(built),
+          surface_plot: String(plot),
+          ref: p.ref || p.reference || String(p.id),
+          images: Array.isArray(p.images?.image) ? p.images.image : [],
           updated_at: new Date().toISOString()
         };
       });
