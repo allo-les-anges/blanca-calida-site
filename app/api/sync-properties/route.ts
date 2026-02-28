@@ -19,7 +19,6 @@ export async function GET() {
     for (const source of SOURCES) {
       const response = await fetch(source.url, { cache: 'no-store' });
       const xmlText = await response.text();
-      
       const parser = new xml2js.Parser({ explicitArray: true }); 
       const result = await parser.parseStringPromise(xmlText);
       
@@ -30,12 +29,9 @@ export async function GET() {
       if (properties.length === 0) continue;
 
       const updates = properties.map((p: any) => {
-        const getVal = (field: any) => {
-            if (!field) return null;
-            return Array.isArray(field) ? field[0] : field;
-        };
+        const getVal = (field: any) => Array.isArray(field) ? field[0] : field;
 
-        // --- NETTOYAGE DES IMAGES ---
+        // --- LOGIQUE DE NETTOYAGE DES IMAGES ---
         let cleanImages: string[] = [];
         const rawImages = p.images?.[0]?.image || p.images?.image;
 
@@ -43,11 +39,11 @@ export async function GET() {
           const imageArray = Array.isArray(rawImages) ? rawImages : [rawImages];
           cleanImages = imageArray
             .map((img: any) => {
-              // Si c'est un objet { url: '...' }, on prend l'url. Si c'est une string, on la prend.
-              const url = typeof img === 'object' ? (img.url || img._) : img;
-              return typeof url === 'string' ? url : null;
+              // On cherche l'URL soit dans l'attribut, soit dans l'objet, soit en string direct
+              const url = img?.$?.url || img?.url || (typeof img === 'string' ? img : null);
+              return url;
             })
-            .filter(Boolean) as string[];
+            .filter(img => typeof img === 'string' && img.startsWith('http'));
         }
 
         const rawTitle = getVal(p.title);
@@ -63,15 +59,7 @@ export async function GET() {
           beds: getVal(p.bedrooms) || getVal(p.beds) || "0",
           ref: getVal(p.reference) || getVal(p.ref) || getVal(p.id),
           development_name: getVal(p.development_name) || "",
-          
-          // On envoie maintenant le tableau d'URLs propres
-          images: cleanImages, 
-
-          details: {
-            bathrooms: getVal(p.bathrooms),
-            size: getVal(p.size),
-            surface: getVal(p.size)
-          },
+          images: cleanImages, // Tableau de strings propres
           updated_at: new Date().toISOString()
         };
       });
@@ -81,7 +69,6 @@ export async function GET() {
     }
 
     return NextResponse.json({ success: true, totalSynced });
-
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
