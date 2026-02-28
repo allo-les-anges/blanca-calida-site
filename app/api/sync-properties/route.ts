@@ -33,7 +33,7 @@ export async function GET() {
 
       const updates = properties.map((p: any) => {
         
-        // --- 1. EXTRACTION DE LA DESCRIPTION (MULTI-NIVEAUX) ---
+        // --- 1. EXTRACTION DE LA DESCRIPTION ---
         let finalDesc = "";
         if (p.description) {
           if (typeof p.description === 'string') {
@@ -45,20 +45,22 @@ export async function GET() {
           }
         }
 
+        // Sécurité : conversion en texte pur et nettoyage des espaces
+        const cleanText = String(finalDesc || "").trim();
+
         // --- 2. SURFACES ---
         const built = p.surface_area?.built || p.surface_built || "0";
         const plot = p.surface_area?.plot || p.surface_plot || "0";
 
-        // --- 3. DÉTECTION VILLE / TOWN ---
+        // --- 3. DÉTECTION VILLE ---
         const townVal = p.town || p.city || p.location?.city || "Espagne";
 
         return {
-          // Identifiant de base
           id_externe: String(p.id),
           
-          // --- DOUBLONS FRANÇAIS / ANGLAIS (On remplit tout pour être sûr) ---
-          description: String(finalDesc),
-          details: String(finalDesc), // Parfois utilisé pour la description longue
+          // On force l'envoi dans les deux colonnes
+          description: cleanText,
+          details: cleanText, 
           
           town: String(townVal),
           ville: String(townVal),
@@ -72,7 +74,6 @@ export async function GET() {
           surface_built: String(built),
           surface_plot: String(plot),
           
-          // Autres champs
           titre: p.title?.fr || p.title || "Villa Neuve",
           type: p.type || "Villa",
           ref: p.ref || p.reference || String(p.id),
@@ -83,7 +84,6 @@ export async function GET() {
         };
       });
 
-      // L'upsert avec id_externe comme clé de conflit
       const { error } = await supabase
         .from('villas')
         .upsert(updates, { onConflict: 'id_externe' });
