@@ -9,77 +9,91 @@ interface PropertyCardProps {
 }
 
 export default function PropertyCard({ property }: PropertyCardProps) {
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('de-DE').format(price) + ' €';
-  };
-
-  const isNearBeach = property.distance_beach && parseInt(property.distance_beach) <= 2000;
-  const hasPool = property.pool === "Oui" || property.pool === "1";
+  // Formatage propre : 3.725.000 € (sans retour à la ligne)
+  const priceFormatted = new Intl.NumberFormat('de-DE').format(property.price || property.prix || 0);
 
   return (
-    <Link href={`/property/${property.id_externe || property.id}`} className="group flex flex-col bg-white transition-all duration-500">
-      <div className="relative h-[420px] overflow-hidden shadow-sm rounded-sm">
+    <Link 
+      href={`/property/${property.id_externe || property.id}`} 
+      className="group flex flex-col bg-white overflow-hidden"
+    >
+      {/* --- IMAGE & BADGES --- */}
+      <div className="relative h-[380px] overflow-hidden rounded-sm shadow-sm">
         <img 
-          src={property.images?.[0] || "https://images.unsplash.com/photo-1613490493576-7fde63acd811?q=80&w=800"} 
+          src={property.images?.[0] || "/placeholder-house.jpg"} 
           alt={property.titre}
-          className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
         />
         
-        <div className="absolute bottom-6 left-6 flex flex-wrap gap-2 max-w-[85%]">
-          <span className="bg-[#C1A87D] text-white text-[10px] font-bold px-4 py-1.5 rounded-full uppercase tracking-widest shadow-lg">
+        {/* Badges stylisés comme sur l'image */}
+        <div className="absolute bottom-4 left-4 flex flex-wrap gap-1.5 max-w-[80%]">
+          <span className="bg-[#C1A87D] text-white text-[9px] font-bold px-3 py-1 rounded-full uppercase tracking-widest shadow-sm">
             REF: {property.ref || property.id_externe}
           </span>
-          {isNearBeach && (
-            <span className="bg-[#7D917D] text-white text-[10px] font-bold px-4 py-1.5 rounded-full uppercase tracking-widest shadow-lg">
+          {property.distance_beach && parseInt(property.distance_beach) < 2000 && (
+            <span className="bg-[#7D917D] text-white text-[9px] font-bold px-3 py-1 rounded-full uppercase tracking-widest shadow-sm">
               PROCHE MER
             </span>
           )}
-          <span className="bg-white/90 backdrop-blur-md text-slate-800 text-[10px] font-bold px-4 py-1.5 rounded-full uppercase tracking-widest shadow-lg">
-             VUE DÉGAGÉE
+          <span className="bg-white/90 backdrop-blur-sm text-slate-800 text-[9px] font-bold px-3 py-1 rounded-full uppercase tracking-widest shadow-sm">
+            VUE DÉGAGÉE
           </span>
         </div>
 
-        <div className="absolute bottom-6 right-6 flex gap-3">
-           <button className="bg-white/90 p-2.5 rounded-full shadow-md">
-              <Heart size={18} className="text-slate-400" />
-           </button>
-           <div className="bg-[#C1A87D] p-2.5 rounded-full text-white shadow-md">
-              <ChevronRight size={20} />
-           </div>
+        {/* Boutons flottants */}
+        <div className="absolute bottom-4 right-4 flex gap-2">
+          <button className="bg-white/90 p-2 rounded-full shadow-md hover:bg-white transition-colors group/heart">
+            <Heart size={16} className="text-slate-400 group-hover/heart:text-red-500" />
+          </button>
+          <div className="bg-[#C1A87D] p-2 rounded-full text-white shadow-md">
+            <ChevronRight size={18} />
+          </div>
         </div>
       </div>
 
-      <div className="pt-8 pb-6">
-        <div className="flex justify-between items-start mb-2">
-          <h3 className="font-serif text-[26px] text-slate-900 leading-tight">
-            {property.type || "Villa"} <span className="text-slate-300 font-sans text-lg ml-1">· {property.town}</span>
+      {/* --- INFOS : TITRE ET PRIX --- */}
+      <div className="py-6">
+        <div className="flex justify-between items-baseline gap-4 mb-1">
+          <h3 className="font-serif text-2xl text-slate-900 truncate uppercase tracking-tight">
+            {property.type || 'Property'} <span className="text-slate-300 font-sans text-base">· {property.town}</span>
           </h3>
-          <span className="text-2xl font-bold text-slate-900">
-            {formatPrice(property.price || property.prix)}
+          {/* whitespace-nowrap empêche le symbole € de passer à la ligne */}
+          <span className="text-xl font-bold text-slate-900 whitespace-nowrap">
+            {priceFormatted} €
           </span>
         </div>
-        <p className="text-slate-400 text-[10px] tracking-[0.3em] uppercase font-bold">
-          {property.town} · {property.region || "Costa Blanca"}
+        <p className="text-slate-400 text-[10px] tracking-[0.2em] uppercase font-bold">
+          {property.town} · {property.region || 'Costa Blanca'}
         </p>
       </div>
 
-      <div className="border-t border-slate-100 pt-8 flex justify-between items-center text-slate-500 px-1">
-        <IconItem icon={<Maximize size={22} />} label={`${property.surface_built || '0'} m²`} />
-        <IconItem icon={<Map size={22} />} label={`${property.surface_plot || '0'} m²`} />
-        <IconItem icon={<Bed size={22} />} label={property.beds || '0'} />
-        <IconItem icon={<Bath size={22} />} label={property.baths || '0'} />
-        <IconItem icon={<Waves size={22} />} label={hasPool ? "OUI" : "NON"} />
-        <IconItem icon={<Car size={22} />} label="PRIVÉ" />
+      {/* --- ICONES TECHNIQUES (Plus fines et élégantes) --- */}
+      <div className="border-t border-slate-100 pt-6 flex justify-between items-center text-slate-500">
+        <div className="flex flex-col items-center gap-1.5 flex-1">
+          <Maximize size={20} strokeWidth={1.2} className="text-slate-400" />
+          <span className="text-[10px] font-semibold">{property.surface_built || '0'} m²</span>
+        </div>
+        <div className="flex flex-col items-center gap-1.5 flex-1 border-x border-slate-50">
+          <Map size={20} strokeWidth={1.2} className="text-slate-400" />
+          <span className="text-[10px] font-semibold">{property.surface_plot || '0'} m²</span>
+        </div>
+        <div className="flex flex-col items-center gap-1.5 flex-1">
+          <Bed size={20} strokeWidth={1.2} className="text-slate-400" />
+          <span className="text-[10px] font-semibold">{property.beds || '0'}</span>
+        </div>
+        <div className="flex flex-col items-center gap-1.5 flex-1 border-x border-slate-50">
+          <Bath size={20} strokeWidth={1.2} className="text-slate-400" />
+          <span className="text-[10px] font-semibold">{property.baths || '0'}</span>
+        </div>
+        <div className="flex flex-col items-center gap-1.5 flex-1">
+          <Waves size={20} strokeWidth={1.2} className="text-slate-400" />
+          <span className="text-[10px] font-semibold uppercase">{property.pool === "Oui" ? "Oui" : "Non"}</span>
+        </div>
+        <div className="flex flex-col items-center gap-1.5 flex-1 border-l border-slate-50">
+          <Car size={20} strokeWidth={1.2} className="text-slate-400" />
+          <span className="text-[10px] font-semibold uppercase">Privé</span>
+        </div>
       </div>
     </Link>
-  );
-}
-
-function IconItem({ icon, label }: { icon: React.ReactNode, label: string }) {
-  return (
-    <div className="flex flex-col items-center gap-2">
-      <div className="text-slate-400">{icon}</div>
-      <span className="text-[10px] font-bold tracking-tight uppercase">{label}</span>
-    </div>
   );
 }
