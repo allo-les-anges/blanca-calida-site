@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { 
   HardHat, Camera, Download, Calendar, 
-  MapPin, Loader2, FileText, LogOut, ArrowLeft,
-  CheckCircle2, Clock, ShieldCheck, ChevronRight
+  MapPin, Loader2, FileText, LogOut,
+  CheckCircle2, Clock, ShieldCheck, User, X, ChevronRight
 } from "lucide-react";
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -15,273 +15,154 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-const PHASES = [
-  "Signature", "Terrassement", "Fondations", "Murs", "Toiture", 
-  "Menuiseries", "Électricité", "Isolation", "Plâtrerie", 
-  "Sols", "Peintures", "Extérieurs", "Clés"
-];
-
-const getBase64ImageFromURL = (url: string): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.setAttribute("crossOrigin", "anonymous");
-    img.onload = () => {
-      const canvas = document.createElement("canvas");
-      canvas.width = img.width;
-      canvas.height = img.height;
-      const ctx = canvas.getContext("2d");
-      ctx?.drawImage(img, 0, 0);
-      resolve(canvas.toDataURL("image/jpeg"));
-    };
-    img.onerror = (error) => reject(error);
-    img.src = url;
-  });
-};
-
 export default function ClientDashboard() {
   const [projet, setProjet] = useState<any>(null);
   const [photos, setPhotos] = useState<any[]>([]);
   const [documents, setDocuments] = useState<any[]>([]);
+  const [agentName, setAgentName] = useState<string>("Expert Technique");
   const [loading, setLoading] = useState(true);
-  const [isExporting, setIsExporting] = useState(false);
+  const [selectedDay, setSelectedDay] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchInitialData = async () => {
       const savedPin = localStorage.getItem("client_access_pin");
       if (!savedPin) { window.location.href = "/"; return; }
 
-      const { data: projectData } = await supabase
-        .from("suivi_chantier")
-        .select("*")
-        .eq("pin_code", savedPin)
-        .maybeSingle();
+      const { data: projectData } = await supabase.from("suivi_chantier").select("*").eq("pin_code", savedPin).maybeSingle();
 
       if (projectData) {
         setProjet(projectData);
-        
-        // Charger Photos
-        const { data: photosData } = await supabase
-          .from("constats-photos")
-          .select("*")
-          .eq("id_projet", projectData.id)
-          .order("created_at", { ascending: false });
-        if (photosData) setPhotos(photosData);
+        // On récupère l'agent lié au PIN
+        const { data: staff } = await supabase.from("staff_prestataires").select("nom").eq("pin_code", savedPin).maybeSingle();
+        if (staff) setAgentName(staff.nom);
 
-        // Charger Documents Admin
-        const { data: docsData } = await supabase
-          .from("documents_projets")
-          .select("*")
-          .eq("projet_id", projectData.id);
-        if (docsData) setDocuments(docsData);
+        const { data: ph } = await supabase.from("constats-photos").select("*").eq("id_projet", projectData.id).order("created_at", { ascending: false });
+        if (ph) setPhotos(ph);
 
-        setLoading(false);
+        const { data: doc } = await supabase.from("documents_projets").select("*").eq("projet_id", projectData.id);
+        if (doc) setDocuments(doc);
       }
+      setLoading(false);
     };
     fetchInitialData();
   }, []);
 
-  const downloadPDF = async () => {
-    if (!projet || photos.length === 0) return;
-    setIsExporting(true);
+  // Regroupement des photos par date
+  const groupedPhotos = useMemo(() => {
+    return photos.reduce((acc: any, photo: any) => {
+      const date = new Date(photo.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+      if (!acc[date]) acc[date] = [];
+      acc[date].push(photo);
+      return acc;
+    }, {});
+  }, [photos]);
+
+  const generateDailyPDF = async (date: string, dailyPhotos: any[]) => {
     const doc = new jsPDF();
-    const now = new Date();
-    const dateStr = now.toLocaleDateString('fr-FR');
-    const timeStr = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-
-    // --- DESIGN DU PDF (STYLE BUREAU D'ETUDE) ---
-    // Entête
-    doc.setFillColor(15, 23, 42); // Navy Dark
+    doc.setFillColor(15, 23, 42); 
     doc.rect(0, 0, 210, 40, 'F');
-    
     doc.setTextColor(255, 255, 255);
-    doc.setFont("helvetica", "bold");
     doc.setFontSize(18);
-    doc.text("RAPPORT D'EXPERTISE CHANTIER", 14, 20);
-    doc.setFontSize(10);
-    doc.setFont("helvetica", "normal");
-    doc.text(`Villa : ${projet.nom_villa.toUpperCase()}`, 14, 30);
+    doc.text(`RAPPORT DE CHANTIER - ${date.toUpperCase()}`, 14, 25);
     
-    // Infos de traçabilité
     doc.setTextColor(50, 50, 50);
-    doc.setFontSize(9);
-    doc.text(`Généré le : ${dateStr} à ${timeStr}`, 140, 50);
-    doc.text(`Expert en charge : Bureau d'Étude Prestige OS`, 140, 55);
-    doc.text(`Client : ${projet.client_prenom} ${projet.client_nom}`, 14, 55);
-
-    const rows = await Promise.all(photos.map(async (p) => {
-      try {
-        const base64 = await getBase64ImageFromURL(p.url_image);
-        return {
-          date: new Date(p.created_at).toLocaleString('fr-FR'),
-          note: p.note_expert || "Conforme aux attentes techniques.",
-          expert: p.nom_expert || "Expert Technique",
-          img: base64
-        };
-      } catch (e) {
-        return { date: "N/A", note: "Erreur image", expert: "N/A", img: null };
-      }
-    }));
+    doc.setFontSize(10);
+    doc.text(`Expert : ${agentName}`, 140, 50);
+    doc.text(`Villa : ${projet.nom_villa}`, 14, 50);
 
     autoTable(doc, {
-      startY: 65,
-      head: [['Constat Visuel', 'Date & Heure', 'Analyse de l\'Expert']],
-      body: rows.map(r => ['', r.date, `${r.note}\n\nValidé par : ${r.expert}`]),
-      headStyles: { fillColor: [16, 185, 129], textColor: 255, fontStyle: 'bold' },
-      columnStyles: { 0: { cellWidth: 50 }, 2: { fontSize: 10 } },
-      styles: { minCellHeight: 45, valign: 'middle', overflow: 'linebreak' }, 
-      didDrawCell: (data) => {
-        if (data.section === 'body' && data.column.index === 0) {
-          const rowIndex = data.row.index;
-          const base64Img = rows[rowIndex].img;
-          if (base64Img) {
-            doc.addImage(base64Img, 'JPEG', data.cell.x + 2, data.cell.y + 2, 46, 40);
-          }
-        }
-      },
+      startY: 60,
+      head: [['Heure', 'Observation Technique', 'Statut']],
+      body: dailyPhotos.map(p => [
+        new Date(p.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+        p.note_expert || "Conforme",
+        "Validé"
+      ]),
+      headStyles: { fillColor: [16, 185, 129] }
     });
 
-    doc.save(`Rapport_Expertise_${projet.nom_villa}.pdf`);
-    setIsExporting(false);
+    doc.save(`Rapport_${projet.nom_villa}_${date.replace(/ /g, '_')}.pdf`);
   };
 
-  const currentPhaseIndex = PHASES.findIndex(p => projet?.etape_actuelle?.includes(p)) || 0;
-
-  if (loading) return (
-    <div className="h-screen flex flex-col items-center justify-center bg-[#020617]">
-      <Loader2 className="animate-spin mb-4 text-emerald-500" size={40} />
-      <span className="text-emerald-500 font-mono text-sm tracking-widest uppercase">Initialisation...</span>
-    </div>
-  );
+  if (loading) return <div className="h-screen flex items-center justify-center bg-[#020617]"><Loader2 className="animate-spin text-emerald-500" size={40} /></div>;
 
   return (
-    <div className="min-h-screen bg-[#020617] text-slate-200 font-sans pb-20">
-      
-      {/* HEADER PREMIUM */}
-      <div className="bg-[#0F172A]/80 backdrop-blur-md border-b border-white/5 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-4">
-             <div className="bg-emerald-500 p-2 rounded-lg">
-                <HardHat size={20} className="text-black" />
-             </div>
-             <div>
-                <h1 className="text-white font-black uppercase text-xs tracking-tighter">Prestige <span className="text-emerald-500 text-[10px]">OS</span></h1>
-                <p className="text-[9px] text-slate-500 uppercase tracking-widest font-bold">Client Dashboard</p>
-             </div>
-          </div>
-          <div className="flex gap-4">
-            <button onClick={downloadPDF} className="bg-white text-black px-4 py-2 rounded-xl text-[10px] font-black uppercase flex items-center gap-2 hover:bg-emerald-500 transition-all">
-               {isExporting ? <Loader2 size={14} className="animate-spin" /> : <FileText size={14} />} Rapport PDF
-            </button>
-            <button onClick={() => { localStorage.removeItem("client_access_pin"); window.location.href = "/"; }} className="p-2 text-slate-500 hover:text-white transition-all">
-              <LogOut size={20} />
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-6 pt-10 space-y-12">
+    <div className="min-h-screen bg-[#020617] text-slate-200 p-6 md:p-12 text-left">
+      <div className="max-w-7xl mx-auto space-y-12">
         
-        {/* VILLA HERO & PROGRESSION */}
-        <div className="grid lg:grid-cols-3 gap-10">
-           <div className="lg:col-span-2 space-y-10">
-              <div className="flex flex-col md:flex-row gap-8 items-start">
-                 <div className="w-full md:w-48 h-48 rounded-[2rem] overflow-hidden border-4 border-white/5 shadow-2xl">
-                    <img src={projet.lien_photo || "https://images.unsplash.com/photo-1613490493576-7fde63acd811?q=80&w=2071&auto=format&fit=crop"} className="w-full h-full object-cover" alt="Villa" />
-                 </div>
-                 <div className="text-left flex-1">
-                    <h2 className="text-6xl font-black tracking-tighter text-white mb-2">{projet.nom_villa}</h2>
-                    <div className="flex items-center gap-4 text-slate-400 font-bold uppercase text-[10px] tracking-widest">
-                       <span className="flex items-center gap-1"><MapPin size={12} className="text-emerald-500"/> {projet.ville}</span>
-                       <span className="flex items-center gap-1"><ShieldCheck size={12} className="text-blue-500"/> Certifié Conforme</span>
-                    </div>
-                 </div>
-              </div>
-
-              {/* BARRE DE PROGRESSION DESIGN */}
-              <div className="bg-[#0F172A] p-8 rounded-[2.5rem] border border-white/5 shadow-inner">
-                 <div className="flex justify-between mb-6">
-                    <h3 className="text-[10px] font-black uppercase tracking-widest text-emerald-400">Progression du Chantier</h3>
-                    <span className="text-[10px] font-black text-white">{Math.round((currentPhaseIndex / 12) * 100)}%</span>
-                 </div>
-                 <div className="relative flex justify-between">
-                    <div className="absolute top-4 left-0 w-full h-[2px] bg-white/5 z-0"></div>
-                    <div className="absolute top-4 left-0 h-[2px] bg-emerald-500 z-0 transition-all duration-1000" style={{ width: `${(currentPhaseIndex / 12) * 100}%` }}></div>
-                    
-                    {PHASES.map((phase, idx) => (
-                       <div key={idx} className="relative z-10 flex flex-col items-center">
-                          <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${idx <= currentPhaseIndex ? 'bg-emerald-500 text-black scale-110' : 'bg-[#1E293B] text-slate-600'}`}>
-                             {idx < currentPhaseIndex ? <CheckCircle2 size={16} /> : <span className="text-[10px] font-bold">{idx}</span>}
-                          </div>
-                          <span className={`text-[8px] font-bold uppercase mt-3 tracking-tighter ${idx === currentPhaseIndex ? 'text-white' : 'text-slate-600'}`}>
-                             {phase}
-                          </span>
-                       </div>
-                    ))}
-                 </div>
-              </div>
-           </div>
-
-           {/* DOCUMENTS & CASHBACK */}
-           <div className="space-y-6">
-              <div className="bg-emerald-500 rounded-[2.5rem] p-8 text-black shadow-lg shadow-emerald-500/10">
-                 <p className="text-[10px] font-black uppercase tracking-[0.2em] mb-2 opacity-60">Cashback Avantages</p>
-                 <div className="text-5xl font-black tracking-tighter">{projet.montant_cashback?.toLocaleString() || "0"} €</div>
-              </div>
-
-              <div className="bg-[#0F172A] rounded-[2.5rem] p-8 border border-white/5 flex flex-col h-64">
-                 <h3 className="text-[10px] font-black uppercase text-white mb-6 flex items-center gap-2">
-                    <FileText size={16} className="text-emerald-500"/> Documents Officiels
-                 </h3>
-                 <div className="overflow-y-auto space-y-3 pr-2 custom-scrollbar text-left">
-                    {documents.map((doc) => (
-                       <a key={doc.id} href={doc.url_fichier} target="_blank" rel="noreferrer" className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5 hover:border-emerald-500 transition-all group">
-                          <span className="text-[10px] font-bold truncate flex-1 pr-4">{doc.nom_fichier}</span>
-                          <Download size={14} className="text-slate-500 group-hover:text-emerald-500" />
-                       </a>
-                    ))}
-                    {documents.length === 0 && <p className="text-[10px] text-slate-600 italic">Aucun document partagé.</p>}
-                 </div>
-              </div>
-           </div>
+        {/* HEADER */}
+        <div className="flex justify-between items-center bg-[#0F172A] p-6 rounded-3xl border border-white/5">
+          <div className="flex items-center gap-4">
+            <div className="bg-emerald-500 p-3 rounded-2xl"><HardHat className="text-black" /></div>
+            <div>
+              <h1 className="text-xl font-black uppercase">Journal de Bord</h1>
+              <p className="text-[10px] text-emerald-500 font-bold uppercase tracking-widest">Expert en charge : {agentName}</p>
+            </div>
+          </div>
+          <button onClick={() => { localStorage.removeItem("client_access_pin"); window.location.href = "/"; }} className="p-2 text-slate-500 hover:text-white"><LogOut /></button>
         </div>
 
-        {/* JOURNAL DES RAPPORTS */}
-        <div className="space-y-8 pt-10 text-left">
-           <div className="flex items-center gap-4">
-              <div className="h-[1px] flex-1 bg-white/5"></div>
-              <h2 className="text-2xl font-black uppercase tracking-tighter text-white">Journal Expert</h2>
-              <div className="h-[1px] flex-1 bg-white/5"></div>
-           </div>
-
-           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {photos.map((p) => (
-                 <div key={p.id} className="group bg-[#0F172A] rounded-[2rem] overflow-hidden border border-white/5 hover:border-emerald-500/50 transition-all">
-                    <div className="h-64 relative overflow-hidden">
-                       <img src={p.url_image} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="Constat" />
-                       <div className="absolute top-4 left-4 bg-emerald-500 text-black px-3 py-1 rounded-full text-[9px] font-black uppercase">Rapport #{p.id.toString().slice(-4)}</div>
-                    </div>
-                    <div className="p-6 space-y-4">
-                       <div className="flex justify-between items-center text-[9px] font-bold text-slate-500 uppercase tracking-widest">
-                          <span className="flex items-center gap-1"><Calendar size={12}/> {new Date(p.created_at).toLocaleDateString('fr-FR')}</span>
-                          <span className="flex items-center gap-1"><Clock size={12}/> {new Date(p.created_at).toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'})}</span>
-                       </div>
-                       <p className="text-slate-300 text-sm italic leading-relaxed">"{p.note_expert || "Analyse technique en cours..."}"</p>
-                       <div className="pt-4 border-t border-white/5 flex items-center justify-between">
-                          <span className="text-[9px] font-black uppercase text-emerald-500">Expert: {p.nom_expert || "Bureau Technique"}</span>
-                          <CheckCircle2 size={16} className="text-emerald-500" />
-                       </div>
-                    </div>
-                 </div>
-              ))}
-           </div>
+        {/* GRILLE DES VIGNETTES PAR DATE */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {Object.keys(groupedPhotos).map((date) => (
+            <div key={date} onClick={() => setSelectedDay(date)} className="group bg-[#0F172A] rounded-[2.5rem] overflow-hidden border border-white/5 hover:border-emerald-500/50 transition-all cursor-pointer">
+              <div className="h-48 relative">
+                <img src={groupedPhotos[date][0].url_image} className="w-full h-full object-cover group-hover:scale-105 transition-all" alt="Day Cover" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A] to-transparent" />
+                <div className="absolute bottom-6 left-8">
+                  <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-1">Rapports du jour</p>
+                  <h3 className="text-2xl font-bold text-white tracking-tighter">{date}</h3>
+                </div>
+                <div className="absolute top-4 right-4 bg-white/10 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold">
+                  {groupedPhotos[date].length} Photos
+                </div>
+              </div>
+              <div className="p-6 flex justify-between items-center text-slate-400 group-hover:text-emerald-400 transition-colors">
+                <span className="text-[10px] font-bold uppercase tracking-widest">Voir le détail technique</span>
+                <ChevronRight size={18} />
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
-      <style jsx global>{`
-        .custom-scrollbar::-webkit-scrollbar { width: 3px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #10b981; }
-      `}</style>
+      {/* MODAL : DÉTAIL D'UNE JOURNÉE */}
+      {selectedDay && (
+        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex items-center justify-center p-4">
+          <div className="bg-[#0F172A] w-full max-w-5xl rounded-[3rem] border border-white/10 overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="p-8 border-b border-white/5 flex justify-between items-center">
+              <div>
+                <h2 className="text-3xl font-black text-white tracking-tighter">{selectedDay}</h2>
+                <p className="text-xs text-slate-500 uppercase tracking-widest font-bold">Analyse technique complète</p>
+              </div>
+              <div className="flex gap-4">
+                <button 
+                  onClick={() => generateDailyPDF(selectedDay, groupedPhotos[selectedDay])}
+                  className="bg-emerald-500 text-black px-6 py-2 rounded-xl text-[10px] font-black uppercase flex items-center gap-2"
+                >
+                  <FileText size={14} /> PDF du Jour
+                </button>
+                <button onClick={() => setSelectedDay(null)} className="p-2 text-slate-400 hover:text-white"><X /></button>
+              </div>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+              {groupedPhotos[selectedDay].map((p: any) => (
+                <div key={p.id} className="bg-black/40 rounded-2xl overflow-hidden border border-white/5">
+                  <div className="h-64"><img src={p.url_image} className="w-full h-full object-cover" /></div>
+                  <div className="p-6 space-y-3">
+                    <div className="flex justify-between items-center text-[10px] text-slate-500 font-bold uppercase">
+                      <span className="flex items-center gap-1"><Clock size={12}/> {new Date(p.created_at).toLocaleTimeString()}</span>
+                      <span className="text-emerald-500">Expert : {agentName}</span>
+                    </div>
+                    <p className="text-sm italic text-slate-300 leading-relaxed">"{p.note_expert || "Aucun commentaire pour ce constat."}"</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
