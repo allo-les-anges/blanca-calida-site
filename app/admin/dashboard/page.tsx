@@ -63,25 +63,36 @@ export default function AdminDashboard() {
   useEffect(() => { if (selectedProjet?.id) loadDocuments(selectedProjet.id); }, [selectedProjet]);
 
   // --- ACTIONS LOGIQUE ---
+
+  // FONCTION UPLOAD CORRIGÉE AVEC DEBUG
   const handleUploadDocument = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !selectedProjet) return;
+
+    console.log("🚀 Tentative d'upload pour:", file.name);
     setUpdating(true);
+
     try {
       const fileExt = file.name.split('.').pop();
       const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
       const filePath = `${selectedProjet.id}/${fileName}`;
 
-      const { error: uploadError } = await supabase.storage
+      // 1. Envoi au Storage (Bucket: documents-clients)
+      console.log("📡 Envoi vers Supabase Storage...");
+      const { data: uploadData, error: uploadError } = await supabase.storage
         .from('documents-clients')
         .upload(filePath, file);
 
       if (uploadError) throw uploadError;
 
+      // 2. Récupération URL
+      console.log("🔗 Génération de l'URL publique...");
       const { data: { publicUrl } } = supabase.storage
         .from('documents-clients')
         .getPublicUrl(filePath);
 
+      // 3. Liaison SQL
+      console.log("💾 Liaison base de données...");
       const { error: dbError } = await supabase.from('documents_projets').insert([{
           projet_id: selectedProjet.id,
           nom_fichier: file.name,
@@ -89,11 +100,16 @@ export default function AdminDashboard() {
         }]);
 
       if (dbError) throw dbError;
-      loadDocuments(selectedProjet.id);
+
+      console.log("✅ Succès total !");
+      await loadDocuments(selectedProjet.id);
+      
     } catch (err: any) {
-      alert("Erreur upload : " + err.message);
+      console.error("❌ ERREUR UPLOAD:", err);
+      alert("Erreur: " + (err.message || "Problème de connexion au bucket Supabase"));
     } finally {
       setUpdating(false);
+      e.target.value = ""; // Reset de l'input
     }
   };
 
