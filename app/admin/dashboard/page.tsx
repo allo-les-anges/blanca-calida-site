@@ -43,6 +43,7 @@ export default function AdminDashboard() {
 
   const [newStaff, setNewStaff] = useState({ nom: "", prenom: "" });
 
+  // --- CHARGEMENT DES DONNÉES ---
   const loadData = async () => {
     setLoading(true);
     const { data: projData } = await supabase.from('suivi_chantier').select('*').order('created_at', { ascending: false });
@@ -70,6 +71,7 @@ export default function AdminDashboard() {
   useEffect(() => { loadData(); }, []);
   useEffect(() => { if (selectedProjet?.id) loadDocuments(selectedProjet.id); }, [selectedProjet]);
 
+  // --- GESTION DES FICHIERS (UPLOAD & DELETE) ---
   const handleUploadDocument = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !selectedProjet) return;
@@ -77,10 +79,10 @@ export default function AdminDashboard() {
     setUpdating(true);
     try {
       const fileExt = file.name.split('.').pop();
-      const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const fileName = `${Math.random().toString(36).substring(2)}_${file.name}`;
       const filePath = `${selectedProjet.id}/${fileName}`;
 
-      // Envoi au Storage (Bucket exact: documents-clients)
+      // 1. Upload vers le Storage
       const { error: uploadError } = await supabase.storage
         .from('documents-clients')
         .upload(filePath, file);
@@ -91,11 +93,12 @@ export default function AdminDashboard() {
         .from('documents-clients')
         .getPublicUrl(filePath);
 
-      // Insertion SQL
+      // 2. Enregistrement en Base de données
       const { error: dbError } = await supabase.from('documents_projets').insert([{
           projet_id: selectedProjet.id,
           nom_fichier: file.name,
-          url_fichier: publicUrl
+          url_fichier: publicUrl,
+          storage_path: filePath // On stocke le chemin pour faciliter la suppression plus tard
         }]);
 
       if (dbError) throw dbError;
@@ -106,19 +109,47 @@ export default function AdminDashboard() {
       }, 1000);
 
     } catch (err: any) {
-      alert("Erreur upload : " + (err.message || "Vérifiez le nom du bucket dans Supabase"));
+      alert("Erreur upload : " + (err.message || "Erreur inconnue"));
       setUpdating(false);
     } finally {
       e.target.value = ""; 
     }
   };
 
-  const handleDeleteDocument = async (docId: string) => {
-    if (!confirm("Supprimer ce document ?")) return;
-    await supabase.from('documents_projets').delete().eq('id', docId);
-    if (selectedProjet) loadDocuments(selectedProjet.id);
+  const handleDeleteDocument = async (doc: any) => {
+    if (!confirm(`Supprimer définitivement le fichier "${doc.nom_fichier}" ?`)) return;
+
+    try {
+      setUpdating(true);
+
+      // 1. Supprimer du Storage Supabase si le chemin est connu
+      if (doc.storage_path) {
+        const { error: storageError } = await supabase.storage
+          .from('documents-clients')
+          .remove([doc.storage_path]);
+        
+        if (storageError) console.warn("Note: Fichier non trouvé dans le storage, suppression SQL uniquement.");
+      }
+
+      // 2. Supprimer de la table SQL
+      const { error: dbError } = await supabase
+        .from('documents_projets')
+        .delete()
+        .eq('id', doc.id);
+
+      if (dbError) throw dbError;
+
+      // 3. Rafraîchir la liste
+      await loadDocuments(selectedProjet.id);
+      
+    } catch (err: any) {
+      alert("Erreur lors de la suppression : " + err.message);
+    } finally {
+      setUpdating(false);
+    }
   };
 
+  // --- AUTRES ACTIONS ---
   const handleDeleteClient = async (id: string) => {
     if (!confirm("⚠️ Supprimer ce dossier client ?")) return;
     await supabase.from('suivi_chantier').delete().eq('id', id);
@@ -250,8 +281,16 @@ export default function AdminDashboard() {
                       <div key={doc.id} className="flex items-center justify-between p-4 bg-white/[0.03] rounded-2xl border border-white/5 hover:border-emerald-500/50 transition-all">
                         <p className="text-[11px] font-medium truncate text-slate-300 flex-1 mr-4">{doc.nom_fichier}</p>
                         <div className="flex gap-2">
-                          <a href={doc.url_fichier} target="_blank" rel="noreferrer" className="p-2 text-slate-500 hover:text-white"><Download size={14} /></a>
-                          <button onClick={() => handleDeleteDocument(doc.id)} className="p-2 text-slate-500 hover:text-red-400"><Trash2 size={14} /></button>
+                          <a href={doc.url_fichier} target="_blank" rel="noreferrer" className="p-2 text-slate-500 hover:text-white transition-colors">
+                            <Download size={14} />
+                          </a>
+                          <button 
+                            onClick={() => handleDeleteDocument(doc)} 
+                            disabled={updating}
+                            className="p-2 text-slate-500 hover:text-red-400 transition-colors disabled:opacity-30"
+                          >
+                            <Trash2 size={14} />
+                          </button>
                         </div>
                       </div>
                     ))
