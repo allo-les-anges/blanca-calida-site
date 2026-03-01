@@ -44,7 +44,7 @@ export default function AdminDashboard() {
 
   const [newStaff, setNewStaff] = useState({ nom: "", prenom: "" });
 
-  // --- CHARGEMENT ---
+  // --- CHARGEMENT DES DONNÉES ---
   const loadData = async () => {
     setLoading(true);
     const { data: projData } = await supabase.from('suivi_chantier').select('*').order('created_at', { ascending: false });
@@ -55,16 +55,30 @@ export default function AdminDashboard() {
   };
 
   const loadDocuments = async (projetId: string) => {
-    const { data } = await supabase.from('documents_projets').select('*').eq('projet_id', projetId).order('created_at', { ascending: false });
+    if (!projetId) return;
+    console.log("📂 Chargement des documents pour ID:", projetId);
+    const { data, error } = await supabase
+      .from('documents_projets')
+      .select('*')
+      .eq('projet_id', projetId)
+      .order('created_at', { ascending: false });
+    
+    if (error) console.error("Erreur de lecture documents:", error);
     setDocuments(data || []);
   };
 
   useEffect(() => { loadData(); }, []);
-  useEffect(() => { if (selectedProjet?.id) loadDocuments(selectedProjet.id); }, [selectedProjet]);
+  
+  useEffect(() => { 
+    if (selectedProjet?.id) {
+      loadDocuments(selectedProjet.id);
+    } else {
+      setDocuments([]);
+    }
+  }, [selectedProjet]);
 
   // --- ACTIONS LOGIQUE ---
 
-  // FONCTION UPLOAD CORRIGÉE AVEC DEBUG
   const handleUploadDocument = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !selectedProjet) return;
@@ -77,22 +91,22 @@ export default function AdminDashboard() {
       const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
       const filePath = `${selectedProjet.id}/${fileName}`;
 
-      // 1. Envoi au Storage (Bucket: documents-clients)
+      // 1. Envoi au Storage
       console.log("📡 Envoi vers Supabase Storage...");
-      const { data: uploadData, error: uploadError } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from('documents-clients')
         .upload(filePath, file);
 
       if (uploadError) throw uploadError;
 
-      // 2. Récupération URL
-      console.log("🔗 Génération de l'URL publique...");
+      // 2. URL Publique
+      console.log("🔗 Récupération de l'URL...");
       const { data: { publicUrl } } = supabase.storage
         .from('documents-clients')
         .getPublicUrl(filePath);
 
       // 3. Liaison SQL
-      console.log("💾 Liaison base de données...");
+      console.log("💾 Mise à jour de la base de données...");
       const { error: dbError } = await supabase.from('documents_projets').insert([{
           projet_id: selectedProjet.id,
           nom_fichier: file.name,
@@ -101,15 +115,20 @@ export default function AdminDashboard() {
 
       if (dbError) throw dbError;
 
-      console.log("✅ Succès total !");
-      await loadDocuments(selectedProjet.id);
+      console.log("✅ Succès ! Rafraîchissement de la liste...");
       
+      // Petit délai pour laisser la DB respirer
+      setTimeout(async () => {
+        await loadDocuments(selectedProjet.id);
+        setUpdating(false);
+      }, 800);
+
     } catch (err: any) {
       console.error("❌ ERREUR UPLOAD:", err);
-      alert("Erreur: " + (err.message || "Problème de connexion au bucket Supabase"));
-    } finally {
+      alert("Erreur: " + (err.message || "Problème de connexion"));
       setUpdating(false);
-      e.target.value = ""; // Reset de l'input
+    } finally {
+      e.target.value = ""; 
     }
   };
 
@@ -336,8 +355,8 @@ export default function AdminDashboard() {
 
       {/* MODALE CRÉATION */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-xl z-50 flex items-center justify-center p-4">
-          <form onSubmit={handleCreateDossier} className="bg-[#0F172A] w-full max-w-4xl rounded-[3rem] p-10 border border-white/10 shadow-2xl space-y-8 animate-in zoom-in-95 duration-300 text-left">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-xl z-50 flex items-center justify-center p-4 text-left">
+          <form onSubmit={handleCreateDossier} className="bg-[#0F172A] w-full max-w-4xl rounded-[3rem] p-10 border border-white/10 shadow-2xl space-y-8 animate-in zoom-in-95 duration-300">
             <div className="flex justify-between items-center border-b border-white/5 pb-6">
               <h2 className="text-2xl font-bold tracking-tighter text-white uppercase italic">Initialiser <span className="text-emerald-400 font-black">Nouveau Dossier</span></h2>
               <button type="button" onClick={() => setShowModal(false)} className="p-2 hover:bg-white/5 rounded-full transition-all text-slate-400"><X /></button>
