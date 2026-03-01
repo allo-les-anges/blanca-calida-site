@@ -36,7 +36,7 @@ export default function AdminDashboard() {
   const [showModal, setShowModal] = useState(false);
   const [newDossier, setNewDossier] = useState({
     client_prenom: "", client_nom: "", email_client: "",
-    rue: "", ville: "", pays: "Belgique",
+    rue: "", ville: "", pays: "Espagne",
     nom_villa: "", date_livraison_prevue: "",
     montant_cashback: 0, commentaires_etape: "",
     etape_actuelle: PHASES_CHANTIER[0]
@@ -58,12 +58,60 @@ export default function AdminDashboard() {
   };
 
   const loadDocuments = async (projetId: string) => {
-    const { data } = await supabase.from('documents_projets').select('*').eq('projet_id', projetId);
+    const { data } = await supabase.from('documents_projets').select('*').eq('projet_id', projetId).order('created_at', { ascending: false });
     setDocuments(data || []);
   };
 
   useEffect(() => { loadData(); }, []);
   useEffect(() => { if (selectedProjet?.id) loadDocuments(selectedProjet.id); }, [selectedProjet]);
+
+  // --- ACTIONS DOCUMENTS (AJOUTÉ) ---
+  const handleUploadDocument = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !selectedProjet) return;
+
+    setUpdating(true);
+    try {
+      // 1. Upload vers Supabase Storage (Bucket: 'projet-documents')
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const filePath = `${selectedProjet.id}/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('projet-documents')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      // 2. Récupérer l'URL publique
+      const { data: { publicUrl } } = supabase.storage
+        .from('projet-documents')
+        .getPublicUrl(filePath);
+
+      // 3. Insérer la référence dans la table SQL
+      const { error: dbError } = await supabase
+        .from('documents_projets')
+        .insert([{
+          projet_id: selectedProjet.id,
+          nom_fichier: file.name,
+          url_fichier: publicUrl
+        }]);
+
+      if (dbError) throw dbError;
+
+      loadDocuments(selectedProjet.id);
+    } catch (err: any) {
+      alert("Erreur upload : " + err.message);
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const handleDeleteDocument = async (docId: string) => {
+    if (!confirm("Supprimer ce document ?")) return;
+    const { error } = await supabase.from('documents_projets').delete().eq('id', docId);
+    if (!error && selectedProjet) loadDocuments(selectedProjet.id);
+  };
 
   // --- ACTIONS CLIENTS ---
   const handleCreateDossier = async (e: React.FormEvent) => {
@@ -121,7 +169,6 @@ export default function AdminDashboard() {
             <h1 className="text-xl font-serif italic text-slate-900">Partner Portal</h1>
           </div>
 
-          {/* ONGLETS NAVIGATION */}
           <div className="flex bg-slate-100 p-1 rounded-2xl">
             <button onClick={() => setActiveTab('clients')} className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'clients' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-400'}`}>Clients</button>
             <button onClick={() => setActiveTab('staff')} className={`flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'staff' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-400'}`}>Staff PIN</button>
@@ -149,7 +196,6 @@ export default function AdminDashboard() {
           )}
         </div>
         
-        {/* LISTE DYNAMIQUE */}
         <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-2">
           {loading ? <div className="flex justify-center p-8"><Loader2 className="animate-spin text-indigo-200" /></div> : 
             activeTab === 'clients' ? (
@@ -180,19 +226,12 @@ export default function AdminDashboard() {
           }
         </div>
 
-        {/* PIED DE LA SIDEBAR (Navigation de retour) */}
         <div className="p-4 border-t border-slate-50 bg-slate-50/50 space-y-2">
-          <button 
-            onClick={() => window.location.href = '/'} 
-            className="w-full flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-indigo-600 hover:bg-white rounded-xl transition-all group"
-          >
+          <button onClick={() => window.location.href = '/'} className="w-full flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-indigo-600 hover:bg-white rounded-xl transition-all group">
             <Home size={18} className="group-hover:scale-110 transition-transform text-slate-400 group-hover:text-indigo-600" />
             <span className="text-[10px] font-black uppercase tracking-widest">Retour Accueil</span>
           </button>
-          <button 
-            onClick={() => window.location.href = '/'} 
-            className="w-full flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all group"
-          >
+          <button onClick={() => window.location.href = '/'} className="w-full flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all group">
             <LogOut size={18} />
             <span className="text-[10px] font-black uppercase tracking-widest">Quitter</span>
           </button>
@@ -203,7 +242,6 @@ export default function AdminDashboard() {
       <div className="flex-1 p-8 md:p-12 overflow-y-auto bg-[#FBFDFF]">
         {selectedProjet && activeTab === 'clients' ? (
           <div className="max-w-5xl mx-auto space-y-8 text-left animate-in fade-in slide-in-from-right-4">
-            {/* Header Projet */}
             <div className="bg-white p-8 rounded-[3rem] shadow-sm border border-slate-200/50 flex justify-between items-center">
               <div>
                 <span className="text-[10px] font-black uppercase text-indigo-500 tracking-[0.3em]">Fiche Chantier</span>
@@ -240,21 +278,48 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
+              {/* SECTION DOCUMENTS CORRIGÉE */}
               <div className="bg-white p-8 rounded-[3rem] border border-slate-200/50 shadow-sm">
-                <h3 className="text-[10px] font-black uppercase text-slate-400 mb-6 flex items-center gap-2 tracking-widest">
-                  <Camera size={14} className="text-indigo-500"/> Documents & Médias
-                </h3>
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="text-[10px] font-black uppercase text-slate-400 mb-0 flex items-center gap-2 tracking-widest">
+                    <Camera size={14} className="text-indigo-500"/> Documents & Médias
+                  </h3>
+                  
+                  {/* INPUT UPLOAD */}
+                  <label className="cursor-pointer p-2 bg-indigo-50 text-indigo-600 rounded-xl hover:bg-indigo-600 hover:text-white transition-all">
+                    {updating ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
+                    <input 
+                      type="file" 
+                      className="hidden" 
+                      onChange={handleUploadDocument} 
+                      disabled={updating}
+                    />
+                  </label>
+                </div>
+
                 <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
-                  {documents.map((doc) => (
-                    <div key={doc.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl group border border-transparent hover:border-indigo-100 transition-all">
-                      <div className="truncate flex-1">
-                        <p className="text-[10px] font-bold truncate text-slate-700">{doc.nom_fichier}</p>
-                      </div>
-                      <div className="flex gap-1 ml-2">
-                        <a href={doc.url_fichier} target="_blank" className="p-2 text-slate-400 hover:text-indigo-600 transition-colors"><Download size={14} /></a>
-                      </div>
+                  {documents.length === 0 ? (
+                    <div className="text-center py-10">
+                      <FileText size={32} className="mx-auto text-slate-100 mb-2" />
+                      <p className="text-[10px] text-slate-400 italic">Aucun document</p>
                     </div>
-                  ))}
+                  ) : (
+                    documents.map((doc) => (
+                      <div key={doc.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl group border border-transparent hover:border-indigo-100 transition-all">
+                        <div className="truncate flex-1">
+                          <p className="text-[10px] font-bold truncate text-slate-700">{doc.nom_fichier}</p>
+                        </div>
+                        <div className="flex gap-1 ml-2">
+                          <a href={doc.url_fichier} target="_blank" rel="noreferrer" className="p-2 text-slate-400 hover:text-indigo-600 transition-colors">
+                            <Download size={14} />
+                          </a>
+                          <button onClick={() => handleDeleteDocument(doc.id)} className="p-2 text-slate-200 hover:text-red-500 transition-colors">
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
             </div>
@@ -287,22 +352,17 @@ export default function AdminDashboard() {
                   <input required placeholder="Nom" className="w-full p-4 bg-slate-50 rounded-2xl outline-none text-sm border border-slate-100 focus:border-indigo-300 transition-all" onChange={e => setNewDossier({...newDossier, client_nom: e.target.value})} />
                 </div>
                 <input type="email" required placeholder="Email personnel" className="w-full p-4 bg-slate-50 rounded-2xl outline-none text-sm border border-slate-100 focus:border-indigo-300 transition-all" onChange={e => setNewDossier({...newDossier, email_client: e.target.value})} />
-                <div className="grid grid-cols-2 gap-4">
-                  <input placeholder="Ville" className="w-full p-4 bg-slate-50 rounded-2xl outline-none text-sm border border-slate-100 focus:border-indigo-300 transition-all" onChange={e => setNewDossier({...newDossier, ville: e.target.value})} />
-                  <input placeholder="Pays" className="w-full p-4 bg-slate-50 rounded-2xl outline-none text-sm border border-slate-100 focus:border-indigo-300 transition-all" value={newDossier.pays} onChange={e => setNewDossier({...newDossier, pays: e.target.value})} />
-                </div>
               </div>
 
               <div className="space-y-6">
                 <h3 className="text-[10px] font-black uppercase text-amber-600 bg-amber-50 px-4 py-2 rounded-xl w-fit">Détails de Construction</h3>
-                <input required placeholder="Nom de la Villa (ex: Villa Albatros)" className="w-full p-4 bg-slate-900 text-white rounded-2xl outline-none text-sm shadow-xl focus:ring-2 ring-indigo-500 transition-all" onChange={e => setNewDossier({...newDossier, nom_villa: e.target.value})} />
+                <input required placeholder="Nom de la Villa" className="w-full p-4 bg-slate-900 text-white rounded-2xl outline-none text-sm shadow-xl focus:ring-2 ring-indigo-500 transition-all" onChange={e => setNewDossier({...newDossier, nom_villa: e.target.value})} />
                 <div className="grid grid-cols-2 gap-4">
                   <select className="w-full p-4 bg-slate-100 rounded-2xl outline-none font-bold text-[10px] uppercase tracking-tighter" onChange={e => setNewDossier({...newDossier, etape_actuelle: e.target.value})}>
                     {PHASES_CHANTIER.map(p => <option key={p} value={p}>{p}</option>)}
                   </select>
                   <input type="date" className="w-full p-4 bg-slate-100 rounded-2xl outline-none text-[10px] font-bold" onChange={e => setNewDossier({...newDossier, date_livraison_prevue: e.target.value})} />
                 </div>
-                <input type="number" placeholder="Montant Cashback (€)" className="w-full p-4 bg-emerald-50 text-emerald-700 font-black rounded-2xl outline-none text-sm border border-emerald-100 focus:border-emerald-300 transition-all" onChange={e => setNewDossier({...newDossier, montant_cashback: parseInt(e.target.value) || 0})} />
               </div>
             </div>
 
