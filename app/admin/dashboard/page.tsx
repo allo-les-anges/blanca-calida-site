@@ -65,21 +65,21 @@ export default function AdminDashboard() {
 
   const loadDocuments = async (projetId: string) => {
     if (!projetId) return;
-    console.log(`📂 Chargement des documents pour le projet: ${projetId}`);
+    console.log(`📂 Tentative de lecture des documents pour: ${projetId}`);
     
+    // Correction : On retire le .order('created_at') car la colonne n'existe pas encore en BDD
     const { data, error } = await supabase
       .from('documents_projets')
       .select('*')
-      .eq('projet_id', projetId)
-      .order('created_at', { ascending: false });
+      .eq('projet_id', projetId);
     
     if (error) {
-       // On logge l'erreur complète en string pour éviter le [object Object]
-       console.error("❌ Erreur de lecture SQL (Documents):", JSON.stringify(error, null, 2));
-       console.error("Message d'erreur direct:", error.message);
+       console.error("❌ Erreur de lecture SQL détaillée:", JSON.stringify(error, null, 2));
     } else {
-       console.log("✅ Documents récupérés:", data?.length || 0);
-       setDocuments(data || []);
+       console.log("✅ Documents récupérés avec succès:", data?.length || 0);
+       // Tri manuel par ID décroissant (le plus récent en haut) en attendant la colonne created_at
+       const sorted = data ? [...data].sort((a, b) => b.id - a.id) : [];
+       setDocuments(sorted);
     }
   };
 
@@ -97,7 +97,6 @@ export default function AdminDashboard() {
       const fileName = `${Math.random().toString(36).substring(2)}_${file.name.replace(/\s/g, '_')}`;
       const filePath = `${selectedProjet.id}/${fileName}`;
 
-      // 1. Storage
       const { error: uploadError } = await supabase.storage
         .from('documents-clients')
         .upload(filePath, file);
@@ -111,7 +110,6 @@ export default function AdminDashboard() {
         .from('documents-clients')
         .getPublicUrl(filePath);
 
-      // 2. Base de données
       console.log("📝 Enregistrement du lien en BDD...");
       const { error: dbError } = await supabase.from('documents_projets').insert([{
           projet_id: selectedProjet.id,
@@ -125,7 +123,7 @@ export default function AdminDashboard() {
           throw dbError;
       }
 
-      console.log("✨ Upload et enregistrement réussis !");
+      console.log("✨ Succès ! Rechargement de la liste...");
       await loadDocuments(selectedProjet.id);
 
     } catch (err: any) {
@@ -147,7 +145,7 @@ export default function AdminDashboard() {
           .from('documents-clients')
           .remove([doc.storage_path]);
         
-        if (storageError) console.warn("⚠️ Storage warning (fichier non trouvé):", storageError.message);
+        if (storageError) console.warn("⚠️ Storage warning:", storageError.message);
       }
 
       const { error: dbError } = await supabase
@@ -155,13 +153,10 @@ export default function AdminDashboard() {
         .delete()
         .eq('id', doc.id);
 
-      if (dbError) {
-          console.error("❌ Erreur Suppression SQL:", JSON.stringify(dbError, null, 2));
-          throw dbError;
-      }
+      if (dbError) throw dbError;
 
       setDocuments(prev => prev.filter(d => d.id !== doc.id));
-      console.log("✅ Document supprimé avec succès.");
+      console.log("✅ Suppression terminée.");
       
     } catch (err: any) {
       alert("Erreur lors de la suppression : " + err.message);
@@ -170,6 +165,7 @@ export default function AdminDashboard() {
     }
   };
 
+  // --- ACTIONS CLIENTS ---
   const handleDeleteClient = async (id: string) => {
     if (!confirm("⚠️ Supprimer définitivement ce dossier client ?")) return;
     const { error } = await supabase.from('suivi_chantier').delete().eq('id', id);
