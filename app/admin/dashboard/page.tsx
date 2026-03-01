@@ -23,6 +23,7 @@ const PHASES_CHANTIER = [
 ];
 
 export default function AdminDashboard() {
+  // --- ÉTATS ---
   const [activeTab, setActiveTab] = useState<'clients' | 'staff'>('clients');
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
@@ -31,6 +32,8 @@ export default function AdminDashboard() {
   const [selectedProjet, setSelectedProjet] = useState<any>(null);
   const [documents, setDocuments] = useState<any[]>([]);
   const [showModal, setShowModal] = useState(false);
+  const [staffList, setStaffList] = useState<any[]>([]);
+  
   const [newDossier, setNewDossier] = useState({
     client_prenom: "", client_nom: "", email_client: "",
     rue: "", ville: "", pays: "Espagne",
@@ -38,9 +41,10 @@ export default function AdminDashboard() {
     montant_cashback: 0, commentaires_etape: "",
     etape_actuelle: PHASES_CHANTIER[0]
   });
-  const [staffList, setStaffList] = useState<any[]>([]);
+
   const [newStaff, setNewStaff] = useState({ nom: "", prenom: "" });
 
+  // --- CHARGEMENT ---
   const loadData = async () => {
     setLoading(true);
     const { data: projData } = await supabase.from('suivi_chantier').select('*').order('created_at', { ascending: false });
@@ -58,6 +62,7 @@ export default function AdminDashboard() {
   useEffect(() => { loadData(); }, []);
   useEffect(() => { if (selectedProjet?.id) loadDocuments(selectedProjet.id); }, [selectedProjet]);
 
+  // --- ACTIONS LOGIQUE ---
   const handleUploadDocument = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !selectedProjet) return;
@@ -68,7 +73,7 @@ export default function AdminDashboard() {
       const filePath = `${selectedProjet.id}/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
-        .from('documents-clients') // Corrigé ici
+        .from('documents-clients')
         .upload(filePath, file);
 
       if (uploadError) throw uploadError;
@@ -98,6 +103,16 @@ export default function AdminDashboard() {
     if (selectedProjet) loadDocuments(selectedProjet.id);
   };
 
+  const handleDeleteClient = async (id: string) => {
+    if (!confirm("⚠️ Supprimer ce dossier client définitivement ?")) return;
+    const { error } = await supabase.from('suivi_chantier').delete().eq('id', id);
+    if (error) alert(error.message);
+    else {
+      setSelectedProjet(null);
+      loadData();
+    }
+  };
+
   const handleCreateDossier = async (e: React.FormEvent) => {
     e.preventDefault();
     setUpdating(true);
@@ -110,6 +125,23 @@ export default function AdminDashboard() {
     } catch (err: any) { alert(err.message); } finally { setUpdating(false); }
   };
 
+  const handleCreateStaff = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setUpdating(true);
+    const generatedPin = Math.floor(100000 + Math.random() * 900000).toString();
+    try {
+      await supabase.from('staff_prestataires').insert([{ ...newStaff, pin_code: generatedPin }]);
+      setNewStaff({ nom: "", prenom: "" });
+      loadData();
+    } catch (err: any) { alert(err.message); } finally { setUpdating(false); }
+  };
+
+  const handleDeleteStaff = async (id: string) => {
+    if (!confirm("Supprimer cet accès agent ?")) return;
+    await supabase.from('staff_prestataires').delete().eq('id', id);
+    loadData();
+  };
+
   const filteredProjets = useMemo(() => {
     return projets.filter(p => `${p.client_prenom} ${p.client_nom} ${p.nom_villa}`.toLowerCase().includes(searchTerm.toLowerCase()));
   }, [projets, searchTerm]);
@@ -117,7 +149,7 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-[#020617] flex flex-col md:flex-row text-slate-200 font-sans selection:bg-emerald-500/30">
       
-      {/* SIDEBAR - DESIGN HIGH-TECH */}
+      {/* SIDEBAR */}
       <div className="w-full md:w-80 bg-[#0F172A]/50 backdrop-blur-xl border-r border-white/5 h-screen sticky top-0 flex flex-col z-20">
         <div className="p-8 space-y-8">
           <div className="flex items-center gap-3">
@@ -132,49 +164,66 @@ export default function AdminDashboard() {
             <button onClick={() => setActiveTab('staff')} className={`flex-1 py-2.5 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all ${activeTab === 'staff' ? 'bg-emerald-500 text-black' : 'text-slate-500 hover:text-white'}`}>Agents</button>
           </div>
 
-          <div className="space-y-4">
-            <button onClick={() => setShowModal(true)} className="group w-full bg-white text-black p-4 rounded-xl flex items-center justify-center gap-2 font-black text-[10px] uppercase tracking-[0.2em] hover:bg-emerald-400 transition-all">
-              <Plus size={16} className="group-hover:rotate-90 transition-transform" /> Nouveau Dossier
-            </button>
-            <div className="relative group">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-emerald-400 transition-colors" size={14} />
-              <input type="text" placeholder="Recherche villa..." className="w-full pl-10 pr-4 py-3 bg-white/5 rounded-xl text-xs outline-none border border-white/5 focus:border-emerald-500/50 transition-all" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+          {activeTab === 'clients' ? (
+            <div className="space-y-4 text-left">
+              <button onClick={() => setShowModal(true)} className="group w-full bg-white text-black p-4 rounded-xl flex items-center justify-center gap-2 font-black text-[10px] uppercase tracking-[0.2em] hover:bg-emerald-400 transition-all">
+                <Plus size={16} className="group-hover:rotate-90 transition-transform" /> Nouveau Dossier
+              </button>
+              <div className="relative group">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-emerald-400 transition-colors" size={14} />
+                <input type="text" placeholder="Recherche villa..." className="w-full pl-10 pr-4 py-3 bg-white/5 rounded-xl text-xs outline-none border border-white/5 focus:border-emerald-500/50 transition-all" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+              </div>
             </div>
-          </div>
+          ) : (
+            <form onSubmit={handleCreateStaff} className="space-y-3 text-left">
+               <input required placeholder="Prénom" className="w-full p-3 bg-white/5 rounded-xl border border-white/5 text-xs outline-none focus:border-emerald-500/50" value={newStaff.prenom} onChange={e => setNewStaff({...newStaff, prenom: e.target.value})} />
+               <input required placeholder="Nom" className="w-full p-3 bg-white/5 rounded-xl border border-white/5 text-xs outline-none focus:border-emerald-500/50" value={newStaff.nom} onChange={e => setNewStaff({...newStaff, nom: e.target.value})} />
+               <button type="submit" className="w-full bg-emerald-500 text-black py-3 rounded-xl text-[9px] font-bold uppercase tracking-widest">Créer Accès Agent</button>
+            </form>
+          )}
         </div>
         
         <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-2 custom-scrollbar">
           {loading ? <div className="flex justify-center p-8"><Loader2 className="animate-spin text-emerald-500/30" /></div> : 
-            filteredProjets.map((p) => (
-              <button key={p.id} onClick={() => setSelectedProjet(p)} className={`w-full text-left p-4 rounded-xl border transition-all duration-300 ${selectedProjet?.id === p.id ? 'bg-emerald-500/10 border-emerald-500/50 ring-1 ring-emerald-500/20' : 'bg-transparent border-white/5 hover:bg-white/5'}`}>
-                <p className={`font-bold text-sm ${selectedProjet?.id === p.id ? 'text-emerald-400' : 'text-slate-200'}`}>{p.client_prenom} {p.client_nom}</p>
-                <div className="flex justify-between items-center mt-1 opacity-50">
-                  <p className="text-[9px] uppercase font-bold tracking-widest">{p.nom_villa}</p>
-                  <p className="text-[9px] font-mono">PIN: {p.pin_code}</p>
+            activeTab === 'clients' ? (
+              filteredProjets.map((p) => (
+                <button key={p.id} onClick={() => setSelectedProjet(p)} className={`w-full text-left p-4 rounded-xl border transition-all duration-300 ${selectedProjet?.id === p.id ? 'bg-emerald-500/10 border-emerald-500/50 ring-1 ring-emerald-500/20' : 'bg-transparent border-white/5 hover:bg-white/5'}`}>
+                  <p className={`font-bold text-sm ${selectedProjet?.id === p.id ? 'text-emerald-400' : 'text-slate-200'}`}>{p.client_prenom} {p.client_nom}</p>
+                  <div className="flex justify-between items-center mt-1 opacity-50">
+                    <p className="text-[9px] uppercase font-bold tracking-widest">{p.nom_villa}</p>
+                    <p className="text-[9px] font-mono">PIN: {p.pin_code}</p>
+                  </div>
+                </button>
+              ))
+            ) : (
+              staffList.map((s) => (
+                <div key={s.id} className="w-full bg-white/5 border border-white/5 p-4 rounded-xl flex justify-between items-center">
+                  <div>
+                    <p className="font-bold text-sm text-white">{s.prenom} {s.nom}</p>
+                    <span className="text-[10px] font-mono text-emerald-400">PIN: {s.pin_code}</span>
+                  </div>
+                  <button onClick={() => handleDeleteStaff(s.id)} className="p-2 text-slate-500 hover:text-red-500 transition-colors"><Trash2 size={14} /></button>
                 </div>
-              </button>
-            ))
+              ))
+            )
           }
         </div>
 
         <div className="p-4 border-t border-white/5 bg-black/20 space-y-1">
           <button onClick={() => window.location.href = '/'} className="w-full flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-emerald-400 rounded-xl transition-all">
             <Home size={16} />
-            <span className="text-[10px] font-bold uppercase tracking-widest">Dashboard</span>
+            <span className="text-[10px] font-bold uppercase tracking-widest">Dashboard Public</span>
           </button>
         </div>
       </div>
 
-      {/* MAIN CONTENT - DARK LUXURY */}
-      <div className="flex-1 p-6 md:p-12 overflow-y-auto bg-gradient-to-br from-[#020617] to-[#0F172A]">
-        {selectedProjet ? (
+      {/* MAIN CONTENT */}
+      <div className="flex-1 p-6 md:p-12 overflow-y-auto bg-gradient-to-br from-[#020617] to-[#0F172A] text-left">
+        {selectedProjet && activeTab === 'clients' ? (
           <div className="max-w-6xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
             
-            {/* TOP BAR / HEADER */}
             <div className="relative group overflow-hidden bg-white/[0.02] p-8 md:p-12 rounded-[2rem] border border-white/5 backdrop-blur-3xl shadow-2xl">
-              <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
-                 <LayoutDashboard size={120} />
-              </div>
+              <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity"><LayoutDashboard size={120} /></div>
               <div className="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
                 <div>
                   <div className="flex items-center gap-2 mb-4">
@@ -184,18 +233,18 @@ export default function AdminDashboard() {
                   <h2 className="text-5xl font-bold tracking-tighter text-white mb-4">{selectedProjet.nom_villa}</h2>
                   <div className="flex flex-wrap gap-4 text-[10px] font-bold uppercase tracking-widest text-slate-400">
                     <span className="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-full border border-white/5"><UserPlus size={12} className="text-emerald-400"/> {selectedProjet.client_prenom} {selectedProjet.client_nom}</span>
-                    <span className="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-full border border-white/5"><MapPin size={12} className="text-emerald-400"/> {selectedProjet.ville}</span>
                     <span className="flex items-center gap-2 bg-emerald-500/10 text-emerald-400 px-4 py-2 rounded-full border border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.1)]"><Key size={12}/> PIN ACCÈS: {selectedProjet.pin_code}</span>
                   </div>
                 </div>
                 <div className="flex gap-2">
-                   <button onClick={() => handleDeleteClient(selectedProjet.id)} className="p-4 bg-red-500/10 text-red-500 rounded-2xl hover:bg-red-500 hover:text-white transition-all border border-red-500/20"><Trash2 size={20} /></button>
+                   <button onClick={() => handleDeleteClient(selectedProjet.id)} className="p-4 bg-red-500/10 text-red-500 rounded-2xl hover:bg-red-500 hover:text-white transition-all border border-red-500/20">
+                     <Trash2 size={20} />
+                   </button>
                 </div>
               </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* STATUS CARD */}
               <div className="lg:col-span-2 space-y-8">
                 <div className="relative bg-black p-10 rounded-[2.5rem] border border-white/5 overflow-hidden group shadow-2xl">
                   <div className="absolute -top-24 -right-24 w-64 h-64 bg-emerald-500/10 rounded-full blur-[100px] group-hover:bg-emerald-500/20 transition-all"></div>
@@ -205,37 +254,23 @@ export default function AdminDashboard() {
                         <Activity size={24} className="text-emerald-400" />
                       </div>
                       <div className="text-right">
-                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Progression</p>
-                        <p className="text-emerald-400 font-mono font-bold text-xl">{selectedProjet.etape_actuelle.split('.')[0]} / 12</p>
+                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Status Phase</p>
+                        <p className="text-emerald-400 font-mono font-bold text-xl">{selectedProjet.etape_actuelle}</p>
                       </div>
                     </div>
-                    <h3 className="text-sm font-bold uppercase tracking-[0.3em] text-slate-500 mb-4">Dernier Log Terrain</h3>
+                    <h3 className="text-sm font-bold uppercase tracking-[0.3em] text-slate-500 mb-4">Journal de bord Agent</h3>
                     <p className="text-2xl font-medium text-slate-200 leading-relaxed italic border-l-2 border-emerald-500 pl-6 py-2">
-                      "{selectedProjet.commentaires_etape || "Aucune donnée de terrain synchronisée pour le moment."}"
+                      "{selectedProjet.commentaires_etape || "Aucun log terrain disponible."}"
                     </p>
                   </div>
                 </div>
-
-                {/* INFO GRID */}
-                <div className="grid grid-cols-2 gap-4">
-                   <div className="bg-white/[0.02] border border-white/5 p-6 rounded-3xl">
-                      <p className="text-[10px] font-bold text-slate-500 uppercase mb-2">Cashback Client</p>
-                      <p className="text-2xl font-bold text-white">{selectedProjet.montant_cashback || 0} €</p>
-                   </div>
-                   <div className="bg-white/[0.02] border border-white/5 p-6 rounded-3xl">
-                      <p className="text-[10px] font-bold text-slate-500 uppercase mb-2">Livraison Estimée</p>
-                      <p className="text-2xl font-bold text-white">{selectedProjet.date_livraison_prevue || 'N/A'}</p>
-                   </div>
-                </div>
               </div>
 
-              {/* DOCUMENTS - DESIGN GLASS */}
               <div className="bg-[#0F172A]/80 backdrop-blur-2xl p-8 rounded-[2.5rem] border border-white/10 shadow-2xl flex flex-col h-full">
                 <div className="flex justify-between items-center mb-8">
                   <h3 className="text-[10px] font-black uppercase text-white flex items-center gap-3 tracking-[0.2em]">
                     <Camera size={16} className="text-emerald-400"/> Drive Médias
                   </h3>
-                  
                   <label className="cursor-pointer p-3 bg-emerald-500 text-black rounded-xl hover:scale-105 active:scale-95 transition-all shadow-[0_0_20px_rgba(16,185,129,0.3)]">
                     {updating ? <Loader2 size={18} className="animate-spin" /> : <Upload size={18} />}
                     <input type="file" className="hidden" onChange={handleUploadDocument} disabled={updating} />
@@ -246,7 +281,7 @@ export default function AdminDashboard() {
                   {documents.length === 0 ? (
                     <div className="h-full flex flex-col items-center justify-center opacity-20 border-2 border-dashed border-white/10 rounded-3xl p-8">
                       <FileText size={40} className="mb-4" />
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-center">En attente de fichiers</p>
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-center text-white">Drive Vide</p>
                     </div>
                   ) : (
                     documents.map((doc) => (
@@ -275,26 +310,26 @@ export default function AdminDashboard() {
                <div className="absolute inset-0 bg-emerald-500/20 blur-[100px]"></div>
                <div className="relative bg-white/[0.02] border border-white/10 p-20 rounded-[4rem] backdrop-blur-3xl flex flex-col items-center">
                  <Zap size={60} className="text-emerald-500 mb-8 animate-pulse shadow-emerald-500" />
-                 <p className="font-bold text-[10px] uppercase tracking-[0.5em] text-emerald-400 mb-2">Système Prêt</p>
-                 <p className="text-2xl font-light text-slate-500 italic">Veuillez sélectionner un projet actif</p>
+                 <p className="font-bold text-[10px] uppercase tracking-[0.5em] text-emerald-400 mb-2">Prestige System</p>
+                 <p className="text-2xl font-light text-slate-500 italic">Veuillez sélectionner un terminal actif</p>
                </div>
             </div>
           </div>
         )}
       </div>
 
-      {/* MODALE - STYLE DARK GLASS */}
+      {/* MODALE CRÉATION */}
       {showModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-xl z-50 flex items-center justify-center p-4">
-          <form onSubmit={handleCreateDossier} className="bg-[#0F172A] w-full max-w-4xl rounded-[3rem] p-10 border border-white/10 shadow-2xl space-y-8 animate-in zoom-in-95 duration-300">
+          <form onSubmit={handleCreateDossier} className="bg-[#0F172A] w-full max-w-4xl rounded-[3rem] p-10 border border-white/10 shadow-2xl space-y-8 animate-in zoom-in-95 duration-300 text-left">
             <div className="flex justify-between items-center border-b border-white/5 pb-6">
-              <h2 className="text-2xl font-bold tracking-tighter text-white uppercase italic">Initialiser <span className="text-emerald-400 font-black">Nouveau Client</span></h2>
+              <h2 className="text-2xl font-bold tracking-tighter text-white uppercase italic">Initialiser <span className="text-emerald-400 font-black">Nouveau Dossier</span></h2>
               <button type="button" onClick={() => setShowModal(false)} className="p-2 hover:bg-white/5 rounded-full transition-all text-slate-400"><X /></button>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-4">
-                <p className="text-[10px] font-black uppercase text-emerald-400 tracking-widest">Identité</p>
+                <p className="text-[10px] font-black uppercase text-emerald-400 tracking-widest">Client</p>
                 <div className="grid grid-cols-2 gap-3">
                   <input required placeholder="Prénom" className="w-full p-4 bg-black/40 rounded-xl border border-white/10 outline-none focus:border-emerald-500 text-sm transition-all" onChange={e => setNewDossier({...newDossier, client_prenom: e.target.value})} />
                   <input required placeholder="Nom" className="w-full p-4 bg-black/40 rounded-xl border border-white/10 outline-none focus:border-emerald-500 text-sm transition-all" onChange={e => setNewDossier({...newDossier, client_nom: e.target.value})} />
@@ -303,23 +338,24 @@ export default function AdminDashboard() {
               </div>
 
               <div className="space-y-4">
-                <p className="text-[10px] font-black uppercase text-emerald-400 tracking-widest">Villa & Localisation</p>
-                <input required placeholder="Nom de la Villa (ex: Albatros)" className="w-full p-4 bg-emerald-500/10 text-emerald-400 rounded-xl border border-emerald-500/20 outline-none text-sm font-bold transition-all" onChange={e => setNewDossier({...newDossier, nom_villa: e.target.value})} />
+                <p className="text-[10px] font-black uppercase text-emerald-400 tracking-widest">Construction</p>
+                <input required placeholder="Nom de la Villa" className="w-full p-4 bg-emerald-500/10 text-emerald-400 rounded-xl border border-emerald-500/20 outline-none text-sm font-bold transition-all" onChange={e => setNewDossier({...newDossier, nom_villa: e.target.value})} />
                 <div className="grid grid-cols-2 gap-3">
-                  <input placeholder="Ville" className="w-full p-4 bg-black/40 rounded-xl border border-white/10 outline-none focus:border-emerald-500 text-sm transition-all" onChange={e => setNewDossier({...newDossier, ville: e.target.value})} />
+                  <select className="w-full p-4 bg-black/40 rounded-xl border border-white/10 outline-none text-xs font-bold uppercase" onChange={e => setNewDossier({...newDossier, etape_actuelle: e.target.value})}>
+                    {PHASES_CHANTIER.map(p => <option key={p} value={p} className="bg-[#0F172A]">{p}</option>)}
+                  </select>
                   <input type="date" className="w-full p-4 bg-black/40 rounded-xl border border-white/10 outline-none focus:border-emerald-500 text-sm transition-all" onChange={e => setNewDossier({...newDossier, date_livraison_prevue: e.target.value})} />
                 </div>
               </div>
             </div>
 
             <button type="submit" disabled={updating} className="w-full bg-emerald-500 hover:bg-emerald-400 text-black py-6 rounded-2xl font-black uppercase text-[11px] tracking-[0.4em] shadow-[0_0_30px_rgba(16,185,129,0.3)] transition-all">
-              {updating ? <Loader2 className="animate-spin mx-auto text-black" /> : "Générer Fiche Client"}
+              {updating ? <Loader2 className="animate-spin mx-auto" /> : "Générer Dossier Master"}
             </button>
           </form>
         </div>
       )}
 
-      {/* CSS CUSTOM SCROLLBAR */}
       <style jsx global>{`
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
