@@ -46,11 +46,16 @@ export default function AdminDashboard() {
   // --- CHARGEMENT DES DONNÉES ---
   const loadData = async () => {
     setLoading(true);
-    const { data: projData } = await supabase.from('suivi_chantier').select('*').order('created_at', { ascending: false });
-    const { data: stfData } = await supabase.from('staff_prestataires').select('*').order('created_at', { ascending: false });
-    if (projData) setProjets(projData);
-    if (stfData) setStaffList(stfData);
-    setLoading(false);
+    try {
+      const { data: projData } = await supabase.from('suivi_chantier').select('*').order('created_at', { ascending: false });
+      const { data: stfData } = await supabase.from('staff_prestataires').select('*').order('created_at', { ascending: false });
+      if (projData) setProjets(projData);
+      if (stfData) setStaffList(stfData);
+    } catch (error) {
+      console.error("Erreur chargement global:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const loadDocuments = async (projetId: string) => {
@@ -62,7 +67,7 @@ export default function AdminDashboard() {
       .order('created_at', { ascending: false });
     
     if (error) {
-       console.error("Erreur de lecture SQL:", error);
+       console.error("Erreur de lecture SQL (Documents):", error.message);
     } else {
        setDocuments(data || []);
     }
@@ -79,7 +84,7 @@ export default function AdminDashboard() {
     setUpdating(true);
     try {
       const fileExt = file.name.split('.').pop();
-      const fileName = `${Math.random().toString(36).substring(2)}_${file.name}`;
+      const fileName = `${Math.random().toString(36).substring(2)}_${file.name.replace(/\s/g, '_')}`;
       const filePath = `${selectedProjet.id}/${fileName}`;
 
       // 1. Upload vers le Storage
@@ -93,45 +98,42 @@ export default function AdminDashboard() {
         .from('documents-clients')
         .getPublicUrl(filePath);
 
-      // 2. Enregistrement en Base de données
+      // 2. Enregistrement en Base de données (On inclut storage_path)
       const { error: dbError } = await supabase.from('documents_projets').insert([{
           projet_id: selectedProjet.id,
           nom_fichier: file.name,
           url_fichier: publicUrl,
-          storage_path: filePath // On stocke le chemin pour faciliter la suppression plus tard
+          storage_path: filePath 
         }]);
 
       if (dbError) throw dbError;
 
-      setTimeout(() => {
-        loadDocuments(selectedProjet.id);
-        setUpdating(false);
-      }, 1000);
+      // Recharger la liste
+      await loadDocuments(selectedProjet.id);
 
     } catch (err: any) {
       alert("Erreur upload : " + (err.message || "Erreur inconnue"));
-      setUpdating(false);
     } finally {
+      setUpdating(false);
       e.target.value = ""; 
     }
   };
 
   const handleDeleteDocument = async (doc: any) => {
-    if (!confirm(`Supprimer définitivement le fichier "${doc.nom_fichier}" ?`)) return;
+    if (!confirm(`Supprimer définitivement "${doc.nom_fichier}" ?`)) return;
 
+    setUpdating(true);
     try {
-      setUpdating(true);
-
-      // 1. Supprimer du Storage Supabase si le chemin est connu
+      // 1. Suppression du fichier physique dans le Storage (si le chemin est connu)
       if (doc.storage_path) {
         const { error: storageError } = await supabase.storage
           .from('documents-clients')
           .remove([doc.storage_path]);
         
-        if (storageError) console.warn("Note: Fichier non trouvé dans le storage, suppression SQL uniquement.");
+        if (storageError) console.warn("Fichier physique introuvable, suite de la suppression SQL.");
       }
 
-      // 2. Supprimer de la table SQL
+      // 2. Suppression de la ligne en Base de données
       const { error: dbError } = await supabase
         .from('documents_projets')
         .delete()
@@ -139,8 +141,8 @@ export default function AdminDashboard() {
 
       if (dbError) throw dbError;
 
-      // 3. Rafraîchir la liste
-      await loadDocuments(selectedProjet.id);
+      // 3. Rafraîchir l'interface
+      setDocuments(prev => prev.filter(d => d.id !== doc.id));
       
     } catch (err: any) {
       alert("Erreur lors de la suppression : " + err.message);
@@ -151,7 +153,7 @@ export default function AdminDashboard() {
 
   // --- AUTRES ACTIONS ---
   const handleDeleteClient = async (id: string) => {
-    if (!confirm("⚠️ Supprimer ce dossier client ?")) return;
+    if (!confirm("⚠️ Supprimer définitivement ce dossier client ?")) return;
     await supabase.from('suivi_chantier').delete().eq('id', id);
     setSelectedProjet(null);
     loadData();
@@ -163,16 +165,6 @@ export default function AdminDashboard() {
     const pin = Math.floor(1000 + Math.random() * 9000).toString();
     await supabase.from('suivi_chantier').insert([{ ...newDossier, pin_code: pin }]);
     setShowModal(false);
-    loadData();
-    setUpdating(false);
-  };
-
-  const handleCreateStaff = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setUpdating(true);
-    const pin = Math.floor(100000 + Math.random() * 900000).toString();
-    await supabase.from('staff_prestataires').insert([{ ...newStaff, pin_code: pin }]);
-    setNewStaff({ nom: "", prenom: "" });
     loadData();
     setUpdating(false);
   };
@@ -234,7 +226,7 @@ export default function AdminDashboard() {
       {/* MAIN CONTENT */}
       <div className="flex-1 p-6 md:p-12 overflow-y-auto bg-gradient-to-br from-[#020617] to-[#0F172A] text-left">
         {selectedProjet && activeTab === 'clients' ? (
-          <div className="max-w-6xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4">
+          <div className="max-w-6xl mx-auto space-y-8">
             
             <div className="bg-white/[0.02] p-8 rounded-[2rem] border border-white/5 backdrop-blur-3xl flex justify-between items-end">
               <div>
@@ -250,19 +242,20 @@ export default function AdminDashboard() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              <div className="lg:col-span-2 space-y-8">
+              <div className="lg:col-span-2">
                 <div className="bg-black p-10 rounded-[2.5rem] border border-white/5">
                    <h3 className="text-[10px] font-bold uppercase text-slate-500 mb-6 tracking-widest">Dernier rapport terrain</h3>
                    <p className="text-2xl font-medium text-slate-200 italic border-l-2 border-emerald-500 pl-6 py-2">
-                     "{selectedProjet.commentaires_etape || "Aucun log disponible."}"
+                     "{selectedProjet.commentaires_etape || "Aucun commentaire pour le moment."}"
                    </p>
                 </div>
               </div>
 
+              {/* SECTION DOCUMENTS */}
               <div className="bg-[#0F172A]/80 backdrop-blur-2xl p-8 rounded-[2.5rem] border border-white/10 flex flex-col h-[500px]">
                 <div className="flex justify-between items-center mb-8">
                   <h3 className="text-[10px] font-black uppercase text-white flex items-center gap-3">
-                    <Camera size={16} className="text-emerald-400"/> Documents & Media
+                    <Camera size={16} className="text-emerald-400"/> Documents & Photos
                   </h3>
                   <label className="cursor-pointer p-3 bg-emerald-500 text-black rounded-xl hover:scale-105 transition-all">
                     {updating ? <Loader2 size={18} className="animate-spin" /> : <Upload size={18} />}
@@ -274,20 +267,20 @@ export default function AdminDashboard() {
                   {documents.length === 0 ? (
                     <div className="h-full flex flex-col items-center justify-center opacity-20 border-2 border-dashed border-white/10 rounded-3xl">
                       <FileText size={40} className="mb-2" />
-                      <p className="text-[10px] uppercase font-bold">Aucun document</p>
+                      <p className="text-[10px] uppercase font-bold">Vide</p>
                     </div>
                   ) : (
                     documents.map((doc) => (
-                      <div key={doc.id} className="flex items-center justify-between p-4 bg-white/[0.03] rounded-2xl border border-white/5 hover:border-emerald-500/50 transition-all">
+                      <div key={doc.id} className="flex items-center justify-between p-4 bg-white/[0.03] rounded-2xl border border-white/5 hover:border-emerald-500/50 transition-all group">
                         <p className="text-[11px] font-medium truncate text-slate-300 flex-1 mr-4">{doc.nom_fichier}</p>
                         <div className="flex gap-2">
-                          <a href={doc.url_fichier} target="_blank" rel="noreferrer" className="p-2 text-slate-500 hover:text-white transition-colors">
+                          <a href={doc.url_fichier} target="_blank" rel="noreferrer" className="p-2 text-slate-500 hover:text-white">
                             <Download size={14} />
                           </a>
                           <button 
-                            onClick={() => handleDeleteDocument(doc)} 
+                            onClick={() => handleDeleteDocument(doc)}
                             disabled={updating}
-                            className="p-2 text-slate-500 hover:text-red-400 transition-colors disabled:opacity-30"
+                            className="p-2 text-slate-500 hover:text-red-400 disabled:opacity-20"
                           >
                             <Trash2 size={14} />
                           </button>
@@ -302,7 +295,7 @@ export default function AdminDashboard() {
         ) : (
           <div className="h-full flex flex-col items-center justify-center opacity-30">
              <Zap size={60} className="text-emerald-500 mb-8" />
-             <p className="text-2xl font-light italic text-slate-500 tracking-tighter">Sélectionnez un terminal pour commencer</p>
+             <p className="text-2xl font-light italic text-slate-500 tracking-tighter text-center">Sélectionnez un projet pour accéder au tableau de bord</p>
           </div>
         )}
       </div>
@@ -317,18 +310,20 @@ export default function AdminDashboard() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                <div className="space-y-4">
-                  <input required placeholder="Prénom" className="w-full p-4 bg-black/40 rounded-xl border border-white/10 outline-none focus:border-emerald-500 text-sm" onChange={e => setNewDossier({...newDossier, client_prenom: e.target.value})} />
-                  <input required placeholder="Nom" className="w-full p-4 bg-black/40 rounded-xl border border-white/10 outline-none focus:border-emerald-500 text-sm" onChange={e => setNewDossier({...newDossier, client_nom: e.target.value})} />
-                  <input type="email" required placeholder="Email" className="w-full p-4 bg-black/40 rounded-xl border border-white/10 outline-none focus:border-emerald-500 text-sm" onChange={e => setNewDossier({...newDossier, email_client: e.target.value})} />
+                  <input required placeholder="Prénom Client" className="w-full p-4 bg-black/40 rounded-xl border border-white/10 outline-none focus:border-emerald-500 text-sm" onChange={e => setNewDossier({...newDossier, client_prenom: e.target.value})} />
+                  <input required placeholder="Nom Client" className="w-full p-4 bg-black/40 rounded-xl border border-white/10 outline-none focus:border-emerald-500 text-sm" onChange={e => setNewDossier({...newDossier, client_nom: e.target.value})} />
+                  <input type="email" required placeholder="Email Contact" className="w-full p-4 bg-black/40 rounded-xl border border-white/10 outline-none focus:border-emerald-500 text-sm" onChange={e => setNewDossier({...newDossier, email_client: e.target.value})} />
                </div>
                <div className="space-y-4">
-                  <input required placeholder="Nom de la Villa" className="w-full p-4 bg-emerald-500/10 text-emerald-400 rounded-xl border border-emerald-500/20 outline-none font-bold" onChange={e => setNewDossier({...newDossier, nom_villa: e.target.value})} />
+                  <input required placeholder="Nom de la Villa / Projet" className="w-full p-4 bg-emerald-500/10 text-emerald-400 rounded-xl border border-emerald-500/20 outline-none font-bold placeholder:text-emerald-400/50" onChange={e => setNewDossier({...newDossier, nom_villa: e.target.value})} />
                   <select className="w-full p-4 bg-black/40 rounded-xl border border-white/10 outline-none text-xs uppercase" onChange={e => setNewDossier({...newDossier, etape_actuelle: e.target.value})}>
                     {PHASES_CHANTIER.map(p => <option key={p} value={p}>{p}</option>)}
                   </select>
                </div>
             </div>
-            <button type="submit" disabled={updating} className="w-full bg-emerald-500 text-black py-6 rounded-2xl font-black uppercase text-[11px] tracking-widest shadow-lg">Générer Dossier</button>
+            <button type="submit" disabled={updating} className="w-full bg-emerald-500 text-black py-6 rounded-2xl font-black uppercase text-[11px] tracking-widest shadow-lg hover:bg-white transition-colors disabled:opacity-50">
+               {updating ? 'Création en cours...' : 'Générer le dossier client'}
+            </button>
           </form>
         </div>
       )}
