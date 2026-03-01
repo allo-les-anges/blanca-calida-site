@@ -45,14 +45,19 @@ export default function AdminDashboard() {
 
   // --- CHARGEMENT DES DONNÉES ---
   const loadData = async () => {
+    console.log("🔄 Chargement initial des données...");
     setLoading(true);
     try {
-      const { data: projData } = await supabase.from('suivi_chantier').select('*').order('created_at', { ascending: false });
-      const { data: stfData } = await supabase.from('staff_prestataires').select('*').order('created_at', { ascending: false });
+      const { data: projData, error: projError } = await supabase.from('suivi_chantier').select('*').order('created_at', { ascending: false });
+      const { data: stfData, error: stfError } = await supabase.from('staff_prestataires').select('*').order('created_at', { ascending: false });
+      
+      if (projError) console.error("❌ Erreur Projets:", JSON.stringify(projError, null, 2));
+      if (stfError) console.error("❌ Erreur Staff:", JSON.stringify(stfError, null, 2));
+
       if (projData) setProjets(projData);
       if (stfData) setStaffList(stfData);
     } catch (error) {
-      console.error("Erreur chargement global:", error);
+      console.error("💥 Erreur critique loadData:", error);
     } finally {
       setLoading(false);
     }
@@ -60,6 +65,8 @@ export default function AdminDashboard() {
 
   const loadDocuments = async (projetId: string) => {
     if (!projetId) return;
+    console.log(`📂 Chargement des documents pour le projet: ${projetId}`);
+    
     const { data, error } = await supabase
       .from('documents_projets')
       .select('*')
@@ -67,8 +74,11 @@ export default function AdminDashboard() {
       .order('created_at', { ascending: false });
     
     if (error) {
-       console.error("Erreur de lecture SQL (Documents):", error.message);
+       // On logge l'erreur complète en string pour éviter le [object Object]
+       console.error("❌ Erreur de lecture SQL (Documents):", JSON.stringify(error, null, 2));
+       console.error("Message d'erreur direct:", error.message);
     } else {
+       console.log("✅ Documents récupérés:", data?.length || 0);
        setDocuments(data || []);
     }
   };
@@ -81,24 +91,28 @@ export default function AdminDashboard() {
     const file = e.target.files?.[0];
     if (!file || !selectedProjet) return;
 
+    console.log("📤 Début de l'upload pour:", file.name);
     setUpdating(true);
     try {
-      const fileExt = file.name.split('.').pop();
       const fileName = `${Math.random().toString(36).substring(2)}_${file.name.replace(/\s/g, '_')}`;
       const filePath = `${selectedProjet.id}/${fileName}`;
 
-      // 1. Upload vers le Storage
+      // 1. Storage
       const { error: uploadError } = await supabase.storage
         .from('documents-clients')
         .upload(filePath, file);
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+          console.error("❌ Erreur Storage Upload:", JSON.stringify(uploadError, null, 2));
+          throw uploadError;
+      }
 
       const { data: { publicUrl } } = supabase.storage
         .from('documents-clients')
         .getPublicUrl(filePath);
 
-      // 2. Enregistrement en Base de données (On inclut storage_path)
+      // 2. Base de données
+      console.log("📝 Enregistrement du lien en BDD...");
       const { error: dbError } = await supabase.from('documents_projets').insert([{
           projet_id: selectedProjet.id,
           nom_fichier: file.name,
@@ -106,43 +120,48 @@ export default function AdminDashboard() {
           storage_path: filePath 
         }]);
 
-      if (dbError) throw dbError;
+      if (dbError) {
+          console.error("❌ Erreur Insertion SQL:", JSON.stringify(dbError, null, 2));
+          throw dbError;
+      }
 
-      // Recharger la liste
+      console.log("✨ Upload et enregistrement réussis !");
       await loadDocuments(selectedProjet.id);
 
     } catch (err: any) {
       alert("Erreur upload : " + (err.message || "Erreur inconnue"));
     } finally {
       setUpdating(false);
-      e.target.value = ""; 
+      if (e.target) e.target.value = ""; 
     }
   };
 
   const handleDeleteDocument = async (doc: any) => {
     if (!confirm(`Supprimer définitivement "${doc.nom_fichier}" ?`)) return;
 
+    console.log("🗑️ Suppression du document:", doc.id);
     setUpdating(true);
     try {
-      // 1. Suppression du fichier physique dans le Storage (si le chemin est connu)
       if (doc.storage_path) {
         const { error: storageError } = await supabase.storage
           .from('documents-clients')
           .remove([doc.storage_path]);
         
-        if (storageError) console.warn("Fichier physique introuvable, suite de la suppression SQL.");
+        if (storageError) console.warn("⚠️ Storage warning (fichier non trouvé):", storageError.message);
       }
 
-      // 2. Suppression de la ligne en Base de données
       const { error: dbError } = await supabase
         .from('documents_projets')
         .delete()
         .eq('id', doc.id);
 
-      if (dbError) throw dbError;
+      if (dbError) {
+          console.error("❌ Erreur Suppression SQL:", JSON.stringify(dbError, null, 2));
+          throw dbError;
+      }
 
-      // 3. Rafraîchir l'interface
       setDocuments(prev => prev.filter(d => d.id !== doc.id));
+      console.log("✅ Document supprimé avec succès.");
       
     } catch (err: any) {
       alert("Erreur lors de la suppression : " + err.message);
@@ -151,10 +170,10 @@ export default function AdminDashboard() {
     }
   };
 
-  // --- AUTRES ACTIONS ---
   const handleDeleteClient = async (id: string) => {
     if (!confirm("⚠️ Supprimer définitivement ce dossier client ?")) return;
-    await supabase.from('suivi_chantier').delete().eq('id', id);
+    const { error } = await supabase.from('suivi_chantier').delete().eq('id', id);
+    if (error) console.error("❌ Erreur suppression client:", JSON.stringify(error, null, 2));
     setSelectedProjet(null);
     loadData();
   };
@@ -163,7 +182,8 @@ export default function AdminDashboard() {
     e.preventDefault();
     setUpdating(true);
     const pin = Math.floor(1000 + Math.random() * 9000).toString();
-    await supabase.from('suivi_chantier').insert([{ ...newDossier, pin_code: pin }]);
+    const { error } = await supabase.from('suivi_chantier').insert([{ ...newDossier, pin_code: pin }]);
+    if (error) console.error("❌ Erreur création dossier:", JSON.stringify(error, null, 2));
     setShowModal(false);
     loadData();
     setUpdating(false);
@@ -227,7 +247,6 @@ export default function AdminDashboard() {
       <div className="flex-1 p-6 md:p-12 overflow-y-auto bg-gradient-to-br from-[#020617] to-[#0F172A] text-left">
         {selectedProjet && activeTab === 'clients' ? (
           <div className="max-w-6xl mx-auto space-y-8">
-            
             <div className="bg-white/[0.02] p-8 rounded-[2rem] border border-white/5 backdrop-blur-3xl flex justify-between items-end">
               <div>
                 <h2 className="text-5xl font-bold tracking-tighter text-white mb-4">{selectedProjet.nom_villa}</h2>
