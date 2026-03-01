@@ -6,7 +6,7 @@ import {
   Save, Camera, Trash2, Loader2, Plus, X, 
   Search, ShieldCheck, MapPin, Mail, FileText, 
   Download, Upload, Key, AlertTriangle, Users, UserPlus, ChevronRight,
-  Home, LogOut, LayoutDashboard, Activity, Zap
+  Home, LogOut, LayoutDashboard, Activity, Zap, Euro, Calendar
 } from 'lucide-react';
 
 const supabase = createClient(
@@ -41,23 +41,17 @@ export default function AdminDashboard() {
     etape_actuelle: PHASES_CHANTIER[0]
   });
 
-  const [newStaff, setNewStaff] = useState({ nom: "", prenom: "" });
-
   // --- CHARGEMENT DES DONNÉES ---
   const loadData = async () => {
-    console.log("🔄 Chargement initial des données...");
+    console.log("🔄 Chargement initial...");
     setLoading(true);
     try {
       const { data: projData, error: projError } = await supabase.from('suivi_chantier').select('*').order('created_at', { ascending: false });
       const { data: stfData, error: stfError } = await supabase.from('staff_prestataires').select('*').order('created_at', { ascending: false });
-      
-      if (projError) console.error("❌ Erreur Projets:", JSON.stringify(projError, null, 2));
-      if (stfError) console.error("❌ Erreur Staff:", JSON.stringify(stfError, null, 2));
-
       if (projData) setProjets(projData);
       if (stfData) setStaffList(stfData);
     } catch (error) {
-      console.error("💥 Erreur critique loadData:", error);
+      console.error("💥 Erreur loadData:", error);
     } finally {
       setLoading(false);
     }
@@ -65,19 +59,14 @@ export default function AdminDashboard() {
 
   const loadDocuments = async (projetId: string) => {
     if (!projetId) return;
-    console.log(`📂 Tentative de lecture des documents pour: ${projetId}`);
-    
-    // Correction : On retire le .order('created_at') car la colonne n'existe pas encore en BDD
     const { data, error } = await supabase
       .from('documents_projets')
       .select('*')
       .eq('projet_id', projetId);
     
     if (error) {
-       console.error("❌ Erreur de lecture SQL détaillée:", JSON.stringify(error, null, 2));
+       console.error("❌ Erreur SQL Documents:", JSON.stringify(error, null, 2));
     } else {
-       console.log("✅ Documents récupérés avec succès:", data?.length || 0);
-       // Tri manuel par ID décroissant (le plus récent en haut) en attendant la colonne created_at
        const sorted = data ? [...data].sort((a, b) => b.id - a.id) : [];
        setDocuments(sorted);
     }
@@ -86,102 +75,65 @@ export default function AdminDashboard() {
   useEffect(() => { loadData(); }, []);
   useEffect(() => { if (selectedProjet?.id) loadDocuments(selectedProjet.id); }, [selectedProjet]);
 
-  // --- GESTION DES FICHIERS (UPLOAD & DELETE) ---
+  // --- UPLOAD ---
   const handleUploadDocument = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !selectedProjet) return;
-
-    console.log("📤 Début de l'upload pour:", file.name);
     setUpdating(true);
     try {
       const fileName = `${Math.random().toString(36).substring(2)}_${file.name.replace(/\s/g, '_')}`;
       const filePath = `${selectedProjet.id}/${fileName}`;
+      const { error: uploadError } = await supabase.storage.from('documents-clients').upload(filePath, file);
+      if (uploadError) throw uploadError;
 
-      const { error: uploadError } = await supabase.storage
-        .from('documents-clients')
-        .upload(filePath, file);
+      const { data: { publicUrl } } = supabase.storage.from('documents-clients').getPublicUrl(filePath);
 
-      if (uploadError) {
-          console.error("❌ Erreur Storage Upload:", JSON.stringify(uploadError, null, 2));
-          throw uploadError;
-      }
+      await supabase.from('documents_projets').insert([{
+        projet_id: selectedProjet.id,
+        nom_fichier: file.name,
+        url_fichier: publicUrl,
+        storage_path: filePath 
+      }]);
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('documents-clients')
-        .getPublicUrl(filePath);
-
-      console.log("📝 Enregistrement du lien en BDD...");
-      const { error: dbError } = await supabase.from('documents_projets').insert([{
-          projet_id: selectedProjet.id,
-          nom_fichier: file.name,
-          url_fichier: publicUrl,
-          storage_path: filePath 
-        }]);
-
-      if (dbError) {
-          console.error("❌ Erreur Insertion SQL:", JSON.stringify(dbError, null, 2));
-          throw dbError;
-      }
-
-      console.log("✨ Succès ! Rechargement de la liste...");
       await loadDocuments(selectedProjet.id);
-
     } catch (err: any) {
-      alert("Erreur upload : " + (err.message || "Erreur inconnue"));
+      alert("Erreur upload : " + err.message);
     } finally {
       setUpdating(false);
-      if (e.target) e.target.value = ""; 
     }
   };
 
   const handleDeleteDocument = async (doc: any) => {
-    if (!confirm(`Supprimer définitivement "${doc.nom_fichier}" ?`)) return;
-
-    console.log("🗑️ Suppression du document:", doc.id);
+    if (!confirm(`Supprimer "${doc.nom_fichier}" ?`)) return;
     setUpdating(true);
     try {
-      if (doc.storage_path) {
-        const { error: storageError } = await supabase.storage
-          .from('documents-clients')
-          .remove([doc.storage_path]);
-        
-        if (storageError) console.warn("⚠️ Storage warning:", storageError.message);
-      }
-
-      const { error: dbError } = await supabase
-        .from('documents_projets')
-        .delete()
-        .eq('id', doc.id);
-
-      if (dbError) throw dbError;
-
+      if (doc.storage_path) await supabase.storage.from('documents-clients').remove([doc.storage_path]);
+      await supabase.from('documents_projets').delete().eq('id', doc.id);
       setDocuments(prev => prev.filter(d => d.id !== doc.id));
-      console.log("✅ Suppression terminée.");
-      
-    } catch (err: any) {
-      alert("Erreur lors de la suppression : " + err.message);
     } finally {
       setUpdating(false);
     }
   };
 
-  // --- ACTIONS CLIENTS ---
-  const handleDeleteClient = async (id: string) => {
-    if (!confirm("⚠️ Supprimer définitivement ce dossier client ?")) return;
-    const { error } = await supabase.from('suivi_chantier').delete().eq('id', id);
-    if (error) console.error("❌ Erreur suppression client:", JSON.stringify(error, null, 2));
-    setSelectedProjet(null);
-    loadData();
-  };
-
+  // --- ACTIONS DOSSIER ---
   const handleCreateDossier = async (e: React.FormEvent) => {
     e.preventDefault();
     setUpdating(true);
+    console.log("📝 Envoi du dossier complet:", newDossier);
+    
     const pin = Math.floor(1000 + Math.random() * 9000).toString();
-    const { error } = await supabase.from('suivi_chantier').insert([{ ...newDossier, pin_code: pin }]);
-    if (error) console.error("❌ Erreur création dossier:", JSON.stringify(error, null, 2));
-    setShowModal(false);
-    loadData();
+    const { error } = await supabase.from('suivi_chantier').insert([{ 
+      ...newDossier, 
+      pin_code: pin 
+    }]);
+
+    if (error) {
+      console.error("❌ Erreur création:", JSON.stringify(error, null, 2));
+      alert("Erreur base de données : " + error.message);
+    } else {
+      setShowModal(false);
+      loadData();
+    }
     setUpdating(false);
   };
 
@@ -220,89 +172,59 @@ export default function AdminDashboard() {
         
         <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-2">
           {loading ? <div className="flex justify-center p-8"><Loader2 className="animate-spin text-emerald-500" /></div> : 
-            activeTab === 'clients' ? (
-              filteredProjets.map((p) => (
-                <button key={p.id} onClick={() => setSelectedProjet(p)} className={`w-full text-left p-4 rounded-xl border transition-all ${selectedProjet?.id === p.id ? 'bg-emerald-500/10 border-emerald-500/50' : 'bg-transparent border-white/5 hover:bg-white/5'}`}>
-                  <p className="font-bold text-sm">{p.client_prenom} {p.client_nom}</p>
-                  <p className="text-[9px] uppercase opacity-50">{p.nom_villa}</p>
-                </button>
-              ))
-            ) : (
-              staffList.map((s) => (
-                <div key={s.id} className="w-full bg-white/5 border border-white/5 p-4 rounded-xl flex justify-between items-center">
-                  <p className="font-bold text-sm text-white">{s.prenom} {s.nom}</p>
-                  <span className="text-[10px] font-mono text-emerald-400">PIN: {s.pin_code}</span>
-                </div>
-              ))
-            )
+            filteredProjets.map((p) => (
+              <button key={p.id} onClick={() => setSelectedProjet(p)} className={`w-full text-left p-4 rounded-xl border transition-all ${selectedProjet?.id === p.id ? 'bg-emerald-500/10 border-emerald-500/50' : 'bg-transparent border-white/5 hover:bg-white/5'}`}>
+                <p className="font-bold text-sm">{p.client_prenom} {p.client_nom}</p>
+                <p className="text-[9px] uppercase opacity-50">{p.nom_villa}</p>
+              </button>
+            ))
           }
         </div>
       </div>
 
       {/* MAIN CONTENT */}
       <div className="flex-1 p-6 md:p-12 overflow-y-auto bg-gradient-to-br from-[#020617] to-[#0F172A] text-left">
-        {selectedProjet && activeTab === 'clients' ? (
+        {selectedProjet ? (
           <div className="max-w-6xl mx-auto space-y-8">
             <div className="bg-white/[0.02] p-8 rounded-[2rem] border border-white/5 backdrop-blur-3xl flex justify-between items-end">
               <div>
                 <h2 className="text-5xl font-bold tracking-tighter text-white mb-4">{selectedProjet.nom_villa}</h2>
-                <div className="flex gap-4 text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                  <span className="bg-white/5 px-4 py-2 rounded-full">{selectedProjet.client_prenom} {selectedProjet.client_nom}</span>
+                <div className="flex flex-wrap gap-4 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                  <span className="bg-white/5 px-4 py-2 rounded-full flex items-center gap-2"><MapPin size={12}/> {selectedProjet.ville}, {selectedProjet.pays}</span>
                   <span className="bg-emerald-500/10 text-emerald-400 px-4 py-2 rounded-full border border-emerald-500/20">PIN: {selectedProjet.pin_code}</span>
+                  <span className="bg-blue-500/10 text-blue-400 px-4 py-2 rounded-full flex items-center gap-2"><Euro size={12}/> Cashback: {selectedProjet.montant_cashback}€</span>
                 </div>
               </div>
-              <button onClick={() => handleDeleteClient(selectedProjet.id)} className="p-4 bg-red-500/10 text-red-500 rounded-2xl border border-red-500/20 hover:bg-red-500 hover:text-white transition-all">
-                <Trash2 size={20} />
-              </button>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <div className="lg:col-span-2">
                 <div className="bg-black p-10 rounded-[2.5rem] border border-white/5">
-                   <h3 className="text-[10px] font-bold uppercase text-slate-500 mb-6 tracking-widest">Dernier rapport terrain</h3>
+                   <h3 className="text-[10px] font-bold uppercase text-slate-500 mb-6 tracking-widest">Rapport Terrain : {selectedProjet.etape_actuelle}</h3>
                    <p className="text-2xl font-medium text-slate-200 italic border-l-2 border-emerald-500 pl-6 py-2">
-                     "{selectedProjet.commentaires_etape || "Aucun commentaire pour le moment."}"
+                     "{selectedProjet.commentaires_etape || "Aucun commentaire."}"
                    </p>
                 </div>
               </div>
 
-              {/* SECTION DOCUMENTS */}
-              <div className="bg-[#0F172A]/80 backdrop-blur-2xl p-8 rounded-[2.5rem] border border-white/10 flex flex-col h-[500px]">
+              <div className="bg-[#0F172A]/80 backdrop-blur-2xl p-8 rounded-[2.5rem] border border-white/10 flex flex-col h-[400px]">
                 <div className="flex justify-between items-center mb-8">
-                  <h3 className="text-[10px] font-black uppercase text-white flex items-center gap-3">
-                    <Camera size={16} className="text-emerald-400"/> Documents & Photos
-                  </h3>
+                  <h3 className="text-[10px] font-black uppercase text-white flex items-center gap-3"><Camera size={16}/> Documents</h3>
                   <label className="cursor-pointer p-3 bg-emerald-500 text-black rounded-xl hover:scale-105 transition-all">
                     {updating ? <Loader2 size={18} className="animate-spin" /> : <Upload size={18} />}
                     <input type="file" className="hidden" onChange={handleUploadDocument} disabled={updating} />
                   </label>
                 </div>
-
                 <div className="flex-1 space-y-3 overflow-y-auto pr-2 custom-scrollbar">
-                  {documents.length === 0 ? (
-                    <div className="h-full flex flex-col items-center justify-center opacity-20 border-2 border-dashed border-white/10 rounded-3xl">
-                      <FileText size={40} className="mb-2" />
-                      <p className="text-[10px] uppercase font-bold">Vide</p>
-                    </div>
-                  ) : (
-                    documents.map((doc) => (
-                      <div key={doc.id} className="flex items-center justify-between p-4 bg-white/[0.03] rounded-2xl border border-white/5 hover:border-emerald-500/50 transition-all group">
-                        <p className="text-[11px] font-medium truncate text-slate-300 flex-1 mr-4">{doc.nom_fichier}</p>
-                        <div className="flex gap-2">
-                          <a href={doc.url_fichier} target="_blank" rel="noreferrer" className="p-2 text-slate-500 hover:text-white">
-                            <Download size={14} />
-                          </a>
-                          <button 
-                            onClick={() => handleDeleteDocument(doc)}
-                            disabled={updating}
-                            className="p-2 text-slate-500 hover:text-red-400 disabled:opacity-20"
-                          >
-                            <Trash2 size={14} />
-                          </button>
-                        </div>
+                  {documents.map((doc) => (
+                    <div key={doc.id} className="flex items-center justify-between p-4 bg-white/[0.03] rounded-2xl border border-white/5">
+                      <p className="text-[11px] font-medium truncate flex-1 mr-4">{doc.nom_fichier}</p>
+                      <div className="flex gap-2">
+                        <a href={doc.url_fichier} target="_blank" rel="noreferrer" className="p-2 text-slate-500 hover:text-white"><Download size={14} /></a>
+                        <button onClick={() => handleDeleteDocument(doc)} className="p-2 text-slate-500 hover:text-red-400"><Trash2 size={14} /></button>
                       </div>
-                    ))
-                  )}
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
@@ -310,34 +232,62 @@ export default function AdminDashboard() {
         ) : (
           <div className="h-full flex flex-col items-center justify-center opacity-30">
              <Zap size={60} className="text-emerald-500 mb-8" />
-             <p className="text-2xl font-light italic text-slate-500 tracking-tighter text-center">Sélectionnez un projet pour accéder au tableau de bord</p>
+             <p className="text-2xl font-light italic text-slate-500 tracking-tighter text-center">Sélectionnez un projet</p>
           </div>
         )}
       </div>
 
-      {/* MODALE CRÉATION */}
+      {/* --- MODALE DE CRÉATION COMPLETE --- */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-xl z-50 flex items-center justify-center p-4">
-          <form onSubmit={handleCreateDossier} className="bg-[#0F172A] w-full max-w-4xl rounded-[3rem] p-10 border border-white/10 text-left space-y-8">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-xl z-50 flex items-center justify-center p-4 overflow-y-auto">
+          <form onSubmit={handleCreateDossier} className="bg-[#0F172A] w-full max-w-4xl rounded-[3rem] p-10 border border-white/10 text-left space-y-8 my-auto">
             <div className="flex justify-between items-center border-b border-white/5 pb-6">
-              <h2 className="text-2xl font-bold text-white uppercase italic">Nouveau <span className="text-emerald-400 font-black">Dossier</span></h2>
+              <h2 className="text-2xl font-bold text-white uppercase italic">Nouveau <span className="text-emerald-400 font-black">Dossier Client</span></h2>
               <button type="button" onClick={() => setShowModal(false)} className="p-2 text-slate-400 hover:text-white"><X /></button>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+               {/* Colonne Gauche : Identité */}
                <div className="space-y-4">
-                  <input required placeholder="Prénom Client" className="w-full p-4 bg-black/40 rounded-xl border border-white/10 outline-none focus:border-emerald-500 text-sm" onChange={e => setNewDossier({...newDossier, client_prenom: e.target.value})} />
-                  <input required placeholder="Nom Client" className="w-full p-4 bg-black/40 rounded-xl border border-white/10 outline-none focus:border-emerald-500 text-sm" onChange={e => setNewDossier({...newDossier, client_nom: e.target.value})} />
-                  <input type="email" required placeholder="Email Contact" className="w-full p-4 bg-black/40 rounded-xl border border-white/10 outline-none focus:border-emerald-500 text-sm" onChange={e => setNewDossier({...newDossier, email_client: e.target.value})} />
+                  <p className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest">Identité du Client</p>
+                  <input required placeholder="Prénom" className="w-full p-4 bg-black/40 rounded-xl border border-white/10 text-sm" onChange={e => setNewDossier({...newDossier, client_prenom: e.target.value})} />
+                  <input required placeholder="Nom" className="w-full p-4 bg-black/40 rounded-xl border border-white/10 text-sm" onChange={e => setNewDossier({...newDossier, client_nom: e.target.value})} />
+                  <input type="email" required placeholder="Email" className="w-full p-4 bg-black/40 rounded-xl border border-white/10 text-sm" onChange={e => setNewDossier({...newDossier, email_client: e.target.value})} />
+                  
+                  <p className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest pt-4">Localisation</p>
+                  <input placeholder="Rue / Adresse" className="w-full p-4 bg-black/40 rounded-xl border border-white/10 text-sm" onChange={e => setNewDossier({...newDossier, rue: e.target.value})} />
+                  <div className="grid grid-cols-2 gap-4">
+                    <input placeholder="Ville" className="w-full p-4 bg-black/40 rounded-xl border border-white/10 text-sm" onChange={e => setNewDossier({...newDossier, ville: e.target.value})} />
+                    <input placeholder="Pays" defaultValue="Espagne" className="w-full p-4 bg-black/40 rounded-xl border border-white/10 text-sm" onChange={e => setNewDossier({...newDossier, pays: e.target.value})} />
+                  </div>
                </div>
+
+               {/* Colonne Droite : Projet */}
                <div className="space-y-4">
-                  <input required placeholder="Nom de la Villa / Projet" className="w-full p-4 bg-emerald-500/10 text-emerald-400 rounded-xl border border-emerald-500/20 outline-none font-bold placeholder:text-emerald-400/50" onChange={e => setNewDossier({...newDossier, nom_villa: e.target.value})} />
-                  <select className="w-full p-4 bg-black/40 rounded-xl border border-white/10 outline-none text-xs uppercase" onChange={e => setNewDossier({...newDossier, etape_actuelle: e.target.value})}>
+                  <p className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest">Détails du Projet</p>
+                  <input required placeholder="Nom de la Villa / Projet" className="w-full p-4 bg-emerald-500/10 text-emerald-400 rounded-xl border border-emerald-500/20 font-bold" onChange={e => setNewDossier({...newDossier, nom_villa: e.target.value})} />
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-[9px] uppercase ml-2 text-slate-500">Livraison prévue</label>
+                      <input type="date" className="w-full p-4 bg-black/40 rounded-xl border border-white/10 text-sm mt-1" onChange={e => setNewDossier({...newDossier, date_livraison_prevue: e.target.value})} />
+                    </div>
+                    <div>
+                      <label className="text-[9px] uppercase ml-2 text-slate-500">Montant Cashback (€)</label>
+                      <input type="number" placeholder="Ex: 5000" className="w-full p-4 bg-black/40 rounded-xl border border-white/10 text-sm mt-1" onChange={e => setNewDossier({...newDossier, montant_cashback: Number(e.target.value)})} />
+                    </div>
+                  </div>
+
+                  <p className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest pt-4">Avancement</p>
+                  <select className="w-full p-4 bg-black/40 rounded-xl border border-white/10 text-xs uppercase" onChange={e => setNewDossier({...newDossier, etape_actuelle: e.target.value})}>
                     {PHASES_CHANTIER.map(p => <option key={p} value={p}>{p}</option>)}
                   </select>
+                  <textarea placeholder="Commentaire initial sur l'étape actuelle..." className="w-full p-4 bg-black/40 rounded-xl border border-white/10 text-sm h-24" onChange={e => setNewDossier({...newDossier, commentaires_etape: e.target.value})} />
                </div>
             </div>
-            <button type="submit" disabled={updating} className="w-full bg-emerald-500 text-black py-6 rounded-2xl font-black uppercase text-[11px] tracking-widest shadow-lg hover:bg-white transition-colors disabled:opacity-50">
-               {updating ? 'Création en cours...' : 'Générer le dossier client'}
+
+            <button type="submit" disabled={updating} className="w-full bg-emerald-500 text-black py-6 rounded-2xl font-black uppercase text-[11px] tracking-widest shadow-lg hover:bg-white transition-all disabled:opacity-50">
+               {updating ? 'Création en cours...' : 'Générer le dossier complet'}
             </button>
           </form>
         </div>
@@ -346,7 +296,6 @@ export default function AdminDashboard() {
       <style jsx global>{`
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.05); border-radius: 10px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #10b981; }
       `}</style>
     </div>
   );
