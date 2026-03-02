@@ -5,7 +5,7 @@ import { createBrowserClient } from '@supabase/ssr';
 import Link from 'next/link';
 import { 
   Building2, Loader2, LogOut, ShieldCheck, 
-  XCircle, Plus, Users, LayoutDashboard, Trash2,
+  XCircle, Plus, Users, Trash2,
   ArrowLeft, Search, Copy, CheckCircle2
 } from 'lucide-react';
 
@@ -32,7 +32,11 @@ export default function SuperAdminDashboard() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const fetchAdmins = useCallback(async () => {
-    const { data, error } = await supabase.from('profiles').select('*').order('created_at', { ascending: false }); 
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .order('created_at', { ascending: false }); 
+      
     if (!error) {
       const filtered = data?.filter(a => a.role !== 'super_admin');
       setAdmins(filtered || []);
@@ -49,25 +53,22 @@ export default function SuperAdminDashboard() {
           return;
         }
 
-        // VÉRIFICATION PAR RÔLE (Plus robuste que l'email seul)
+        const userEmail = user.email?.toLowerCase().trim();
+        const masterEmail = 'gaetan@amaru-homes.com'.toLowerCase().trim();
+
+        // Vérification du rôle en base de données
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('role')
           .eq('id', user.id)
           .single();
 
-        if (!profileError && profile?.role === 'super_admin') {
+        // Si l'email correspond OU si le rôle est super_admin
+        if (userEmail === masterEmail || (!profileError && profile?.role === 'super_admin')) {
           setAuthStatus('authorized');
           fetchAdmins();
         } else {
-          // Double sécurité par email si le profil n'est pas encore à jour
-          const userEmail = user.email?.toLowerCase().trim();
-          if (userEmail === 'gaetan@amaru-homes.com') {
-            setAuthStatus('authorized');
-            fetchAdmins();
-          } else {
-            setAuthStatus('denied');
-          }
+          setAuthStatus('denied');
         }
       } catch (err) {
         setAuthStatus('denied');
@@ -76,11 +77,16 @@ export default function SuperAdminDashboard() {
     checkUser();
   }, [supabase, fetchAdmins]);
 
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    localStorage.clear();
+    window.location.assign('/login');
+  };
+
   // LOGIQUE DE RECHERCHE
   const filteredAdmins = useMemo(() => {
     return admins.filter(admin => 
       admin.company_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      admin.id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       admin.email?.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [admins, searchTerm]);
@@ -90,8 +96,9 @@ export default function SuperAdminDashboard() {
     e.preventDefault();
     setIsGlobalLoading(true);
     try {
+      const cleanEmail = email.toLowerCase().trim();
       const { data: authData, error: authError } = await supabase.auth.signUp({ 
-        email: email.toLowerCase().trim(), 
+        email: cleanEmail, 
         password 
       });
       
@@ -100,7 +107,7 @@ export default function SuperAdminDashboard() {
       if (authData?.user) {
         const { error: profileError } = await supabase.from('profiles').upsert({ 
           id: authData.user.id, 
-          email: email.toLowerCase().trim(), 
+          email: cleanEmail, 
           role: 'admin', 
           company_name: companyName,
           prenom: adminPrenom,
@@ -110,7 +117,7 @@ export default function SuperAdminDashboard() {
 
         if (profileError) throw profileError;
 
-        alert(`Licence ${pack} créée avec succès pour ${companyName} !`);
+        alert(`Licence ${pack} créée avec succès !`);
         setEmail(""); setPassword(""); setCompanyName(""); setAdminPrenom(""); setAdminNom("");
         fetchAdmins();
       }
@@ -125,17 +132,16 @@ export default function SuperAdminDashboard() {
   const deleteAdminAccount = async (adminId: string, company: string) => {
     const { data } = await supabase.auth.getUser();
     if (adminId === data.user?.id) {
-       alert("Sécurité : Vous ne pouvez pas supprimer votre propre compte.");
+       alert("Sécurité : Impossible de supprimer votre propre compte.");
        return;
     }
     
-    if (!confirm(`ATTENTION : Révoquer définitivement l'accès de "${company}" ?`)) return;
+    if (!confirm(`Révoquer définitivement l'accès de "${company}" ?`)) return;
 
     setDeletingId(adminId);
     try {
       const { error } = await supabase.from('profiles').delete().eq('id', adminId);
       if (error) throw error;
-      alert(`Licence révoquée.`);
       fetchAdmins();
     } catch (err: any) {
       alert("Erreur : " + err.message);
@@ -150,15 +156,19 @@ export default function SuperAdminDashboard() {
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  if (authStatus === 'loading') return <div className="min-h-screen bg-[#050505] flex items-center justify-center"><Loader2 className="animate-spin text-red-600" size={40} /></div>;
+  if (authStatus === 'loading') return (
+    <div className="min-h-screen bg-[#050505] flex items-center justify-center">
+      <Loader2 className="animate-spin text-red-600" size={40} />
+    </div>
+  );
 
   if (authStatus === 'denied') return (
     <div className="min-h-screen bg-[#050505] flex items-center justify-center p-6 text-center">
        <div className="bg-[#0a0a0a] border border-red-900/30 p-12 rounded-[3rem] shadow-2xl max-w-md w-full">
           <XCircle size={64} className="text-red-600 mx-auto mb-6" />
           <h2 className="text-3xl font-serif text-white mb-6">Accès Refusé</h2>
-          <p className="text-slate-500 mb-8 text-sm">Ce compte n'est pas reconnu comme Super Admin.</p>
-          <button onClick={() => window.location.assign('/login')} className="w-full bg-white text-black py-4 rounded-xl font-bold uppercase text-[10px]">Retour à la connexion</button>
+          <p className="text-slate-500 mb-8 text-sm">Ce compte ne possède pas les privilèges Super Admin.</p>
+          <button onClick={handleLogout} className="w-full bg-white text-black py-4 rounded-xl font-bold uppercase text-[10px]">Changer de compte</button>
        </div>
     </div>
   );
@@ -182,16 +192,16 @@ export default function SuperAdminDashboard() {
             <Link href="/" className="flex-1 md:flex-none flex items-center justify-center gap-3 bg-[#0f0f0f] border border-slate-800 px-6 py-3 rounded-xl hover:bg-slate-900 transition-all text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-white">
               <ArrowLeft size={16} /> Site
             </Link>
-            <button onClick={async () => { await supabase.auth.signOut(); window.location.assign('/login'); }} className="h-12 w-12 flex items-center justify-center bg-[#0f0f0f] border border-slate-800 rounded-xl hover:bg-red-950/30 transition-all text-slate-500 hover:text-red-400">
+            <button onClick={handleLogout} className="h-12 w-12 flex items-center justify-center bg-[#0f0f0f] border border-slate-800 rounded-xl hover:bg-red-950/30 transition-all text-slate-500 hover:text-red-400">
                <LogOut size={20} />
             </button>
           </div>
         </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 text-left">
           {/* FORMULAIRE */}
           <section className="lg:col-span-5 space-y-6">
-            <div className="bg-[#0a0a0a] border border-slate-800/60 rounded-[2.5rem] p-8 shadow-2xl text-left">
+            <div className="bg-[#0a0a0a] border border-slate-800/60 rounded-[2.5rem] p-8 shadow-2xl">
               <h2 className="text-xl font-serif italic text-white mb-8 flex items-center gap-3">
                 <Plus size={20} className="text-red-500" /> Nouvelle Agence
               </h2>
@@ -236,7 +246,7 @@ export default function SuperAdminDashboard() {
           </section>
 
           {/* LISTE */}
-          <section className="lg:col-span-7 space-y-6 text-left">
+          <section className="lg:col-span-7 space-y-6">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-4">
               <h2 className="text-xl font-serif italic text-white flex items-center gap-3">
                 <Users size={20} className="text-red-500" /> Agences Actives
@@ -290,6 +300,9 @@ export default function SuperAdminDashboard() {
                   </div>
                 </div>
               ))}
+              {filteredAdmins.length === 0 && (
+                <div className="text-center py-12 text-slate-600 text-xs">Aucune agence trouvée</div>
+              )}
             </div>
           </section>
         </div>
