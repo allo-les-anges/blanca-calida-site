@@ -56,15 +56,21 @@ export default function SuperAdminDashboard() {
         const userEmail = user.email?.toLowerCase().trim();
         const masterEmail = 'gaetan@amaru-homes.com'.toLowerCase().trim();
 
-        // Vérification du rôle en base de données
-        const { data: profile, error: profileError } = await supabase
+        // 1. VÉRIFICATION PRIORITAIRE PAR EMAIL
+        if (userEmail === masterEmail) {
+          setAuthStatus('authorized');
+          fetchAdmins();
+          return;
+        }
+
+        // 2. VÉRIFICATION SECONDAIRE PAR RÔLE DB
+        const { data: profile } = await supabase
           .from('profiles')
           .select('role')
           .eq('id', user.id)
           .single();
 
-        // Si l'email correspond OU si le rôle est super_admin
-        if (userEmail === masterEmail || (!profileError && profile?.role === 'super_admin')) {
+        if (profile?.role === 'super_admin') {
           setAuthStatus('authorized');
           fetchAdmins();
         } else {
@@ -80,10 +86,10 @@ export default function SuperAdminDashboard() {
   const handleLogout = async () => {
     await supabase.auth.signOut();
     localStorage.clear();
+    sessionStorage.clear();
     window.location.assign('/login');
   };
 
-  // LOGIQUE DE RECHERCHE
   const filteredAdmins = useMemo(() => {
     return admins.filter(admin => 
       admin.company_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -91,7 +97,6 @@ export default function SuperAdminDashboard() {
     );
   }, [admins, searchTerm]);
 
-  // FONCTION : CRÉER UN COMPTE
   const createAdminAccount = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsGlobalLoading(true);
@@ -117,7 +122,7 @@ export default function SuperAdminDashboard() {
 
         if (profileError) throw profileError;
 
-        alert(`Licence ${pack} créée avec succès !`);
+        alert(`Licence ${pack} activée pour ${companyName}`);
         setEmail(""); setPassword(""); setCompanyName(""); setAdminPrenom(""); setAdminNom("");
         fetchAdmins();
       }
@@ -128,15 +133,8 @@ export default function SuperAdminDashboard() {
     }
   };
 
-  // FONCTION : SUPPRIMER UN COMPTE
   const deleteAdminAccount = async (adminId: string, company: string) => {
-    const { data } = await supabase.auth.getUser();
-    if (adminId === data.user?.id) {
-       alert("Sécurité : Impossible de supprimer votre propre compte.");
-       return;
-    }
-    
-    if (!confirm(`Révoquer définitivement l'accès de "${company}" ?`)) return;
+    if (!confirm(`Supprimer définitivement l'accès de "${company}" ?`)) return;
 
     setDeletingId(adminId);
     try {
@@ -167,7 +165,7 @@ export default function SuperAdminDashboard() {
        <div className="bg-[#0a0a0a] border border-red-900/30 p-12 rounded-[3rem] shadow-2xl max-w-md w-full">
           <XCircle size={64} className="text-red-600 mx-auto mb-6" />
           <h2 className="text-3xl font-serif text-white mb-6">Accès Refusé</h2>
-          <p className="text-slate-500 mb-8 text-sm">Ce compte ne possède pas les privilèges Super Admin.</p>
+          <p className="text-slate-500 mb-8 text-sm">Seul le compte Gaëtan peut piloter cette interface.</p>
           <button onClick={handleLogout} className="w-full bg-white text-black py-4 rounded-xl font-bold uppercase text-[10px]">Changer de compte</button>
        </div>
     </div>
@@ -177,7 +175,6 @@ export default function SuperAdminDashboard() {
     <div className="min-h-screen bg-[#050505] text-slate-200 font-sans selection:bg-red-500/30">
       <div className="relative z-10 max-w-7xl mx-auto p-6 md:p-12">
         
-        {/* HEADER */}
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-16 text-left">
           <div className="flex items-center gap-6">
             <div className="h-16 w-16 bg-gradient-to-br from-red-600 to-red-900 rounded-2xl flex items-center justify-center shadow-lg shadow-red-900/20">
@@ -199,7 +196,6 @@ export default function SuperAdminDashboard() {
         </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 text-left">
-          {/* FORMULAIRE */}
           <section className="lg:col-span-5 space-y-6">
             <div className="bg-[#0a0a0a] border border-slate-800/60 rounded-[2.5rem] p-8 shadow-2xl">
               <h2 className="text-xl font-serif italic text-white mb-8 flex items-center gap-3">
@@ -209,16 +205,16 @@ export default function SuperAdminDashboard() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <label className="text-[9px] uppercase tracking-widest font-black text-slate-500 ml-2">Prénom</label>
-                    <input className="w-full bg-[#050505] border border-slate-800 rounded-xl p-3 text-sm text-white focus:border-red-600 outline-none" value={adminPrenom} onChange={e => setAdminPrenom(e.target.value)} required />
+                    <input autoComplete="given-name" className="w-full bg-[#050505] border border-slate-800 rounded-xl p-3 text-sm text-white focus:border-red-600 outline-none" value={adminPrenom} onChange={e => setAdminPrenom(e.target.value)} required />
                   </div>
                   <div className="space-y-1">
                     <label className="text-[9px] uppercase tracking-widest font-black text-slate-500 ml-2">Nom</label>
-                    <input className="w-full bg-[#050505] border border-slate-800 rounded-xl p-3 text-sm text-white focus:border-red-600 outline-none" value={adminNom} onChange={e => setAdminNom(e.target.value)} required />
+                    <input autoComplete="family-name" className="w-full bg-[#050505] border border-slate-800 rounded-xl p-3 text-sm text-white focus:border-red-600 outline-none" value={adminNom} onChange={e => setAdminNom(e.target.value)} required />
                   </div>
                 </div>
                 <div className="space-y-1">
                   <label className="text-[9px] uppercase tracking-widest font-black text-slate-500 ml-2">Agence</label>
-                  <input className="w-full bg-[#050505] border border-slate-800 rounded-xl p-3 text-sm text-white focus:border-red-600 outline-none" value={companyName} onChange={e => setCompanyName(e.target.value)} required />
+                  <input autoComplete="organization" className="w-full bg-[#050505] border border-slate-800 rounded-xl p-3 text-sm text-white focus:border-red-600 outline-none" value={companyName} onChange={e => setCompanyName(e.target.value)} required />
                 </div>
                 <div className="space-y-1">
                   <label className="text-[9px] uppercase tracking-widest font-black text-slate-500 ml-2">Pack</label>
@@ -231,11 +227,11 @@ export default function SuperAdminDashboard() {
                 <div className="pt-4 border-t border-slate-900 space-y-4">
                   <div className="space-y-1">
                     <label className="text-[9px] uppercase tracking-widest font-black text-slate-500 ml-2">Email</label>
-                    <input className="w-full bg-[#050505] border border-slate-800 rounded-xl p-3 text-sm text-white focus:border-red-600 outline-none" value={email} onChange={e => setEmail(e.target.value)} required />
+                    <input autoComplete="email" className="w-full bg-[#050505] border border-slate-800 rounded-xl p-3 text-sm text-white focus:border-red-600 outline-none" value={email} onChange={e => setEmail(e.target.value)} required />
                   </div>
                   <div className="space-y-1">
                     <label className="text-[9px] uppercase tracking-widest font-black text-slate-500 ml-2">Mot de passe</label>
-                    <input type="password" className="w-full bg-[#050505] border border-slate-800 rounded-xl p-3 text-sm text-white focus:border-red-600 outline-none" value={password} onChange={e => setPassword(e.target.value)} required />
+                    <input type="password" name="password" autoComplete="new-password" className="w-full bg-[#050505] border border-slate-800 rounded-xl p-3 text-sm text-white focus:border-red-600 outline-none" value={password} onChange={e => setPassword(e.target.value)} required />
                   </div>
                 </div>
                 <button type="submit" disabled={isGlobalLoading} className="w-full bg-red-700 hover:bg-red-600 py-4 mt-6 rounded-xl font-black uppercase text-[10px] tracking-widest">
@@ -245,7 +241,6 @@ export default function SuperAdminDashboard() {
             </div>
           </section>
 
-          {/* LISTE */}
           <section className="lg:col-span-7 space-y-6">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-4">
               <h2 className="text-xl font-serif italic text-white flex items-center gap-3">
