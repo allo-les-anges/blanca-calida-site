@@ -49,16 +49,25 @@ export default function SuperAdminDashboard() {
           return;
         }
 
-        // Nettoyage ultra-robuste de l'email pour éviter l'Accès Refusé
-        const userEmail = user.email?.toLowerCase().trim();
-        const targetEmail = 'gaetan@amaru-homes.com'.toLowerCase().trim();
+        // VÉRIFICATION PAR RÔLE (Plus robuste que l'email seul)
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single();
 
-        if (userEmail === targetEmail) {
+        if (!profileError && profile?.role === 'super_admin') {
           setAuthStatus('authorized');
           fetchAdmins();
         } else {
-          console.log("Tentative d'accès non autorisée de :", userEmail);
-          setAuthStatus('denied');
+          // Double sécurité par email si le profil n'est pas encore à jour
+          const userEmail = user.email?.toLowerCase().trim();
+          if (userEmail === 'gaetan@amaru-homes.com') {
+            setAuthStatus('authorized');
+            fetchAdmins();
+          } else {
+            setAuthStatus('denied');
+          }
         }
       } catch (err) {
         setAuthStatus('denied');
@@ -81,7 +90,11 @@ export default function SuperAdminDashboard() {
     e.preventDefault();
     setIsGlobalLoading(true);
     try {
-      const { data: authData, error: authError } = await supabase.auth.signUp({ email, password });
+      const { data: authData, error: authError } = await supabase.auth.signUp({ 
+        email: email.toLowerCase().trim(), 
+        password 
+      });
+      
       if (authError) throw authError;
 
       if (authData?.user) {
@@ -97,17 +110,22 @@ export default function SuperAdminDashboard() {
 
         if (profileError) throw profileError;
 
-        alert(`Licence ${pack} créée avec succès !`);
+        alert(`Licence ${pack} créée avec succès pour ${companyName} !`);
         setEmail(""); setPassword(""); setCompanyName(""); setAdminPrenom(""); setAdminNom("");
         fetchAdmins();
       }
-    } catch (err: any) { alert(err.message); } finally { setIsGlobalLoading(false); }
+    } catch (err: any) { 
+      alert(err.message); 
+    } finally { 
+      setIsGlobalLoading(false); 
+    }
   };
 
   // FONCTION : SUPPRIMER UN COMPTE
   const deleteAdminAccount = async (adminId: string, company: string) => {
-    if (adminId === (await supabase.auth.getUser()).data.user?.id) {
-       alert("Sécurité : Vous ne pouvez pas supprimer votre propre compte Super Admin.");
+    const { data } = await supabase.auth.getUser();
+    if (adminId === data.user?.id) {
+       alert("Sécurité : Vous ne pouvez pas supprimer votre propre compte.");
        return;
     }
     
@@ -139,14 +157,14 @@ export default function SuperAdminDashboard() {
        <div className="bg-[#0a0a0a] border border-red-900/30 p-12 rounded-[3rem] shadow-2xl max-w-md w-full">
           <XCircle size={64} className="text-red-600 mx-auto mb-6" />
           <h2 className="text-3xl font-serif text-white mb-6">Accès Refusé</h2>
-          <p className="text-slate-500 mb-8 text-sm">Votre compte n'est pas autorisé à accéder au panneau Super Admin.</p>
+          <p className="text-slate-500 mb-8 text-sm">Ce compte n'est pas reconnu comme Super Admin.</p>
           <button onClick={() => window.location.assign('/login')} className="w-full bg-white text-black py-4 rounded-xl font-bold uppercase text-[10px]">Retour à la connexion</button>
        </div>
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-[#050505] text-slate-200 font-sans">
+    <div className="min-h-screen bg-[#050505] text-slate-200 font-sans selection:bg-red-500/30">
       <div className="relative z-10 max-w-7xl mx-auto p-6 md:p-12">
         
         {/* HEADER */}
@@ -161,7 +179,7 @@ export default function SuperAdminDashboard() {
             </div>
           </div>
           <div className="flex gap-4 w-full md:w-auto">
-            <Link href="/" className="flex-1 md:flex-none flex items-center justify-center gap-3 bg-[#0f0f0f] border border-slate-800 px-6 py-3 rounded-xl hover:bg-slate-900 transition-all text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-white font-sans">
+            <Link href="/" className="flex-1 md:flex-none flex items-center justify-center gap-3 bg-[#0f0f0f] border border-slate-800 px-6 py-3 rounded-xl hover:bg-slate-900 transition-all text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-white">
               <ArrowLeft size={16} /> Site
             </Link>
             <button onClick={async () => { await supabase.auth.signOut(); window.location.assign('/login'); }} className="h-12 w-12 flex items-center justify-center bg-[#0f0f0f] border border-slate-800 rounded-xl hover:bg-red-950/30 transition-all text-slate-500 hover:text-red-400">
@@ -171,13 +189,13 @@ export default function SuperAdminDashboard() {
         </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-          {/* SECTION CRÉATION */}
+          {/* FORMULAIRE */}
           <section className="lg:col-span-5 space-y-6">
             <div className="bg-[#0a0a0a] border border-slate-800/60 rounded-[2.5rem] p-8 shadow-2xl text-left">
               <h2 className="text-xl font-serif italic text-white mb-8 flex items-center gap-3">
                 <Plus size={20} className="text-red-500" /> Nouvelle Agence
               </h2>
-              <form onSubmit={createAdminAccount} className="space-y-4 font-sans">
+              <form onSubmit={createAdminAccount} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <label className="text-[9px] uppercase tracking-widest font-black text-slate-500 ml-2">Prénom</label>
@@ -189,12 +207,12 @@ export default function SuperAdminDashboard() {
                   </div>
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[9px] uppercase tracking-widest font-black text-slate-500 ml-2">Nom de l'agence</label>
+                  <label className="text-[9px] uppercase tracking-widest font-black text-slate-500 ml-2">Agence</label>
                   <input className="w-full bg-[#050505] border border-slate-800 rounded-xl p-3 text-sm text-white focus:border-red-600 outline-none" value={companyName} onChange={e => setCompanyName(e.target.value)} required />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[9px] uppercase tracking-widest font-black text-slate-500 ml-2">Pack Licence</label>
-                  <select value={pack} onChange={e => setPack(e.target.value)} className="w-full bg-[#050505] border border-slate-800 rounded-xl p-3 text-sm text-white outline-none focus:border-red-600">
+                  <label className="text-[9px] uppercase tracking-widest font-black text-slate-500 ml-2">Pack</label>
+                  <select value={pack} onChange={e => setPack(e.target.value)} className="w-full bg-[#050505] border border-slate-800 rounded-xl p-3 text-sm text-white outline-none">
                     <option value="CORE">CORE (2 Experts)</option>
                     <option value="ASCENT">ASCENT (10 Experts)</option>
                     <option value="HORIZON">HORIZON (Illimité)</option>
@@ -202,7 +220,7 @@ export default function SuperAdminDashboard() {
                 </div>
                 <div className="pt-4 border-t border-slate-900 space-y-4">
                   <div className="space-y-1">
-                    <label className="text-[9px] uppercase tracking-widest font-black text-slate-500 ml-2">Email de connexion</label>
+                    <label className="text-[9px] uppercase tracking-widest font-black text-slate-500 ml-2">Email</label>
                     <input className="w-full bg-[#050505] border border-slate-800 rounded-xl p-3 text-sm text-white focus:border-red-600 outline-none" value={email} onChange={e => setEmail(e.target.value)} required />
                   </div>
                   <div className="space-y-1">
@@ -217,18 +235,18 @@ export default function SuperAdminDashboard() {
             </div>
           </section>
 
-          {/* SECTION LISTE & RECHERCHE */}
+          {/* LISTE */}
           <section className="lg:col-span-7 space-y-6 text-left">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-4 font-sans">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-4">
               <h2 className="text-xl font-serif italic text-white flex items-center gap-3">
-                <Users size={20} className="text-red-500" /> Agences sous contrat
+                <Users size={20} className="text-red-500" /> Agences Actives
               </h2>
               <div className="relative w-full sm:w-64">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-600" size={14} />
                 <input 
                   type="text" 
-                  placeholder="Rechercher Nom, Email ou ID..." 
-                  className="w-full pl-10 pr-4 py-2 bg-[#0a0a0a] border border-slate-800 rounded-full text-[11px] outline-none focus:border-red-900/50"
+                  placeholder="Rechercher..." 
+                  className="w-full pl-10 pr-4 py-2 bg-[#0a0a0a] border border-slate-800 rounded-full text-[11px] outline-none"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -246,17 +264,17 @@ export default function SuperAdminDashboard() {
                       <div>
                         <div className="flex items-center gap-3">
                           <p className="font-bold text-white group-hover:text-red-500 transition-colors">{admin.company_name}</p>
-                          <span className="text-[8px] px-2 py-0.5 rounded bg-red-500/10 text-red-500 border border-red-500/20 font-black tracking-tighter">{admin.pack}</span>
+                          <span className="text-[8px] px-2 py-0.5 rounded bg-red-500/10 text-red-500 border border-red-500/20 font-black">{admin.pack}</span>
                         </div>
                         <div className="flex items-center gap-2 mt-1">
                           <p className="text-[9px] font-mono text-slate-600 truncate max-w-[150px]">ID: {admin.id}</p>
-                          <button onClick={() => copyToClipboard(admin.id)} className="text-slate-700 hover:text-white" title="Copier l'ID">
+                          <button onClick={() => copyToClipboard(admin.id)} className="text-slate-700 hover:text-white">
                             {copiedId === admin.id ? <CheckCircle2 size={10} className="text-emerald-500" /> : <Copy size={10} />}
                           </button>
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center justify-between md:justify-end gap-6">
+                    <div className="flex items-center gap-6">
                       <div className="text-right hidden sm:block">
                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">{admin.prenom} {admin.nom}</p>
                         <p className="text-[9px] text-slate-600">{admin.email}</p>
