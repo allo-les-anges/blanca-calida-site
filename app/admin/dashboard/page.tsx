@@ -23,7 +23,7 @@ const TRANSLATIONS = {
     noDocs: "Aucun document chargé.", createExpert: "Nouvel Expert", savePin: "Enregistrer & Créer PIN",
     quota: "Quota Atteint", identity: "Identité & Lieu", projectDetails: "Détails Projet",
     createDossier: "Créer le Dossier & Générer PIN", loading: "Chargement...",
-    settings: "Paramètres Agence", save: "Enregistrer",
+    settings: "Profil & Agence", save: "Enregistrer les modifications",
     phases: [
       "0. Signature & Réservation", "1. Terrain / Terrassement", "2. Fondations", 
       "3. Murs / Élévation", "4. Toiture / Charpente", "5. Menuiseries", 
@@ -38,43 +38,8 @@ const TRANSLATIONS = {
     noDocs: "No documents uploaded.", createExpert: "New Expert", savePin: "Save & Create PIN",
     quota: "Limit Reached", identity: "Identity & Location", projectDetails: "Project Details",
     createDossier: "Create File & Generate PIN", loading: "Loading...",
-    settings: "Agency Settings", save: "Save",
-    phases: [
-      "0. Signature & Reservation", "1. Land / Earthworks", "2. Foundations", 
-      "3. Walls / Elevation", "4. Roof / Framework", "5. Joinery", 
-      "6. Electricity / Plumbing", "7. Insulation", "8. Plastering", 
-      "9. Floors & Tiling", "10. Painting / Finishes", "11. Exterior / Garden", "12. Key Handover"
-    ]
-  },
-  es: {
-    dossiers: "Expedientes", experts: "Expertos", newDossier: "Nuevo Expediente", 
-    addExpert: "Añadir Experto", search: "Buscar...", currentStep: "Etapa actual",
-    clientPin: "PIN Cliente", cashback: "Reembolso", docs: "Documentos Clientes",
-    noDocs: "No hay documentos.", createExpert: "Nuevo Experto", savePin: "Guardar y Crear PIN",
-    quota: "Cupo Lleno", identity: "Identidad y Ubicación", projectDetails: "Detalles del Proyecto",
-    createDossier: "Crear Expediente y Generar PIN", loading: "Cargando...",
-    settings: "Ajustes de Agencia", save: "Guardar",
-    phases: [
-      "0. Firma y Reserva", "1. Terreno / Movimiento de tierras", "2. Cimientos", 
-      "3. Muros / Elevación", "4. Techo / Estructura", "5. Carpintería", 
-      "6. Electricidad / Fontanería", "7. Aislamiento", "8. Yeso", 
-      "9. Suelos y Azulejos", "10. Pintura / Acabados", "11. Exteriores / Jardín", "12. Entrega de llaves"
-    ]
-  },
-  nl: {
-    dossiers: "Dossiers", experts: "Experts", newDossier: "Nieuw Dossier", 
-    addExpert: "Expert Toevoegen", search: "Zoeken...", currentStep: "Huidige fase",
-    clientPin: "Klant PIN", cashback: "Cashback", docs: "Klantdocumenten",
-    noDocs: "Geen documenten geladen.", createExpert: "Nieuwe Expert", savePin: "Opslaan & PIN Aanmaken",
-    quota: "Limiet Bereikt", identity: "Identiteit & Locatie", projectDetails: "Projectdetails",
-    createDossier: "Dossier Aanmaken & PIN Genereren", loading: "Laden...",
-    settings: "Instellingen", save: "Opslaan",
-    phases: [
-      "0. Handtekening & Reservering", "1. Terrein / Grondwerken", "2. Funderingen", 
-      "3. Muren / Opbouw", "4. Dak / Gebinte", "5. Schrijnwerk", 
-      "6. Elektriciteit / Loodgieterij", "7. Isolatie", "8. Pleisterwerk", 
-      "9. Vloeren & Tegels", "10. Schilderwerk / Afwerking", "11. Buiten / Tuin", "12. Sleuteloverdracht"
-    ]
+    settings: "Profile & Agency", save: "Save Changes",
+    phases: ["0. Signature & Reservation", "1. Land / Earthworks", "2. Foundations", "3. Walls / Elevation", "4. Roof / Framework", "5. Joinery", "6. Electricity / Plumbing", "7. Insulation", "8. Plastering", "9. Floors & Tiling", "10. Painting / Finishes", "11. Exterior / Garden", "12. Key Handover"]
   }
 };
 
@@ -86,7 +51,7 @@ const PACK_CONFIG = {
 
 export default function AdminDashboard() {
   const [isMounted, setIsMounted] = useState(false);
-  const [lang, setLang] = useState<'fr' | 'en' | 'es' | 'nl'>('fr');
+  const [lang, setLang] = useState<'fr' | 'en'>('fr');
   const t = TRANSLATIONS[lang];
 
   const [activeTab, setActiveTab] = useState<'clients' | 'staff'>('clients');
@@ -97,16 +62,18 @@ export default function AdminDashboard() {
   const [selectedProjet, setSelectedProjet] = useState<any>(null);
   const [documents, setDocuments] = useState<any[]>([]);
   
-  // Modales
   const [showModal, setShowModal] = useState(false);
   const [showStaffModal, setShowStaffModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   
   const [staffList, setStaffList] = useState<any[]>([]);
-  const [adminFirstName, setAdminFirstName] = useState("");
+  
+  // État combiné Agence + Identité Admin
   const [agencyProfile, setAgencyProfile] = useState<any>({
     id: null,
-    company_name: "Chargement...",
+    company_name: "Amaru-Homes",
+    prenom: "",
+    nom: "",
     logo_url: null,
     pack: "CORE"
   });
@@ -129,34 +96,50 @@ export default function AdminDashboard() {
     setLoading(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
+      
       if (user) {
-        const namePart = user.email?.split('@')[0] || "Admin";
-        setAdminFirstName(namePart.charAt(0).toUpperCase() + namePart.slice(1));
-
+        // Lecture du profil
         const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+        
+        // Extraction fallback de l'email si le prénom est vide en base
+        const emailPrefix = user.email?.split('@')[0] || "Admin";
+        const defaultPrenom = emailPrefix.charAt(0).toUpperCase() + emailPrefix.slice(1);
+
         if (profile) {
           setAgencyProfile({
-            ...profile,
+            id: profile.id,
             company_name: profile.company_name || "Amaru-Homes",
+            prenom: profile.prenom || defaultPrenom,
+            nom: profile.nom || "",
+            logo_url: profile.logo_url,
             pack: profile.pack || "CORE"
           });
         }
       }
+
       const { data: projData } = await supabase.from('suivi_chantier').select('*').order('created_at', { ascending: false });
       const { data: stfData } = await supabase.from('staff_prestataires').select('*').order('created_at', { ascending: false });
+      
       if (projData) setProjets(projData);
       if (stfData) setStaffList(stfData);
-    } catch (error) { console.error(error); } finally { setLoading(false); }
+    } catch (error) { 
+      console.error("Erreur chargement:", error); 
+    } finally { 
+      setLoading(false); 
+    }
   };
 
-  // --- LOGIQUE DES PARAMÈTRES ---
-  const handleUpdateAgency = async (e: React.FormEvent) => {
+  const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     setUpdating(true);
     try {
       const { error } = await supabase
         .from('profiles')
-        .update({ company_name: agencyProfile.company_name })
+        .update({ 
+          company_name: agencyProfile.company_name,
+          prenom: agencyProfile.prenom,
+          nom: agencyProfile.nom 
+        })
         .eq('id', agencyProfile.id);
       
       if (!error) setShowSettingsModal(false);
@@ -212,15 +195,6 @@ export default function AdminDashboard() {
     } finally { setUpdating(false); }
   };
 
-  const handleCreateDossier = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setUpdating(true);
-    const pin = Math.floor(1000 + Math.random() * 9000).toString();
-    const { error } = await supabase.from('suivi_chantier').insert([{ ...newDossier, pin_code: pin }]);
-    if (!error) { setShowModal(false); loadData(); }
-    setUpdating(false);
-  };
-
   const filteredProjets = useMemo(() => {
     return projets.filter(p => `${p.client_prenom} ${p.client_nom} ${p.nom_villa}`.toLowerCase().includes(searchTerm.toLowerCase()));
   }, [projets, searchTerm]);
@@ -247,19 +221,15 @@ export default function AdminDashboard() {
             <div className="space-y-1">
               <h1 className="text-sm font-black text-white uppercase tracking-tight leading-none truncate max-w-[140px]">{agencyProfile.company_name}</h1>
               <div className="flex items-center gap-2">
-                <p className="text-[10px] text-emerald-400 font-bold">{adminFirstName}</p>
+                <p className="text-[10px] text-emerald-400 font-bold uppercase tracking-tighter">
+                  {agencyProfile.prenom} {agencyProfile.nom}
+                </p>
                 <button onClick={() => setShowSettingsModal(true)} className="text-slate-500 hover:text-white transition-colors"><Settings size={12}/></button>
               </div>
               <div className={`inline-flex items-center px-2 py-0.5 rounded-full border text-[8px] font-black uppercase tracking-[0.15em] ${currentPack.style}`}>
                 <Zap size={8} className="mr-1 fill-current" /> {currentPack.label}
               </div>
             </div>
-          </div>
-
-          <div className="grid grid-cols-4 gap-1 bg-black/40 p-1 rounded-xl border border-white/5">
-            {(['fr', 'en', 'es', 'nl'] as const).map((l) => (
-              <button key={l} onClick={() => setLang(l)} className={`py-1 rounded-lg text-[9px] font-black uppercase transition-all ${lang === l ? 'bg-emerald-500 text-black shadow-lg shadow-emerald-500/20' : 'text-slate-500 hover:text-white'}`}>{l}</button>
-            ))}
           </div>
 
           <div className="flex bg-black/40 p-1 rounded-xl border border-white/5">
@@ -307,9 +277,9 @@ export default function AdminDashboard() {
       {/* MAIN CONTENT */}
       <main className="flex-1 p-6 md:p-12 overflow-y-auto bg-gradient-to-br from-[#020617] to-[#0F172A]">
         {selectedProjet ? (
-          <div className="max-w-6xl mx-auto space-y-8 animate-in fade-in duration-500">
+          <div className="max-w-6xl mx-auto space-y-8 animate-in fade-in duration-500 text-left">
             <div className="bg-white/[0.02] p-8 rounded-[2rem] border border-white/5 backdrop-blur-3xl flex flex-col md:flex-row justify-between items-start md:items-end gap-6 shadow-2xl">
-              <div className="text-left">
+              <div>
                 <h2 className="text-4xl md:text-5xl font-bold tracking-tighter text-white mb-4 italic uppercase">{selectedProjet.nom_villa}</h2>
                 <div className="flex flex-wrap gap-4 text-[10px] font-bold uppercase tracking-widest text-slate-400">
                   <span className="bg-white/5 px-4 py-2 rounded-full flex items-center gap-2 border border-white/5"><MapPin size={12}/> {selectedProjet.ville}</span>
@@ -317,14 +287,12 @@ export default function AdminDashboard() {
                   <span className="bg-blue-500/10 text-blue-400 px-4 py-2 rounded-full flex items-center gap-2 border border-blue-500/20"><Euro size={12}/> {t.cashback}: {selectedProjet.montant_cashback}€</span>
                 </div>
               </div>
-              <div className="flex gap-3">
-                 <button onClick={() => { supabase.auth.signOut(); window.location.reload(); }} className="p-4 bg-red-500/10 text-red-500 rounded-2xl hover:bg-red-500 hover:text-white transition-all border border-red-500/20"><LogOut size={20}/></button>
-              </div>
+              <button onClick={() => { supabase.auth.signOut(); window.location.reload(); }} className="p-4 bg-red-500/10 text-red-500 rounded-2xl hover:bg-red-500 hover:text-white transition-all border border-red-500/20"><LogOut size={20}/></button>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <div className="lg:col-span-2">
-                <div className="bg-black/60 p-10 rounded-[2.5rem] border border-white/5 text-left">
+                <div className="bg-black/60 p-10 rounded-[2.5rem] border border-white/5">
                    <h3 className="text-[10px] font-bold uppercase text-emerald-500 mb-6 tracking-widest flex items-center gap-2"><Activity size={14}/> {t.currentStep} : {selectedProjet.etape_actuelle}</h3>
                    <p className="text-2xl font-medium text-slate-200 italic border-l-4 border-emerald-500 pl-8 py-2 leading-relaxed">"{selectedProjet.commentaires_etape || "..."}"</p>
                 </div>
@@ -336,61 +304,77 @@ export default function AdminDashboard() {
                 </div>
                 <div className="flex-1 space-y-3 overflow-y-auto pr-2 custom-scrollbar">
                   {documents.length === 0 ? <p className="text-[10px] text-slate-500 italic mt-10 text-center">{t.noDocs}</p> : documents.map((doc) => (
-                    <div key={doc.id} className="flex items-center justify-between p-4 bg-white/[0.03] rounded-2xl border border-white/5 hover:bg-white/5 transition-all group"><p className="text-[11px] font-medium truncate flex-1 mr-4 text-slate-400 group-hover:text-white text-left">{doc.nom_fichier}</p><div className="flex gap-2"><a href={doc.url_fichier} target="_blank" rel="noreferrer" className="p-2 text-slate-600 hover:text-white"><Download size={14} /></a><button onClick={async () => { if(confirm("Supprimer ?")) { await supabase.from('documents_projets').delete().eq('id', doc.id); loadDocuments(selectedProjet.id); }}} className="p-2 text-slate-600 hover:text-red-400"><Trash2 size={14} /></button></div></div>
+                    <div key={doc.id} className="flex items-center justify-between p-4 bg-white/[0.03] rounded-2xl border border-white/5 hover:bg-white/5 transition-all group">
+                      <p className="text-[11px] font-medium truncate flex-1 mr-4 text-slate-400 group-hover:text-white">{doc.nom_fichier}</p>
+                      <div className="flex gap-2">
+                        <a href={doc.url_fichier} target="_blank" rel="noreferrer" className="p-2 text-slate-600 hover:text-white"><Download size={14} /></a>
+                        <button onClick={async () => { if(confirm("Supprimer ?")) { await supabase.from('documents_projets').delete().eq('id', doc.id); loadDocuments(selectedProjet.id); }}} className="p-2 text-slate-600 hover:text-red-400"><Trash2 size={14} /></button>
+                      </div>
+                    </div>
                   ))}
                 </div>
               </div>
             </div>
           </div>
         ) : (
-          <div className="h-full flex flex-col items-center justify-center opacity-10 grayscale"><Zap size={120} className="text-emerald-500 mb-8" /><p className="text-3xl font-black uppercase tracking-[0.5em] text-center">{agencyProfile.company_name}</p></div>
+          <div className="h-full flex flex-col items-center justify-center opacity-10 grayscale">
+            <Zap size={120} className="text-emerald-500 mb-8" />
+            <p className="text-3xl font-black uppercase tracking-[0.5em] text-center">{agencyProfile.company_name}</p>
+          </div>
         )}
       </main>
 
-      {/* --- MODALE PARAMÈTRES AGENCE --- */}
+      {/* --- MODALE PARAMÈTRES (PROFIL + AGENCE) --- */}
       {showSettingsModal && (
         <div className="fixed inset-0 bg-black/95 backdrop-blur-xl z-[70] flex items-center justify-center p-4">
-          <form onSubmit={handleUpdateAgency} className="bg-[#0F172A] w-full max-w-md rounded-[3rem] p-10 border border-white/10 shadow-2xl space-y-8 text-left">
+          <form onSubmit={handleUpdateProfile} className="bg-[#0F172A] w-full max-w-md rounded-[3rem] p-10 border border-white/10 shadow-2xl space-y-8 text-left">
             <div className="flex justify-between items-center">
               <h2 className="text-2xl font-black text-white uppercase italic tracking-tighter">{t.settings}</h2>
               <button type="button" onClick={() => setShowSettingsModal(false)} className="text-slate-500 hover:text-white"><X /></button>
             </div>
             
-            <div className="space-y-6">
-              {/* Logo Upload Zone */}
-              <div className="flex flex-col items-center gap-4">
+            <div className="space-y-4">
+              {/* Logo Section */}
+              <div className="flex flex-col items-center gap-4 mb-4">
                 <div className="relative group">
-                   <div className="w-24 h-24 rounded-3xl bg-black/40 border border-white/10 flex items-center justify-center overflow-hidden">
-                     {agencyProfile.logo_url ? <img src={agencyProfile.logo_url} className="w-full h-full object-contain p-2" /> : <Briefcase size={30} className="text-slate-700"/>}
+                   <div className="w-20 h-20 rounded-3xl bg-black/40 border border-white/10 flex items-center justify-center overflow-hidden">
+                     {agencyProfile.logo_url ? <img src={agencyProfile.logo_url} className="w-full h-full object-contain p-2" /> : <Briefcase size={24} className="text-slate-700"/>}
                    </div>
                    <label className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer rounded-3xl">
-                     <Camera className="text-white" size={20} />
+                     <Camera className="text-white" size={18} />
                      <input type="file" className="hidden" accept="image/*" onChange={handleLogoUpload} />
                    </label>
                 </div>
-                <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">Cliquez pour modifier le logo</p>
+                <p className="text-[8px] text-slate-500 font-bold uppercase tracking-widest">Logo de l'agence</p>
               </div>
 
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-emerald-500 uppercase ml-2 tracking-widest">Nom de l'agence</label>
-                <input required value={agencyProfile.company_name} className="w-full p-5 bg-black/40 rounded-2xl border border-white/10 text-sm outline-none focus:border-emerald-500/50" onChange={e => setAgencyProfile({...agencyProfile, company_name: e.target.value})} />
+              {/* Admin Identity */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                    <label className="text-[9px] font-black text-emerald-500 uppercase ml-2">Prénom</label>
+                    <input value={agencyProfile.prenom} className="w-full p-4 bg-black/40 rounded-xl border border-white/10 text-sm outline-none focus:border-emerald-500/50" onChange={e => setAgencyProfile({...agencyProfile, prenom: e.target.value})} />
+                </div>
+                <div className="space-y-1">
+                    <label className="text-[9px] font-black text-emerald-500 uppercase ml-2">Nom</label>
+                    <input value={agencyProfile.nom} className="w-full p-4 bg-black/40 rounded-xl border border-white/10 text-sm outline-none focus:border-emerald-500/50" onChange={e => setAgencyProfile({...agencyProfile, nom: e.target.value})} />
+                </div>
               </div>
 
-              <div className="p-4 bg-emerald-500/5 rounded-2xl border border-emerald-500/10">
-                <p className="text-[10px] text-slate-400 leading-relaxed italic">Ces informations seront visibles par vos clients sur leur interface de suivi de chantier.</p>
+              {/* Agency Name */}
+              <div className="space-y-1">
+                <label className="text-[9px] font-black text-emerald-500 uppercase ml-2">Nom de l'agence</label>
+                <input required value={agencyProfile.company_name} className="w-full p-4 bg-black/40 rounded-xl border border-white/10 text-sm outline-none focus:border-emerald-500/50" onChange={e => setAgencyProfile({...agencyProfile, company_name: e.target.value})} />
               </div>
             </div>
 
-            <button type="submit" disabled={updating} className="w-full bg-emerald-500 text-black py-6 rounded-2xl font-black uppercase text-[11px] hover:bg-white transition-all shadow-xl shadow-emerald-500/10">
+            <button type="submit" disabled={updating} className="w-full bg-emerald-500 text-black py-5 rounded-2xl font-black uppercase text-[10px] hover:bg-white transition-all shadow-xl shadow-emerald-500/10">
               {updating ? <Loader2 className="animate-spin mx-auto"/> : t.save}
             </button>
           </form>
         </div>
       )}
 
-      {/* Reste des modales (Staff, Dossier) inchangé... */}
-      {/* ... */}
-      
+      {/* Styles globaux pour la scannabilité */}
       <style jsx global>{`
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
