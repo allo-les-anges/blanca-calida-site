@@ -6,7 +6,14 @@ import Link from 'next/link';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  {
+    auth: {
+      persistSession: true,      // INDISPENSABLE : Force le stockage dans le navigateur
+      autoRefreshToken: true,    // Garde la session vivante
+      detectSessionInUrl: true   // Capte le token après le login
+    }
+  }
 );
 
 export default function AdminDashboard() {
