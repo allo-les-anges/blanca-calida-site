@@ -1,32 +1,32 @@
 "use client";
 import React, { useEffect, useState, useCallback } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import { Loader2, LogOut, LayoutDashboard, Briefcase } from 'lucide-react';
+import { Loader2, LogOut } from 'lucide-react';
 import Link from 'next/link';
 
-// Utilisation d'un stockage local très agressif
+// Utilisation d'un client avec une clé de stockage isolée
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
   {
     auth: {
       persistSession: true,
-      storageKey: 'amaru-dashboard-session', // Clé isolée
+      storageKey: 'amaru-legacy-auth', 
       autoRefreshToken: true,
+      detectSessionInUrl: true
     }
   }
 );
 
 export default function AdminDashboard() {
   const [isMounted, setIsMounted] = useState(false);
-  const [loading, setLoading] = useState(true);
   const [agencyProfile, setAgencyProfile] = useState<any>(null);
   const [projets, setProjets] = useState<any[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   const loadDashboardData = useCallback(async (user: any) => {
-    console.log("💾 Tentative de récupération des données pour :", user.email);
     try {
-      // 1. Profil (Uniquement company_name)
+      // 1. Profil (Harmonisé sur company_name)
       const { data: profile } = await supabase
         .from('profiles')
         .select('*')
@@ -34,7 +34,6 @@ export default function AdminDashboard() {
         .single();
 
       const currentAgency = profile?.company_name || "Agence Amaru";
-      
       setAgencyProfile({
         ...profile,
         company_name: currentAgency,
@@ -43,128 +42,65 @@ export default function AdminDashboard() {
 
       // 2. Projets
       const { data: allProjects } = await supabase.from('suivi_chantier').select('*');
-      
       const isSuperAdmin = user.email === 'gaetan@amaru-homes.com' || profile?.role === 'super_admin';
       
-      if (isSuperAdmin) {
-        setProjets(allProjects || []);
-      } else {
-        setProjets((allProjects || []).filter(p => p.company_name === currentAgency));
-      }
+      setProjets(isSuperAdmin ? (allProjects || []) : (allProjects || []).filter(p => p.company_name === currentAgency));
     } catch (err) {
-      console.error("❌ Erreur de chargement des données :", err);
-    } finally {
-      setLoading(false);
+      setError("Erreur de chargement des données.");
     }
   }, []);
 
   useEffect(() => {
     setIsMounted(true);
 
-    // On écoute uniquement les changements d'état
+    // ÉCOUTEUR UNIQUE : On ne fait rien d'autre que d'attendre l'user
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log("⚡ ÉVÉNEMENT CAPTÉ PAR LE DASHBOARD :", event);
-      
+      console.log("⚡ EVENEMENT AUTH :", event);
       if (session) {
-        console.log("✅ Session confirmée pour :", session.user.email);
         loadDashboardData(session.user);
-      } else {
-        console.log("⚠️ Aucune session détectée pour le moment.");
-        // ON NE REDIRIGE PLUS AUTOMATIQUEMENT ICI.
       }
     });
 
-    // Vérification initiale manuelle
-    const checkAuth = async () => {
+    // Vérification manuelle forcée
+    const forceCheck = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) loadDashboardData(session.user);
     };
 
-    checkAuth();
+    forceCheck();
     return () => subscription.unsubscribe();
   }, [loadDashboardData]);
 
   if (!isMounted) return null;
 
-  // L'écran ne s'affiche que si on a réussi à charger le profil
   if (!agencyProfile) {
     return (
-      <div className="min-h-screen bg-[#020617] flex flex-col items-center justify-center gap-6">
-        <Loader2 className="text-emerald-500 animate-spin" size={50} />
-        <div className="text-center">
-          <p className="text-white font-bold uppercase tracking-widest text-xs">Authentification en cours...</p>
-          <p className="text-slate-500 text-[10px] mt-2 italic">Si cet écran reste figé, vérifiez vos cookies.</p>
+      <div className="min-h-screen bg-[#020617] flex flex-col items-center justify-center text-white p-10">
+        <Loader2 className="text-emerald-500 animate-spin mb-4" size={40} />
+        <p className="text-xs font-bold uppercase tracking-widest animate-pulse">Session en cours de validation...</p>
+        <div className="mt-8 flex gap-4">
+            <button onClick={() => window.location.href = '/login'} className="text-[10px] border border-slate-700 px-4 py-2 rounded-full opacity-50">RETOUR LOGIN</button>
+            <button onClick={() => window.location.reload()} className="text-[10px] bg-emerald-500/10 text-emerald-500 px-4 py-2 rounded-full font-bold">RECHARGER</button>
         </div>
-        <button 
-          onClick={() => window.location.href = '/login'}
-          className="text-slate-500 text-[10px] underline uppercase"
-        >
-          Retour au login
-        </button>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#020617] text-white p-6 md:p-12 font-sans">
-      <div className="max-w-6xl mx-auto">
-        <header className="flex justify-between items-start mb-12">
-          <div>
-            <h1 className="text-4xl font-serif italic text-emerald-500">Bonjour {agencyProfile.prenom}</h1>
-            <p className="text-slate-400 text-sm mt-2 font-medium tracking-wide">
-              Gestionnaire : <span className="text-emerald-400">{agencyProfile.company_name}</span>
-            </p>
-          </div>
-          <button 
-            onClick={async () => {
-              await supabase.auth.signOut();
-              window.location.href = '/login';
-            }}
-            className="bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/20 px-6 py-2 rounded-full text-xs font-bold uppercase transition-all"
-          >
-            Déconnexion
-          </button>
-        </header>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-          <div className="bg-slate-900/50 border border-slate-800 p-8 rounded-[2rem]">
-            <p className="text-slate-500 text-[10px] uppercase font-black tracking-widest mb-2">Projets en cours</p>
-            <p className="text-5xl font-serif italic text-emerald-500">{projets.length}</p>
-          </div>
+    <div className="min-h-screen bg-[#020617] text-white p-10">
+      <div className="max-w-4xl mx-auto bg-[#0f172a] p-10 rounded-[3rem] border border-slate-800">
+        <div className="flex justify-between items-start mb-10">
+            <h1 className="text-2xl font-serif italic text-emerald-500">Espace {agencyProfile.company_name}</h1>
+            <button onClick={() => { supabase.auth.signOut(); window.location.href='/login'; }} className="text-red-400 text-[10px] font-bold">DÉCONNEXION</button>
         </div>
-
-        <div className="bg-slate-900/30 border border-slate-800 rounded-[2.5rem] overflow-hidden">
-          <table className="w-full text-left">
-            <thead>
-              <tr className="bg-slate-900 text-[10px] uppercase text-slate-500 tracking-widest">
-                <th className="p-8">Chantier / Client</th>
-                <th className="p-8 text-right">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-800/50">
-              {projets.map((p) => (
-                <tr key={p.id} className="hover:bg-emerald-500/5 transition-colors">
-                  <td className="p-8">
-                    <p className="text-lg font-bold">{p.nom_projet}</p>
-                    <p className="text-xs text-slate-500">{p.client_name || "Client Amaru"}</p>
-                  </td>
-                  <td className="p-8 text-right">
-                    <Link 
-                      href={`/admin/projet/${p.id}`}
-                      className="inline-block bg-emerald-500 text-black px-6 py-2 rounded-full text-xs font-black uppercase hover:scale-105 transition-transform"
-                    >
-                      Détails
-                    </Link>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          {projets.length === 0 && (
-            <div className="p-20 text-center text-slate-500 italic">
-              Aucun projet trouvé pour {agencyProfile.company_name}.
+        
+        <div className="space-y-4">
+          {projets.map(p => (
+            <div key={p.id} className="p-6 bg-slate-900/50 rounded-2xl border border-slate-800 flex justify-between items-center">
+              <span className="font-bold">{p.nom_projet}</span>
+              <Link href={`/admin/projet/${p.id}`} className="text-emerald-500 text-xs font-bold">ACCÉDER →</Link>
             </div>
-          )}
+          ))}
         </div>
       </div>
     </div>
