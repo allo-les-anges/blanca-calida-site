@@ -29,22 +29,27 @@ export default function LoginPage() {
       if (error) throw error;
 
       if (data?.session) {
-        console.log("Connexion réussie, préparation de la redirection...");
+        if (data?.session) {
+        console.log("Connexion réussie, stockage session...");
         
-        // 2. On laisse un micro-délai pour que le stockage des cookies se stabilise
-        // C'est souvent le secret pour éviter les boucles de redirection
+        // On force l'enregistrement avant de quitter la page
+        const { error: sessionError } = await supabase.auth.setSession({
+          access_token: data.session.access_token,
+          refresh_token: data.session.refresh_token
+        });
+
+        if (sessionError) throw sessionError;
+
+        const userEmail = data.session.user.email?.toLowerCase().trim();
+        
+        // On attend un peu plus pour être SÛR que le cookie est écrit
         setTimeout(() => {
-          const userEmail = data.session.user.email?.toLowerCase().trim();
-          
-          // 3. REDIRECTION FORCÉE (window.location) 
-          // Contrairement au router.push, ceci force le navigateur à rafraîchir 
-          // les headers et donc à envoyer les cookies tout juste créés.
           if (userEmail === 'gaetan@amaru-homes.com') {
-            window.location.href = '/super-admin';
+            window.location.assign('/super-admin');
           } else {
-            window.location.href = '/admin/dashboard';
+            window.location.assign('/admin/dashboard');
           }
-        }, 500); 
+        }, 800); 
       }
     } catch (error: any) {
       alert("Erreur de connexion : " + error.message);

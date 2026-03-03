@@ -91,18 +91,34 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     setIsMounted(true);
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+
+    const checkSession = async () => {
+      // On récupère la session de manière active
+      const { data: { session }, error } = await supabase.auth.getSession();
+      
       if (session) {
+        console.log("Session détectée pour:", session.user.email);
         setSessionActive(true);
         loadDashboardData(session.user);
       } else {
-        const timeout = setTimeout(() => {
-          if (!session) window.location.replace('/login');
-        }, 1500);
-        return () => clearTimeout(timeout);
+        console.warn("Pas de session, tentative via onAuthStateChange...");
+        // Fallback sur l'écouteur si getSession échoue au premier boot
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+          if (session) {
+            setSessionActive(true);
+            loadDashboardData(session.user);
+          } else {
+            // On attend 2 secondes avant de bannir, pour laisser au SSR le temps de respirer
+            setTimeout(() => {
+               if (!session) window.location.replace('/login');
+            }, 2000);
+          }
+        });
+        return () => subscription.unsubscribe();
       }
-    });
-    return () => subscription.unsubscribe();
+    };
+
+    checkSession();
   }, [loadDashboardData]);
 
   const handleCreateDossier = async (e: React.FormEvent) => {
@@ -235,7 +251,7 @@ export default function AdminDashboard() {
             <form onSubmit={handleCreateDossier} className="grid grid-cols-2 gap-4">
               <input required placeholder="Prénom Client" className="bg-black/40 p-4 rounded-xl border border-white/5 text-white" value={newDossier.client_prenom} onChange={e => setNewDossier({...newDossier, client_prenom: e.target.value})} />
               <input required placeholder="Nom Client" className="bg-black/40 p-4 rounded-xl border border-white/5 text-white" value={newDossier.client_nom} onChange={e => setNewDossier({...newDossier, client_nom: e.target.value})} />
-              <input required placeholder="Nom de la Villa" className="col-span-2 bg-black/40 p-4 rounded-xl border border-white/5 text-white" value={newDossier.nom_villa} onChange={e => setNewDossier({...newDossier, nom_villa: e.target.value})} />
+              <input required placeholder="Référence Constructeur" className="col-span-2 bg-black/40 p-4 rounded-xl border border-white/5 text-white" value={newDossier.nom_villa} onChange={e => setNewDossier({...newDossier, nom_villa: e.target.value})} />
               <button type="submit" disabled={updating} className="col-span-2 bg-emerald-500 text-black py-5 rounded-2xl font-black uppercase text-xs tracking-widest mt-4">
                 {updating ? <Loader2 className="animate-spin mx-auto" /> : "Créer le dossier & générer PIN"}
               </button>
