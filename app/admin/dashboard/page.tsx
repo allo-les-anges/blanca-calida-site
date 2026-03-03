@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { 
   Save, Camera, Trash2, Loader2, Plus, X, 
@@ -62,24 +62,24 @@ export default function AdminDashboard() {
     nom_villa: "", date_livraison_prevue: "", montant_cashback: 0, etape_actuelle: TRANSLATIONS.fr.phases[0]
   });
 
-  useEffect(() => { 
-    setIsMounted(true); 
-    loadData(); 
-  }, []);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
       
+      // On récupère la session actuelle de manière asynchrone
       const { data: { session }, error: authError } = await supabase.auth.getSession();
       
       if (authError || !session) {
-        if (typeof window !== "undefined") window.location.href = '/login';
+        console.log("Session invalide ou expirée");
+        if (typeof window !== "undefined") {
+          window.location.replace('/login');
+        }
         return;
       }
 
       const user = session.user;
 
+      // Récupération du profil
       const { data: profile, error: profError } = await supabase.from('profiles')
         .select('*')
         .eq('id', user.id)
@@ -97,6 +97,7 @@ export default function AdminDashboard() {
 
       const isSuperAdmin = currentProfile.agency_name === 'SUPER_ADMIN' || user.email === 'gaetan@amaru-homes.com';
 
+      // Chargement des données métier
       const [projRes, adsRes, stfRes] = await Promise.all([
         supabase.from('suivi_chantier')
           .select('*')
@@ -117,11 +118,16 @@ export default function AdminDashboard() {
       if (stfRes.data) setStaffList(stfRes.data);
 
     } catch (error) {
-      console.error("Erreur de chargement:", error);
+      console.error("Erreur de chargement globale:", error);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => { 
+    setIsMounted(true); 
+    loadData(); 
+  }, [loadData]);
 
   const handleCreateDossier = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -245,7 +251,7 @@ export default function AdminDashboard() {
           <button onClick={() => setActiveTab('settings')} className={`w-full flex items-center gap-3 p-4 rounded-xl transition-all ${activeTab === 'settings' ? 'bg-white/10 text-white' : 'text-slate-500 hover:text-white'}`}>
             <Settings size={18} /> <span className="text-[10px] font-black uppercase tracking-widest">{t.settings}</span>
           </button>
-          <button onClick={() => { supabase.auth.signOut(); window.location.href = '/'; }} className="w-full flex items-center justify-between p-4 rounded-xl text-slate-500 hover:text-red-500 transition-all group">
+          <button onClick={async () => { await supabase.auth.signOut(); window.location.replace('/'); }} className="w-full flex items-center justify-between p-4 rounded-xl text-slate-500 hover:text-red-500 transition-all group">
             <span className="text-[10px] font-black uppercase tracking-widest">{t.logout}</span> <LogOut size={16} />
           </button>
         </div>
@@ -301,7 +307,7 @@ export default function AdminDashboard() {
         ) : (
           <div className="h-full flex flex-col items-center justify-center">
             <Zap size={100} className="text-emerald-500 mb-8 opacity-20 animate-pulse" />
-            <p className="text-3xl font-black uppercase tracking-[0.4em] text-white/20 text-center mb-4">{agencyProfile?.agency_name}</p>
+            <p className="text-3xl font-black uppercase tracking-[0.4em] text-white/20 text-center mb-4">{agencyProfile?.agency_name || "Veuillez patienter..."}</p>
           </div>
         )}
       </main>
