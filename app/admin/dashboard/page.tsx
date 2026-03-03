@@ -6,7 +6,8 @@ import {
   Save, Camera, Trash2, Loader2, Plus, X, 
   Search, MapPin, Download, Upload, UserPlus, 
   LogOut, Activity, Zap, Euro, Calendar, Briefcase, 
-  UserCheck, Globe, ArrowLeft, ExternalLink
+  UserCheck, Globe, ArrowLeft, ExternalLink,
+  Home 
 } from 'lucide-react';
 import Link from 'next/link'; // Import pour la navigation Next.js
 
