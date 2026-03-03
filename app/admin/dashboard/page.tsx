@@ -1,3 +1,8 @@
+Voici le code complet, corrigé et optimisé pour éviter tout blocage.
+
+Les modifications majeures incluent une gestion robuste de la session avec `getSession()`, l'utilisation de `maybeSingle()` pour éviter les erreurs si le profil est manquant, et une garantie que `setLoading(false)` est appelé même en cas d'erreur réseau ou d'authentification.
+
+```tsx
 "use client";
 
 import React, { useEffect, useState, useMemo } from 'react';
@@ -55,7 +60,6 @@ export default function AdminDashboard() {
   const [adminsList, setAdminsList] = useState<any[]>([]); 
   const [agencyProfile, setAgencyProfile] = useState<any>(null);
 
-  const [newStaff, setNewStaff] = useState({ nom: "", prenom: "", pin: "" });
   const [newPass, setNewPass] = useState("");
   const [inviteEmail, setInviteEmail] = useState("");
   const [newDossier, setNewDossier] = useState({
@@ -69,46 +73,59 @@ export default function AdminDashboard() {
   }, []);
 
   const loadData = async () => {
-    setLoading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        window.location.href = '/login';
+      setLoading(true);
+      
+      // Récupération sécurisée de la session
+      const { data: { session }, error: authError } = await supabase.auth.getSession();
+      
+      if (authError || !session) {
+        console.error("Session non trouvée ou erreur auth");
+        if (isMounted) window.location.href = '/login';
         return;
       }
 
-      // 1. On récupère le profil de l'utilisateur actuel
-      const { data: profile } = await supabase.from('profiles')
+      const user = session.user;
+
+      // Récupération du profil (maybeSingle pour éviter l'erreur si l'entrée n'existe pas encore)
+      const { data: profile, error: profError } = await supabase.from('profiles')
         .select('*')
         .eq('id', user.id)
-        .single();
+        .maybeSingle();
 
-      if (profile) {
-        setAgencyProfile(profile);
+      if (profError) throw profError;
 
-        // Détection Super Admin pour débloquer la vue
-        const isSuperAdmin = profile.agency_name === 'SUPER_ADMIN' || user.email === 'gaetan@amaru-homes.com';
+      // On définit un profil par défaut si la table profiles est vide pour cet ID
+      const currentProfile = profile || { 
+        agency_name: "Agence Inconnue", 
+        prenom: "Utilisateur", 
+        nom: "Admin" 
+      };
+      
+      setAgencyProfile(currentProfile);
 
-        // 2. Chargement des Dossiers (Filtrés par agence sauf pour Super Admin)
-        let projQuery = supabase.from('suivi_chantier').select('*').order('created_at', { ascending: false });
-        if (!isSuperAdmin) {
-          projQuery = projQuery.eq('agency_name', profile.agency_name);
-        }
-        const { data: projData } = await projQuery;
-        if (projData) setProjets(projData);
+      const isSuperAdmin = currentProfile.agency_name === 'SUPER_ADMIN' || user.email === 'gaetan@amaru-homes.com';
 
-        // 3. Chargement des Collaborateurs (Filtrés par agence sauf pour Super Admin)
-        let adsQuery = supabase.from('profiles').select('*');
-        if (!isSuperAdmin) {
-          adsQuery = adsQuery.eq('agency_name', profile.agency_name);
-        }
-        const { data: adsData } = await adsQuery;
-        if (adsData) setAdminsList(adsData);
+      // Chargement des données en parallèle pour éviter les temps d'attente
+      const [projRes, adsRes, stfRes] = await Promise.all([
+        supabase.from('suivi_chantier')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .filter(isSuperAdmin ? 'id' : 'agency_name', isSuperAdmin ? 'not.is' : 'eq', isSuperAdmin ? null : currentProfile.agency_name),
+        
+        supabase.from('profiles')
+          .select('*')
+          .filter(isSuperAdmin ? 'id' : 'agency_name', isSuperAdmin ? 'not.is' : 'eq', isSuperAdmin ? null : currentProfile.agency_name),
+        
+        supabase.from('staff_prestataires')
+          .select('*')
+          .order('created_at', { ascending: false })
+      ]);
 
-        // 4. Experts terrain (Généralement partagés ou globaux)
-        const { data: stfData } = await supabase.from('staff_prestataires').select('*').order('created_at', { ascending: false });
-        if (stfData) setStaffList(stfData);
-      }
+      if (projRes.data) setProjets(projRes.data);
+      if (adsRes.data) setAdminsList(adsRes.data);
+      if (stfRes.data) setStaffList(stfRes.data);
+
     } catch (error) {
       console.error("Erreur globale de chargement:", error);
     } finally {
@@ -121,7 +138,6 @@ export default function AdminDashboard() {
     setUpdating(true);
     const clientPin = Math.floor(100000 + Math.random() * 900000).toString();
     
-    // On force l'ajout de l'agence du créateur pour que le dossier reste privé à son agence
     const { error } = await supabase.from('suivi_chantier').insert([{ 
       ...newDossier, 
       pin_code: clientPin,
@@ -130,7 +146,7 @@ export default function AdminDashboard() {
 
     if (!error) { 
       setShowModal(false); 
-      loadData(); 
+      await loadData(); 
       setNewDossier({
         client_prenom: "", client_nom: "", email_client: "", rue: "", ville: "", pays: "Espagne",
         nom_villa: "", date_livraison_prevue: "", montant_cashback: 0, etape_actuelle: TRANSLATIONS.fr.phases[0]
@@ -162,13 +178,18 @@ export default function AdminDashboard() {
   }, [selectedProjet]);
 
   const filteredProjets = useMemo(() => {
-    return projets.filter(p => `${p.client_prenom} ${p.client_nom} ${p.nom_villa}`.toLowerCase().includes(searchTerm.toLowerCase()));
+    return projets.filter(p => 
+      `${p.client_prenom} ${p.client_nom} ${p.nom_villa}`.toLowerCase().includes(searchTerm.toLowerCase())
+    );
   }, [projets, searchTerm]);
 
   if (!isMounted || loading) {
     return (
       <div className="min-h-screen bg-[#020617] flex items-center justify-center">
-        <Loader2 className="text-emerald-500 animate-spin" size={40} />
+        <div className="flex flex-col items-center gap-4">
+            <Loader2 className="text-emerald-500 animate-spin" size={40} />
+            <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">Synchronisation...</p>
+        </div>
       </div>
     );
   }
@@ -210,15 +231,15 @@ export default function AdminDashboard() {
             )}
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={14} />
-              <input type="text" placeholder={t.search} className="w-full pl-10 pr-4 py-3 bg-white/5 rounded-xl text-xs outline-none border border-white/5" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+              <input type="text" placeholder={t.search} className="w-full pl-10 pr-4 py-3 bg-white/5 rounded-xl text-xs outline-none border border-white/5 focus:border-emerald-500/50" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
             </div>
           </div>
 
           <div className="space-y-2">
             {activeTab === 'clients' ? (
               filteredProjets.map((p) => (
-                <button key={p.id} onClick={() => setSelectedProjet(p)} className={`w-full text-left p-4 rounded-xl border transition-all ${selectedProjet?.id === p.id ? 'bg-emerald-500/10 border-emerald-500/50' : 'bg-transparent border-white/5 hover:bg-white/5'}`}>
-                  <p className="font-bold text-sm">{p.client_prenom} {p.client_nom}</p>
+                <button key={p.id} onClick={() => setSelectedProjet(p)} className={`w-full text-left p-4 rounded-xl border transition-all ${selectedProjet?.id === p.id ? 'bg-emerald-500/10 border-emerald-500/50 shadow-lg shadow-emerald-500/5' : 'bg-transparent border-white/5 hover:bg-white/5'}`}>
+                  <p className="font-bold text-sm text-white">{p.client_prenom} {p.client_nom}</p>
                   <p className="text-[9px] uppercase opacity-50 font-bold tracking-widest">{p.nom_villa}</p>
                 </button>
               ))
@@ -263,7 +284,7 @@ export default function AdminDashboard() {
                 </div>
                 <div className="bg-black/40 p-6 rounded-[2rem] border border-white/5">
                   <h3 className="text-[10px] font-black uppercase text-emerald-500 mb-4">{t.inviteDev}</h3>
-                  <input type="email" placeholder="email@agence.com" className="w-full bg-white/5 p-4 rounded-xl border border-white/5 outline-none mb-4" value={inviteEmail} onChange={e => setInviteEmail(e.target.value)} />
+                  <input type="email" placeholder="email@agence.com" className="w-full bg-white/5 p-4 rounded-xl border border-white/5 outline-none mb-4 text-white" value={inviteEmail} onChange={e => setInviteEmail(e.target.value)} />
                   <button className="w-full bg-emerald-500 text-black py-4 rounded-xl font-black uppercase text-[10px] tracking-widest flex items-center justify-center gap-2"><Mail size={14}/> Inviter</button>
                 </div>
               </div>
@@ -275,22 +296,39 @@ export default function AdminDashboard() {
                 <h2 className="text-2xl font-bold text-white">{t.changePass}</h2>
               </div>
               <form onSubmit={handleUpdatePassword} className="flex flex-col md:flex-row gap-4">
-                <input type="password" required placeholder="Nouveau mot de passe" className="flex-1 bg-black/40 p-5 rounded-2xl border border-white/5 outline-none focus:border-emerald-500" value={newPass} onChange={e => setNewPass(e.target.value)} />
+                <input type="password" required placeholder="Nouveau mot de passe" className="flex-1 bg-black/40 p-5 rounded-2xl border border-white/5 outline-none focus:border-emerald-500 text-white" value={newPass} onChange={e => setNewPass(e.target.value)} />
                 <button type="submit" className="bg-white text-black px-10 py-5 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:bg-emerald-500 transition-all">Mettre à jour</button>
               </form>
             </section>
           </div>
         ) : selectedProjet ? (
-            /* Affichage du dossier sélectionné - Logique inchangée mais sécurisée */
             <div className="max-w-6xl mx-auto space-y-8 animate-in slide-in-from-bottom-4 duration-500">
                <div className="bg-white/[0.02] p-8 rounded-[2.5rem] border border-white/5 backdrop-blur-3xl shadow-2xl">
                  <h2 className="text-4xl md:text-5xl font-bold tracking-tighter text-white mb-6 italic uppercase">{selectedProjet.nom_villa}</h2>
                  <div className="flex flex-wrap gap-3">
                    <span className="bg-emerald-500/10 text-emerald-400 px-4 py-2 rounded-full border border-emerald-500/20 text-[10px] font-bold uppercase">{t.clientPin} : {selectedProjet.pin_code}</span>
                    <span className="bg-blue-500/10 text-blue-400 px-4 py-2 rounded-full border border-blue-500/20 text-[10px] font-bold uppercase flex items-center gap-2"><Euro size={12}/> {selectedProjet.montant_cashback}€</span>
+                   <span className="bg-purple-500/10 text-purple-400 px-4 py-2 rounded-full border border-purple-500/20 text-[10px] font-bold uppercase">{selectedProjet.etape_actuelle}</span>
                  </div>
                </div>
-               {/* Ici insérez le reste de votre vue dossier client si besoin */}
+               
+               {/* Grille d'infos du dossier */}
+               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                 <div className="bg-white/[0.02] p-6 rounded-3xl border border-white/5">
+                    <p className="text-[9px] font-black uppercase text-slate-500 mb-4 tracking-widest">Client</p>
+                    <p className="text-xl font-bold text-white">{selectedProjet.client_prenom} {selectedProjet.client_nom}</p>
+                    <p className="text-sm text-slate-400">{selectedProjet.email_client}</p>
+                 </div>
+                 <div className="bg-white/[0.02] p-6 rounded-3xl border border-white/5">
+                    <p className="text-[9px] font-black uppercase text-slate-500 mb-4 tracking-widest">Adresse</p>
+                    <p className="text-xl font-bold text-white">{selectedProjet.ville}</p>
+                    <p className="text-sm text-slate-400 italic">{selectedProjet.rue}</p>
+                 </div>
+                 <div className="bg-white/[0.02] p-6 rounded-3xl border border-white/5">
+                    <p className="text-[9px] font-black uppercase text-slate-500 mb-4 tracking-widest">Livraison Prévue</p>
+                    <p className="text-xl font-bold text-white flex items-center gap-2"><Calendar size={18} className="text-amber-500"/> {selectedProjet.date_livraison_prevue || "Non définie"}</p>
+                 </div>
+               </div>
             </div>
         ) : (
           <div className="h-full flex flex-col items-center justify-center">
@@ -304,7 +342,7 @@ export default function AdminDashboard() {
         )}
       </main>
 
-      {/* MODALE DOSSIER (Identique à votre structure précédente) */}
+      {/* MODALE DOSSIER */}
       {showModal && (
         <div className="fixed inset-0 bg-black/95 backdrop-blur-xl z-[100] flex items-center justify-center p-6 overflow-y-auto">
           <div className="bg-[#0F172A] w-full max-w-3xl rounded-[3rem] p-10 border border-white/10 shadow-2xl relative my-auto">
@@ -338,7 +376,7 @@ export default function AdminDashboard() {
                     <input type="number" placeholder="Cashback (€)" className="w-full bg-black/40 p-4 rounded-xl border border-white/5 outline-none focus:border-amber-500 text-white" value={newDossier.montant_cashback} onChange={e => setNewDossier({...newDossier, montant_cashback: Number(e.target.value)})} />
                 </div>
               </div>
-              <button type="submit" disabled={updating} className="w-full bg-emerald-500 text-black py-6 rounded-[2rem] font-black uppercase text-xs tracking-widest mt-6 shadow-xl shadow-emerald-500/10">
+              <button type="submit" disabled={updating} className="w-full bg-emerald-500 text-black py-6 rounded-[2rem] font-black uppercase text-xs tracking-widest mt-6 shadow-xl shadow-emerald-500/10 transition-all hover:bg-emerald-400 active:scale-[0.98]">
                 {updating ? <Loader2 className="animate-spin mx-auto" /> : t.createDossier}
               </button>
             </form>
