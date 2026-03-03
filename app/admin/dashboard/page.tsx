@@ -42,52 +42,51 @@ export default function AdminDashboard() {
   });
 
   // --- CHARGEMENT DES DONNÉES AVEC DOUBLE VÉRIFICATION DE COLONNE ---
-  const loadDashboardData = useCallback(async (user: any) => {
-    try {
-      setLoading(true);
+  // REMPLACEZ votre fonction loadDashboardData par celle-ci
+const loadDashboardData = useCallback(async (user: any) => {
+  try {
+    setLoading(true);
 
-      // 1. Récupération du profil (Gestion des colonnes agency_name OU company_name)
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .maybeSingle();
+    // 1. Récupération du profil avec détection ultra-large
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .maybeSingle();
 
-      const detectedAgency = profile?.agency_name || profile?.company_name || "Agence";
-      
-      setAgencyProfile({
-        ...profile,
-        agency_name: detectedAgency,
-        prenom: profile?.prenom || user.email.split('@')[0],
-        nom: profile?.nom || ""
-      });
+    // ON PREND TOUT : agency_name OU company_name OU un nom par défaut
+    const detectedAgency = profile?.agency_name || profile?.company_name || "Agence";
+    
+    setAgencyProfile({
+      ...profile,
+      agency_name: detectedAgency,
+      prenom: profile?.prenom || user.email.split('@')[0]
+    });
 
-      // 2. Chargement des données
-      const [projRes, stfRes] = await Promise.all([
-        supabase.from('suivi_chantier').select('*').order('created_at', { ascending: false }),
-        supabase.from('staff_prestataires').select('*')
-      ]);
+    // 2. Chargement des données SANS FILTRE BLOQUANT
+    const { data: projData } = await supabase.from('suivi_chantier').select('*');
 
-      // Filtrage : Super Admin voit tout, les autres filtrent par leur agence détectée
-      const isSuperAdmin = user.email === 'gaetan@amaru-homes.com' || detectedAgency === 'SUPER_ADMIN';
-      
-      if (isSuperAdmin) {
-        setProjets(projRes.data || []);
-      } else {
-        const filtered = (projRes.data || []).filter(p => 
-          p.agency_name === detectedAgency || p.company_name === detectedAgency
-        );
-        setProjets(filtered);
-      }
-
-      setStaffList(stfRes.data || []);
-
-    } catch (err) {
-      console.error("Erreur critique:", err);
-    } finally {
-      setLoading(false);
+    // On filtre manuellement en JS pour être sûr de ne rien rater
+    const isSuperAdmin = user.email === 'gaetan@amaru-homes.com';
+    
+    if (isSuperAdmin) {
+      setProjets(projData || []);
+    } else {
+      const filtered = (projData || []).filter(p => 
+        p.agency_name === detectedAgency || 
+        p.company_name === detectedAgency ||
+        p.agency_name === profile?.agency_name ||
+        p.agency_name === profile?.company_name
+      );
+      setProjets(filtered);
     }
-  }, []);
+
+  } catch (err) {
+    console.error("Erreur de chargement:", err);
+  } finally {
+    setLoading(false);
+  }
+}, []);
 
   useEffect(() => {
     setIsMounted(true);
