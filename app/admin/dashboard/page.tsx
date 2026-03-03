@@ -255,7 +255,7 @@ export default function AdminDashboard() {
               <div className="pt-4 border-t border-white/5 grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-4">
                     <label className="text-[9px] font-black text-purple-400 uppercase ml-2 tracking-widest flex items-center gap-2"><Home size={12}/> Détails Villa</label>
-                    <input required placeholder="Nom de la Villa (ex: Villa Bianca)" className="w-full bg-black/40 p-4 rounded-xl border border-white/5 outline-none focus:border-purple-500 transition-all" value={newDossier.nom_villa} onChange={e => setNewDossier({...newDossier, nom_villa: e.target.value})} />
+                    <input required placeholder="Ref builder (ex: REF:123)" className="w-full bg-black/40 p-4 rounded-xl border border-white/5 outline-none focus:border-purple-500 transition-all" value={newDossier.nom_villa} onChange={e => setNewDossier({...newDossier, nom_villa: e.target.value})} />
                     <select className="w-full bg-black/40 p-4 rounded-xl border border-white/5 outline-none focus:border-emerald-500" value={newDossier.etape_actuelle} onChange={e => setNewDossier({...newDossier, etape_actuelle: e.target.value})}>
                         {TRANSLATIONS.fr.phases.map(p => <option key={p} value={p}>{p}</option>)}
                     </select>
