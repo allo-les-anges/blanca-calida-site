@@ -10,10 +10,11 @@ import {
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!, 
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+// Correction 1 : Sécurisation de l'initialisation Supabase
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
+
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 const CHANTIER_STEPS = [
   { id: 1, label: "Fondations", color: "#ef4444" },
@@ -35,55 +36,55 @@ export default function ClientDashboard() {
 
   useEffect(() => {
     const fetchInitialData = async () => {
-      const savedPin = localStorage.getItem("client_access_pin");
-      if (!savedPin) { window.location.href = "/"; return; }
+      try {
+        const savedPin = localStorage.getItem("client_access_pin");
+        if (!savedPin) { window.location.href = "/"; return; }
 
-      // 1. Récupération du projet lié au PIN
-      const { data: projectData } = await supabase
-        .from("suivi_chantier")
-        .select("*")
-        .eq("pin_code", savedPin)
-        .maybeSingle();
-      
-      if (projectData) {
-        setProjet(projectData);
-
-        // 2. RÉCUPÉRATION EXPERT + AGENCE (Jointure via admin_id)
-        const { data: staff } = await supabase
-          .from("staff_prestataires")
-          .select(`
-            nom,
-            profiles:admin_id (company_name)
-          `)
+        const { data: projectData } = await supabase
+          .from("suivi_chantier")
+          .select("*")
           .eq("pin_code", savedPin)
           .maybeSingle();
+        
+        if (projectData) {
+          setProjet(projectData);
 
-        if (staff) {
-          setAgentResponsable(staff.nom);
-          // @ts-ignore : Supabase retourne un objet ou un tableau selon la config
-          const company = staff.profiles?.company_name;
-          if (company) setNomAgence(company);
+          const { data: staff } = await supabase
+            .from("staff_prestataires")
+            .select(`
+              nom,
+              profiles:admin_id (company_name)
+            `)
+            .eq("pin_code", savedPin)
+            .maybeSingle();
+
+          if (staff) {
+            setAgentResponsable(staff.nom);
+            // @ts-ignore
+            const company = staff.profiles?.company_name;
+            if (company) setNomAgence(company);
+          }
+
+          const { data: ph } = await supabase.from("constats-photos")
+            .select("*")
+            .eq("id_projet", projectData.id)
+            .order("created_at", { ascending: false });
+          if (ph) setPhotos(ph);
+
+          const { data: docs } = await supabase.from("documents_projets")
+            .select("id, nom_fichier, url_fichier")
+            .eq("projet_id", projectData.id);
+          if (docs) setDocuments(docs);
         }
-
-        // 3. Récupération des photos
-        const { data: ph } = await supabase.from("constats-photos")
-          .select("*")
-          .eq("id_projet", projectData.id)
-          .order("created_at", { ascending: false });
-        if (ph) setPhotos(ph);
-
-        // 4. Récupération des documents
-        const { data: docs } = await supabase.from("documents_projets")
-          .select("id, nom_fichier, url_fichier")
-          .eq("projet_id", projectData.id);
-        if (docs) setDocuments(docs);
+      } catch (error) {
+        console.error("Erreur de chargement:", error);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
     fetchInitialData();
   }, []);
 
-  // Groupement des photos par date pour l'affichage en dossiers
   const groupedPhotos = useMemo(() => {
     return photos.reduce((acc: any, photo: any) => {
       const date = new Date(photo.created_at).toLocaleDateString('fr-FR', { 
@@ -95,52 +96,68 @@ export default function ClientDashboard() {
     }, {});
   }, [photos]);
 
-  // Génération du rapport PDF personnalisé avec le nom de l'agence
+  // Correction 2 : Gestion optimisée du PDF pour Mobile/iOS
   const handlePDFAction = async (date: string, dailyPhotos: any[], action: 'save' | 'print' | 'preview') => {
+    if (isProcessing) return;
     setIsProcessing(true);
-    const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
-    
-    // Header Dynamique aux couleurs de l'agence
-    doc.setFillColor(15, 23, 42);
-    doc.rect(0, 0, 210, 55, 'F');
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(22);
-    doc.setFont("helvetica", "bold");
-    doc.text(nomAgence.toUpperCase(), 14, 22);
-    
-    doc.setFontSize(9);
-    doc.setFont("helvetica", "normal");
-    doc.text(`RAPPORT DE SUIVI TECHNIQUE`, 14, 30);
-    doc.setTextColor(150, 150, 150);
-    doc.text(`PROJET : ${projet?.nom_villa || "Villa Client"}`, 14, 38);
-    doc.text(`EXPERT RÉFÉRENT : ${agentResponsable}`, 14, 44);
-    doc.text(`DATE DE VISITE : ${date}`, 150, 44);
 
-    const tableData = dailyPhotos.map((p) => ({
-      time: new Date(p.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-      note: p.note_expert || "RAS - Conforme aux normes.",
-      imageUrl: p.url_image
-    }));
+    try {
+      const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+      
+      doc.setFillColor(15, 23, 42);
+      doc.rect(0, 0, 210, 55, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(22);
+      doc.setFont("helvetica", "bold");
+      doc.text(nomAgence.toUpperCase(), 14, 22);
+      
+      doc.setFontSize(9);
+      doc.setFont("helvetica", "normal");
+      doc.text(`RAPPORT DE SUIVI TECHNIQUE`, 14, 30);
+      doc.setTextColor(150, 150, 150);
+      doc.text(`PROJET : ${projet?.nom_villa || "Villa Client"}`, 14, 38);
+      doc.text(`EXPERT RÉFÉRENT : ${agentResponsable}`, 14, 44);
+      doc.text(`DATE DE VISITE : ${date}`, 150, 44);
 
-    autoTable(doc, {
-      startY: 60,
-      head: [['ANALYSE EXPERTISE', 'CONSTAT PHOTO']],
-      body: tableData.map(d => [`OBSERVATION (${d.time}) :\n\n${d.note}`, ""]),
-      theme: 'grid',
-      headStyles: { fillColor: [30, 41, 59], fontSize: 10 },
-      columnStyles: { 0: { cellWidth: 70 }, 1: { cellWidth: 110, minCellHeight: 80 } },
-      didDrawCell: (data) => {
-        if (data.column.index === 1 && data.section === 'body') {
-          const row = tableData[data.row.index];
-          doc.addImage(row.imageUrl, 'JPEG', data.cell.x + 5, data.cell.y + 5, 100, 70);
+      const tableData = dailyPhotos.map((p) => ({
+        time: new Date(p.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+        note: p.note_expert || "RAS - Conforme aux normes.",
+        imageUrl: p.url_image
+      }));
+
+      autoTable(doc, {
+        startY: 60,
+        head: [['ANALYSE EXPERTISE', 'CONSTAT PHOTO']],
+        body: tableData.map(d => [`OBSERVATION (${d.time}) :\n\n${d.note}`, ""]),
+        theme: 'grid',
+        headStyles: { fillColor: [30, 41, 59], fontSize: 10 },
+        columnStyles: { 0: { cellWidth: 70 }, 1: { cellWidth: 110, minCellHeight: 80 } },
+        didDrawCell: (data) => {
+          if (data.column.index === 1 && data.section === 'body') {
+            try {
+              const row = tableData[data.row.index];
+              // On force le format JPEG et on réduit un peu la qualité si besoin
+              doc.addImage(row.imageUrl, 'JPEG', data.cell.x + 5, data.cell.y + 5, 100, 70, undefined, 'FAST');
+            } catch (e) {
+              console.warn("Image impossible à charger dans le PDF");
+            }
+          }
         }
-      }
-    });
+      });
 
-    if (action === 'save') doc.save(`${nomAgence}_${date}.pdf`);
-    else if (action === 'print') doc.autoPrint();
-    else if (action === 'preview') window.open(doc.output('bloburl'));
-    setIsProcessing(false);
+      if (action === 'save') {
+        doc.save(`${nomAgence}_${date}.pdf`);
+      } else {
+        // Correction iOS : On utilise le flux direct au lieu de window.open qui est bloqué
+        const blob = doc.output('bloburl');
+        window.location.href = blob; 
+      }
+    } catch (error) {
+      console.error("Erreur PDF:", error);
+      alert("Erreur lors de la génération du document. Les photos sont peut-être trop lourdes pour la mémoire du téléphone.");
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   if (loading) return (
@@ -154,7 +171,7 @@ export default function ClientDashboard() {
     <div className="min-h-screen bg-[#020617] text-slate-200 p-4 md:p-12 text-left font-sans">
       <div className="max-w-7xl mx-auto space-y-8">
         
-        {/* HEADER : NOM DE L'AGENCE & EXPERT */}
+        {/* HEADER */}
         <div className="flex flex-col md:flex-row justify-between items-center gap-6 bg-[#0F172A] p-8 rounded-[2.5rem] border border-white/5 shadow-2xl relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 blur-3xl rounded-full" />
           
@@ -180,7 +197,7 @@ export default function ClientDashboard() {
           </div>
         </div>
 
-        {/* PROGRESSION DU CHANTIER */}
+        {/* PROGRESSION */}
         <div className="bg-[#0F172A] p-8 md:p-12 rounded-[3rem] border border-white/5">
           <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 mb-10 text-center">État d'avancement du projet</h3>
           <div className="relative flex justify-between items-center max-w-4xl mx-auto">
@@ -199,7 +216,7 @@ export default function ClientDashboard() {
           </div>
         </div>
 
-        {/* GRILLE DES RAPPORTS QUOTIDIENS */}
+        {/* GRILLE DES RAPPORTS */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {Object.keys(groupedPhotos).map((date) => (
             <div key={date} onClick={() => setSelectedDay(date)} className="group bg-[#0F172A] rounded-[2.5rem] overflow-hidden border border-white/5 hover:border-emerald-500/30 hover:translate-y-[-4px] transition-all cursor-pointer">
@@ -221,7 +238,7 @@ export default function ClientDashboard() {
           ))}
         </div>
 
-        {/* COFFRE-FORT DOCUMENTS */}
+        {/* DOCUMENTS */}
         <div className="bg-[#0F172A] p-10 rounded-[3rem] border border-white/5">
           <div className="flex items-center gap-4 mb-8">
             <ShieldCheck className="text-emerald-500" size={20} />
@@ -243,10 +260,9 @@ export default function ClientDashboard() {
             )}
           </div>
         </div>
-
       </div>
 
-      {/* MODAL RAPPORT DÉTAILLÉ */}
+      {/* MODAL */}
       {selectedDay && (
         <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
           <div className="bg-[#0F172A] w-full max-w-5xl rounded-[3rem] border border-white/10 overflow-hidden flex flex-col max-h-[90vh] shadow-3xl">
@@ -262,13 +278,25 @@ export default function ClientDashboard() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <button onClick={() => handlePDFAction(selectedDay, groupedPhotos[selectedDay], 'preview')} className="bg-white/5 hover:bg-emerald-500 hover:text-black p-5 rounded-2xl border border-white/5 flex items-center justify-center gap-3 transition-all font-black text-[10px] uppercase tracking-widest">
-                  <Eye size={18} /> Aperçu
+                <button 
+                  disabled={isProcessing}
+                  onClick={() => handlePDFAction(selectedDay, groupedPhotos[selectedDay], 'preview')} 
+                  className="bg-white/5 hover:bg-emerald-500 hover:text-black p-5 rounded-2xl border border-white/5 flex items-center justify-center gap-3 transition-all font-black text-[10px] uppercase tracking-widest disabled:opacity-50"
+                >
+                  {isProcessing ? <Loader2 className="animate-spin" size={18}/> : <Eye size={18} />} Aperçu
                 </button>
-                <button onClick={() => handlePDFAction(selectedDay, groupedPhotos[selectedDay], 'save')} className="bg-white/5 hover:bg-emerald-500 hover:text-black p-5 rounded-2xl border border-white/5 flex items-center justify-center gap-3 transition-all font-black text-[10px] uppercase tracking-widest">
+                <button 
+                  disabled={isProcessing}
+                  onClick={() => handlePDFAction(selectedDay, groupedPhotos[selectedDay], 'save')} 
+                  className="bg-white/5 hover:bg-emerald-500 hover:text-black p-5 rounded-2xl border border-white/5 flex items-center justify-center gap-3 transition-all font-black text-[10px] uppercase tracking-widest disabled:opacity-50"
+                >
                   <Save size={18} /> Télécharger
                 </button>
-                <button onClick={() => handlePDFAction(selectedDay, groupedPhotos[selectedDay], 'print')} className="bg-white/5 hover:bg-emerald-500 hover:text-black p-5 rounded-2xl border border-white/5 flex items-center justify-center gap-3 transition-all font-black text-[10px] uppercase tracking-widest">
+                <button 
+                  disabled={isProcessing}
+                  onClick={() => handlePDFAction(selectedDay, groupedPhotos[selectedDay], 'print')} 
+                  className="bg-white/5 hover:bg-emerald-500 hover:text-black p-5 rounded-2xl border border-white/5 flex items-center justify-center gap-3 transition-all font-black text-[10px] uppercase tracking-widest disabled:opacity-50"
+                >
                   <Printer size={18} /> Imprimer
                 </button>
               </div>
