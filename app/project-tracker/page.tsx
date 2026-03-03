@@ -167,7 +167,7 @@ export default function ClientDashboard() {
         doc.save(`Rapport_${nomAgence}_${date}.pdf`);
       } else {
         const blob = doc.output('bloburl');
-        window.location.href = blob;
+      window.location.href = blob.toString();
       }
     } catch (error) {
       alert("Erreur lors de la génération. Vérifiez la taille des photos.");
