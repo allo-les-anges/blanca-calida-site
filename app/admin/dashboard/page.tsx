@@ -1,135 +1,180 @@
 "use client";
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import { Loader2, LogOut, RefreshCw, Briefcase, ShieldCheck } from 'lucide-react';
-import Link from 'next/link';
+import { 
+  Users, PlusCircle, Key, FileUp, Settings, 
+  Search, ShieldCheck, Loader2, LogOut, Trash2 
+} from 'lucide-react';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  {
-    auth: { persistSession: true, storageKey: 'amaru-final-v8' }
-  }
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-export default function AdminDashboard() {
-  const [isMounted, setIsMounted] = useState(false);
-  const [agencyProfile, setAgencyProfile] = useState<any>(null);
-  const [projets, setProjets] = useState<any[]>([]);
+export default function SuperAdminDashboard() {
+  const [activeTab, setActiveTab] = useState('clients');
+  const [clients, setClients] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-
-  const loadAllData = useCallback(async (user: any) => {
-    try {
-      // 1. Récupération du profil
-      const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single();
-      
-      // On nettoie la valeur pour éviter les erreurs d'espaces
-      const userAgency = (profile?.company_name || "").trim();
-      
-      setAgencyProfile({
-        ...profile,
-        company_name: userAgency,
-        prenom: profile?.prenom || user.email.split('@')[0],
-      });
-
-      // 2. Récupération et Filtrage
-      const { data: allProjects } = await supabase.from('suivi_chantier').select('*');
-      
-      const isSuperAdmin = user.email === 'gaetan@amaru-homes.com' || profile?.role === 'super_admin';
-
-      if (isSuperAdmin) {
-        setProjets(allProjects || []);
-      } else {
-        // Filtrage ultra-souple : on compare en minuscules et sans espaces
-        const filtered = (allProjects || []).filter(p => {
-          const projectAgency = (p.company_name || "").trim().toLowerCase();
-          const targetAgency = userAgency.toLowerCase();
-          return projectAgency === targetAgency;
-        });
-        setProjets(filtered);
-      }
-    } catch (err) {
-      console.error("Erreur de données:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
-    const check = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) loadAllData(session.user);
-      else setLoading(false);
-    };
-    check();
-  }, [loadAllData]);
+    fetchClients();
+  }, []);
+
+  async function fetchClients() {
+    // Récupère les dossiers de suivi_chantier (vos clients)
+    const { data } = await supabase.from('suivi_chantier').select('*').order('created_at', { ascending: false });
+    setClients(data || []);
+    setLoading(false);
+  }
 
   if (!isMounted) return null;
 
-  if (loading) return (
-    <div className="min-h-screen bg-[#020617] flex flex-col items-center justify-center text-white font-sans">
-      <Loader2 className="text-emerald-500 animate-spin mb-4" size={40} />
-      <p className="text-[10px] uppercase tracking-widest font-bold opacity-50">Synchronisation des projets...</p>
-    </div>
-  );
-
   return (
-    <div className="min-h-screen bg-[#020617] text-white p-6 md:p-12 font-sans">
-      <div className="max-w-4xl mx-auto">
-        <header className="flex justify-between items-start mb-16">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-               <h1 className="text-4xl font-serif italic text-emerald-500">Bonjour {agencyProfile?.prenom}</h1>
-               {agencyProfile?.role === 'super_admin' && <ShieldCheck className="text-emerald-500/50" size={20} />}
-            </div>
-            <p className="text-[10px] text-slate-500 uppercase tracking-[0.3em] font-bold">
-              Agence : <span className="text-slate-300">{agencyProfile?.company_name || "Gaëtan (Admin)"}</span>
-            </p>
-          </div>
+    <div className="min-h-screen bg-[#020617] text-white flex font-sans">
+      {/* SIDEBAR DE GESTION */}
+      <aside className="w-64 border-r border-slate-800 p-6 flex flex-col gap-8 bg-[#020617]">
+        <div className="text-emerald-500 font-serif italic text-2xl">Amaru Admin</div>
+        
+        <nav className="flex flex-col gap-2">
           <button 
-            onClick={async () => { await supabase.auth.signOut(); window.location.href = '/login'; }}
-            className="border border-red-500/20 text-red-500 text-[10px] font-bold uppercase px-6 py-2 rounded-full hover:bg-red-500/10 transition-all"
+            onClick={() => setActiveTab('clients')}
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${activeTab === 'clients' ? 'bg-emerald-500 text-black' : 'hover:bg-white/5 text-slate-400'}`}
           >
-            Déconnexion
+            <Users size={18} /> Liste Clients
           </button>
+          <button 
+            onClick={() => setActiveTab('create')}
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${activeTab === 'create' ? 'bg-emerald-500 text-black' : 'hover:bg-white/5 text-slate-400'}`}
+          >
+            <PlusCircle size={18} /> Nouveau Dossier
+          </button>
+          <button 
+            onClick={() => setActiveTab('security')}
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${activeTab === 'security' ? 'bg-emerald-500 text-black' : 'hover:bg-white/5 text-slate-400'}`}
+          >
+            <Key size={18} /> Codes PIN & Accès
+          </button>
+        </nav>
+
+        <button 
+          onClick={() => { supabase.auth.signOut(); window.location.href='/login'; }}
+          className="mt-auto flex items-center gap-3 px-4 py-3 text-red-500 text-[10px] font-black uppercase tracking-widest opacity-60 hover:opacity-100"
+        >
+          <LogOut size={16} /> Déconnexion
+        </button>
+      </aside>
+
+      {/* CONTENU PRINCIPAL */}
+      <main className="flex-1 p-10 overflow-y-auto">
+        <header className="flex justify-between items-center mb-12">
+          <h2 className="text-3xl font-serif italic">
+            {activeTab === 'clients' && "Gestion des dossiers clients"}
+            {activeTab === 'create' && "Créer un nouveau projet"}
+            {activeTab === 'security' && "Sécurité et Codes PIN"}
+          </h2>
+          <div className="flex items-center gap-4 bg-slate-900 border border-slate-800 px-4 py-2 rounded-full">
+            <Search size={16} className="text-slate-500" />
+            <input type="text" placeholder="Rechercher..." className="bg-transparent border-none text-xs focus:ring-0 w-48" />
+          </div>
         </header>
 
-        <div className="grid gap-6">
-          {projets.length > 0 ? (
-            projets.map(p => (
-              <div key={p.id} className="bg-slate-900/40 border border-slate-800 p-8 rounded-[2.5rem] flex flex-col md:flex-row justify-between items-center group hover:border-emerald-500/30 transition-all">
-                <div className="flex items-center gap-6 mb-6 md:mb-0">
-                  <div className="w-16 h-16 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-emerald-500 group-hover:bg-emerald-500 group-hover:text-black transition-all">
-                    <Briefcase size={28} />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-slate-100 mb-1">{p.nom_villa || "Villa Amaru"}</h3>
-                    <p className="text-[10px] text-slate-500 uppercase font-black tracking-widest italic">{p.client_nom} {p.client_prenom}</p>
-                    <div className="flex gap-2 mt-3">
-                        <span className="text-[9px] bg-slate-800 px-2 py-1 rounded text-slate-400 uppercase font-bold">{p.ville || "Espagne"}</span>
-                        <span className="text-[9px] bg-emerald-500/10 px-2 py-1 rounded text-emerald-500 uppercase font-bold">{p.etape_actuelle || "En cours"}</span>
+        {/* CONTENU : LISTE DES CLIENTS */}
+        {activeTab === 'clients' && (
+          <div className="grid gap-4">
+            {loading ? <Loader2 className="animate-spin text-emerald-500 mx-auto" /> : (
+              clients.map(client => (
+                <div key={client.id} className="bg-slate-900/40 border border-slate-800 p-6 rounded-3xl flex justify-between items-center group hover:border-emerald-500/30 transition-all">
+                  <div className="flex gap-6 items-center">
+                    <div className="w-12 h-12 bg-slate-800 rounded-2xl flex items-center justify-center text-emerald-500 font-bold">
+                      {client.client_nom?.charAt(0)}
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-lg">{client.nom_villa || "Sans nom"}</h3>
+                      <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">
+                        {client.client_prenom} {client.client_nom} — {client.company_name}
+                      </p>
                     </div>
                   </div>
+                  <div className="flex gap-3">
+                    <button className="p-3 bg-slate-800 hover:bg-emerald-500 hover:text-black rounded-xl transition-all" title="Uploader Document">
+                      <FileUp size={16} />
+                    </button>
+                    <button className="p-3 bg-slate-800 hover:bg-red-500/20 hover:text-red-500 rounded-xl transition-all">
+                      <Trash2 size={16} />
+                    </button>
+                    <Link href={`/admin/projet/${client.id}`} className="px-6 py-3 bg-emerald-500 text-black rounded-xl text-[10px] font-black uppercase tracking-tighter">
+                      Modifier
+                    </Link>
+                  </div>
                 </div>
-                <Link 
-                  href={`/admin/projet/${p.id}`}
-                  className="w-full md:w-auto bg-emerald-500 text-black px-12 py-4 rounded-full text-xs font-black uppercase tracking-[0.2em] hover:scale-105 active:scale-95 transition-all text-center"
-                >
-                  Ouvrir le suivi
-                </Link>
+              ))
+            )}
+          </div>
+        )}
+
+        {/* CONTENU : FORMULAIRE CRÉATION (Simplifié) */}
+        {activeTab === 'create' && (
+          <div className="max-w-2xl bg-slate-900/40 border border-slate-800 p-10 rounded-[3rem]">
+            <p className="text-slate-400 text-sm mb-8 italic">Remplissez les informations pour créer un nouveau dossier de suivi.</p>
+            <div className="grid grid-cols-2 gap-6">
+              <div className="flex flex-col gap-2">
+                <label className="text-[10px] uppercase font-black text-slate-500">Nom du Client</label>
+                <input type="text" className="bg-slate-800 border-none rounded-xl p-3 text-sm" placeholder="ex: Martin" />
               </div>
-            ))
-          ) : (
-            <div className="p-24 text-center border border-dashed border-slate-800 rounded-[3rem] bg-slate-900/10">
-              <p className="text-slate-500 italic text-sm mb-6">Aucun projet trouvé pour "{agencyProfile?.company_name}".</p>
-              <button onClick={() => window.location.reload()} className="inline-flex items-center gap-2 text-emerald-500 text-[10px] font-black uppercase tracking-widest border border-emerald-500/20 px-6 py-3 rounded-full hover:bg-emerald-500/10 transition-all">
-                <RefreshCw size={14} /> Forcer la synchronisation
+              <div className="flex flex-col gap-2">
+                <label className="text-[10px] uppercase font-black text-slate-500">Prénom du Client</label>
+                <input type="text" className="bg-slate-800 border-none rounded-xl p-3 text-sm" placeholder="ex: Jean" />
+              </div>
+              <div className="flex flex-col gap-2 col-span-2">
+                <label className="text-[10px] uppercase font-black text-slate-500">Agence Responsable</label>
+                <select className="bg-slate-800 border-none rounded-xl p-3 text-sm text-white">
+                  <option>Amaru-Homes</option>
+                  <option>Amaru-Prestige</option>
+                </select>
+              </div>
+              <button className="col-span-2 mt-4 bg-emerald-500 text-black py-4 rounded-2xl font-black uppercase text-xs tracking-[0.2em]">
+                Créer le dossier client
               </button>
             </div>
-          )}
-        </div>
-      </div>
+          </div>
+        )}
+
+        {/* CONTENU : CODES PIN */}
+        {activeTab === 'security' && (
+          <div className="bg-slate-900/40 border border-slate-800 p-10 rounded-[3rem]">
+             <div className="flex items-center gap-4 mb-8 text-emerald-500">
+                <ShieldCheck size={32} />
+                <h3 className="text-xl font-bold">Gestion des accès PIN</h3>
+             </div>
+             <table className="w-full text-left text-sm">
+                <thead>
+                  <tr className="text-slate-500 text-[10px] uppercase font-black border-b border-slate-800">
+                    <th className="pb-4">Client</th>
+                    <th className="pb-4">Agence</th>
+                    <th className="pb-4">Code PIN Actuel</th>
+                    <th className="pb-4">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="text-slate-300">
+                  {clients.map(c => (
+                    <tr key={c.id} className="border-b border-slate-800/50">
+                      <td className="py-4 font-bold">{c.client_nom}</td>
+                      <td className="py-4 opacity-60 text-xs uppercase">{c.company_name}</td>
+                      <td className="py-4 font-mono text-emerald-500">{c.pin_code || "----"}</td>
+                      <td className="py-4">
+                        <button className="text-[10px] font-bold text-white bg-white/5 px-4 py-2 rounded-lg hover:bg-white/10 transition-all">
+                          Générer Nouveau
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+             </table>
+          </div>
+        )}
+      </main>
     </div>
   );
 }
