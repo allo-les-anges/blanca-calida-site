@@ -8,7 +8,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // On initialise le client Supabase
+  // Initialisation du client Supabase SSR
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -20,7 +20,7 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      // 1. Connexion avec nettoyage des entrées
+      // 1. Connexion
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email.toLowerCase().trim(),
         password: password,
@@ -28,11 +28,11 @@ export default function LoginPage() {
 
       if (error) throw error;
 
+      // 2. Si la session existe, on la sécurise et on redirige
       if (data?.session) {
-        if (data?.session) {
         console.log("Connexion réussie, stockage session...");
         
-        // On force l'enregistrement avant de quitter la page
+        // Enregistrement explicite de la session pour éviter les bugs de cookies
         const { error: sessionError } = await supabase.auth.setSession({
           access_token: data.session.access_token,
           refresh_token: data.session.refresh_token
@@ -42,7 +42,7 @@ export default function LoginPage() {
 
         const userEmail = data.session.user.email?.toLowerCase().trim();
         
-        // On attend un peu plus pour être SÛR que le cookie est écrit
+        // Délai de sécurité pour laisser les cookies s'écrire sur le navigateur
         setTimeout(() => {
           if (userEmail === 'gaetan@amaru-homes.com') {
             window.location.assign('/super-admin');
