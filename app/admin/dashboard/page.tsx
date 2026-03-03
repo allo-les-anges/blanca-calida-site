@@ -2,15 +2,17 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { Loader2, LogOut, RefreshCw, AlertCircle } from 'lucide-react';
+// IMPORTATION MANQUANTE CI-DESSOUS (CORRIGÉ)
+import Link from 'next/link';
 
-// Configuration ultra-stable
+// Configuration stable
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
   {
     auth: {
       persistSession: true,
-      storageKey: 'amaru-final-auth',
+      storageKey: 'amaru-final-auth-v4',
       autoRefreshToken: true,
       detectSessionInUrl: true
     }
@@ -27,7 +29,6 @@ export default function AdminDashboard() {
     try {
       setLoadingStep("Accès à la base de données...");
       
-      // 1. Profil (Harmonisé sur company_name)
       const { data: profile, error: pError } = await supabase
         .from('profiles')
         .select('*')
@@ -44,7 +45,6 @@ export default function AdminDashboard() {
         prenom: profile?.prenom || user.email.split('@')[0],
       });
 
-      // 2. Projets
       setLoadingStep("Récupération des chantiers...");
       const { data: allProjects } = await supabase.from('suivi_chantier').select('*');
       
@@ -53,7 +53,6 @@ export default function AdminDashboard() {
       if (isSuperAdmin) {
         setProjets(allProjects || []);
       } else {
-        // Filtrage strict sur Amaru-Prestige ou Amaru-Homes
         setProjets((allProjects || []).filter(p => p.company_name === currentAgency));
       }
     } catch (err) {
@@ -65,7 +64,6 @@ export default function AdminDashboard() {
   useEffect(() => {
     setIsMounted(true);
 
-    // Écouteur principal
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log("⚡ ÉVÉNEMENT AUTH :", event);
       if (session?.user) {
@@ -75,13 +73,11 @@ export default function AdminDashboard() {
       }
     });
 
-    // Vérification immédiate au montage
     const checkInitialSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
         loadAllData(session.user);
       } else {
-        // Si après 8 secondes rien ne se passe, on propose le reset
         setTimeout(() => {
            setLoadingStep("La session semble bloquée...");
         }, 8000);
@@ -94,7 +90,6 @@ export default function AdminDashboard() {
 
   if (!isMounted) return null;
 
-  // Écran de chargement amélioré pour éviter la boucle infinie visuelle
   if (!agencyProfile) {
     return (
       <div className="min-h-screen bg-[#020617] flex flex-col items-center justify-center text-white p-6">
@@ -131,7 +126,7 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-[#020617] text-white p-8 font-sans">
       <div className="max-w-4xl mx-auto">
-        <header className="flex justify-between items-center mb-12">
+        <header className="flex justify-between items-center mb-12 border-b border-slate-800 pb-8">
             <div>
                 <h1 className="text-3xl font-serif italic text-emerald-500">Dashboard</h1>
                 <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mt-1">
@@ -140,7 +135,7 @@ export default function AdminDashboard() {
             </div>
             <button 
                 onClick={async () => { await supabase.auth.signOut(); window.location.href = '/login'; }}
-                className="bg-red-500/10 text-red-500 px-5 py-2 rounded-full text-[10px] font-bold uppercase border border-red-500/20"
+                className="bg-red-500/10 text-red-500 px-5 py-2 rounded-full text-[10px] font-bold uppercase border border-red-400/20"
             >
                 Quitter
             </button>
@@ -148,12 +143,12 @@ export default function AdminDashboard() {
 
         <div className="grid gap-4">
             {projets.length > 0 ? projets.map(p => (
-                <div key={p.id} className="bg-slate-900/40 border border-slate-800 p-6 rounded-2xl flex justify-between items-center">
+                <div key={p.id} className="bg-slate-900/40 border border-slate-800 p-6 rounded-2xl flex justify-between items-center group hover:border-emerald-500/50 transition-all">
                     <div>
                         <h3 className="font-bold text-slate-200">{p.nom_projet}</h3>
                         <p className="text-[10px] text-slate-500 uppercase">{p.company_name}</p>
                     </div>
-                    <Link href={`/admin/projet/${p.id}`} className="bg-emerald-500 text-black px-5 py-2 rounded-full text-[10px] font-black uppercase">
+                    <Link href={`/admin/projet/${p.id}`} className="bg-emerald-500 text-black px-6 py-2 rounded-full text-[10px] font-black uppercase hover:scale-105 transition-transform">
                         Ouvrir
                     </Link>
                 </div>
