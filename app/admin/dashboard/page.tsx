@@ -1,19 +1,18 @@
 "use client";
 import React, { useEffect, useState, useCallback } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import { Loader2, LogOut, Plus, Search, LayoutDashboard } from 'lucide-react';
+import { Loader2, LogOut, LayoutDashboard, Briefcase } from 'lucide-react';
 import Link from 'next/link';
 
-// Utilisation d'un client unique pour éviter les instanciations multiples
+// Utilisation d'un stockage local très agressif
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
   {
     auth: {
       persistSession: true,
-      storageKey: 'amaru-auth-token', // Clé personnalisée pour éviter les conflits middleware
+      storageKey: 'amaru-dashboard-session', // Clé isolée
       autoRefreshToken: true,
-      detectSessionInUrl: true
     }
   }
 );
@@ -23,11 +22,11 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [agencyProfile, setAgencyProfile] = useState<any>(null);
   const [projets, setProjets] = useState<any[]>([]);
-  const [searchTerm, setSearchTerm] = useState("");
 
   const loadDashboardData = useCallback(async (user: any) => {
-    console.log("💾 Chargement des données pour :", user.email);
+    console.log("💾 Tentative de récupération des données pour :", user.email);
     try {
+      // 1. Profil (Uniquement company_name)
       const { data: profile } = await supabase
         .from('profiles')
         .select('*')
@@ -35,12 +34,14 @@ export default function AdminDashboard() {
         .single();
 
       const currentAgency = profile?.company_name || "Agence Amaru";
+      
       setAgencyProfile({
         ...profile,
         company_name: currentAgency,
         prenom: profile?.prenom || user.email.split('@')[0],
       });
 
+      // 2. Projets
       const { data: allProjects } = await supabase.from('suivi_chantier').select('*');
       
       const isSuperAdmin = user.email === 'gaetan@amaru-homes.com' || profile?.role === 'super_admin';
@@ -51,7 +52,7 @@ export default function AdminDashboard() {
         setProjets((allProjects || []).filter(p => p.company_name === currentAgency));
       }
     } catch (err) {
-      console.error("Erreur de données:", err);
+      console.error("❌ Erreur de chargement des données :", err);
     } finally {
       setLoading(false);
     }
@@ -60,94 +61,110 @@ export default function AdminDashboard() {
   useEffect(() => {
     setIsMounted(true);
 
-    // On écoute les changements. Si SIGNED_IN arrive, on bloque la redirection.
+    // On écoute uniquement les changements d'état
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log("⚡ ÉVÉNEMENT CAPTÉ :", event);
+      console.log("⚡ ÉVÉNEMENT CAPTÉ PAR LE DASHBOARD :", event);
+      
       if (session) {
+        console.log("✅ Session confirmée pour :", session.user.email);
         loadDashboardData(session.user);
-      } else if (event === 'SIGNED_OUT') {
-        window.location.href = '/login';
+      } else {
+        console.log("⚠️ Aucune session détectée pour le moment.");
+        // ON NE REDIRIGE PLUS AUTOMATIQUEMENT ICI.
       }
     });
 
-    const checkInitialAuth = async () => {
+    // Vérification initiale manuelle
+    const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        console.log("✅ Session initiale OK");
-        loadDashboardData(session.user);
-      } else {
-        // AU LIEU DE REDIRIGER, ON LAISSE UNE CHANCE À L'ÉVÉNEMENT SIGNED_IN
-        console.log("⏳ En attente de l'événement SIGNED_IN...");
-        setTimeout(async () => {
-          const { data: { session: finalCheck } } = await supabase.auth.getSession();
-          if (!finalCheck) {
-            console.log("🚫 Toujours rien, redirection finale.");
-            window.location.href = '/login';
-          }
-        }, 6000); // On monte à 6 secondes pour être sûr
-      }
+      if (session) loadDashboardData(session.user);
     };
 
-    checkInitialAuth();
+    checkAuth();
     return () => subscription.unsubscribe();
   }, [loadDashboardData]);
 
   if (!isMounted) return null;
 
-  // TANT QUE l'agencyProfile n'est pas chargé, on montre le loader
-  // même si sessionActive est techniquement false.
-  if (loading && !agencyProfile) {
+  // L'écran ne s'affiche que si on a réussi à charger le profil
+  if (!agencyProfile) {
     return (
-      <div className="min-h-screen bg-[#020617] flex flex-col items-center justify-center gap-4">
-        <Loader2 className="text-emerald-500 animate-spin" size={40} />
-        <p className="text-white text-xs font-bold uppercase tracking-widest">Initialisation Amaru...</p>
+      <div className="min-h-screen bg-[#020617] flex flex-col items-center justify-center gap-6">
+        <Loader2 className="text-emerald-500 animate-spin" size={50} />
+        <div className="text-center">
+          <p className="text-white font-bold uppercase tracking-widest text-xs">Authentification en cours...</p>
+          <p className="text-slate-500 text-[10px] mt-2 italic">Si cet écran reste figé, vérifiez vos cookies.</p>
+        </div>
+        <button 
+          onClick={() => window.location.href = '/login'}
+          className="text-slate-500 text-[10px] underline uppercase"
+        >
+          Retour au login
+        </button>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#020617] text-white p-10 font-sans">
-      <div className="max-w-5xl mx-auto">
-        <div className="flex justify-between items-center mb-10">
+    <div className="min-h-screen bg-[#020617] text-white p-6 md:p-12 font-sans">
+      <div className="max-w-6xl mx-auto">
+        <header className="flex justify-between items-start mb-12">
           <div>
-            <h1 className="text-3xl font-serif italic text-emerald-500">Bonjour {agencyProfile?.prenom}</h1>
-            <p className="text-xs text-slate-500 uppercase tracking-widest font-bold mt-1">
-              {agencyProfile?.company_name}
+            <h1 className="text-4xl font-serif italic text-emerald-500">Bonjour {agencyProfile.prenom}</h1>
+            <p className="text-slate-400 text-sm mt-2 font-medium tracking-wide">
+              Gestionnaire : <span className="text-emerald-400">{agencyProfile.company_name}</span>
             </p>
           </div>
           <button 
-            onClick={() => { supabase.auth.signOut(); window.location.href = '/login'; }}
-            className="flex items-center gap-2 text-red-400 text-[10px] font-bold uppercase border border-red-400/20 px-4 py-2 rounded-full hover:bg-red-400/10 transition-all"
+            onClick={async () => {
+              await supabase.auth.signOut();
+              window.location.href = '/login';
+            }}
+            className="bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/20 px-6 py-2 rounded-full text-xs font-bold uppercase transition-all"
           >
-            <LogOut size={14} /> Quitter
+            Déconnexion
           </button>
+        </header>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+          <div className="bg-slate-900/50 border border-slate-800 p-8 rounded-[2rem]">
+            <p className="text-slate-500 text-[10px] uppercase font-black tracking-widest mb-2">Projets en cours</p>
+            <p className="text-5xl font-serif italic text-emerald-500">{projets.length}</p>
+          </div>
         </div>
 
-        <div className="bg-[#0f172a] border border-slate-800 rounded-[2.5rem] overflow-hidden shadow-2xl">
-           <table className="w-full text-left">
-              <thead className="bg-slate-900/50">
-                <tr>
-                  <th className="p-6 text-[10px] uppercase text-slate-500">Projet</th>
-                  <th className="p-6 text-[10px] uppercase text-slate-500 text-right">Action</th>
+        <div className="bg-slate-900/30 border border-slate-800 rounded-[2.5rem] overflow-hidden">
+          <table className="w-full text-left">
+            <thead>
+              <tr className="bg-slate-900 text-[10px] uppercase text-slate-500 tracking-widest">
+                <th className="p-8">Chantier / Client</th>
+                <th className="p-8 text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-800/50">
+              {projets.map((p) => (
+                <tr key={p.id} className="hover:bg-emerald-500/5 transition-colors">
+                  <td className="p-8">
+                    <p className="text-lg font-bold">{p.nom_projet}</p>
+                    <p className="text-xs text-slate-500">{p.client_name || "Client Amaru"}</p>
+                  </td>
+                  <td className="p-8 text-right">
+                    <Link 
+                      href={`/admin/projet/${p.id}`}
+                      className="inline-block bg-emerald-500 text-black px-6 py-2 rounded-full text-xs font-black uppercase hover:scale-105 transition-transform"
+                    >
+                      Détails
+                    </Link>
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {projets.map(p => (
-                  <tr key={p.id} className="border-t border-slate-800/50 hover:bg-slate-800/20">
-                    <td className="p-6">
-                      <p className="font-bold">{p.nom_projet}</p>
-                      <p className="text-[10px] text-slate-500">{p.company_name}</p>
-                    </td>
-                    <td className="p-6 text-right">
-                      <Link href={`/admin/projet/${p.id}`} className="text-emerald-500 text-xs font-bold">Consulter →</Link>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-           </table>
-           {projets.length === 0 && (
-             <div className="p-20 text-center text-slate-600 italic">Aucun projet trouvé.</div>
-           )}
+              ))}
+            </tbody>
+          </table>
+          {projets.length === 0 && (
+            <div className="p-20 text-center text-slate-500 italic">
+              Aucun projet trouvé pour {agencyProfile.company_name}.
+            </div>
+          )}
         </div>
       </div>
     </div>
