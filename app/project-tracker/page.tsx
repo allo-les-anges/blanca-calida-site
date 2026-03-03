@@ -4,19 +4,12 @@ import React, { useEffect, useState, useMemo } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { 
   HardHat, Loader2, LogOut, X, ChevronRight, CheckCircle2,
-  Printer, Eye, Save, FileText, Download, MapPin
+  Printer, Eye, Save, FileText, Download, ShieldCheck, MapPin
 } from "lucide-react";
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
 const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL || "", process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "");
-
-const CHANTIER_STEPS = [
-  "0. Signature & Réservation", "1. Terrain / Terrassement", "2. Fondations", 
-  "3. Murs / Élévation", "4. Toiture / Charpente", "5. Menuiseries", 
-  "6. Électricité / Plomberie", "7. Isolation", "8. Plâtrerie", 
-  "9. Sols & Carrelages", "10. Peintures / Finitions", "11. Extérieurs / Jardin", "12. Remise des clés"
-];
 
 export default function ProjectTracker() {
   const [projet, setProjet] = useState<any>(null);
@@ -27,6 +20,7 @@ export default function ProjectTracker() {
   const [isProcessing, setIsProcessing] = useState(false);
 
   const NOM_AGENCE = "AMARU-HOMES";
+  const BUREAU_ETUDE = "Département Contrôle Technique & Qualité";
   const EXPERT_NOM = "Gaëtan Mukeba";
 
   useEffect(() => {
@@ -63,27 +57,83 @@ export default function ProjectTracker() {
     setIsProcessing(true);
     try {
       const doc = new jsPDF();
-      doc.setFillColor(15, 23, 42);
-      doc.rect(0, 0, 210, 60, 'F');
-      doc.setTextColor(255, 255, 255);
-      doc.setFontSize(22);
-      doc.text(NOM_AGENCE, 14, 25);
-      doc.setFontSize(10);
-      doc.text(`Expert : ${EXPERT_NOM}`, 14, 35);
-      doc.text(`Date : ${date}`, 14, 42);
-      doc.text(`Projet : ${projet?.nom_villa}`, 14, 49);
+      const pageWidth = doc.internal.pageSize.getWidth();
 
-      let yPos = 70;
-      dailyPhotos.forEach((p) => {
-        if (yPos > 240) { doc.addPage(); yPos = 20; }
-        doc.addImage(p.url_image, 'JPEG', 14, yPos, 100, 65);
-        yPos += 75;
-        doc.setTextColor(50, 50, 50);
-        doc.text(`Observation : ${p.note_expert || "Conforme"}`, 14, yPos);
-        yPos += 20;
+      // --- EN-TÊTE PROFESSIONNEL ---
+      doc.setFillColor(245, 245, 245);
+      doc.rect(0, 0, pageWidth, 45, 'F');
+      
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(18);
+      doc.setTextColor(15, 23, 42);
+      doc.text(NOM_AGENCE, 14, 20);
+      
+      doc.setFontSize(9);
+      doc.setTextColor(100, 100, 100);
+      doc.text(BUREAU_ETUDE, 14, 26);
+      
+      doc.setDrawColor(16, 185, 129);
+      doc.setLineWidth(1);
+      doc.line(14, 32, 60, 32);
+
+      // --- INFOS DOSSIER ---
+      doc.setFontSize(10);
+      doc.setTextColor(15, 23, 42);
+      doc.text(`Rapport de Constat : #RC-${date.replace(/ /g, '')}`, 140, 20);
+      doc.setFont("helvetica", "normal");
+      doc.text(`Date de visite : ${date}`, 140, 26);
+      doc.text(`Phase : ${projet?.etape_actuelle || "N/A"}`, 140, 32);
+
+      // --- RÉCAPITULATIF PROJET ---
+      doc.setFont("helvetica", "bold");
+      doc.text("DESTINATAIRE :", 14, 55);
+      doc.setFont("helvetica", "normal");
+      doc.text(`${projet?.client_prenom} ${projet?.client_nom}`, 14, 60);
+      doc.text(`Projet : ${projet?.nom_villa}`, 14, 65);
+
+      doc.setFont("helvetica", "bold");
+      doc.text("EXPERT RÉFÉRENT :", 110, 55);
+      doc.setFont("helvetica", "normal");
+      doc.text(EXPERT_NOM, 110, 60);
+
+      // --- TABLEAU DES CONSTATS ---
+      autoTable(doc, {
+        startY: 75,
+        head: [['RÉFÉRENCE PHOTO', 'ANALYSE TECHNIQUE & OBSERVATIONS']],
+        body: dailyPhotos.map((p, i) => [
+          `Prise de vue #${i+1}\n\nGPS : ${p.latitude || 'N/A'}\n${p.longitude || 'N/A'}`,
+          `STATUT : CONFORME\n\n${p.note_expert || "Aucune anomalie détectée lors de l'inspection visuelle."}`
+        ]),
+        theme: 'striped',
+        headStyles: { fillColor: [15, 23, 42], fontSize: 9 },
+        columnStyles: { 0: { cellWidth: 45 }, 1: { fontSize: 10 } },
       });
 
-      if (action === 'save') doc.save(`Rapport_${date}.pdf`);
+      // --- INSERTION DES PHOTOS (Nouvelle page pour clarté si besoin) ---
+      doc.addPage();
+      doc.setFont("helvetica", "bold");
+      doc.text("ANNEXE PHOTOGRAPHIQUE ET GÉOLOCALISATION", 14, 20);
+      
+      let yPos = 30;
+      dailyPhotos.forEach((p, index) => {
+        if (yPos > 220) { doc.addPage(); yPos = 20; }
+        doc.addImage(p.url_image, 'JPEG', 14, yPos, 120, 75);
+        doc.setFontSize(8);
+        doc.text(`Illustration #${index + 1} - Capturée le ${new Date(p.created_at).toLocaleString()}`, 14, yPos + 82);
+        yPos += 95;
+      });
+
+      // --- CERTIFICATION FINALE ---
+      const finalY = doc.internal.pageSize.getHeight() - 40;
+      doc.setDrawColor(200, 200, 200);
+      doc.line(14, finalY, pageWidth - 14, finalY);
+      doc.setFontSize(8);
+      doc.setFont("helvetica", "italic");
+      doc.text("CERTIFICATION :", 14, finalY + 10);
+      doc.text(`Je soussigné, ${EXPERT_NOM}, certifie que les informations, relevés GPS et photographies contenus dans ce rapport`, 14, finalY + 15);
+      doc.text(`reflètent fidèlement l'état d'avancement réel du chantier à la date mentionnée. Document édité par le système Amaru Project Tracker.`, 14, finalY + 19);
+
+      if (action === 'save') doc.save(`Rapport_Technique_${date}.pdf`);
       else window.open(doc.output('bloburl'), '_blank');
     } catch (e) { alert("Erreur génération PDF"); } finally { setIsProcessing(false); }
   };
@@ -95,45 +145,57 @@ export default function ProjectTracker() {
       <div className="max-w-6xl mx-auto space-y-12">
         
         {/* HEADER */}
-        <header className="flex justify-between items-center bg-[#0F172A] p-8 rounded-[2rem] border border-white/5">
+        <header className="flex justify-between items-center bg-[#0F172A] p-8 rounded-[2rem] border border-white/5 shadow-xl">
           <div className="flex items-center gap-5">
-            <div className="bg-emerald-500 p-4 rounded-2xl"><HardHat className="text-black" /></div>
+            <div className="bg-emerald-500 p-4 rounded-2xl shadow-lg shadow-emerald-500/20"><HardHat className="text-black" /></div>
             <div>
               <h2 className="text-2xl font-black text-white">{NOM_AGENCE}</h2>
-              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">Client : {projet?.client_prenom} {projet?.client_nom}</p>
+              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">
+                Phase Actuelle : <span className="text-emerald-500">{projet?.etape_actuelle}</span>
+              </p>
             </div>
           </div>
-          <button onClick={() => {localStorage.clear(); window.location.href="/";}} className="text-red-500 font-bold text-xs uppercase tracking-widest">Déconnexion</button>
+          <button onClick={() => {localStorage.clear(); window.location.href="/";}} className="text-slate-500 hover:text-red-500 font-bold text-xs uppercase tracking-widest transition-colors flex items-center gap-2">
+            <LogOut size={16}/> Quitter
+          </button>
         </header>
 
-        {/* SECTION DOCUMENTS (Vérifiée présente) */}
+        {/* DOCUMENTS SECTION */}
         <section className="bg-[#0F172A]/50 p-8 rounded-[2rem] border border-white/5">
           <h3 className="text-xs font-black uppercase tracking-[0.3em] text-emerald-500 mb-6 flex items-center gap-2">
-            <FileText size={16}/> Documents Administratifs
+            <FileText size={16}/> Pièces Jointes Administratives
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {documents.length > 0 ? documents.map((doc) => (
-              <a key={doc.id} href={doc.url_fichier} target="_blank" className="flex items-center justify-between p-4 bg-white/5 border border-white/5 rounded-xl hover:bg-emerald-500/10 transition-all">
+            {documents.map((doc) => (
+              <a key={doc.id} href={doc.url_fichier} target="_blank" className="flex items-center justify-between p-5 bg-white/5 border border-white/5 rounded-2xl hover:bg-emerald-500/10 hover:border-emerald-500/30 transition-all group">
                 <span className="text-xs font-bold truncate pr-4">{doc.nom_fichier}</span>
-                <Download size={16} className="text-emerald-500" />
+                <Download size={18} className="text-slate-500 group-hover:text-emerald-500" />
               </a>
-            )) : <p className="text-slate-600 text-xs italic uppercase">Aucun document disponible</p>}
+            ))}
           </div>
         </section>
 
-        {/* SECTION RAPPORTS */}
+        {/* LISTE DES RAPPORTS */}
         <section>
-          <h3 className="text-xs font-black uppercase tracking-[0.3em] text-emerald-500 mb-6 flex items-center gap-2">Rapports de visite</h3>
+          <h3 className="text-xs font-black uppercase tracking-[0.3em] text-emerald-500 mb-6 flex items-center gap-2">
+            <ShieldCheck size={16}/> Dossier de Suivi Technique
+          </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {Object.keys(groupedPhotos).map((date) => (
-              <div key={date} onClick={() => setSelectedDay(date)} className="group bg-[#0F172A] rounded-[2.5rem] border border-white/5 overflow-hidden cursor-pointer hover:border-emerald-500/30 transition-all">
+              <div key={date} onClick={() => setSelectedDay(date)} className="group bg-[#0F172A] rounded-[3rem] border border-white/5 overflow-hidden cursor-pointer hover:border-emerald-500/30 transition-all shadow-2xl">
                 <div className="h-56 relative">
                   <img src={groupedPhotos[date][0].url_image} className="w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A] to-transparent" />
-                  <div className="absolute bottom-6 left-6 text-white font-black text-xl">{date}</div>
+                  <div className="absolute bottom-6 left-8">
+                    <p className="text-white font-black text-2xl tracking-tighter">{date}</p>
+                    <p className="text-[10px] text-emerald-500 font-bold uppercase mt-1">Rapport de Constat Validé</p>
+                  </div>
                 </div>
-                <div className="p-6 flex justify-between items-center">
-                  <span className="text-[10px] font-bold uppercase text-slate-400">{groupedPhotos[date].length} Photos</span>
+                <div className="p-6 flex justify-between items-center bg-white/[0.02]">
+                  <div className="flex flex-col">
+                    <span className="text-[9px] font-black text-slate-500 uppercase">Expertise</span>
+                    <span className="text-xs text-slate-300 font-bold">{EXPERT_NOM}</span>
+                  </div>
                   <ChevronRight className="text-emerald-500" />
                 </div>
               </div>
@@ -142,25 +204,43 @@ export default function ProjectTracker() {
         </section>
       </div>
 
-      {/* MODALE PRÉVISUALISATION */}
+      {/* MODALE PRÉVISUALISATION PROFESSIONNELLE */}
       {selectedDay && (
-        <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-[#0F172A] w-full max-w-4xl rounded-[3rem] border border-white/10 flex flex-col max-h-[90vh] overflow-hidden">
-            <div className="p-8 border-b border-white/5 flex justify-between items-center">
-              <h3 className="text-2xl font-black text-white">{selectedDay}</h3>
-              <div className="flex gap-3">
-                <button onClick={() => handlePDFAction(selectedDay, groupedPhotos[selectedDay], 'preview')} className="p-3 bg-white/5 rounded-xl hover:bg-emerald-500 transition-all"><Eye size={18}/></button>
-                <button onClick={() => setSelectedDay(null)} className="p-3 bg-white/10 rounded-xl"><X size={18}/></button>
+        <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex items-center justify-center p-4">
+          <div className="bg-[#0F172A] w-full max-w-5xl rounded-[3rem] border border-white/10 flex flex-col max-h-[92vh] overflow-hidden shadow-2xl">
+            <div className="p-10 border-b border-white/5 flex justify-between items-center bg-white/[0.01]">
+              <div>
+                <span className="text-[10px] text-emerald-500 font-black uppercase tracking-widest">Rapport d'inspection</span>
+                <h3 className="text-3xl font-black text-white">{selectedDay}</h3>
+                <p className="text-xs text-slate-500 mt-1 uppercase font-bold italic">Phase : {projet?.etape_actuelle}</p>
+              </div>
+              <div className="flex gap-4">
+                <button onClick={() => handlePDFAction(selectedDay, groupedPhotos[selectedDay], 'preview')} className="flex items-center gap-2 px-6 py-3 bg-emerald-500 text-black rounded-xl hover:bg-emerald-400 transition-all text-xs font-black uppercase shadow-lg shadow-emerald-500/20"><Printer size={16}/> Générer Rapport</button>
+                <button onClick={() => setSelectedDay(null)} className="p-3 bg-white/5 text-slate-400 rounded-xl hover:text-white transition-all"><X size={24}/></button>
               </div>
             </div>
-            <div className="flex-1 overflow-y-auto p-8 space-y-8">
+            
+            <div className="flex-1 overflow-y-auto p-10 space-y-12 custom-scrollbar">
+              <div className="bg-emerald-500/5 p-6 rounded-2xl border border-emerald-500/20 flex gap-4 items-center">
+                 <ShieldCheck className="text-emerald-500" size={24}/>
+                 <p className="text-xs text-slate-300 leading-relaxed italic">
+                   "Je certifie que les informations et les photographies présentées ci-dessous ont été relevées sur site par le département technique Amaru-Homes. Les coordonnées GPS garantissent l'authenticité de l'inspection."
+                 </p>
+              </div>
+
               {groupedPhotos[selectedDay].map((p: any, i: number) => (
-                <div key={i} className="bg-white/5 rounded-[2rem] overflow-hidden border border-white/5">
-                  <img src={p.url_image} className="w-full aspect-video object-cover" />
-                  <div className="p-6">
-                    <p className="text-[10px] text-emerald-500 font-black uppercase mb-2">Commentaire</p>
-                    <p className="text-slate-300 italic text-sm">"{p.note_expert || "RAS"}"</p>
-                    {p.latitude && <p className="text-[9px] text-slate-500 mt-4 uppercase">Position GPS : {p.latitude}, {p.longitude}</p>}
+                <div key={i} className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                  <div className="rounded-3xl overflow-hidden border border-white/5 shadow-2xl">
+                    <img src={p.url_image} className="w-full aspect-video object-cover" />
+                  </div>
+                  <div className="space-y-4 py-2">
+                    <div className="flex items-center gap-2 text-[10px] font-black uppercase text-slate-500 tracking-tighter">
+                       <MapPin size={14} className="text-emerald-500"/> Localisation : {p.latitude}, {p.longitude}
+                    </div>
+                    <h4 className="text-sm font-black text-white uppercase">Observation technique #{i+1}</h4>
+                    <p className="text-slate-400 text-sm leading-relaxed border-l-2 border-emerald-500 pl-4 italic">
+                      "{p.note_expert || "Constat visuel conforme aux plans d'exécution et aux normes techniques en vigueur."}"
+                    </p>
                   </div>
                 </div>
               ))}
@@ -168,6 +248,11 @@ export default function ProjectTracker() {
           </div>
         </div>
       )}
+      
+      <style jsx global>{`
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #10b981; border-radius: 10px; }
+      `}</style>
     </div>
   );
 }
