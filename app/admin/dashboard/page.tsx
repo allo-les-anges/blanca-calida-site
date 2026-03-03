@@ -47,42 +47,45 @@ const loadDashboardData = useCallback(async (user: any) => {
   try {
     setLoading(true);
 
-    // 1. Récupération du profil avec détection ultra-large
+    // 1. On récupère le profil en étant flexible sur les colonnes
     const { data: profile } = await supabase
       .from('profiles')
       .select('*')
       .eq('id', user.id)
       .maybeSingle();
 
-    // ON PREND TOUT : agency_name OU company_name OU un nom par défaut
-    const detectedAgency = profile?.agency_name || profile?.company_name || "Agence";
+    // On détecte l'agence peu importe où elle est rangée
+    const detectedAgency = profile?.agency_name || profile?.company_name || "Agence inconnue";
     
     setAgencyProfile({
       ...profile,
       agency_name: detectedAgency,
-      prenom: profile?.prenom || user.email.split('@')[0]
+      prenom: profile?.prenom || user.email.split('@')[0],
+      nom: profile?.nom || ""
     });
 
-    // 2. Chargement des données SANS FILTRE BLOQUANT
-    const { data: projData } = await supabase.from('suivi_chantier').select('*');
+    // 2. Chargement des projets
+    const { data: projRes } = await supabase
+      .from('suivi_chantier')
+      .select('*')
+      .order('created_at', { ascending: false });
 
-    // On filtre manuellement en JS pour être sûr de ne rien rater
-    const isSuperAdmin = user.email === 'gaetan@amaru-homes.com';
+    // 3. Filtrage ultra-souple
+    const isSuperAdmin = user.email === 'gaetan@amaru-homes.com' || profile?.role === 'super_admin';
     
     if (isSuperAdmin) {
-      setProjets(projData || []);
+      setProjets(projRes || []);
     } else {
-      const filtered = (projData || []).filter(p => 
+      // On accepte les projets qui matchent l'une ou l'autre des colonnes
+      const filtered = (projRes || []).filter(p => 
         p.agency_name === detectedAgency || 
-        p.company_name === detectedAgency ||
-        p.agency_name === profile?.agency_name ||
-        p.agency_name === profile?.company_name
+        p.company_name === detectedAgency
       );
       setProjets(filtered);
     }
 
   } catch (err) {
-    console.error("Erreur de chargement:", err);
+    console.error("Erreur critique Dashboard:", err);
   } finally {
     setLoading(false);
   }
