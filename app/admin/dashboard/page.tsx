@@ -51,9 +51,9 @@ export default function AdminDashboard() {
   const [showModal, setShowModal] = useState(false);
   const [showStaffModal, setShowStaffModal] = useState(false);
   
-  const [staffList, setStaffList] = useState<any[]>([]); // Experts terrain
-  const [adminsList, setAdminsList] = useState<any[]>([]); // Collaborateurs bureau
-  const [agencyProfile, setAgencyProfile] = useState<any>({ id: null, company_name: "Amaru-Homes", prenom: "", nom: "" });
+  const [staffList, setStaffList] = useState<any[]>([]); 
+  const [adminsList, setAdminsList] = useState<any[]>([]); 
+  const [agencyProfile, setAgencyProfile] = useState<any>({ id: null, agency_name: "Chargement...", prenom: "", nom: "" });
 
   const [newStaff, setNewStaff] = useState({ nom: "", prenom: "", pin: "" });
   const [newPass, setNewPass] = useState("");
@@ -69,17 +69,39 @@ export default function AdminDashboard() {
     setLoading(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single();
-        if (profile) setAgencyProfile(profile);
+      if (!user) return;
+
+      // 1. Récupérer le profil précis de la personne connectée
+      const { data: profile } = await supabase.from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+      if (profile) {
+        setAgencyProfile(profile);
+
+        // 2. Logique de filtrage par agence
+        const isSuperAdmin = profile.agency_name === 'SUPER_ADMIN';
+        
+        // Requête Dossiers
+        let projQuery = supabase.from('suivi_chantier').select('*').order('created_at', { ascending: false });
+        if (!isSuperAdmin) projQuery = projQuery.eq('agency_name', profile.agency_name);
+        const { data: projData } = await projQuery;
+
+        // Requête Collaborateurs
+        let adsQuery = supabase.from('profiles').select('prenom, nom, email, agency_name');
+        if (!isSuperAdmin) adsQuery = adsQuery.eq('agency_name', profile.agency_name);
+        const { data: adsData } = await adsQuery;
+
+        // Requête Experts Terrain (Peuvent être filtrés par agence aussi si besoin)
+        const { data: stfData } = await supabase.from('staff_prestataires').select('*').order('created_at', { ascending: false });
+
+        if (projData) setProjets(projData);
+        if (adsData) setAdminsList(adsData);
+        if (stfData) setStaffList(stfData);
       }
-      const { data: projData } = await supabase.from('suivi_chantier').select('*').order('created_at', { ascending: false });
-      const { data: stfData } = await supabase.from('staff_prestataires').select('*').order('created_at', { ascending: false });
-      const { data: adsData } = await supabase.from('profiles').select('prenom, nom, email');
-      
-      if (projData) setProjets(projData);
-      if (stfData) setStaffList(stfData);
-      if (adsData) setAdminsList(adsData);
+    } catch (err) {
+      console.error("Erreur chargement:", err);
     } finally { setLoading(false); }
   };
 
@@ -98,7 +120,12 @@ export default function AdminDashboard() {
     e.preventDefault();
     setUpdating(true);
     const clientPin = Math.floor(100000 + Math.random() * 900000).toString();
-    const { error } = await supabase.from('suivi_chantier').insert([{ ...newDossier, pin_code: clientPin }]);
+    // On attache automatiquement l'agence du créateur au nouveau dossier
+    const { error } = await supabase.from('suivi_chantier').insert([{ 
+        ...newDossier, 
+        pin_code: clientPin, 
+        agency_name: agencyProfile.agency_name 
+    }]);
     if (!error) { setShowModal(false); loadData(); }
     setUpdating(false);
   };
@@ -151,8 +178,8 @@ export default function AdminDashboard() {
           <div className="flex items-center gap-4 mt-2">
             <div className="bg-emerald-500 p-3 rounded-2xl shadow-lg shadow-emerald-500/20"><Briefcase className="text-[#020617]" size={22} /></div>
             <div>
-              <h1 className="text-sm font-black text-white uppercase truncate">{agencyProfile.company_name}</h1>
-              <p className="text-[10px] text-emerald-400 font-bold uppercase tracking-tighter italic italic">Admin</p>
+              <h1 className="text-sm font-black text-white uppercase truncate">{agencyProfile.agency_name}</h1>
+              <p className="text-[10px] text-emerald-400 font-bold uppercase tracking-tighter italic">{agencyProfile.prenom} {agencyProfile.nom}</p>
             </div>
           </div>
         </div>
@@ -209,19 +236,18 @@ export default function AdminDashboard() {
       {/* MAIN CONTENT */}
       <main className="flex-1 p-6 md:p-12 overflow-y-auto bg-gradient-to-br from-[#020617] to-[#0F172A]">
         {activeTab === 'settings' ? (
-          /* SECTION PARAMÈTRES ET ÉQUIPE */
           <div className="max-w-4xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-4">
             <section className="bg-white/[0.02] p-10 rounded-[3rem] border border-white/5 backdrop-blur-3xl shadow-2xl">
               <div className="flex items-center gap-4 mb-8">
                 <div className="p-4 bg-blue-500/10 rounded-2xl text-blue-400"><ShieldCheck size={28} /></div>
-                <div><h2 className="text-2xl font-bold text-white">{t.team}</h2><p className="text-[10px] text-slate-500 uppercase tracking-widest">Collaborateurs Agence</p></div>
+                <div><h2 className="text-2xl font-bold text-white">{t.team}</h2><p className="text-[10px] text-slate-500 uppercase tracking-widest">Équipe {agencyProfile.agency_name}</p></div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-3">
                   {adminsList.map((admin, i) => (
                     <div key={i} className="p-4 bg-white/5 rounded-2xl border border-white/5 flex items-center justify-between">
                       <div><p className="text-sm font-bold">{admin.prenom} {admin.nom}</p><p className="text-[10px] text-slate-500">{admin.email}</p></div>
-                      <span className="px-3 py-1 bg-blue-500/10 text-blue-400 text-[8px] font-black uppercase rounded-full">Admin</span>
+                      <span className="px-3 py-1 bg-blue-500/10 text-blue-400 text-[8px] font-black uppercase rounded-full">{admin.agency_name === 'SUPER_ADMIN' ? 'SuperAdmin' : 'Admin'}</span>
                     </div>
                   ))}
                 </div>
@@ -229,6 +255,7 @@ export default function AdminDashboard() {
                   <h3 className="text-[10px] font-black uppercase text-emerald-500 mb-4">{t.inviteDev}</h3>
                   <input type="email" placeholder="email@agence.com" className="w-full bg-white/5 p-4 rounded-xl border border-white/5 outline-none mb-4" value={inviteEmail} onChange={e => setInviteEmail(e.target.value)} />
                   <button className="w-full bg-emerald-500 text-black py-4 rounded-xl font-black uppercase text-[10px] tracking-widest flex items-center justify-center gap-2"><Mail size={14}/> Inviter</button>
+                  <p className="text-[8px] text-slate-600 mt-4 text-center">L'utilisateur sera rattaché à : {agencyProfile.agency_name}</p>
                 </div>
               </div>
             </section>
@@ -245,7 +272,6 @@ export default function AdminDashboard() {
             </section>
           </div>
         ) : selectedProjet ? (
-          /* SECTION DOSSIER CLIENT (Identique à ton code original) */
           <div className="max-w-6xl mx-auto space-y-8 animate-in slide-in-from-bottom-4 duration-500">
             <div className="bg-white/[0.02] p-8 rounded-[2.5rem] border border-white/5 backdrop-blur-3xl shadow-2xl">
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
@@ -306,16 +332,16 @@ export default function AdminDashboard() {
         ) : (
           <div className="h-full flex flex-col items-center justify-center">
             <Zap size={100} className="text-emerald-500 mb-8 opacity-20 animate-pulse" />
-            <p className="text-3xl font-black uppercase tracking-[0.4em] text-white/20 text-center mb-4">{agencyProfile.company_name}</p>
+            <p className="text-3xl font-black uppercase tracking-[0.4em] text-white/20 text-center mb-4">{agencyProfile.agency_name}</p>
             <div className="flex gap-4">
-               <button onClick={() => setShowModal(true)} className="px-8 py-3 bg-white/5 hover:bg-white/10 rounded-full border border-white/5 text-[10px] font-black uppercase tracking-widest transition-all">Créer un dossier</button>
-               <Link href="/" className="px-8 py-3 bg-emerald-500 text-black rounded-full font-black uppercase text-[10px] tracking-widest transition-all hover:bg-white">Homepage</Link>
+                <button onClick={() => setShowModal(true)} className="px-8 py-3 bg-white/5 hover:bg-white/10 rounded-full border border-white/5 text-[10px] font-black uppercase tracking-widest transition-all">Créer un dossier</button>
+                <Link href="/" className="px-8 py-3 bg-emerald-500 text-black rounded-full font-black uppercase text-[10px] tracking-widest transition-all hover:bg-white">Homepage</Link>
             </div>
           </div>
         )}
       </main>
 
-      {/* MODALES : Identiques au code fourni, réintégrées ici */}
+      {/* MODALE CRÉATION DOSSIER */}
       {showModal && (
         <div className="fixed inset-0 bg-black/95 backdrop-blur-xl z-[100] flex items-center justify-center p-6 overflow-y-auto">
           <div className="bg-[#0F172A] w-full max-w-3xl rounded-[3rem] p-10 border border-white/10 shadow-2xl relative my-auto">
@@ -358,6 +384,7 @@ export default function AdminDashboard() {
         </div>
       )}
 
+      {/* MODALE CRÉATION EXPERT */}
       {showStaffModal && (
         <div className="fixed inset-0 bg-black/95 backdrop-blur-xl z-[100] flex items-center justify-center p-6">
           <div className="bg-[#0F172A] w-full max-w-md rounded-[2.5rem] p-10 border border-white/10 shadow-2xl relative">
