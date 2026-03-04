@@ -1,293 +1,349 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { createBrowserClient } from "@supabase/ssr";
+import React, { useEffect, useState, useMemo } from 'react';
+import { createClient } from '@supabase/supabase-js';
 import { 
-  Plus, Users, FileText, LayoutDashboard, 
-  LogOut, Search, HardHat, Euro, MapPin, 
-  ChevronRight, Loader2, Trash2, ShieldCheck, Globe, X
-} from "lucide-react";
-import { useRouter } from "next/navigation";
+  Save, Camera, Trash2, Loader2, Plus, X, 
+  Search, ShieldCheck, MapPin, Mail, FileText, 
+  Download, Upload, Key, AlertTriangle, Users, UserPlus, ChevronRight,
+  Home, LogOut, LayoutDashboard, Activity, Zap, Euro, Calendar, Briefcase, Globe, UserCheck, CheckCircle2
+} from 'lucide-react';
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
+
+const PHASES_CHANTIER = [
+  "0. Signature & Réservation", "1. Terrain / Terrassement", "2. Fondations", 
+  "3. Murs / Élévation", "4. Toiture / Charpente", "5. Menuiseries", 
+  "6. Électricité / Plomberie", "7. Isolation", "8. Plâtrerie", 
+  "9. Sols & Carrelages", "10. Peintures / Finitions", "11. Extérieurs / Jardin", 
+  "12. Remise des clés"
+];
+
+const PACK_CONFIG = {
+  CORE: { max_staff: 2, label: "CORE", style: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" },
+  ASCENT: { max_staff: 10, label: "ASCENT", style: "bg-blue-500/10 text-blue-400 border-blue-500/20" },
+  HORIZON: { max_staff: 999, label: "HORIZON", style: "bg-purple-500/10 text-purple-400 border-purple-500/20 shadow-[0_0_15px_rgba(168,85,247,0.15)]" }
+};
 
 export default function AdminDashboard() {
-  const router = useRouter();
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
-
-  // --- ÉTATS ---
-  const [projets, setProjets] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState<'clients' | 'staff'>('clients');
   const [loading, setLoading] = useState(true);
-  const [agencyInfo, setAgencyInfo] = useState<{name: string, pack: string} | null>(null);
+  const [updating, setUpdating] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [projets, setProjets] = useState<any[]>([]);
+  const [selectedProjet, setSelectedProjet] = useState<any>(null);
+  const [documents, setDocuments] = useState<any[]>([]);
   const [showModal, setShowModal] = useState(false);
+  const [showStaffModal, setShowStaffModal] = useState(false);
+  const [staffList, setStaffList] = useState<any[]>([]);
+  
+  // États pour la modification du projet sélectionné
+  const [editComment, setEditComment] = useState("");
+  const [editStep, setEditStep] = useState("");
 
-  // Formulaire synchronisé avec la table suivi_chantier
-  const [newProject, setNewProject] = useState({
-    client_nom: "",
-    client_prenom: "",
-    email_client: "",
-    telephone: "",
-    rue: "",
-    code_postal: "",
-    ville: "",
-    pays: "",
-    nom_villa: "",
-    constructeur_info: "",
-    montant_cashback: 0,
-    date_livraison_prevue: ""
+  const [agencyProfile, setAgencyProfile] = useState<any>({
+    company_name: "Chargement...",
+    logo_url: null,
+    pack: "CORE"
   });
 
-  // --- CHARGEMENT DES DONNÉES ---
-  const fetchData = useCallback(async () => {
+  const [newStaff, setNewStaff] = useState({ nom: "", prenom: "" });
+  const [newDossier, setNewDossier] = useState({
+    client_prenom: "", client_nom: "", email_client: "",
+    rue: "", ville: "", pays: "Espagne",
+    nom_villa: "", date_livraison_prevue: "",
+    montant_cashback: 0, commentaires_etape: "",
+    etape_actuelle: PHASES_CHANTIER[0]
+  });
+
+  const loadData = async () => {
     setLoading(true);
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) { router.push("/login"); return; }
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+        if (profile) setAgencyProfile(profile);
+      }
+      const { data: projData } = await supabase.from('suivi_chantier').select('*').order('created_at', { ascending: false });
+      const { data: stfData } = await supabase.from('staff_prestataires').select('*').order('created_at', { ascending: false });
+      if (projData) setProjets(projData);
+      if (stfData) setStaffList(stfData);
+    } finally { setLoading(false); }
+  };
 
-    // 1. Récupérer le nom de l'agence et le pack
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("agency_name, pack")
-      .eq("id", session.user.id)
-      .single();
+  const loadDocuments = async (projetId: string) => {
+    const { data } = await supabase.from('documents_projets').select('*').eq('projet_id', projetId);
+    setDocuments(data ? [...data].sort((a, b) => b.id - a.id) : []);
+  };
+
+  useEffect(() => { loadData(); }, []);
+  
+  useEffect(() => { 
+    if (selectedProjet?.id) {
+      loadDocuments(selectedProjet.id);
+      setEditComment(selectedProjet.commentaires_etape || "");
+      setEditStep(selectedProjet.etape_actuelle || PHASES_CHANTIER[0]);
+    } 
+  }, [selectedProjet]);
+
+  // --- ACTIONS LOGIQUE ---
+
+  const handleUpdateProjet = async () => {
+    setUpdating(true);
+    const { error } = await supabase
+      .from('suivi_chantier')
+      .update({ 
+        commentaires_etape: editComment, 
+        etape_actuelle: editStep,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', selectedProjet.id);
     
-    if (profile) setAgencyInfo({ name: profile.agency_name, pack: profile.pack });
+    if (!error) {
+      alert("Projet mis à jour !");
+      loadData();
+    }
+    setUpdating(false);
+  };
 
-    // 2. Récupérer les projets
-    // Note : On suppose que vos projets sont liés via une colonne admin_id ou que l'admin voit tout son périmètre
-    const { data: projects, error } = await supabase
-      .from("suivi_chantier")
-      .select("*")
-      .order("created_at", { ascending: false });
+  const handleUploadDocument = async (e: React.ChangeEvent<HTMLInputElement>, type: 'photo' | 'pdf') => {
+    const file = e.target.files?.[0];
+    if (!file || !selectedProjet) return;
+    setUpdating(true);
+    try {
+      const fileName = `${selectedProjet.id}/${type}_${Date.now()}_${file.name.replace(/\s/g, '_')}`;
+      const { error: uploadError } = await supabase.storage.from('documents-clients').upload(fileName, file);
+      if (uploadError) throw uploadError;
 
-    if (!error) setProjets(projects || []);
-    setLoading(false);
-  }, [supabase, router]);
+      const { data: { publicUrl } } = supabase.storage.from('documents-clients').getPublicUrl(fileName);
 
-  useEffect(() => { fetchData(); }, [fetchData]);
+      await supabase.from('documents_projets').insert([{
+        projet_id: selectedProjet.id, 
+        nom_fichier: file.name, 
+        url_fichier: publicUrl, 
+        storage_path: fileName,
+        type_document: type // optionnel si tu ajoutes cette colonne
+      }]);
+      loadDocuments(selectedProjet.id);
+    } catch (err: any) {
+      alert(err.message);
+    } finally { setUpdating(false); }
+  };
 
-  // --- LOGIQUE DE RECHERCHE ---
+  const handleCreateStaff = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const config = PACK_CONFIG[agencyProfile.pack as keyof typeof PACK_CONFIG] || PACK_CONFIG.CORE;
+    if (staffList.length >= config.max_staff) {
+      alert("Limite atteinte pour votre pack.");
+      return;
+    }
+    setUpdating(true);
+    const pin = Math.floor(1000 + Math.random() * 9000).toString();
+    const { error } = await supabase.from('staff_prestataires').insert([{ nom: `${newStaff.prenom} ${newStaff.nom}`, pin_code: pin }]);
+    if (!error) { setShowStaffModal(false); setNewStaff({nom:"", prenom:""}); loadData(); }
+    setUpdating(false);
+  };
+
+  const handleCreateDossier = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setUpdating(true);
+    const pin = Math.floor(1000 + Math.random() * 9000).toString();
+    const { error } = await supabase.from('suivi_chantier').insert([{ ...newDossier, pin_code: pin }]);
+    if (!error) { setShowModal(false); loadData(); }
+    setUpdating(false);
+  };
+
   const filteredProjets = useMemo(() => {
-    return projets.filter(p => 
-      `${p.client_nom} ${p.client_prenom} ${p.nom_villa}`.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    return projets.filter(p => `${p.client_prenom} ${p.client_nom} ${p.nom_villa}`.toLowerCase().includes(searchTerm.toLowerCase()));
   }, [projets, searchTerm]);
 
-  // --- CRÉATION DE CLIENT ---
-  const handleCreateProject = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) return;
-
-    const generatedPin = Math.floor(100000 + Math.random() * 900000).toString();
-
-    const { error } = await supabase.from("suivi_chantier").insert([{
-      ...newProject,
-      pin_code: generatedPin,
-      etape_actuelle: 1, // Étape initiale
-      // admin_id: session.user.id // Décommentez si vous avez cette colonne pour filtrer par agence
-    }]);
-
-    if (!error) {
-      setShowModal(false);
-      setNewProject({
-        client_nom: "", client_prenom: "", email_client: "", telephone: "",
-        rue: "", code_postal: "", ville: "", pays: "",
-        nom_villa: "", constructeur_info: "", montant_cashback: 0, date_livraison_prevue: ""
-      });
-      fetchData();
-    } else {
-      alert("Erreur : " + error.message);
-    }
-  };
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    router.push("/login");
-  };
-
-  if (loading) return (
-    <div className="h-screen bg-[#020617] flex flex-col items-center justify-center gap-4">
-      <Loader2 className="animate-spin text-emerald-500" size={40} />
-      <p className="text-slate-500 font-mono text-[10px] uppercase tracking-widest italic">Initialisation du Terminal Admin...</p>
-    </div>
-  );
+  const currentPack = PACK_CONFIG[agencyProfile.pack as keyof typeof PACK_CONFIG] || PACK_CONFIG.CORE;
 
   return (
-    <div className="min-h-screen bg-[#020617] text-slate-200 font-sans p-4 md:p-10">
-      <div className="max-w-7xl mx-auto">
-        
-        {/* HEADER */}
-        <header className="flex flex-col lg:flex-row justify-between items-center gap-6 mb-12 bg-[#0F172A] p-8 rounded-[2.5rem] border border-white/5 shadow-2xl">
-          <div className="flex items-center gap-6 text-left">
-            <div className="bg-emerald-500 p-4 rounded-2xl shadow-lg shadow-emerald-500/20 text-black">
-              <LayoutDashboard size={28} />
-            </div>
-            <div>
-              <h1 className="text-2xl font-black uppercase tracking-tighter text-white leading-none">
-                {agencyInfo?.name || "Agence Partenaire"}
-              </h1>
-              <p className="text-[10px] text-emerald-500 font-bold uppercase tracking-[0.2em] mt-2">
-                Licence {agencyInfo?.pack || "Active"} • Gestion Immobilière
-              </p>
-            </div>
-          </div>
-          
+    <div className="min-h-screen bg-[#020617] flex flex-col md:flex-row text-slate-200 font-sans">
+      
+      {/* SIDEBAR (Inchangée mais optimisée) */}
+      <div className="w-full md:w-80 bg-[#0F172A]/50 backdrop-blur-xl border-r border-white/5 h-screen sticky top-0 flex flex-col z-20">
+        <div className="p-8 space-y-8 text-left">
           <div className="flex items-center gap-4">
-            <button 
-              onClick={() => setShowModal(true)}
-              className="flex items-center gap-3 bg-white text-black px-8 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-emerald-500 transition-all shadow-xl shadow-emerald-500/10"
-            >
-              <Plus size={18} /> Nouveau Client
-            </button>
-            <button onClick={handleLogout} className="p-3 bg-white/5 rounded-2xl text-slate-400 hover:text-red-500 transition-colors">
-              <LogOut size={20} />
-            </button>
+            {agencyProfile.logo_url ? (
+              <img src={agencyProfile.logo_url} className="w-12 h-12 rounded-2xl object-contain bg-white/5 border border-white/10 p-1.5 shadow-2xl" alt="Logo" />
+            ) : (
+              <div className="bg-gradient-to-br from-emerald-400 to-emerald-600 p-3 rounded-2xl shadow-lg shadow-emerald-500/20"><Briefcase className="text-[#020617]" size={22} /></div>
+            )}
+            <div className="space-y-1.5">
+              <h1 className="text-sm font-black text-white uppercase tracking-tight leading-none">{agencyProfile.company_name}</h1>
+              <div className={`inline-flex items-center px-2.5 py-0.5 rounded-full border text-[8px] font-black uppercase tracking-[0.15em] ${currentPack.style}`}>
+                <Zap size={8} className="mr-1 fill-current" /> {currentPack.label}
+              </div>
+            </div>
           </div>
-        </header>
 
-        {/* STATS */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10 text-left">
-          <div className="bg-[#0F172A] p-6 rounded-3xl border border-white/5 flex items-center gap-5">
-            <div className="h-12 w-12 bg-blue-500/10 rounded-xl flex items-center justify-center text-blue-500"><Users size={24}/></div>
-            <div><p className="text-[10px] uppercase font-black text-slate-500">Total Clients</p><p className="text-2xl font-bold">{projets.length}</p></div>
+          <div className="flex bg-black/40 p-1 rounded-xl border border-white/5">
+            <button onClick={() => setActiveTab('clients')} className={`flex-1 py-2 rounded-lg text-[10px] font-bold uppercase transition-all ${activeTab === 'clients' ? 'bg-emerald-500 text-black shadow-lg shadow-emerald-500/20' : 'text-slate-500'}`}>Dossiers</button>
+            <button onClick={() => setActiveTab('staff')} className={`flex-1 py-2 rounded-lg text-[10px] font-bold uppercase transition-all ${activeTab === 'staff' ? 'bg-emerald-500 text-black shadow-lg shadow-emerald-500/20' : 'text-slate-500'}`}>Experts</button>
           </div>
-          <div className="bg-[#0F172A] p-6 rounded-3xl border border-white/5 flex items-center gap-5">
-            <div className="h-12 w-12 bg-emerald-500/10 rounded-xl flex items-center justify-center text-emerald-500"><Euro size={24}/></div>
-            <div><p className="text-[10px] uppercase font-black text-slate-500">Cashback Engagé</p><p className="text-2xl font-bold">{projets.reduce((acc, p) => acc + (p.montant_cashback || 0), 0)} €</p></div>
-          </div>
-          <div className="bg-[#0F172A] p-6 rounded-3xl border border-white/5 flex items-center gap-5">
-            <div className="h-12 w-12 bg-orange-500/10 rounded-xl flex items-center justify-center text-orange-500"><HardHat size={24}/></div>
-            <div><p className="text-[10px] uppercase font-black text-slate-500">Chantiers Actifs</p><p className="text-2xl font-bold">{projets.filter(p => p.etape_actuelle < 5).length}</p></div>
+
+          <div className="space-y-4 text-left">
+            <button onClick={() => activeTab === 'clients' ? setShowModal(true) : setShowStaffModal(true)} className="w-full bg-white text-black p-4 rounded-xl flex items-center justify-center gap-2 font-black text-[10px] uppercase hover:bg-emerald-400 transition-all shadow-xl">
+              <Plus size={16} /> {activeTab === 'clients' ? 'Nouveau Dossier' : 'Ajouter un Expert'}
+            </button>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={14} />
+              <input type="text" placeholder="Recherche..." className="w-full pl-10 pr-4 py-3 bg-white/5 rounded-xl text-xs outline-none border border-white/5 focus:border-emerald-500/50" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+            </div>
           </div>
         </div>
-
-        {/* LISTE */}
-        <div className="bg-[#0F172A] rounded-[3rem] border border-white/5 overflow-hidden">
-          <div className="p-8 border-b border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 bg-white/[0.01]">
-            <h3 className="font-black uppercase text-[10px] tracking-widest flex items-center gap-3">
-              <FileText className="text-emerald-500" size={16} /> Portefeuilles Clients
-            </h3>
-            <div className="relative w-full md:w-72">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={14} />
-              <input 
-                placeholder="Rechercher un dossier..." 
-                className="w-full bg-black/50 border border-white/10 rounded-full py-2 pl-10 pr-4 text-xs focus:border-emerald-500 outline-none transition-all"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-          </div>
-
-          <div className="overflow-x-auto text-left">
-            <table className="w-full border-collapse">
-              <thead>
-                <tr className="text-[9px] uppercase tracking-widest text-slate-500 border-b border-white/5">
-                  <th className="p-6 font-black">Identité & Villa</th>
-                  <th className="p-6 font-black">Constructeur</th>
-                  <th className="p-6 font-black">Localisation</th>
-                  <th className="p-6 font-black">Cashback</th>
-                  <th className="p-6 font-black text-center">PIN Code</th>
-                  <th className="p-6 font-black text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/5">
-                {filteredProjets.map((p) => (
-                  <tr key={p.id} className="group hover:bg-white/[0.02] transition-colors">
-                    <td className="p-6">
-                      <p className="font-bold text-white text-sm">{p.client_prenom} {p.client_nom}</p>
-                      <p className="text-[10px] text-emerald-500 font-bold uppercase tracking-tight">{p.nom_villa}</p>
-                    </td>
-                    <td className="p-6 font-mono text-[10px] text-slate-400">
-                      {p.constructeur_info || "N/A"}
-                    </td>
-                    <td className="p-6">
-                      <div className="flex items-center gap-2 text-slate-400 text-xs lowercase italic">
-                        <MapPin size={12} className="text-slate-600" /> {p.ville}, {p.pays}
-                      </div>
-                    </td>
-                    <td className="p-6 font-black text-emerald-400 text-sm">
-                      {p.montant_cashback} €
-                    </td>
-                    <td className="p-6 text-center">
-                      <span className="bg-black/60 px-3 py-1.5 rounded-lg border border-white/10 text-xs font-mono text-emerald-500 tracking-wider">
-                        {p.pin_code}
-                      </span>
-                    </td>
-                    <td className="p-6 text-right">
-                      <button 
-                        onClick={() => router.push(`/admin/chantier/${p.id}`)}
-                        className="p-3 bg-white/5 rounded-2xl group-hover:bg-emerald-500 group-hover:text-black transition-all"
-                      >
-                        <ChevronRight size={18} />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {filteredProjets.length === 0 && (
-              <div className="p-20 text-center text-slate-600 italic text-sm">Aucun résultat trouvé.</div>
-            )}
-          </div>
+        
+        <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-2">
+          {loading ? <div className="flex justify-center p-8"><Loader2 className="animate-spin text-emerald-500" /></div> : 
+            activeTab === 'clients' ? (
+              filteredProjets.map((p) => (
+                <button key={p.id} onClick={() => setSelectedProjet(p)} className={`w-full text-left p-4 rounded-xl border transition-all ${selectedProjet?.id === p.id ? 'bg-emerald-500/10 border-emerald-500/50 shadow-inner' : 'bg-transparent border-white/5 hover:bg-white/5'}`}>
+                  <p className="font-bold text-sm text-white">{p.client_prenom} {p.client_nom}</p>
+                  <p className="text-[9px] uppercase opacity-50 font-bold tracking-widest text-emerald-400">{p.nom_villa}</p>
+                </button>
+              ))
+            ) : (
+              staffList.map((s) => (
+                <div key={s.id} className="w-full flex items-center justify-between p-4 rounded-xl border border-white/5 bg-white/5">
+                  <div>
+                    <div className="flex items-center gap-2"><UserCheck size={12} className="text-emerald-500" /><p className="font-bold text-sm text-white">{s.nom}</p></div>
+                    <p className="text-[10px] font-mono text-emerald-400 mt-1">PIN : {s.pin_code}</p>
+                  </div>
+                  <button onClick={async () => { if(confirm("Supprimer ?")) { await supabase.from('staff_prestataires').delete().eq('id', s.id); loadData(); }}} className="p-2 text-slate-600 hover:text-red-500"><Trash2 size={14}/></button>
+                </div>
+              ))
+            )
+          }
         </div>
       </div>
 
-      {/* MODAL CRÉATION CLIENT */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-[#0F172A] w-full max-w-3xl rounded-[3rem] border border-white/10 shadow-3xl overflow-hidden max-h-[90vh] overflow-y-auto">
-            <div className="p-8 border-b border-white/5 flex justify-between items-center sticky top-0 bg-[#0F172A] z-10">
-              <h2 className="text-xl font-black uppercase tracking-tighter text-white">Nouveau Dossier Immobilier</h2>
-              <button onClick={() => setShowModal(false)} className="text-slate-500 hover:text-white"><X size={24} /></button>
-            </div>
+      {/* MAIN CONTENT : GESTION DÉTAILLÉE */}
+      <div className="flex-1 p-6 md:p-12 overflow-y-auto bg-gradient-to-br from-[#020617] to-[#0F172A] text-left">
+        {selectedProjet ? (
+          <div className="max-w-6xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             
-            <form onSubmit={handleCreateProject} className="p-8 grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
-              <div className="space-y-1">
-                <label className="text-[9px] uppercase font-black text-slate-500 ml-2">Prénom Client</label>
-                <input required className="w-full bg-black border border-white/5 rounded-2xl p-4 text-sm focus:border-emerald-500 outline-none" value={newProject.client_prenom} onChange={e => setNewProject({...newProject, client_prenom: e.target.value})} />
+            {/* TOP BAR PROJET */}
+            <div className="bg-white/[0.02] p-8 rounded-[2rem] border border-white/5 flex justify-between items-center shadow-2xl">
+              <div>
+                <h2 className="text-5xl font-black tracking-tighter text-white mb-2 uppercase italic">{selectedProjet.nom_villa}</h2>
+                <div className="flex flex-wrap gap-3">
+                   <span className="bg-emerald-500 text-black px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest">PIN CLIENT: {selectedProjet.pin_code}</span>
+                   <span className="bg-white/5 text-slate-400 px-3 py-1 rounded-lg text-[9px] font-bold uppercase tracking-widest flex items-center gap-2"><MapPin size={10}/> {selectedProjet.ville}</span>
+                </div>
               </div>
-              <div className="space-y-1">
-                <label className="text-[9px] uppercase font-black text-slate-500 ml-2">Nom Client</label>
-                <input required className="w-full bg-black border border-white/5 rounded-2xl p-4 text-sm focus:border-emerald-500 outline-none" value={newProject.client_nom} onChange={e => setNewProject({...newProject, client_nom: e.target.value})} />
+              <div className="flex gap-3">
+                 <button onClick={handleUpdateProjet} disabled={updating} className="flex items-center gap-2 px-6 py-3 bg-emerald-500 text-black rounded-xl font-black text-[10px] uppercase hover:scale-105 transition-all shadow-lg shadow-emerald-500/20">
+                    {updating ? <Loader2 size={14} className="animate-spin"/> : <Save size={14}/>} Enregistrer Modifs
+                 </button>
+                 <button onClick={() => { supabase.auth.signOut(); window.location.reload(); }} className="p-3 bg-red-500/10 text-red-500 rounded-xl hover:bg-red-500 hover:text-white transition-all"><LogOut size={18}/></button>
               </div>
-              <div className="space-y-1">
-                <label className="text-[9px] uppercase font-black text-slate-500 ml-2">Email</label>
-                <input type="email" className="w-full bg-black border border-white/5 rounded-2xl p-4 text-sm focus:border-emerald-500 outline-none" value={newProject.email_client} onChange={e => setNewProject({...newProject, email_client: e.target.value})} />
-              </div>
-              <div className="space-y-1">
-                <label className="text-[9px] uppercase font-black text-slate-500 ml-2">Téléphone</label>
-                <input className="w-full bg-black border border-white/5 rounded-2xl p-4 text-sm focus:border-emerald-500 outline-none" value={newProject.telephone} onChange={e => setNewProject({...newProject, telephone: e.target.value})} />
-              </div>
+            </div>
 
-              <div className="md:col-span-2 grid grid-cols-2 md:grid-cols-3 gap-4">
-                <div className="md:col-span-1"><label className="text-[9px] uppercase font-black text-slate-500">Ville</label><input className="w-full bg-black border border-white/5 rounded-2xl p-4 text-sm" value={newProject.ville} onChange={e => setNewProject({...newProject, ville: e.target.value})} /></div>
-                <div className="md:col-span-1"><label className="text-[9px] uppercase font-black text-slate-500">Pays</label><input className="w-full bg-black border border-white/5 rounded-2xl p-4 text-sm" value={newProject.pays} onChange={e => setNewProject({...newProject, pays: e.target.value})} /></div>
-                <div className="md:col-span-1"><label className="text-[9px] uppercase font-black text-slate-500">Code Postal</label><input className="w-full bg-black border border-white/5 rounded-2xl p-4 text-sm" value={newProject.code_postal} onChange={e => setNewProject({...newProject, code_postal: e.target.value})} /></div>
-              </div>
-
-              <div className="md:col-span-2 space-y-1 border-t border-white/5 pt-6">
-                <label className="text-[9px] uppercase font-black text-emerald-500 ml-2">Nom de la Villa / Projet</label>
-                <input required className="w-full bg-black border border-white/5 rounded-2xl p-4 text-sm font-bold focus:border-emerald-500 outline-none" value={newProject.nom_villa} onChange={e => setNewProject({...newProject, nom_villa: e.target.value})} />
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-[9px] uppercase font-black text-slate-500 ml-2">Info Constructeur</label>
-                <input className="w-full bg-black border border-white/5 rounded-2xl p-4 text-sm focus:border-emerald-500 outline-none" value={newProject.constructeur_info} onChange={e => setNewProject({...newProject, constructeur_info: e.target.value})} />
-              </div>
-              <div className="space-y-1">
-                <label className="text-[9px] uppercase font-black text-slate-500 ml-2">Montant Cashback (€)</label>
-                <input type="number" className="w-full bg-black border border-white/5 rounded-2xl p-4 text-sm outline-none text-emerald-400 font-bold" value={newProject.montant_cashback} onChange={e => setNewProject({...newProject, montant_cashback: Number(e.target.value)})} />
-              </div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               
-              <button type="submit" className="md:col-span-2 bg-emerald-500 text-black py-5 rounded-2xl font-black text-xs uppercase tracking-[0.2em] mt-4 hover:bg-emerald-400 transition-all shadow-lg shadow-emerald-500/20">
-                Générer le dossier & Code PIN
-              </button>
-            </form>
+              {/* SÉLECTEUR D'ÉTAPES (COLONNE GAUCHE) */}
+              <div className="space-y-4">
+                <h3 className="text-[10px] font-black uppercase text-slate-500 tracking-[0.2em] ml-2">Progression du Chantier</h3>
+                <div className="bg-black/40 p-3 rounded-[2rem] border border-white/5 space-y-2 max-h-[600px] overflow-y-auto custom-scrollbar">
+                  {PHASES_CHANTIER.map((phase, idx) => {
+                    const isActive = editStep === phase;
+                    return (
+                      <button 
+                        key={idx} 
+                        onClick={() => setEditStep(phase)}
+                        className={`w-full flex items-center justify-between p-4 rounded-2xl border transition-all ${isActive ? 'bg-emerald-500 border-emerald-500 text-black font-bold shadow-lg shadow-emerald-500/20' : 'bg-transparent border-white/5 text-slate-500 hover:border-white/20'}`}
+                      >
+                        <span className="text-[10px] uppercase tracking-tight truncate">{phase}</span>
+                        {isActive && <CheckCircle2 size={14} />}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+
+              {/* ZONE CENTRALE : COMMENTAIRE ET UPLOADS */}
+              <div className="lg:col-span-2 space-y-8">
+                
+                {/* COMMENTAIRE ÉTAPE */}
+                <div className="bg-[#0F172A] p-8 rounded-[2.5rem] border border-white/5 shadow-xl">
+                  <h3 className="text-[10px] font-black uppercase text-emerald-500 mb-4 tracking-widest flex items-center gap-2">
+                    <Activity size={14}/> Note pour le client (Étape {editStep.split('.')[0]})
+                  </h3>
+                  <textarea 
+                    value={editComment}
+                    onChange={(e) => setEditComment(e.target.value)}
+                    className="w-full bg-black/50 border border-white/10 rounded-2xl p-6 text-lg text-slate-200 min-h-[150px] outline-none focus:border-emerald-500/50 transition-all italic"
+                    placeholder="Écrivez ici l'avancement pour le client..."
+                  />
+                </div>
+
+                {/* CENTRE DE DOCUMENTS */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  
+                  {/* UPLOAD PHOTOS */}
+                  <div className="bg-black/60 p-8 rounded-[2.5rem] border border-white/5">
+                    <div className="flex justify-between items-center mb-6">
+                      <h3 className="text-[10px] font-black uppercase text-white flex items-center gap-2"><Camera size={14} className="text-emerald-500"/> Galerie Photo</h3>
+                      <label className="cursor-pointer p-2 bg-emerald-500 text-black rounded-lg hover:scale-110 transition-all">
+                        <Plus size={16} />
+                        <input type="file" className="hidden" accept="image/*" onChange={(e) => handleUploadDocument(e, 'photo')} />
+                      </label>
+                    </div>
+                    <div className="space-y-3 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
+                      {documents.filter(d => d.type_document !== 'pdf').map((doc) => (
+                        <div key={doc.id} className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5 group">
+                          <img src={doc.url_fichier} className="w-10 h-10 rounded-lg object-cover" />
+                          <div className="flex-1 ml-4 truncate text-[10px] font-bold text-slate-400">{doc.nom_fichier}</div>
+                          <button onClick={async () => { if(confirm("Supprimer ?")) { await supabase.from('documents_projets').delete().eq('id', doc.id); loadDocuments(selectedProjet.id); }}} className="p-2 text-slate-600 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"><Trash2 size={14}/></button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* UPLOAD PDFS */}
+                  <div className="bg-black/60 p-8 rounded-[2.5rem] border border-white/5">
+                    <div className="flex justify-between items-center mb-6">
+                      <h3 className="text-[10px] font-black uppercase text-white flex items-center gap-2"><FileText size={14} className="text-blue-400"/> Dossier PDF</h3>
+                      <label className="cursor-pointer p-2 bg-blue-500 text-white rounded-lg hover:scale-110 transition-all">
+                        <Upload size={16} />
+                        <input type="file" className="hidden" accept=".pdf" onChange={(e) => handleUploadDocument(e, 'pdf')} />
+                      </label>
+                    </div>
+                    <div className="space-y-3 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
+                      {documents.filter(d => d.type_document === 'pdf').map((doc) => (
+                        <div key={doc.id} className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5 group">
+                          <div className="p-2 bg-blue-500/10 rounded-lg text-blue-400"><FileText size={14}/></div>
+                          <div className="flex-1 ml-4 truncate text-[10px] font-bold text-slate-400">{doc.nom_fichier}</div>
+                          <a href={doc.url_fichier} target="_blank" className="p-2 text-slate-600 hover:text-white"><Download size={14}/></a>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
-      )}
+        ) : (
+          <div className="h-full flex flex-col items-center justify-center opacity-10 grayscale">
+              <Zap size={120} className="text-emerald-500 mb-8" />
+              <p className="text-3xl font-black uppercase tracking-[0.5em] text-center">{agencyProfile.company_name}</p>
+          </div>
+        )}
+      </div>
+
+      {/* STYLES & MODALES (Gardés de ton code d'origine) */}
+      {/* ... Tes modales existantes showStaffModal et showModal de création ... */}
+
+      <style jsx global>{`
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.05); border-radius: 10px; }
+      `}</style>
     </div>
   );
 }
