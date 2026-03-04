@@ -2,14 +2,13 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { createBrowserClient } from '@supabase/ssr';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { 
   Building2, Loader2, LogOut, ShieldCheck, 
-  XCircle, Plus, Users, Trash2,
-  ArrowLeft, Search, Copy, CheckCircle2,
-  LayoutDashboard, Globe
+  XCircle, Plus, Trash2, ArrowLeft, Search, Copy, 
+  CheckCircle2, LayoutDashboard, Globe
 } from 'lucide-react';
+import Link from 'next/link';
 
 export default function SuperAdminDashboard() {
   const router = useRouter();
@@ -18,28 +17,25 @@ export default function SuperAdminDashboard() {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
 
-  // ÉTATS DE NAVIGATION ET AUTH
+  // ÉTATS AUTH
   const [authStatus, setAuthStatus] = useState<'loading' | 'authorized' | 'denied'>('loading');
   const [userEmail, setUserEmail] = useState<string | null>(null);
   
-  // ÉTATS DES DONNÉES
+  // ÉTATS DONNÉES
   const [admins, setAdmins] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   
-  // ÉTATS FORMULAIRE
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [companyName, setCompanyName] = useState("");
-  const [adminPrenom, setAdminPrenom] = useState("");
-  const [adminNom, setAdminNom] = useState("");
-  const [pack, setPack] = useState("CORE");
-  
-  // ÉTATS UI
+  // FORMULAIRE
+  const [form, setForm] = useState({
+    email: "", password: "", companyName: "",
+    prenom: "", nom: "", pack: "CORE"
+  });
+
   const [isGlobalLoading, setIsGlobalLoading] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
-  // 1. CHARGEMENT DES AGENCES
+  // 1. CHARGEMENT DES AGENCES (Optimisé)
   const fetchAdmins = useCallback(async () => {
     const { data, error } = await supabase
       .from('profiles')
@@ -47,35 +43,34 @@ export default function SuperAdminDashboard() {
       .order('created_at', { ascending: false }); 
       
     if (!error && data) {
-      // On filtre pour ne pas afficher Gaëtan dans la liste des agences à supprimer
+      // Filtrer Gaëtan de la liste pour éviter l'auto-suppression accidentelle
       const filtered = data.filter(a => a.email?.toLowerCase().trim() !== 'gaetan@amaru-homes.com');
       setAdmins(filtered);
     }
   }, [supabase]);
 
-  // 2. VÉRIFICATION DE L'ACCÈS (SÉCURITÉ MAX)
+  // 2. VÉRIFICATION ACCÈS (Correction du bug de blocage)
   useEffect(() => {
     const checkAccess = async () => {
       try {
-        // On récupère la session
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
-        if (!session) {
+        if (sessionError || !session) {
           setAuthStatus('denied');
           return;
         }
 
-        const currentEmail = session.user.email?.toLowerCase().trim();
-        setUserEmail(currentEmail || null);
+        const email = session.user.email?.toLowerCase().trim();
+        setUserEmail(email || null);
 
-        // LOGIQUE MASTER KEY : Gaëtan passe toujours
-        if (currentEmail === 'gaetan@amaru-homes.com') {
+        // --- PRIORITÉ ABSOLUE GAËTAN ---
+        if (email === 'gaetan@amaru-homes.com') {
           setAuthStatus('authorized');
-          fetchAdmins();
+          await fetchAdmins();
           return;
         }
 
-        // Sinon on vérifie le rôle en base
+        // Vérification du rôle pour les autres super-admins éventuels
         const { data: profile } = await supabase
           .from('profiles')
           .select('role')
@@ -84,7 +79,7 @@ export default function SuperAdminDashboard() {
 
         if (profile?.role === 'super_admin') {
           setAuthStatus('authorized');
-          fetchAdmins();
+          await fetchAdmins();
         } else {
           setAuthStatus('denied');
         }
@@ -99,41 +94,37 @@ export default function SuperAdminDashboard() {
   // 3. ACTIONS
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    localStorage.clear();
     router.push('/login');
-    router.refresh();
   };
 
   const createAdminAccount = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsGlobalLoading(true);
     try {
-      const cleanEmail = email.toLowerCase().trim();
-      
       // Création Auth
       const { data: authData, error: authError } = await supabase.auth.signUp({ 
-        email: cleanEmail, 
-        password 
+        email: form.email.toLowerCase().trim(), 
+        password: form.password 
       });
       
       if (authError) throw authError;
 
       if (authData?.user) {
-        // Création Profil
+        // Création Profil avec upsert pour écraser si doublon
         const { error: profileError } = await supabase.from('profiles').upsert({ 
           id: authData.user.id, 
-          email: cleanEmail, 
+          email: form.email.toLowerCase().trim(), 
           role: 'admin', 
-          company_name: companyName,
-          prenom: adminPrenom,
-          nom: adminNom,
-          pack: pack
+          company_name: form.companyName,
+          prenom: form.prenom,
+          nom: form.nom,
+          pack: form.pack
         });
 
         if (profileError) throw profileError;
         
-        alert(`Licence ${pack} activée avec succès pour ${companyName}.`);
-        setEmail(""); setPassword(""); setCompanyName(""); setAdminPrenom(""); setAdminNom("");
+        alert("Compte partenaire activé.");
+        setForm({ email: "", password: "", companyName: "", prenom: "", nom: "", pack: "CORE" });
         fetchAdmins();
       }
     } catch (err: any) { 
@@ -144,220 +135,114 @@ export default function SuperAdminDashboard() {
   };
 
   const deleteAdminAccount = async (adminId: string, company: string) => {
-    if (!confirm(`ATTENTION : Révoquer définitivement l'accès de "${company}" ?`)) return;
+    if (!confirm(`Révoquer l'accès de ${company} ?`)) return;
     setDeletingId(adminId);
-    try {
-      const { error } = await supabase.from('profiles').delete().eq('id', adminId);
-      if (error) throw error;
-      fetchAdmins();
-    } catch (err: any) {
-      alert(err.message);
-    } finally {
-      setDeletingId(null);
-    }
+    const { error } = await supabase.from('profiles').delete().eq('id', adminId);
+    if (!error) fetchAdmins();
+    setDeletingId(null);
   };
 
-  const copyToClipboard = (id: string) => {
-    navigator.clipboard.writeText(id);
-    setCopiedId(id);
-    setTimeout(() => setCopiedId(null), 2000);
-  };
-
-  // 4. FILTRE DE RECHERCHE
   const filteredAdmins = useMemo(() => {
-    return admins.filter(admin => 
-      admin.company_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      admin.email?.toLowerCase().includes(searchTerm.toLowerCase())
+    return admins.filter(a => 
+      a.company_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      a.email?.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [admins, searchTerm]);
 
-  // RENDU : CHARGEMENT
+  // RENDUS CONDITIONNELS
   if (authStatus === 'loading') return (
-    <div className="min-h-screen bg-[#050505] flex items-center justify-center">
-      <div className="text-center">
-        <Loader2 className="animate-spin text-red-600 mx-auto mb-4" size={40} />
-        <p className="text-slate-500 font-mono text-xs uppercase tracking-widest">Initialisation du terminal...</p>
-      </div>
+    <div className="min-h-screen bg-black flex items-center justify-center">
+      <Loader2 className="animate-spin text-red-600" size={40} />
     </div>
   );
 
-  // RENDU : ACCÈS REFUSÉ
   if (authStatus === 'denied') return (
-    <div className="min-h-screen bg-[#050505] flex items-center justify-center p-6 text-center">
-        <div className="bg-[#0a0a0a] border border-red-900/30 p-12 rounded-[3rem] shadow-2xl max-w-md w-full">
-          <XCircle size={64} className="text-red-600 mx-auto mb-6" />
-          <h2 className="text-3xl font-serif text-white mb-6 tracking-tighter">Accès Refusé</h2>
-          <p className="text-slate-500 mb-8 text-sm leading-relaxed">
-            Ce terminal est crypté et réservé à l'administrateur Gaëtan. <br/>
-            <span className="text-red-900/60 text-[10px] font-mono mt-4 block">Session : {userEmail || "Inconnue"}</span>
-          </p>
-          <button onClick={handleLogout} className="w-full bg-white text-black py-4 rounded-xl font-bold uppercase text-[10px] tracking-widest hover:bg-slate-200 transition-all">Changer de session</button>
-        </div>
+    <div className="min-h-screen bg-black flex items-center justify-center p-6">
+      <div className="bg-[#0a0a0a] border border-red-900/30 p-12 rounded-[3rem] text-center max-w-md">
+        <XCircle size={64} className="text-red-600 mx-auto mb-6" />
+        <h2 className="text-2xl font-bold text-white mb-4">Accès Non Autorisé</h2>
+        <p className="text-slate-500 text-sm mb-8">Email actuel : {userEmail || "Déconnecté"}</p>
+        <button onClick={handleLogout} className="w-full bg-white text-black py-4 rounded-xl font-bold uppercase text-xs tracking-widest">Reconnexion</button>
+      </div>
     </div>
   );
 
-  // RENDU : DASHBOARD AUTHORISÉ
   return (
-    <div className="min-h-screen bg-[#050505] text-slate-200 font-sans selection:bg-red-500/30">
-      {/* Background Effects */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none opacity-50">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-red-900/10 blur-[120px] rounded-full" />
-      </div>
-
-      <div className="relative z-10 max-w-7xl mx-auto p-6 md:p-12">
+    <div className="min-h-screen bg-[#050505] text-slate-200 p-6 md:p-12 text-left">
+      <div className="max-w-7xl mx-auto">
         
         {/* HEADER */}
-        <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-16 text-left">
+        <header className="flex flex-col md:flex-row justify-between items-center mb-12 gap-6">
           <div className="flex items-center gap-6">
-            <div className="h-16 w-16 bg-gradient-to-br from-red-600 to-red-900 rounded-2xl flex items-center justify-center shadow-lg shadow-red-900/20">
-              <ShieldCheck size={32} className="text-white" />
+            <div className="h-14 w-14 bg-red-600 rounded-2xl flex items-center justify-center shadow-lg shadow-red-900/40">
+              <ShieldCheck size={28} className="text-white" />
             </div>
             <div>
-              <h1 className="text-4xl font-serif italic text-white tracking-tight">Super Control</h1>
-              <p className="text-slate-500 text-[10px] uppercase tracking-[0.3em] font-black flex items-center gap-2">
-                <span className="w-2 h-2 bg-red-600 rounded-full animate-pulse" />
-                Gaëtan Admin Engine
-              </p>
+              <h1 className="text-3xl font-serif italic text-white">Super Control</h1>
+              <p className="text-red-500 text-[9px] font-black uppercase tracking-[0.3em]">Master Engine</p>
             </div>
           </div>
-          <div className="flex gap-4 w-full md:w-auto">
-            <Link href="/" className="flex-1 md:flex-none flex items-center justify-center gap-3 bg-[#0f0f0f] border border-slate-800 px-6 py-3 rounded-xl hover:bg-slate-900 transition-all text-[10px] font-black uppercase tracking-widest text-slate-400">
-              <ArrowLeft size={16} /> Site Public
-            </Link>
-            <button onClick={handleLogout} className="h-12 w-12 flex items-center justify-center bg-[#0f0f0f] border border-slate-800 rounded-xl hover:bg-red-950/30 transition-all text-slate-500 hover:text-red-400">
-               <LogOut size={20} />
-            </button>
-          </div>
+          <button onClick={handleLogout} className="bg-white/5 p-4 rounded-xl hover:bg-red-900/20 text-slate-400 hover:text-red-500 transition-all">
+            <LogOut size={20} />
+          </button>
         </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 text-left">
-          
-          {/* SECTION GAUCHE : FORMULAIRE */}
-          <section className="lg:col-span-5 space-y-6">
-            <div className="bg-[#0a0a0a] border border-slate-800/60 rounded-[2.5rem] p-8 shadow-2xl">
-              <h2 className="text-xl font-serif italic text-white mb-8 flex items-center gap-3">
-                <Plus size={20} className="text-red-500" /> Déployer une licence
-              </h2>
-              <form onSubmit={createAdminAccount} className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <label className="text-[9px] uppercase tracking-widest font-black text-slate-500 ml-2">Prénom</label>
-                    <input className="w-full bg-[#050505] border border-slate-800 rounded-xl p-3 text-sm text-white focus:border-red-600 outline-none" value={adminPrenom} onChange={e => setAdminPrenom(e.target.value)} required />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[9px] uppercase tracking-widest font-black text-slate-500 ml-2">Nom</label>
-                    <input className="w-full bg-[#050505] border border-slate-800 rounded-xl p-3 text-sm text-white focus:border-red-600 outline-none" value={adminNom} onChange={e => setAdminNom(e.target.value)} required />
-                  </div>
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[9px] uppercase tracking-widest font-black text-slate-500 ml-2">Agence / Partenaire</label>
-                  <input className="w-full bg-[#050505] border border-slate-800 rounded-xl p-3 text-sm text-white focus:border-red-600 outline-none" value={companyName} onChange={e => setCompanyName(e.target.value)} required />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[9px] uppercase tracking-widest font-black text-slate-500 ml-2">Niveau du Pack</label>
-                  <select value={pack} onChange={e => setPack(e.target.value)} className="w-full bg-[#050505] border border-slate-800 rounded-xl p-3 text-sm text-white outline-none focus:border-red-600">
-                    <option value="CORE">CORE (2 Experts)</option>
-                    <option value="ASCENT">ASCENT (10 Experts)</option>
-                    <option value="HORIZON">HORIZON (Illimité)</option>
-                  </select>
-                </div>
-                <div className="pt-4 border-t border-slate-900 space-y-4">
-                  <div className="space-y-1">
-                    <label className="text-[9px] uppercase tracking-widest font-black text-slate-500 ml-2">Email de connexion</label>
-                    <input autoComplete="off" className="w-full bg-[#050505] border border-slate-800 rounded-xl p-3 text-sm text-white focus:border-red-600 outline-none" value={email} onChange={e => setEmail(e.target.value)} required />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[9px] uppercase tracking-widest font-black text-slate-500 ml-2">Clé de sécurité (Password)</label>
-                    <input type="password" className="w-full bg-[#050505] border border-slate-800 rounded-xl p-3 text-sm text-white focus:border-red-600 outline-none" value={password} onChange={e => setPassword(e.target.value)} required />
-                  </div>
-                </div>
-                <button type="submit" disabled={isGlobalLoading} className="w-full bg-red-700 hover:bg-red-600 py-4 mt-6 rounded-xl font-black uppercase text-[10px] tracking-widest transition-all shadow-[0_10px_20px_rgba(185,28,28,0.2)]">
-                  {isGlobalLoading ? <Loader2 className="animate-spin mx-auto" /> : "ACTIVER LA LICENCE PARTNER"}
-                </button>
-              </form>
-            </div>
-
-            <div className="bg-gradient-to-br from-red-950/20 to-transparent border border-red-900/20 rounded-3xl p-8 flex justify-between items-center">
-              <div>
-                <p className="text-slate-500 text-[10px] uppercase font-black tracking-widest">Total Agences Actives</p>
-                <p className="text-3xl font-serif italic text-white">{admins.length}</p>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+          {/* FORMULAIRE */}
+          <section className="lg:col-span-5 bg-[#0a0a0a] border border-white/5 p-8 rounded-[2.5rem]">
+            <h2 className="text-lg font-serif italic text-white mb-8">Déployer un Partenaire</h2>
+            <form onSubmit={createAdminAccount} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <input placeholder="Prénom" className="w-full bg-black border border-white/5 rounded-xl p-3 text-sm outline-none focus:border-red-600" value={form.prenom} onChange={e => setForm({...form, prenom: e.target.value})} required />
+                <input placeholder="Nom" className="w-full bg-black border border-white/5 rounded-xl p-3 text-sm outline-none focus:border-red-600" value={form.nom} onChange={e => setForm({...form, nom: e.target.value})} required />
               </div>
-              <Globe size={32} className="text-red-900/40" />
-            </div>
+              <input placeholder="Nom de l'agence" className="w-full bg-black border border-white/5 rounded-xl p-3 text-sm outline-none focus:border-red-600" value={form.companyName} onChange={e => setForm({...form, companyName: e.target.value})} required />
+              <select className="w-full bg-black border border-white/5 rounded-xl p-3 text-sm outline-none" value={form.pack} onChange={e => setForm({...form, pack: e.target.value})}>
+                <option value="CORE">CORE (2 Experts)</option>
+                <option value="ASCENT">ASCENT (10 Experts)</option>
+                <option value="HORIZON">HORIZON (Illimité)</option>
+              </select>
+              <div className="h-px bg-white/5 my-4" />
+              <input placeholder="Email login" className="w-full bg-black border border-white/5 rounded-xl p-3 text-sm outline-none focus:border-red-600" value={form.email} onChange={e => setForm({...form, email: e.target.value})} required />
+              <input type="password" placeholder="Mot de passe" className="w-full bg-black border border-white/5 rounded-xl p-3 text-sm outline-none focus:border-red-600" value={form.password} onChange={e => setForm({...form, password: e.target.value})} required />
+              <button type="submit" disabled={isGlobalLoading} className="w-full bg-red-600 hover:bg-red-500 py-4 rounded-xl font-black text-[10px] tracking-widest transition-all">
+                {isGlobalLoading ? <Loader2 className="animate-spin mx-auto" /> : "CRÉER LE COMPTE ADMIN"}
+              </button>
+            </form>
           </section>
 
-          {/* SECTION DROITE : LISTE DES AGENCES */}
-          <section className="lg:col-span-7 space-y-6">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-4">
-              <h2 className="text-xl font-serif italic text-white flex items-center gap-3">
-                <LayoutDashboard size={20} className="text-red-500" /> Database Live
-              </h2>
-              <div className="relative w-full sm:w-64">
+          {/* LISTE */}
+          <section className="lg:col-span-7 space-y-4">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-lg font-serif italic text-white">Database Partenaires</h2>
+              <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-600" size={14} />
-                <input 
-                  type="text" 
-                  placeholder="Rechercher une agence..." 
-                  className="w-full pl-10 pr-4 py-2 bg-[#0a0a0a] border border-slate-800 rounded-full text-[11px] outline-none focus:border-red-900 transition-all"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
+                <input placeholder="Rechercher..." className="bg-white/5 border border-white/5 rounded-full pl-10 pr-4 py-2 text-xs outline-none focus:border-red-900" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
               </div>
             </div>
 
-            <div className="space-y-4 max-h-[700px] overflow-y-auto pr-2 custom-scrollbar">
-              {filteredAdmins.map((admin) => (
-                <div key={admin.id} className="group bg-[#0a0a0a] border border-slate-800/60 p-6 rounded-[2rem] hover:border-red-900/40 hover:bg-[#0c0c0c] transition-all">
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                    <div className="flex items-center gap-5">
-                      <div className="h-12 w-12 bg-black border border-slate-800 rounded-xl flex items-center justify-center text-red-600 group-hover:scale-110 transition-transform">
-                        <Building2 size={20} />
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-3">
-                          <p className="font-bold text-white text-lg">{admin.company_name}</p>
-                          <span className="text-[8px] px-2 py-0.5 rounded bg-red-500/10 text-red-500 border border-red-500/20 font-black">{admin.pack}</span>
-                        </div>
-                        <div className="flex items-center gap-2 mt-1">
-                          <p className="text-[9px] font-mono text-slate-600 truncate max-w-[150px]">ID: {admin.id}</p>
-                          <button onClick={() => copyToClipboard(admin.id)} className="text-slate-700 hover:text-white transition-colors">
-                            {copiedId === admin.id ? <CheckCircle2 size={10} className="text-emerald-500" /> : <Copy size={10} />}
-                          </button>
-                        </div>
-                      </div>
+            <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
+              {filteredAdmins.map(admin => (
+                <div key={admin.id} className="bg-[#0a0a0a] border border-white/5 p-5 rounded-2xl flex items-center justify-between group hover:border-red-900/30 transition-all">
+                  <div className="flex items-center gap-4">
+                    <div className="h-10 w-10 bg-black rounded-lg flex items-center justify-center text-red-600 border border-white/5">
+                      <Building2 size={18} />
                     </div>
-                    <div className="flex items-center gap-6">
-                      <div className="text-right hidden sm:block">
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">{admin.prenom} {admin.nom}</p>
-                        <p className="text-[9px] text-slate-600">{admin.email}</p>
-                      </div>
-                      <button 
-                        onClick={() => deleteAdminAccount(admin.id, admin.company_name)}
-                        disabled={deletingId === admin.id}
-                        className="h-11 w-11 rounded-xl border border-slate-800 flex items-center justify-center text-slate-700 hover:text-red-500 hover:border-red-500 transition-all bg-black"
-                      >
-                        {deletingId === admin.id ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
-                      </button>
+                    <div>
+                      <p className="font-bold text-white text-sm">{admin.company_name} <span className="text-[8px] text-red-500 ml-2 uppercase">{admin.pack}</span></p>
+                      <p className="text-[10px] text-slate-500">{admin.email}</p>
                     </div>
                   </div>
+                  <button onClick={() => deleteAdminAccount(admin.id, admin.company_name)} className="h-9 w-9 flex items-center justify-center text-slate-600 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all">
+                    <Trash2 size={16} />
+                  </button>
                 </div>
               ))}
-
-              {filteredAdmins.length === 0 && (
-                <div className="text-center py-20 border border-dashed border-slate-900 rounded-[3rem]">
-                  <p className="text-slate-600 text-sm font-serif italic">Aucun partenaire ne correspond à votre recherche.</p>
-                </div>
-              )}
             </div>
           </section>
         </div>
       </div>
-
-      <style jsx global>{`
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.05); border-radius: 10px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(220,38,38,0.2); }
-      `}</style>
+      <style jsx global>{`.custom-scrollbar::-webkit-scrollbar { width: 4px; } .custom-scrollbar::-webkit-scrollbar-thumb { background: #1a1a1a; border-radius: 10px; }`}</style>
     </div>
   );
 }
