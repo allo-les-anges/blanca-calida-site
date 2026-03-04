@@ -5,7 +5,7 @@ import { createClient } from '@supabase/supabase-js';
 import { 
   Save, Trash2, Loader2, Search, MapPin, Plus, X,
   LogOut, Activity, Zap, Briefcase, UserCheck,
-  Phone, Mail, Home, FileText, Image as ImageIcon, ExternalLink
+  Phone, Mail, Calendar, Home, HardHat, Wallet, Clock, FileText, Image as ImageIcon, ExternalLink
 } from 'lucide-react';
 
 const supabase = createClient(
@@ -118,17 +118,22 @@ export default function AdminDashboard() {
   };
 
   const handleDeleteFile = async (field: 'lien_photo' | 'document_url') => {
-    if (!selectedProjet || !confirm("Supprimer définitivement ce document du dossier client ?")) return;
+    if (!selectedProjet || !confirm("Voulez-vous supprimer définitivement ce document ?")) return;
+    
     setUpdating(true);
     try {
-        const { error } = await supabase.from('suivi_chantier').update({ [field]: null }).eq('id', selectedProjet.id);
-        if (error) throw error;
-        alert("Document effacé.");
-        loadData();
+      const { error } = await supabase
+        .from('suivi_chantier')
+        .update({ [field]: null })
+        .eq('id', selectedProjet.id);
+
+      if (error) throw error;
+      alert("Document supprimé.");
+      loadData();
     } catch (error: any) {
-        alert(error.message);
+      alert("Erreur: " + error.message);
     } finally {
-        setUpdating(false);
+      setUpdating(false);
     }
   };
 
@@ -204,7 +209,7 @@ export default function AdminDashboard() {
 
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={14} />
-            <input type="text" placeholder="Rechercher client ou villa..." className="w-full pl-10 pr-4 py-3 bg-white/5 rounded-xl text-xs outline-none border border-white/5 focus:border-emerald-500" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+            <input type="text" placeholder="Filtrer..." className="w-full pl-10 pr-4 py-3 bg-white/5 rounded-xl text-xs outline-none border border-white/5 focus:border-emerald-500" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
           </div>
         </div>
         
@@ -237,90 +242,105 @@ export default function AdminDashboard() {
               </div>
               <div className="flex gap-3 w-full md:w-auto">
                  <button onClick={handleUpdateProjet} disabled={updating} className="flex-1 flex items-center justify-center gap-2 px-10 py-4 bg-emerald-500 text-black rounded-2xl font-black text-[10px] uppercase shadow-xl hover:scale-105 transition-all">
-                    {updating ? <Loader2 size={16} className="animate-spin"/> : <Save size={16}/>} Enregistrer
+                    {updating ? <Loader2 size={16} className="animate-spin"/> : <Save size={16}/>} Mettre à jour le dossier
                  </button>
                  <button onClick={() => { supabase.auth.signOut(); window.location.href='/login'; }} className="p-4 bg-red-500/10 text-red-500 rounded-2xl border border-red-500/20"><LogOut size={20}/></button>
               </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* COLONNE GAUCHE (DOCUMENTS) */}
               <div className="space-y-6">
                 <section className="bg-white/5 p-6 rounded-[2rem] border border-white/5 space-y-4">
-                  <h3 className="text-[10px] font-black uppercase text-orange-400 tracking-[0.2em] flex items-center gap-2"><FileText size={14}/> Documents & Médias</h3>
-                  
-                  {/* PHOTO VILLA */}
-                  <div className="space-y-2">
-                    <label className="text-[9px] text-slate-500 uppercase font-bold block mb-2 italic">Photo Villa</label>
-                    {selectedProjet.lien_photo ? (
-                      <div className="relative h-24 w-full rounded-2xl overflow-hidden border border-white/10 group">
-                        <img src={selectedProjet.lien_photo} className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-all" alt="villa"/>
-                        <div className="absolute inset-0 flex items-center justify-center gap-3 bg-black/40 opacity-0 group-hover:opacity-100 transition-all">
-                           <a href={selectedProjet.lien_photo} target="_blank" className="p-2 bg-white/10 rounded-full hover:bg-emerald-500 hover:text-black"><ExternalLink size={14}/></a>
-                           <button onClick={() => handleDeleteFile('lien_photo')} className="p-2 bg-white/10 rounded-full hover:bg-red-500"><Trash2 size={14}/></button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="border-2 border-dashed border-white/5 rounded-2xl p-4 text-center">
-                        <label className="cursor-pointer flex flex-col items-center gap-2 text-slate-500 hover:text-emerald-500">
-                          <ImageIcon size={20}/>
-                          <span className="text-[9px] font-black uppercase">Importer Photo</span>
-                          <input type="file" className="hidden" onChange={(e) => handleFileUpload(e, 'lien_photo')} />
-                        </label>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* PDF CONTRAT */}
-                  <div className="pt-4 border-t border-white/5 space-y-2">
-                    <label className="text-[9px] text-slate-500 uppercase font-bold block mb-2 italic">Dossier PDF / Contrat</label>
-                    {selectedProjet.document_url ? (
-                        <div className="flex items-center justify-between bg-black/40 p-3 rounded-xl border border-white/5">
-                           <a href={selectedProjet.document_url} target="_blank" className="text-[10px] text-blue-400 font-bold hover:underline truncate flex items-center gap-2"><FileText size={12}/> Voir le PDF</a>
-                           <button onClick={() => handleDeleteFile('document_url')} className="text-slate-600 hover:text-red-500 transition-colors"><Trash2 size={14}/></button>
-                        </div>
-                    ) : (
-                        <input type="file" className="text-[10px] w-full file:bg-white/5 file:text-white file:border-0 file:rounded-full file:px-4 file:py-2 cursor-pointer" onChange={(e) => handleFileUpload(e, 'document_url')} />
-                    )}
+                  <h3 className="text-[10px] font-black uppercase text-emerald-500 tracking-[0.2em] flex items-center gap-2 mb-4"><UserCheck size={14}/> Fiche Client</h3>
+                  <div className="space-y-4 text-sm">
+                    <div className="flex items-center gap-3"><Mail size={14} className="text-slate-500"/> {selectedProjet.email_client}</div>
+                    <div className="flex items-center gap-3"><Phone size={14} className="text-slate-500"/> {selectedProjet.telephone}</div>
+                    <div className="flex items-start gap-3 pt-4 border-t border-white/5"><MapPin size={14} className="text-slate-500 mt-1"/> <div>{selectedProjet.rue}<br/>{selectedProjet.code_postal} {selectedProjet.ville}</div></div>
                   </div>
                 </section>
 
                 <section className="bg-white/5 p-6 rounded-[2rem] border border-white/5 space-y-4">
-                  <h3 className="text-[10px] font-black uppercase text-emerald-500 tracking-[0.2em] flex items-center gap-2 mb-4"><UserCheck size={14}/> Client</h3>
-                  <div className="space-y-4 text-sm">
-                    <div className="flex items-center gap-3 text-slate-300 font-medium"><Mail size={14} className="text-slate-500"/> {selectedProjet.email_client}</div>
-                    <div className="flex items-center gap-3 text-slate-300 font-medium"><Phone size={14} className="text-slate-500"/> {selectedProjet.telephone}</div>
-                    <div className="flex items-start gap-3 pt-4 border-t border-white/5 text-slate-400"><MapPin size={14} className="text-slate-500 mt-1"/> <div>{selectedProjet.rue}<br/>{selectedProjet.code_postal} {selectedProjet.ville}</div></div>
+                  <h3 className="text-[10px] font-black uppercase text-blue-400 tracking-[0.2em] flex items-center gap-2"><Home size={14}/> Finance & Délais</h3>
+                  <div className="space-y-4 text-left">
+                    <div>
+                      <label className="text-[9px] text-slate-500 uppercase font-bold block mb-1 italic">Constructeur</label>
+                      <p className="text-sm font-bold text-white">{selectedProjet.constructeur_info || "Non renseigné"}</p>
+                    </div>
+                    <div>
+                      <label className="text-[9px] text-slate-500 uppercase font-bold block mb-1 italic">Cashback (€)</label>
+                      <input type="text" value={editCashback} onChange={(e) => setEditCashback(e.target.value)} className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-sm outline-none focus:border-emerald-500 text-emerald-400 font-bold" />
+                    </div>
+                    <div>
+                      <label className="text-[9px] text-slate-500 uppercase font-bold block mb-1 italic">Livraison Estimée</label>
+                      <input type="text" value={editLivraison} onChange={(e) => setEditLivraison(e.target.value)} className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-sm outline-none focus:border-emerald-500 text-white" />
+                    </div>
+                  </div>
+                </section>
+
+                {/* --- SECTION DOCUMENTS (Bucket: documents-clients) --- */}
+                <section className="bg-white/5 p-6 rounded-[2rem] border border-white/5 space-y-4">
+                  <h3 className="text-[10px] font-black uppercase text-orange-400 tracking-[0.2em] flex items-center gap-2"><FileText size={14}/> Documents & Médias</h3>
+                  <div className="space-y-4 text-left">
+                    {/* Gestion Photo Villa */}
+                    <div className="space-y-2">
+                      <label className="text-[9px] text-slate-500 uppercase font-bold block italic">Photo de la Villa</label>
+                      {selectedProjet.lien_photo ? (
+                        <div className="relative group h-24 w-full rounded-2xl overflow-hidden border border-white/5">
+                          <img src={selectedProjet.lien_photo} className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-all" alt="villa"/>
+                          <div className="absolute inset-0 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-all bg-black/40">
+                             <a href={selectedProjet.lien_photo} target="_blank" className="p-2 bg-emerald-500 text-black rounded-full hover:scale-110 transition-transform"><ExternalLink size={14}/></a>
+                             <button onClick={() => handleDeleteFile('lien_photo')} className="p-2 bg-red-500 text-white rounded-full hover:scale-110 transition-transform"><Trash2 size={14}/></button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-center p-4 border-2 border-dashed border-white/10 rounded-2xl hover:border-emerald-500/50 transition-colors">
+                           <label className="cursor-pointer flex flex-col items-center gap-2">
+                             <ImageIcon size={20} className="text-slate-500"/>
+                             <span className="text-[10px] uppercase font-black text-slate-500">Ajouter Photo</span>
+                             <input type="file" className="hidden" onChange={(e) => handleFileUpload(e, 'lien_photo')} />
+                           </label>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Gestion Document PDF */}
+                    <div className="pt-4 border-t border-white/5 space-y-2">
+                      <label className="text-[9px] text-slate-500 uppercase font-bold block italic">Document (Contrat/PDF)</label>
+                      {selectedProjet.document_url ? (
+                        <div className="flex items-center justify-between bg-black/40 p-3 rounded-xl border border-white/5">
+                           <a href={selectedProjet.document_url} target="_blank" rel="noreferrer" className="text-[10px] text-emerald-400 font-bold hover:underline truncate flex items-center gap-2">
+                             <FileText size={12}/> Consulter le PDF
+                           </a>
+                           <button onClick={() => handleDeleteFile('document_url')} className="text-slate-500 hover:text-red-500"><Trash2 size={14}/></button>
+                        </div>
+                      ) : (
+                        <input type="file" className="text-[10px] text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-[9px] file:font-black file:bg-white/5 file:text-white cursor-pointer w-full" onChange={(e) => handleFileUpload(e, 'document_url')} />
+                      )}
+                    </div>
                   </div>
                 </section>
               </div>
 
-              {/* COLONNE DROITE (AVANCEMENT) */}
+              {/* COLONNE DROITE (ÉTAPES) */}
               <div className="lg:col-span-2 space-y-6 text-left">
                 <div className="bg-[#0F172A] p-8 rounded-[2.5rem] border border-white/5 shadow-2xl">
                   <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
                     <h3 className="text-[10px] font-black uppercase text-emerald-500 tracking-[0.2em] flex items-center gap-2"><Activity size={14}/> État d'avancement</h3>
-                    <div className="text-[9px] font-mono text-slate-500 bg-black/30 px-4 py-1.5 rounded-full uppercase border border-white/5 italic">Dernière mise à jour : {selectedProjet.updated_at ? new Date(selectedProjet.updated_at).toLocaleString() : 'N/A'}</div>
+                    <div className="text-[9px] font-mono text-slate-500 bg-black/30 px-4 py-1.5 rounded-full uppercase border border-white/5">MàJ : {selectedProjet.updated_at ? new Date(selectedProjet.updated_at).toLocaleString() : 'Initiale'}</div>
                   </div>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                    <div>
-                        <label className="text-[9px] text-slate-500 uppercase font-bold block mb-2 italic">Phase du Chantier</label>
-                        <select value={editStep} onChange={(e) => setEditStep(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded-2xl p-4 text-sm font-bold outline-none focus:border-emerald-500 text-emerald-500 appearance-none shadow-inner">
-                            {PHASES_CHANTIER.map(p => <option key={p} value={p}>{p}</option>)}
-                        </select>
-                    </div>
-                    <div>
-                        <label className="text-[9px] text-slate-500 uppercase font-bold block mb-2 italic">Livraison Estimée</label>
-                        <input type="text" value={editLivraison} onChange={(e) => setEditLivraison(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded-2xl p-4 text-sm outline-none focus:border-emerald-500 text-white font-bold" />
-                    </div>
+                  <div className="mb-8">
+                    <label className="text-[9px] text-slate-500 uppercase font-bold block mb-2 italic">Phase du Chantier</label>
+                    <select value={editStep} onChange={(e) => setEditStep(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded-2xl p-4 text-sm font-bold outline-none focus:border-emerald-500 text-emerald-500 appearance-none shadow-inner">
+                      {PHASES_CHANTIER.map(p => <option key={p} value={p}>{p}</option>)}
+                    </select>
                   </div>
 
-                  <label className="text-[9px] text-slate-500 uppercase font-bold block mb-2 italic">Commentaire de suivi (Visible par le client)</label>
+                  <label className="text-[9px] text-slate-500 uppercase font-bold block mb-2 italic">Note à l'attention du client</label>
                   <textarea 
                     value={editComment} onChange={(e) => setEditComment(e.target.value)}
                     className="w-full bg-black/50 border border-white/10 rounded-3xl p-8 text-lg text-slate-200 min-h-[400px] outline-none focus:border-emerald-500 italic leading-relaxed shadow-inner"
-                    placeholder="Écrivez ici les détails techniques ou les nouvelles du chantier pour votre client..."
+                    placeholder="Détaillez ici les avancées du chantier..."
                   />
                 </div>
               </div>
@@ -334,21 +354,20 @@ export default function AdminDashboard() {
         )}
       </div>
 
-      {/* MODAL : NOUVEAU CLIENT AVEC PLACEHOLDERS */}
+      {/* MODAL : NOUVEAU CLIENT */}
       {showModal && (
         <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex items-center justify-center p-4">
           <div className="bg-[#0F172A] w-full max-w-4xl rounded-[3rem] border border-white/10 shadow-3xl overflow-hidden max-h-[90vh] flex flex-col">
             <div className="p-8 border-b border-white/5 flex justify-between items-center bg-[#0F172A] z-10 text-left">
               <div>
-                <h2 className="text-2xl font-black uppercase tracking-tighter text-white leading-none">Création Dossier Client</h2>
-                <p className="text-[10px] text-emerald-500 font-bold uppercase mt-1">Le client recevra son PIN par email</p>
+                <h2 className="text-2xl font-black uppercase tracking-tighter text-white leading-none">Nouveau Dossier</h2>
+                <p className="text-[10px] text-emerald-500 font-bold uppercase mt-1">Génération automatique du Code PIN de suivi</p>
               </div>
               <button onClick={() => setShowModal(false)} className="p-3 bg-white/5 rounded-full text-slate-500 hover:text-white transition-colors"><X size={24} /></button>
             </div>
             
             <form onSubmit={handleCreateProject} className="p-8 overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-6 text-left">
               <div className="md:col-span-2 text-emerald-500 font-black text-[10px] uppercase tracking-[0.3em] border-b border-white/5 pb-2">Identité Client</div>
-              
               <div className="space-y-1">
                 <label className="text-[9px] uppercase font-black text-slate-500 ml-2">Prénom</label>
                 <input required placeholder="ex: Jean" className="w-full bg-black/50 border border-white/10 rounded-2xl p-4 text-sm outline-none focus:border-emerald-500" value={newProject.client_prenom} onChange={e => setNewProject({...newProject, client_prenom: e.target.value})} />
@@ -358,31 +377,30 @@ export default function AdminDashboard() {
                 <input required placeholder="ex: Dupont" className="w-full bg-black/50 border border-white/10 rounded-2xl p-4 text-sm outline-none focus:border-emerald-500" value={newProject.client_nom} onChange={e => setNewProject({...newProject, client_nom: e.target.value})} />
               </div>
               <div className="space-y-1">
-                <label className="text-[9px] uppercase font-black text-slate-500 ml-2">Email de connexion</label>
-                <input type="email" required placeholder="ex: j.dupont@email.com" className="w-full bg-black/50 border border-white/10 rounded-2xl p-4 text-sm outline-none focus:border-emerald-500" value={newProject.email_client} onChange={e => setNewProject({...newProject, email_client: e.target.value})} />
+                <label className="text-[9px] uppercase font-black text-slate-500 ml-2">Email</label>
+                <input type="email" required placeholder="client@exemple.com" className="w-full bg-black/50 border border-white/10 rounded-2xl p-4 text-sm outline-none focus:border-emerald-500" value={newProject.email_client} onChange={e => setNewProject({...newProject, email_client: e.target.value})} />
               </div>
               <div className="space-y-1">
                 <label className="text-[9px] uppercase font-black text-slate-500 ml-2">Téléphone</label>
-                <input placeholder="ex: +33 6 12 34 56 78" className="w-full bg-black/50 border border-white/10 rounded-2xl p-4 text-sm outline-none focus:border-emerald-500" value={newProject.telephone} onChange={e => setNewProject({...newProject, telephone: e.target.value})} />
+                <input placeholder="+33 6 00 00 00 00" className="w-full bg-black/50 border border-white/10 rounded-2xl p-4 text-sm outline-none focus:border-emerald-500" value={newProject.telephone} onChange={e => setNewProject({...newProject, telephone: e.target.value})} />
               </div>
 
-              <div className="md:col-span-2 text-blue-500 font-black text-[10px] uppercase tracking-[0.3em] border-b border-white/5 pb-2 mt-4">Projet Immobilier</div>
-              
+              <div className="md:col-span-2 text-blue-500 font-black text-[10px] uppercase tracking-[0.3em] border-b border-white/5 pb-2 mt-4">Localisation & Projet</div>
               <div className="md:col-span-2 space-y-1">
                 <label className="text-[9px] uppercase font-black text-slate-400 ml-2">Nom de la Villa / Plot</label>
-                <input required placeholder="ex: Villa Serena - Plot 42" className="w-full bg-black/50 border border-white/10 rounded-2xl p-4 text-sm font-bold focus:border-blue-500 outline-none text-white uppercase" value={newProject.nom_villa} onChange={e => setNewProject({...newProject, nom_villa: e.target.value})} />
+                <input required placeholder="ex: Villa Serena - Plot 42" className="w-full bg-black/50 border border-white/10 rounded-2xl p-4 text-sm font-bold focus:border-blue-500 outline-none text-white" value={newProject.nom_villa} onChange={e => setNewProject({...newProject, nom_villa: e.target.value})} />
               </div>
               <div className="space-y-1">
-                <label className="text-[9px] uppercase font-black text-slate-500 ml-2">Localisation (Ville)</label>
-                <input placeholder="ex: Alicante, Costa Blanca" className="w-full bg-black/50 border border-white/10 rounded-2xl p-4 text-sm outline-none focus:border-emerald-500" value={newProject.ville} onChange={e => setNewProject({...newProject, ville: e.target.value})} />
+                <label className="text-[9px] uppercase font-black text-slate-500 ml-2">Ville</label>
+                <input placeholder="ex: Marbella" className="w-full bg-black/50 border border-white/10 rounded-2xl p-4 text-sm outline-none focus:border-emerald-500" value={newProject.ville} onChange={e => setNewProject({...newProject, ville: e.target.value})} />
               </div>
               <div className="space-y-1">
-                <label className="text-[9px] uppercase font-black text-slate-500 ml-2">Cashback Client (€)</label>
-                <input type="number" placeholder="ex: 5000" className="w-full bg-black/50 border border-white/10 rounded-2xl p-4 text-sm outline-none focus:border-emerald-500 font-bold text-emerald-400" value={newProject.montant_cashback} onChange={e => setNewProject({...newProject, montant_cashback: Number(e.target.value)})} />
+                <label className="text-[9px] uppercase font-black text-slate-500 ml-2">Cashback Prévu (€)</label>
+                <input type="number" placeholder="5000" className="w-full bg-black/50 border border-white/10 rounded-2xl p-4 text-sm outline-none focus:border-emerald-500 font-bold text-emerald-400" value={newProject.montant_cashback} onChange={e => setNewProject({...newProject, montant_cashback: Number(e.target.value)})} />
               </div>
 
-              <button type="submit" className="md:col-span-2 bg-emerald-500 text-black py-5 rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] mt-8 hover:bg-white transition-all shadow-2xl flex items-center justify-center gap-3">
-                <Plus size={18}/> Activer le suivi & Créer le PIN
+              <button type="submit" className="md:col-span-2 bg-emerald-500 text-black py-5 rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] mt-8 hover:bg-white transition-all shadow-2xl">
+                Activer le suivi & Générer PIN
               </button>
             </form>
           </div>
