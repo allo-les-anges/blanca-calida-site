@@ -5,7 +5,8 @@ import { createClient } from '@supabase/supabase-js';
 import { 
   Save, Trash2, Loader2, Search, MapPin, Plus, X,
   LogOut, Activity, Zap, Briefcase, UserCheck,
-  Phone, Mail, Calendar, Home, HardHat, Wallet, Clock, FileText, Image as ImageIcon, ExternalLink
+  Phone, Mail, Calendar, Home, HardHat, Wallet, Clock, FileText, 
+  Image as ImageIcon, ExternalLink, File, Video, Eye
 } from 'lucide-react';
 
 const supabase = createClient(
@@ -31,6 +32,10 @@ export default function AdminDashboard() {
   const [staffList, setStaffList] = useState<any[]>([]);
   const [showModal, setShowModal] = useState(false);
 
+  // État pour la liste des documents du projet sélectionné
+  const [projectDocs, setProjectDocs] = useState<any[]>([]);
+  const [projectReports, setProjectReports] = useState<any[]>([]);
+
   // États pour l'édition
   const [editComment, setEditComment] = useState("");
   const [editStep, setEditStep] = useState("");
@@ -39,7 +44,6 @@ export default function AdminDashboard() {
 
   const [agencyProfile, setAgencyProfile] = useState<any>({ company_name: "Amaru-Homes" });
 
-  // État pour la création d'un nouveau projet
   const [newProject, setNewProject] = useState({
     client_nom: "", client_prenom: "", email_client: "", telephone: "",
     rue: "", code_postal: "", ville: "", pays: "Espagne",
@@ -70,6 +74,25 @@ export default function AdminDashboard() {
     } catch (err) { console.error(err); } finally { setLoading(false); }
   }, []);
 
+  // Charger les documents et rapports spécifiques au projet sélectionné
+  const loadProjectExtras = async (projectId: string) => {
+    // 1. Charger les documents (Photos, PDF, Vidéos)
+    const { data: docs } = await supabase
+      .from('documents_projets')
+      .select('*')
+      .eq('projet_id', projectId)
+      .order('created_at', { ascending: false });
+    setProjectDocs(docs || []);
+
+    // 2. Charger les rapports de suivi envoyés
+    const { data: reports } = await supabase
+      .from('chantier_updates')
+      .select('*')
+      .eq('projet_id', projectId)
+      .order('created_at', { ascending: false });
+    setProjectReports(reports || []);
+  };
+
   useEffect(() => { loadData(); }, [loadData]);
   
   useEffect(() => { 
@@ -78,19 +101,21 @@ export default function AdminDashboard() {
       setEditStep(selectedProjet.etape_actuelle || PHASES_CHANTIER[0]);
       setEditCashback(selectedProjet.montant_cashback || "");
       setEditLivraison(selectedProjet.date_livraison_prevue || "");
+      loadProjectExtras(selectedProjet.id);
     } 
   }, [selectedProjet]);
 
-  // --- LOGIQUE DOCUMENTAIRE (Bucket: documents-clients) ---
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, field: 'lien_photo' | 'document_url') => {
+  // --- NOUVELLE LOGIQUE MULTI-DOCUMENTS ---
+  const handleMultiFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !selectedProjet) return;
 
     setUpdating(true);
     try {
       const fileExt = file.name.split('.').pop();
-      const fileName = `${selectedProjet.id}/${field}-${Date.now()}.${fileExt}`;
+      const fileName = `${selectedProjet.id}/${Date.now()}-${file.name}`;
 
+      // Upload dans le bucket
       const { error: uploadError } = await supabase.storage
         .from('documents-clients')
         .upload(fileName, file);
@@ -101,40 +126,35 @@ export default function AdminDashboard() {
         .from('documents-clients')
         .getPublicUrl(fileName);
 
-      const { error: updateError } = await supabase
-        .from('suivi_chantier')
-        .update({ [field]: publicUrl })
-        .eq('id', selectedProjet.id);
+      // Insertion dans la table documents_projets
+      const { error: insertError } = await supabase
+        .from('documents_projets')
+        .insert([{
+          projet_id: selectedProjet.id,
+          nom_fichier: file.name,
+          url: publicUrl,
+          type: file.type
+        }]);
 
-      if (updateError) throw updateError;
+      if (insertError) throw insertError;
 
-      alert("Fichier importé avec succès !");
-      loadData();
+      loadProjectExtras(selectedProjet.id);
     } catch (error: any) {
-      alert("Erreur: " + error.message);
+      alert("Erreur upload: " + error.message);
     } finally {
       setUpdating(false);
     }
   };
 
-  const handleDeleteFile = async (field: 'lien_photo' | 'document_url') => {
-    if (!selectedProjet || !confirm("Voulez-vous supprimer définitivement ce document ?")) return;
-    
+  const deleteDocument = async (docId: string, url: string) => {
+    if (!confirm("Supprimer ce document ?")) return;
     setUpdating(true);
     try {
-      const { error } = await supabase
-        .from('suivi_chantier')
-        .update({ [field]: null })
-        .eq('id', selectedProjet.id);
-
-      if (error) throw error;
-      alert("Document supprimé.");
-      loadData();
-    } catch (error: any) {
-      alert("Erreur: " + error.message);
-    } finally {
-      setUpdating(false);
-    }
+      // 1. Supprimer de la DB
+      await supabase.from('documents_projets').delete().eq('id', docId);
+      // 2. Supprimer du Storage (optionnel selon ta config)
+      loadProjectExtras(selectedProjet.id);
+    } catch (err) { console.error(err); } finally { setUpdating(false); }
   };
 
   const handleUpdateProjet = async () => {
@@ -173,9 +193,7 @@ export default function AdminDashboard() {
       setShowModal(false);
       setNewProject({ client_nom: "", client_prenom: "", email_client: "", telephone: "", rue: "", code_postal: "", ville: "", pays: "Espagne", nom_villa: "", constructeur_info: "", montant_cashback: 0, date_naissance: "" });
       loadData();
-    } else {
-      alert(error.message);
-    }
+    } else { alert(error.message); }
   };
 
   const filteredProjets = useMemo(() => {
@@ -183,6 +201,14 @@ export default function AdminDashboard() {
       `${p.client_prenom} ${p.client_nom} ${p.nom_villa}`.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [projets, searchTerm]);
+
+  // Helper pour l'icône selon le type de fichier
+  const getFileIcon = (type: string) => {
+    if (type.includes('image')) return <ImageIcon size={16} className="text-orange-400" />;
+    if (type.includes('video')) return <Video size={16} className="text-purple-400" />;
+    if (type.includes('pdf')) return <FileText size={16} className="text-red-400" />;
+    return <File size={16} className="text-slate-400" />;
+  };
 
   if (loading) return <div className="h-screen bg-[#020617] flex items-center justify-center"><Loader2 className="animate-spin text-emerald-500" size={40} /></div>;
 
@@ -228,10 +254,11 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* MAIN CONTENT (Éditeur) */}
+      {/* MAIN CONTENT */}
       <div className="flex-1 p-6 md:p-12 overflow-y-auto">
         {selectedProjet ? (
           <div className="max-w-6xl mx-auto space-y-8 text-left animate-in fade-in duration-500">
+            {/* HEADER PROJET */}
             <div className="bg-white/[0.02] p-8 rounded-[2rem] border border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
               <div>
                 <h2 className="text-5xl font-black text-white uppercase italic tracking-tighter leading-none">{selectedProjet.nom_villa}</h2>
@@ -250,6 +277,7 @@ export default function AdminDashboard() {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <div className="space-y-6">
+                {/* FICHE CLIENT */}
                 <section className="bg-white/5 p-6 rounded-[2rem] border border-white/5 space-y-4">
                   <h3 className="text-[10px] font-black uppercase text-emerald-500 tracking-[0.2em] flex items-center gap-2 mb-4"><UserCheck size={14}/> Fiche Client</h3>
                   <div className="space-y-4 text-sm">
@@ -259,74 +287,59 @@ export default function AdminDashboard() {
                   </div>
                 </section>
 
+                {/* GESTION MULTI-DOCUMENTS (PDF, PHOTOS, VIDEOS) */}
                 <section className="bg-white/5 p-6 rounded-[2rem] border border-white/5 space-y-4">
-                  <h3 className="text-[10px] font-black uppercase text-blue-400 tracking-[0.2em] flex items-center gap-2"><Home size={14}/> Finance & Délais</h3>
-                  <div className="space-y-4 text-left">
-                    <div>
-                      <label className="text-[9px] text-slate-500 uppercase font-bold block mb-1 italic">Constructeur</label>
-                      <p className="text-sm font-bold text-white">{selectedProjet.constructeur_info || "Non renseigné"}</p>
-                    </div>
-                    <div>
-                      <label className="text-[9px] text-slate-500 uppercase font-bold block mb-1 italic">Cashback (€)</label>
-                      <input type="text" value={editCashback} onChange={(e) => setEditCashback(e.target.value)} className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-sm outline-none focus:border-emerald-500 text-emerald-400 font-bold" />
-                    </div>
-                    <div>
-                      <label className="text-[9px] text-slate-500 uppercase font-bold block mb-1 italic">Livraison Estimée</label>
-                      <input type="text" value={editLivraison} onChange={(e) => setEditLivraison(e.target.value)} className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-sm outline-none focus:border-emerald-500 text-white" />
-                    </div>
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-[10px] font-black uppercase text-orange-400 tracking-[0.2em] flex items-center gap-2"><FileText size={14}/> Documents & Médias</h3>
+                    <label className="cursor-pointer bg-white/5 p-2 rounded-lg hover:bg-emerald-500 hover:text-black transition-all">
+                      <Plus size={14} />
+                      <input type="file" className="hidden" onChange={handleMultiFileUpload} />
+                    </label>
+                  </div>
+                  
+                  <div className="space-y-2 max-h-60 overflow-y-auto pr-2">
+                    {projectDocs.length > 0 ? projectDocs.map((doc) => (
+                      <div key={doc.id} className="group flex items-center justify-between bg-black/40 p-3 rounded-xl border border-white/5 hover:border-emerald-500/30 transition-all">
+                        <div className="flex items-center gap-3 min-w-0">
+                          {getFileIcon(doc.type || "")}
+                          <span className="text-[10px] font-bold text-slate-300 truncate">{doc.nom_fichier}</span>
+                        </div>
+                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <a href={doc.url} target="_blank" className="p-1.5 text-emerald-500 hover:bg-emerald-500/10 rounded-lg"><ExternalLink size={12}/></a>
+                          <button onClick={() => deleteDocument(doc.id, doc.url)} className="p-1.5 text-red-500 hover:bg-red-500/10 rounded-lg"><Trash2 size={12}/></button>
+                        </div>
+                      </div>
+                    )) : (
+                      <p className="text-[9px] text-slate-600 italic text-center py-4">Aucun document importé</p>
+                    )}
                   </div>
                 </section>
 
-                {/* --- SECTION DOCUMENTS (Bucket: documents-clients) --- */}
+                {/* CONSULTATION DES RAPPORTS ENVOYÉS */}
                 <section className="bg-white/5 p-6 rounded-[2rem] border border-white/5 space-y-4">
-                  <h3 className="text-[10px] font-black uppercase text-orange-400 tracking-[0.2em] flex items-center gap-2"><FileText size={14}/> Documents & Médias</h3>
-                  <div className="space-y-4 text-left">
-                    {/* Gestion Photo Villa */}
-                    <div className="space-y-2">
-                      <label className="text-[9px] text-slate-500 uppercase font-bold block italic">Photo de la Villa</label>
-                      {selectedProjet.lien_photo ? (
-                        <div className="relative group h-24 w-full rounded-2xl overflow-hidden border border-white/5">
-                          <img src={selectedProjet.lien_photo} className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-all" alt="villa"/>
-                          <div className="absolute inset-0 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-all bg-black/40">
-                             <a href={selectedProjet.lien_photo} target="_blank" className="p-2 bg-emerald-500 text-black rounded-full hover:scale-110 transition-transform"><ExternalLink size={14}/></a>
-                             <button onClick={() => handleDeleteFile('lien_photo')} className="p-2 bg-red-500 text-white rounded-full hover:scale-110 transition-transform"><Trash2 size={14}/></button>
-                          </div>
+                  <h3 className="text-[10px] font-black uppercase text-blue-400 tracking-[0.2em] flex items-center gap-2"><Clock size={14}/> Historique Suivis</h3>
+                  <div className="space-y-2 max-h-60 overflow-y-auto pr-2">
+                    {projectReports.length > 0 ? projectReports.map((report) => (
+                      <div key={report.id} className="bg-black/20 p-3 rounded-xl border border-white/5">
+                        <div className="flex justify-between items-start mb-1">
+                          <span className="text-[9px] font-mono text-emerald-500">{new Date(report.created_at).toLocaleDateString()}</span>
+                          <span className="text-[8px] bg-white/5 px-2 py-0.5 rounded uppercase text-slate-400 font-bold">{report.etape_actuelle?.split('.')[0]}</span>
                         </div>
-                      ) : (
-                        <div className="flex items-center justify-center p-4 border-2 border-dashed border-white/10 rounded-2xl hover:border-emerald-500/50 transition-colors">
-                           <label className="cursor-pointer flex flex-col items-center gap-2">
-                             <ImageIcon size={20} className="text-slate-500"/>
-                             <span className="text-[10px] uppercase font-black text-slate-500">Ajouter Photo</span>
-                             <input type="file" className="hidden" onChange={(e) => handleFileUpload(e, 'lien_photo')} />
-                           </label>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Gestion Document PDF */}
-                    <div className="pt-4 border-t border-white/5 space-y-2">
-                      <label className="text-[9px] text-slate-500 uppercase font-bold block italic">Document (Contrat/PDF)</label>
-                      {selectedProjet.document_url ? (
-                        <div className="flex items-center justify-between bg-black/40 p-3 rounded-xl border border-white/5">
-                           <a href={selectedProjet.document_url} target="_blank" rel="noreferrer" className="text-[10px] text-emerald-400 font-bold hover:underline truncate flex items-center gap-2">
-                             <FileText size={12}/> Consulter le PDF
-                           </a>
-                           <button onClick={() => handleDeleteFile('document_url')} className="text-slate-500 hover:text-red-500"><Trash2 size={14}/></button>
-                        </div>
-                      ) : (
-                        <input type="file" className="text-[10px] text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-[9px] file:font-black file:bg-white/5 file:text-white cursor-pointer w-full" onChange={(e) => handleFileUpload(e, 'document_url')} />
-                      )}
-                    </div>
+                        <p className="text-[10px] text-slate-400 line-clamp-2 italic">"{report.commentaires_etape}"</p>
+                      </div>
+                    )) : (
+                      <p className="text-[9px] text-slate-600 italic text-center py-4">Aucun rapport envoyé</p>
+                    )}
                   </div>
                 </section>
               </div>
 
-              {/* COLONNE DROITE (ÉTAPES) */}
+              {/* ÉDITEUR (COLONNE DROITE) */}
               <div className="lg:col-span-2 space-y-6 text-left">
                 <div className="bg-[#0F172A] p-8 rounded-[2.5rem] border border-white/5 shadow-2xl">
                   <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
                     <h3 className="text-[10px] font-black uppercase text-emerald-500 tracking-[0.2em] flex items-center gap-2"><Activity size={14}/> État d'avancement</h3>
-                    <div className="text-[9px] font-mono text-slate-500 bg-black/30 px-4 py-1.5 rounded-full uppercase border border-white/5">MàJ : {selectedProjet.updated_at ? new Date(selectedProjet.updated_at).toLocaleString() : 'Initiale'}</div>
+                    <div className="text-[9px] font-mono text-slate-500 bg-black/30 px-4 py-1.5 rounded-full uppercase border border-white/5">Dernier rapport : {selectedProjet.updated_at ? new Date(selectedProjet.updated_at).toLocaleString() : 'Jamais'}</div>
                   </div>
                   
                   <div className="mb-8">
@@ -340,7 +353,7 @@ export default function AdminDashboard() {
                   <textarea 
                     value={editComment} onChange={(e) => setEditComment(e.target.value)}
                     className="w-full bg-black/50 border border-white/10 rounded-3xl p-8 text-lg text-slate-200 min-h-[400px] outline-none focus:border-emerald-500 italic leading-relaxed shadow-inner"
-                    placeholder="Détaillez ici les avancées du chantier..."
+                    placeholder="Détaillez ici les avancées du chantier pour le client..."
                   />
                 </div>
               </div>
@@ -370,33 +383,33 @@ export default function AdminDashboard() {
               <div className="md:col-span-2 text-emerald-500 font-black text-[10px] uppercase tracking-[0.3em] border-b border-white/5 pb-2">Identité Client</div>
               <div className="space-y-1">
                 <label className="text-[9px] uppercase font-black text-slate-500 ml-2">Prénom</label>
-                <input required placeholder="ex: Jean" className="w-full bg-black/50 border border-white/10 rounded-2xl p-4 text-sm outline-none focus:border-emerald-500" value={newProject.client_prenom} onChange={e => setNewProject({...newProject, client_prenom: e.target.value})} />
+                <input required placeholder="ex: Nancy" className="w-full bg-black/50 border border-white/10 rounded-2xl p-4 text-sm outline-none focus:border-emerald-500" value={newProject.client_prenom} onChange={e => setNewProject({...newProject, client_prenom: e.target.value})} />
               </div>
               <div className="space-y-1">
                 <label className="text-[9px] uppercase font-black text-slate-500 ml-2">Nom</label>
-                <input required placeholder="ex: Dupont" className="w-full bg-black/50 border border-white/10 rounded-2xl p-4 text-sm outline-none focus:border-emerald-500" value={newProject.client_nom} onChange={e => setNewProject({...newProject, client_nom: e.target.value})} />
+                <input required placeholder="ex: Dekens" className="w-full bg-black/50 border border-white/10 rounded-2xl p-4 text-sm outline-none focus:border-emerald-500" value={newProject.client_nom} onChange={e => setNewProject({...newProject, client_nom: e.target.value})} />
               </div>
               <div className="space-y-1">
                 <label className="text-[9px] uppercase font-black text-slate-500 ml-2">Email</label>
-                <input type="email" required placeholder="client@exemple.com" className="w-full bg-black/50 border border-white/10 rounded-2xl p-4 text-sm outline-none focus:border-emerald-500" value={newProject.email_client} onChange={e => setNewProject({...newProject, email_client: e.target.value})} />
+                <input type="email" required placeholder="nd@gmail.com" className="w-full bg-black/50 border border-white/10 rounded-2xl p-4 text-sm outline-none focus:border-emerald-500" value={newProject.email_client} onChange={e => setNewProject({...newProject, email_client: e.target.value})} />
               </div>
               <div className="space-y-1">
                 <label className="text-[9px] uppercase font-black text-slate-500 ml-2">Téléphone</label>
-                <input placeholder="+33 6 00 00 00 00" className="w-full bg-black/50 border border-white/10 rounded-2xl p-4 text-sm outline-none focus:border-emerald-500" value={newProject.telephone} onChange={e => setNewProject({...newProject, telephone: e.target.value})} />
+                <input placeholder="+32 ..." className="w-full bg-black/50 border border-white/10 rounded-2xl p-4 text-sm outline-none focus:border-emerald-500" value={newProject.telephone} onChange={e => setNewProject({...newProject, telephone: e.target.value})} />
               </div>
 
               <div className="md:col-span-2 text-blue-500 font-black text-[10px] uppercase tracking-[0.3em] border-b border-white/5 pb-2 mt-4">Localisation & Projet</div>
               <div className="md:col-span-2 space-y-1">
-                <label className="text-[9px] uppercase font-black text-slate-400 ml-2">Nom de la Villa / Plot</label>
-                <input required placeholder="ex: Villa Serena - Plot 42" className="w-full bg-black/50 border border-white/10 rounded-2xl p-4 text-sm font-bold focus:border-blue-500 outline-none text-white" value={newProject.nom_villa} onChange={e => setNewProject({...newProject, nom_villa: e.target.value})} />
+                <label className="text-[9px] uppercase font-black text-slate-400 ml-2">Nom de la Villa / Référence</label>
+                <input required placeholder="ex: ref.123" className="w-full bg-black/50 border border-white/10 rounded-2xl p-4 text-sm font-bold focus:border-blue-500 outline-none text-white" value={newProject.nom_villa} onChange={e => setNewProject({...newProject, nom_villa: e.target.value})} />
               </div>
               <div className="space-y-1">
                 <label className="text-[9px] uppercase font-black text-slate-500 ml-2">Ville</label>
-                <input placeholder="ex: Marbella" className="w-full bg-black/50 border border-white/10 rounded-2xl p-4 text-sm outline-none focus:border-emerald-500" value={newProject.ville} onChange={e => setNewProject({...newProject, ville: e.target.value})} />
+                <input placeholder="ex: Beloeil" className="w-full bg-black/50 border border-white/10 rounded-2xl p-4 text-sm outline-none focus:border-emerald-500" value={newProject.ville} onChange={e => setNewProject({...newProject, ville: e.target.value})} />
               </div>
               <div className="space-y-1">
-                <label className="text-[9px] uppercase font-black text-slate-500 ml-2">Cashback Prévu (€)</label>
-                <input type="number" placeholder="5000" className="w-full bg-black/50 border border-white/10 rounded-2xl p-4 text-sm outline-none focus:border-emerald-500 font-bold text-emerald-400" value={newProject.montant_cashback} onChange={e => setNewProject({...newProject, montant_cashback: Number(e.target.value)})} />
+                <label className="text-[9px] uppercase font-black text-slate-500 ml-2">Cashback (€)</label>
+                <input type="number" placeholder="2500" className="w-full bg-black/50 border border-white/10 rounded-2xl p-4 text-sm outline-none focus:border-emerald-500 font-bold text-emerald-400" value={newProject.montant_cashback} onChange={e => setNewProject({...newProject, montant_cashback: Number(e.target.value)})} />
               </div>
 
               <button type="submit" className="md:col-span-2 bg-emerald-500 text-black py-5 rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] mt-8 hover:bg-white transition-all shadow-2xl">
