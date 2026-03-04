@@ -40,7 +40,6 @@ export default function AdminDashboard() {
   const [showStaffModal, setShowStaffModal] = useState(false);
   const [staffList, setStaffList] = useState<any[]>([]);
   
-  // États pour la modification du projet sélectionné
   const [editComment, setEditComment] = useState("");
   const [editStep, setEditStep] = useState("");
 
@@ -59,47 +58,60 @@ export default function AdminDashboard() {
     etape_actuelle: PHASES_CHANTIER[0]
   });
 
-  // --- CHARGEMENT DES DONNÉES ---
+  // --- CHARGEMENT DES DONNÉES (CORRIGÉ POUR VERCEL) ---
   const loadData = async () => {
-  setLoading(true);
-  console.log("Démarrage du chargement pour Iris...");
-  
-  try {
-    const { data: { user } } = await supabase.auth.getUser();
+    setLoading(true);
+    console.log("Démarrage du chargement des données...");
     
-    if (!user) {
-      console.error("Aucune session trouvée");
-      return;
-    }
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      // Sécurité TypeScript pour Vercel : On vérifie si user et email existent
+      if (user && user.email) {
+        const userEmail = user.email.toLowerCase();
 
-    // On utilise .select('*') pour tout récupérer
-    const { data: profile, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('email', user.email.toLowerCase()) // On force le minuscule
-      .single();
+        // 1. Récupérer le profil
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('email', userEmail)
+          .single();
 
-    if (error) {
-      console.error("Erreur Supabase lors de la lecture du profil :", error.message);
-      // Fallback manuel si la base fait défaut
-      if (user.email === 'iris@amaru-homes.com') {
-        setAgencyProfile({ company_name: "AMARU-HOMES", pack: "HORIZON", role: "admin" });
+        let currentAgencyName = "";
+
+        if (profile) {
+          setAgencyProfile(profile);
+          currentAgencyName = profile.company_name;
+        } else if (userEmail === 'iris@amaru-homes.com') {
+          // Fallback manuel pour Iris si le profil n'est pas trouvé
+          const irisFallback = { company_name: "AMARU-HOMES", pack: "HORIZON", role: "admin" };
+          setAgencyProfile(irisFallback);
+          currentAgencyName = irisFallback.company_name;
+        }
+
+        // 2. Charger les projets filtrés par company_name
+        const { data: projData } = await supabase
+          .from('suivi_chantier')
+          .select('*')
+          .eq('company_name', currentAgencyName)
+          .order('created_at', { ascending: false });
+
+        if (projData) setProjets(projData);
+
+        // 3. Charger le staff
+        const { data: stfData } = await supabase
+          .from('staff_prestataires')
+          .select('*')
+          .order('created_at', { ascending: false });
+        
+        if (stfData) setStaffList(stfData);
       }
-    } else if (profile) {
-      console.log("Profil récupéré avec succès :", profile.company_name);
-      setAgencyProfile(profile);
+    } catch (err) {
+      console.error("Erreur critique loadData:", err);
+    } finally {
+      setLoading(false);
     }
-
-    // Chargement des autres données (toujours charger même si profil échoue)
-    const { data: projData } = await supabase.from('suivi_chantier').select('*');
-    if (projData) setProjets(projData);
-
-  } catch (err) {
-    console.error("Erreur inattendue :", err);
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   const loadDocuments = async (projetId: string) => {
     const { data } = await supabase.from('documents_projets').select('*').eq('projet_id', projetId);
@@ -152,7 +164,7 @@ export default function AdminDashboard() {
         nom_fichier: file.name, 
         url_fichier: publicUrl, 
         storage_path: fileName,
-        type_document: type // optionnel si tu ajoutes cette colonne
+        type_document: type
       }]);
       loadDocuments(selectedProjet.id);
     } catch (err: any) {
@@ -178,8 +190,20 @@ export default function AdminDashboard() {
     e.preventDefault();
     setUpdating(true);
     const pin = Math.floor(1000 + Math.random() * 9000).toString();
-    const { error } = await supabase.from('suivi_chantier').insert([{ ...newDossier, pin_code: pin }]);
-    if (!error) { setShowModal(false); loadData(); }
+    
+    // On force l'utilisation de company_name pour lier le dossier à l'agence actuelle
+    const { error } = await supabase.from('suivi_chantier').insert([{ 
+      ...newDossier, 
+      pin_code: pin,
+      company_name: agencyProfile.company_name 
+    }]);
+
+    if (!error) { 
+      setShowModal(false); 
+      loadData(); 
+    } else {
+      alert("Erreur lors de la création : " + error.message);
+    }
     setUpdating(false);
   };
 
@@ -190,11 +214,11 @@ export default function AdminDashboard() {
   const currentPack = PACK_CONFIG[agencyProfile.pack as keyof typeof PACK_CONFIG] || PACK_CONFIG.CORE;
 
   return (
-    <div className="min-h-screen bg-[#020617] flex flex-col md:flex-row text-slate-200 font-sans">
+    <div className="min-h-screen bg-[#020617] flex flex-col md:flex-row text-slate-200 font-sans text-left">
       
-      {/* SIDEBAR (Inchangée mais optimisée) */}
+      {/* SIDEBAR */}
       <div className="w-full md:w-80 bg-[#0F172A]/50 backdrop-blur-xl border-r border-white/5 h-screen sticky top-0 flex flex-col z-20">
-        <div className="p-8 space-y-8 text-left">
+        <div className="p-8 space-y-8">
           <div className="flex items-center gap-4">
             {agencyProfile.logo_url ? (
               <img src={agencyProfile.logo_url} className="w-12 h-12 rounded-2xl object-contain bg-white/5 border border-white/10 p-1.5 shadow-2xl" alt="Logo" />
@@ -214,7 +238,7 @@ export default function AdminDashboard() {
             <button onClick={() => setActiveTab('staff')} className={`flex-1 py-2 rounded-lg text-[10px] font-bold uppercase transition-all ${activeTab === 'staff' ? 'bg-emerald-500 text-black shadow-lg shadow-emerald-500/20' : 'text-slate-500'}`}>Experts</button>
           </div>
 
-          <div className="space-y-4 text-left">
+          <div className="space-y-4">
             <button onClick={() => activeTab === 'clients' ? setShowModal(true) : setShowStaffModal(true)} className="w-full bg-white text-black p-4 rounded-xl flex items-center justify-center gap-2 font-black text-[10px] uppercase hover:bg-emerald-400 transition-all shadow-xl">
               <Plus size={16} /> {activeTab === 'clients' ? 'Nouveau Dossier' : 'Ajouter un Expert'}
             </button>
@@ -249,12 +273,11 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* MAIN CONTENT : GESTION DÉTAILLÉE */}
-      <div className="flex-1 p-6 md:p-12 overflow-y-auto bg-gradient-to-br from-[#020617] to-[#0F172A] text-left">
+      {/* MAIN CONTENT */}
+      <div className="flex-1 p-6 md:p-12 overflow-y-auto bg-gradient-to-br from-[#020617] to-[#0F172A]">
         {selectedProjet ? (
           <div className="max-w-6xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             
-            {/* TOP BAR PROJET */}
             <div className="bg-white/[0.02] p-8 rounded-[2rem] border border-white/5 flex justify-between items-center shadow-2xl">
               <div>
                 <h2 className="text-5xl font-black tracking-tighter text-white mb-2 uppercase italic">{selectedProjet.nom_villa}</h2>
@@ -272,8 +295,6 @@ export default function AdminDashboard() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              
-              {/* SÉLECTEUR D'ÉTAPES (COLONNE GAUCHE) */}
               <div className="space-y-4">
                 <h3 className="text-[10px] font-black uppercase text-slate-500 tracking-[0.2em] ml-2">Progression du Chantier</h3>
                 <div className="bg-black/40 p-3 rounded-[2rem] border border-white/5 space-y-2 max-h-[600px] overflow-y-auto custom-scrollbar">
@@ -293,10 +314,7 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
-              {/* ZONE CENTRALE : COMMENTAIRE ET UPLOADS */}
               <div className="lg:col-span-2 space-y-8">
-                
-                {/* COMMENTAIRE ÉTAPE */}
                 <div className="bg-[#0F172A] p-8 rounded-[2.5rem] border border-white/5 shadow-xl">
                   <h3 className="text-[10px] font-black uppercase text-emerald-500 mb-4 tracking-widest flex items-center gap-2">
                     <Activity size={14}/> Note pour le client (Étape {editStep.split('.')[0]})
@@ -309,10 +327,7 @@ export default function AdminDashboard() {
                   />
                 </div>
 
-                {/* CENTRE DE DOCUMENTS */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  
-                  {/* UPLOAD PHOTOS */}
                   <div className="bg-black/60 p-8 rounded-[2.5rem] border border-white/5">
                     <div className="flex justify-between items-center mb-6">
                       <h3 className="text-[10px] font-black uppercase text-white flex items-center gap-2"><Camera size={14} className="text-emerald-500"/> Galerie Photo</h3>
@@ -332,7 +347,6 @@ export default function AdminDashboard() {
                     </div>
                   </div>
 
-                  {/* UPLOAD PDFS */}
                   <div className="bg-black/60 p-8 rounded-[2.5rem] border border-white/5">
                     <div className="flex justify-between items-center mb-6">
                       <h3 className="text-[10px] font-black uppercase text-white flex items-center gap-2"><FileText size={14} className="text-blue-400"/> Dossier PDF</h3>
@@ -351,7 +365,6 @@ export default function AdminDashboard() {
                       ))}
                     </div>
                   </div>
-
                 </div>
               </div>
             </div>
@@ -363,9 +376,6 @@ export default function AdminDashboard() {
           </div>
         )}
       </div>
-
-      {/* STYLES & MODALES (Gardés de ton code d'origine) */}
-      {/* ... Tes modales existantes showStaffModal et showModal de création ... */}
 
       <style jsx global>{`
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
