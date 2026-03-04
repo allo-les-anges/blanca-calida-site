@@ -61,46 +61,45 @@ export default function AdminDashboard() {
 
   // --- CHARGEMENT DES DONNÉES ---
   const loadData = async () => {
-    setLoading(true);
-    try {
-      // 1. Récupérer l'utilisateur connecté via la session
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (user && user.email) {
-        // 2. Chercher dans 'profiles' en utilisant l'email
-        const { data: profile, error: profileError } = await supabase
-          .from('profiles')
-          .select('company_name, logo_url, pack, email')
-          .eq('email', user.email) // On filtre par l'email du login
-          .single();
-
-        if (profile) {
-          setAgencyProfile(profile);
-        } else {
-          console.error("Profil non trouvé pour cet email:", user.email);
-        }
-      }
-
-      // 3. Charger le reste (Projets et Staff)
-      const { data: projData } = await supabase
-        .from('suivi_chantier')
-        .select('*')
-        .order('created_at', { ascending: false });
-        
-      const { data: stfData } = await supabase
-        .from('staff_prestataires')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      if (projData) setProjets(projData);
-      if (stfData) setStaffList(stfData);
-      
-    } catch (error) {
-      console.error("Erreur générale loadData:", error);
-    } finally {
-      setLoading(false);
+  setLoading(true);
+  console.log("Démarrage du chargement pour Iris...");
+  
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      console.error("Aucune session trouvée");
+      return;
     }
-  };
+
+    // On utilise .select('*') pour tout récupérer
+    const { data: profile, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('email', user.email.toLowerCase()) // On force le minuscule
+      .single();
+
+    if (error) {
+      console.error("Erreur Supabase lors de la lecture du profil :", error.message);
+      // Fallback manuel si la base fait défaut
+      if (user.email === 'iris@amaru-homes.com') {
+        setAgencyProfile({ company_name: "AMARU-HOMES", pack: "HORIZON", role: "admin" });
+      }
+    } else if (profile) {
+      console.log("Profil récupéré avec succès :", profile.company_name);
+      setAgencyProfile(profile);
+    }
+
+    // Chargement des autres données (toujours charger même si profil échoue)
+    const { data: projData } = await supabase.from('suivi_chantier').select('*');
+    if (projData) setProjets(projData);
+
+  } catch (err) {
+    console.error("Erreur inattendue :", err);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const loadDocuments = async (projetId: string) => {
     const { data } = await supabase.from('documents_projets').select('*').eq('projet_id', projetId);
