@@ -29,7 +29,7 @@ export default function LoginPage() {
       setLoading(false);
     } else {
       // Redirection forcée vers le dashboard admin
-      router.push("/admin");
+      router.push("admin/dashboard");
     }
   };
 
