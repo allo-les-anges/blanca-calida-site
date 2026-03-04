@@ -61,41 +61,40 @@ export default function AdminDashboard() {
   // --- CHARGEMENT DES DONNÉES (CORRIGÉ POUR VERCEL) ---
   const loadData = async () => {
     setLoading(true);
-    console.log("Démarrage du chargement des données...");
+    console.log("Démarrage du chargement pour Amaru-Homes...");
     
     try {
       const { data: { user } } = await supabase.auth.getUser();
       
-      // Sécurité TypeScript pour Vercel : On vérifie si user et email existent
       if (user && user.email) {
         const userEmail = user.email.toLowerCase();
 
-        // 1. Récupérer le profil
-        const { data: profile, error: profileError } = await supabase
+        // 1. Récupérer le profil (On enlève .single() pour éviter le crash si non trouvé)
+        const { data: profiles, error: profileError } = await supabase
           .from('profiles')
           .select('*')
-          .eq('email', userEmail)
-          .single();
+          .eq('email', userEmail);
 
-        let currentAgencyName = "";
+        // On définit le nom exact trouvé en base, ou le fallback correct
+        const profile = profiles?.[0];
+        const currentAgencyName = profile?.company_name || "Amaru-Homes";
 
-        if (profile) {
-          setAgencyProfile(profile);
-          currentAgencyName = profile.company_name;
-        } else if (userEmail === 'iris@amaru-homes.com') {
-          // Fallback manuel pour Iris si le profil n'est pas trouvé
-          const irisFallback = { company_name: "AMARU-HOMES", pack: "HORIZON", role: "admin" };
-          setAgencyProfile(irisFallback);
-          currentAgencyName = irisFallback.company_name;
-        }
+        setAgencyProfile({
+          company_name: currentAgencyName,
+          pack: profile?.pack || "CORE",
+          logo_url: profile?.logo_url || null
+        });
 
-        // 2. Charger les projets filtrés par company_name
-        const { data: projData } = await supabase
+        console.log("Recherche des dossiers pour :", currentAgencyName);
+
+        // 2. Charger les dossiers avec le NOM EXACT (Amaru-Homes)
+        const { data: projData, error: projError } = await supabase
           .from('suivi_chantier')
           .select('*')
           .eq('company_name', currentAgencyName)
           .order('created_at', { ascending: false });
 
+        if (projError) throw projError;
         if (projData) setProjets(projData);
 
         // 3. Charger le staff
