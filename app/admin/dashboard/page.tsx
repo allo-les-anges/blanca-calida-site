@@ -1,187 +1,194 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { createBrowserClient } from '@supabase/ssr';
-import { useRouter } from 'next/navigation';
+import React, { useState, useEffect, useCallback } from "react";
+import { createBrowserClient } from "@supabase/ssr";
 import { 
-  Building2, Loader2, LogOut, ShieldCheck, 
-  XCircle, Plus, Trash2, Search, Copy, 
-  CheckCircle2, LayoutDashboard, Globe
-} from 'lucide-react';
+  Plus, Users, FileText, LayoutDashboard, 
+  LogOut, Search, HardHat, Euro, MapPin, 
+  ChevronRight, Loader2, Trash2, ShieldCheck, Calendar
+} from "lucide-react";
+import { useRouter } from "next/navigation";
 
-export default function SuperAdminDashboard() {
+export default function AdminDashboard() {
   const router = useRouter();
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
 
-  const [authStatus, setAuthStatus] = useState<'loading' | 'authorized' | 'denied'>('loading');
-  const [admins, setAdmins] = useState<any[]>([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [isGlobalLoading, setIsGlobalLoading] = useState(false);
+  // ÉTATS DONNÉES
+  const [projets, setProjets] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [agencyInfo, setAgencyInfo] = useState<{name: string, pack: string} | null>(null);
 
-  // État du formulaire synchronisé avec ta colonne SQL : agency_name
-  const [form, setForm] = useState({
-    email: "", password: "", agencyName: "",
-    prenom: "", nom: "", pack: "CORE"
+  // ÉTATS FORMULAIRE (Synchronisé avec vos colonnes SQL)
+  const [showModal, setShowModal] = useState(false);
+  const [newProject, setNewProject] = useState({
+    client_nom: "",
+    client_prenom: "",
+    email_client: "",
+    telephone: "",
+    rue: "",
+    code_postal: "",
+    ville: "",
+    pays: "",
+    nom_villa: "",
+    constructeur_info: "",
+    montant_cashback: 0,
+    date_livraison_prevue: ""
   });
 
-  // 1. Chargement des agences
-  const fetchAdmins = useCallback(async () => {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .order('created_at', { ascending: false }); 
-      
-    if (!error && data) {
-      // On filtre pour ne pas s'auto-supprimer
-      setAdmins(data.filter(a => a.email?.toLowerCase() !== 'gaetan@amaru-homes.com'));
-    }
-  }, [supabase]);
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) { router.push("/login"); return; }
 
-  // 2. Vérification d'accès blindée
-  useEffect(() => {
-    const checkAccess = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        setAuthStatus('denied');
-        return;
-      }
+    // 1. Récupérer l'agence
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("agency_name, pack")
+      .eq("id", session.user.id)
+      .single();
+    
+    if (profile) setAgencyInfo({ name: profile.agency_name, pack: profile.pack });
 
-      const email = session.user.email?.toLowerCase().trim();
+    // 2. Récupérer les projets (On utilise created_by ou admin_id selon votre liaison)
+    const { data: projects, error } = await supabase
+      .from("suivi_chantier")
+      .select("*")
+      .order("created_at", { ascending: false });
 
-      // Master Key : Gaëtan ou Iris (si Iris est Super Admin)
-      if (email === 'gaetan@amaru-homes.com' || email === 'iris@amaru-homes.com') {
-        setAuthStatus('authorized');
-        fetchAdmins();
-        return;
-      }
+    if (!error) setProjets(projects || []);
+    setLoading(false);
+  }, [supabase, router]);
 
-      // Vérification SQL pour les autres
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', session.user.id)
-        .single();
+  useEffect(() => { fetchData(); }, [fetchData]);
 
-      if (profile?.role === 'super_admin') {
-        setAuthStatus('authorized');
-        fetchAdmins();
-      } else {
-        setAuthStatus('denied');
-      }
-    };
-    checkAccess();
-  }, [supabase, fetchAdmins]);
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    router.push('/login');
-  };
-
-  const createAdminAccount = async (e: React.FormEvent) => {
+  const handleCreateProject = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsGlobalLoading(true);
-    try {
-      const { data: authData, error: authError } = await supabase.auth.signUp({ 
-        email: form.email.toLowerCase().trim(), 
-        password: form.password 
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    // Génération PIN 6 chiffres
+    const generatedPin = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Insertion avec vos noms de colonnes exacts
+    const { error } = await supabase.from("suivi_chantier").insert([{
+      ...newProject,
+      pin_code: generatedPin,
+      etape_actuelle: 1, // par défaut
+      // admin_id: session?.user.id // Assurez-vous d'avoir cette colonne pour lier le projet à l'agence
+    }]);
+
+    if (!error) {
+      setShowModal(false);
+      setNewProject({
+        client_nom: "", client_prenom: "", email_client: "", telephone: "",
+        rue: "", code_postal: "", ville: "", pays: "",
+        nom_villa: "", constructeur_info: "", montant_cashback: 0, date_livraison_prevue: ""
       });
-      
-      if (authError) throw authError;
-
-      if (authData?.user) {
-        // CORRECTION ICI : On utilise agency_name comme dans ton SQL
-        const { error: profileError } = await supabase.from('profiles').upsert({ 
-          id: authData.user.id, 
-          email: form.email.toLowerCase().trim(), 
-          role: 'admin', 
-          agency_name: form.agencyName, // Nom de colonne corrigé
-          prenom: form.prenom,
-          nom: form.nom,
-          pack: form.pack
-        });
-
-        if (profileError) throw profileError;
-        alert("Licence activée avec succès.");
-        setForm({ email: "", password: "", agencyName: "", prenom: "", nom: "", pack: "CORE" });
-        fetchAdmins();
-      }
-    } catch (err: any) { alert(err.message); }
-    finally { setIsGlobalLoading(false); }
+      fetchData();
+    } else {
+      alert("Erreur SQL : " + error.message);
+    }
   };
 
-  // Filtrage pour la recherche
-  const filteredAdmins = useMemo(() => {
-    return admins.filter(a => 
-      a.agency_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      a.email?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [admins, searchTerm]);
-
-  if (authStatus === 'loading') return <div className="h-screen bg-black flex items-center justify-center"><Loader2 className="animate-spin text-red-600" /></div>;
-  if (authStatus === 'denied') return (
-    <div className="h-screen bg-black flex items-center justify-center p-6 text-center">
-      <div className="bg-[#0a0a0a] p-10 rounded-[2rem] border border-red-900/20">
-        <XCircle size={48} className="text-red-600 mx-auto mb-4" />
-        <h2 className="text-xl text-white mb-6">Accès restreint au Super Admin</h2>
-        <button onClick={handleLogout} className="bg-white text-black px-8 py-3 rounded-lg font-bold text-xs uppercase">Changer de session</button>
-      </div>
+  if (loading) return (
+    <div className="h-screen bg-[#020617] flex items-center justify-center">
+      <Loader2 className="animate-spin text-emerald-500" size={40} />
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-[#050505] text-slate-200 p-8">
-      <div className="max-w-6xl mx-auto">
-        <header className="flex justify-between items-center mb-12">
-          <div className="flex items-center gap-4">
-             <ShieldCheck className="text-red-600" size={32} />
-             <h1 className="text-2xl font-serif italic">Terminal de Contrôle</h1>
+    <div className="min-h-screen bg-[#020617] text-slate-200 p-6 md:p-10 text-left">
+      <div className="max-w-7xl mx-auto">
+        
+        {/* HEADER AGENCE */}
+        <header className="flex flex-col md:flex-row justify-between items-center gap-6 mb-10 bg-[#0F172A] p-8 rounded-[2.5rem] border border-white/5">
+          <div className="flex items-center gap-6">
+            <div className="bg-emerald-500 p-4 rounded-2xl text-black shadow-lg shadow-emerald-500/20">
+              <LayoutDashboard size={24} />
+            </div>
+            <div>
+              <h1 className="text-2xl font-black uppercase tracking-tighter text-white">{agencyInfo?.name || "Agence"}</h1>
+              <p className="text-[10px] text-emerald-500 font-bold uppercase tracking-widest">Partenaire {agencyInfo?.pack}</p>
+            </div>
           </div>
-          <button onClick={handleLogout} className="p-3 bg-white/5 rounded-xl hover:text-red-500"><LogOut size={20}/></button>
+          <button onClick={() => setShowModal(true)} className="bg-white text-black px-8 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-emerald-400 transition-all">
+            + Nouveau Client
+          </button>
         </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-          {/* FORMULAIRE */}
-          <div className="bg-[#0a0a0a] p-8 rounded-[2rem] border border-white/5">
-            <h2 className="mb-6 text-sm font-bold uppercase tracking-widest text-red-500">Nouvelle Licence</h2>
-            <form onSubmit={createAdminAccount} className="space-y-4">
-              <input placeholder="Agence (ex: Amaru Prestige)" className="w-full bg-black border border-white/10 p-4 rounded-xl" value={form.agencyName} onChange={e => setForm({...form, agencyName: e.target.value})} required />
-              <div className="grid grid-cols-2 gap-4">
-                <input placeholder="Prénom" className="w-full bg-black border border-white/10 p-4 rounded-xl" value={form.prenom} onChange={e => setForm({...form, prenom: e.target.value})} />
-                <input placeholder="Nom" className="w-full bg-black border border-white/10 p-4 rounded-xl" value={form.nom} onChange={e => setForm({...form, nom: e.target.value})} />
-              </div>
-              <input placeholder="Email admin" className="w-full bg-black border border-white/10 p-4 rounded-xl" value={form.email} onChange={e => setForm({...form, email: e.target.value})} required />
-              <input type="password" placeholder="Mot de passe" className="w-full bg-black border border-white/10 p-4 rounded-xl" value={form.password} onChange={e => setForm({...form, password: e.target.value})} required />
-              <button type="submit" className="w-full bg-red-600 p-4 rounded-xl font-bold uppercase text-[10px] tracking-widest">
-                {isGlobalLoading ? "Action en cours..." : "Déployer la licence"}
-              </button>
-            </form>
-          </div>
-
-          {/* LISTE */}
-          <div className="space-y-4">
-            <div className="relative mb-6">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
-              <input placeholder="Filtrer les agences..." className="w-full bg-[#0a0a0a] border border-white/5 pl-12 pr-4 py-3 rounded-full text-sm" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
-            </div>
-            
-            <div className="space-y-3 overflow-y-auto max-h-[500px] pr-2">
-              {filteredAdmins.map(admin => (
-                <div key={admin.id} className="bg-[#0a0a0a] p-4 rounded-2xl border border-white/5 flex items-center justify-between group">
-                  <div>
-                    <p className="font-bold text-white uppercase text-xs tracking-tight">{admin.agency_name || "Sans Nom"}</p>
-                    <p className="text-[10px] text-slate-500">{admin.email}</p>
-                  </div>
-                  <div className="px-3 py-1 bg-red-500/10 border border-red-500/20 rounded text-[8px] text-red-500 font-black">{admin.pack}</div>
-                </div>
+        {/* TABLEAU DES CLIENTS */}
+        <div className="bg-[#0F172A] rounded-[2.5rem] border border-white/5 overflow-hidden">
+          <table className="w-full text-left">
+            <thead>
+              <tr className="text-[9px] uppercase tracking-[0.2em] text-slate-500 border-b border-white/5">
+                <th className="p-6">Client & Villa</th>
+                <th className="p-6">Constructeur</th>
+                <th className="p-6">Cashback</th>
+                <th className="p-6">Localisation</th>
+                <th className="p-6 text-center">Code PIN</th>
+                <th className="p-6 text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/5">
+              {projets.map((p) => (
+                <tr key={p.id} className="hover:bg-white/[0.02] transition-colors group">
+                  <td className="p-6">
+                    <p className="font-bold text-white text-sm">{p.client_prenom} {p.client_nom}</p>
+                    <p className="text-[10px] text-emerald-500 font-bold uppercase">{p.nom_villa}</p>
+                  </td>
+                  <td className="p-6">
+                    <span className="text-xs text-slate-400">{p.constructeur_info || "-"}</span>
+                  </td>
+                  <td className="p-6 text-emerald-400 font-black text-sm">{p.montant_cashback} €</td>
+                  <td className="p-6 text-xs text-slate-400">{p.ville}, {p.pays}</td>
+                  <td className="p-6 text-center">
+                    <span className="bg-black px-3 py-1 rounded border border-white/10 font-mono text-emerald-500 text-xs">{p.pin_code}</span>
+                  </td>
+                  <td className="p-6 text-right">
+                    <button onClick={() => router.push(`/admin/chantier/${p.id}`)} className="p-2 bg-white/5 rounded-lg hover:bg-emerald-500 hover:text-black transition-all">
+                      <ChevronRight size={16} />
+                    </button>
+                  </td>
+                </tr>
               ))}
-            </div>
-          </div>
+            </tbody>
+          </table>
         </div>
       </div>
+
+      {/* MODAL DE CRÉATION (AVEC VOS COLONNES SQL) */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[#0F172A] w-full max-w-3xl rounded-[3rem] border border-white/10 p-8 shadow-2xl max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <h2 className="text-xl font-black uppercase text-white mb-8">Nouveau Dossier Immobilier</h2>
+            
+            <form onSubmit={handleCreateProject} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <input placeholder="Prénom Client" className="bg-black border border-white/5 p-4 rounded-xl text-sm" value={newProject.client_prenom} onChange={e => setNewProject({...newProject, client_prenom: e.target.value})} required />
+              <input placeholder="Nom Client" className="bg-black border border-white/5 p-4 rounded-xl text-sm" value={newProject.client_nom} onChange={e => setNewProject({...newProject, client_nom: e.target.value})} required />
+              <input placeholder="Email" className="bg-black border border-white/5 p-4 rounded-xl text-sm" value={newProject.email_client} onChange={e => setNewProject({...newProject, email_client: e.target.value})} />
+              <input placeholder="Téléphone" className="bg-black border border-white/5 p-4 rounded-xl text-sm" value={newProject.telephone} onChange={e => setNewProject({...newProject, telephone: e.target.value})} />
+              
+              <div className="md:col-span-2 grid grid-cols-2 md:grid-cols-4 gap-4">
+                <input placeholder="Rue" className="md:col-span-2 bg-black border border-white/5 p-4 rounded-xl text-sm" value={newProject.rue} onChange={e => setNewProject({...newProject, rue: e.target.value})} />
+                <input placeholder="CP" className="bg-black border border-white/5 p-4 rounded-xl text-sm" value={newProject.code_postal} onChange={e => setNewProject({...newProject, code_postal: e.target.value})} />
+                <input placeholder="Ville" className="bg-black border border-white/5 p-4 rounded-xl text-sm" value={newProject.ville} onChange={e => setNewProject({...newProject, ville: e.target.value})} />
+              </div>
+
+              <input placeholder="Nom de la Villa" className="bg-black border border-white/5 p-4 rounded-xl text-sm font-bold text-emerald-500" value={newProject.nom_villa} onChange={e => setNewProject({...newProject, nom_villa: e.target.value})} required />
+              <input placeholder="Info Constructeur" className="bg-black border border-white/5 p-4 rounded-xl text-sm" value={newProject.constructeur_info} onChange={e => setNewProject({...newProject, constructeur_info: e.target.value})} />
+              <input type="number" placeholder="Cashback (€)" className="bg-black border border-white/5 p-4 rounded-xl text-sm font-bold text-emerald-400" value={newProject.montant_cashback} onChange={e => setNewProject({...newProject, montant_cashback: Number(e.target.value)})} />
+              <input type="date" placeholder="Livraison Prévue" className="bg-black border border-white/5 p-4 rounded-xl text-sm" value={newProject.date_livraison_prevue} onChange={e => setNewProject({...newProject, date_livraison_prevue: e.target.value})} />
+
+              <button type="submit" className="md:col-span-2 bg-emerald-500 text-black py-5 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-emerald-400 transition-all">
+                Générer le Dossier & le Code PIN
+              </button>
+              <button type="button" onClick={() => setShowModal(false)} className="md:col-span-2 text-slate-500 text-[10px] uppercase font-bold tracking-widest">Annuler</button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
