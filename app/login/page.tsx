@@ -1,8 +1,13 @@
 "use client";
-import React, { useState } from 'react';
-import { createBrowserClient } from '@supabase/ssr';
-import { Loader2 } from 'lucide-react';
-import { useRouter } from 'next/navigation'; // On utilise le router officiel
+
+import { useState } from "react";
+import { createClient } from "@supabase/supabase-js";
+import { useRouter } from "next/navigation";
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -10,75 +15,53 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (loading) return;
     setLoading(true);
 
-    try {
-      // 1. Connexion
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: email.toLowerCase().trim(),
-        password,
-      });
+    const { error } = await supabase.auth.signInWithPassword({
+      email: email.trim(),
+      password: password,
+    });
 
-      if (error) throw error;
-
-      if (data?.session) {
-        // 2. IMPORTANT : On attend que la session soit bien enregistrée localement
-        await supabase.auth.setSession(data.session);
-        
-        const userEmail = data.session.user.email?.toLowerCase().trim();
-        
-        // 3. Redirection propre via Next.js Router
-        if (userEmail === 'gaetan@amaru-homes.com') {
-          router.push('/super-admin');
-          router.refresh(); // Force la mise à jour des cookies
-        } else {
-          router.push('/admin/dashboard');
-          router.refresh();
-        }
-      }
-    } catch (error: any) {
+    if (error) {
       alert("Erreur : " + error.message);
       setLoading(false);
+    } else {
+      // Redirection forcée vers le dashboard admin
+      router.push("/admin");
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#020617] flex items-center justify-center p-6 text-white">
-      <form onSubmit={handleLogin} className="w-full max-w-md bg-[#0f172a] p-10 rounded-[2rem] border border-slate-800 shadow-2xl">
-        <div className="text-center mb-10">
-          <h1 className="text-3xl font-serif italic text-emerald-500">Master Template</h1>
-          <p className="text-slate-500 text-[10px] uppercase tracking-[0.3em] mt-2 font-bold">Connexion Sécurisée</p>
-        </div>
-
-        <div className="space-y-5">
-          <input 
-            type="email" 
-            className="w-full bg-[#020617] border border-slate-800 rounded-2xl p-4 text-sm text-white"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)} 
-            required 
-            placeholder="Email"
-          />
-          <input 
-            type="password" 
-            className="w-full bg-[#020617] border border-slate-800 rounded-2xl p-4 text-sm text-white"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)} 
-            required 
-            placeholder="Mot de passe"
-          />
-          <button type="submit" disabled={loading} className="w-full bg-emerald-600 hover:bg-emerald-500 py-5 rounded-2xl font-black uppercase text-[10px] tracking-[0.2em]">
-            {loading ? <Loader2 className="animate-spin mx-auto" /> : "Entrer dans le système"}
-          </button>
-        </div>
+    <div className="h-screen bg-[#020617] flex items-center justify-center p-4">
+      <form onSubmit={handleLogin} className="bg-[#0F172A] p-8 rounded-3xl border border-white/10 w-full max-w-md">
+        <h1 className="text-white text-2xl font-black mb-6 uppercase tracking-tight">Connexion Admin</h1>
+        <input
+          type="email"
+          placeholder="Email (ex: iris@amaru-homes.com)"
+          className="w-full bg-black/50 border border-slate-800 rounded-2xl p-4 text-white mb-4 outline-none focus:border-emerald-500"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+          autoComplete="email"
+        />
+        <input
+          type="password"
+          placeholder="Mot de passe"
+          className="w-full bg-black/50 border border-slate-800 rounded-2xl p-4 text-white mb-6 outline-none focus:border-emerald-500"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+          autoComplete="current-password"
+        />
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full bg-emerald-500 text-black font-bold py-4 rounded-2xl hover:bg-emerald-400 transition-all uppercase"
+        >
+          {loading ? "Connexion..." : "Se connecter"}
+        </button>
       </form>
     </div>
   );
