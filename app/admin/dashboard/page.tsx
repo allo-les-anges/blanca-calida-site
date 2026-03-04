@@ -59,19 +59,47 @@ export default function AdminDashboard() {
     etape_actuelle: PHASES_CHANTIER[0]
   });
 
+  // --- CHARGEMENT DES DONNÉES ---
   const loadData = async () => {
     setLoading(true);
     try {
+      // 1. Récupérer l'utilisateur connecté via la session
       const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single();
-        if (profile) setAgencyProfile(profile);
+      
+      if (user && user.email) {
+        // 2. Chercher dans 'profiles' en utilisant l'email
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('company_name, logo_url, pack, email')
+          .eq('email', user.email) // On filtre par l'email du login
+          .single();
+
+        if (profile) {
+          setAgencyProfile(profile);
+        } else {
+          console.error("Profil non trouvé pour cet email:", user.email);
+        }
       }
-      const { data: projData } = await supabase.from('suivi_chantier').select('*').order('created_at', { ascending: false });
-      const { data: stfData } = await supabase.from('staff_prestataires').select('*').order('created_at', { ascending: false });
+
+      // 3. Charger le reste (Projets et Staff)
+      const { data: projData } = await supabase
+        .from('suivi_chantier')
+        .select('*')
+        .order('created_at', { ascending: false });
+        
+      const { data: stfData } = await supabase
+        .from('staff_prestataires')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
       if (projData) setProjets(projData);
       if (stfData) setStaffList(stfData);
-    } finally { setLoading(false); }
+      
+    } catch (error) {
+      console.error("Erreur générale loadData:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const loadDocuments = async (projetId: string) => {
