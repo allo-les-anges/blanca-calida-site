@@ -29,21 +29,17 @@ export default function AdminDashboard() {
   const [updating, setUpdating] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   
-  // Listes
   const [projets, setProjets] = useState<any[]>([]);
   const [staffList, setStaffList] = useState<any[]>([]);
   
-  // Sélections et Modals
   const [selectedProjet, setSelectedProjet] = useState<any>(null);
   const [showModal, setShowModal] = useState(false);
   const [showStaffModal, setShowStaffModal] = useState(false);
 
-  // État édition
   const [projectDocs, setProjectDocs] = useState<any[]>([]);
   const [editFields, setEditFields] = useState<any>({});
   const [agencyProfile, setAgencyProfile] = useState<any>({ company_name: "Amaru-Homes" });
   
-  // Formulaires nouveaux
   const [newStaff, setNewStaff] = useState({ nom: "", prenom: "", email: "", role: "agent de suivi" });
   const [newProject, setNewProject] = useState({
     client_nom: "", client_prenom: "", email_client: "", telephone: "", date_naissance: "",
@@ -79,7 +75,6 @@ export default function AdminDashboard() {
         }
       }
 
-      // 1. Récupérer le profil de l'utilisateur connecté
       const { data: staffData } = await supabase
         .from('profiles')
         .select('*')
@@ -91,7 +86,6 @@ export default function AdminDashboard() {
           currentAgency = staffData.company_name || "Amaru-Homes";
       }
 
-      // 2. Charger les projets de l'agence
       const { data: projData } = await supabase
         .from('suivi_chantier')
         .select('*')
@@ -100,7 +94,6 @@ export default function AdminDashboard() {
       
       if (projData) setProjets(projData);
 
-      // 3. Charger TOUTE l'équipe de l'agence (pour l'onglet Staff)
       const { data: stfData } = await supabase
         .from('profiles')
         .select('*')
@@ -109,7 +102,7 @@ export default function AdminDashboard() {
       if (stfData) setStaffList(stfData);
       
     } catch (err: any) { 
-      console.error("Erreur chargement:", err); 
+      console.error("Erreur Dashboard:", err); 
     } finally { 
       setLoading(false); 
     }
@@ -147,21 +140,15 @@ export default function AdminDashboard() {
   };
 
   const handleDeleteStaff = async (staffId: string, name: string) => {
-    if (!confirm(`ATTENTION : Voulez-vous vraiment supprimer ${name} de l'équipe ?`)) return;
+    if (!confirm(`Supprimer ${name} de l'équipe ?`)) return;
     setUpdating(true);
     try {
-      // Note : Dans Supabase, supprimer de 'profiles' ne supprime pas le compte 'Auth' 
-      // sauf si vous avez configuré une fonction spécifique, mais cela l'enlèvera de votre liste agence.
       const { error } = await supabase.from('profiles').delete().eq('id', staffId);
       if (error) throw error;
-      
       setStaffList(prev => prev.filter(s => s.id !== staffId));
-      alert("Membre retiré avec succès.");
-    } catch (err: any) { 
-      alert("Erreur lors de la suppression : " + err.message); 
-    } finally {
-      setUpdating(false);
-    }
+      alert("Membre supprimé.");
+    } catch (err: any) { alert(err.message); }
+    setUpdating(false);
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -200,63 +187,39 @@ export default function AdminDashboard() {
             <h1 className="text-sm font-black text-white uppercase tracking-tighter italic">{agencyProfile.company_name}</h1>
             <div className="flex gap-2">
                 <button onClick={() => setShowModal(true)} title="Nouveau Projet" className="p-2 bg-emerald-500/10 text-emerald-500 rounded-lg hover:bg-emerald-500 hover:text-black transition-all"><Plus size={16}/></button>
-                <button onClick={() => setShowStaffModal(true)} title="Ajouter un membre" className="p-2 bg-blue-500/10 text-blue-500 rounded-lg hover:bg-blue-500 hover:text-black transition-all"><Users size={16}/></button>
+                <button onClick={() => setShowStaffModal(true)} title="Gérer l'équipe" className="p-2 bg-blue-500/10 text-blue-500 rounded-lg hover:bg-blue-500 hover:text-black transition-all"><Users size={16}/></button>
             </div>
           </div>
-
           <div className="flex bg-black/40 p-1 rounded-xl border border-white/5">
             <button onClick={() => setActiveTab('clients')} className={`flex-1 py-2 rounded-lg text-[10px] font-bold uppercase transition-all ${activeTab === 'clients' ? 'bg-emerald-500 text-black shadow-lg shadow-emerald-500/20' : 'text-slate-500'}`}>Dossiers</button>
             <button onClick={() => setActiveTab('staff')} className={`flex-1 py-2 rounded-lg text-[10px] font-bold uppercase transition-all ${activeTab === 'staff' ? 'bg-blue-500 text-black shadow-lg shadow-blue-500/20' : 'text-slate-500'}`}>Équipe</button>
           </div>
-
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={14} />
-            <input 
-              type="text" 
-              placeholder="Rechercher..." 
-              className="w-full pl-10 pr-4 py-3 bg-white/5 rounded-xl text-xs outline-none border border-white/5 focus:border-emerald-500 text-white" 
-              value={searchTerm} 
-              onChange={(e) => setSearchTerm(e.target.value)} 
-            />
+            <input type="text" placeholder="Rechercher..." className="w-full pl-10 pr-4 py-3 bg-white/5 rounded-xl text-xs outline-none border border-white/5 focus:border-emerald-500 text-white" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
           </div>
         </div>
 
-        {/* LISTE DYNAMIQUE (CLIENTS OU ÉQUIPE) */}
-        <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-2">
-          {activeTab === 'clients' ? (
-            projets.filter(p => `${p.client_prenom} ${p.client_nom} ${p.nom_villa}`.toLowerCase().includes(searchTerm.toLowerCase())).map((p) => (
-              <button 
-                key={p.id} 
-                onClick={() => setSelectedProjet(p)} 
-                className={`w-full text-left p-4 rounded-xl border transition-all ${selectedProjet?.id === p.id ? 'bg-emerald-500/10 border-emerald-500/50' : 'border-white/5 hover:bg-white/5'}`}
-              >
-                <p className="font-bold text-sm text-white">{p.client_prenom} {p.client_nom}</p>
-                <p className="text-[10px] uppercase font-black text-emerald-500 mt-1">{p.nom_villa}</p>
-              </button>
-            ))
-          ) : (
-            staffList.filter(s => `${s.prenom} ${s.nom} ${s.email}`.toLowerCase().includes(searchTerm.toLowerCase())).map((s) => (
-              <div key={s.id} className="p-4 rounded-xl border border-white/5 bg-white/5 flex justify-between items-center group animate-in slide-in-from-left-2 duration-300">
-                <div className='text-left'>
-                  <p className="font-bold text-sm text-white">{s.prenom} {s.nom}</p>
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className={`text-[8px] px-2 py-0.5 rounded-full font-black uppercase ${s.role === 'admin' ? 'bg-rose-500/20 text-rose-500' : 'bg-blue-500/20 text-blue-500'}`}>
-                      {s.role}
-                    </span>
-                    <p className="text-[9px] text-slate-500 font-bold">PIN: {s.pin_code}</p>
-                  </div>
+        <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-2 text-left">
+          {activeTab === 'clients' ? projets.filter(p => `${p.client_prenom} ${p.client_nom}`.toLowerCase().includes(searchTerm.toLowerCase())).map((p) => (
+            <button key={p.id} onClick={() => setSelectedProjet(p)} className={`w-full text-left p-4 rounded-xl border transition-all ${selectedProjet?.id === p.id ? 'bg-emerald-500/10 border-emerald-500/50' : 'border-white/5 hover:bg-white/5'}`}>
+              <p className="font-bold text-sm text-white">{p.client_prenom} {p.client_nom}</p>
+              <p className="text-[10px] uppercase font-black text-emerald-500 mt-1">{p.nom_villa}</p>
+            </button>
+          )) : staffList.filter(s => `${s.prenom} ${s.nom}`.toLowerCase().includes(searchTerm.toLowerCase())).map((s) => (
+            <div key={s.id} className="p-4 rounded-xl border border-white/5 bg-white/5 flex justify-between items-center group">
+              <div className='text-left'>
+                <p className="font-bold text-sm text-white">{s.prenom} {s.nom}</p>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className={`text-[8px] px-2 py-0.5 rounded-full font-black uppercase ${s.role === 'admin' ? 'bg-rose-500/20 text-rose-500' : 'bg-blue-500/20 text-blue-500'}`}>
+                    {s.role}
+                  </span>
+                  <p className="text-[9px] text-slate-500 font-bold uppercase">PIN: {s.pin_code}</p>
                 </div>
-                {/* Bouton de suppression d'un membre */}
-                <button 
-                  onClick={() => handleDeleteStaff(s.id, s.prenom)} 
-                  className="opacity-0 group-hover:opacity-100 p-2 text-rose-500 hover:bg-rose-500/10 rounded-lg transition-all"
-                  title="Supprimer ce membre"
-                >
-                  <Trash2 size={14}/>
-                </button>
               </div>
-            ))
-          )}
+              <button onClick={() => handleDeleteStaff(s.id, s.prenom)} className="opacity-0 group-hover:opacity-100 p-2 text-rose-500 hover:bg-rose-500/10 rounded-lg transition-all"><Trash2 size={14}/></button>
+            </div>
+          ))}
         </div>
 
         <div className="p-4 border-t border-white/5 bg-black/20 space-y-2">
@@ -265,8 +228,8 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* CONTENU PRINCIPAL */}
-      <div className="flex-1 p-8 lg:p-12 overflow-y-auto print:p-0">
+      {/* CONTENU CENTRAL */}
+      <div className="flex-1 p-8 lg:p-12 overflow-y-auto">
         {selectedProjet ? (
           <div id="printable-area" className="max-w-6xl mx-auto space-y-8 text-left animate-in fade-in duration-500 print:text-black">
             <div className="flex justify-between items-end border-b border-white/5 pb-8 print:border-slate-200">
@@ -279,48 +242,32 @@ export default function AdminDashboard() {
                 </div>
                 <div className="flex gap-3 print:hidden">
                     <button onClick={() => window.print()} className="flex items-center gap-2 px-6 py-4 bg-white/10 text-white rounded-2xl font-black text-xs uppercase hover:bg-white/20 transition-all"><Printer size={16}/> Imprimer</button>
-                    <button onClick={handleUpdateDossier} disabled={updating} className="flex items-center gap-2 px-8 py-4 bg-emerald-500 text-black rounded-2xl font-black text-xs uppercase hover:scale-105 transition-all shadow-xl shadow-emerald-500/10">
-                      {updating ? <Loader2 className="animate-spin" size={16}/> : <Save size={16}/>} Sauvegarder
-                    </button>
+                    <button onClick={handleUpdateDossier} disabled={updating} className="flex items-center gap-2 px-8 py-4 bg-emerald-500 text-black rounded-2xl font-black text-xs uppercase hover:scale-105 transition-all shadow-xl shadow-emerald-500/10">{updating ? <Loader2 className="animate-spin" size={16}/> : <Save size={16}/>} Sauvegarder</button>
                 </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div className="space-y-6">
-                <section className="bg-white/5 p-6 rounded-[2rem] border border-white/5 space-y-4">
-                  <h3 className="text-[10px] font-black uppercase text-emerald-500 flex items-center gap-2"><UserCheck size={14}/> Identité Client</h3>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1">
-                      <label className="text-[9px] text-slate-500 uppercase font-bold">Prénom</label>
-                      <input className="w-full bg-black/40 border border-white/5 p-3 rounded-xl text-xs text-white" value={editFields.client_prenom || ""} onChange={e => setEditFields({...editFields, client_prenom: e.target.value})} />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[9px] text-slate-500 uppercase font-bold">Nom</label>
-                      <input className="w-full bg-black/40 border border-white/5 p-3 rounded-xl text-xs text-white" value={editFields.client_nom || ""} onChange={e => setEditFields({...editFields, client_nom: e.target.value})} />
-                    </div>
-                    <div className="col-span-2 space-y-1">
-                      <label className="text-[9px] text-slate-500 uppercase font-bold">Email</label>
-                      <input className="w-full bg-black/40 border border-white/5 p-3 rounded-xl text-xs text-white" value={editFields.email_client || ""} onChange={e => setEditFields({...editFields, email_client: e.target.value})} />
-                    </div>
-                  </div>
-                </section>
-              </div>
+              <section className="bg-white/5 p-6 rounded-[2rem] border border-white/5 space-y-4">
+                <h3 className="text-[10px] font-black uppercase text-emerald-500 flex items-center gap-2"><UserCheck size={14}/> Identité Client</h3>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1"><label className="text-[9px] text-slate-500 uppercase font-bold">Prénom</label><input className="w-full bg-black/40 border border-white/5 p-3 rounded-xl text-xs text-white" value={editFields.client_prenom || ""} onChange={e => setEditFields({...editFields, client_prenom: e.target.value})} /></div>
+                  <div className="space-y-1"><label className="text-[9px] text-slate-500 uppercase font-bold">Nom</label><input className="w-full bg-black/40 border border-white/5 p-3 rounded-xl text-xs text-white" value={editFields.client_nom || ""} onChange={e => setEditFields({...editFields, client_nom: e.target.value})} /></div>
+                  <div className="col-span-2 space-y-1"><label className="text-[9px] text-slate-500 uppercase font-bold">Email</label><input className="w-full bg-black/40 border border-white/5 p-3 rounded-xl text-xs text-white" value={editFields.email_client || ""} onChange={e => setEditFields({...editFields, email_client: e.target.value})} /></div>
+                </div>
+              </section>
 
               <div className="space-y-6">
                 <section className="bg-white/5 p-6 rounded-[2rem] border border-white/5 space-y-4">
                   <h3 className="text-[10px] font-black uppercase text-orange-400 flex items-center gap-2"><MapPin size={14}/> État d'avancement</h3>
-                  <div className="space-y-3">
-                    <label className="text-[9px] text-slate-500 uppercase font-bold">Phase Actuelle du Chantier</label>
-                    <select 
-                      className="w-full bg-black/40 border border-white/10 p-3 rounded-xl text-xs text-emerald-500 font-bold outline-none" 
-                      value={editFields.etape_actuelle || ""} 
-                      onChange={e => setEditFields({...editFields, etape_actuelle: e.target.value})}
-                    >
-                      {PHASES_CHANTIER.map(p => <option key={p} value={p}>{p}</option>)}
-                    </select>
-                  </div>
+                  <select 
+                    className="w-full bg-black/40 border border-white/10 p-3 rounded-xl text-xs text-emerald-500 font-bold outline-none" 
+                    value={editFields.etape_actuelle || ""} 
+                    onChange={e => setEditFields({...editFields, etape_actuelle: e.target.value})}
+                  >
+                    {PHASES_CHANTIER.map(p => <option key={p} value={p}>{p}</option>)}
+                  </select>
                 </section>
-                
+
                 <section className="bg-white/5 p-6 rounded-[2rem] border border-white/5 space-y-4">
                   <div className="flex justify-between items-center">
                     <h3 className="text-[10px] font-black uppercase text-slate-400 flex items-center gap-2"><FileText size={14}/> Documents</h3>
@@ -333,9 +280,7 @@ export default function AdminDashboard() {
                     {projectDocs.map((doc: any) => (
                       <div key={doc.id} className="p-3 bg-black/40 rounded-xl border border-white/5 flex justify-between items-center group">
                         <span className="text-[10px] text-white truncate">{doc.nom_fichier}</span>
-                        <div className="flex gap-2">
-                          <a href={doc.url_fichier} target="_blank" rel="noreferrer" className="p-2 text-emerald-500 hover:bg-emerald-500/10 rounded-lg"><ExternalLink size={14}/></a>
-                        </div>
+                        <a href={doc.url_fichier} target="_blank" rel="noreferrer" className="p-2 text-emerald-500 hover:bg-emerald-500/10 rounded-lg"><ExternalLink size={14}/></a>
                       </div>
                     ))}
                   </div>
@@ -346,24 +291,26 @@ export default function AdminDashboard() {
         ) : (
           <div className="h-full flex flex-col items-center justify-center opacity-10">
             <Zap size={100} className="text-emerald-500 mb-4 animate-pulse" />
-            <p className="text-2xl font-black uppercase tracking-[0.5em]">Sélectionnez un élément</p>
+            <p className="text-2xl font-black uppercase tracking-[0.5em]">Sélectionnez un dossier</p>
           </div>
         )}
       </div>
 
-      {/* MODAL AJOUT STAFF */}
+      {/* MODAL STAFF - CORRIGÉ POUR L'INSERTION DANS PROFILES */}
       {showStaffModal && (
         <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex items-center justify-center p-4">
-          <div className="bg-[#0F172A] w-full max-w-md rounded-[2.5rem] border border-white/10 p-8 text-left shadow-2xl">
-            <h2 className="text-xl font-black uppercase text-white mb-6 italic">Inscrire un collaborateur</h2>
+          <div className="bg-[#0F172A] w-full max-w-md rounded-[2.5rem] border border-white/10 p-8 text-left">
+            <h2 className="text-xl font-black uppercase text-white mb-6 italic">Ajouter un collaborateur</h2>
             
             <form onSubmit={async (e) => { 
                 e.preventDefault(); 
                 setUpdating(true);
+                
                 const staffPin = Math.floor(1000 + Math.random() * 9000).toString();
                 const tempPassword = "Amaru" + Math.random().toString(36).slice(-8);
 
                 try {
+                  // 1. Création dans Supabase Auth
                   const { data: authData, error: authError } = await supabase.auth.signUp({
                     email: newStaff.email,
                     password: tempPassword,
@@ -372,46 +319,46 @@ export default function AdminDashboard() {
                   if (authError) throw authError;
 
                   if (authData.user) {
+                    // 2. Création IMMÉDIATE dans la table profiles
                     const { error: profileError } = await supabase.from('profiles').insert([{ 
-                      id: authData.user.id,
+                      id: authData.user.id, // On lie l'ID Auth à l'ID Profile
                       prenom: newStaff.prenom,
                       nom: newStaff.nom,
                       email: newStaff.email,
                       role: newStaff.role,
                       pin_code: staffPin,
                       company_name: agencyProfile.company_name,
-                      pack: "Standard"
+                      pack: "Standard" 
                     }]);
 
                     if (profileError) throw profileError;
 
-                    alert(`Succès ! PIN de connexion : ${staffPin}`);
+                    alert(`Collaborateur ajouté !\nPIN: ${staffPin}`);
                     setNewStaff({ nom: "", prenom: "", email: "", role: "agent de suivi" });
                     setShowStaffModal(false); 
                     loadData();
                   }
                 } catch (err: any) {
-                  alert("Erreur : " + err.message);
+                  alert("Erreur de création : " + err.message);
                 } finally {
                   setUpdating(false);
                 }
             }} className="space-y-4">
-              <input required placeholder="Prénom" className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-xs text-white outline-none focus:border-blue-500" value={newStaff.prenom} onChange={e => setNewStaff({...newStaff, prenom: e.target.value})} />
-              <input required placeholder="Nom" className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-xs text-white outline-none focus:border-blue-500" value={newStaff.nom} onChange={e => setNewStaff({...newStaff, nom: e.target.value})} />
-              <input required type="email" placeholder="Email professionnel" className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-xs text-white outline-none focus:border-blue-500" value={newStaff.email} onChange={e => setNewStaff({...newStaff, email: e.target.value})} />
+              <input required placeholder="Prénom" className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-xs text-white" value={newStaff.prenom} onChange={e => setNewStaff({...newStaff, prenom: e.target.value})} />
+              <input required placeholder="Nom" className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-xs text-white" value={newStaff.nom} onChange={e => setNewStaff({...newStaff, nom: e.target.value})} />
+              <input required type="email" placeholder="Email" className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-xs text-white" value={newStaff.email} onChange={e => setNewStaff({...newStaff, email: e.target.value})} />
               
-              <select 
-                className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-xs text-white outline-none focus:border-blue-500" 
-                value={newStaff.role}
-                onChange={e => setNewStaff({...newStaff, role: e.target.value})}
-              >
-                <option value="agent de suivi">Agent de suivi</option>
-                <option value="admin">Administrateur d'agence</option>
-                <option value="prestataire">Prestataire externe</option>
-              </select>
+              <div className="space-y-1">
+                <label className="text-[9px] text-slate-500 uppercase font-bold ml-2">Rôle</label>
+                <select className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-xs text-white" value={newStaff.role} onChange={e => setNewStaff({...newStaff, role: e.target.value})}>
+                  <option value="agent de suivi">Agent de suivi</option>
+                  <option value="admin">Administrateur d'agence</option>
+                  <option value="prestataire">Prestataire externe</option>
+                </select>
+              </div>
 
-              <button type="submit" disabled={updating} className="w-full bg-blue-500 text-black py-4 rounded-xl font-black text-xs uppercase flex justify-center items-center gap-2 hover:bg-blue-400 transition-all">
-                {updating ? <Loader2 className="animate-spin" size={18} /> : <Plus size={18}/>} Inscrire le collaborateur
+              <button type="submit" disabled={updating} className="w-full bg-blue-500 text-black py-4 rounded-xl font-black text-xs uppercase flex justify-center items-center">
+                {updating ? <Loader2 className="animate-spin" size={18} /> : "Inscrire le collaborateur"}
               </button>
               
               <button type="button" onClick={() => setShowStaffModal(false)} className="w-full text-slate-500 text-[10px] uppercase font-bold mt-2">Annuler</button>
@@ -420,7 +367,7 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      {/* MODAL NOUVEAU PROJET */}
+      {/* MODAL PROJET */}
       {showModal && (
         <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex items-center justify-center p-4">
           <div className="bg-[#0F172A] w-full max-w-4xl rounded-[3rem] border border-white/10 p-10 max-h-[90vh] overflow-y-auto text-left shadow-2xl">
@@ -444,24 +391,20 @@ export default function AdminDashboard() {
                   if (error) throw error;
                   setShowModal(false); 
                   loadData();
-                } catch (err: any) {
-                  alert(err.message);
-                } finally {
-                  setUpdating(false);
-                }
+                } catch (err: any) { alert(err.message); } finally { setUpdating(false); }
             }} className="space-y-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-4">
                     <h3 className="text-[10px] font-black text-emerald-500 uppercase tracking-widest border-b border-white/5 pb-2">Identité Client</h3>
                     <div className="grid grid-cols-2 gap-3">
-                        <input required placeholder="Prénom" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs text-white outline-none focus:border-emerald-500" onChange={e => setNewProject({...newProject, client_prenom: e.target.value})} />
-                        <input required placeholder="Nom" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs text-white outline-none focus:border-emerald-500" onChange={e => setNewProject({...newProject, client_nom: e.target.value})} />
-                        <input required type="email" placeholder="Email" className="col-span-2 bg-black/50 border border-white/10 rounded-xl p-4 text-xs text-white outline-none focus:border-emerald-500" onChange={e => setNewProject({...newProject, email_client: e.target.value})} />
+                        <input required placeholder="Prénom" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs text-white" onChange={e => setNewProject({...newProject, client_prenom: e.target.value})} />
+                        <input required placeholder="Nom" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs text-white" onChange={e => setNewProject({...newProject, client_nom: e.target.value})} />
+                        <input required type="email" placeholder="Email" className="col-span-2 bg-black/50 border border-white/10 rounded-xl p-4 text-xs text-white" onChange={e => setNewProject({...newProject, email_client: e.target.value})} />
                     </div>
                 </div>
                 <div className="space-y-4">
-                    <h3 className="text-[10px] font-black text-orange-400 uppercase tracking-widest border-b border-white/5 pb-2">Villa</h3>
-                    <input required placeholder="Nom de la Villa (ex: Villa Miramar)" className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-xs text-white outline-none focus:border-orange-500" onChange={e => setNewProject({...newProject, nom_villa: e.target.value})} />
+                    <h3 className="text-[10px] font-black text-orange-400 uppercase tracking-widest border-b border-white/5 pb-2">Détails Villa</h3>
+                    <input required placeholder="Nom de la Villa" className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-xs text-white" onChange={e => setNewProject({...newProject, nom_villa: e.target.value})} />
                 </div>
               </div>
               <button type="submit" disabled={updating} className="w-full bg-emerald-500 text-black py-5 rounded-2xl font-black text-xs uppercase shadow-xl shadow-emerald-500/20 hover:scale-[1.01] transition-all">
