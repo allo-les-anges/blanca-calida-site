@@ -200,6 +200,237 @@ export default function AdminDashboard() {
               <button onClick={() => handleDeleteStaff(s.id, s.prenom)} className="opacity-0 group-hover:opacity-100 p-2 text-rose-500 hover:bg-rose-500/10 rounded-lg transition-all"><Trash2 size={14}/></button>
             </div>
           ))}
+       "use client";
+
+import React, { useEffect, useState, useCallback } from 'react';
+import { createClient } from '@supabase/supabase-js';
+import { useRouter } from 'next/navigation';
+import { 
+  Save, Trash2, Loader2, Search, Plus, X,
+  Zap, UserCheck, FileText, Printer, LogOut,
+  Users, ShieldCheck, MapPin, ExternalLink, Info, Home, Calendar, Image as ImageIcon
+} from 'lucide-react';
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
+
+const PHASES_CHANTIER = [
+  "0. Signature & Réservation", "1. Terrain / Terrassement", "2. Fondations", 
+  "3. Murs / Élévation", "4. Toiture / Charpente", "5. Menuiseries", 
+  "6. Électricité / Plomberie", "7. Isolation", "8. Plâtrerie", 
+  "9. Sols & Carrelages", "10. Peintures / Finitions", "11. Extérieurs / Jardin", 
+  "12. Remise des clés"
+];
+
+export default function AdminDashboard() {
+  const router = useRouter();
+  const [activeTab, setActiveTab] = useState<'clients' | 'staff'>('clients');
+  const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [projets, setProjets] = useState<any[]>([]);
+  const [selectedProjet, setSelectedProjet] = useState<any>(null);
+  const [staffList, setStaffList] = useState<any[]>([]);
+  
+  const [showModal, setShowModal] = useState(false);
+  const [showStaffModal, setShowStaffModal] = useState(false);
+
+  const [projectDocs, setProjectDocs] = useState<any[]>([]);
+  const [editFields, setEditFields] = useState<any>({});
+  const [agencyProfile, setAgencyProfile] = useState<any>({ company_name: "Amaru-Homes" });
+  
+  const [newStaff, setNewStaff] = useState({ nom: "", prenom: "", email: "", role: "staff" });
+  const [newProject, setNewProject] = useState({
+    client_nom: "", client_prenom: "", email_client: "", telephone: "", date_naissance: "",
+    rue: "", code_postal: "", ville: "", pays: "Espagne",
+    nom_villa: "", constructeur_info: "", montant_cashback: 0,
+    commentaires_etape: "", commentaire_etape_chantier: "", 
+    lien_photo: "", date_livraison_prevue: "", document_url: ""
+  });
+
+  // --- GESTION DE LA DÉCONNEXION ---
+  const handleLogout = async () => {
+    if(!confirm("Voulez-vous vous déconnecter ?")) return;
+    await supabase.auth.signOut();
+    localStorage.removeItem("staff_session");
+    router.replace("/login");
+  };
+
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      let userEmail = session?.user?.email;
+      let currentAgency = "Amaru-Homes";
+
+      // Vérification hybride Session / PIN
+      if (!session) {
+        const savedPinSession = localStorage.getItem("staff_session");
+        if (savedPinSession) {
+          const pinUser = JSON.parse(savedPinSession);
+          userEmail = pinUser.email;
+          currentAgency = pinUser.company_name;
+        } else {
+          router.replace("/login");
+          return;
+        }
+      }
+
+      // Récupération du profil (Sécurité renforcée pour Iris)
+      const { data: staffData } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('email', userEmail)
+        .single();
+
+      if (staffData) {
+          setAgencyProfile(staffData);
+          currentAgency = staffData.company_name || "Amaru-Homes";
+      }
+
+      // Chargement des projets de l'agence
+      const { data: projData, error: projError } = await supabase
+        .from('suivi_chantier')
+        .select('*')
+        .eq('company_name', currentAgency)
+        .order('created_at', { ascending: false });
+      
+      if (projData) setProjets(projData);
+
+      // Chargement de l'équipe
+      const { data: stfData } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('company_name', currentAgency)
+        .neq('email', userEmail);
+      
+      if (stfData) setStaffList(stfData);
+      
+    } catch (err: any) { 
+      console.error("Erreur Dashboard:", err); 
+    } finally { 
+      setLoading(false); 
+    }
+  }, [router]);
+
+  const loadProjectExtras = async (projectId: string) => {
+    if (!projectId) return;
+    try {
+      const { data: docs } = await supabase.from('documents_projets').select('*').eq('projet_id', projectId).order('created_at', { ascending: false });
+      setProjectDocs(docs || []);
+    } catch (err) { console.error(err); }
+  };
+
+  useEffect(() => { loadData(); }, [loadData]);
+
+  useEffect(() => { 
+    if (selectedProjet?.id) {
+      setEditFields({ ...selectedProjet });
+      loadProjectExtras(selectedProjet.id);
+    }
+  }, [selectedProjet]);
+
+  const handleUpdateDossier = async () => {
+    if (!selectedProjet) return;
+    setUpdating(true);
+    try {
+      const { error } = await supabase.from('suivi_chantier').update({ 
+        ...editFields,
+        updated_at: new Date().toISOString()
+      }).eq('id', selectedProjet.id);
+      if (error) throw error;
+      alert("Mise à jour effectuée !");
+      loadData();
+    } catch (err: any) { alert(err.message); }
+    setUpdating(false);
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !selectedProjet) return;
+    setUpdating(true);
+    try {
+      const fileName = `${selectedProjet.id}/${Date.now()}-${file.name}`;
+      const { error: uploadError } = await supabase.storage.from('documents-clients').upload(fileName, file);
+      if (uploadError) throw uploadError;
+      const { data: urlData } = supabase.storage.from('documents-clients').getPublicUrl(fileName);
+      const { error: dbError } = await supabase.from('documents_projets').insert([{
+        projet_id: selectedProjet.id, 
+        nom_fichier: file.name, 
+        url_fichier: urlData.publicUrl, 
+        storage_path: fileName 
+      }]);
+      if (dbError) throw dbError;
+      loadProjectExtras(selectedProjet.id);
+    } catch (err: any) { alert("Erreur upload : " + err.message); } finally { setUpdating(false); }
+  };
+
+  const handleDeleteFile = async (docId: string, storagePath: string) => {
+    if (!confirm("Supprimer ce document ?")) return;
+    setUpdating(true);
+    try {
+      if (storagePath) await supabase.storage.from('documents-clients').remove([storagePath]);
+      const { error } = await supabase.from('documents_projets').delete().eq('id', docId);
+      if (error) throw error;
+      setProjectDocs(prev => prev.filter(doc => doc.id !== docId));
+    } catch (err: any) { alert(err.message); } finally { setUpdating(false); }
+  };
+
+  const handleDeleteStaff = async (staffId: string, name: string) => {
+    if (!confirm(`Retirer ${name} de l'équipe ?`)) return;
+    try {
+      const { error } = await supabase.from('profiles').delete().eq('id', staffId);
+      if (error) throw error;
+      loadData();
+    } catch (err: any) { alert(err.message); }
+  };
+
+  if (loading) return (
+    <div className="min-h-screen bg-[#020617] flex items-center justify-center">
+      <Loader2 className="animate-spin text-emerald-500" size={40} />
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen bg-[#020617] flex text-slate-200 font-sans print:bg-white print:text-black text-left">
+      
+      {/* SIDEBAR */}
+      <div className="w-80 bg-[#0F172A]/50 border-r border-white/5 h-screen sticky top-0 flex flex-col print:hidden">
+        <div className="p-8 space-y-6">
+          <div className="flex items-center justify-between">
+            <h1 className="text-sm font-black text-white uppercase tracking-tighter italic">{agencyProfile.company_name}</h1>
+            <div className="flex gap-2">
+                <button onClick={() => setShowModal(true)} title="Nouveau Projet" className="p-2 bg-emerald-500/10 text-emerald-500 rounded-lg hover:bg-emerald-500 hover:text-black transition-all"><Plus size={16}/></button>
+                <button onClick={() => setShowStaffModal(true)} title="Gérer l'équipe" className="p-2 bg-blue-500/10 text-blue-500 rounded-lg hover:bg-blue-500 hover:text-black transition-all"><Users size={16}/></button>
+            </div>
+          </div>
+          <div className="flex bg-black/40 p-1 rounded-xl border border-white/5">
+            <button onClick={() => setActiveTab('clients')} className={`flex-1 py-2 rounded-lg text-[10px] font-bold uppercase transition-all ${activeTab === 'clients' ? 'bg-emerald-500 text-black shadow-lg shadow-emerald-500/20' : 'text-slate-500'}`}>Dossiers</button>
+            <button onClick={() => setActiveTab('staff')} className={`flex-1 py-2 rounded-lg text-[10px] font-bold uppercase transition-all ${activeTab === 'staff' ? 'bg-blue-500 text-black shadow-lg shadow-blue-500/20' : 'text-slate-500'}`}>Équipe</button>
+          </div>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={14} />
+            <input type="text" placeholder="Rechercher..." className="w-full pl-10 pr-4 py-3 bg-white/5 rounded-xl text-xs outline-none border border-white/5 focus:border-emerald-500" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+          </div>
+        </div>
+
+        <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-2 text-left">
+          {activeTab === 'clients' ? projets.filter(p => `${p.client_prenom} ${p.client_nom}`.toLowerCase().includes(searchTerm.toLowerCase())).map((p) => (
+            <button key={p.id} onClick={() => setSelectedProjet(p)} className={`w-full text-left p-4 rounded-xl border transition-all ${selectedProjet?.id === p.id ? 'bg-emerald-500/10 border-emerald-500/50' : 'border-white/5 hover:bg-white/5'}`}>
+              <p className="font-bold text-sm text-white">{p.client_prenom} {p.client_nom}</p>
+              <p className="text-[10px] uppercase font-black text-emerald-500 mt-1">{p.nom_villa}</p>
+            </button>
+          )) : staffList.map((s) => (
+            <div key={s.id} className="p-4 rounded-xl border border-white/5 bg-white/5 flex justify-between items-center group">
+              <div className='text-left'>
+                <p className="font-bold text-sm text-white">{s.prenom} {s.nom}</p>
+                <p className="text-[9px] text-blue-400 uppercase font-black">{s.role} <span className="text-slate-500 ml-2">PIN: {s.pin_code}</span></p>
+              </div>
+              <button onClick={() => handleDeleteStaff(s.id, s.prenom)} className="opacity-0 group-hover:opacity-100 p-2 text-rose-500 hover:bg-rose-500/10 rounded-lg transition-all"><Trash2 size={14}/></button>
+            </div>
+          ))}
         </div>
 
         <div className="p-4 border-t border-white/5 bg-black/20 space-y-2">
@@ -228,7 +459,6 @@ export default function AdminDashboard() {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 print:grid-cols-2">
               <div className="space-y-6">
-                {/* Identité */}
                 <section className="bg-white/5 p-6 rounded-[2rem] border border-white/5 space-y-4 print:p-4">
                   <h3 className="text-[10px] font-black uppercase text-emerald-500 flex items-center gap-2 print:text-black"><UserCheck size={14}/> Identité Client</h3>
                   <div className="grid grid-cols-2 gap-3 text-left">
@@ -240,7 +470,6 @@ export default function AdminDashboard() {
                   </div>
                 </section>
 
-                {/* Localisation */}
                 <section className="bg-white/5 p-6 rounded-[2rem] border border-white/5 space-y-4 print:p-4">
                   <h3 className="text-[10px] font-black uppercase text-blue-400 flex items-center gap-2 print:text-black"><MapPin size={14}/> Adresse du projet</h3>
                   <div className="grid grid-cols-2 gap-3 text-left">
@@ -251,22 +480,14 @@ export default function AdminDashboard() {
                   </div>
                 </section>
 
-                {/* Médias */}
                 <section className="bg-white/5 p-6 rounded-[2rem] border border-white/5 space-y-4 print:p-4">
                   <h3 className="text-[10px] font-black uppercase text-purple-400 flex items-center gap-2 print:text-black"><ImageIcon size={14}/> Médias & Liens Externes</h3>
                   <div className="space-y-3 text-left">
                     <div className="space-y-1">
-                      <label className="text-[9px] text-slate-500 uppercase font-bold">Lien Album Photos (Cloud/Drive)</label>
+                      <label className="text-[9px] text-slate-500 uppercase font-bold">Lien Album Photos</label>
                       <div className="flex gap-2">
                         <input className="flex-1 bg-black/40 border border-white/5 p-3 rounded-xl text-xs text-blue-400" value={editFields.lien_photo || ""} onChange={e => setEditFields({...editFields, lien_photo: e.target.value})} />
                         {editFields.lien_photo && <a href={editFields.lien_photo} target="_blank" className="p-3 bg-white/5 rounded-xl text-white"><ExternalLink size={14}/></a>}
-                      </div>
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[9px] text-slate-500 uppercase font-bold">Lien Dossier Documents Cloud</label>
-                      <div className="flex gap-2">
-                        <input className="flex-1 bg-black/40 border border-white/5 p-3 rounded-xl text-xs text-blue-400" value={editFields.document_url || ""} onChange={e => setEditFields({...editFields, document_url: e.target.value})} />
-                        {editFields.document_url && <a href={editFields.document_url} target="_blank" className="p-3 bg-white/5 rounded-xl text-white"><ExternalLink size={14}/></a>}
                       </div>
                     </div>
                   </div>
@@ -274,7 +495,6 @@ export default function AdminDashboard() {
               </div>
 
               <div className="space-y-6">
-                {/* Villa Details */}
                 <section className="bg-white/5 p-6 rounded-[2rem] border border-white/5 space-y-4 print:p-4">
                   <h3 className="text-[10px] font-black uppercase text-orange-400 flex items-center gap-2 print:text-black"><Home size={14}/> Détails Villa & Planning</h3>
                   <div className="space-y-3 text-left">
@@ -284,10 +504,6 @@ export default function AdminDashboard() {
                         {PHASES_CHANTIER.map(p => <option key={p} value={p}>{p}</option>)}
                       </select>
                     </div>
-                    <div className="space-y-1">
-                      <label className="text-[9px] text-slate-500 uppercase font-bold">Constructeur / Prestataire</label>
-                      <input className="w-full bg-black/40 border border-white/5 p-3 rounded-xl text-xs" value={editFields.constructeur_info || ""} onChange={e => setEditFields({...editFields, constructeur_info: e.target.value})} />
-                    </div>
                     <div className="grid grid-cols-2 gap-3">
                       <div className="space-y-1"><label className="text-[9px] text-slate-500 uppercase font-bold">Livraison Prévue</label><input type="date" className="w-full bg-black/40 border border-white/5 p-3 rounded-xl text-xs font-sans" value={editFields.date_livraison_prevue || ""} onChange={e => setEditFields({...editFields, date_livraison_prevue: e.target.value})} /></div>
                       <div className="space-y-1"><label className="text-[9px] text-slate-500 uppercase font-bold">Cashback (€)</label><input type="number" className="w-full bg-black/40 border border-white/5 p-3 rounded-xl text-xs text-emerald-500 font-bold" value={editFields.montant_cashback || 0} onChange={e => setEditFields({...editFields, montant_cashback: Number(e.target.value)})} /></div>
@@ -295,16 +511,13 @@ export default function AdminDashboard() {
                   </div>
                 </section>
 
-                {/* Commentaires */}
                 <section className="bg-white/5 p-6 rounded-[2rem] border border-white/5 space-y-4 print:p-4">
                   <h3 className="text-[10px] font-black uppercase text-slate-400 flex items-center gap-2 print:text-black"><Info size={14}/> Suivi de Chantier</h3>
                   <div className="space-y-3 text-left">
                     <div className="space-y-1"><label className="text-[9px] text-slate-500 uppercase font-bold">Commentaires Etape Actuelle</label><textarea className="w-full bg-black/40 border border-white/5 p-4 rounded-xl text-xs min-h-[80px]" value={editFields.commentaires_etape || ""} onChange={e => setEditFields({...editFields, commentaires_etape: e.target.value})} /></div>
-                    <div className="space-y-1"><label className="text-[9px] text-slate-500 uppercase font-bold">Notes Générales / Techniques</label><textarea className="w-full bg-black/40 border border-white/5 p-4 rounded-xl text-xs min-h-[120px]" value={editFields.commentaire_etape_chantier || ""} onChange={e => setEditFields({...editFields, commentaire_etape_chantier: e.target.value})} /></div>
                   </div>
                 </section>
 
-                {/* Documents Storage */}
                 <section className="bg-white/5 p-6 rounded-[2rem] border border-white/5 space-y-4 print:hidden">
                   <div className="flex justify-between items-center">
                     <h3 className="text-[10px] font-black uppercase text-slate-400 flex items-center gap-2"><FileText size={14}/> Documents Internes</h3>
@@ -339,7 +552,7 @@ export default function AdminDashboard() {
         )}
       </div>
 
-      {/* MODAL NOUVEAU STAFF (COMPLET) */}
+      {/* MODALS (STAFF & PROJET) */}
       {showStaffModal && (
         <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex items-center justify-center p-4">
           <div className="bg-[#0F172A] w-full max-w-md rounded-[2.5rem] border border-white/10 p-8 text-left">
@@ -370,7 +583,6 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      {/* MODAL NOUVEAU CHANTIER (L'INTÉGRALITÉ DES CHAMPS) */}
       {showModal && (
         <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex items-center justify-center p-4">
           <div className="bg-[#0F172A] w-full max-w-4xl rounded-[3rem] border border-white/10 p-10 max-h-[90vh] overflow-y-auto text-left shadow-2xl">
@@ -398,46 +610,21 @@ export default function AdminDashboard() {
             }} className="space-y-8">
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* Section 1 : Identité */}
                 <div className="space-y-4">
                     <h3 className="text-[10px] font-black text-emerald-500 uppercase tracking-widest border-b border-white/5 pb-2">Identité Client</h3>
                     <div className="grid grid-cols-2 gap-3">
                         <input required placeholder="Prénom" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, client_prenom: e.target.value})} />
                         <input required placeholder="Nom" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, client_nom: e.target.value})} />
                         <input required type="email" placeholder="Email" className="col-span-2 bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, email_client: e.target.value})} />
-                        <input placeholder="Téléphone" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, telephone: e.target.value})} />
-                        <input type="date" title="Date de naissance" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs font-sans" onChange={e => setNewProject({...newProject, date_naissance: e.target.value})} />
                     </div>
                 </div>
 
-                {/* Section 2 : Localisation */}
                 <div className="space-y-4">
                     <h3 className="text-[10px] font-black text-blue-500 uppercase tracking-widest border-b border-white/5 pb-2">Adresse du Projet</h3>
                     <div className="grid grid-cols-2 gap-3">
                         <input placeholder="Rue et numéro" className="col-span-2 bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, rue: e.target.value})} />
-                        <input placeholder="Code Postal" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, code_postal: e.target.value})} />
                         <input placeholder="Ville" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, ville: e.target.value})} />
-                        <input placeholder="Pays (ex: Espagne)" className="col-span-2 bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, pays: e.target.value})} />
                     </div>
-                </div>
-
-                {/* Section 3 : Villa & Média */}
-                <div className="space-y-4">
-                    <h3 className="text-[10px] font-black text-orange-500 uppercase tracking-widest border-b border-white/5 pb-2">Spécifications Villa</h3>
-                    <div className="grid grid-cols-2 gap-3">
-                        <input required placeholder="Nom de la Villa" className="col-span-2 bg-black/50 border border-emerald-500/30 rounded-xl p-4 text-sm font-bold text-emerald-500" onChange={e => setNewProject({...newProject, nom_villa: e.target.value})} />
-                        <input placeholder="Constructeur" className="col-span-2 bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, constructeur_info: e.target.value})} />
-                        <div className="space-y-1"><label className="text-[8px] text-slate-500 uppercase ml-2">Livraison Prévue</label><input type="date" className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-xs font-sans" onChange={e => setNewProject({...newProject, date_livraison_prevue: e.target.value})} /></div>
-                        <div className="space-y-1"><label className="text-[8px] text-slate-500 uppercase ml-2">Cashback (€)</label><input type="number" placeholder="0" className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-xs text-emerald-500 font-bold" onChange={e => setNewProject({...newProject, montant_cashback: Number(e.target.value)})} /></div>
-                        <input placeholder="Lien Album Photos" className="col-span-2 bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, lien_photo: e.target.value})} />
-                        <input placeholder="Lien Dossier Documents" className="col-span-2 bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, document_url: e.target.value})} />
-                    </div>
-                </div>
-
-                {/* Section 4 : Notes */}
-                <div className="space-y-4">
-                    <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-white/5 pb-2">Notes & Commentaires</h3>
-                    <textarea placeholder="Commentaires techniques initiaux..." className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-xs min-h-[200px]" onChange={e => setNewProject({...newProject, commentaire_etape_chantier: e.target.value})} />
                 </div>
               </div>
 
