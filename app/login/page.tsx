@@ -12,44 +12,57 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  // 1. ON DESACTIVE LE CHECK AUTOMATIQUE AU CHARGEMENT
-  // On laisse l'utilisateur décider de se connecter ou de nettoyer sa session.
   useEffect(() => {
-    // On nettoie juste les résidus au chargement pour être sûr
-    console.log("Portail prêt.");
+    // Petit check au montage : si déjà connecté, on redirige
+    const checkUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        handleRedirection(session.user.id, session.user.email);
+      }
+    };
+    checkUser();
   }, []);
 
   const handleRedirection = async (userId: string, userEmail?: string) => {
     try {
-      // Priorité Gaëtan
+      // 1. Priorité absolue Gaëtan (Super Admin)
       if (userEmail?.toLowerCase().trim() === 'gaetan@amaru-homes.com') {
         router.replace('/super-admin');
         return;
       }
 
+      // 2. Recherche du profil par ID ou EMAIL pour plus de flexibilité (Iris Fix)
       const { data: profile, error } = await supabase
         .from('profiles')
-        .select('role')
-        .eq('id', userId)
+        .select('role, company_name, email')
+        .or(`id.eq.${userId},email.eq.${userEmail}`)
         .single();
 
       if (error || !profile) {
-        setErrorMsg("Profil introuvable dans la base.");
+        setErrorMsg("Accès non autorisé : Profil manquant.");
         setLoading(false);
         return;
       }
 
-      // Redirection selon tes dossiers réels
+      // 3. Stockage d'une session de secours pour le dashboard (évite les éjections)
+      localStorage.setItem("staff_session", JSON.stringify({
+        email: profile.email,
+        role: profile.role,
+        company_name: profile.company_name || "Amaru-Homes"
+      }));
+
+      // 4. Routage selon le rôle
       if (profile.role === 'super_admin') {
         router.replace('/super-admin');
-      } else if (profile.role === 'admin') {
+      } else if (profile.role === 'admin' || profile.role === 'staff') {
         router.replace('/admin/dashboard');
       } else {
-        setErrorMsg("Accès restreint.");
+        setErrorMsg("Rôle non reconnu.");
         setLoading(false);
       }
     } catch (err) {
-      setErrorMsg("Erreur système.");
+      console.error("Redirection error:", err);
+      setErrorMsg("Erreur de protocole de sécurité.");
       setLoading(false);
     }
   };
@@ -65,14 +78,13 @@ export default function LoginPage() {
     });
 
     if (error) {
-      setErrorMsg(error.message === "Invalid login credentials" ? "Identifiants incorrects" : error.message);
+      setErrorMsg(error.message === "Invalid login credentials" ? "Clé d'accès ou identifiant invalide" : error.message);
       setLoading(false);
     } else if (data?.user) {
       await handleRedirection(data.user.id, data.user.email);
     }
   };
 
-  // 2. FONCTION DE NETTOYAGE MANUEL
   const clearSession = async () => {
     await supabase.auth.signOut();
     localStorage.clear();
@@ -137,7 +149,7 @@ export default function LoginPage() {
           >
             <RefreshCw size={12} /> Purger la session locale
           </button>
-          <p className="text-[8px] text-slate-800 text-center uppercase font-mono">Build: 2026.03.V5</p>
+          <p className="text-[8px] text-slate-800 text-center uppercase font-mono">Build: 2026.03.IRIS_READY</p>
         </div>
       </div>
     </div>
