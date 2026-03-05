@@ -7,8 +7,8 @@ import {
   Building2, Loader2, LogOut, ShieldCheck, 
   XCircle, Plus, Trash2, ArrowLeft, Search, 
   Copy, CheckCircle2, LayoutDashboard, Globe
-} from 'lucide-react';
-import { supabase } from "@/lib/supabase"; // Importation centralisée
+} from 'lucide-center';
+import { supabase } from "@/lib/supabase";
 
 export default function SuperAdminDashboard() {
   const router = useRouter();
@@ -21,7 +21,7 @@ export default function SuperAdminDashboard() {
   const [admins, setAdmins] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   
-  // ÉTATS FORMULAIRE GROUPÉS (Plus court, plus propre)
+  // ÉTATS FORMULAIRE GROUPÉS
   const [form, setForm] = useState({
     email: "",
     password: "",
@@ -36,7 +36,7 @@ export default function SuperAdminDashboard() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
-  // 1. CHARGEMENT DES AGENCES
+  // 1. CHARGEMENT DES PROFILS (Agences + Super Admins)
   const fetchAdmins = useCallback(async () => {
     const { data, error } = await supabase
       .from('profiles')
@@ -44,12 +44,12 @@ export default function SuperAdminDashboard() {
       .order('created_at', { ascending: false }); 
       
     if (!error && data) {
-      // On filtre Gaëtan pour la liste
+      // On affiche tout le monde sauf Gaëtan pour ne pas se supprimer soi-même par erreur
       setAdmins(data.filter(a => a.email?.toLowerCase().trim() !== 'gaetan@amaru-homes.com'));
     }
   }, []);
 
-  // 2. VÉRIFICATION DE L'ACCÈS
+  // 2. VÉRIFICATION DE L'ACCÈS SÉCURISÉ
   useEffect(() => {
     const checkAccess = async () => {
       try {
@@ -63,23 +63,19 @@ export default function SuperAdminDashboard() {
         const email = session.user.email?.toLowerCase().trim();
         setUserEmail(email || null);
 
-        // Autorisation si Gaëtan OU si rôle super_admin
-        if (email === 'gaetan@amaru-homes.com') {
+        // On vérifie le rôle dans la table profiles
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', session.user.id)
+          .single();
+
+        // Accès si : Email est Gaëtan OU si le rôle est super_admin
+        if (email === 'gaetan@amaru-homes.com' || profile?.role === 'super_admin') {
           setAuthStatus('authorized');
           fetchAdmins();
         } else {
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('role')
-            .eq('id', session.user.id)
-            .single();
-
-          if (profile?.role?.toLowerCase().includes('super')) {
-            setAuthStatus('authorized');
-            fetchAdmins();
-          } else {
-            setAuthStatus('denied');
-          }
+          setAuthStatus('denied');
         }
       } catch (err) {
         setAuthStatus('denied');
@@ -92,7 +88,7 @@ export default function SuperAdminDashboard() {
   const handleLogout = async () => {
     await supabase.auth.signOut();
     localStorage.clear();
-    window.location.replace('/login');
+    router.replace('/login');
   };
 
   const createAdminAccount = async (e: React.FormEvent) => {
@@ -108,7 +104,7 @@ export default function SuperAdminDashboard() {
       if (authError) throw authError;
 
       if (authData?.user) {
-        // Insertion dans la table profiles
+        // Insertion dans la table unique 'profiles'
         const { error: profileError } = await supabase.from('profiles').insert({ 
           id: authData.user.id, 
           email: form.email.toLowerCase().trim(), 
@@ -116,12 +112,13 @@ export default function SuperAdminDashboard() {
           company_name: form.companyName,
           prenom: form.prenom,
           nom: form.nom,
-          pack: form.pack
+          pack: form.pack,
+          pin_code: Math.floor(1000 + Math.random() * 9000).toString() // Génère un PIN par défaut
         });
 
         if (profileError) throw profileError;
         
-        alert(`Licence ${form.pack} activée.`);
+        alert(`Licence ${form.pack} activée pour ${form.companyName}`);
         setForm({ email: "", password: "", companyName: "", prenom: "", nom: "", pack: "CORE" });
         fetchAdmins();
       }
@@ -155,11 +152,12 @@ export default function SuperAdminDashboard() {
   const filteredAdmins = useMemo(() => {
     return admins.filter(a => 
       a.company_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      a.email?.toLowerCase().includes(searchTerm.toLowerCase())
+      a.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      a.prenom?.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [admins, searchTerm]);
 
-  // RENDUS CONDITIONNELS (Chargement / Refus)
+  // RENDUS CONDITIONNELS
   if (authStatus === 'loading') return (
     <div className="min-h-screen bg-[#050505] flex items-center justify-center text-white font-mono text-xs uppercase tracking-widest">
       <Loader2 className="animate-spin text-red-600 mr-3" /> Initialisation du terminal...
@@ -171,15 +169,14 @@ export default function SuperAdminDashboard() {
       <div className="bg-[#0a0a0a] border border-red-900/30 p-12 rounded-[3rem] shadow-2xl max-w-md w-full">
         <XCircle size={64} className="text-red-600 mx-auto mb-6" />
         <h2 className="text-3xl font-serif mb-6">Accès Refusé</h2>
-        <p className="text-slate-500 mb-8 text-sm">Session : {userEmail || "Inconnue"}</p>
-        <button onClick={handleLogout} className="w-full bg-white text-black py-4 rounded-xl font-bold uppercase text-[10px] tracking-widest hover:bg-slate-200">Changer de session</button>
+        <p className="text-slate-500 mb-8 text-sm">Votre compte n'a pas les privilèges Super-Admin.<br/>Session : {userEmail}</p>
+        <button onClick={handleLogout} className="w-full bg-white text-black py-4 rounded-xl font-bold uppercase text-[10px] tracking-widest hover:bg-slate-200">Déconnexion</button>
       </div>
     </div>
   );
 
   return (
     <div className="min-h-screen bg-[#050505] text-slate-200 font-sans selection:bg-red-500/30">
-      {/* Background Effet Blur */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none opacity-50">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-red-900/10 blur-[120px] rounded-full" />
       </div>
@@ -193,7 +190,7 @@ export default function SuperAdminDashboard() {
             <div>
               <h1 className="text-4xl font-serif italic text-white tracking-tight">Super Control</h1>
               <p className="text-slate-500 text-[10px] uppercase tracking-[0.3em] font-black flex items-center gap-2">
-                <span className="w-2 h-2 bg-red-600 rounded-full animate-pulse" /> Gaëtan Admin Engine
+                <span className="w-2 h-2 bg-red-600 rounded-full animate-pulse" /> Système Centralisé
               </p>
             </div>
           </div>
@@ -208,11 +205,11 @@ export default function SuperAdminDashboard() {
         </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-          {/* Section Formulaire */}
+          {/* Section Déploiement */}
           <section className="lg:col-span-5 space-y-6">
             <div className="bg-[#0a0a0a] border border-slate-800/60 rounded-[2.5rem] p-8 shadow-2xl">
               <h2 className="text-xl font-serif italic text-white mb-8 flex items-center gap-3">
-                <Plus size={20} className="text-red-500" /> Déployer une licence
+                <Plus size={20} className="text-red-500" /> Déployer un compte
               </h2>
               <form onSubmit={createAdminAccount} className="space-y-4 text-left">
                 <div className="grid grid-cols-2 gap-4">
@@ -241,22 +238,22 @@ export default function SuperAdminDashboard() {
                   <input placeholder="Email de connexion" className="w-full bg-[#050505] border border-slate-800 rounded-xl p-3 text-sm text-white focus:border-red-600 outline-none" value={form.email} onChange={e => setForm({...form, email: e.target.value})} required />
                   <input type="password" placeholder="Mot de passe" className="w-full bg-[#050505] border border-slate-800 rounded-xl p-3 text-sm text-white focus:border-red-600 outline-none" value={form.password} onChange={e => setForm({...form, password: e.target.value})} required />
                 </div>
-                <button type="submit" disabled={isGlobalLoading} className="w-full bg-red-700 hover:bg-red-600 py-4 mt-6 rounded-xl font-black uppercase text-[10px] tracking-widest shadow-lg transition-all">
-                  {isGlobalLoading ? <Loader2 className="animate-spin mx-auto" /> : "ACTIVER LA LICENCE PARTNER"}
+                <button type="submit" disabled={isGlobalLoading} className="w-full bg-red-700 hover:bg-red-600 py-4 mt-6 rounded-xl font-black uppercase text-[10px] tracking-widest shadow-lg transition-all text-white">
+                  {isGlobalLoading ? <Loader2 className="animate-spin mx-auto" /> : "ACTIVER LA LICENCE"}
                 </button>
               </form>
             </div>
             
             <div className="bg-gradient-to-br from-red-950/20 to-transparent border border-red-900/20 rounded-3xl p-8 flex justify-between items-center">
               <div>
-                <p className="text-slate-500 text-[10px] uppercase font-black tracking-widest">Total Agences Actives</p>
+                <p className="text-slate-500 text-[10px] uppercase font-black tracking-widest">Utilisateurs Actifs</p>
                 <p className="text-3xl font-serif italic text-white">{admins.length}</p>
               </div>
               <Globe size={32} className="text-red-900/40" />
             </div>
           </section>
 
-          {/* Section Liste */}
+          {/* Section Database */}
           <section className="lg:col-span-7 space-y-6">
             <div className="flex justify-between items-center px-4">
               <h2 className="text-xl font-serif italic text-white flex items-center gap-3">
@@ -266,7 +263,7 @@ export default function SuperAdminDashboard() {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-600" size={14} />
                 <input 
                   placeholder="Rechercher..." 
-                  className="w-full pl-10 pr-4 py-2 bg-[#0a0a0a] border border-slate-800 rounded-full text-[11px] outline-none focus:border-red-900 transition-all"
+                  className="w-full pl-10 pr-4 py-2 bg-[#0a0a0a] border border-slate-800 rounded-full text-[11px] outline-none focus:border-red-900 transition-all text-white"
                   value={searchTerm}
                   onChange={e => setSearchTerm(e.target.value)}
                 />
@@ -279,12 +276,18 @@ export default function SuperAdminDashboard() {
                   <div className="flex justify-between items-center">
                     <div className="flex items-center gap-5">
                       <div className="h-12 w-12 bg-black border border-slate-800 rounded-xl flex items-center justify-center text-red-600">
-                        <Building2 size={20} />
+                        {admin.role === 'super_admin' ? <ShieldCheck size={20} /> : <Building2 size={20} />}
                       </div>
                       <div className="text-left">
                         <div className="flex items-center gap-3">
-                          <p className="font-bold text-white text-lg">{admin.company_name}</p>
-                          <span className="text-[8px] px-2 py-0.5 rounded bg-red-500/10 text-red-500 border border-red-500/20 font-black">{admin.pack}</span>
+                          <p className="font-bold text-white text-lg">{admin.company_name || 'Utilisateur'}</p>
+                          <span className={`text-[8px] px-2 py-0.5 rounded border font-black ${
+                            admin.role === 'super_admin' 
+                            ? 'bg-red-500/10 text-red-500 border-red-500/20' 
+                            : 'bg-blue-500/10 text-blue-500 border-blue-500/20'
+                          }`}>
+                            {admin.role === 'super_admin' ? 'SYSTEM' : admin.pack}
+                          </span>
                         </div>
                         <div className="flex items-center gap-2">
                           <p className="text-[9px] font-mono text-slate-600">ID: {admin.id}</p>
@@ -298,9 +301,10 @@ export default function SuperAdminDashboard() {
                       <div className="text-right hidden sm:block">
                         <p className="text-[10px] font-bold text-slate-400 uppercase">{admin.prenom} {admin.nom}</p>
                         <p className="text-[9px] text-slate-600">{admin.email}</p>
+                        {admin.pin_code && <p className="text-[10px] text-red-500 font-mono font-bold">PIN: {admin.pin_code}</p>}
                       </div>
                       <button 
-                        onClick={() => deleteAdminAccount(admin.id, admin.company_name)}
+                        onClick={() => deleteAdminAccount(admin.id, admin.company_name || admin.email)}
                         className="h-11 w-11 rounded-xl border border-slate-800 flex items-center justify-center text-slate-700 hover:text-red-500 transition-all bg-black"
                         disabled={deletingId === admin.id}
                       >
@@ -314,12 +318,6 @@ export default function SuperAdminDashboard() {
           </section>
         </div>
       </div>
-
-      <style jsx global>{`
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.05); border-radius: 10px; }
-      `}</style>
     </div>
   );
 }
