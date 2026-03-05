@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { 
   Save, Trash2, Loader2, Search, Plus, X,
   Zap, UserCheck, FileText, Printer, LogOut,
-  Users, ShieldCheck, MapPin, ExternalLink, Info, Home, Calendar, Image as ImageIcon
+  Users, ShieldCheck, MapPin, ExternalLink, Info, Home, Calendar, Image as ImageIcon, Delete, Key
 } from 'lucide-react';
 
 const supabase = createClient(
@@ -48,7 +48,6 @@ export default function AdminDashboard() {
     lien_photo: "", date_livraison_prevue: "", document_url: ""
   });
 
-  // --- GESTION DE LA DÉCONNEXION ---
   const handleLogout = async () => {
     if(!confirm("Voulez-vous vous déconnecter ?")) return;
     await supabase.auth.signOut();
@@ -63,7 +62,6 @@ export default function AdminDashboard() {
       let userEmail = session?.user?.email;
       let currentAgency = "Amaru-Homes";
 
-      // Vérification hybride Session / PIN
       if (!session) {
         const savedPinSession = localStorage.getItem("staff_session");
         if (savedPinSession) {
@@ -76,7 +74,6 @@ export default function AdminDashboard() {
         }
       }
 
-      // Récupération du profil (Sécurité renforcée pour Iris)
       const { data: staffData } = await supabase
         .from('profiles')
         .select('*')
@@ -88,8 +85,7 @@ export default function AdminDashboard() {
           currentAgency = staffData.company_name || "Amaru-Homes";
       }
 
-      // Chargement des projets de l'agence
-      const { data: projData, error: projError } = await supabase
+      const { data: projData } = await supabase
         .from('suivi_chantier')
         .select('*')
         .eq('company_name', currentAgency)
@@ -97,7 +93,6 @@ export default function AdminDashboard() {
       
       if (projData) setProjets(projData);
 
-      // Chargement de l'équipe
       const { data: stfData } = await supabase
         .from('profiles')
         .select('*')
@@ -113,14 +108,6 @@ export default function AdminDashboard() {
     }
   }, [router]);
 
-  const loadProjectExtras = async (projectId: string) => {
-    if (!projectId) return;
-    try {
-      const { data: docs } = await supabase.from('documents_projets').select('*').eq('projet_id', projectId).order('created_at', { ascending: false });
-      setProjectDocs(docs || []);
-    } catch (err) { console.error(err); }
-  };
-
   useEffect(() => { loadData(); }, [loadData]);
 
   useEffect(() => { 
@@ -129,6 +116,13 @@ export default function AdminDashboard() {
       loadProjectExtras(selectedProjet.id);
     }
   }, [selectedProjet]);
+
+  const loadProjectExtras = async (projectId: string) => {
+    try {
+      const { data: docs } = await supabase.from('documents_projets').select('*').eq('projet_id', projectId).order('created_at', { ascending: false });
+      setProjectDocs(docs || []);
+    } catch (err) { console.error(err); }
+  };
 
   const handleUpdateDossier = async () => {
     if (!selectedProjet) return;
@@ -210,7 +204,7 @@ export default function AdminDashboard() {
           </div>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={14} />
-            <input type="text" placeholder="Rechercher..." className="w-full pl-10 pr-4 py-3 bg-white/5 rounded-xl text-xs outline-none border border-white/5 focus:border-emerald-500" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+            <input type="text" placeholder="Rechercher..." className="w-full pl-10 pr-4 py-3 bg-white/5 rounded-xl text-xs outline-none border border-white/5 focus:border-emerald-500 text-white" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
           </div>
         </div>
 
@@ -260,21 +254,21 @@ export default function AdminDashboard() {
                 <section className="bg-white/5 p-6 rounded-[2rem] border border-white/5 space-y-4 print:p-4">
                   <h3 className="text-[10px] font-black uppercase text-emerald-500 flex items-center gap-2 print:text-black"><UserCheck size={14}/> Identité Client</h3>
                   <div className="grid grid-cols-2 gap-3 text-left">
-                    <div className="space-y-1"><label className="text-[9px] text-slate-500 uppercase font-bold">Prénom</label><input className="w-full bg-black/40 border border-white/5 p-3 rounded-xl text-xs" value={editFields.client_prenom || ""} onChange={e => setEditFields({...editFields, client_prenom: e.target.value})} /></div>
-                    <div className="space-y-1"><label className="text-[9px] text-slate-500 uppercase font-bold">Nom</label><input className="w-full bg-black/40 border border-white/5 p-3 rounded-xl text-xs" value={editFields.client_nom || ""} onChange={e => setEditFields({...editFields, client_nom: e.target.value})} /></div>
-                    <div className="col-span-2 space-y-1"><label className="text-[9px] text-slate-500 uppercase font-bold">Email</label><input className="w-full bg-black/40 border border-white/5 p-3 rounded-xl text-xs" value={editFields.email_client || ""} onChange={e => setEditFields({...editFields, email_client: e.target.value})} /></div>
-                    <div className="space-y-1"><label className="text-[9px] text-slate-500 uppercase font-bold">Téléphone</label><input className="w-full bg-black/40 border border-white/5 p-3 rounded-xl text-xs" value={editFields.telephone || ""} onChange={e => setEditFields({...editFields, telephone: e.target.value})} /></div>
-                    <div className="space-y-1"><label className="text-[9px] text-slate-500 uppercase font-bold">Date de Naissance</label><input type="date" className="w-full bg-black/40 border border-white/5 p-3 rounded-xl text-xs font-sans" value={editFields.date_naissance || ""} onChange={e => setEditFields({...editFields, date_naissance: e.target.value})} /></div>
+                    <div className="space-y-1"><label className="text-[9px] text-slate-500 uppercase font-bold">Prénom</label><input className="w-full bg-black/40 border border-white/5 p-3 rounded-xl text-xs text-white" value={editFields.client_prenom || ""} onChange={e => setEditFields({...editFields, client_prenom: e.target.value})} /></div>
+                    <div className="space-y-1"><label className="text-[9px] text-slate-500 uppercase font-bold">Nom</label><input className="w-full bg-black/40 border border-white/5 p-3 rounded-xl text-xs text-white" value={editFields.client_nom || ""} onChange={e => setEditFields({...editFields, client_nom: e.target.value})} /></div>
+                    <div className="col-span-2 space-y-1"><label className="text-[9px] text-slate-500 uppercase font-bold">Email</label><input className="w-full bg-black/40 border border-white/5 p-3 rounded-xl text-xs text-white" value={editFields.email_client || ""} onChange={e => setEditFields({...editFields, email_client: e.target.value})} /></div>
+                    <div className="space-y-1"><label className="text-[9px] text-slate-500 uppercase font-bold">Téléphone</label><input className="w-full bg-black/40 border border-white/5 p-3 rounded-xl text-xs text-white" value={editFields.telephone || ""} onChange={e => setEditFields({...editFields, telephone: e.target.value})} /></div>
+                    <div className="space-y-1"><label className="text-[9px] text-slate-500 uppercase font-bold">Date de Naissance</label><input type="date" className="w-full bg-black/40 border border-white/5 p-3 rounded-xl text-xs font-sans text-white" value={editFields.date_naissance || ""} onChange={e => setEditFields({...editFields, date_naissance: e.target.value})} /></div>
                   </div>
                 </section>
 
                 <section className="bg-white/5 p-6 rounded-[2rem] border border-white/5 space-y-4 print:p-4">
                   <h3 className="text-[10px] font-black uppercase text-blue-400 flex items-center gap-2 print:text-black"><MapPin size={14}/> Adresse du projet</h3>
                   <div className="grid grid-cols-2 gap-3 text-left">
-                    <input className="col-span-2 bg-black/40 border border-white/5 p-3 rounded-xl text-xs" value={editFields.rue || ""} onChange={e => setEditFields({...editFields, rue: e.target.value})} placeholder="Rue et numéro" />
-                    <input className="bg-black/40 border border-white/5 p-3 rounded-xl text-xs" value={editFields.code_postal || ""} onChange={e => setEditFields({...editFields, code_postal: e.target.value})} placeholder="Code Postal" />
-                    <input className="bg-black/40 border border-white/5 p-3 rounded-xl text-xs" value={editFields.ville || ""} onChange={e => setEditFields({...editFields, ville: e.target.value})} placeholder="Ville" />
-                    <input className="col-span-2 bg-black/40 border border-white/5 p-3 rounded-xl text-xs" value={editFields.pays || ""} onChange={e => setEditFields({...editFields, pays: e.target.value})} placeholder="Pays" />
+                    <input className="col-span-2 bg-black/40 border border-white/5 p-3 rounded-xl text-xs text-white" value={editFields.rue || ""} onChange={e => setEditFields({...editFields, rue: e.target.value})} placeholder="Rue et numéro" />
+                    <input className="bg-black/40 border border-white/5 p-3 rounded-xl text-xs text-white" value={editFields.code_postal || ""} onChange={e => setEditFields({...editFields, code_postal: e.target.value})} placeholder="Code Postal" />
+                    <input className="bg-black/40 border border-white/5 p-3 rounded-xl text-xs text-white" value={editFields.ville || ""} onChange={e => setEditFields({...editFields, ville: e.target.value})} placeholder="Ville" />
+                    <input className="col-span-2 bg-black/40 border border-white/5 p-3 rounded-xl text-xs text-white" value={editFields.pays || ""} onChange={e => setEditFields({...editFields, pays: e.target.value})} placeholder="Pays" />
                   </div>
                 </section>
 
@@ -303,7 +297,7 @@ export default function AdminDashboard() {
                       </select>
                     </div>
                     <div className="grid grid-cols-2 gap-3">
-                      <div className="space-y-1"><label className="text-[9px] text-slate-500 uppercase font-bold">Livraison Prévue</label><input type="date" className="w-full bg-black/40 border border-white/5 p-3 rounded-xl text-xs font-sans" value={editFields.date_livraison_prevue || ""} onChange={e => setEditFields({...editFields, date_livraison_prevue: e.target.value})} /></div>
+                      <div className="space-y-1"><label className="text-[9px] text-slate-500 uppercase font-bold">Livraison Prévue</label><input type="date" className="w-full bg-black/40 border border-white/5 p-3 rounded-xl text-xs font-sans text-white" value={editFields.date_livraison_prevue || ""} onChange={e => setEditFields({...editFields, date_livraison_prevue: e.target.value})} /></div>
                       <div className="space-y-1"><label className="text-[9px] text-slate-500 uppercase font-bold">Cashback (€)</label><input type="number" className="w-full bg-black/40 border border-white/5 p-3 rounded-xl text-xs text-emerald-500 font-bold" value={editFields.montant_cashback || 0} onChange={e => setEditFields({...editFields, montant_cashback: Number(e.target.value)})} /></div>
                     </div>
                   </div>
@@ -312,7 +306,7 @@ export default function AdminDashboard() {
                 <section className="bg-white/5 p-6 rounded-[2rem] border border-white/5 space-y-4 print:p-4">
                   <h3 className="text-[10px] font-black uppercase text-slate-400 flex items-center gap-2 print:text-black"><Info size={14}/> Suivi de Chantier</h3>
                   <div className="space-y-3 text-left">
-                    <div className="space-y-1"><label className="text-[9px] text-slate-500 uppercase font-bold">Commentaires Etape Actuelle</label><textarea className="w-full bg-black/40 border border-white/5 p-4 rounded-xl text-xs min-h-[80px]" value={editFields.commentaires_etape || ""} onChange={e => setEditFields({...editFields, commentaires_etape: e.target.value})} /></div>
+                    <div className="space-y-1"><label className="text-[9px] text-slate-500 uppercase font-bold">Commentaires Etape Actuelle</label><textarea className="w-full bg-black/40 border border-white/5 p-4 rounded-xl text-xs min-h-[80px] text-white" value={editFields.commentaires_etape || ""} onChange={e => setEditFields({...editFields, commentaires_etape: e.target.value})} /></div>
                   </div>
                 </section>
 
@@ -329,7 +323,7 @@ export default function AdminDashboard() {
                       <div key={doc.id} className="p-3 bg-black/40 rounded-xl border border-white/5 flex justify-between items-center group">
                         <div className="flex items-center gap-3 truncate">
                           <FileText size={14} className="text-orange-400 flex-shrink-0" />
-                          <span className="text-[10px] truncate">{doc.nom_fichier}</span>
+                          <span className="text-[10px] truncate text-white">{doc.nom_fichier}</span>
                         </div>
                         <div className="flex items-center gap-2">
                           <a href={doc.url_fichier} target="_blank" rel="noreferrer" className="p-2 text-emerald-500 hover:bg-emerald-500/10 rounded-lg transition-colors"><ExternalLink size={14}/></a>
@@ -350,100 +344,114 @@ export default function AdminDashboard() {
         )}
       </div>
 
-      {/* MODALS (STAFF & PROJET) */}
+      {/* MODAL STAFF (CORRIGÉE AVEC AUTH) */}
       {showStaffModal && (
         <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex items-center justify-center p-4">
           <div className="bg-[#0F172A] w-full max-w-md rounded-[2.5rem] border border-white/10 p-8 text-left">
             <h2 className="text-xl font-black uppercase text-white mb-6 italic">Ajouter un collaborateur</h2>
             <form onSubmit={async (e) => { 
                 e.preventDefault(); 
+                setUpdating(true);
+                const tempPassword = "Amaru" + Math.random().toString(36).slice(-8);
                 const staffPin = Math.floor(1000 + Math.random() * 9000).toString();
-                const { error } = await supabase.from('profiles').insert([{ 
-                  ...newStaff, 
-                  pin_code: staffPin,
-                  company_name: agencyProfile.company_name 
-                }]);
-                if (error) alert("Erreur : " + error.message);
-                else { alert(`Profil créé ! PIN : ${staffPin}`); setShowStaffModal(false); loadData(); }
+
+                try {
+                  const { data: authData, error: authError } = await supabase.auth.signUp({
+                    email: newStaff.email,
+                    password: tempPassword,
+                  });
+
+                  if (authError) throw authError;
+
+                  if (authData.user) {
+                    const { error: profileError } = await supabase.from('profiles').insert([{ 
+                      id: authData.user.id,
+                      prenom: newStaff.prenom,
+                      nom: newStaff.nom,
+                      email: newStaff.email,
+                      role: newStaff.role,
+                      pin_code: staffPin,
+                      company_name: agencyProfile.company_name 
+                    }]);
+
+                    if (profileError) throw profileError;
+                    alert(`Profil créé ! PIN : ${staffPin}`);
+                    setShowStaffModal(false); 
+                    loadData();
+                  }
+                } catch (err: any) {
+                  alert("Erreur : " + err.message);
+                } finally {
+                  setUpdating(false);
+                }
             }} className="space-y-4">
-              <input required placeholder="Prénom" className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewStaff({...newStaff, prenom: e.target.value})} />
-              <input required placeholder="Nom" className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewStaff({...newStaff, nom: e.target.value})} />
-              <input required type="email" placeholder="Email" className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewStaff({...newStaff, email: e.target.value})} />
-              <select className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewStaff({...newStaff, role: e.target.value})}>
+              <input required placeholder="Prénom" className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-xs text-white" onChange={e => setNewStaff({...newStaff, prenom: e.target.value})} />
+              <input required placeholder="Nom" className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-xs text-white" onChange={e => setNewStaff({...newStaff, nom: e.target.value})} />
+              <input required type="email" placeholder="Email" className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-xs text-white" onChange={e => setNewStaff({...newStaff, email: e.target.value})} />
+              <select className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-xs text-white" value={newStaff.role} onChange={e => setNewStaff({...newStaff, role: e.target.value})}>
                 <option value="staff">Agent de suivi</option>
                 <option value="admin">Administrateur</option>
                 <option value="prestataire">Prestataire</option>
               </select>
-              <button type="submit" className="w-full bg-blue-500 text-black py-4 rounded-xl font-black text-xs uppercase">Créer l'accès</button>
+              <button type="submit" disabled={updating} className="w-full bg-blue-500 text-black py-4 rounded-xl font-black text-xs uppercase flex justify-center items-center">
+                {updating ? <Loader2 className="animate-spin" size={18} /> : "Créer l'accès"}
+              </button>
               <button type="button" onClick={() => setShowStaffModal(false)} className="w-full text-slate-500 text-[10px] uppercase font-bold mt-2">Annuler</button>
             </form>
           </div>
         </div>
       )}
 
-      {showStaffModal && (
-  <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex items-center justify-center p-4">
-    <div className="bg-[#0F172A] w-full max-w-md rounded-[2.5rem] border border-white/10 p-8 text-left">
-      <h2 className="text-xl font-black uppercase text-white mb-6 italic">Ajouter un collaborateur</h2>
-      
-      <form onSubmit={async (e) => { 
-          e.preventDefault(); 
-          setUpdating(true); // Utilise ton état loading existant si tu veux
-          
-          // 1. Génération d'un mot de passe temporaire (Supabase Auth en a besoin)
-          const tempPassword = "Amaru" + Math.random().toString(36).slice(-8);
-          const staffPin = Math.floor(1000 + Math.random() * 9000).toString();
-
-          try {
-            // 2. Création de l'utilisateur dans Supabase AUTH
-            // Note: L'utilisateur recevra un mail de confirmation selon tes réglages Supabase
-            const { data: authData, error: authError } = await supabase.auth.signUp({
-              email: newStaff.email,
-              password: tempPassword,
-            });
-
-            if (authError) throw authError;
-
-            if (authData.user) {
-              // 3. Insertion dans la table PROFILES avec l'ID récupéré
-              const { error: profileError } = await supabase.from('profiles').insert([{ 
-                id: authData.user.id, // VOICI LA CORRECTION : On lie l'ID
-                prenom: newStaff.prenom,
-                nom: newStaff.nom,
-                email: newStaff.email,
-                role: newStaff.role,
-                pin_code: staffPin,
-                company_name: agencyProfile.company_name 
-              }]);
-
-              if (profileError) throw profileError;
-
-              alert(`Profil créé avec succès !\nPIN : ${staffPin}\nUn compte d'accès a été réservé pour ${newStaff.email}`);
-              setShowStaffModal(false); 
-              loadData();
-            }
-          } catch (error: any) {
-            alert("Erreur critique : " + error.message);
-          } finally {
-            setUpdating(false);
-          }
-      }} className="space-y-4">
-        <input required placeholder="Prénom" className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-xs text-white" onChange={e => setNewStaff({...newStaff, prenom: e.target.value})} />
-        <input required placeholder="Nom" className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-xs text-white" onChange={e => setNewStaff({...newStaff, nom: e.target.value})} />
-        <input required type="email" placeholder="Email" className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-xs text-white" onChange={e => setNewStaff({...newStaff, email: e.target.value})} />
-        
-        <select className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-xs text-white" value={newStaff.role} onChange={e => setNewStaff({...newStaff, role: e.target.value})}>
-          <option value="staff">Agent de suivi</option>
-          <option value="admin">Administrateur</option>
-          <option value="prestataire">Prestataire</option>
-        </select>
-
-        <button type="submit" disabled={updating} className="w-full bg-blue-500 text-black py-4 rounded-xl font-black text-xs uppercase flex justify-center items-center">
-          {updating ? <Loader2 className="animate-spin" size={18} /> : "Créer l'accès"}
-        </button>
-        
-        <button type="button" onClick={() => setShowStaffModal(false)} className="w-full text-slate-500 text-[10px] uppercase font-bold mt-2">Annuler</button>
-      </form>
+      {/* MODAL PROJET */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex items-center justify-center p-4">
+          <div className="bg-[#0F172A] w-full max-w-4xl rounded-[3rem] border border-white/10 p-10 max-h-[90vh] overflow-y-auto text-left shadow-2xl">
+            <div className="flex justify-between items-start mb-8">
+              <div>
+                <h2 className="text-2xl font-black uppercase text-white italic tracking-tighter">Nouveau Dossier Chantier</h2>
+                <p className="text-[10px] text-slate-500 uppercase mt-1">Saisie complète des données - Amaru Homes</p>
+              </div>
+              <button onClick={() => setShowModal(false)} className="text-slate-500 hover:text-white"><X size={24}/></button>
+            </div>
+            
+            <form onSubmit={async (e) => {
+                e.preventDefault();
+                const pin = Math.floor(100000 + Math.random() * 900000).toString();
+                const { error } = await supabase.from("suivi_chantier").insert([{
+                    ...newProject,
+                    company_name: agencyProfile.company_name,
+                    pin_code: pin,
+                    etape_actuelle: PHASES_CHANTIER[0],
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                }]);
+                if (error) alert("Erreur : " + error.message);
+                else { setShowModal(false); loadData(); }
+            }} className="space-y-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-4">
+                    <h3 className="text-[10px] font-black text-emerald-500 uppercase tracking-widest border-b border-white/5 pb-2">Identité Client</h3>
+                    <div className="grid grid-cols-2 gap-3">
+                        <input required placeholder="Prénom" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs text-white" onChange={e => setNewProject({...newProject, client_prenom: e.target.value})} />
+                        <input required placeholder="Nom" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs text-white" onChange={e => setNewProject({...newProject, client_nom: e.target.value})} />
+                        <input required type="email" placeholder="Email" className="col-span-2 bg-black/50 border border-white/10 rounded-xl p-4 text-xs text-white" onChange={e => setNewProject({...newProject, email_client: e.target.value})} />
+                    </div>
+                </div>
+                <div className="space-y-4">
+                    <h3 className="text-[10px] font-black text-blue-500 uppercase tracking-widest border-b border-white/5 pb-2">Adresse du Projet</h3>
+                    <div className="grid grid-cols-2 gap-3">
+                        <input placeholder="Rue et numéro" className="col-span-2 bg-black/50 border border-white/10 rounded-xl p-4 text-xs text-white" onChange={e => setNewProject({...newProject, rue: e.target.value})} />
+                        <input placeholder="Ville" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs text-white" onChange={e => setNewProject({...newProject, ville: e.target.value})} />
+                    </div>
+                </div>
+              </div>
+              <button type="submit" className="w-full bg-emerald-500 text-black py-5 rounded-2xl font-black text-xs uppercase shadow-xl shadow-emerald-500/20 hover:scale-[1.01] transition-all">
+                Créer le dossier & Générer le Code PIN
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
-  </div>
-)}
+  );
+}
