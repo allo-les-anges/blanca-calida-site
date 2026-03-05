@@ -68,7 +68,6 @@ export default function AdminDashboard() {
     } catch (err: any) { console.error(err); } finally { setLoading(false); }
   }, []);
 
-  // --- CHARGEMENT DES DOCUMENTS CORRIGÉ ---
   const loadProjectExtras = async (projectId: string) => {
     if (!projectId) return;
     
@@ -82,10 +81,10 @@ export default function AdminDashboard() {
       if (docError) {
         console.error("Erreur Documents:", docError.message);
       } else {
-        // On s'assure que l'on utilise bien url_fichier de la BDD
+        // Correction de l'affichage : on utilise 'url_fichier' qui existe dans ta table
         const formattedDocs = docs?.map(d => ({
           ...d,
-          displayUrl: d.url_fichier || d.url // On crée un champ displayUrl sécurisé
+          displayUrl: d.url_fichier 
         })) || [];
         setProjectDocs(formattedDocs);
       }
@@ -142,7 +141,6 @@ export default function AdminDashboard() {
     setUpdating(false);
   };
 
-  // --- UPLOAD DANS LA BONNE COLONNE (url_fichier) ---
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !selectedProjet) return;
@@ -160,12 +158,13 @@ export default function AdminDashboard() {
         .from('documents-clients')
         .getPublicUrl(fileName);
 
-      // CORRECTION : Insertion dans url_fichier pour correspondre à ta BDD
+      // CORRECTION FINALE : On retire 'type' car il n'existe pas dans ta table
+      // On utilise 'url_fichier' et 'storage_path' qui existent bien
       const { error: dbError } = await supabase.from('documents_projets').insert([{
         projet_id: selectedProjet.id, 
         nom_fichier: file.name, 
-        url_fichier: data.publicUrl, 
-        type: file.type
+        url_fichier: data.publicUrl,
+        storage_path: fileName 
       }]);
 
       if (dbError) throw dbError;
@@ -182,9 +181,7 @@ export default function AdminDashboard() {
     if(!confirm("Supprimer ce document ?")) return;
     setUpdating(true);
     try {
-      // Extraction du chemin pour le storage (sécurité)
-      const urlToDelete = doc.url_fichier || doc.url;
-      const filePath = urlToDelete.split('/documents-clients/')[1];
+      const filePath = doc.storage_path;
       
       if (filePath) {
         await supabase.storage.from('documents-clients').remove([filePath]);
@@ -265,7 +262,7 @@ export default function AdminDashboard() {
                   </div>
                 </section>
 
-                {/* --- SECTION DOCUMENTS CORRIGÉE --- */}
+                {/* --- SECTION DOCUMENTS --- */}
                 <section className="bg-white/5 p-6 rounded-[2rem] border border-white/5 space-y-4">
                   <div className="flex justify-between items-center">
                     <h3 className="text-[10px] font-black uppercase text-orange-400 tracking-widest flex items-center gap-2"><FileText size={14}/> Médias & Documents</h3>
@@ -278,7 +275,8 @@ export default function AdminDashboard() {
                   <div className="grid grid-cols-1 gap-3 max-h-96 overflow-y-auto pr-2 custom-scrollbar text-left">
                     {projectDocs.length > 0 ? projectDocs.map((doc) => (
                       <div key={doc.id} className="group relative bg-black/40 rounded-2xl border border-white/5 overflow-hidden hover:border-orange-500/50 transition-all">
-                        {doc.type?.includes('image') && (
+                        {/* On tente d'afficher l'image si c'est une extension d'image classique */}
+                        {/\.(jpg|jpeg|png|webp|avif|gif)$/i.test(doc.nom_fichier) && (
                           <div className="w-full h-20 overflow-hidden opacity-40 group-hover:opacity-100 transition-opacity">
                              <img src={doc.displayUrl} alt="" className="w-full h-full object-cover" />
                           </div>
@@ -293,7 +291,7 @@ export default function AdminDashboard() {
                             }}
                           >
                             <div className="p-2 bg-white/5 rounded-lg">
-                              {doc.type?.includes('image') ? <ImageIcon size={14} className="text-orange-400"/> : <FileText size={14} className="text-red-400"/>}
+                              {/\.(jpg|jpeg|png|webp)$/i.test(doc.nom_fichier) ? <ImageIcon size={14} className="text-orange-400"/> : <FileText size={14} className="text-red-400"/>}
                             </div>
                             <div className="flex flex-col min-w-0">
                               <span className="text-[10px] font-bold text-slate-300 truncate">{doc.nom_fichier}</span>
@@ -371,41 +369,4 @@ export default function AdminDashboard() {
               <input required placeholder="Nom" className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewStaff({...newStaff, nom: e.target.value})} />
               <input required type="email" placeholder="Email" className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewStaff({...newStaff, email: e.target.value})} />
               <select className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewStaff({...newStaff, role: e.target.value})}>
-                <option value="staff">Agent de suivi</option>
-                <option value="admin">Administrateur</option>
-              </select>
-              <button type="submit" className="w-full bg-blue-500 text-black py-4 rounded-xl font-black text-xs uppercase">Créer l'accès</button>
-              <button type="button" onClick={() => setShowStaffModal(false)} className="w-full text-slate-500 text-[10px] uppercase font-bold">Annuler</button>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {showModal && (
-        <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex items-center justify-center p-4">
-          <div className="bg-[#0F172A] w-full max-w-2xl rounded-[3rem] border border-white/10 p-10">
-            <h2 className="text-2xl font-black uppercase text-white mb-8">Nouveau Chantier</h2>
-            <form onSubmit={async (e) => {
-                e.preventDefault();
-                const pin = Math.floor(100000 + Math.random() * 900000).toString();
-                await supabase.from("suivi_chantier").insert([{
-                    ...newProject,
-                    company_name: agencyProfile.company_name,
-                    pin_code: pin,
-                    etape_actuelle: PHASES_CHANTIER[0]
-                }]);
-                setShowModal(false); loadData();
-            }} className="grid grid-cols-2 gap-4">
-                <input required placeholder="Prénom Client" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, client_prenom: e.target.value})} />
-                <input required placeholder="Nom Client" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, client_nom: e.target.value})} />
-                <input required placeholder="Email Client" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, email_client: e.target.value})} />
-                <input required placeholder="Nom de la Villa" className="col-span-2 bg-black/50 border border-white/10 rounded-xl p-4 text-xs font-bold text-emerald-500" onChange={e => setNewProject({...newProject, nom_villa: e.target.value})} />
-                <button type="submit" className="col-span-2 bg-emerald-500 text-black py-5 rounded-2xl font-black text-xs uppercase mt-4">Lancer le dossier</button>
-                <button type="button" onClick={() => setShowModal(false)} className="col-span-2 text-slate-500 text-[10px] uppercase font-bold text-center">Fermer</button>
-            </form>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
+                <option value="staff">
