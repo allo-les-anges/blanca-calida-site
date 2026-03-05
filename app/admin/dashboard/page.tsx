@@ -37,7 +37,9 @@ export default function AdminDashboard() {
   const [editFields, setEditFields] = useState<any>({});
   const [agencyProfile, setAgencyProfile] = useState<any>({ company_name: "Amaru-Homes" });
   
+  // Utilisation de la table staff_prestataires
   const [newStaff, setNewStaff] = useState({ nom: "", prenom: "", email: "", role: "staff" });
+  
   const [newProject, setNewProject] = useState({
     client_nom: "", client_prenom: "", email_client: "", telephone: "",
     rue: "", code_postal: "", ville: "", pays: "Espagne",
@@ -51,23 +53,40 @@ export default function AdminDashboard() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
       
-      const { data: profiles } = await supabase.from('profiles').select('*').eq('email', session.user.email);
-      const profile = profiles?.[0];
+      // On récupère le profil de l'utilisateur dans staff_prestataires
+      const { data: staffData } = await supabase.from('staff_prestataires').select('*').eq('email', session.user.email);
+      const profile = staffData?.[0];
       const currentAgency = profile?.company_name || "Amaru-Homes";
       setAgencyProfile(profile || { company_name: "Amaru-Homes" });
 
-      const { data: projData } = await supabase.from('suivi_chantier').select('*').eq('company_name', currentAgency).order('created_at', { ascending: false });
+      // Chargement des projets de l'agence
+      const { data: projData } = await supabase.from('suivi_chantier')
+        .select('*')
+        .eq('company_name', currentAgency)
+        .order('created_at', { ascending: false });
       if (projData) setProjets(projData);
 
-      const { data: stfData } = await supabase.from('profiles').select('*').eq('company_name', currentAgency).neq('email', session.user.email);
+      // Chargement de l'équipe depuis staff_prestataires
+      const { data: stfData } = await supabase.from('staff_prestataires')
+        .select('*')
+        .eq('company_name', currentAgency)
+        .neq('email', session.user.email);
       if (stfData) setStaffList(stfData);
-    } catch (err: any) { console.error(err); } finally { setLoading(false); }
+
+    } catch (err: any) { 
+        console.error("Erreur chargement:", err); 
+    } finally { 
+        setLoading(false); 
+    }
   }, []);
 
   const loadProjectExtras = async (projectId: string) => {
     if (!projectId) return;
     try {
-      const { data: docs } = await supabase.from('documents_projets').select('*').eq('projet_id', projectId).order('created_at', { ascending: false });
+      const { data: docs } = await supabase.from('documents_projets')
+        .select('*')
+        .eq('projet_id', projectId)
+        .order('created_at', { ascending: false });
       setProjectDocs(docs || []);
     } catch (err) { console.error(err); }
   };
@@ -91,7 +110,6 @@ export default function AdminDashboard() {
       }).eq('id', selectedProjet.id);
 
       if (error) throw error;
-      
       alert("Mise à jour effectuée !");
       loadData();
     } catch (err: any) { alert(err.message); }
@@ -104,9 +122,8 @@ export default function AdminDashboard() {
     setUpdating(true);
     try {
       const fileName = `${selectedProjet.id}/${Date.now()}-${file.name}`;
-      const { error: uploadError } = await supabase.storage.from('documents-clients').upload(fileName, file);
-      
-      if (uploadError) throw uploadError;
+      const { error: uploadErr } = await supabase.storage.from('documents-clients').upload(fileName, file);
+      if (uploadErr) throw uploadErr;
 
       const { data: urlData } = supabase.storage.from('documents-clients').getPublicUrl(fileName);
       
@@ -118,45 +135,22 @@ export default function AdminDashboard() {
       }]);
 
       if (dbError) throw dbError;
-
       loadProjectExtras(selectedProjet.id);
-    } catch (err: any) { 
-      alert("Erreur lors de l'upload : " + err.message); 
-    } finally { 
-      setUpdating(false); 
-    }
+    } catch (err: any) { alert("Erreur upload: " + err.message); } finally { setUpdating(false); }
   };
 
   const handleDeleteFile = async (docId: string, storagePath: string) => {
-    if (!confirm("Voulez-vous vraiment supprimer ce document ?")) return;
-    
+    if (!confirm("Supprimer ce document ?")) return;
     setUpdating(true);
     try {
-      // 1. Supprimer le fichier du Storage Supabase
       if (storagePath) {
-        const { error: storageError } = await supabase.storage
-          .from('documents-clients')
-          .remove([storagePath]);
-        
-        if (storageError) throw storageError;
+        await supabase.storage.from('documents-clients').remove([storagePath]);
       }
-
-      // 2. Supprimer la ligne de la base de données
-      const { error: dbError } = await supabase
-        .from('documents_projets')
-        .delete()
-        .eq('id', docId);
-
-      if (dbError) throw dbError;
-
-      // 3. Rafraîchir la liste locale
-      setProjectDocs(prev => prev.filter(doc => doc.id !== docId));
+      const { error } = await supabase.from('documents_projets').delete().eq('id', docId);
+      if (error) throw error;
       
-    } catch (err: any) {
-      alert("Erreur lors de la suppression : " + err.message);
-    } finally {
-      setUpdating(false);
-    }
+      setProjectDocs(prev => prev.filter(d => d.id !== docId));
+    } catch (err: any) { alert("Erreur suppression: " + err.message); } finally { setUpdating(false); }
   };
 
   return (
@@ -165,21 +159,26 @@ export default function AdminDashboard() {
       <div className="w-80 bg-[#0F172A]/50 border-r border-white/5 h-screen sticky top-0 flex flex-col">
         <div className="p-8 space-y-6">
           <div className="flex items-center justify-between">
-            <h1 className="text-sm font-black text-white uppercase tracking-tighter italic">{agencyProfile.company_name}</h1>
+            <h1 className="text-sm font-black text-white uppercase italic tracking-tighter">
+                {agencyProfile.company_name}
+            </h1>
             <div className="flex gap-2">
                 <button onClick={() => setShowModal(true)} className="p-2 bg-emerald-500/10 text-emerald-500 rounded-lg hover:bg-emerald-500 transition-all"><Plus size={16}/></button>
                 <button onClick={() => setShowStaffModal(true)} className="p-2 bg-blue-500/10 text-blue-500 rounded-lg hover:bg-blue-500 transition-all"><Users size={16}/></button>
             </div>
           </div>
+          
           <div className="flex bg-black/40 p-1 rounded-xl border border-white/5">
             <button onClick={() => setActiveTab('clients')} className={`flex-1 py-2 rounded-lg text-[10px] font-bold uppercase ${activeTab === 'clients' ? 'bg-emerald-500 text-black' : 'text-slate-500'}`}>Dossiers</button>
             <button onClick={() => setActiveTab('staff')} className={`flex-1 py-2 rounded-lg text-[10px] font-bold uppercase ${activeTab === 'staff' ? 'bg-blue-500 text-black' : 'text-slate-500'}`}>Équipe</button>
           </div>
+
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={14} />
             <input type="text" placeholder="Rechercher..." className="w-full pl-10 pr-4 py-3 bg-white/5 rounded-xl text-xs outline-none border border-white/5 focus:border-emerald-500" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
           </div>
         </div>
+
         <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-2">
           {activeTab === 'clients' ? projets.filter(p => `${p.client_prenom} ${p.client_nom}`.toLowerCase().includes(searchTerm.toLowerCase())).map((p) => (
             <button key={p.id} onClick={() => setSelectedProjet(p)} className={`w-full text-left p-4 rounded-xl border transition-all ${selectedProjet?.id === p.id ? 'bg-emerald-500/10 border-emerald-500/50' : 'border-white/5 hover:bg-white/5'}`}>
@@ -188,7 +187,10 @@ export default function AdminDashboard() {
             </button>
           )) : staffList.map((s) => (
             <div key={s.email} className="p-4 rounded-xl border border-white/5 bg-white/5 flex justify-between items-center group">
-              <div className='text-left'><p className="font-bold text-sm text-white">{s.prenom} {s.nom}</p><p className="text-[9px] text-blue-400 uppercase">{s.role}</p></div>
+              <div className='text-left'>
+                <p className="font-bold text-sm text-white">{s.prenom} {s.nom}</p>
+                <p className="text-[9px] text-blue-400 uppercase font-black">{s.role}</p>
+              </div>
             </div>
           ))}
         </div>
@@ -212,6 +214,7 @@ export default function AdminDashboard() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* COL GAUCHE */}
               <div className="space-y-6">
                 <section className="bg-white/5 p-6 rounded-[2rem] border border-white/5 space-y-4">
                   <h3 className="text-[10px] font-black uppercase text-emerald-500 flex items-center gap-2"><UserCheck size={14}/> Identité Client</h3>
@@ -224,7 +227,7 @@ export default function AdminDashboard() {
                 </section>
 
                 <section className="bg-white/5 p-6 rounded-[2rem] border border-white/5 space-y-4">
-                  <h3 className="text-[10px] font-black uppercase text-blue-400 flex items-center gap-2"><MapPin size={14}/> Coordonnées de résidence</h3>
+                  <h3 className="text-[10px] font-black uppercase text-blue-400 flex items-center gap-2"><MapPin size={14}/> Coordonnées</h3>
                   <div className="grid grid-cols-2 gap-3">
                     <input className="col-span-2 bg-black/40 border border-white/5 p-3 rounded-xl text-xs" value={editFields.rue || ""} onChange={e => setEditFields({...editFields, rue: e.target.value})} placeholder="Rue et numéro" />
                     <input className="bg-black/40 border border-white/5 p-3 rounded-xl text-xs" value={editFields.code_postal || ""} onChange={e => setEditFields({...editFields, code_postal: e.target.value})} placeholder="Code Postal" />
@@ -238,11 +241,12 @@ export default function AdminDashboard() {
                     className="w-full bg-black/40 border border-white/5 p-4 rounded-xl text-xs min-h-[120px] outline-none focus:border-emerald-500" 
                     value={editFields.infos_complementaires || ""} 
                     onChange={e => setEditFields({...editFields, infos_complementaires: e.target.value})} 
-                    placeholder="Notes internes, détails spécifiques..." 
+                    placeholder="Notes internes..." 
                   />
                 </section>
               </div>
 
+              {/* COL DROITE */}
               <div className="space-y-6">
                 <section className="bg-white/5 p-6 rounded-[2rem] border border-white/5 space-y-4">
                   <h3 className="text-[10px] font-black uppercase text-orange-400 flex items-center gap-2"><Home size={14}/> Détails de la Villa</h3>
@@ -281,11 +285,7 @@ export default function AdminDashboard() {
                           <a href={doc.url_fichier} target="_blank" rel="noreferrer" className="p-2 text-emerald-500 hover:bg-emerald-500/10 rounded-lg transition-colors">
                             <ExternalLink size={14}/>
                           </a>
-                          <button 
-                            onClick={() => handleDeleteFile(doc.id, doc.storage_path)}
-                            disabled={updating}
-                            className="p-2 text-rose-500 hover:bg-rose-500/10 rounded-lg transition-colors"
-                          >
+                          <button onClick={() => handleDeleteFile(doc.id, doc.storage_path)} disabled={updating} className="p-2 text-rose-500 hover:bg-rose-500/10 rounded-lg transition-colors">
                             <Trash2 size={14}/>
                           </button>
                         </div>
@@ -304,14 +304,14 @@ export default function AdminDashboard() {
         )}
       </div>
 
-      {/* MODAL NOUVEAU STAFF */}
+      {/* MODAL STAFF */}
       {showStaffModal && (
         <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex items-center justify-center p-4">
           <div className="bg-[#0F172A] w-full max-w-md rounded-[2.5rem] border border-white/10 p-8 text-left">
             <h2 className="text-xl font-black uppercase text-white mb-6">Ajouter un collaborateur</h2>
             <form onSubmit={async (e) => { 
                 e.preventDefault(); 
-                const { error } = await supabase.from('profiles').insert([{ ...newStaff, company_name: agencyProfile.company_name }]);
+                const { error } = await supabase.from('staff_prestataires').insert([{ ...newStaff, company_name: agencyProfile.company_name }]);
                 if (error) alert(error.message);
                 else { setShowStaffModal(false); loadData(); }
             }} className="space-y-4">
@@ -321,6 +321,7 @@ export default function AdminDashboard() {
               <select className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewStaff({...newStaff, role: e.target.value})}>
                 <option value="staff">Agent de suivi</option>
                 <option value="admin">Administrateur</option>
+                <option value="prestataire">Prestataire</option>
               </select>
               <button type="submit" className="w-full bg-blue-500 text-black py-4 rounded-xl font-black text-xs uppercase">Créer l'accès</button>
               <button type="button" onClick={() => setShowStaffModal(false)} className="w-full text-slate-500 text-[10px] uppercase font-bold">Annuler</button>
@@ -329,10 +330,10 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      {/* MODAL NOUVEAU CHANTIER */}
+      {/* MODAL CHANTIER */}
       {showModal && (
         <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex items-center justify-center p-4">
-          <div className="bg-[#0F172A] w-full max-w-3xl rounded-[3rem] border border-white/10 p-10 max-h-[90vh] overflow-y-auto custom-scrollbar text-left">
+          <div className="bg-[#0F172A] w-full max-w-3xl rounded-[3rem] border border-white/10 p-10 max-h-[90vh] overflow-y-auto text-left">
             <div className="flex justify-between items-start mb-8">
               <div>
                 <h2 className="text-2xl font-black uppercase text-white">Nouveau Dossier Chantier</h2>
@@ -375,7 +376,7 @@ export default function AdminDashboard() {
                 <input required placeholder="Nom de la Villa" className="col-span-2 bg-black/50 border border-white/20 rounded-xl p-4 text-sm font-bold text-emerald-500" onChange={e => setNewProject({...newProject, nom_villa: e.target.value})} />
                 <textarea placeholder="Infos complémentaires..." className="col-span-2 bg-black/50 border border-white/10 rounded-xl p-4 text-xs min-h-[80px]" onChange={e => setNewProject({...newProject, infos_complementaires: e.target.value})} />
               </div>
-              <button type="submit" className="w-full bg-emerald-500 text-black py-5 rounded-2xl font-black text-xs uppercase mt-4">Créer le dossier client & Générer PIN</button>
+              <button type="submit" className="w-full bg-emerald-500 text-black py-5 rounded-2xl font-black text-xs uppercase mt-4">Créer le dossier & Générer PIN</button>
             </form>
           </div>
         </div>
