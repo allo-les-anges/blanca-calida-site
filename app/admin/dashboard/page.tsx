@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { 
   Save, Trash2, Loader2, Search, Plus, X,
   Zap, UserCheck, FileText, Printer, LogOut,
-  Users, ShieldCheck, MapPin, ExternalLink, Info, Home, Calendar, Image as ImageIcon, Delete, Key
+  Users, ShieldCheck, MapPin, ExternalLink, Info, Home, Calendar, Image as ImageIcon
 } from 'lucide-react';
 
 const supabase = createClient(
@@ -39,7 +39,9 @@ export default function AdminDashboard() {
   const [editFields, setEditFields] = useState<any>({});
   const [agencyProfile, setAgencyProfile] = useState<any>({ company_name: "Amaru-Homes" });
   
-  const [newStaff, setNewStaff] = useState({ nom: "", prenom: "", email: "", role: "staff" });
+  // Initialisation avec le rôle par défaut "agent de suivi"
+  const [newStaff, setNewStaff] = useState({ nom: "", prenom: "", email: "", role: "agent de suivi" });
+  
   const [newProject, setNewProject] = useState({
     client_nom: "", client_prenom: "", email_client: "", telephone: "", date_naissance: "",
     rue: "", code_postal: "", ville: "", pays: "Espagne",
@@ -231,7 +233,6 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* MAIN CONTENT */}
       <div className="flex-1 p-8 lg:p-12 overflow-y-auto print:p-0">
         {selectedProjet ? (
           <div id="printable-area" className="max-w-6xl mx-auto space-y-8 text-left animate-in fade-in duration-500 print:text-black">
@@ -261,29 +262,6 @@ export default function AdminDashboard() {
                     <div className="space-y-1"><label className="text-[9px] text-slate-500 uppercase font-bold">Date de Naissance</label><input type="date" className="w-full bg-black/40 border border-white/5 p-3 rounded-xl text-xs font-sans text-white" value={editFields.date_naissance || ""} onChange={e => setEditFields({...editFields, date_naissance: e.target.value})} /></div>
                   </div>
                 </section>
-
-                <section className="bg-white/5 p-6 rounded-[2rem] border border-white/5 space-y-4 print:p-4">
-                  <h3 className="text-[10px] font-black uppercase text-blue-400 flex items-center gap-2 print:text-black"><MapPin size={14}/> Adresse du projet</h3>
-                  <div className="grid grid-cols-2 gap-3 text-left">
-                    <input className="col-span-2 bg-black/40 border border-white/5 p-3 rounded-xl text-xs text-white" value={editFields.rue || ""} onChange={e => setEditFields({...editFields, rue: e.target.value})} placeholder="Rue et numéro" />
-                    <input className="bg-black/40 border border-white/5 p-3 rounded-xl text-xs text-white" value={editFields.code_postal || ""} onChange={e => setEditFields({...editFields, code_postal: e.target.value})} placeholder="Code Postal" />
-                    <input className="bg-black/40 border border-white/5 p-3 rounded-xl text-xs text-white" value={editFields.ville || ""} onChange={e => setEditFields({...editFields, ville: e.target.value})} placeholder="Ville" />
-                    <input className="col-span-2 bg-black/40 border border-white/5 p-3 rounded-xl text-xs text-white" value={editFields.pays || ""} onChange={e => setEditFields({...editFields, pays: e.target.value})} placeholder="Pays" />
-                  </div>
-                </section>
-
-                <section className="bg-white/5 p-6 rounded-[2rem] border border-white/5 space-y-4 print:p-4">
-                  <h3 className="text-[10px] font-black uppercase text-purple-400 flex items-center gap-2 print:text-black"><ImageIcon size={14}/> Médias & Liens Externes</h3>
-                  <div className="space-y-3 text-left">
-                    <div className="space-y-1">
-                      <label className="text-[9px] text-slate-500 uppercase font-bold">Lien Album Photos</label>
-                      <div className="flex gap-2">
-                        <input className="flex-1 bg-black/40 border border-white/5 p-3 rounded-xl text-xs text-blue-400" value={editFields.lien_photo || ""} onChange={e => setEditFields({...editFields, lien_photo: e.target.value})} />
-                        {editFields.lien_photo && <a href={editFields.lien_photo} target="_blank" className="p-3 bg-white/5 rounded-xl text-white"><ExternalLink size={14}/></a>}
-                      </div>
-                    </div>
-                  </div>
-                </section>
               </div>
 
               <div className="space-y-6">
@@ -296,17 +274,6 @@ export default function AdminDashboard() {
                         {PHASES_CHANTIER.map(p => <option key={p} value={p}>{p}</option>)}
                       </select>
                     </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="space-y-1"><label className="text-[9px] text-slate-500 uppercase font-bold">Livraison Prévue</label><input type="date" className="w-full bg-black/40 border border-white/5 p-3 rounded-xl text-xs font-sans text-white" value={editFields.date_livraison_prevue || ""} onChange={e => setEditFields({...editFields, date_livraison_prevue: e.target.value})} /></div>
-                      <div className="space-y-1"><label className="text-[9px] text-slate-500 uppercase font-bold">Cashback (€)</label><input type="number" className="w-full bg-black/40 border border-white/5 p-3 rounded-xl text-xs text-emerald-500 font-bold" value={editFields.montant_cashback || 0} onChange={e => setEditFields({...editFields, montant_cashback: Number(e.target.value)})} /></div>
-                    </div>
-                  </div>
-                </section>
-
-                <section className="bg-white/5 p-6 rounded-[2rem] border border-white/5 space-y-4 print:p-4">
-                  <h3 className="text-[10px] font-black uppercase text-slate-400 flex items-center gap-2 print:text-black"><Info size={14}/> Suivi de Chantier</h3>
-                  <div className="space-y-3 text-left">
-                    <div className="space-y-1"><label className="text-[9px] text-slate-500 uppercase font-bold">Commentaires Etape Actuelle</label><textarea className="w-full bg-black/40 border border-white/5 p-4 rounded-xl text-xs min-h-[80px] text-white" value={editFields.commentaires_etape || ""} onChange={e => setEditFields({...editFields, commentaires_etape: e.target.value})} /></div>
                   </div>
                 </section>
 
@@ -344,14 +311,17 @@ export default function AdminDashboard() {
         )}
       </div>
 
-      {/* MODAL STAFF (CORRIGÉE AVEC AUTH) */}
+      {/* MODAL STAFF - ROLES UNIQUES */}
       {showStaffModal && (
         <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex items-center justify-center p-4">
           <div className="bg-[#0F172A] w-full max-w-md rounded-[2.5rem] border border-white/10 p-8 text-left">
-            <h2 className="text-xl font-black uppercase text-white mb-6 italic">Ajouter un collaborateur</h2>
+            <h2 className="text-xl font-black uppercase text-white mb-6 italic">Ajouter un membre d'équipe</h2>
+            
             <form onSubmit={async (e) => { 
                 e.preventDefault(); 
                 setUpdating(true);
+                
+                const finalRole = newStaff.role; 
                 const tempPassword = "Amaru" + Math.random().toString(36).slice(-8);
                 const staffPin = Math.floor(1000 + Math.random() * 9000).toString();
 
@@ -369,13 +339,14 @@ export default function AdminDashboard() {
                       prenom: newStaff.prenom,
                       nom: newStaff.nom,
                       email: newStaff.email,
-                      role: newStaff.role,
+                      role: finalRole,
                       pin_code: staffPin,
                       company_name: agencyProfile.company_name 
                     }]);
 
                     if (profileError) throw profileError;
-                    alert(`Profil créé ! PIN : ${staffPin}`);
+
+                    alert(`Profil créé !\nRole: ${finalRole}\nPIN : ${staffPin}`);
                     setShowStaffModal(false); 
                     loadData();
                   }
@@ -388,14 +359,24 @@ export default function AdminDashboard() {
               <input required placeholder="Prénom" className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-xs text-white" onChange={e => setNewStaff({...newStaff, prenom: e.target.value})} />
               <input required placeholder="Nom" className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-xs text-white" onChange={e => setNewStaff({...newStaff, nom: e.target.value})} />
               <input required type="email" placeholder="Email" className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-xs text-white" onChange={e => setNewStaff({...newStaff, email: e.target.value})} />
-              <select className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-xs text-white" value={newStaff.role} onChange={e => setNewStaff({...newStaff, role: e.target.value})}>
-                <option value="staff">Agent de suivi</option>
-                <option value="admin">Administrateur</option>
-                <option value="prestataire">Prestataire</option>
-              </select>
+              
+              <div className="space-y-1">
+                <label className="text-[9px] text-slate-500 uppercase font-bold ml-2">Rôle</label>
+                <select 
+                  className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-xs text-white" 
+                  value={newStaff.role}
+                  onChange={e => setNewStaff({...newStaff, role: e.target.value})}
+                >
+                  <option value="agent de suivi">Agent de suivi</option>
+                  <option value="admin">Administrateur d'agence</option>
+                  <option value="prestataire">Prestataire externe</option>
+                </select>
+              </div>
+
               <button type="submit" disabled={updating} className="w-full bg-blue-500 text-black py-4 rounded-xl font-black text-xs uppercase flex justify-center items-center">
                 {updating ? <Loader2 className="animate-spin" size={18} /> : "Créer l'accès"}
               </button>
+              
               <button type="button" onClick={() => setShowStaffModal(false)} className="w-full text-slate-500 text-[10px] uppercase font-bold mt-2">Annuler</button>
             </form>
           </div>
@@ -409,7 +390,6 @@ export default function AdminDashboard() {
             <div className="flex justify-between items-start mb-8">
               <div>
                 <h2 className="text-2xl font-black uppercase text-white italic tracking-tighter">Nouveau Dossier Chantier</h2>
-                <p className="text-[10px] text-slate-500 uppercase mt-1">Saisie complète des données - Amaru Homes</p>
               </div>
               <button onClick={() => setShowModal(false)} className="text-slate-500 hover:text-white"><X size={24}/></button>
             </div>
@@ -437,16 +417,9 @@ export default function AdminDashboard() {
                         <input required type="email" placeholder="Email" className="col-span-2 bg-black/50 border border-white/10 rounded-xl p-4 text-xs text-white" onChange={e => setNewProject({...newProject, email_client: e.target.value})} />
                     </div>
                 </div>
-                <div className="space-y-4">
-                    <h3 className="text-[10px] font-black text-blue-500 uppercase tracking-widest border-b border-white/5 pb-2">Adresse du Projet</h3>
-                    <div className="grid grid-cols-2 gap-3">
-                        <input placeholder="Rue et numéro" className="col-span-2 bg-black/50 border border-white/10 rounded-xl p-4 text-xs text-white" onChange={e => setNewProject({...newProject, rue: e.target.value})} />
-                        <input placeholder="Ville" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs text-white" onChange={e => setNewProject({...newProject, ville: e.target.value})} />
-                    </div>
-                </div>
               </div>
               <button type="submit" className="w-full bg-emerald-500 text-black py-5 rounded-2xl font-black text-xs uppercase shadow-xl shadow-emerald-500/20 hover:scale-[1.01] transition-all">
-                Créer le dossier & Générer le Code PIN
+                Créer le dossier
               </button>
             </form>
           </div>
