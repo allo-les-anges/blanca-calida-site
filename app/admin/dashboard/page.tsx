@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { 
   Save, Trash2, Loader2, Search, Plus, X,
   Zap, UserCheck, FileText, Printer, LogOut,
-  Users, ShieldCheck, MapPin, ExternalLink, Info, Home, Calendar, Image as ImageIcon
+  Users, ShieldCheck, MapPin, ExternalLink, Home
 } from 'lucide-react';
 
 const supabase = createClient(
@@ -39,13 +39,8 @@ export default function AdminDashboard() {
   const [editFields, setEditFields] = useState<any>({});
   const [agencyProfile, setAgencyProfile] = useState<any>({ company_name: "Amaru-Homes" });
   
-  // État initial strict pour le nouveau staff
-  const [newStaff, setNewStaff] = useState({ 
-    nom: "", 
-    prenom: "", 
-    email: "", 
-    role: "agent de suivi" 
-  });
+  // État pour le nouveau staff
+  const [newStaff, setNewStaff] = useState({ nom: "", prenom: "", email: "", role: "agent de suivi" });
   
   const [newProject, setNewProject] = useState({
     client_nom: "", client_prenom: "", email_client: "", telephone: "", date_naissance: "",
@@ -321,7 +316,7 @@ export default function AdminDashboard() {
         )}
       </div>
 
-      {/* MODAL STAFF - CORRECTION ROLE ET ERREUR */}
+      {/* MODAL STAFF - VERSION ROBUSTE ANTI-TRIGGER */}
       {showStaffModal && (
         <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex items-center justify-center p-4">
           <div className="bg-[#0F172A] w-full max-w-md rounded-[2.5rem] border border-white/10 p-8 text-left">
@@ -331,49 +326,42 @@ export default function AdminDashboard() {
                 e.preventDefault(); 
                 setUpdating(true);
                 
-                // On s'assure de capturer la valeur exacte de l'état
-                const roleToInsert = newStaff.role; 
-                const tempPassword = "Amaru" + Math.random().toString(36).slice(-8);
+                const targetRole = newStaff.role; 
                 const staffPin = Math.floor(1000 + Math.random() * 9000).toString();
+                const tempPassword = "Amaru" + Math.random().toString(36).slice(-8);
 
                 try {
-                  // 1. Inscription Auth
+                  // 1. Création du compte Auth
                   const { data: authData, error: authError } = await supabase.auth.signUp({
                     email: newStaff.email,
                     password: tempPassword,
                   });
 
-                  // Note : On ne bloque pas si une erreur de redirection mail survient
-                  // mais on vérifie si l'utilisateur a été créé
-                  if (authError) {
-                      console.warn("Auth SignUp warning/error:", authError.message);
-                      // Si l'erreur est "User already registered", on pourrait arrêter ici
-                  }
+                  // Si l'erreur est "User already registered", on ne peut pas continuer.
+                  if (authError) throw authError;
 
-                  const userId = authData?.user?.id;
-
-                  if (userId) {
-                    // 2. Insertion Profil avec le bon rôle
-                    const { error: profileError } = await supabase.from('profiles').insert([{ 
-                      id: userId,
+                  if (authData.user) {
+                    // 2. LA MAGIE : On utilise UPSERT au lieu de INSERT.
+                    // Upsert dit : "Si le profil existe déjà (créé par un trigger), met le à jour. Sinon crée-le."
+                    const { error: profileError } = await supabase.from('profiles').upsert([{ 
+                      id: authData.user.id,
                       prenom: newStaff.prenom,
                       nom: newStaff.nom,
                       email: newStaff.email,
-                      role: roleToInsert, // <--- FORÇAGE DU RÔLE ICI
+                      role: targetRole, // On force notre rôle ici
                       pin_code: staffPin,
                       company_name: agencyProfile.company_name 
-                    }]);
+                    }], { onConflict: 'id' });
 
                     if (profileError) throw profileError;
 
-                    alert(`Accès créé avec succès !\nNom: ${newStaff.prenom}\nRôle: ${roleToInsert}\nPIN : ${staffPin}`);
+                    alert(`Collaborateur ajouté !\nNom: ${newStaff.prenom}\nRôle: ${targetRole}\nPIN: ${staffPin}`);
                     setShowStaffModal(false); 
                     loadData();
-                  } else {
-                      throw new Error(authError?.message || "Impossible de créer l'identifiant unique.");
                   }
                 } catch (err: any) {
-                  alert("Erreur lors de la création : " + err.message);
+                  // On affiche une erreur plus claire
+                  alert("Note : Si l'utilisateur est déjà inscrit dans Supabase Auth, vous ne pouvez pas le recréer ici. Erreur : " + err.message);
                 } finally {
                   setUpdating(false);
                 }
@@ -396,7 +384,7 @@ export default function AdminDashboard() {
               </div>
 
               <button type="submit" disabled={updating} className="w-full bg-blue-500 text-black py-4 rounded-xl font-black text-xs uppercase flex justify-center items-center">
-                {updating ? <Loader2 className="animate-spin" size={18} /> : "Valider l'inscription"}
+                {updating ? <Loader2 className="animate-spin" size={18} /> : "Finaliser l'inscription"}
               </button>
               
               <button type="button" onClick={() => setShowStaffModal(false)} className="w-full text-slate-500 text-[10px] uppercase font-bold mt-2">Annuler</button>
