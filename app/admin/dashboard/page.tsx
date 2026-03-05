@@ -68,21 +68,61 @@ export default function AdminDashboard() {
     } catch (err: any) { console.error(err); } finally { setLoading(false); }
   }, []);
 
-  const loadProjectExtras = async (projectId: string) => {
-    const { data: docs } = await supabase.from('documents_projets').select('*').eq('projet_id', projectId).order('created_at', { ascending: false });
-    setProjectDocs(docs || []);
-    const { data: reports } = await supabase.from('chantier_updates').select('*').eq('projet_id', projectId).order('created_at', { ascending: false });
-    setProjectReports(reports || []);
-  };
-
-  useEffect(() => { loadData(); }, [loadData]);
+  // 1. Fonction de chargement avec gestion d'erreurs et log de contrôle
+const loadProjectExtras = async (projectId: string) => {
+  if (!projectId) return;
   
-  useEffect(() => { 
-    if (selectedProjet) {
-      setEditFields({ ...selectedProjet });
-      loadProjectExtras(selectedProjet.id);
-    } 
-  }, [selectedProjet]);
+  try {
+    // Récupération des documents (Vérifiez bien que le nom de la table est 'documents_projets')
+    const { data: docs, error: docError } = await supabase
+      .from('documents_projets')
+      .select('*')
+      .eq('projet_id', projectId)
+      .order('created_at', { ascending: false });
+
+    if (docError) {
+      console.error("Erreur Supabase Documents:", docError.message);
+    } else {
+      console.log("Documents chargés pour le projet :", docs); // Pour vérifier dans la console F12
+      setProjectDocs(docs || []);
+    }
+
+    // Récupération des rapports
+    const { data: reports, error: repError } = await supabase
+      .from('chantier_updates')
+      .select('*')
+      .eq('projet_id', projectId)
+      .order('created_at', { ascending: false });
+
+    if (repError) {
+      console.error("Erreur Supabase Rapports:", repError.message);
+    } else {
+      setProjectReports(reports || []);
+    }
+    
+  } catch (err) {
+    console.error("Erreur critique loadProjectExtras:", err);
+  }
+};
+
+// 2. Les useEffects pour orchestrer le chargement
+useEffect(() => { 
+  loadData(); 
+}, [loadData]);
+
+useEffect(() => { 
+  if (selectedProjet?.id) {
+    // On réinitialise les champs d'édition avec les données du projet sélectionné
+    setEditFields({ ...selectedProjet });
+    
+    // On force le chargement des documents et rapports liés à cet ID précis
+    loadProjectExtras(selectedProjet.id);
+  } else {
+    // Si aucun projet n'est sélectionné, on vide les listes
+    setProjectDocs([]);
+    setProjectReports([]);
+  }
+}, [selectedProjet]);
 
   const handleUpdateDossier = async () => {
     if (!selectedProjet) return;
