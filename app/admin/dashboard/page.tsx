@@ -42,9 +42,21 @@ export default function AdminDashboard() {
   
   const [newStaff, setNewStaff] = useState({ nom: "", prenom: "", email: "", role: "staff" });
   const [newProject, setNewProject] = useState({
-    client_nom: "", client_prenom: "", email_client: "", telephone: "",
-    ville: "", nom_villa: "", montant_cashback: 0
-  });
+  client_nom: "",
+  client_prenom: "",
+  email_client: "",
+  telephone: "",
+  date_naissance: "",
+  rue: "",
+  code_postal: "",
+  ville: "",
+  pays: "Espagne", // Par défaut
+  nom_villa: "",
+  constructeur_info: "",
+  montant_cashback: 0,
+  date_livraison_prevue: "",
+  document_url: ""
+});
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -380,30 +392,75 @@ export default function AdminDashboard() {
       )}
 
       {showModal && (
-        <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex items-center justify-center p-4">
-          <div className="bg-[#0F172A] w-full max-w-2xl rounded-[3rem] border border-white/10 p-10">
-            <h2 className="text-2xl font-black uppercase text-white mb-8">Nouveau Chantier</h2>
-            <form onSubmit={async (e) => {
-                e.preventDefault();
-                const pin = Math.floor(100000 + Math.random() * 900000).toString();
-                await supabase.from("suivi_chantier").insert([{
-                    ...newProject,
-                    company_name: agencyProfile.company_name,
-                    pin_code: pin,
-                    etape_actuelle: PHASES_CHANTIER[0]
-                }]);
-                setShowModal(false); loadData();
-            }} className="grid grid-cols-2 gap-4">
-                <input required placeholder="Prénom Client" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, client_prenom: e.target.value})} />
-                <input required placeholder="Nom Client" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, client_nom: e.target.value})} />
-                <input required placeholder="Email Client" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, email_client: e.target.value})} />
-                <input required placeholder="Nom de la Villa" className="col-span-2 bg-black/50 border border-white/10 rounded-xl p-4 text-xs font-bold text-emerald-500" onChange={e => setNewProject({...newProject, nom_villa: e.target.value})} />
-                <button type="submit" className="col-span-2 bg-emerald-500 text-black py-5 rounded-2xl font-black text-xs uppercase mt-4">Lancer le dossier</button>
-                <button type="button" onClick={() => setShowModal(false)} className="col-span-2 text-slate-500 text-[10px] uppercase font-bold text-center">Fermer</button>
-            </form>
+  <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex items-center justify-center p-4">
+    <div className="bg-[#0F172A] w-full max-w-3xl rounded-[3rem] border border-white/10 p-10 max-h-[90vh] overflow-y-auto custom-scrollbar">
+      <div className="flex justify-between items-start mb-8">
+        <div>
+          <h2 className="text-2xl font-black uppercase text-white">Nouveau Dossier Chantier</h2>
+          <p className="text-xs text-slate-500 uppercase tracking-widest mt-1">Enregistrement complet du client</p>
+        </div>
+        <button onClick={() => setShowModal(false)} className="text-slate-500 hover:text-white"><X size={24}/></button>
+      </div>
+
+      <form onSubmit={async (e) => {
+          e.preventDefault();
+          const pin = Math.floor(100000 + Math.random() * 900000).toString();
+          
+          const { error } = await supabase.from("suivi_chantier").insert([{
+              ...newProject,
+              company_name: agencyProfile.company_name,
+              pin_code: pin,
+              etape_actuelle: PHASES_CHANTIER[0],
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+          }]);
+
+          if (error) {
+            alert("Erreur BDD : " + error.message);
+          } else {
+            setShowModal(false); 
+            loadData();
+          }
+      }} className="space-y-8">
+        
+        {/* SECTION : IDENTITÉ */}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="col-span-2 text-[10px] font-black text-emerald-500 uppercase tracking-widest border-b border-white/5 pb-2">Identité Client</div>
+          <input required placeholder="Prénom" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, client_prenom: e.target.value})} />
+          <input required placeholder="Nom" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, client_nom: e.target.value})} />
+          <input required type="email" placeholder="Email" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, email_client: e.target.value})} />
+          <input placeholder="Téléphone" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, telephone: e.target.value})} />
+          <div className="flex flex-col gap-1">
+            <label className="text-[9px] text-slate-500 ml-2 uppercase">Date de naissance</label>
+            <input type="date" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs text-slate-400" onChange={e => setNewProject({...newProject, date_naissance: e.target.value})} />
           </div>
         </div>
-      )}
+
+        {/* SECTION : ADRESSE */}
+        <div className="grid grid-cols-3 gap-4">
+          <div className="col-span-3 text-[10px] font-black text-blue-500 uppercase tracking-widest border-b border-white/5 pb-2">Coordonnées de résidence</div>
+          <input placeholder="Rue et numéro" className="col-span-2 bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, rue: e.target.value})} />
+          <input placeholder="Code Postal" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, code_postal: e.target.value})} />
+          <input placeholder="Ville" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, ville: e.target.value})} />
+          <input placeholder="Pays" defaultValue="Espagne" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, pays: e.target.value})} />
+        </div>
+
+        {/* SECTION : LE PROJET */}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="col-span-2 text-[10px] font-black text-orange-500 uppercase tracking-widest border-b border-white/5 pb-2">Détails de la Villa</div>
+          <input required placeholder="Nom de la Villa (ex: Blanca Calida #4)" className="col-span-2 bg-black/50 border border-white/20 rounded-xl p-4 text-sm font-bold text-emerald-500" onChange={e => setNewProject({...newProject, nom_villa: e.target.value})} />
+          <input placeholder="Constructeur / Info Chantier" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, constructeur_info: e.target.value})} />
+          <input type="number" placeholder="Montant Cashback (€)" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, montant_cashback: Number(e.target.value)})} />
+          <div className="flex flex-col gap-1 col-span-2">
+            <label className="text-[9px] text-slate-500 ml-2 uppercase">Livraison prévue</label>
+            <input type="date" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs text-slate-400" onChange={e => setNewProject({...newProject, date_livraison_prevue: e.target.value})} />
+          </div>
+        </div>
+
+        <button type="submit" className="w-full bg-emerald-500 text-black py-5 rounded-2xl font-black text-xs uppercase mt-4 hover:scale-[1.02] transition-transform shadow-2xl shadow-emerald-500/20">
+          Créer le dossier client & Générer PIN
+        </button>
+      </form>
     </div>
-  );
-}
+  </div>
+)}
