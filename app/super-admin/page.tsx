@@ -7,7 +7,7 @@ import {
   Building2, Loader2, LogOut, ShieldCheck, 
   XCircle, Plus, Trash2, ArrowLeft, Search, 
   Copy, CheckCircle2, LayoutDashboard, Globe
-} from 'lucide-center';
+} from 'lucide-react'; // Correction effectuée ici : lucide-react
 import { supabase } from "@/lib/supabase";
 
 export default function SuperAdminDashboard() {
