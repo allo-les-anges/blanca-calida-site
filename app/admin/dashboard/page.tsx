@@ -75,7 +75,7 @@ export default function AdminDashboard() {
         }
       }
 
-      const { data: staffData } = await supabase.from('staff_prestataires').select('*').eq('email', userEmail);
+      const { data: staffData } = await supabase.from('profiles').select('*').eq('email', userEmail);
       if (staffData?.[0]) {
           setAgencyProfile(staffData[0]);
           currentAgency = staffData[0].company_name;
@@ -84,7 +84,7 @@ export default function AdminDashboard() {
       const { data: projData } = await supabase.from('suivi_chantier').select('*').eq('company_name', currentAgency).order('created_at', { ascending: false });
       if (projData) setProjets(projData);
 
-      const { data: stfData } = await supabase.from('staff_prestataires').select('*').eq('company_name', currentAgency).neq('email', userEmail);
+      const { data: stfData } = await supabase.from('profiles').select('*').eq('company_name', currentAgency).neq('email', userEmail);
       if (stfData) setStaffList(stfData);
       
     } catch (err: any) { console.error(err); } finally { setLoading(false); }
@@ -156,7 +156,7 @@ export default function AdminDashboard() {
   const handleDeleteStaff = async (staffId: string, name: string) => {
     if (!confirm(`Retirer ${name} de l'équipe ?`)) return;
     try {
-      const { error } = await supabase.from('staff_prestataires').delete().eq('id', staffId);
+      const { error } = await supabase.from('profiles').delete().eq('id', staffId);
       if (error) throw error;
       loadData();
     } catch (err: any) { alert(err.message); }
@@ -347,7 +347,7 @@ export default function AdminDashboard() {
             <form onSubmit={async (e) => { 
                 e.preventDefault(); 
                 const staffPin = Math.floor(1000 + Math.random() * 9000).toString();
-                const { error } = await supabase.from('staff_prestataires').insert([{ 
+                const { error } = await supabase.from('profiles').insert([{ 
                   ...newStaff, 
                   pin_code: staffPin,
                   company_name: agencyProfile.company_name 
