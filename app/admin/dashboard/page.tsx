@@ -104,17 +104,59 @@ export default function AdminDashboard() {
     setUpdating(true);
     try {
       const fileName = `${selectedProjet.id}/${Date.now()}-${file.name}`;
-      await supabase.storage.from('documents-clients').upload(fileName, file);
-      const { data } = supabase.storage.from('documents-clients').getPublicUrl(fileName);
+      const { error: uploadError } = await supabase.storage.from('documents-clients').upload(fileName, file);
       
-      await supabase.from('documents_projets').insert([{
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage.from('documents-clients').getPublicUrl(fileName);
+      
+      const { error: dbError } = await supabase.from('documents_projets').insert([{
         projet_id: selectedProjet.id, 
         nom_fichier: file.name, 
-        url_fichier: data.publicUrl, 
+        url_fichier: urlData.publicUrl, 
         storage_path: fileName 
       }]);
+
+      if (dbError) throw dbError;
+
       loadProjectExtras(selectedProjet.id);
-    } catch (err: any) { alert(err.message); } finally { setUpdating(false); }
+    } catch (err: any) { 
+      alert("Erreur lors de l'upload : " + err.message); 
+    } finally { 
+      setUpdating(false); 
+    }
+  };
+
+  const handleDeleteFile = async (docId: string, storagePath: string) => {
+    if (!confirm("Voulez-vous vraiment supprimer ce document ?")) return;
+    
+    setUpdating(true);
+    try {
+      // 1. Supprimer le fichier du Storage Supabase
+      if (storagePath) {
+        const { error: storageError } = await supabase.storage
+          .from('documents-clients')
+          .remove([storagePath]);
+        
+        if (storageError) throw storageError;
+      }
+
+      // 2. Supprimer la ligne de la base de données
+      const { error: dbError } = await supabase
+        .from('documents_projets')
+        .delete()
+        .eq('id', docId);
+
+      if (dbError) throw dbError;
+
+      // 3. Rafraîchir la liste locale
+      setProjectDocs(prev => prev.filter(doc => doc.id !== docId));
+      
+    } catch (err: any) {
+      alert("Erreur lors de la suppression : " + err.message);
+    } finally {
+      setUpdating(false);
+    }
   };
 
   return (
@@ -170,7 +212,6 @@ export default function AdminDashboard() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* SECTION GAUCHE : TOUTES LES INFOS CLIENT */}
               <div className="space-y-6">
                 <section className="bg-white/5 p-6 rounded-[2rem] border border-white/5 space-y-4">
                   <h3 className="text-[10px] font-black uppercase text-emerald-500 flex items-center gap-2"><UserCheck size={14}/> Identité Client</h3>
@@ -191,7 +232,6 @@ export default function AdminDashboard() {
                   </div>
                 </section>
 
-                {/* NOUVEAU : INFOS COMPLÉMENTAIRES */}
                 <section className="bg-emerald-500/5 p-6 rounded-[2rem] border border-emerald-500/20 space-y-4">
                   <h3 className="text-[10px] font-black uppercase text-emerald-500 flex items-center gap-2"><Info size={14}/> Infos Complémentaires</h3>
                   <textarea 
@@ -203,7 +243,6 @@ export default function AdminDashboard() {
                 </section>
               </div>
 
-              {/* SECTION DROITE : PROJET & DOCUMENTS */}
               <div className="space-y-6">
                 <section className="bg-white/5 p-6 rounded-[2rem] border border-white/5 space-y-4">
                   <h3 className="text-[10px] font-black uppercase text-orange-400 flex items-center gap-2"><Home size={14}/> Détails de la Villa</h3>
@@ -227,15 +266,29 @@ export default function AdminDashboard() {
                   <div className="flex justify-between items-center">
                     <h3 className="text-[10px] font-black uppercase text-slate-400 flex items-center gap-2"><FileText size={14}/> Documents</h3>
                     <label className="cursor-pointer bg-white/10 text-white p-2 rounded-lg hover:bg-emerald-500 hover:text-black transition-all">
-                      <Plus size={14}/>
-                      <input type="file" className="hidden" onChange={handleFileUpload} />
+                      {updating ? <Loader2 className="animate-spin" size={14}/> : <Plus size={14}/>}
+                      <input type="file" className="hidden" onChange={handleFileUpload} disabled={updating} />
                     </label>
                   </div>
                   <div className="space-y-2">
                     {projectDocs.map((doc: any) => (
                       <div key={doc.id} className="p-3 bg-black/40 rounded-xl border border-white/5 flex justify-between items-center group">
-                        <span className="text-[10px] truncate w-40">{doc.nom_fichier}</span>
-                        <a href={doc.url_fichier} target="_blank" className="text-emerald-500 hover:scale-110 transition-transform"><ExternalLink size={12}/></a>
+                        <div className="flex items-center gap-3 truncate">
+                          <FileText size={14} className="text-orange-400 flex-shrink-0" />
+                          <span className="text-[10px] truncate">{doc.nom_fichier}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <a href={doc.url_fichier} target="_blank" rel="noreferrer" className="p-2 text-emerald-500 hover:bg-emerald-500/10 rounded-lg transition-colors">
+                            <ExternalLink size={14}/>
+                          </a>
+                          <button 
+                            onClick={() => handleDeleteFile(doc.id, doc.storage_path)}
+                            disabled={updating}
+                            className="p-2 text-rose-500 hover:bg-rose-500/10 rounded-lg transition-colors"
+                          >
+                            <Trash2 size={14}/>
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -302,7 +355,6 @@ export default function AdminDashboard() {
                 if (error) alert("Erreur BDD : " + error.message);
                 else { setShowModal(false); loadData(); }
             }} className="space-y-8">
-              {/* LES CHAMPS DE CRÉATION ICI */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="col-span-2 text-[10px] font-black text-emerald-500 uppercase tracking-widest border-b border-white/5 pb-2">Identité Client</div>
                 <input required placeholder="Prénom" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, client_prenom: e.target.value})} />
