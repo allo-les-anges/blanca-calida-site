@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, ShieldCheck, LogOut } from "lucide-react"; // Ajout de LogOut
+import { Loader2, ShieldCheck, RefreshCw } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 
 export default function LoginPage() {
@@ -11,54 +11,46 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [isChecking, setIsChecking] = useState(true); // État pour bloquer le flash
 
+  // 1. ON DESACTIVE LE CHECK AUTOMATIQUE AU CHARGEMENT
+  // On laisse l'utilisateur décider de se connecter ou de nettoyer sa session.
   useEffect(() => {
-    const checkUser = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session) {
-          // Au lieu de rediriger direct, on vérifie si c'est une session valide
-          await handleRedirection(session.user.id, session.user.email);
-        }
-      } catch (e) {
-        console.error(e);
-      } finally {
-        setIsChecking(false);
-      }
-    };
-    checkUser();
+    // On nettoie juste les résidus au chargement pour être sûr
+    console.log("Portail prêt.");
   }, []);
-
-  // Fonction pour casser la boucle infinie manuellement
-  const forceLogout = async () => {
-    await supabase.auth.signOut();
-    localStorage.clear();
-    window.location.reload(); 
-  };
 
   const handleRedirection = async (userId: string, userEmail?: string) => {
     try {
-      // Redirection simplifiée pour éviter les erreurs 404
+      // Priorité Gaëtan
       if (userEmail?.toLowerCase().trim() === 'gaetan@amaru-homes.com') {
         router.replace('/super-admin');
         return;
       }
 
-      const { data: profile } = await supabase
+      const { data: profile, error } = await supabase
         .from('profiles')
         .select('role')
         .eq('id', userId)
         .single();
 
-      if (profile?.role === 'super_admin') {
+      if (error || !profile) {
+        setErrorMsg("Profil introuvable dans la base.");
+        setLoading(false);
+        return;
+      }
+
+      // Redirection selon tes dossiers réels
+      if (profile.role === 'super_admin') {
         router.replace('/super-admin');
-      } else if (profile?.role === 'admin') {
+      } else if (profile.role === 'admin') {
         router.replace('/admin/dashboard');
+      } else {
+        setErrorMsg("Accès restreint.");
+        setLoading(false);
       }
     } catch (err) {
-      // Si erreur de profil, on reste sur le login et on arrête le chargement
-      setIsChecking(false);
+      setErrorMsg("Erreur système.");
+      setLoading(false);
     }
   };
 
@@ -73,66 +65,80 @@ export default function LoginPage() {
     });
 
     if (error) {
-      setErrorMsg("Identifiants incorrects.");
+      setErrorMsg(error.message === "Invalid login credentials" ? "Identifiants incorrects" : error.message);
       setLoading(false);
     } else if (data?.user) {
       await handleRedirection(data.user.id, data.user.email);
     }
   };
 
-  if (isChecking) {
-    return (
-      <div className="min-h-screen bg-[#050505] flex items-center justify-center">
-        <Loader2 className="animate-spin text-red-600" size={40} />
-      </div>
-    );
-  }
+  // 2. FONCTION DE NETTOYAGE MANUEL
+  const clearSession = async () => {
+    await supabase.auth.signOut();
+    localStorage.clear();
+    sessionStorage.clear();
+    window.location.reload();
+  };
 
   return (
-    <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center p-6">
-      <div className="w-full max-w-md bg-[#0a0a0a] border border-slate-800/60 p-10 rounded-[2.5rem] shadow-2xl text-center">
+    <div className="min-h-screen bg-[#050505] flex items-center justify-center p-6">
+      <div className="w-full max-w-md bg-[#0a0a0a] border border-slate-800/60 p-10 rounded-[2.5rem] shadow-2xl">
         <div className="h-16 w-16 bg-red-600 rounded-2xl flex items-center justify-center mb-6 mx-auto shadow-lg shadow-red-900/20">
           <ShieldCheck size={32} className="text-white" />
         </div>
         
-        <h1 className="text-2xl font-bold text-white mb-8 italic">Amaru Portail</h1>
-        
-        <form onSubmit={handleLogin} className="space-y-4 text-left">
+        <h1 className="text-2xl font-bold text-white text-center mb-2">Amaru Engine</h1>
+        <p className="text-slate-500 text-[10px] text-center uppercase tracking-[0.3em] mb-8 font-black">Security Protocol</p>
+
+        <form onSubmit={handleLogin} className="space-y-4">
           <div className="space-y-1">
-            <label className="text-[10px] uppercase tracking-widest font-black text-slate-500 ml-2">Email</label>
+            <label className="text-[9px] uppercase tracking-widest font-black text-slate-500 ml-2">Identifiant</label>
             <input 
               type="email" 
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-[#111] border border-slate-800 rounded-xl p-4 text-white outline-none focus:border-red-600"
+              className="w-full bg-[#050505] border border-slate-800 rounded-xl p-4 text-white outline-none focus:border-red-600 transition-all text-sm"
+              placeholder="admin@amaru-homes.com"
               required 
             />
           </div>
+
           <div className="space-y-1">
-            <label className="text-[10px] uppercase tracking-widest font-black text-slate-500 ml-2">Mot de passe</label>
+            <label className="text-[9px] uppercase tracking-widest font-black text-slate-500 ml-2">Clé d'accès</label>
             <input 
               type="password" 
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-[#111] border border-slate-800 rounded-xl p-4 text-white outline-none focus:border-red-600"
+              className="w-full bg-[#050505] border border-slate-800 rounded-xl p-4 text-white outline-none focus:border-red-600 transition-all text-sm"
+              placeholder="••••••••"
               required 
             />
           </div>
 
-          {errorMsg && <p className="text-red-500 text-xs font-bold text-center uppercase">{errorMsg}</p>}
-          
-          <button type="submit" disabled={loading} className="w-full bg-red-600 py-4 rounded-xl font-black text-[11px] tracking-widest text-white hover:bg-red-500 flex justify-center shadow-lg">
-            {loading ? <Loader2 className="animate-spin" size={20} /> : "SE CONNECTER"}
+          {errorMsg && (
+            <div className="p-3 bg-red-950/20 border border-red-900/30 rounded-lg">
+              <p className="text-red-500 text-[10px] font-bold text-center uppercase tracking-tighter">{errorMsg}</p>
+            </div>
+          )}
+
+          <button 
+            type="submit" 
+            disabled={loading} 
+            className="w-full bg-red-700 hover:bg-red-600 py-4 mt-4 rounded-xl font-black text-[10px] tracking-[0.2em] text-white flex justify-center items-center transition-all shadow-lg disabled:opacity-50"
+          >
+            {loading ? <Loader2 className="animate-spin" size={18} /> : "INITIALISER LA CONNEXION"}
           </button>
         </form>
 
-        {/* BOUTON DE SECOURS POUR CASSER LA BOUCLE */}
-        <button 
-          onClick={forceLogout}
-          className="mt-8 text-[9px] text-slate-600 uppercase tracking-widest hover:text-red-500 flex items-center gap-2 mx-auto transition-colors"
-        >
-          <LogOut size={12} /> Réinitialiser la session (si bloqué)
-        </button>
+        <div className="mt-8 pt-6 border-t border-slate-900 flex flex-col gap-4">
+          <button 
+            onClick={clearSession}
+            className="text-[9px] text-slate-600 hover:text-white transition-colors flex items-center justify-center gap-2 uppercase font-black tracking-widest"
+          >
+            <RefreshCw size={12} /> Purger la session locale
+          </button>
+          <p className="text-[8px] text-slate-800 text-center uppercase font-mono">Build: 2026.03.V5</p>
+        </div>
       </div>
     </div>
   );
