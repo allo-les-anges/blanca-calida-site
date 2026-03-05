@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Mail, Loader2, ShieldCheck, KeyRound } from "lucide-react";
+import { Loader2, ShieldCheck } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 
 export default function LoginPage() {
@@ -15,13 +15,19 @@ export default function LoginPage() {
   useEffect(() => {
     const checkUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      if (session) handleRedirection(session.user.id);
+      if (session) handleRedirection(session.user.id, session.user.email);
     };
     checkUser();
   }, []);
 
-  const handleRedirection = async (userId: string) => {
+  const handleRedirection = async (userId: string, userEmail?: string) => {
     try {
+      // Sécurité pour ton compte Gaëtan
+      if (userEmail?.toLowerCase().trim() === 'gaetan@amaru-homes.com') {
+        router.push('/super-admin');
+        return;
+      }
+
       const { data: profile, error } = await supabase
         .from('profiles')
         .select('role')
@@ -30,18 +36,22 @@ export default function LoginPage() {
 
       if (error || !profile) {
         setErrorMsg("Profil introuvable.");
+        setLoading(false);
         return;
       }
 
+      // CORRECTION DES CHEMINS SELON TON ARBORESCENCE
       if (profile.role === 'super_admin') {
-        router.push('/super-admin');
+        router.push('/super-admin'); // Vers app/super-admin/page.tsx
       } else if (profile.role === 'admin') {
-        router.push('/admin');
+        router.push('/admin/dashboard'); // Vers app/admin/dashboard/page.tsx
       } else {
-        setErrorMsg("Rôle non autorisé.");
+        setErrorMsg("Rôle non reconnu.");
+        setLoading(false);
       }
     } catch (err) {
       setErrorMsg("Erreur de redirection.");
+      setLoading(false);
     }
   };
 
@@ -59,7 +69,7 @@ export default function LoginPage() {
       setErrorMsg("Identifiants incorrects.");
       setLoading(false);
     } else if (data?.user) {
-      await handleRedirection(data.user.id);
+      await handleRedirection(data.user.id, data.user.email);
     }
   };
 
@@ -69,26 +79,30 @@ export default function LoginPage() {
         <div className="h-16 w-16 bg-red-600 rounded-2xl flex items-center justify-center mb-6 mx-auto shadow-lg shadow-red-900/20">
           <ShieldCheck size={32} className="text-white" />
         </div>
-        <h1 className="text-2xl font-bold text-white mb-8">Accès Portail</h1>
+        <h1 className="text-2xl font-bold text-white mb-8 italic">Amaru Portail</h1>
         <form onSubmit={handleLogin} className="space-y-4 text-left">
-          <input 
-            type="email" 
-            placeholder="Email" 
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full bg-[#111] border border-slate-800 rounded-xl p-4 text-white outline-none focus:border-red-600"
-            required 
-          />
-          <input 
-            type="password" 
-            placeholder="Mot de passe" 
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full bg-[#111] border border-slate-800 rounded-xl p-4 text-white outline-none focus:border-red-600"
-            required 
-          />
-          {errorMsg && <p className="text-red-500 text-xs font-bold text-center">{errorMsg}</p>}
-          <button type="submit" disabled={loading} className="w-full bg-red-600 py-4 rounded-xl font-bold text-white hover:bg-red-500 flex justify-center">
+          <div className="space-y-1">
+            <label className="text-[10px] uppercase tracking-widest font-black text-slate-500 ml-2">Email</label>
+            <input 
+              type="email" 
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full bg-[#111] border border-slate-800 rounded-xl p-4 text-white outline-none focus:border-red-600"
+              required 
+            />
+          </div>
+          <div className="space-y-1">
+            <label className="text-[10px] uppercase tracking-widest font-black text-slate-500 ml-2">Mot de passe</label>
+            <input 
+              type="password" 
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full bg-[#111] border border-slate-800 rounded-xl p-4 text-white outline-none focus:border-red-600"
+              required 
+            />
+          </div>
+          {errorMsg && <p className="text-red-500 text-xs font-bold text-center uppercase tracking-tighter">{errorMsg}</p>}
+          <button type="submit" disabled={loading} className="w-full bg-red-600 py-4 rounded-xl font-black text-[11px] tracking-widest text-white hover:bg-red-500 flex justify-center shadow-lg">
             {loading ? <Loader2 className="animate-spin" size={20} /> : "SE CONNECTER"}
           </button>
         </form>
