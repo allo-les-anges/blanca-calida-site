@@ -381,58 +381,69 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      {showModal && (
-        <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex items-center justify-center p-4">
-          <div className="bg-[#0F172A] w-full max-w-4xl rounded-[3rem] border border-white/10 p-10 max-h-[90vh] overflow-y-auto text-left shadow-2xl">
-            <div className="flex justify-between items-start mb-8">
-              <div>
-                <h2 className="text-2xl font-black uppercase text-white italic tracking-tighter">Nouveau Dossier Chantier</h2>
-                <p className="text-[10px] text-slate-500 uppercase mt-1">Saisie complète des données - Amaru Homes</p>
-              </div>
-              <button onClick={() => setShowModal(false)} className="text-slate-500 hover:text-white"><X size={24}/></button>
-            </div>
-            
-            <form onSubmit={async (e) => {
-                e.preventDefault();
-                const pin = Math.floor(100000 + Math.random() * 900000).toString();
-                const { error } = await supabase.from("suivi_chantier").insert([{
-                    ...newProject,
-                    company_name: agencyProfile.company_name,
-                    pin_code: pin,
-                    etape_actuelle: PHASES_CHANTIER[0],
-                    created_at: new Date().toISOString(),
-                    updated_at: new Date().toISOString()
-                }]);
-                if (error) alert("Erreur : " + error.message);
-                else { setShowModal(false); loadData(); }
-            }} className="space-y-8">
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="space-y-4">
-                    <h3 className="text-[10px] font-black text-emerald-500 uppercase tracking-widest border-b border-white/5 pb-2">Identité Client</h3>
-                    <div className="grid grid-cols-2 gap-3">
-                        <input required placeholder="Prénom" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, client_prenom: e.target.value})} />
-                        <input required placeholder="Nom" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, client_nom: e.target.value})} />
-                        <input required type="email" placeholder="Email" className="col-span-2 bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, email_client: e.target.value})} />
-                    </div>
-                </div>
+      {showStaffModal && (
+  <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex items-center justify-center p-4">
+    <div className="bg-[#0F172A] w-full max-w-md rounded-[2.5rem] border border-white/10 p-8 text-left">
+      <h2 className="text-xl font-black uppercase text-white mb-6 italic">Ajouter un collaborateur</h2>
+      
+      <form onSubmit={async (e) => { 
+          e.preventDefault(); 
+          setUpdating(true); // Utilise ton état loading existant si tu veux
+          
+          // 1. Génération d'un mot de passe temporaire (Supabase Auth en a besoin)
+          const tempPassword = "Amaru" + Math.random().toString(36).slice(-8);
+          const staffPin = Math.floor(1000 + Math.random() * 9000).toString();
 
-                <div className="space-y-4">
-                    <h3 className="text-[10px] font-black text-blue-500 uppercase tracking-widest border-b border-white/5 pb-2">Adresse du Projet</h3>
-                    <div className="grid grid-cols-2 gap-3">
-                        <input placeholder="Rue et numéro" className="col-span-2 bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, rue: e.target.value})} />
-                        <input placeholder="Ville" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, ville: e.target.value})} />
-                    </div>
-                </div>
-              </div>
+          try {
+            // 2. Création de l'utilisateur dans Supabase AUTH
+            // Note: L'utilisateur recevra un mail de confirmation selon tes réglages Supabase
+            const { data: authData, error: authError } = await supabase.auth.signUp({
+              email: newStaff.email,
+              password: tempPassword,
+            });
 
-              <button type="submit" className="w-full bg-emerald-500 text-black py-5 rounded-2xl font-black text-xs uppercase shadow-xl shadow-emerald-500/20 hover:scale-[1.01] transition-all">
-                Créer le dossier & Générer le Code PIN
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
+            if (authError) throw authError;
+
+            if (authData.user) {
+              // 3. Insertion dans la table PROFILES avec l'ID récupéré
+              const { error: profileError } = await supabase.from('profiles').insert([{ 
+                id: authData.user.id, // VOICI LA CORRECTION : On lie l'ID
+                prenom: newStaff.prenom,
+                nom: newStaff.nom,
+                email: newStaff.email,
+                role: newStaff.role,
+                pin_code: staffPin,
+                company_name: agencyProfile.company_name 
+              }]);
+
+              if (profileError) throw profileError;
+
+              alert(`Profil créé avec succès !\nPIN : ${staffPin}\nUn compte d'accès a été réservé pour ${newStaff.email}`);
+              setShowStaffModal(false); 
+              loadData();
+            }
+          } catch (error: any) {
+            alert("Erreur critique : " + error.message);
+          } finally {
+            setUpdating(false);
+          }
+      }} className="space-y-4">
+        <input required placeholder="Prénom" className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-xs text-white" onChange={e => setNewStaff({...newStaff, prenom: e.target.value})} />
+        <input required placeholder="Nom" className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-xs text-white" onChange={e => setNewStaff({...newStaff, nom: e.target.value})} />
+        <input required type="email" placeholder="Email" className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-xs text-white" onChange={e => setNewStaff({...newStaff, email: e.target.value})} />
+        
+        <select className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-xs text-white" value={newStaff.role} onChange={e => setNewStaff({...newStaff, role: e.target.value})}>
+          <option value="staff">Agent de suivi</option>
+          <option value="admin">Administrateur</option>
+          <option value="prestataire">Prestataire</option>
+        </select>
+
+        <button type="submit" disabled={updating} className="w-full bg-blue-500 text-black py-4 rounded-xl font-black text-xs uppercase flex justify-center items-center">
+          {updating ? <Loader2 className="animate-spin" size={18} /> : "Créer l'accès"}
+        </button>
+        
+        <button type="button" onClick={() => setShowStaffModal(false)} className="w-full text-slate-500 text-[10px] uppercase font-bold mt-2">Annuler</button>
+      </form>
     </div>
-  );
-}
+  </div>
+)}
