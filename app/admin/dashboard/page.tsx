@@ -4,8 +4,8 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { 
   Save, Trash2, Loader2, Search, Plus, X,
-  Activity, Zap, UserCheck, Clock, FileText, 
-  Image as ImageIcon, Users, ShieldCheck, MapPin, ExternalLink
+  Activity, Zap, UserCheck, FileText, 
+  Users, ShieldCheck, MapPin, ExternalLink, Info, Home
 } from 'lucide-react';
 
 const supabase = createClient(
@@ -34,27 +34,15 @@ export default function AdminDashboard() {
   const [showStaffModal, setShowStaffModal] = useState(false);
 
   const [projectDocs, setProjectDocs] = useState<any[]>([]);
-  const [projectReports, setProjectReports] = useState<any[]>([]);
-
   const [editFields, setEditFields] = useState<any>({});
   const [agencyProfile, setAgencyProfile] = useState<any>({ company_name: "Amaru-Homes" });
   
   const [newStaff, setNewStaff] = useState({ nom: "", prenom: "", email: "", role: "staff" });
   const [newProject, setNewProject] = useState({
-    client_nom: "",
-    client_prenom: "",
-    email_client: "",
-    telephone: "",
-    date_naissance: "",
-    rue: "",
-    code_postal: "",
-    ville: "",
-    pays: "Espagne",
-    nom_villa: "",
-    constructeur_info: "",
-    montant_cashback: 0,
-    date_livraison_prevue: "",
-    document_url: ""
+    client_nom: "", client_prenom: "", email_client: "", telephone: "",
+    rue: "", code_postal: "", ville: "", pays: "Espagne",
+    nom_villa: "", constructeur_info: "", montant_cashback: 0,
+    infos_complementaires: "" 
   });
 
   const loadData = useCallback(async () => {
@@ -62,6 +50,7 @@ export default function AdminDashboard() {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
+      
       const { data: profiles } = await supabase.from('profiles').select('*').eq('email', session.user.email);
       const profile = profiles?.[0];
       const currentAgency = profile?.company_name || "Amaru-Homes";
@@ -79,9 +68,7 @@ export default function AdminDashboard() {
     if (!projectId) return;
     try {
       const { data: docs } = await supabase.from('documents_projets').select('*').eq('projet_id', projectId).order('created_at', { ascending: false });
-      setProjectDocs(docs?.map(d => ({ ...d, displayUrl: d.url_fichier })) || []);
-      const { data: reports } = await supabase.from('chantier_updates').select('*').eq('projet_id', projectId).order('created_at', { ascending: false });
-      setProjectReports(reports || []);
+      setProjectDocs(docs || []);
     } catch (err) { console.error(err); }
   };
 
@@ -98,16 +85,13 @@ export default function AdminDashboard() {
     if (!selectedProjet) return;
     setUpdating(true);
     try {
-      await supabase.from('suivi_chantier').update({ 
+      const { error } = await supabase.from('suivi_chantier').update({ 
         ...editFields,
         updated_at: new Date().toISOString()
       }).eq('id', selectedProjet.id);
 
-      await supabase.from('chantier_updates').insert([{
-          projet_id: selectedProjet.id,
-          etape_actuelle: editFields.etape_actuelle,
-          commentaires_etape: editFields.commentaires_etape
-      }]);
+      if (error) throw error;
+      
       alert("Mise à jour effectuée !");
       loadData();
     } catch (err: any) { alert(err.message); }
@@ -122,8 +106,12 @@ export default function AdminDashboard() {
       const fileName = `${selectedProjet.id}/${Date.now()}-${file.name}`;
       await supabase.storage.from('documents-clients').upload(fileName, file);
       const { data } = supabase.storage.from('documents-clients').getPublicUrl(fileName);
+      
       await supabase.from('documents_projets').insert([{
-        projet_id: selectedProjet.id, nom_fichier: file.name, url_fichier: data.publicUrl, storage_path: fileName 
+        projet_id: selectedProjet.id, 
+        nom_fichier: file.name, 
+        url_fichier: data.publicUrl, 
+        storage_path: fileName 
       }]);
       loadProjectExtras(selectedProjet.id);
     } catch (err: any) { alert(err.message); } finally { setUpdating(false); }
@@ -170,10 +158,10 @@ export default function AdminDashboard() {
           <div className="max-w-6xl mx-auto space-y-8 text-left animate-in fade-in duration-500">
             <div className="flex justify-between items-end border-b border-white/5 pb-8">
                 <div>
-                    <h2 className="text-5xl font-black text-white uppercase italic tracking-tighter">{selectedProjet.nom_villa}</h2>
+                    <h2 className="text-5xl font-black text-white uppercase italic tracking-tighter">{editFields.nom_villa}</h2>
                     <div className="flex gap-4 mt-2">
-                        <span className="text-[10px] font-black text-emerald-500 uppercase flex items-center gap-1"><ShieldCheck size={12}/> PIN CLIENT : {selectedProjet.pin_code}</span>
-                        <span className="text-[10px] font-black text-slate-500 uppercase flex items-center gap-1"><MapPin size={12}/> {selectedProjet.ville}</span>
+                        <span className="text-[10px] font-black text-emerald-500 uppercase flex items-center gap-1"><ShieldCheck size={12}/> PIN CLIENT : {editFields.pin_code}</span>
+                        <span className="text-[10px] font-black text-slate-500 uppercase flex items-center gap-1"><MapPin size={12}/> {editFields.ville}</span>
                     </div>
                 </div>
                 <button onClick={handleUpdateDossier} disabled={updating} className="flex items-center gap-2 px-8 py-4 bg-emerald-500 text-black rounded-2xl font-black text-xs uppercase hover:scale-105 transition-all shadow-xl shadow-emerald-500/10">
@@ -181,42 +169,77 @@ export default function AdminDashboard() {
                 </button>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* SECTION GAUCHE : TOUTES LES INFOS CLIENT */}
               <div className="space-y-6">
                 <section className="bg-white/5 p-6 rounded-[2rem] border border-white/5 space-y-4">
-                  <h3 className="text-[10px] font-black uppercase text-emerald-500 tracking-widest flex items-center gap-2"><UserCheck size={14}/> Fiche Client</h3>
-                  <div className="space-y-3">
-                    <input className="w-full bg-black/40 border border-white/5 p-3 rounded-xl text-xs" value={editFields.client_prenom || ""} onChange={e => setEditFields({...editFields, client_prenom: e.target.value})} placeholder="Prénom" />
-                    <input className="w-full bg-black/40 border border-white/5 p-3 rounded-xl text-xs" value={editFields.client_nom || ""} onChange={e => setEditFields({...editFields, client_nom: e.target.value})} placeholder="Nom" />
-                    <input className="w-full bg-black/40 border border-white/5 p-3 rounded-xl text-xs" value={editFields.email_client || ""} onChange={e => setEditFields({...editFields, email_client: e.target.value})} placeholder="Email" />
+                  <h3 className="text-[10px] font-black uppercase text-emerald-500 flex items-center gap-2"><UserCheck size={14}/> Identité Client</h3>
+                  <div className="grid grid-cols-2 gap-3">
+                    <input className="bg-black/40 border border-white/5 p-3 rounded-xl text-xs" value={editFields.client_prenom || ""} onChange={e => setEditFields({...editFields, client_prenom: e.target.value})} placeholder="Prénom" />
+                    <input className="bg-black/40 border border-white/5 p-3 rounded-xl text-xs" value={editFields.client_nom || ""} onChange={e => setEditFields({...editFields, client_nom: e.target.value})} placeholder="Nom" />
+                    <input className="col-span-2 bg-black/40 border border-white/5 p-3 rounded-xl text-xs" value={editFields.email_client || ""} onChange={e => setEditFields({...editFields, email_client: e.target.value})} placeholder="Email" />
+                    <input className="col-span-2 bg-black/40 border border-white/5 p-3 rounded-xl text-xs" value={editFields.telephone || ""} onChange={e => setEditFields({...editFields, telephone: e.target.value})} placeholder="Téléphone" />
                   </div>
                 </section>
+
+                <section className="bg-white/5 p-6 rounded-[2rem] border border-white/5 space-y-4">
+                  <h3 className="text-[10px] font-black uppercase text-blue-400 flex items-center gap-2"><MapPin size={14}/> Coordonnées de résidence</h3>
+                  <div className="grid grid-cols-2 gap-3">
+                    <input className="col-span-2 bg-black/40 border border-white/5 p-3 rounded-xl text-xs" value={editFields.rue || ""} onChange={e => setEditFields({...editFields, rue: e.target.value})} placeholder="Rue et numéro" />
+                    <input className="bg-black/40 border border-white/5 p-3 rounded-xl text-xs" value={editFields.code_postal || ""} onChange={e => setEditFields({...editFields, code_postal: e.target.value})} placeholder="Code Postal" />
+                    <input className="bg-black/40 border border-white/5 p-3 rounded-xl text-xs" value={editFields.ville || ""} onChange={e => setEditFields({...editFields, ville: e.target.value})} placeholder="Ville" />
+                  </div>
+                </section>
+
+                {/* NOUVEAU : INFOS COMPLÉMENTAIRES */}
+                <section className="bg-emerald-500/5 p-6 rounded-[2rem] border border-emerald-500/20 space-y-4">
+                  <h3 className="text-[10px] font-black uppercase text-emerald-500 flex items-center gap-2"><Info size={14}/> Infos Complémentaires</h3>
+                  <textarea 
+                    className="w-full bg-black/40 border border-white/5 p-4 rounded-xl text-xs min-h-[120px] outline-none focus:border-emerald-500" 
+                    value={editFields.infos_complementaires || ""} 
+                    onChange={e => setEditFields({...editFields, infos_complementaires: e.target.value})} 
+                    placeholder="Notes internes, détails spécifiques..." 
+                  />
+                </section>
+              </div>
+
+              {/* SECTION DROITE : PROJET & DOCUMENTS */}
+              <div className="space-y-6">
+                <section className="bg-white/5 p-6 rounded-[2rem] border border-white/5 space-y-4">
+                  <h3 className="text-[10px] font-black uppercase text-orange-400 flex items-center gap-2"><Home size={14}/> Détails de la Villa</h3>
+                  <div className="space-y-3">
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[9px] text-slate-500 uppercase ml-2">Phase Actuelle</label>
+                      <select className="bg-black/40 border border-white/10 p-3 rounded-xl text-xs text-emerald-500 font-bold" value={editFields.etape_actuelle || ""} onChange={e => setEditFields({...editFields, etape_actuelle: e.target.value})}>
+                        {PHASES_CHANTIER.map(p => <option key={p} value={p}>{p}</option>)}
+                      </select>
+                    </div>
+                    <input className="w-full bg-black/40 border border-white/5 p-3 rounded-xl text-xs" value={editFields.constructeur_info || ""} onChange={e => setEditFields({...editFields, constructeur_info: e.target.value})} placeholder="Constructeur" />
+                    <div className="flex items-center gap-2 bg-black/40 border border-white/5 p-3 rounded-xl">
+                        <span className="text-xs text-slate-500">Cashback:</span>
+                        <input type="number" className="bg-transparent text-xs w-full outline-none" value={editFields.montant_cashback || 0} onChange={e => setEditFields({...editFields, montant_cashback: Number(e.target.value)})} />
+                        <span className="text-xs">€</span>
+                    </div>
+                  </div>
+                </section>
+
                 <section className="bg-white/5 p-6 rounded-[2rem] border border-white/5 space-y-4">
                   <div className="flex justify-between items-center">
-                    <h3 className="text-[10px] font-black uppercase text-orange-400 flex items-center gap-2"><FileText size={14}/> Documents</h3>
-                    <label className="cursor-pointer bg-orange-500/10 text-orange-500 p-2 rounded-lg hover:bg-orange-500 transition-all"><Plus size={14}/><input type="file" className="hidden" onChange={handleFileUpload} /></label>
+                    <h3 className="text-[10px] font-black uppercase text-slate-400 flex items-center gap-2"><FileText size={14}/> Documents</h3>
+                    <label className="cursor-pointer bg-white/10 text-white p-2 rounded-lg hover:bg-emerald-500 hover:text-black transition-all">
+                      <Plus size={14}/>
+                      <input type="file" className="hidden" onChange={handleFileUpload} />
+                    </label>
                   </div>
                   <div className="space-y-2">
                     {projectDocs.map((doc: any) => (
                       <div key={doc.id} className="p-3 bg-black/40 rounded-xl border border-white/5 flex justify-between items-center group">
                         <span className="text-[10px] truncate w-40">{doc.nom_fichier}</span>
-                        <a href={doc.displayUrl} target="_blank" className="text-emerald-500 hover:scale-110 transition-transform"><ExternalLink size={12}/></a>
+                        <a href={doc.url_fichier} target="_blank" className="text-emerald-500 hover:scale-110 transition-transform"><ExternalLink size={12}/></a>
                       </div>
                     ))}
                   </div>
                 </section>
-              </div>
-
-              <div className="lg:col-span-2 space-y-6">
-                <div className="bg-[#0F172A] p-8 rounded-[3rem] border border-white/5 space-y-6 shadow-2xl">
-                  <div className="flex justify-between items-center">
-                    <h3 className="text-[10px] font-black uppercase text-emerald-500 flex items-center gap-2"><Activity size={14}/> Journal de bord</h3>
-                    <select value={editFields.etape_actuelle || ""} onChange={e => setEditFields({...editFields, etape_actuelle: e.target.value})} className="bg-black/50 border border-white/10 rounded-xl p-3 text-xs font-bold text-emerald-500 outline-none">
-                      {PHASES_CHANTIER.map(p => <option key={p} value={p}>{p}</option>)}
-                    </select>
-                  </div>
-                  <textarea value={editFields.commentaires_etape || ""} onChange={e => setEditFields({...editFields, commentaires_etape: e.target.value})} className="w-full bg-black/50 border border-white/10 rounded-3xl p-8 text-lg text-slate-200 min-h-[350px] outline-none focus:border-emerald-500 italic" placeholder="Rédiger la mise à jour..." />
-                </div>
               </div>
             </div>
           </div>
@@ -279,6 +302,7 @@ export default function AdminDashboard() {
                 if (error) alert("Erreur BDD : " + error.message);
                 else { setShowModal(false); loadData(); }
             }} className="space-y-8">
+              {/* LES CHAMPS DE CRÉATION ICI */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="col-span-2 text-[10px] font-black text-emerald-500 uppercase tracking-widest border-b border-white/5 pb-2">Identité Client</div>
                 <input required placeholder="Prénom" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, client_prenom: e.target.value})} />
@@ -286,20 +310,20 @@ export default function AdminDashboard() {
                 <input required type="email" placeholder="Email" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, email_client: e.target.value})} />
                 <input placeholder="Téléphone" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, telephone: e.target.value})} />
               </div>
-              <div className="grid grid-cols-3 gap-4">
-                <div className="col-span-3 text-[10px] font-black text-blue-500 uppercase tracking-widest border-b border-white/5 pb-2">Coordonnées de résidence</div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="col-span-2 text-[10px] font-black text-blue-500 uppercase tracking-widest border-b border-white/5 pb-2">Coordonnées de résidence</div>
                 <input placeholder="Rue et numéro" className="col-span-2 bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, rue: e.target.value})} />
                 <input placeholder="Code Postal" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, code_postal: e.target.value})} />
                 <input placeholder="Ville" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, ville: e.target.value})} />
-                <input placeholder="Pays" defaultValue="Espagne" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, pays: e.target.value})} />
               </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="col-span-2 text-[10px] font-black text-orange-500 uppercase tracking-widest border-b border-white/5 pb-2">Détails de la Villa</div>
                 <input required placeholder="Nom de la Villa" className="col-span-2 bg-black/50 border border-white/20 rounded-xl p-4 text-sm font-bold text-emerald-500" onChange={e => setNewProject({...newProject, nom_villa: e.target.value})} />
-                <input placeholder="Constructeur / Info Chantier" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, constructeur_info: e.target.value})} />
-                <input type="number" placeholder="Montant Cashback (€)" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, montant_cashback: Number(e.target.value)})} />
+                <textarea placeholder="Infos complémentaires..." className="col-span-2 bg-black/50 border border-white/10 rounded-xl p-4 text-xs min-h-[80px]" onChange={e => setNewProject({...newProject, infos_complementaires: e.target.value})} />
               </div>
-              <button type="submit" className="w-full bg-emerald-500 text-black py-5 rounded-2xl font-black text-xs uppercase mt-4 hover:scale-[1.02] transition-transform shadow-2xl shadow-emerald-500/20">Créer le dossier client & Générer PIN</button>
+              <button type="submit" className="w-full bg-emerald-500 text-black py-5 rounded-2xl font-black text-xs uppercase mt-4">Créer le dossier client & Générer PIN</button>
             </form>
           </div>
         </div>
