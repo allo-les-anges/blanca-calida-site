@@ -4,8 +4,8 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { 
   Save, Trash2, Loader2, Search, Plus, X,
-  Activity, Zap, UserCheck, FileText, 
-  Users, ShieldCheck, MapPin, ExternalLink, Info, Home
+  Activity, Zap, UserCheck, FileText, Printer,
+  Users, ShieldCheck, MapPin, ExternalLink, Info, Home, Calendar, Image as ImageIcon
 } from 'lucide-react';
 
 const supabase = createClient(
@@ -39,10 +39,11 @@ export default function AdminDashboard() {
   
   const [newStaff, setNewStaff] = useState({ nom: "", prenom: "", email: "", role: "staff" });
   const [newProject, setNewProject] = useState({
-    client_nom: "", client_prenom: "", email_client: "", telephone: "",
+    client_nom: "", client_prenom: "", email_client: "", telephone: "", date_naissance: "",
     rue: "", code_postal: "", ville: "", pays: "Espagne",
     nom_villa: "", constructeur_info: "", montant_cashback: 0,
-    infos_complementaires: "" 
+    commentaires_etape: "", commentaire_etape_chantier: "", 
+    lien_photo: "", date_livraison_prevue: "", document_url: ""
   });
 
   const loadData = useCallback(async () => {
@@ -96,6 +97,10 @@ export default function AdminDashboard() {
     setUpdating(false);
   };
 
+  const handlePrint = () => {
+    window.print();
+  };
+
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !selectedProjet) return;
@@ -137,20 +142,20 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-[#020617] flex text-slate-200 font-sans">
-      {/* SIDEBAR */}
-      <div className="w-80 bg-[#0F172A]/50 border-r border-white/5 h-screen sticky top-0 flex flex-col">
+    <div className="min-h-screen bg-[#020617] flex text-slate-200 font-sans print:bg-white print:text-black">
+      {/* SIDEBAR - Hidden on print */}
+      <div className="w-80 bg-[#0F172A]/50 border-r border-white/5 h-screen sticky top-0 flex flex-col print:hidden">
         <div className="p-8 space-y-6">
           <div className="flex items-center justify-between">
             <h1 className="text-sm font-black text-white uppercase tracking-tighter italic">{agencyProfile.company_name}</h1>
             <div className="flex gap-2">
-                <button onClick={() => setShowModal(true)} className="p-2 bg-emerald-500/10 text-emerald-500 rounded-lg hover:bg-emerald-500 transition-all"><Plus size={16}/></button>
-                <button onClick={() => setShowStaffModal(true)} className="p-2 bg-blue-500/10 text-blue-500 rounded-lg hover:bg-blue-500 transition-all"><Users size={16}/></button>
+                <button onClick={() => setShowModal(true)} title="Nouveau Projet" className="p-2 bg-emerald-500/10 text-emerald-500 rounded-lg hover:bg-emerald-500 hover:text-black transition-all"><Plus size={16}/></button>
+                <button onClick={() => setShowStaffModal(true)} title="Gérer l'équipe" className="p-2 bg-blue-500/10 text-blue-500 rounded-lg hover:bg-blue-500 hover:text-black transition-all"><Users size={16}/></button>
             </div>
           </div>
           <div className="flex bg-black/40 p-1 rounded-xl border border-white/5">
-            <button onClick={() => setActiveTab('clients')} className={`flex-1 py-2 rounded-lg text-[10px] font-bold uppercase ${activeTab === 'clients' ? 'bg-emerald-500 text-black' : 'text-slate-500'}`}>Dossiers</button>
-            <button onClick={() => setActiveTab('staff')} className={`flex-1 py-2 rounded-lg text-[10px] font-bold uppercase ${activeTab === 'staff' ? 'bg-blue-500 text-black' : 'text-slate-500'}`}>Équipe</button>
+            <button onClick={() => setActiveTab('clients')} className={`flex-1 py-2 rounded-lg text-[10px] font-bold uppercase transition-all ${activeTab === 'clients' ? 'bg-emerald-500 text-black shadow-lg shadow-emerald-500/20' : 'text-slate-500'}`}>Dossiers</button>
+            <button onClick={() => setActiveTab('staff')} className={`flex-1 py-2 rounded-lg text-[10px] font-bold uppercase transition-all ${activeTab === 'staff' ? 'bg-blue-500 text-black shadow-lg shadow-blue-500/20' : 'text-slate-500'}`}>Équipe</button>
           </div>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={14} />
@@ -176,69 +181,131 @@ export default function AdminDashboard() {
       </div>
 
       {/* MAIN CONTENT */}
-      <div className="flex-1 p-12 overflow-y-auto">
+      <div className="flex-1 p-8 lg:p-12 overflow-y-auto print:p-0">
         {selectedProjet ? (
-          <div className="max-w-6xl mx-auto space-y-8 text-left animate-in fade-in duration-500">
-            <div className="flex justify-between items-end border-b border-white/5 pb-8">
+          <div id="printable-area" className="max-w-6xl mx-auto space-y-8 text-left animate-in fade-in duration-500 print:text-black">
+            {/* Header Fiche */}
+            <div className="flex justify-between items-end border-b border-white/5 pb-8 print:border-slate-200">
                 <div>
-                    <h2 className="text-5xl font-black text-white uppercase italic tracking-tighter">{editFields.nom_villa}</h2>
+                    <h2 className="text-5xl font-black text-white uppercase italic tracking-tighter print:text-black print:text-3xl">{editFields.nom_villa}</h2>
                     <div className="flex gap-4 mt-2">
-                        <span className="text-[10px] font-black text-emerald-500 uppercase flex items-center gap-1"><ShieldCheck size={12}/> PIN CLIENT : {editFields.pin_code}</span>
-                        <span className="text-[10px] font-black text-slate-500 uppercase flex items-center gap-1"><MapPin size={12}/> {editFields.ville}</span>
+                        <span className="text-[10px] font-black text-emerald-500 uppercase flex items-center gap-1 print:text-slate-700"><ShieldCheck size={12}/> PIN CLIENT : {editFields.pin_code}</span>
+                        <span className="text-[10px] font-black text-slate-500 uppercase flex items-center gap-1 print:text-slate-700"><MapPin size={12}/> {editFields.ville}, {editFields.pays}</span>
                     </div>
                 </div>
-                <button onClick={handleUpdateDossier} disabled={updating} className="flex items-center gap-2 px-8 py-4 bg-emerald-500 text-black rounded-2xl font-black text-xs uppercase hover:scale-105 transition-all shadow-xl shadow-emerald-500/10">
-                    {updating ? <Loader2 className="animate-spin" size={16}/> : <Save size={16}/>} Sauvegarder
-                </button>
+                <div className="flex gap-3 print:hidden">
+                    <button onClick={handlePrint} className="flex items-center gap-2 px-6 py-4 bg-white/10 text-white rounded-2xl font-black text-xs uppercase hover:bg-white/20 transition-all">
+                        <Printer size={16}/> Imprimer
+                    </button>
+                    <button onClick={handleUpdateDossier} disabled={updating} className="flex items-center gap-2 px-8 py-4 bg-emerald-500 text-black rounded-2xl font-black text-xs uppercase hover:scale-105 transition-all shadow-xl shadow-emerald-500/10">
+                        {updating ? <Loader2 className="animate-spin" size={16}/> : <Save size={16}/>} Sauvegarder
+                    </button>
+                </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 print:grid-cols-2">
               <div className="space-y-6">
-                <section className="bg-white/5 p-6 rounded-[2rem] border border-white/5 space-y-4">
-                  <h3 className="text-[10px] font-black uppercase text-emerald-500 flex items-center gap-2"><UserCheck size={14}/> Identité Client</h3>
+                {/* Identité */}
+                <section className="bg-white/5 p-6 rounded-[2rem] border border-white/5 space-y-4 print:bg-transparent print:border-slate-200 print:p-4">
+                  <h3 className="text-[10px] font-black uppercase text-emerald-500 flex items-center gap-2 print:text-black"><UserCheck size={14}/> Identité Client</h3>
                   <div className="grid grid-cols-2 gap-3">
-                    <input className="bg-black/40 border border-white/5 p-3 rounded-xl text-xs" value={editFields.client_prenom || ""} onChange={e => setEditFields({...editFields, client_prenom: e.target.value})} placeholder="Prénom" />
-                    <input className="bg-black/40 border border-white/5 p-3 rounded-xl text-xs" value={editFields.client_nom || ""} onChange={e => setEditFields({...editFields, client_nom: e.target.value})} placeholder="Nom" />
-                    <input className="col-span-2 bg-black/40 border border-white/5 p-3 rounded-xl text-xs" value={editFields.email_client || ""} onChange={e => setEditFields({...editFields, email_client: e.target.value})} placeholder="Email" />
-                    <input className="col-span-2 bg-black/40 border border-white/5 p-3 rounded-xl text-xs" value={editFields.telephone || ""} onChange={e => setEditFields({...editFields, telephone: e.target.value})} placeholder="Téléphone" />
+                    <div className="space-y-1">
+                        <label className="text-[9px] text-slate-500 uppercase font-bold">Prénom</label>
+                        <input className="w-full bg-black/40 border border-white/5 p-3 rounded-xl text-xs print:border-slate-200 print:bg-white" value={editFields.client_prenom || ""} onChange={e => setEditFields({...editFields, client_prenom: e.target.value})} />
+                    </div>
+                    <div className="space-y-1">
+                        <label className="text-[9px] text-slate-500 uppercase font-bold">Nom</label>
+                        <input className="w-full bg-black/40 border border-white/5 p-3 rounded-xl text-xs print:border-slate-200 print:bg-white" value={editFields.client_nom || ""} onChange={e => setEditFields({...editFields, client_nom: e.target.value})} />
+                    </div>
+                    <div className="col-span-2 space-y-1">
+                        <label className="text-[9px] text-slate-500 uppercase font-bold">Email</label>
+                        <input className="w-full bg-black/40 border border-white/5 p-3 rounded-xl text-xs print:border-slate-200 print:bg-white" value={editFields.email_client || ""} onChange={e => setEditFields({...editFields, email_client: e.target.value})} />
+                    </div>
+                    <div className="space-y-1">
+                        <label className="text-[9px] text-slate-500 uppercase font-bold">Téléphone</label>
+                        <input className="w-full bg-black/40 border border-white/5 p-3 rounded-xl text-xs print:border-slate-200 print:bg-white" value={editFields.telephone || ""} onChange={e => setEditFields({...editFields, telephone: e.target.value})} />
+                    </div>
+                    <div className="space-y-1">
+                        <label className="text-[9px] text-slate-500 uppercase font-bold">Date de Naissance</label>
+                        <input type="date" className="w-full bg-black/40 border border-white/5 p-3 rounded-xl text-xs print:border-slate-200 print:bg-white" value={editFields.date_naissance || ""} onChange={e => setEditFields({...editFields, date_naissance: e.target.value})} />
+                    </div>
                   </div>
                 </section>
-                <section className="bg-white/5 p-6 rounded-[2rem] border border-white/5 space-y-4">
-                  <h3 className="text-[10px] font-black uppercase text-blue-400 flex items-center gap-2"><MapPin size={14}/> Coordonnées</h3>
+
+                {/* Coordonnées */}
+                <section className="bg-white/5 p-6 rounded-[2rem] border border-white/5 space-y-4 print:bg-transparent print:border-slate-200 print:p-4">
+                  <h3 className="text-[10px] font-black uppercase text-blue-400 flex items-center gap-2 print:text-black"><MapPin size={14}/> Adresse du projet</h3>
                   <div className="grid grid-cols-2 gap-3">
-                    <input className="col-span-2 bg-black/40 border border-white/5 p-3 rounded-xl text-xs" value={editFields.rue || ""} onChange={e => setEditFields({...editFields, rue: e.target.value})} placeholder="Rue et numéro" />
-                    <input className="bg-black/40 border border-white/5 p-3 rounded-xl text-xs" value={editFields.code_postal || ""} onChange={e => setEditFields({...editFields, code_postal: e.target.value})} placeholder="Code Postal" />
-                    <input className="bg-black/40 border border-white/5 p-3 rounded-xl text-xs" value={editFields.ville || ""} onChange={e => setEditFields({...editFields, ville: e.target.value})} placeholder="Ville" />
+                    <input className="col-span-2 bg-black/40 border border-white/5 p-3 rounded-xl text-xs print:border-slate-200 print:bg-white" value={editFields.rue || ""} onChange={e => setEditFields({...editFields, rue: e.target.value})} placeholder="Rue et numéro" />
+                    <input className="bg-black/40 border border-white/5 p-3 rounded-xl text-xs print:border-slate-200 print:bg-white" value={editFields.code_postal || ""} onChange={e => setEditFields({...editFields, code_postal: e.target.value})} placeholder="Code Postal" />
+                    <input className="bg-black/40 border border-white/5 p-3 rounded-xl text-xs print:border-slate-200 print:bg-white" value={editFields.ville || ""} onChange={e => setEditFields({...editFields, ville: e.target.value})} placeholder="Ville" />
+                    <input className="col-span-2 bg-black/40 border border-white/5 p-3 rounded-xl text-xs print:border-slate-200 print:bg-white" value={editFields.pays || ""} onChange={e => setEditFields({...editFields, pays: e.target.value})} placeholder="Pays" />
                   </div>
                 </section>
-                <section className="bg-emerald-500/5 p-6 rounded-[2rem] border border-emerald-500/20 space-y-4">
-                  <h3 className="text-[10px] font-black uppercase text-emerald-500 flex items-center gap-2"><Info size={14}/> Infos Complémentaires</h3>
-                  <textarea className="w-full bg-black/40 border border-white/5 p-4 rounded-xl text-xs min-h-[120px] outline-none focus:border-emerald-500" value={editFields.infos_complementaires || ""} onChange={e => setEditFields({...editFields, infos_complementaires: e.target.value})} placeholder="Notes internes..." />
+
+                {/* Photos & Liens */}
+                <section className="bg-white/5 p-6 rounded-[2rem] border border-white/5 space-y-4 print:p-4">
+                  <h3 className="text-[10px] font-black uppercase text-purple-400 flex items-center gap-2 print:text-black"><ImageIcon size={14}/> Médias & Liens Externes</h3>
+                  <div className="space-y-3">
+                    <div className="space-y-1">
+                        <label className="text-[9px] text-slate-500 uppercase font-bold">Lien Album Photos (Cloud/Drive)</label>
+                        <input className="w-full bg-black/40 border border-white/5 p-3 rounded-xl text-xs text-blue-400 print:bg-white print:border-slate-200" value={editFields.lien_photo || ""} onChange={e => setEditFields({...editFields, lien_photo: e.target.value})} placeholder="https://..." />
+                    </div>
+                    <div className="space-y-1">
+                        <label className="text-[9px] text-slate-500 uppercase font-bold">Lien Dossier Documents Cloud</label>
+                        <input className="w-full bg-black/40 border border-white/5 p-3 rounded-xl text-xs text-blue-400 print:bg-white print:border-slate-200" value={editFields.document_url || ""} onChange={e => setEditFields({...editFields, document_url: e.target.value})} placeholder="https://..." />
+                    </div>
+                  </div>
                 </section>
               </div>
 
               <div className="space-y-6">
-                <section className="bg-white/5 p-6 rounded-[2rem] border border-white/5 space-y-4">
-                  <h3 className="text-[10px] font-black uppercase text-orange-400 flex items-center gap-2"><Home size={14}/> Détails Villa</h3>
+                {/* Détails Villa & Chantier */}
+                <section className="bg-white/5 p-6 rounded-[2rem] border border-white/5 space-y-4 print:p-4">
+                  <h3 className="text-[10px] font-black uppercase text-orange-400 flex items-center gap-2 print:text-black"><Home size={14}/> Détails Villa & Planning</h3>
                   <div className="space-y-3">
                     <div className="flex flex-col gap-1">
-                      <label className="text-[9px] text-slate-500 uppercase ml-2">Phase Actuelle</label>
-                      <select className="bg-black/40 border border-white/10 p-3 rounded-xl text-xs text-emerald-500 font-bold" value={editFields.etape_actuelle || ""} onChange={e => setEditFields({...editFields, etape_actuelle: e.target.value})}>
+                      <label className="text-[9px] text-slate-500 uppercase font-bold">Phase Actuelle du chantier</label>
+                      <select className="bg-black/40 border border-white/10 p-3 rounded-xl text-xs text-emerald-500 font-bold print:bg-white print:border-slate-200" value={editFields.etape_actuelle || ""} onChange={e => setEditFields({...editFields, etape_actuelle: e.target.value})}>
                         {PHASES_CHANTIER.map(p => <option key={p} value={p}>{p}</option>)}
                       </select>
                     </div>
-                    <input className="w-full bg-black/40 border border-white/5 p-3 rounded-xl text-xs" value={editFields.constructeur_info || ""} onChange={e => setEditFields({...editFields, constructeur_info: e.target.value})} placeholder="Constructeur" />
-                    <div className="flex items-center gap-2 bg-black/40 border border-white/5 p-3 rounded-xl text-xs">
-                        <span className="text-slate-500">Cashback:</span>
-                        <input type="number" className="bg-transparent w-full outline-none" value={editFields.montant_cashback || 0} onChange={e => setEditFields({...editFields, montant_cashback: Number(e.target.value)})} />
-                        <span>€</span>
+                    <div className="space-y-1">
+                        <label className="text-[9px] text-slate-500 uppercase font-bold">Constructeur / Prestataire principal</label>
+                        <input className="w-full bg-black/40 border border-white/5 p-3 rounded-xl text-xs print:bg-white print:border-slate-200" value={editFields.constructeur_info || ""} onChange={e => setEditFields({...editFields, constructeur_info: e.target.value})} />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-1">
+                            <label className="text-[9px] text-slate-500 uppercase font-bold">Livraison Prévue</label>
+                            <input type="date" className="w-full bg-black/40 border border-white/5 p-3 rounded-xl text-xs print:bg-white print:border-slate-200" value={editFields.date_livraison_prevue || ""} onChange={e => setEditFields({...editFields, date_livraison_prevue: e.target.value})} />
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-[9px] text-slate-500 uppercase font-bold">Cashback (€)</label>
+                            <input type="number" className="w-full bg-black/40 border border-white/5 p-3 rounded-xl text-xs text-emerald-500 font-bold print:bg-white print:border-slate-200" value={editFields.montant_cashback || 0} onChange={e => setEditFields({...editFields, montant_cashback: Number(e.target.value)})} />
+                        </div>
                     </div>
                   </div>
                 </section>
 
-                <section className="bg-white/5 p-6 rounded-[2rem] border border-white/5 space-y-4">
+                {/* Infos Complémentaires */}
+                <section className="bg-white/5 p-6 rounded-[2rem] border border-white/5 space-y-4 print:p-4">
+                  <h3 className="text-[10px] font-black uppercase text-slate-400 flex items-center gap-2 print:text-black"><Info size={14}/> Commentaires de Chantier</h3>
+                  <div className="space-y-3">
+                    <div className="space-y-1">
+                        <label className="text-[9px] text-slate-500 uppercase font-bold">Commentaires Etape Actuelle</label>
+                        <textarea className="w-full bg-black/40 border border-white/5 p-4 rounded-xl text-xs min-h-[80px] print:bg-white print:border-slate-200" value={editFields.commentaires_etape || ""} onChange={e => setEditFields({...editFields, commentaires_etape: e.target.value})} placeholder="Notes sur la phase en cours..." />
+                    </div>
+                    <div className="space-y-1">
+                        <label className="text-[9px] text-slate-500 uppercase font-bold">Notes Générales / Techniques</label>
+                        <textarea className="w-full bg-black/40 border border-white/5 p-4 rounded-xl text-xs min-h-[120px] print:bg-white print:border-slate-200" value={editFields.commentaire_etape_chantier || ""} onChange={e => setEditFields({...editFields, commentaire_etape_chantier: e.target.value})} placeholder="Historique technique..." />
+                    </div>
+                  </div>
+                </section>
+
+                {/* Documents - Hidden on Print to save space or kept? */}
+                <section className="bg-white/5 p-6 rounded-[2rem] border border-white/5 space-y-4 print:hidden">
                   <div className="flex justify-between items-center">
-                    <h3 className="text-[10px] font-black uppercase text-slate-400 flex items-center gap-2"><FileText size={14}/> Documents</h3>
+                    <h3 className="text-[10px] font-black uppercase text-slate-400 flex items-center gap-2"><FileText size={14}/> Documents Joints</h3>
                     <label className="cursor-pointer bg-white/10 text-white p-2 rounded-lg hover:bg-emerald-500 hover:text-black transition-all">
                       {updating ? <Loader2 className="animate-spin" size={14}/> : <Plus size={14}/>}
                       <input type="file" className="hidden" onChange={handleFileUpload} disabled={updating} />
@@ -270,14 +337,13 @@ export default function AdminDashboard() {
         )}
       </div>
 
-      {/* MODAL NOUVEAU STAFF (CORRIGÉE) */}
+      {/* MODAL NOUVEAU STAFF */}
       {showStaffModal && (
         <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex items-center justify-center p-4">
           <div className="bg-[#0F172A] w-full max-w-md rounded-[2.5rem] border border-white/10 p-8 text-left">
-            <h2 className="text-xl font-black uppercase text-white mb-6">Ajouter un collaborateur</h2>
+            <h2 className="text-xl font-black uppercase text-white mb-6 italic">Ajouter un collaborateur</h2>
             <form onSubmit={async (e) => { 
                 e.preventDefault(); 
-                // GÉNÉRATION DU PIN POUR ÉVITER L'ERREUR BDD
                 const staffPin = Math.floor(1000 + Math.random() * 9000).toString();
                 const { error } = await supabase.from('staff_prestataires').insert([{ 
                   ...newStaff, 
@@ -286,7 +352,7 @@ export default function AdminDashboard() {
                 }]);
                 if (error) alert("Erreur : " + error.message);
                 else { 
-                  alert(`Collaborateur ajouté ! PIN généré : ${staffPin}`);
+                  alert(`Collaborateur ajouté ! PIN : ${staffPin}`);
                   setShowStaffModal(false); 
                   loadData(); 
                 }
@@ -306,14 +372,14 @@ export default function AdminDashboard() {
         </div>
       )}
 
-      {/* MODAL NOUVEAU CHANTIER */}
+      {/* MODAL NOUVEAU CHANTIER (FORMULAIRE COMPLET) */}
       {showModal && (
         <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex items-center justify-center p-4">
-          <div className="bg-[#0F172A] w-full max-w-3xl rounded-[3rem] border border-white/10 p-10 max-h-[90vh] overflow-y-auto text-left shadow-2xl">
+          <div className="bg-[#0F172A] w-full max-w-4xl rounded-[3rem] border border-white/10 p-10 max-h-[90vh] overflow-y-auto text-left shadow-2xl">
             <div className="flex justify-between items-start mb-8">
               <div>
                 <h2 className="text-2xl font-black uppercase text-white italic tracking-tighter">Nouveau Dossier Chantier</h2>
-                <p className="text-xs text-slate-500 uppercase tracking-widest mt-1">Enregistrement client & PIN automatique</p>
+                <p className="text-xs text-slate-500 uppercase tracking-widest mt-1">Saisie complète des informations - Amaru Homes</p>
               </div>
               <button onClick={() => setShowModal(false)} className="text-slate-500 hover:text-white"><X size={24}/></button>
             </div>
@@ -331,22 +397,51 @@ export default function AdminDashboard() {
                 if (error) alert("Erreur : " + error.message);
                 else { setShowModal(false); loadData(); }
             }} className="space-y-8">
-              <div className="grid grid-cols-2 gap-4">
-                <input required placeholder="Prénom Client" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, client_prenom: e.target.value})} />
-                <input required placeholder="Nom Client" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, client_nom: e.target.value})} />
-                <input required type="email" placeholder="Email" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, email_client: e.target.value})} />
-                <input placeholder="Téléphone" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, telephone: e.target.value})} />
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Identité */}
+                <div className="space-y-4">
+                    <h3 className="text-[10px] font-black text-emerald-500 uppercase tracking-widest border-b border-white/5 pb-2">Identité & Contact</h3>
+                    <div className="grid grid-cols-2 gap-3">
+                        <input required placeholder="Prénom" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, client_prenom: e.target.value})} />
+                        <input required placeholder="Nom" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, client_nom: e.target.value})} />
+                        <input required type="email" placeholder="Email" className="col-span-2 bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, email_client: e.target.value})} />
+                        <input placeholder="Téléphone" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, telephone: e.target.value})} />
+                        <input type="date" title="Date de naissance" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, date_naissance: e.target.value})} />
+                    </div>
+                </div>
+
+                {/* Localisation */}
+                <div className="space-y-4">
+                    <h3 className="text-[10px] font-black text-blue-500 uppercase tracking-widest border-b border-white/5 pb-2">Localisation</h3>
+                    <div className="grid grid-cols-2 gap-3">
+                        <input placeholder="Rue et numéro" className="col-span-2 bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, rue: e.target.value})} />
+                        <input placeholder="Code Postal" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, code_postal: e.target.value})} />
+                        <input placeholder="Ville" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, ville: e.target.value})} />
+                        <input placeholder="Pays (Espagne, etc.)" className="col-span-2 bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, pays: e.target.value})} />
+                    </div>
+                </div>
+
+                {/* Villa & Planning */}
+                <div className="space-y-4">
+                    <h3 className="text-[10px] font-black text-orange-500 uppercase tracking-widest border-b border-white/5 pb-2">Détails Villa & Planning</h3>
+                    <div className="grid grid-cols-2 gap-3">
+                        <input required placeholder="Nom de la Villa" className="col-span-2 bg-black/50 border border-white/20 rounded-xl p-4 text-sm font-bold text-emerald-500" onChange={e => setNewProject({...newProject, nom_villa: e.target.value})} />
+                        <input placeholder="Constructeur" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, constructeur_info: e.target.value})} />
+                        <input type="date" title="Livraison prévue" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, date_livraison_prevue: e.target.value})} />
+                        <input type="number" placeholder="Cashback (€)" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs text-emerald-500 font-bold" onChange={e => setNewProject({...newProject, montant_cashback: Number(e.target.value)})} />
+                        <input placeholder="Lien Photos" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, lien_photo: e.target.value})} />
+                    </div>
+                </div>
+
+                {/* Notes */}
+                <div className="space-y-4">
+                    <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-white/5 pb-2">Commentaires initiaux</h3>
+                    <textarea placeholder="Notes techniques ou commerciales..." className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-xs min-h-[140px]" onChange={e => setNewProject({...newProject, commentaire_etape_chantier: e.target.value})} />
+                </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <input placeholder="Rue et numéro" className="col-span-2 bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, rue: e.target.value})} />
-                <input placeholder="Code Postal" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, code_postal: e.target.value})} />
-                <input placeholder="Ville" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, ville: e.target.value})} />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <input required placeholder="Nom de la Villa" className="col-span-2 bg-black/50 border border-white/20 rounded-xl p-4 text-sm font-bold text-emerald-500" onChange={e => setNewProject({...newProject, nom_villa: e.target.value})} />
-                <textarea placeholder="Infos complémentaires..." className="col-span-2 bg-black/50 border border-white/10 rounded-xl p-4 text-xs min-h-[80px]" onChange={e => setNewProject({...newProject, infos_complementaires: e.target.value})} />
-              </div>
-              <button type="submit" className="w-full bg-emerald-500 text-black py-5 rounded-2xl font-black text-xs uppercase shadow-xl shadow-emerald-500/20">Créer le dossier & Générer PIN</button>
+
+              <button type="submit" className="w-full bg-emerald-500 text-black py-5 rounded-2xl font-black text-xs uppercase mt-4 shadow-xl shadow-emerald-500/20 hover:scale-[1.01] transition-all">Enregistrer le dossier & Générer PIN</button>
             </form>
           </div>
         </div>
