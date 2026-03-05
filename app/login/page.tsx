@@ -34,7 +34,7 @@ export default function LoginPage() {
         });
         if (error) throw error;
 
-        // Si Mot de passe, on cherche d'abord dans la table PROFILES
+        // On cherche dans PROFILES (Rôles: super_admin, admin)
         const { data: profile } = await supabase
           .from("profiles")
           .select("role")
@@ -43,7 +43,7 @@ export default function LoginPage() {
         
         if (profile) finalRole = profile.role;
       } else {
-        // Si PIN, on cherche dans STAFF_PRESTATAIRES
+        // Connexion par PIN (Table staff_prestataires)
         const { data: staff, error } = await supabase
           .from("staff_prestataires")
           .select("*")
@@ -57,29 +57,18 @@ export default function LoginPage() {
         finalRole = staff.role;
       }
 
-      // --- 2. DOUBLE VÉRIFICATION (Si le rôle n'est toujours pas trouvé) ---
-      if (!finalRole) {
-        const { data: staffCheck } = await supabase
-          .from("staff_prestataires")
-          .select("role")
-          .eq("email", userEmail)
-          .single();
-        if (staffCheck) finalRole = staffCheck.role;
-      }
-
-      // --- 3. LOGIQUE DE REDIRECTION STRICTE ---
-      console.log("Rôle détecté :", finalRole); // Pour debug
-
+      // --- 2. LOGIQUE DE REDIRECTION (Adaptée à tes images) ---
+      // Nettoyage de la chaîne (enlève espaces et met en minuscule)
       const roleClean = finalRole?.toLowerCase().trim();
 
-      if (roleClean === "super-admin") {
+      if (roleClean === "super_admin" || roleClean === "super-admin") {
         router.push("/super-admin");
       } else if (roleClean === "admin") {
         router.push("/admin/dashboard");
       } else if (roleClean === "staff" || roleClean === "prestataire") {
         router.push("/admin-chantier");
       } else {
-        // Par défaut si rôle inconnu
+        // Redirection par défaut vers le dashboard standard
         router.push("/admin/dashboard");
       }
 
@@ -121,7 +110,7 @@ export default function LoginPage() {
 
         <form onSubmit={handleLogin} className="bg-[#0F172A] p-8 rounded-[2.5rem] border border-white/5 shadow-2xl space-y-6">
           <div className="space-y-2">
-            <label className="text-[10px] font-black text-slate-500 uppercase ml-2 tracking-widest text-left block">Identifiant Email</label>
+            <label className="text-[10px] font-black text-slate-500 uppercase ml-2 tracking-widest block">Identifiant Email</label>
             <div className="relative">
               <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
               <input
@@ -137,7 +126,7 @@ export default function LoginPage() {
 
           {method === "password" ? (
             <div className="space-y-2 animate-in slide-in-from-right-2 duration-300">
-              <label className="text-[10px] font-black text-slate-500 uppercase ml-2 tracking-widest text-left block">Mot de passe</label>
+              <label className="text-[10px] font-black text-slate-500 uppercase ml-2 tracking-widest block">Mot de passe</label>
               <div className="relative">
                 <KeyRound className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
                 <input
@@ -152,7 +141,7 @@ export default function LoginPage() {
             </div>
           ) : (
             <div className="space-y-2 animate-in slide-in-from-left-2 duration-300">
-              <label className="text-[10px] font-black text-slate-500 uppercase ml-2 tracking-widest text-left block">Code PIN</label>
+              <label className="text-[10px] font-black text-slate-500 uppercase ml-2 tracking-widest block">Code PIN</label>
               <div className="relative">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
                 <input
@@ -179,10 +168,6 @@ export default function LoginPage() {
             {loading ? <Loader2 className="animate-spin" size={18} /> : "Accéder à mon espace"}
           </button>
         </form>
-
-        <p className="text-center text-[10px] text-slate-600 uppercase font-bold tracking-widest">
-          Système de routage Multi-Tables actif
-        </p>
       </div>
     </div>
   );
