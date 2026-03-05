@@ -68,61 +68,52 @@ export default function AdminDashboard() {
     } catch (err: any) { console.error(err); } finally { setLoading(false); }
   }, []);
 
-  // 1. Fonction de chargement avec gestion d'erreurs et log de contrôle
-const loadProjectExtras = async (projectId: string) => {
-  if (!projectId) return;
-  
-  try {
-    // Récupération des documents (Vérifiez bien que le nom de la table est 'documents_projets')
-    const { data: docs, error: docError } = await supabase
-      .from('documents_projets')
-      .select('*')
-      .eq('projet_id', projectId)
-      .order('created_at', { ascending: false });
+  // --- CHARGEMENT DES DOCUMENTS AVEC MAPPING DE LA COLONNE url_fichier ---
+  const loadProjectExtras = async (projectId: string) => {
+    if (!projectId) return;
+    
+    try {
+      const { data: docs, error: docError } = await supabase
+        .from('documents_projets')
+        .select('*')
+        .eq('projet_id', projectId)
+        .order('created_at', { ascending: false });
 
-    if (docError) {
-      console.error("Erreur Supabase Documents:", docError.message);
-    } else {
-      console.log("Documents chargés pour le projet :", docs); // Pour vérifier dans la console F12
-      setProjectDocs(docs || []);
-    }
+      if (docError) {
+        console.error("Erreur Documents:", docError.message);
+      } else {
+        // CORRECTION : On s'assure que .url utilise bien la colonne .url_fichier de ta BDD
+        const formattedDocs = docs?.map(d => ({
+          ...d,
+          url: d.url_fichier || d.url // Supporte les deux au cas où
+        })) || [];
+        setProjectDocs(formattedDocs);
+      }
 
-    // Récupération des rapports
-    const { data: reports, error: repError } = await supabase
-      .from('chantier_updates')
-      .select('*')
-      .eq('projet_id', projectId)
-      .order('created_at', { ascending: false });
+      const { data: reports } = await supabase
+        .from('chantier_updates')
+        .select('*')
+        .eq('projet_id', projectId)
+        .order('created_at', { ascending: false });
 
-    if (repError) {
-      console.error("Erreur Supabase Rapports:", repError.message);
-    } else {
       setProjectReports(reports || []);
+      
+    } catch (err) {
+      console.error("Erreur loadProjectExtras:", err);
     }
-    
-  } catch (err) {
-    console.error("Erreur critique loadProjectExtras:", err);
-  }
-};
+  };
 
-// 2. Les useEffects pour orchestrer le chargement
-useEffect(() => { 
-  loadData(); 
-}, [loadData]);
+  useEffect(() => { loadData(); }, [loadData]);
 
-useEffect(() => { 
-  if (selectedProjet?.id) {
-    // On réinitialise les champs d'édition avec les données du projet sélectionné
-    setEditFields({ ...selectedProjet });
-    
-    // On force le chargement des documents et rapports liés à cet ID précis
-    loadProjectExtras(selectedProjet.id);
-  } else {
-    // Si aucun projet n'est sélectionné, on vide les listes
-    setProjectDocs([]);
-    setProjectReports([]);
-  }
-}, [selectedProjet]);
+  useEffect(() => { 
+    if (selectedProjet?.id) {
+      setEditFields({ ...selectedProjet });
+      loadProjectExtras(selectedProjet.id);
+    } else {
+      setProjectDocs([]);
+      setProjectReports([]);
+    }
+  }, [selectedProjet]);
 
   const handleUpdateDossier = async () => {
     if (!selectedProjet) return;
@@ -145,13 +136,13 @@ useEffect(() => {
           commentaires_etape: editFields.commentaires_etape
       }]);
 
-      alert("Dossier client et rapport mis à jour !");
+      alert("Mise à jour effectuée !");
       loadData();
     } catch (err: any) { alert(err.message); }
     setUpdating(false);
   };
 
-  // --- LOGIQUE STORAGE CORRIGÉE ---
+  // --- LOGIQUE UPLOAD CORRIGÉE (NOM DE COLONNE BDD) ---
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !selectedProjet) return;
@@ -169,10 +160,11 @@ useEffect(() => {
         .from('documents-clients')
         .getPublicUrl(fileName);
 
+      // CORRECTION : On insère dans url_fichier pour correspondre à ta BDD
       await supabase.from('documents_projets').insert([{
         projet_id: selectedProjet.id, 
         nom_fichier: file.name, 
-        url: data.publicUrl, 
+        url_fichier: data.publicUrl, 
         type: file.type
       }]);
       
@@ -181,26 +173,17 @@ useEffect(() => {
   };
 
   const handleDeleteFile = async (doc: any) => {
-    if(!confirm("Supprimer définitivement ce document ?")) return;
+    if(!confirm("Supprimer ce document ?")) return;
     setUpdating(true);
     try {
-      // 1. Extraire le nom du fichier du chemin URL pour le storage
+      // Extraction du chemin pour le storage
       const filePath = doc.url.split('/documents-clients/')[1];
-      
-      // 2. Supprimer physiquement du bucket
       if (filePath) {
         await supabase.storage.from('documents-clients').remove([filePath]);
       }
-
-      // 3. Supprimer de la base de données
       await supabase.from('documents_projets').delete().eq('id', doc.id);
-      
       loadProjectExtras(selectedProjet.id);
-    } catch (err: any) {
-      alert("Erreur lors de la suppression : " + err.message);
-    } finally {
-      setUpdating(false);
-    }
+    } catch (err: any) { alert(err.message); } finally { setUpdating(false); }
   };
 
   return (
@@ -212,8 +195,8 @@ useEffect(() => {
           <div className="flex items-center justify-between">
             <h1 className="text-sm font-black text-white uppercase tracking-tighter italic">{agencyProfile.company_name}</h1>
             <div className="flex gap-2">
-                <button onClick={() => setShowModal(true)} title="Nouveau Client" className="p-2 bg-emerald-500/10 text-emerald-500 rounded-lg hover:bg-emerald-500 hover:text-black transition-all"><Plus size={16}/></button>
-                <button onClick={() => setShowStaffModal(true)} title="Ajouter Agent" className="p-2 bg-blue-500/10 text-blue-500 rounded-lg hover:bg-blue-500 hover:text-black transition-all"><Users size={16}/></button>
+                <button onClick={() => setShowModal(true)} className="p-2 bg-emerald-500/10 text-emerald-500 rounded-lg hover:bg-emerald-500 hover:text-black transition-all"><Plus size={16}/></button>
+                <button onClick={() => setShowStaffModal(true)} className="p-2 bg-blue-500/10 text-blue-500 rounded-lg hover:bg-blue-500 hover:text-black transition-all"><Users size={16}/></button>
             </div>
           </div>
 
@@ -257,7 +240,7 @@ useEffect(() => {
                     </div>
                 </div>
                 <button onClick={handleUpdateDossier} disabled={updating} className="flex items-center gap-2 px-8 py-4 bg-emerald-500 text-black rounded-2xl font-black text-xs uppercase hover:scale-105 transition-all shadow-xl">
-                    {updating ? <Loader2 className="animate-spin" size={16}/> : <Save size={16}/>} Sauvegarder et notifier
+                    {updating ? <Loader2 className="animate-spin" size={16}/> : <Save size={16}/>} Sauvegarder
                 </button>
             </div>
 
@@ -274,19 +257,18 @@ useEffect(() => {
                   </div>
                 </section>
 
-                {/* --- SECTION DOCUMENTS AMÉLIORÉE --- */}
+                {/* --- DOCUMENTS SECTION CORRIGÉE --- */}
                 <section className="bg-white/5 p-6 rounded-[2rem] border border-white/5 space-y-4">
                   <div className="flex justify-between items-center">
                     <h3 className="text-[10px] font-black uppercase text-orange-400 tracking-widest flex items-center gap-2"><FileText size={14}/> Médias & Documents</h3>
-                    <label className="cursor-pointer bg-orange-500/10 text-orange-500 p-2 rounded-lg hover:bg-orange-500 hover:text-black transition-all">
+                    <label className="cursor-pointer bg-orange-500/10 text-orange-500 p-2 rounded-lg hover:bg-orange-500 transition-all">
                       <Plus size={14}/><input type="file" className="hidden" onChange={handleFileUpload}/>
                     </label>
                   </div>
                   
-                  <div className="grid grid-cols-1 gap-3 max-h-96 overflow-y-auto pr-2 custom-scrollbar">
+                  <div className="grid grid-cols-1 gap-3 max-h-96 overflow-y-auto pr-2 custom-scrollbar text-left">
                     {projectDocs.length > 0 ? projectDocs.map((doc) => (
                       <div key={doc.id} className="group relative bg-black/40 rounded-2xl border border-white/5 overflow-hidden hover:border-orange-500/50 transition-all">
-                        {/* Aperçu Miniature si Image */}
                         {doc.type?.includes('image') && (
                           <div className="w-full h-20 overflow-hidden opacity-40 group-hover:opacity-100 transition-opacity">
                              <img src={doc.url} alt="" className="w-full h-full object-cover" />
@@ -296,28 +278,28 @@ useEffect(() => {
                         <div className="p-3 flex items-center justify-between bg-[#0F172A]/80 backdrop-blur-sm">
                           <div 
                             className="flex items-center gap-3 cursor-pointer min-w-0 flex-1" 
-                            onClick={() => window.open(doc.url, '_blank', 'noopener,noreferrer')}
+                            onClick={() => {
+                                if(doc.url) window.open(doc.url, '_blank');
+                                else alert("Fichier introuvable");
+                            }}
                           >
                             <div className="p-2 bg-white/5 rounded-lg">
                               {doc.type?.includes('image') ? <ImageIcon size={14} className="text-orange-400"/> : <FileText size={14} className="text-red-400"/>}
                             </div>
                             <div className="flex flex-col min-w-0">
                               <span className="text-[10px] font-bold text-slate-300 truncate">{doc.nom_fichier}</span>
-                              <span className="text-[8px] text-emerald-500 uppercase font-black flex items-center gap-1">Ouvrir <ExternalLink size={8}/></span>
+                              <span className="text-[8px] text-emerald-500 uppercase font-black flex items-center gap-1">Cliquez pour voir <ExternalLink size={8}/></span>
                             </div>
                           </div>
 
-                          <button 
-                            onClick={(e) => { e.stopPropagation(); handleDeleteFile(doc); }}
-                            className="p-2 text-slate-600 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
-                          >
+                          <button onClick={(e) => { e.stopPropagation(); handleDeleteFile(doc); }} className="p-2 text-slate-600 hover:text-red-500 transition-all">
                             <Trash2 size={14}/>
                           </button>
                         </div>
                       </div>
                     )) : (
                       <div className="text-center py-8 border-2 border-dashed border-white/5 rounded-2xl">
-                         <p className="text-[10px] text-slate-600 uppercase tracking-widest italic">Aucun document</p>
+                         <p className="text-[10px] text-slate-600 uppercase italic">Aucun document</p>
                       </div>
                     )}
                   </div>
@@ -325,7 +307,7 @@ useEffect(() => {
               </div>
 
               {/* SUIVI CHANTIER */}
-              <div className="lg:col-span-2 space-y-6">
+              <div className="lg:col-span-2 space-y-6 text-left">
                 <div className="bg-[#0F172A] p-8 rounded-[3rem] border border-white/5 space-y-6 shadow-2xl">
                   <div className="flex justify-between items-center">
                     <h3 className="text-[10px] font-black uppercase text-emerald-500 tracking-widest flex items-center gap-2"><Activity size={14}/> Journal de bord</h3>
@@ -341,7 +323,7 @@ useEffect(() => {
                 </div>
 
                 <section className="bg-white/5 p-6 rounded-[3rem] border border-white/5">
-                    <h3 className="text-[10px] font-black uppercase text-blue-400 mb-4"><Clock size={14} className="inline mr-2"/> Rapports passés</h3>
+                    <h3 className="text-[10px] font-black uppercase text-blue-400 mb-4"><Clock size={14} className="inline mr-2"/> Historique</h3>
                     <div className="space-y-3">
                         {projectReports.map(rep => (
                             <div key={rep.id} className="bg-black/20 p-4 rounded-2xl border border-white/5 text-xs">
@@ -365,7 +347,7 @@ useEffect(() => {
         )}
       </div>
 
-      {/* MODAL AJOUT STAFF */}
+      {/* MODALS (IDEM AU CODE ORIGINAL) */}
       {showStaffModal && (
         <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex items-center justify-center p-4">
           <div className="bg-[#0F172A] w-full max-w-md rounded-[2.5rem] border border-white/10 p-8">
@@ -375,7 +357,7 @@ useEffect(() => {
                 const { error } = await supabase.from('profiles').insert([{ ...newStaff, company_name: agencyProfile.company_name }]);
                 if (error) alert(error.message);
                 else { setShowStaffModal(false); loadData(); }
-            }} className="space-y-4 text-left">
+            }} className="space-y-4">
               <input required placeholder="Prénom" className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewStaff({...newStaff, prenom: e.target.value})} />
               <input required placeholder="Nom" className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewStaff({...newStaff, nom: e.target.value})} />
               <input required type="email" placeholder="Email" className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewStaff({...newStaff, email: e.target.value})} />
@@ -390,11 +372,10 @@ useEffect(() => {
         </div>
       )}
 
-      {/* MODAL NOUVEAU CLIENT */}
       {showModal && (
         <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex items-center justify-center p-4">
           <div className="bg-[#0F172A] w-full max-w-2xl rounded-[3rem] border border-white/10 p-10">
-            <h2 className="text-2xl font-black uppercase text-white mb-8 text-left">Nouveau Chantier</h2>
+            <h2 className="text-2xl font-black uppercase text-white mb-8">Nouveau Chantier</h2>
             <form onSubmit={async (e) => {
                 e.preventDefault();
                 const pin = Math.floor(100000 + Math.random() * 900000).toString();
@@ -405,7 +386,7 @@ useEffect(() => {
                     etape_actuelle: PHASES_CHANTIER[0]
                 }]);
                 setShowModal(false); loadData();
-            }} className="grid grid-cols-2 gap-4 text-left">
+            }} className="grid grid-cols-2 gap-4">
                 <input required placeholder="Prénom Client" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, client_prenom: e.target.value})} />
                 <input required placeholder="Nom Client" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, client_nom: e.target.value})} />
                 <input required placeholder="Email Client" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, email_client: e.target.value})} />
