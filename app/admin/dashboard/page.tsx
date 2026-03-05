@@ -369,4 +369,41 @@ export default function AdminDashboard() {
               <input required placeholder="Nom" className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewStaff({...newStaff, nom: e.target.value})} />
               <input required type="email" placeholder="Email" className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewStaff({...newStaff, email: e.target.value})} />
               <select className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewStaff({...newStaff, role: e.target.value})}>
-                <option value="staff">
+                <option value="staff">Agent de suivi</option>
+                <option value="admin">Administrateur</option>
+              </select>
+              <button type="submit" className="w-full bg-blue-500 text-black py-4 rounded-xl font-black text-xs uppercase">Créer l'accès</button>
+              <button type="button" onClick={() => setShowStaffModal(false)} className="w-full text-slate-500 text-[10px] uppercase font-bold">Annuler</button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {showModal && (
+        <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex items-center justify-center p-4">
+          <div className="bg-[#0F172A] w-full max-w-2xl rounded-[3rem] border border-white/10 p-10">
+            <h2 className="text-2xl font-black uppercase text-white mb-8">Nouveau Chantier</h2>
+            <form onSubmit={async (e) => {
+                e.preventDefault();
+                const pin = Math.floor(100000 + Math.random() * 900000).toString();
+                await supabase.from("suivi_chantier").insert([{
+                    ...newProject,
+                    company_name: agencyProfile.company_name,
+                    pin_code: pin,
+                    etape_actuelle: PHASES_CHANTIER[0]
+                }]);
+                setShowModal(false); loadData();
+            }} className="grid grid-cols-2 gap-4">
+                <input required placeholder="Prénom Client" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, client_prenom: e.target.value})} />
+                <input required placeholder="Nom Client" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, client_nom: e.target.value})} />
+                <input required placeholder="Email Client" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, email_client: e.target.value})} />
+                <input required placeholder="Nom de la Villa" className="col-span-2 bg-black/50 border border-white/10 rounded-xl p-4 text-xs font-bold text-emerald-500" onChange={e => setNewProject({...newProject, nom_villa: e.target.value})} />
+                <button type="submit" className="col-span-2 bg-emerald-500 text-black py-5 rounded-2xl font-black text-xs uppercase mt-4">Lancer le dossier</button>
+                <button type="button" onClick={() => setShowModal(false)} className="col-span-2 text-slate-500 text-[10px] uppercase font-bold text-center">Fermer</button>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
