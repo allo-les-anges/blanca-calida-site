@@ -39,8 +39,13 @@ export default function AdminDashboard() {
   const [editFields, setEditFields] = useState<any>({});
   const [agencyProfile, setAgencyProfile] = useState<any>({ company_name: "Amaru-Homes" });
   
-  // Initialisation avec le rôle par défaut "agent de suivi"
-  const [newStaff, setNewStaff] = useState({ nom: "", prenom: "", email: "", role: "agent de suivi" });
+  // État initial strict pour le nouveau staff
+  const [newStaff, setNewStaff] = useState({ 
+    nom: "", 
+    prenom: "", 
+    email: "", 
+    role: "agent de suivi" 
+  });
   
   const [newProject, setNewProject] = useState({
     client_nom: "", client_prenom: "", email_client: "", telephone: "", date_naissance: "",
@@ -220,7 +225,12 @@ export default function AdminDashboard() {
             <div key={s.id} className="p-4 rounded-xl border border-white/5 bg-white/5 flex justify-between items-center group">
               <div className='text-left'>
                 <p className="font-bold text-sm text-white">{s.prenom} {s.nom}</p>
-                <p className="text-[9px] text-blue-400 uppercase font-black">{s.role} <span className="text-slate-500 ml-2">PIN: {s.pin_code}</span></p>
+                <div className="flex items-center gap-2">
+                  <span className={`text-[8px] px-2 py-0.5 rounded-full font-black uppercase ${s.role === 'admin' ? 'bg-rose-500/20 text-rose-500' : s.role === 'agent de suivi' ? 'bg-blue-500/20 text-blue-500' : 'bg-orange-500/20 text-orange-500'}`}>
+                    {s.role}
+                  </span>
+                  <p className="text-[9px] text-slate-500 font-bold uppercase">PIN: {s.pin_code}</p>
+                </div>
               </div>
               <button onClick={() => handleDeleteStaff(s.id, s.prenom)} className="opacity-0 group-hover:opacity-100 p-2 text-rose-500 hover:bg-rose-500/10 rounded-lg transition-all"><Trash2 size={14}/></button>
             </div>
@@ -311,57 +321,69 @@ export default function AdminDashboard() {
         )}
       </div>
 
-      {/* MODAL STAFF - ROLES UNIQUES */}
+      {/* MODAL STAFF - CORRECTION ROLE ET ERREUR */}
       {showStaffModal && (
         <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex items-center justify-center p-4">
           <div className="bg-[#0F172A] w-full max-w-md rounded-[2.5rem] border border-white/10 p-8 text-left">
-            <h2 className="text-xl font-black uppercase text-white mb-6 italic">Ajouter un membre d'équipe</h2>
+            <h2 className="text-xl font-black uppercase text-white mb-6 italic">Ajouter un collaborateur</h2>
             
             <form onSubmit={async (e) => { 
                 e.preventDefault(); 
                 setUpdating(true);
                 
-                const finalRole = newStaff.role; 
+                // On s'assure de capturer la valeur exacte de l'état
+                const roleToInsert = newStaff.role; 
                 const tempPassword = "Amaru" + Math.random().toString(36).slice(-8);
                 const staffPin = Math.floor(1000 + Math.random() * 9000).toString();
 
                 try {
+                  // 1. Inscription Auth
                   const { data: authData, error: authError } = await supabase.auth.signUp({
                     email: newStaff.email,
                     password: tempPassword,
                   });
 
-                  if (authError) throw authError;
+                  // Note : On ne bloque pas si une erreur de redirection mail survient
+                  // mais on vérifie si l'utilisateur a été créé
+                  if (authError) {
+                      console.warn("Auth SignUp warning/error:", authError.message);
+                      // Si l'erreur est "User already registered", on pourrait arrêter ici
+                  }
 
-                  if (authData.user) {
+                  const userId = authData?.user?.id;
+
+                  if (userId) {
+                    // 2. Insertion Profil avec le bon rôle
                     const { error: profileError } = await supabase.from('profiles').insert([{ 
-                      id: authData.user.id,
+                      id: userId,
                       prenom: newStaff.prenom,
                       nom: newStaff.nom,
                       email: newStaff.email,
-                      role: finalRole,
+                      role: roleToInsert, // <--- FORÇAGE DU RÔLE ICI
                       pin_code: staffPin,
                       company_name: agencyProfile.company_name 
                     }]);
 
                     if (profileError) throw profileError;
 
-                    alert(`Profil créé !\nRole: ${finalRole}\nPIN : ${staffPin}`);
+                    alert(`Accès créé avec succès !\nNom: ${newStaff.prenom}\nRôle: ${roleToInsert}\nPIN : ${staffPin}`);
                     setShowStaffModal(false); 
                     loadData();
+                  } else {
+                      throw new Error(authError?.message || "Impossible de créer l'identifiant unique.");
                   }
                 } catch (err: any) {
-                  alert("Erreur : " + err.message);
+                  alert("Erreur lors de la création : " + err.message);
                 } finally {
                   setUpdating(false);
                 }
             }} className="space-y-4">
-              <input required placeholder="Prénom" className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-xs text-white" onChange={e => setNewStaff({...newStaff, prenom: e.target.value})} />
-              <input required placeholder="Nom" className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-xs text-white" onChange={e => setNewStaff({...newStaff, nom: e.target.value})} />
-              <input required type="email" placeholder="Email" className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-xs text-white" onChange={e => setNewStaff({...newStaff, email: e.target.value})} />
+              <input required placeholder="Prénom" className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-xs text-white" value={newStaff.prenom} onChange={e => setNewStaff({...newStaff, prenom: e.target.value})} />
+              <input required placeholder="Nom" className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-xs text-white" value={newStaff.nom} onChange={e => setNewStaff({...newStaff, nom: e.target.value})} />
+              <input required type="email" placeholder="Email" className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-xs text-white" value={newStaff.email} onChange={e => setNewStaff({...newStaff, email: e.target.value})} />
               
               <div className="space-y-1">
-                <label className="text-[9px] text-slate-500 uppercase font-bold ml-2">Rôle</label>
+                <label className="text-[9px] text-slate-500 uppercase font-bold ml-2">Rôle à attribuer</label>
                 <select 
                   className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-xs text-white" 
                   value={newStaff.role}
@@ -374,7 +396,7 @@ export default function AdminDashboard() {
               </div>
 
               <button type="submit" disabled={updating} className="w-full bg-blue-500 text-black py-4 rounded-xl font-black text-xs uppercase flex justify-center items-center">
-                {updating ? <Loader2 className="animate-spin" size={18} /> : "Créer l'accès"}
+                {updating ? <Loader2 className="animate-spin" size={18} /> : "Valider l'inscription"}
               </button>
               
               <button type="button" onClick={() => setShowStaffModal(false)} className="w-full text-slate-500 text-[10px] uppercase font-bold mt-2">Annuler</button>
