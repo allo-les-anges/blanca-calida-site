@@ -11,12 +11,14 @@ import {
   LayoutDashboard, Globe
 } from 'lucide-react';
 
+// CRUCIAL : On crée le client à l'extérieur pour éviter les multiples instances GoTrue
+const supabase = createBrowserClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
+
 export default function SuperAdminDashboard() {
   const router = useRouter();
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
 
   // ÉTATS DE NAVIGATION ET AUTH
   const [authStatus, setAuthStatus] = useState<'loading' | 'authorized' | 'denied'>('loading');
@@ -41,22 +43,21 @@ export default function SuperAdminDashboard() {
 
   // 1. CHARGEMENT DES AGENCES
   const fetchAdmins = useCallback(async () => {
-    // Correction RLS : on s'assure que la requête ne plante pas le rendu
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
       .order('created_at', { ascending: false }); 
       
     if (!error && data) {
-      // Filtrage de Gaëtan pour la liste
+      // Filtrage de Gaëtan pour ne pas s'auto-afficher/supprimer dans la liste
       const filtered = data.filter(a => a.email?.toLowerCase().trim() !== 'gaetan@amaru-homes.com');
       setAdmins(filtered);
     } else {
       console.error("Erreur fetchAdmins:", error);
     }
-  }, [supabase]);
+  }, []);
 
-  // 2. VÉRIFICATION DE L'ACCÈS (SÉCURITÉ MAX)
+  // 2. VÉRIFICATION DE L'ACCÈS
   useEffect(() => {
     const checkAccess = async () => {
       try {
@@ -70,48 +71,42 @@ export default function SuperAdminDashboard() {
         const currentEmail = session.user.email?.toLowerCase().trim();
         setUserEmail(currentEmail || null);
 
-        // LOGIQUE MASTER KEY : Gaëtan passe toujours
-        // Note : Vérifie bien que ton email en base est exactement celui-ci
+        // LOGIQUE MASTER KEY : Gaëtan passe toujours par l'email
         if (currentEmail === 'gaetan@amaru-homes.com') {
           setAuthStatus('authorized');
           fetchAdmins();
           return;
         }
 
-        // Sinon on vérifie le rôle en base
-        // CORRECTION : On cherche par email plutôt que par ID si l'ID pose problème avec le SSR
+        // Sinon on vérifie le rôle en base dans 'profiles'
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('role')
-          .eq('email', currentEmail)
+          .eq('id', session.user.id) // Recherche par ID est plus fiable ici
           .single();
 
-        // CORRECTION : Tolérance super_admin (avec underscore)
         const userRole = profile?.role?.toLowerCase().trim();
         
         if (userRole === 'super_admin' || userRole === 'super-admin') {
           setAuthStatus('authorized');
           fetchAdmins();
         } else {
-          console.warn("Accès refusé pour le rôle:", userRole);
           setAuthStatus('denied');
         }
       } catch (err) {
-        console.error("Erreur critique checkAccess:", err);
         setAuthStatus('denied');
       }
     };
 
     checkAccess();
-  }, [supabase, fetchAdmins]);
+  }, [fetchAdmins]);
 
   // 3. ACTIONS
   const handleLogout = async () => {
     await supabase.auth.signOut();
     localStorage.clear();
-    router.push('/login');
-    // On utilise window.location pour forcer un clean state après déconnexion super-admin
-    window.location.href = '/login';
+    // Utilisation de replace pour éviter le retour arrière
+    window.location.replace('/login');
   };
 
   const createAdminAccount = async (e: React.FormEvent) => {
@@ -141,7 +136,7 @@ export default function SuperAdminDashboard() {
 
         if (profileError) throw profileError;
         
-        alert(`Licence ${pack} activée avec succès pour ${companyName}.`);
+        alert(`Licence ${pack} activée pour ${companyName}.`);
         setEmail(""); setPassword(""); setCompanyName(""); setAdminPrenom(""); setAdminNom("");
         fetchAdmins();
       }
@@ -153,9 +148,10 @@ export default function SuperAdminDashboard() {
   };
 
   const deleteAdminAccount = async (adminId: string, company: string) => {
-    if (!confirm(`ATTENTION : Révoquer définitivement l'accès de "${company}" ?`)) return;
+    if (!confirm(`Révoquer définitivement l'accès de "${company}" ?`)) return;
     setDeletingId(adminId);
     try {
+      // Suppression dans la table profiles (Note: l'user reste dans Supabase Auth sauf si supprimé via API Admin)
       const { error } = await supabase.from('profiles').delete().eq('id', adminId);
       if (error) throw error;
       fetchAdmins();
@@ -231,7 +227,7 @@ export default function SuperAdminDashboard() {
               <ArrowLeft size={16} /> Site Public
             </Link>
             <button onClick={handleLogout} className="h-12 w-12 flex items-center justify-center bg-[#0f0f0f] border border-slate-800 rounded-xl hover:bg-red-950/30 transition-all text-slate-500 hover:text-red-400">
-               <LogOut size={20} />
+                <LogOut size={20} />
             </button>
           </div>
         </header>
@@ -268,11 +264,11 @@ export default function SuperAdminDashboard() {
                 <div className="pt-4 border-t border-slate-900 space-y-4">
                   <div className="space-y-1">
                     <label className="text-[9px] uppercase tracking-widest font-black text-slate-500 ml-2">Email de connexion</label>
-                    <input autoComplete="off" className="w-full bg-[#050505] border border-slate-800 rounded-xl p-3 text-sm text-white focus:border-red-600 outline-none" value={email} onChange={e => setEmail(e.target.value)} required />
+                    <input autoComplete="email" className="w-full bg-[#050505] border border-slate-800 rounded-xl p-3 text-sm text-white focus:border-red-600 outline-none" value={email} onChange={e => setEmail(e.target.value)} required />
                   </div>
                   <div className="space-y-1">
                     <label className="text-[9px] uppercase tracking-widest font-black text-slate-500 ml-2">Clé de sécurité (Password)</label>
-                    <input type="password" className="w-full bg-[#050505] border border-slate-800 rounded-xl p-3 text-sm text-white focus:border-red-600 outline-none" value={password} onChange={e => setPassword(e.target.value)} required />
+                    <input type="password" underline-autocomplete="current-password" className="w-full bg-[#050505] border border-slate-800 rounded-xl p-3 text-sm text-white focus:border-red-600 outline-none" value={password} onChange={e => setPassword(e.target.value)} required />
                   </div>
                 </div>
                 <button type="submit" disabled={isGlobalLoading} className="w-full bg-red-700 hover:bg-red-600 py-4 mt-6 rounded-xl font-black uppercase text-[10px] tracking-widest transition-all shadow-[0_10px_20px_rgba(185,28,28,0.2)]">
