@@ -1,15 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { createClient } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
 import { Lock, Mail, Loader2, ShieldCheck, KeyRound } from "lucide-react";
-
-// CRUCIAL : On crée le client à l'extérieur pour éviter "Multiple GoTrueClient instances"
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
+import { supabase } from "@/lib/supabase"; // Utilisation du client unique
 
 export default function LoginPage() {
   const [method, setMethod] = useState<"password" | "pin">("password");
@@ -27,9 +21,7 @@ export default function LoginPage() {
       const userEmail = email.trim().toLowerCase();
       let finalRole = "";
 
-      // --- 1. AUTHENTIFICATION ---
       if (method === "password") {
-        // Tentative de connexion Auth Supabase
         const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
           email: userEmail,
           password: password,
@@ -37,21 +29,15 @@ export default function LoginPage() {
         
         if (authError) throw authError;
 
-        // Si l'auth réussit, on cherche DIRECTEMENT le rôle dans 'profiles'
-        // On ne vérifie que cette table pour le mode mot de passe
         const { data: profile, error: profileError } = await supabase
           .from("profiles")
           .select("role")
-          .eq("email", userEmail)
+          .eq("id", authData.user.id) // Recherche par ID plus sûre que par email
           .single();
         
-        if (profileError || !profile) {
-          throw new Error("Accès refusé : Aucun profil administrateur lié à cet email.");
-        }
-
+        if (profileError || !profile) throw new Error("Profil introuvable.");
         finalRole = profile.role;
       } else {
-        // CONNEXION PAR PIN (Vérifie uniquement la table staff_prestataires)
         const { data: staff, error: staffError } = await supabase
           .from("staff_prestataires")
           .select("*")
@@ -59,31 +45,24 @@ export default function LoginPage() {
           .eq("pin_code", pin.trim())
           .single();
 
-        if (staffError || !staff) {
-          throw new Error("Email ou Code PIN incorrect.");
-        }
+        if (staffError || !staff) throw new Error("Email ou PIN incorrect.");
         
-        // On simule une session pour le staff terrain
         localStorage.setItem("staff_session", JSON.stringify(staff));
         finalRole = staff.role;
       }
 
-      // --- 2. LOGIQUE DE REDIRECTION ---
+      // Redirection unifiée
       const roleClean = finalRole?.toLowerCase().trim();
-
-      // Vérification spécifique pour Gaëtan ou les super admins
-      if (roleClean === "super_admin" || roleClean === "super-admin") {
+      if (roleClean.includes("super")) {
         router.push("/super-admin");
       } else if (roleClean === "admin") {
         router.push("/admin/dashboard");
-      } else if (roleClean === "staff" || roleClean === "prestataire") {
-        router.push("/admin-chantier");
       } else {
-        router.push("/admin/dashboard");
+        router.push("/admin-chantier");
       }
 
     } catch (err: any) {
-      alert("Erreur d'accès : " + err.message);
+      alert(err.message);
     } finally {
       setLoading(false);
     }
@@ -125,7 +104,6 @@ export default function LoginPage() {
               <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
               <input
                 type="email"
-                autoComplete="email"
                 placeholder="votre@email.com"
                 className="w-full bg-black/40 border border-white/5 rounded-2xl p-4 pl-12 text-white outline-none focus:border-emerald-500 transition-all text-sm"
                 value={email}
@@ -136,13 +114,12 @@ export default function LoginPage() {
           </div>
 
           {method === "password" ? (
-            <div className="space-y-2 animate-in slide-in-from-right-2 duration-300">
+            <div className="space-y-2 animate-in slide-in-from-right-2">
               <label className="text-[10px] font-black text-slate-500 uppercase ml-2 tracking-widest block">Mot de passe</label>
               <div className="relative">
                 <KeyRound className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
                 <input
                   type="password"
-                  autoComplete="current-password"
                   placeholder="••••••••"
                   className="w-full bg-black/40 border border-white/5 rounded-2xl p-4 pl-12 text-white outline-none focus:border-emerald-500 transition-all text-sm"
                   value={password}
@@ -152,13 +129,12 @@ export default function LoginPage() {
               </div>
             </div>
           ) : (
-            <div className="space-y-2 animate-in slide-in-from-left-2 duration-300">
+            <div className="space-y-2 animate-in slide-in-from-left-2">
               <label className="text-[10px] font-black text-slate-500 uppercase ml-2 tracking-widest block">Code PIN</label>
               <div className="relative">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
                 <input
                   type="password"
-                  autoComplete="one-time-code"
                   inputMode="numeric"
                   placeholder="0000"
                   maxLength={6}
