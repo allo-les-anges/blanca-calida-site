@@ -6,7 +6,7 @@ import {
   Save, Trash2, Loader2, Search, Plus, X,
   Activity, Zap, Briefcase, UserCheck,
   Phone, Mail, Clock, FileText, 
-  Image as ImageIcon, Users, ShieldCheck, MapPin
+  Image as ImageIcon, Users, ShieldCheck, MapPin, ExternalLink
 } from 'lucide-react';
 
 const supabase = createClient(
@@ -31,19 +31,15 @@ export default function AdminDashboard() {
   const [selectedProjet, setSelectedProjet] = useState<any>(null);
   const [staffList, setStaffList] = useState<any[]>([]);
   
-  // Modales
   const [showModal, setShowModal] = useState(false);
   const [showStaffModal, setShowStaffModal] = useState(false);
 
-  // Documents et rapports
   const [projectDocs, setProjectDocs] = useState<any[]>([]);
   const [projectReports, setProjectReports] = useState<any[]>([]);
 
-  // État local pour l'édition (Fiche client + Chantier)
   const [editFields, setEditFields] = useState<any>({});
   const [agencyProfile, setAgencyProfile] = useState<any>({ company_name: "Amaru-Homes" });
   
-  // États nouveaux ajouts
   const [newStaff, setNewStaff] = useState({ nom: "", prenom: "", email: "", role: "staff" });
   const [newProject, setNewProject] = useState({
     client_nom: "", client_prenom: "", email_client: "", telephone: "",
@@ -61,12 +57,10 @@ export default function AdminDashboard() {
       const currentAgency = profile?.company_name || "Amaru-Homes";
       setAgencyProfile(profile || { company_name: "Amaru-Homes" });
 
-      // 1. Charger les chantiers
       const { data: projData } = await supabase.from('suivi_chantier')
         .select('*').eq('company_name', currentAgency).order('created_at', { ascending: false });
       if (projData) setProjets(projData);
 
-      // 2. Charger les agents/collaborateurs (Table PROFILES)
       const { data: stfData } = await supabase.from('profiles')
         .select('*').eq('company_name', currentAgency).neq('email', session.user.email);
       if (stfData) setStaffList(stfData);
@@ -94,8 +88,7 @@ export default function AdminDashboard() {
     if (!selectedProjet) return;
     setUpdating(true);
     try {
-      // Met à jour la table suivi_chantier (Infos client + Phase actuelle)
-      const { error } = await supabase.from('suivi_chantier')
+      await supabase.from('suivi_chantier')
         .update({ 
           client_nom: editFields.client_nom,
           client_prenom: editFields.client_prenom,
@@ -106,39 +99,72 @@ export default function AdminDashboard() {
           updated_at: new Date().toISOString()
         }).eq('id', selectedProjet.id);
 
-      // Ajoute une ligne dans l'historique des rapports
       await supabase.from('chantier_updates').insert([{
           projet_id: selectedProjet.id,
           etape_actuelle: editFields.etape_actuelle,
           commentaires_etape: editFields.commentaires_etape
       }]);
 
-      if (!error) {
-        alert("Dossier client et rapport mis à jour !");
-        loadData();
-      }
+      alert("Dossier client et rapport mis à jour !");
+      loadData();
     } catch (err: any) { alert(err.message); }
     setUpdating(false);
   };
 
+  // --- LOGIQUE STORAGE CORRIGÉE ---
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !selectedProjet) return;
     setUpdating(true);
     try {
       const fileName = `${selectedProjet.id}/${Date.now()}-${file.name}`;
-      const { error: uploadError } = await supabase.storage.from('documents-clients').upload(fileName, file);
+      
+      const { error: uploadError } = await supabase.storage
+        .from('documents-clients')
+        .upload(fileName, file);
+
       if (uploadError) throw uploadError;
-      const { data: { publicUrl } } = supabase.storage.from('documents-clients').getPublicUrl(fileName);
+
+      const { data } = supabase.storage
+        .from('documents-clients')
+        .getPublicUrl(fileName);
+
       await supabase.from('documents_projets').insert([{
-        projet_id: selectedProjet.id, nom_fichier: file.name, url: publicUrl, type: file.type
+        projet_id: selectedProjet.id, 
+        nom_fichier: file.name, 
+        url: data.publicUrl, 
+        type: file.type
       }]);
+      
       loadProjectExtras(selectedProjet.id);
     } catch (err: any) { alert(err.message); } finally { setUpdating(false); }
   };
 
+  const handleDeleteFile = async (doc: any) => {
+    if(!confirm("Supprimer définitivement ce document ?")) return;
+    setUpdating(true);
+    try {
+      // 1. Extraire le nom du fichier du chemin URL pour le storage
+      const filePath = doc.url.split('/documents-clients/')[1];
+      
+      // 2. Supprimer physiquement du bucket
+      if (filePath) {
+        await supabase.storage.from('documents-clients').remove([filePath]);
+      }
+
+      // 3. Supprimer de la base de données
+      await supabase.from('documents_projets').delete().eq('id', doc.id);
+      
+      loadProjectExtras(selectedProjet.id);
+    } catch (err: any) {
+      alert("Erreur lors de la suppression : " + err.message);
+    } finally {
+      setUpdating(false);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-[#020617] flex text-slate-200">
+    <div className="min-h-screen bg-[#020617] flex text-slate-200 font-sans">
       
       {/* SIDEBAR */}
       <div className="w-80 bg-[#0F172A]/50 border-r border-white/5 h-screen sticky top-0 flex flex-col">
@@ -162,7 +188,7 @@ export default function AdminDashboard() {
           </div>
         </div>
         
-        <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-2">
+        <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-2 custom-scrollbar">
           {activeTab === 'clients' ? projets.filter(p => `${p.client_prenom} ${p.client_nom}`.toLowerCase().includes(searchTerm.toLowerCase())).map((p) => (
             <button key={p.id} onClick={() => setSelectedProjet(p)} className={`w-full text-left p-4 rounded-xl border transition-all ${selectedProjet?.id === p.id ? 'bg-emerald-500/10 border-emerald-500/50' : 'border-white/5 hover:bg-white/5'}`}>
               <p className="font-bold text-sm text-white">{p.client_prenom} {p.client_nom}</p>
@@ -197,10 +223,9 @@ export default function AdminDashboard() {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               
-              {/* ÉDITION FICHE CLIENT */}
               <div className="space-y-6">
                 <section className="bg-white/5 p-6 rounded-[2rem] border border-white/5 space-y-4">
-                  <h3 className="text-[10px] font-black uppercase text-emerald-500 tracking-widest flex items-center gap-2"><UserCheck size={14}/> Fiche Client (Éditable)</h3>
+                  <h3 className="text-[10px] font-black uppercase text-emerald-500 tracking-widest flex items-center gap-2"><UserCheck size={14}/> Fiche Client</h3>
                   <div className="space-y-3">
                     <input className="w-full bg-black/40 border border-white/5 p-3 rounded-xl text-xs" value={editFields.client_prenom || ""} onChange={e => setEditFields({...editFields, client_prenom: e.target.value})} placeholder="Prénom" />
                     <input className="w-full bg-black/40 border border-white/5 p-3 rounded-xl text-xs" value={editFields.client_nom || ""} onChange={e => setEditFields({...editFields, client_nom: e.target.value})} placeholder="Nom" />
@@ -209,24 +234,52 @@ export default function AdminDashboard() {
                   </div>
                 </section>
 
-                {/* DOCUMENTS */}
+                {/* --- SECTION DOCUMENTS AMÉLIORÉE --- */}
                 <section className="bg-white/5 p-6 rounded-[2rem] border border-white/5 space-y-4">
                   <div className="flex justify-between items-center">
-                    <h3 className="text-[10px] font-black uppercase text-orange-400 tracking-widest flex items-center gap-2"><FileText size={14}/> Documents & Photos</h3>
-                    <label className="cursor-pointer bg-emerald-500/10 text-emerald-500 p-2 rounded-lg hover:bg-emerald-500 hover:text-black transition-all">
+                    <h3 className="text-[10px] font-black uppercase text-orange-400 tracking-widest flex items-center gap-2"><FileText size={14}/> Médias & Documents</h3>
+                    <label className="cursor-pointer bg-orange-500/10 text-orange-500 p-2 rounded-lg hover:bg-orange-500 hover:text-black transition-all">
                       <Plus size={14}/><input type="file" className="hidden" onChange={handleFileUpload}/>
                     </label>
                   </div>
-                  <div className="space-y-2 max-h-60 overflow-y-auto pr-2">
-                    {projectDocs.map((doc) => (
-                      <div key={doc.id} className="flex items-center justify-between bg-black/40 p-3 rounded-xl border border-white/5">
-                        <div className="flex items-center gap-3 cursor-pointer truncate" onClick={() => window.open(doc.url, '_blank')}>
-                          {doc.type?.includes('image') ? <ImageIcon size={14} className="text-orange-400"/> : <FileText size={14} className="text-red-400"/>}
-                          <span className="text-[10px] font-bold text-slate-300 truncate">{doc.nom_fichier}</span>
+                  
+                  <div className="grid grid-cols-1 gap-3 max-h-96 overflow-y-auto pr-2 custom-scrollbar">
+                    {projectDocs.length > 0 ? projectDocs.map((doc) => (
+                      <div key={doc.id} className="group relative bg-black/40 rounded-2xl border border-white/5 overflow-hidden hover:border-orange-500/50 transition-all">
+                        {/* Aperçu Miniature si Image */}
+                        {doc.type?.includes('image') && (
+                          <div className="w-full h-20 overflow-hidden opacity-40 group-hover:opacity-100 transition-opacity">
+                             <img src={doc.url} alt="" className="w-full h-full object-cover" />
+                          </div>
+                        )}
+
+                        <div className="p-3 flex items-center justify-between bg-[#0F172A]/80 backdrop-blur-sm">
+                          <div 
+                            className="flex items-center gap-3 cursor-pointer min-w-0 flex-1" 
+                            onClick={() => window.open(doc.url, '_blank', 'noopener,noreferrer')}
+                          >
+                            <div className="p-2 bg-white/5 rounded-lg">
+                              {doc.type?.includes('image') ? <ImageIcon size={14} className="text-orange-400"/> : <FileText size={14} className="text-red-400"/>}
+                            </div>
+                            <div className="flex flex-col min-w-0">
+                              <span className="text-[10px] font-bold text-slate-300 truncate">{doc.nom_fichier}</span>
+                              <span className="text-[8px] text-emerald-500 uppercase font-black flex items-center gap-1">Ouvrir <ExternalLink size={8}/></span>
+                            </div>
+                          </div>
+
+                          <button 
+                            onClick={(e) => { e.stopPropagation(); handleDeleteFile(doc); }}
+                            className="p-2 text-slate-600 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
+                          >
+                            <Trash2 size={14}/>
+                          </button>
                         </div>
-                        <button onClick={async () => { if(confirm("Supprimer ?")) { await supabase.from('documents_projets').delete().eq('id', doc.id); loadProjectExtras(selectedProjet.id); }}} className="text-slate-600 hover:text-red-500 ml-2"><Trash2 size={12}/></button>
                       </div>
-                    ))}
+                    )) : (
+                      <div className="text-center py-8 border-2 border-dashed border-white/5 rounded-2xl">
+                         <p className="text-[10px] text-slate-600 uppercase tracking-widest italic">Aucun document</p>
+                      </div>
+                    )}
                   </div>
                 </section>
               </div>
@@ -247,7 +300,6 @@ export default function AdminDashboard() {
                   />
                 </div>
 
-                {/* Historique */}
                 <section className="bg-white/5 p-6 rounded-[3rem] border border-white/5">
                     <h3 className="text-[10px] font-black uppercase text-blue-400 mb-4"><Clock size={14} className="inline mr-2"/> Rapports passés</h3>
                     <div className="space-y-3">
@@ -273,26 +325,25 @@ export default function AdminDashboard() {
         )}
       </div>
 
-      {/* MODAL AJOUT STAFF (Dans Table Profiles) */}
+      {/* MODAL AJOUT STAFF */}
       {showStaffModal && (
         <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex items-center justify-center p-4">
           <div className="bg-[#0F172A] w-full max-w-md rounded-[2.5rem] border border-white/10 p-8">
             <h2 className="text-xl font-black uppercase text-white mb-6">Ajouter un collaborateur</h2>
             <form onSubmit={async (e) => { 
                 e.preventDefault(); 
-                // Important : on l'insère dans 'profiles' pour qu'il puisse se connecter au dashboard
                 const { error } = await supabase.from('profiles').insert([{ ...newStaff, company_name: agencyProfile.company_name }]);
                 if (error) alert(error.message);
                 else { setShowStaffModal(false); loadData(); }
             }} className="space-y-4 text-left">
               <input required placeholder="Prénom" className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewStaff({...newStaff, prenom: e.target.value})} />
               <input required placeholder="Nom" className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewStaff({...newStaff, nom: e.target.value})} />
-              <input required type="email" placeholder="Email (Sert d'identifiant)" className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewStaff({...newStaff, email: e.target.value})} />
+              <input required type="email" placeholder="Email" className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewStaff({...newStaff, email: e.target.value})} />
               <select className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewStaff({...newStaff, role: e.target.value})}>
                 <option value="staff">Agent de suivi</option>
                 <option value="admin">Administrateur</option>
               </select>
-              <button type="submit" className="w-full bg-blue-500 text-black py-4 rounded-xl font-black text-xs uppercase">Créer l'accès Dashboard</button>
+              <button type="submit" className="w-full bg-blue-500 text-black py-4 rounded-xl font-black text-xs uppercase">Créer l'accès</button>
               <button type="button" onClick={() => setShowStaffModal(false)} className="w-full text-slate-500 text-[10px] uppercase font-bold">Annuler</button>
             </form>
           </div>
