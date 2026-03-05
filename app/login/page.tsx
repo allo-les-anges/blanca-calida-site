@@ -1,162 +1,152 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Lock, Mail, Loader2, ShieldCheck, KeyRound } from "lucide-react";
-import { supabase } from "@/lib/supabase"; // Utilisation du client unique
+import { supabase } from "@/lib/supabase"; // Import centralisé
 
 export default function LoginPage() {
-  const [method, setMethod] = useState<"password" | "pin">("password");
+  const router = useRouter();
+  
+  // ÉTATS
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [pin, setPin] = useState("");
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
+  // 1. Vérification si déjà connecté au chargement
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        redirectUser(session.user.id, session.user.email || "");
+      }
+    };
+    checkUser();
+  }, []);
+
+  // 2. Logique de redirection selon le rôle
+  const redirectUser = async (userId: string, userEmail: string) => {
+    const cleanEmail = userEmail.toLowerCase().trim();
+
+    // CAS SPÉCIAL : Gaëtan est toujours Super Admin
+    if (cleanEmail === 'gaetan@amaru-homes.com') {
+      router.push('/super-admin');
+      return;
+    }
+
+    // Pour les autres (Iris, Gillian, etc.), on vérifie dans la table 'profiles'
+    const { data: profile, error } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', userId)
+      .single();
+
+    if (error || !profile) {
+      setErrorMsg("Profil introuvable. Contactez Gaëtan.");
+      return;
+    }
+
+    const role = profile.role?.toLowerCase().trim();
+
+    if (role === 'super_admin' || role === 'super-admin') {
+      router.push('/super-admin');
+    } else if (role === 'admin') {
+      router.push('/admin'); // Redirige Iris vers son dashboard agence
+    } else {
+      setErrorMsg("Accès non autorisé.");
+    }
+  };
+
+  // 3. Action de connexion
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setErrorMsg(null);
 
     try {
-      const userEmail = email.trim().toLowerCase();
-      let finalRole = "";
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password: password,
+      });
 
-      if (method === "password") {
-        const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-          email: userEmail,
-          password: password,
-        });
-        
-        if (authError) throw authError;
+      if (error) throw error;
 
-        const { data: profile, error: profileError } = await supabase
-          .from("profiles")
-          .select("role")
-          .eq("id", authData.user.id) // Recherche par ID plus sûre que par email
-          .single();
-        
-        if (profileError || !profile) throw new Error("Profil introuvable.");
-        finalRole = profile.role;
-      } else {
-        const { data: staff, error: staffError } = await supabase
-          .from("staff_prestataires")
-          .select("*")
-          .eq("email", userEmail)
-          .eq("pin_code", pin.trim())
-          .single();
-
-        if (staffError || !staff) throw new Error("Email ou PIN incorrect.");
-        
-        localStorage.setItem("staff_session", JSON.stringify(staff));
-        finalRole = staff.role;
+      if (data?.user) {
+        await redirectUser(data.user.id, data.user.email || "");
       }
-
-      // Redirection unifiée
-      const roleClean = finalRole?.toLowerCase().trim();
-      if (roleClean.includes("super")) {
-        router.push("/super-admin");
-      } else if (roleClean === "admin") {
-        router.push("/admin/dashboard");
-      } else {
-        router.push("/admin-chantier");
-      }
-
     } catch (err: any) {
-      alert(err.message);
+      setErrorMsg(err.message === "Invalid login credentials" 
+        ? "Identifiants invalides." 
+        : err.message);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="h-screen bg-[#020617] flex items-center justify-center p-4 font-sans text-left">
-      <div className="w-full max-w-md space-y-8">
-        <div className="text-center">
-          <div className="inline-flex p-4 rounded-3xl bg-emerald-500/10 text-emerald-500 mb-4">
-            <ShieldCheck size={40} />
-          </div>
-          <h1 className="text-white text-3xl font-black uppercase italic tracking-tighter">
-            Amaru-Homes <span className="text-emerald-500 text-sm align-top">ACCESS</span>
-          </h1>
-          
-          <div className="flex bg-black/40 p-1 rounded-2xl border border-white/5 mt-8 w-64 mx-auto">
-            <button 
-              type="button"
-              onClick={() => setMethod("password")}
-              className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-xl text-[10px] font-bold uppercase transition-all ${method === "password" ? "bg-white/10 text-white shadow-lg" : "text-slate-500"}`}
-            >
-              <KeyRound size={12}/> Pass
-            </button>
-            <button 
-              type="button"
-              onClick={() => setMethod("pin")}
-              className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-xl text-[10px] font-bold uppercase transition-all ${method === "pin" ? "bg-emerald-500 text-black shadow-lg shadow-emerald-500/20" : "text-slate-500"}`}
-            >
-              <Lock size={12}/> PIN
-            </button>
-          </div>
-        </div>
+    <div className="min-h-screen bg-[#050505] flex items-center justify-center p-6 selection:bg-red-500/30">
+      {/* Design Background Similaire au Super-Admin */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none opacity-50">
+        <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-red-900/10 blur-[120px] rounded-full" />
+      </div>
 
-        <form onSubmit={handleLogin} className="bg-[#0F172A] p-8 rounded-[2.5rem] border border-white/5 shadow-2xl space-y-6">
-          <div className="space-y-2">
-            <label className="text-[10px] font-black text-slate-500 uppercase ml-2 tracking-widest block">Identifiant Email</label>
-            <div className="relative">
-              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
-              <input
-                type="email"
-                placeholder="votre@email.com"
-                className="w-full bg-black/40 border border-white/5 rounded-2xl p-4 pl-12 text-white outline-none focus:border-emerald-500 transition-all text-sm"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
+      <div className="relative z-10 w-full max-w-md">
+        <div className="bg-[#0a0a0a] border border-slate-800/60 p-10 rounded-[2.5rem] shadow-2xl">
+          <div className="flex flex-col items-center mb-10">
+            <div className="h-16 w-16 bg-gradient-to-br from-red-600 to-red-900 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-red-900/20">
+              <ShieldCheck size={32} className="text-white" />
             </div>
+            <h1 className="text-3xl font-serif italic text-white tracking-tight text-center">Terminal de Connexion</h1>
+            <p className="text-slate-500 text-[9px] uppercase tracking-[0.3em] font-black mt-2">Accès Sécurisé Engine</p>
           </div>
 
-          {method === "password" ? (
-            <div className="space-y-2 animate-in slide-in-from-right-2">
-              <label className="text-[10px] font-black text-slate-500 uppercase ml-2 tracking-widest block">Mot de passe</label>
+          <form onSubmit={handleLogin} className="space-y-5">
+            <div className="space-y-1">
+              <label className="text-[9px] uppercase tracking-widest font-black text-slate-500 ml-2">Identifiant (Email)</label>
               <div className="relative">
-                <KeyRound className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
-                <input
-                  type="password"
-                  placeholder="••••••••"
-                  className="w-full bg-black/40 border border-white/5 rounded-2xl p-4 pl-12 text-white outline-none focus:border-emerald-500 transition-all text-sm"
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600" size={16} />
+                <input 
+                  type="email" 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full bg-[#050505] border border-slate-800 rounded-xl p-4 pl-12 text-sm text-white focus:border-red-600 outline-none transition-all"
+                  placeholder="nom@amaru-homes.com"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-[9px] uppercase tracking-widest font-black text-slate-500 ml-2">Clé de sécurité</label>
+              <div className="relative">
+                <KeyRound className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600" size={16} />
+                <input 
+                  type="password" 
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  required={method === "password"}
+                  className="w-full bg-[#050505] border border-slate-800 rounded-xl p-4 pl-12 text-sm text-white focus:border-red-600 outline-none transition-all"
+                  placeholder="••••••••"
+                  required
                 />
               </div>
             </div>
-          ) : (
-            <div className="space-y-2 animate-in slide-in-from-left-2">
-              <label className="text-[10px] font-black text-slate-500 uppercase ml-2 tracking-widest block">Code PIN</label>
-              <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
-                <input
-                  type="password"
-                  inputMode="numeric"
-                  placeholder="0000"
-                  maxLength={6}
-                  className="w-full bg-black/40 border border-white/5 rounded-2xl p-4 pl-12 text-white outline-none focus:border-emerald-500 transition-all tracking-[0.5em] font-black text-lg"
-                  value={pin}
-                  onChange={(e) => setPin(e.target.value)}
-                  required={method === "pin"}
-                />
-              </div>
-            </div>
-          )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className={`w-full font-black py-5 rounded-2xl transition-all uppercase text-xs tracking-widest flex items-center justify-center gap-2 shadow-xl ${
-              method === 'pin' ? 'bg-emerald-500 text-black shadow-emerald-500/20' : 'bg-white text-black shadow-white/10'
-            }`}
-          >
-            {loading ? <Loader2 className="animate-spin" size={18} /> : "Accéder à mon espace"}
-          </button>
-        </form>
+            {errorMsg && (
+              <div className="bg-red-500/10 border border-red-500/20 text-red-500 text-[10px] p-3 rounded-lg text-center font-bold uppercase tracking-wider">
+                {errorMsg}
+              </div>
+            )}
+
+            <button 
+              type="submit" 
+              disabled={loading}
+              className="w-full bg-red-700 hover:bg-red-600 py-4 mt-4 rounded-xl font-black uppercase text-[10px] tracking-widest transition-all shadow-lg flex items-center justify-center text-white"
+            >
+              {loading ? <Loader2 className="animate-spin" size={18} /> : "S'AUTHENTIFIER"}
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );
