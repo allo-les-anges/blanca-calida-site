@@ -5,6 +5,7 @@ import { createClient } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
 import { Lock, Mail, Loader2, ShieldCheck, KeyRound } from "lucide-react";
 
+// CRUCIAL : On crée le client à l'extérieur pour éviter "Multiple GoTrueClient instances"
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -28,15 +29,16 @@ export default function LoginPage() {
 
       // --- 1. AUTHENTIFICATION ---
       if (method === "password") {
-        // CONNEXION ADMIN / SUPER_ADMIN (Table: profiles)
-        const { error: authError } = await supabase.auth.signInWithPassword({
+        // Tentative de connexion Auth Supabase
+        const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
           email: userEmail,
           password: password,
         });
         
         if (authError) throw authError;
 
-        // On récupère le rôle uniquement dans la table profiles
+        // Si l'auth réussit, on cherche DIRECTEMENT le rôle dans 'profiles'
+        // On ne vérifie que cette table pour le mode mot de passe
         const { data: profile, error: profileError } = await supabase
           .from("profiles")
           .select("role")
@@ -44,12 +46,12 @@ export default function LoginPage() {
           .single();
         
         if (profileError || !profile) {
-          throw new Error("Aucun profil administrateur trouvé pour cet e-mail.");
+          throw new Error("Accès refusé : Aucun profil administrateur lié à cet email.");
         }
 
         finalRole = profile.role;
       } else {
-        // CONNEXION STAFF / PRESTATAIRE (Table: staff_prestataires via PIN)
+        // CONNEXION PAR PIN (Vérifie uniquement la table staff_prestataires)
         const { data: staff, error: staffError } = await supabase
           .from("staff_prestataires")
           .select("*")
@@ -61,7 +63,7 @@ export default function LoginPage() {
           throw new Error("Email ou Code PIN incorrect.");
         }
         
-        // Stockage de la session spécifique pour le staff (car pas de session Auth classique)
+        // On simule une session pour le staff terrain
         localStorage.setItem("staff_session", JSON.stringify(staff));
         finalRole = staff.role;
       }
@@ -69,17 +71,14 @@ export default function LoginPage() {
       // --- 2. LOGIQUE DE REDIRECTION ---
       const roleClean = finalRole?.toLowerCase().trim();
 
+      // Vérification spécifique pour Gaëtan ou les super admins
       if (roleClean === "super_admin" || roleClean === "super-admin") {
-        // Redirection vers la console Gaëtan
         router.push("/super-admin");
       } else if (roleClean === "admin") {
-        // Redirection vers le Dashboard Agence
         router.push("/admin/dashboard");
       } else if (roleClean === "staff" || roleClean === "prestataire") {
-        // Redirection vers l'interface chantier
         router.push("/admin-chantier");
       } else {
-        // Redirection de secours
         router.push("/admin/dashboard");
       }
 
@@ -101,7 +100,6 @@ export default function LoginPage() {
             Amaru-Homes <span className="text-emerald-500 text-sm align-top">ACCESS</span>
           </h1>
           
-          {/* SWITCHER DE MÉTHODE */}
           <div className="flex bg-black/40 p-1 rounded-2xl border border-white/5 mt-8 w-64 mx-auto">
             <button 
               type="button"
@@ -121,13 +119,13 @@ export default function LoginPage() {
         </div>
 
         <form onSubmit={handleLogin} className="bg-[#0F172A] p-8 rounded-[2.5rem] border border-white/5 shadow-2xl space-y-6">
-          {/* EMAIL (Commun aux deux méthodes) */}
           <div className="space-y-2">
             <label className="text-[10px] font-black text-slate-500 uppercase ml-2 tracking-widest block">Identifiant Email</label>
             <div className="relative">
               <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
               <input
                 type="email"
+                autoComplete="email"
                 placeholder="votre@email.com"
                 className="w-full bg-black/40 border border-white/5 rounded-2xl p-4 pl-12 text-white outline-none focus:border-emerald-500 transition-all text-sm"
                 value={email}
@@ -137,7 +135,6 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {/* MOT DE PASSE (Méthode Password) */}
           {method === "password" ? (
             <div className="space-y-2 animate-in slide-in-from-right-2 duration-300">
               <label className="text-[10px] font-black text-slate-500 uppercase ml-2 tracking-widest block">Mot de passe</label>
@@ -145,6 +142,7 @@ export default function LoginPage() {
                 <KeyRound className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
                 <input
                   type="password"
+                  autoComplete="current-password"
                   placeholder="••••••••"
                   className="w-full bg-black/40 border border-white/5 rounded-2xl p-4 pl-12 text-white outline-none focus:border-emerald-500 transition-all text-sm"
                   value={password}
@@ -154,13 +152,13 @@ export default function LoginPage() {
               </div>
             </div>
           ) : (
-            /* CODE PIN (Méthode PIN) */
             <div className="space-y-2 animate-in slide-in-from-left-2 duration-300">
               <label className="text-[10px] font-black text-slate-500 uppercase ml-2 tracking-widest block">Code PIN</label>
               <div className="relative">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
                 <input
                   type="password"
+                  autoComplete="one-time-code"
                   inputMode="numeric"
                   placeholder="0000"
                   maxLength={6}
