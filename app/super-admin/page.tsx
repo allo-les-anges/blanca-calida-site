@@ -41,15 +41,18 @@ export default function SuperAdminDashboard() {
 
   // 1. CHARGEMENT DES AGENCES
   const fetchAdmins = useCallback(async () => {
+    // Correction RLS : on s'assure que la requête ne plante pas le rendu
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
       .order('created_at', { ascending: false }); 
       
     if (!error && data) {
-      // On filtre pour ne pas afficher Gaëtan dans la liste des agences à supprimer
+      // Filtrage de Gaëtan pour la liste
       const filtered = data.filter(a => a.email?.toLowerCase().trim() !== 'gaetan@amaru-homes.com');
       setAdmins(filtered);
+    } else {
+      console.error("Erreur fetchAdmins:", error);
     }
   }, [supabase]);
 
@@ -57,10 +60,9 @@ export default function SuperAdminDashboard() {
   useEffect(() => {
     const checkAccess = async () => {
       try {
-        // On récupère la session
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
-        if (!session) {
+        if (sessionError || !session) {
           setAuthStatus('denied');
           return;
         }
@@ -69,6 +71,7 @@ export default function SuperAdminDashboard() {
         setUserEmail(currentEmail || null);
 
         // LOGIQUE MASTER KEY : Gaëtan passe toujours
+        // Note : Vérifie bien que ton email en base est exactement celui-ci
         if (currentEmail === 'gaetan@amaru-homes.com') {
           setAuthStatus('authorized');
           fetchAdmins();
@@ -76,19 +79,25 @@ export default function SuperAdminDashboard() {
         }
 
         // Sinon on vérifie le rôle en base
-        const { data: profile } = await supabase
+        // CORRECTION : On cherche par email plutôt que par ID si l'ID pose problème avec le SSR
+        const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('role')
-          .eq('id', session.user.id)
+          .eq('email', currentEmail)
           .single();
 
-        if (profile?.role === 'super_admin') {
+        // CORRECTION : Tolérance super_admin (avec underscore)
+        const userRole = profile?.role?.toLowerCase().trim();
+        
+        if (userRole === 'super_admin' || userRole === 'super-admin') {
           setAuthStatus('authorized');
           fetchAdmins();
         } else {
+          console.warn("Accès refusé pour le rôle:", userRole);
           setAuthStatus('denied');
         }
       } catch (err) {
+        console.error("Erreur critique checkAccess:", err);
         setAuthStatus('denied');
       }
     };
@@ -101,7 +110,8 @@ export default function SuperAdminDashboard() {
     await supabase.auth.signOut();
     localStorage.clear();
     router.push('/login');
-    router.refresh();
+    // On utilise window.location pour forcer un clean state après déconnexion super-admin
+    window.location.href = '/login';
   };
 
   const createAdminAccount = async (e: React.FormEvent) => {
@@ -110,7 +120,6 @@ export default function SuperAdminDashboard() {
     try {
       const cleanEmail = email.toLowerCase().trim();
       
-      // Création Auth
       const { data: authData, error: authError } = await supabase.auth.signUp({ 
         email: cleanEmail, 
         password 
@@ -119,7 +128,6 @@ export default function SuperAdminDashboard() {
       if (authError) throw authError;
 
       if (authData?.user) {
-        // Création Profil
         const { error: profileError } = await supabase.from('profiles').upsert({ 
           id: authData.user.id, 
           email: cleanEmail, 
@@ -127,7 +135,8 @@ export default function SuperAdminDashboard() {
           company_name: companyName,
           prenom: adminPrenom,
           nom: adminNom,
-          pack: pack
+          pack: pack,
+          created_at: new Date().toISOString()
         });
 
         if (profileError) throw profileError;
@@ -184,12 +193,12 @@ export default function SuperAdminDashboard() {
   // RENDU : ACCÈS REFUSÉ
   if (authStatus === 'denied') return (
     <div className="min-h-screen bg-[#050505] flex items-center justify-center p-6 text-center">
-        <div className="bg-[#0a0a0a] border border-red-900/30 p-12 rounded-[3rem] shadow-2xl max-w-md w-full">
+        <div className="bg-[#0a0a0a] border border-red-900/30 p-12 rounded-[3rem] shadow-2xl max-w-md w-full text-left">
           <XCircle size={64} className="text-red-600 mx-auto mb-6" />
-          <h2 className="text-3xl font-serif text-white mb-6 tracking-tighter">Accès Refusé</h2>
-          <p className="text-slate-500 mb-8 text-sm leading-relaxed">
+          <h2 className="text-3xl font-serif text-white mb-6 tracking-tighter text-center">Accès Refusé</h2>
+          <p className="text-slate-500 mb-8 text-sm leading-relaxed text-center">
             Ce terminal est crypté et réservé à l'administrateur Gaëtan. <br/>
-            <span className="text-red-900/60 text-[10px] font-mono mt-4 block">Session : {userEmail || "Inconnue"}</span>
+            <span className="text-red-900/60 text-[10px] font-mono mt-4 block">Session détectée : {userEmail || "Inconnue"}</span>
           </p>
           <button onClick={handleLogout} className="w-full bg-white text-black py-4 rounded-xl font-bold uppercase text-[10px] tracking-widest hover:bg-slate-200 transition-all">Changer de session</button>
         </div>
@@ -199,14 +208,11 @@ export default function SuperAdminDashboard() {
   // RENDU : DASHBOARD AUTHORISÉ
   return (
     <div className="min-h-screen bg-[#050505] text-slate-200 font-sans selection:bg-red-500/30">
-      {/* Background Effects */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none opacity-50">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-red-900/10 blur-[120px] rounded-full" />
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto p-6 md:p-12">
-        
-        {/* HEADER */}
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-16 text-left">
           <div className="flex items-center gap-6">
             <div className="h-16 w-16 bg-gradient-to-br from-red-600 to-red-900 rounded-2xl flex items-center justify-center shadow-lg shadow-red-900/20">
@@ -231,8 +237,6 @@ export default function SuperAdminDashboard() {
         </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 text-left">
-          
-          {/* SECTION GAUCHE : FORMULAIRE */}
           <section className="lg:col-span-5 space-y-6">
             <div className="bg-[#0a0a0a] border border-slate-800/60 rounded-[2.5rem] p-8 shadow-2xl">
               <h2 className="text-xl font-serif italic text-white mb-8 flex items-center gap-3">
@@ -286,7 +290,6 @@ export default function SuperAdminDashboard() {
             </div>
           </section>
 
-          {/* SECTION DROITE : LISTE DES AGENCES */}
           <section className="lg:col-span-7 space-y-6">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-4">
               <h2 className="text-xl font-serif italic text-white flex items-center gap-3">
@@ -307,7 +310,7 @@ export default function SuperAdminDashboard() {
             <div className="space-y-4 max-h-[700px] overflow-y-auto pr-2 custom-scrollbar">
               {filteredAdmins.map((admin) => (
                 <div key={admin.id} className="group bg-[#0a0a0a] border border-slate-800/60 p-6 rounded-[2rem] hover:border-red-900/40 hover:bg-[#0c0c0c] transition-all">
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 text-left">
                     <div className="flex items-center gap-5">
                       <div className="h-12 w-12 bg-black border border-slate-800 rounded-xl flex items-center justify-center text-red-600 group-hover:scale-110 transition-transform">
                         <Building2 size={20} />
