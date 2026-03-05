@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, ShieldCheck, RefreshCw } from "lucide-center";
+import { Loader2, ShieldCheck, RefreshCw } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 
 export default function LoginPage() {
@@ -12,7 +12,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  // --- MODIFICATION ICI : ON NE REDIRIGE PLUS AUTOMATIQUEMENT ---
+  // Désactivation de la redirection automatique pour forcer l'action manuelle
   useEffect(() => {
     console.log("Portail Amaru prêt. Connexion automatique désactivée.");
   }, []);
@@ -36,6 +36,7 @@ export default function LoginPage() {
         return;
       }
 
+      // Stockage de secours pour éviter les éjections sur le dashboard
       localStorage.setItem("staff_session", JSON.stringify({
         email: profile.email,
         role: profile.role,
@@ -78,7 +79,8 @@ export default function LoginPage() {
     await supabase.auth.signOut();
     localStorage.clear();
     sessionStorage.clear();
-    // On force un nettoyage complet des cookies de session
+    
+    // Nettoyage manuel des cookies au cas où
     const cookies = document.cookie.split(";");
     for (let i = 0; i < cookies.length; i++) {
         const cookie = cookies[i];
