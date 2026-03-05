@@ -23,64 +23,68 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      let userEmail = email.trim().toLowerCase();
+      const userEmail = email.trim().toLowerCase();
+      let finalRole = "";
 
-      // 1. AUTHENTIFICATION
+      // --- 1. AUTHENTIFICATION ---
       if (method === "password") {
         const { error } = await supabase.auth.signInWithPassword({
           email: userEmail,
           password: password,
         });
         if (error) throw error;
+
+        // Si Mot de passe, on cherche d'abord dans la table PROFILES
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("email", userEmail)
+          .single();
+        
+        if (profile) finalRole = profile.role;
       } else {
-        const { data, error } = await supabase
+        // Si PIN, on cherche dans STAFF_PRESTATAIRES
+        const { data: staff, error } = await supabase
           .from("staff_prestataires")
           .select("*")
           .eq("email", userEmail)
           .eq("pin_code", pin.trim())
           .single();
 
-        if (error || !data) throw new Error("Email ou Code PIN incorrect.");
+        if (error || !staff) throw new Error("Email ou Code PIN incorrect.");
         
-        // Stockage de la session PIN
-        localStorage.setItem("staff_session", JSON.stringify(data));
+        localStorage.setItem("staff_session", JSON.stringify(staff));
+        finalRole = staff.role;
       }
 
-      // 2. RÉCUPÉRATION DU RÔLE POUR REDIRECTION
-      // On cherche dans la table staff qui est cet utilisateur
-      const { data: staffProfile, error: roleError } = await supabase
-        .from("staff_prestataires")
-        .select("role")
-        .eq("email", userEmail)
-        .single();
+      // --- 2. DOUBLE VÉRIFICATION (Si le rôle n'est toujours pas trouvé) ---
+      if (!finalRole) {
+        const { data: staffCheck } = await supabase
+          .from("staff_prestataires")
+          .select("role")
+          .eq("email", userEmail)
+          .single();
+        if (staffCheck) finalRole = staffCheck.role;
+      }
 
-      if (roleError || !staffProfile) {
-        // Si l'utilisateur est dans l'Auth mais pas dans la table Staff, 
-        // par sécurité on l'envoie sur le dashboard par défaut ou on bloque.
+      // --- 3. LOGIQUE DE REDIRECTION STRICTE ---
+      console.log("Rôle détecté :", finalRole); // Pour debug
+
+      const roleClean = finalRole?.toLowerCase().trim();
+
+      if (roleClean === "super-admin") {
+        router.push("/super-admin");
+      } else if (roleClean === "admin") {
         router.push("/admin/dashboard");
-        return;
-      }
-
-      // 3. LOGIQUE DE REDIRECTION SELON LE RÔLE
-      const userRole = staffProfile.role?.toLowerCase();
-
-      switch (userRole) {
-        case "super-admin":
-          router.push("/super-admin");
-          break;
-        case "admin":
-          router.push("/admin/dashboard");
-          break;
-        case "staff":
-        case "prestataire":
-          router.push("/admin-chantier");
-          break;
-        default:
-          router.push("/admin/dashboard");
+      } else if (roleClean === "staff" || roleClean === "prestataire") {
+        router.push("/admin-chantier");
+      } else {
+        // Par défaut si rôle inconnu
+        router.push("/admin/dashboard");
       }
 
     } catch (err: any) {
-      alert("Erreur : " + err.message);
+      alert("Erreur d'accès : " + err.message);
     } finally {
       setLoading(false);
     }
@@ -93,11 +97,10 @@ export default function LoginPage() {
           <div className="inline-flex p-4 rounded-3xl bg-emerald-500/10 text-emerald-500 mb-4">
             <ShieldCheck size={40} />
           </div>
-          <h1 className="text-white text-3xl font-black uppercase tracking-tighter italic">
+          <h1 className="text-white text-3xl font-black uppercase italic tracking-tighter">
             Amaru-Homes <span className="text-emerald-500 text-sm align-top">ACCESS</span>
           </h1>
           
-          {/* Sélecteur de méthode */}
           <div className="flex bg-black/40 p-1 rounded-2xl border border-white/5 mt-8 w-64 mx-auto">
             <button 
               type="button"
@@ -117,7 +120,6 @@ export default function LoginPage() {
         </div>
 
         <form onSubmit={handleLogin} className="bg-[#0F172A] p-8 rounded-[2.5rem] border border-white/5 shadow-2xl space-y-6">
-          {/* Champ Email Commun */}
           <div className="space-y-2">
             <label className="text-[10px] font-black text-slate-500 uppercase ml-2 tracking-widest text-left block">Identifiant Email</label>
             <div className="relative">
@@ -145,13 +147,12 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required={method === "password"}
-                  autoComplete="current-password"
                 />
               </div>
             </div>
           ) : (
             <div className="space-y-2 animate-in slide-in-from-left-2 duration-300">
-              <label className="text-[10px] font-black text-slate-500 uppercase ml-2 tracking-widest text-left block">Code PIN Personnel</label>
+              <label className="text-[10px] font-black text-slate-500 uppercase ml-2 tracking-widest text-left block">Code PIN</label>
               <div className="relative">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
                 <input
@@ -175,12 +176,12 @@ export default function LoginPage() {
               method === 'pin' ? 'bg-emerald-500 text-black shadow-emerald-500/20' : 'bg-white text-black shadow-white/10'
             }`}
           >
-            {loading ? <Loader2 className="animate-spin" size={18} /> : "Vérifier les accès"}
+            {loading ? <Loader2 className="animate-spin" size={18} /> : "Accéder à mon espace"}
           </button>
         </form>
 
         <p className="text-center text-[10px] text-slate-600 uppercase font-bold tracking-widest">
-          Redirection automatique selon profil • Amaru Homes
+          Système de routage Multi-Tables actif
         </p>
       </div>
     </div>
