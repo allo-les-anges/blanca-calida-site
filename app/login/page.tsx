@@ -28,47 +28,58 @@ export default function LoginPage() {
 
       // --- 1. AUTHENTIFICATION ---
       if (method === "password") {
-        const { error } = await supabase.auth.signInWithPassword({
+        // CONNEXION ADMIN / SUPER_ADMIN (Table: profiles)
+        const { error: authError } = await supabase.auth.signInWithPassword({
           email: userEmail,
           password: password,
         });
-        if (error) throw error;
+        
+        if (authError) throw authError;
 
-        // On cherche dans PROFILES (Rôles: super_admin, admin)
-        const { data: profile } = await supabase
+        // On récupère le rôle uniquement dans la table profiles
+        const { data: profile, error: profileError } = await supabase
           .from("profiles")
           .select("role")
           .eq("email", userEmail)
           .single();
         
-        if (profile) finalRole = profile.role;
+        if (profileError || !profile) {
+          throw new Error("Aucun profil administrateur trouvé pour cet e-mail.");
+        }
+
+        finalRole = profile.role;
       } else {
-        // Connexion par PIN (Table staff_prestataires)
-        const { data: staff, error } = await supabase
+        // CONNEXION STAFF / PRESTATAIRE (Table: staff_prestataires via PIN)
+        const { data: staff, error: staffError } = await supabase
           .from("staff_prestataires")
           .select("*")
           .eq("email", userEmail)
           .eq("pin_code", pin.trim())
           .single();
 
-        if (error || !staff) throw new Error("Email ou Code PIN incorrect.");
+        if (staffError || !staff) {
+          throw new Error("Email ou Code PIN incorrect.");
+        }
         
+        // Stockage de la session spécifique pour le staff (car pas de session Auth classique)
         localStorage.setItem("staff_session", JSON.stringify(staff));
         finalRole = staff.role;
       }
 
-      // --- 2. LOGIQUE DE REDIRECTION (Adaptée à tes images) ---
-      // Nettoyage de la chaîne (enlève espaces et met en minuscule)
+      // --- 2. LOGIQUE DE REDIRECTION ---
       const roleClean = finalRole?.toLowerCase().trim();
 
       if (roleClean === "super_admin" || roleClean === "super-admin") {
+        // Redirection vers la console Gaëtan
         router.push("/super-admin");
       } else if (roleClean === "admin") {
+        // Redirection vers le Dashboard Agence
         router.push("/admin/dashboard");
       } else if (roleClean === "staff" || roleClean === "prestataire") {
+        // Redirection vers l'interface chantier
         router.push("/admin-chantier");
       } else {
-        // Redirection par défaut vers le dashboard standard
+        // Redirection de secours
         router.push("/admin/dashboard");
       }
 
@@ -90,6 +101,7 @@ export default function LoginPage() {
             Amaru-Homes <span className="text-emerald-500 text-sm align-top">ACCESS</span>
           </h1>
           
+          {/* SWITCHER DE MÉTHODE */}
           <div className="flex bg-black/40 p-1 rounded-2xl border border-white/5 mt-8 w-64 mx-auto">
             <button 
               type="button"
@@ -109,6 +121,7 @@ export default function LoginPage() {
         </div>
 
         <form onSubmit={handleLogin} className="bg-[#0F172A] p-8 rounded-[2.5rem] border border-white/5 shadow-2xl space-y-6">
+          {/* EMAIL (Commun aux deux méthodes) */}
           <div className="space-y-2">
             <label className="text-[10px] font-black text-slate-500 uppercase ml-2 tracking-widest block">Identifiant Email</label>
             <div className="relative">
@@ -124,6 +137,7 @@ export default function LoginPage() {
             </div>
           </div>
 
+          {/* MOT DE PASSE (Méthode Password) */}
           {method === "password" ? (
             <div className="space-y-2 animate-in slide-in-from-right-2 duration-300">
               <label className="text-[10px] font-black text-slate-500 uppercase ml-2 tracking-widest block">Mot de passe</label>
@@ -140,6 +154,7 @@ export default function LoginPage() {
               </div>
             </div>
           ) : (
+            /* CODE PIN (Méthode PIN) */
             <div className="space-y-2 animate-in slide-in-from-left-2 duration-300">
               <label className="text-[10px] font-black text-slate-500 uppercase ml-2 tracking-widest block">Code PIN</label>
               <div className="relative">
