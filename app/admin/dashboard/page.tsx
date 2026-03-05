@@ -31,22 +31,17 @@ export default function AdminDashboard() {
   const [selectedProjet, setSelectedProjet] = useState<any>(null);
   const [staffList, setStaffList] = useState<any[]>([]);
   
-  // Modales
   const [showModal, setShowModal] = useState(false);
   const [showStaffModal, setShowStaffModal] = useState(false);
 
-  // Documents et rapports
   const [projectDocs, setProjectDocs] = useState<any[]>([]);
   const [projectReports, setProjectReports] = useState<any[]>([]);
 
-  // État local pour l'édition (évite les lags d'input)
   const [editFields, setEditFields] = useState<any>({});
   const [agencyProfile, setAgencyProfile] = useState<any>({ company_name: "Amaru-Homes" });
   
-  // Nouveau Staff
   const [newStaff, setNewStaff] = useState({ nom: "", prenom: "", email: "", role: "staff" });
   
-  // Nouveau Projet
   const [newProject, setNewProject] = useState({
     client_nom: "", client_prenom: "", email_client: "", telephone: "",
     rue: "", code_postal: "", ville: "", pays: "Espagne",
@@ -64,26 +59,22 @@ export default function AdminDashboard() {
       const currentAgency = profile?.company_name || "Amaru-Homes";
       setAgencyProfile(profile || { company_name: "Amaru-Homes" });
 
-      // Charger les chantiers de l'agence
       const { data: projData } = await supabase.from('suivi_chantier')
         .select('*').eq('company_name', currentAgency).order('created_at', { ascending: false });
       if (projData) setProjets(projData);
 
-      // Charger les collaborateurs (Table profiles filtrée par agence)
       const { data: stfData } = await supabase.from('profiles')
         .select('*').eq('company_name', currentAgency).neq('email', session.user.email);
       if (stfData) setStaffList(stfData);
 
-    } catch (err) { console.error(err); } finally { setLoading(false); }
+    } catch (err: any) { console.error(err); } finally { setLoading(false); }
   }, []);
 
   const loadProjectExtras = async (projectId: string) => {
-    // 1. Charger tous les documents liés
     const { data: docs } = await supabase.from('documents_projets')
       .select('*').eq('projet_id', projectId).order('created_at', { ascending: false });
     setProjectDocs(docs || []);
 
-    // 2. Charger l'historique des notes envoyées
     const { data: reports } = await supabase.from('chantier_updates')
       .select('*').eq('projet_id', projectId).order('created_at', { ascending: false });
     setProjectReports(reports || []);
@@ -113,7 +104,6 @@ export default function AdminDashboard() {
           updated_at: new Date().toISOString()
         }).eq('id', selectedProjet.id);
 
-      // Créer une entrée dans l'historique
       await supabase.from('chantier_updates').insert([{
           projet_id: selectedProjet.id,
           etape_actuelle: editFields.etape_actuelle,
@@ -124,7 +114,7 @@ export default function AdminDashboard() {
         alert("Dossier client et rapport mis à jour !");
         loadData();
       }
-    } catch (err) { console.error(err); }
+    } catch (err: any) { console.error(err); }
     setUpdating(false);
   };
 
@@ -146,7 +136,11 @@ export default function AdminDashboard() {
         type: file.type
       }]);
       loadProjectExtras(selectedProjet.id);
-    } catch (err) { alert(err.message); } finally { setUpdating(false); }
+    } catch (err: any) { 
+        alert(err.message || "Erreur lors de l'upload"); 
+    } finally { 
+        setUpdating(false); 
+    }
   };
 
   return (
@@ -229,7 +223,6 @@ export default function AdminDashboard() {
                   </div>
                 </section>
 
-                {/* DOCUMENTS & PHOTOS */}
                 <section className="bg-white/5 p-6 rounded-[2rem] border border-white/5 space-y-4">
                   <div className="flex justify-between items-center">
                     <h3 className="text-[10px] font-black uppercase text-orange-400 tracking-widest flex items-center gap-2"><FileText size={14}/> Documents & Photos</h3>
@@ -251,7 +244,7 @@ export default function AdminDashboard() {
                 </section>
               </div>
 
-              {/* JOURNAL AGENT ET HISTORIQUE */}
+              {/* JOURNAL AGENT */}
               <div className="lg:col-span-2 space-y-6">
                 <div className="bg-[#0F172A] p-10 rounded-[3rem] border border-white/5 space-y-6">
                   <div className="flex justify-between items-center">
@@ -267,9 +260,8 @@ export default function AdminDashboard() {
                   />
                 </div>
 
-                {/* Historique des notes */}
                 <section className="bg-white/5 p-8 rounded-[3rem] border border-white/5">
-                    <h3 className="text-[10px] font-black uppercase text-blue-400 tracking-widest flex items-center gap-2 mb-4"><Clock size={14}/> Historique des rapports envoyés</h3>
+                    <h3 className="text-[10px] font-black uppercase text-blue-400 tracking-widest flex items-center gap-2 mb-4"><Clock size={14}/> Historique des rapports</h3>
                     <div className="space-y-3">
                         {projectReports.map(rep => (
                             <div key={rep.id} className="bg-black/20 p-4 rounded-2xl border border-white/5">
@@ -297,8 +289,8 @@ export default function AdminDashboard() {
       {showStaffModal && (
         <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex items-center justify-center p-4">
           <div className="bg-[#0F172A] w-full max-w-md rounded-[2.5rem] border border-white/10 p-8">
-            <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-black uppercase text-white tracking-tighter">Ajouter un collaborateur</h2>
+            <div className="flex justify-between items-center mb-6 text-left">
+                <h2 className="text-xl font-black uppercase text-white tracking-tighter">Collaborateur</h2>
                 <button onClick={() => setShowStaffModal(false)} className="text-slate-500 hover:text-white"><X size={24} /></button>
             </div>
             <form onSubmit={async (e) => { 
@@ -310,12 +302,44 @@ export default function AdminDashboard() {
                 <input required placeholder="Prénom" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewStaff({...newStaff, prenom: e.target.value})} />
                 <input required placeholder="Nom" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewStaff({...newStaff, nom: e.target.value})} />
               </div>
-              <input required type="email" placeholder="Email (identifiant de connexion)" className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewStaff({...newStaff, email: e.target.value})} />
+              <input required type="email" placeholder="Email" className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewStaff({...newStaff, email: e.target.value})} />
               <select className="w-full bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewStaff({...newStaff, role: e.target.value})}>
                 <option value="staff">Agent de suivi</option>
                 <option value="admin">Administrateur agence</option>
               </select>
-              <button type="submit" className="w-full bg-blue-500 text-black py-4 rounded-xl font-black text-xs uppercase mt-4">Créer l'accès dashboard</button>
+              <button type="submit" className="w-full bg-blue-500 text-black py-4 rounded-xl font-black text-xs uppercase mt-4">Créer l'accès</button>
+            </form>
+          </div>
+        </div>
+      )}
+      
+      {/* MODAL CLIENT */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex items-center justify-center p-4">
+          <div className="bg-[#0F172A] w-full max-w-2xl rounded-[3rem] border border-white/10 p-10">
+            <div className="flex justify-between items-center mb-8 text-left">
+                <h2 className="text-2xl font-black uppercase text-white tracking-tighter">Nouveau Dossier</h2>
+                <button onClick={() => setShowModal(false)} className="text-slate-500 hover:text-white"><X size={24} /></button>
+            </div>
+            <form onSubmit={async (e) => {
+                e.preventDefault();
+                const pin = Math.floor(100000 + Math.random() * 900000).toString();
+                await supabase.from("suivi_chantier").insert([{
+                    ...newProject,
+                    company_name: agencyProfile.company_name,
+                    pin_code: pin,
+                    etape_actuelle: PHASES_CHANTIER[0]
+                }]);
+                setShowModal(false); loadData();
+            }} className="grid grid-cols-2 gap-4 text-left">
+                <input required placeholder="Prénom Client" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, client_prenom: e.target.value})} />
+                <input required placeholder="Nom Client" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, client_nom: e.target.value})} />
+                <input required placeholder="Email Client" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, email_client: e.target.value})} />
+                <input required placeholder="Téléphone" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, telephone: e.target.value})} />
+                <input required placeholder="Nom de la Villa" className="col-span-2 bg-black/50 border border-white/10 rounded-xl p-4 text-xs font-bold text-emerald-500" onChange={e => setNewProject({...newProject, nom_villa: e.target.value})} />
+                <input required placeholder="Ville" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, ville: e.target.value})} />
+                <input required type="number" placeholder="Cashback (€)" className="bg-black/50 border border-white/10 rounded-xl p-4 text-xs" onChange={e => setNewProject({...newProject, montant_cashback: Number(e.target.value)})} />
+                <button type="submit" className="col-span-2 bg-emerald-500 text-black py-5 rounded-2xl font-black text-xs uppercase mt-4">Créer le chantier</button>
             </form>
           </div>
         </div>
