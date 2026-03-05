@@ -68,7 +68,7 @@ export default function AdminDashboard() {
     } catch (err: any) { console.error(err); } finally { setLoading(false); }
   }, []);
 
-  // --- CHARGEMENT DES DOCUMENTS AVEC MAPPING DE LA COLONNE url_fichier ---
+  // --- CHARGEMENT DES DOCUMENTS CORRIGÉ ---
   const loadProjectExtras = async (projectId: string) => {
     if (!projectId) return;
     
@@ -82,10 +82,10 @@ export default function AdminDashboard() {
       if (docError) {
         console.error("Erreur Documents:", docError.message);
       } else {
-        // CORRECTION : On s'assure que .url utilise bien la colonne .url_fichier de ta BDD
+        // On s'assure que l'on utilise bien url_fichier de la BDD
         const formattedDocs = docs?.map(d => ({
           ...d,
-          url: d.url_fichier || d.url // Supporte les deux au cas où
+          displayUrl: d.url_fichier || d.url // On crée un champ displayUrl sécurisé
         })) || [];
         setProjectDocs(formattedDocs);
       }
@@ -142,7 +142,7 @@ export default function AdminDashboard() {
     setUpdating(false);
   };
 
-  // --- LOGIQUE UPLOAD CORRIGÉE (NOM DE COLONNE BDD) ---
+  // --- UPLOAD DANS LA BONNE COLONNE (url_fichier) ---
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !selectedProjet) return;
@@ -160,24 +160,32 @@ export default function AdminDashboard() {
         .from('documents-clients')
         .getPublicUrl(fileName);
 
-      // CORRECTION : On insère dans url_fichier pour correspondre à ta BDD
-      await supabase.from('documents_projets').insert([{
+      // CORRECTION : Insertion dans url_fichier pour correspondre à ta BDD
+      const { error: dbError } = await supabase.from('documents_projets').insert([{
         projet_id: selectedProjet.id, 
         nom_fichier: file.name, 
         url_fichier: data.publicUrl, 
         type: file.type
       }]);
+
+      if (dbError) throw dbError;
       
       loadProjectExtras(selectedProjet.id);
-    } catch (err: any) { alert(err.message); } finally { setUpdating(false); }
+    } catch (err: any) { 
+      alert("Erreur lors de l'envoi : " + err.message); 
+    } finally { 
+      setUpdating(false); 
+    }
   };
 
   const handleDeleteFile = async (doc: any) => {
     if(!confirm("Supprimer ce document ?")) return;
     setUpdating(true);
     try {
-      // Extraction du chemin pour le storage
-      const filePath = doc.url.split('/documents-clients/')[1];
+      // Extraction du chemin pour le storage (sécurité)
+      const urlToDelete = doc.url_fichier || doc.url;
+      const filePath = urlToDelete.split('/documents-clients/')[1];
+      
       if (filePath) {
         await supabase.storage.from('documents-clients').remove([filePath]);
       }
@@ -257,12 +265,13 @@ export default function AdminDashboard() {
                   </div>
                 </section>
 
-                {/* --- DOCUMENTS SECTION CORRIGÉE --- */}
+                {/* --- SECTION DOCUMENTS CORRIGÉE --- */}
                 <section className="bg-white/5 p-6 rounded-[2rem] border border-white/5 space-y-4">
                   <div className="flex justify-between items-center">
                     <h3 className="text-[10px] font-black uppercase text-orange-400 tracking-widest flex items-center gap-2"><FileText size={14}/> Médias & Documents</h3>
                     <label className="cursor-pointer bg-orange-500/10 text-orange-500 p-2 rounded-lg hover:bg-orange-500 transition-all">
-                      <Plus size={14}/><input type="file" className="hidden" onChange={handleFileUpload}/>
+                      {updating ? <Loader2 size={14} className="animate-spin"/> : <Plus size={14}/>}
+                      <input type="file" className="hidden" onChange={handleFileUpload} disabled={updating}/>
                     </label>
                   </div>
                   
@@ -271,7 +280,7 @@ export default function AdminDashboard() {
                       <div key={doc.id} className="group relative bg-black/40 rounded-2xl border border-white/5 overflow-hidden hover:border-orange-500/50 transition-all">
                         {doc.type?.includes('image') && (
                           <div className="w-full h-20 overflow-hidden opacity-40 group-hover:opacity-100 transition-opacity">
-                             <img src={doc.url} alt="" className="w-full h-full object-cover" />
+                             <img src={doc.displayUrl} alt="" className="w-full h-full object-cover" />
                           </div>
                         )}
 
@@ -279,8 +288,8 @@ export default function AdminDashboard() {
                           <div 
                             className="flex items-center gap-3 cursor-pointer min-w-0 flex-1" 
                             onClick={() => {
-                                if(doc.url) window.open(doc.url, '_blank');
-                                else alert("Fichier introuvable");
+                                if(doc.displayUrl) window.open(doc.displayUrl, '_blank');
+                                else alert("Lien du fichier manquant");
                             }}
                           >
                             <div className="p-2 bg-white/5 rounded-lg">
@@ -288,7 +297,7 @@ export default function AdminDashboard() {
                             </div>
                             <div className="flex flex-col min-w-0">
                               <span className="text-[10px] font-bold text-slate-300 truncate">{doc.nom_fichier}</span>
-                              <span className="text-[8px] text-emerald-500 uppercase font-black flex items-center gap-1">Cliquez pour voir <ExternalLink size={8}/></span>
+                              <span className="text-[8px] text-emerald-500 uppercase font-black flex items-center gap-1">Consulter <ExternalLink size={8}/></span>
                             </div>
                           </div>
 
@@ -318,7 +327,7 @@ export default function AdminDashboard() {
                   <textarea 
                     value={editFields.commentaires_etape || ""} onChange={e => setEditFields({...editFields, commentaires_etape: e.target.value})}
                     className="w-full bg-black/50 border border-white/10 rounded-3xl p-8 text-lg text-slate-200 min-h-[350px] outline-none focus:border-emerald-500 italic"
-                    placeholder="Écrivez ici le rapport pour le client..."
+                    placeholder="Rédiger la mise à jour pour le client..."
                   />
                 </div>
 
@@ -347,7 +356,7 @@ export default function AdminDashboard() {
         )}
       </div>
 
-      {/* MODALS (IDEM AU CODE ORIGINAL) */}
+      {/* MODALS */}
       {showStaffModal && (
         <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex items-center justify-center p-4">
           <div className="bg-[#0F172A] w-full max-w-md rounded-[2.5rem] border border-white/10 p-8">
