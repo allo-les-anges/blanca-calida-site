@@ -1,85 +1,107 @@
 "use client";
 
+import React from 'react';
+import { MapPin, ChevronRight } from 'lucide-react';
+
+interface Property {
+  region?: string;
+  [key: string]: any;
+}
+
 interface RegionGridProps {
-  properties: any[];
+  properties: Property[];
   onRegionClick: (regionName: string) => void;
 }
 
-// Bornes GPS approximatives pour sécuriser le comptage (Latitude / Longitude)
-const GEO_BOUNDS: Record<string, { minLat: number, maxLat: number, minLng: number, maxLng: number }> = {
-  "Costa Blanca": { minLat: 37.8, maxLat: 39.0, minLng: -0.8, maxLng: 0.2 },
-  "Costa Calida": { minLat: 37.3, maxLat: 37.9, minLng: -1.8, maxLng: -0.7 },
-  "Costa del Sol": { minLat: 36.0, maxLat: 36.9, minLng: -5.6, maxLng: -3.6 },
-  "Costa Almeria": { minLat: 36.6, maxLat: 37.5, minLng: -2.3, maxLng: -1.7 }
-};
-
-const COSTA_MAPPING: Record<string, string[]> = {
-  "Costa Blanca": ["calpe", "denia", "altea", "moraira", "benidorm", "torrevieja", "alicante", "javea", "villajoyosa", "finestrat", "benitachell"],
-  "Costa Calida": ["murcia", "cartagena", "san pedro del pinatar", "los alcazares", "mazarron", "aguilas"],
-  "Costa del Sol": ["marbella", "malaga", "estepona", "fuengirola", "mijas", "benalmadena", "nerja", "casares"],
-  "Costa Almeria": ["vera", "mojacar", "roquetas de mar", "almeria", "san juan de los terreros"]
-};
-
-const landscapeImages = ["/images/regions/1.jpg", "/images/regions/2.jpg", "/images/regions/3.jpg", "/images/regions/4.jpg"];
-const regionNames = ["Costa Blanca", "Costa Calida", "Costa del Sol", "Costa Almeria"];
+const REGIONS_CONFIG = [
+  {
+    name: "Costa Blanca Nord",
+    image: "https://images.unsplash.com/photo-1583795121081-4e8822455fd0?auto=format&fit=crop&q=80&w=800",
+    description: "Montagnes et criques cristallines"
+  },
+  {
+    name: "Costa Blanca Sud",
+    image: "https://images.unsplash.com/photo-1544918877-460635b6d13e?auto=format&fit=crop&q=80&w=800",
+    description: "Plages de sable fin et golfs"
+  },
+  {
+    name: "Costa Calida",
+    image: "https://images.unsplash.com/photo-1516483642144-7f1007ca0b95?auto=format&fit=crop&q=80&w=800",
+    description: "Lagunes et nature sauvage"
+  },
+  {
+    name: "Valencia",
+    image: "https://images.unsplash.com/photo-1558642084-fd07fae52827?auto=format&fit=crop&q=80&w=800",
+    description: "Culture, art et modernité"
+  }
+];
 
 export default function RegionGrid({ properties, onRegionClick }: RegionGridProps) {
   
-  const regions = regionNames.map((name, index) => {
-    const count = properties.filter(p => {
-      const propTown = (p.town || "").toLowerCase();
-      const propRegion = (p.region || "").toLowerCase();
-      const propAddress = (p.adresse || "").toLowerCase();
-      const lat = parseFloat(p.latitude);
-      const lng = parseFloat(p.longitude);
-      const target = name.toLowerCase();
-
-      // 1. Check Texte (Région, Adresse, Ville)
-      if (propRegion.includes(target) || propAddress.includes(target)) return true;
-      if ((COSTA_MAPPING[name] || []).some(city => propTown.includes(city) || propAddress.includes(city))) return true;
-
-      // 2. Check GPS (Si les textes sont vides ou erronés)
-      if (!isNaN(lat) && !isNaN(lng)) {
-        const bounds = GEO_BOUNDS[name];
-        if (lat >= bounds.minLat && lat <= bounds.maxLat && lng >= bounds.minLng && lng <= bounds.maxLng) {
-          return true;
-        }
-      }
-
-      return false;
-    }).length;
-
-    return { name, count, img: landscapeImages[index] };
-  });
+  // Fonction pour compter les propriétés par région
+  const getCount = (regionName: string) => {
+    return properties.filter(p => p.region === regionName).length;
+  };
 
   return (
-    <section className="py-24 px-6 max-w-7xl mx-auto bg-white">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12">
-        {regions.map((region) => (
-          <div key={region.name} className="group cursor-pointer" onClick={() => onRegionClick(region.name)}>
-            <div className="relative h-[520px] overflow-hidden mb-8 shadow-2xl rounded-[1rem] bg-slate-50 border border-slate-100">
-              <img 
-                src={region.img} 
-                className="w-full h-full object-cover transition-transform duration-[3000ms] ease-out group-hover:scale-110" 
-                alt={region.name}
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a]/80 via-transparent to-transparent opacity-60 group-hover:opacity-90 transition-opacity duration-500" />
-              <div className="absolute inset-0 flex items-center justify-center translate-y-8 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-700">
-                <span className="text-white text-[10px] uppercase tracking-[0.6em] font-black border-b border-white/50 pb-2">Explorer</span>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {REGIONS_CONFIG.map((region) => (
+        <div
+          key={region.name}
+          onClick={() => onRegionClick(region.name)}
+          className="group relative h-[450px] rounded-[2.5rem] overflow-hidden cursor-pointer border border-white/5 bg-[#0F172A]/40 backdrop-blur-sm hover:border-emerald-500/50 transition-all duration-700 shadow-2xl"
+        >
+          {/* IMAGE DE FOND AVEC ZOOM AU HOVER */}
+          <div className="absolute inset-0 z-0">
+            <img
+              src={region.image}
+              alt={region.name}
+              className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
+            />
+            {/* Overlay dégradé pour la lisibilité */}
+            <div className="absolute inset-0 bg-gradient-to-t from-[#020617] via-[#020617]/40 to-transparent opacity-80 group-hover:opacity-90 transition-opacity" />
+          </div>
+
+          {/* CONTENU TEXTE */}
+          <div className="absolute inset-0 z-10 p-8 flex flex-col justify-end">
+            <div className="space-y-4 translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+              
+              {/* Badge compteur */}
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-emerald-500/20 backdrop-blur-xl border border-emerald-500/30 rounded-full">
+                <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+                <span className="text-[9px] font-black text-emerald-400 uppercase tracking-[0.2em]">
+                  {getCount(region.name)} Propriétés
+                </span>
               </div>
-            </div>
-            
-            <div className="text-center">
-              <h3 className="font-serif text-3xl text-slate-900 mb-3 italic tracking-tight">{region.name}</h3>
-              <div className="flex items-center justify-center gap-4">
-                <span className="h-[1px] w-6 bg-emerald-600/30"></span>
-                <p className="text-slate-400 text-[9px] tracking-[0.4em] uppercase font-black">{region.count} Biens</p>
-                <span className="h-[1px] w-6 bg-emerald-600/30"></span>
+
+              <div className="space-y-1">
+                <h3 className="text-3xl font-black text-white italic uppercase tracking-tighter leading-none">
+                  {region.name}
+                </h3>
+                <p className="text-slate-400 text-xs font-medium uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity duration-700 delay-100">
+                  {region.description}
+                </p>
+              </div>
+
+              {/* Bouton Explorer */}
+              <div className="flex items-center gap-2 text-white text-[10px] font-black uppercase tracking-[0.3em] pt-4 opacity-0 group-hover:opacity-100 transition-all duration-500 delay-200">
+                Explorer <ChevronRight size={14} className="text-emerald-500" />
               </div>
             </div>
           </div>
-        ))}
-      </div>
-    </section>
+
+          {/* EFFET DE LUMIÈRE AU SURVOL (Glow) */}
+          <div className="absolute -inset-full top-0 z-20 block h-full w-1/2 -skew-x-12 bg-gradient-to-r from-transparent via-white/5 to-transparent group-hover:animate-[shine_1.5s_ease-in-out]" />
+        </div>
+      ))}
+
+      <style jsx>{`
+        @keyframes shine {
+          100% {
+            left: 200%;
+          }
+        }
+      `}</style>
+    </div>
   );
 }
