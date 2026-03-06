@@ -35,7 +35,7 @@ export default function Navbar() {
   const langMenuRef = useRef<HTMLDivElement>(null);
   const regionMenuRef = useRef<HTMLDivElement>(null);
 
-  // --- CONFIGURATION (RÉPARÉ : Variable 'languages' ajoutée) ---
+  // --- CONFIGURATION ---
   const regions = [
     { name: "Costa Blanca", slug: "costa-blanca" },
     { name: "Costa Calida", slug: "costa-calida" },
@@ -53,7 +53,7 @@ export default function Navbar() {
   const propertyTypes = ["Villa", "Appartement", "Penthouse", "Terrain", "Commerce"];
   const features = ["Piscine", "Vue Mer", "Garage", "Jardin", "Neuf", "Solarium"];
 
-  // --- LOGIQUE AUTH & SCROLL ---
+  // --- LOGIQUE ---
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
@@ -80,7 +80,6 @@ export default function Navbar() {
     setIsLoginModalOpen(false);
   }, [pathname]);
 
-  // --- ACTIONS ---
   const handleLogout = async () => {
     await supabase.auth.signOut();
     localStorage.removeItem("client_access_pin");
@@ -204,81 +203,128 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* --- MODAL RECHERCHE BOTTOM SHEET --- */}
+      {/* --- MODAL RECHERCHE AVANCÉE (STYLE BOTTOM SHEET MODERNE) --- */}
       {isSearchModalOpen && (
         <div className="fixed inset-0 z-[300] flex items-end sm:items-center justify-center">
           <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => setIsSearchModalOpen(false)} />
-          <div className="relative bg-white w-full sm:max-w-xl sm:rounded-[2.5rem] rounded-t-[2.5rem] overflow-hidden shadow-2xl animate-in slide-in-from-bottom duration-500 flex flex-col max-h-[92vh]">
+          
+          <div className="relative bg-[#F8FAFC] w-full sm:max-w-xl sm:rounded-[2.5rem] rounded-t-[2.5rem] overflow-hidden shadow-2xl animate-in slide-in-from-bottom duration-500 flex flex-col max-h-[92vh]">
             
+            {/* Header Fixe */}
             <div className="bg-white px-8 py-6 border-b border-slate-100 flex justify-between items-center shrink-0">
-              <div className="flex flex-col">
-                <h3 className="text-xl font-serif italic text-slate-900">Recherche Avancée</h3>
-                <span className="text-[#D4AF37] text-[8px] uppercase tracking-[0.3em] font-black">Trouvez votre résidence d'exception</span>
+              <div>
+                <h3 className="text-xl font-serif italic text-slate-900">Recherche</h3>
+                <p className="text-[9px] uppercase tracking-widest text-[#D4AF37] font-bold">Trouvez votre villa idéale</p>
               </div>
-              <button onClick={() => setIsSearchModalOpen(false)} className="w-12 h-12 bg-[#020617] text-[#D4AF37] rounded-full flex items-center justify-center shadow-xl">
+              <button 
+                onClick={() => setIsSearchModalOpen(false)}
+                className="w-12 h-12 bg-slate-100 text-slate-900 rounded-full flex items-center justify-center hover:bg-[#D4AF37] transition-all"
+              >
                 <X size={24} />
               </button>
             </div>
 
+            {/* Contenu Scrollable (TOUS LES FILTRES) */}
             <div className="p-8 overflow-y-auto space-y-10 pb-32">
-              <div className="space-y-4">
-                <label className="text-[10px] uppercase tracking-[0.2em] font-black text-slate-400">Référence Propriété</label>
-                <div className="relative">
-                  <ShieldCheck className="absolute left-4 top-1/2 -translate-y-1/2 text-[#D4AF37]" size={18} />
-                  <input type="text" placeholder="Ex: REF-1234" className="w-full bg-slate-50 border border-slate-100 pl-12 pr-4 py-4 rounded-2xl outline-none focus:border-[#D4AF37] text-slate-900 font-medium" />
+              
+              {/* Référence & Programme */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-3">
+                  <label className="text-[10px] uppercase tracking-[0.2em] font-black text-slate-400 flex items-center gap-2">
+                    <ShieldCheck size={14} className="text-[#D4AF37]"/> Référence
+                  </label>
+                  <input type="text" placeholder="REF-0000" className="w-full bg-white border border-slate-200 px-5 py-4 rounded-2xl outline-none focus:border-[#D4AF37] text-slate-900 font-medium" />
+                </div>
+                <div className="space-y-3">
+                  <label className="text-[10px] uppercase tracking-[0.2em] font-black text-slate-400 flex items-center gap-2">
+                    <Building2 size={14} className="text-[#D4AF37]"/> Programme
+                  </label>
+                  <input type="text" placeholder="Nom du projet..." className="w-full bg-white border border-slate-200 px-5 py-4 rounded-2xl outline-none focus:border-[#D4AF37] text-slate-900 font-medium" />
                 </div>
               </div>
 
-              <div className="space-y-4">
-                <label className="text-[10px] uppercase tracking-[0.2em] font-black text-slate-400">Région (Espagne)</label>
-                <div className="relative">
-                  <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-[#D4AF37]" size={18} />
-                  <select className="w-full bg-slate-50 border border-slate-100 pl-12 pr-4 py-4 rounded-2xl outline-none appearance-none text-slate-900 font-medium">
-                    <option>Espagne (Toutes)</option>
-                    {regions.map(r => <option key={r.slug}>{r.name}</option>)}
-                  </select>
-                </div>
+              {/* Région */}
+              <div className="space-y-3">
+                <label className="text-[10px] uppercase tracking-[0.2em] font-black text-slate-400 flex items-center gap-2">
+                  <MapPin size={14} className="text-[#D4AF37]"/> Secteur
+                </label>
+                <select className="w-full bg-white border border-slate-200 px-5 py-4 rounded-2xl outline-none appearance-none text-slate-900 font-medium cursor-pointer">
+                  <option>Espagne (Toutes les régions)</option>
+                  {regions.map(r => <option key={r.slug}>{r.name}</option>)}
+                </select>
               </div>
 
-              <div className="space-y-4">
-                <label className="text-[10px] uppercase tracking-[0.2em] font-black text-slate-400">Type de bien</label>
-                <div className="grid grid-cols-2 gap-3">
+              {/* Type de propriété */}
+              <div className="space-y-3">
+                <label className="text-[10px] uppercase tracking-[0.2em] font-black text-slate-400 flex items-center gap-2">
+                   <Home size={14} className="text-[#D4AF37]"/> Type de propriété
+                </label>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                   {propertyTypes.map(type => (
-                    <button key={type} className="flex items-center gap-3 p-4 rounded-2xl border border-slate-200 bg-white hover:border-[#D4AF37] hover:bg-[#D4AF37]/5 transition-all">
-                      <Home size={16} className="text-[#D4AF37]" />
-                      <span className="text-xs font-bold text-slate-700">{type}</span>
+                    <button key={type} className="py-3 px-4 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-[#D4AF37] hover:text-black hover:border-[#D4AF37] transition-all">
+                      {type}
                     </button>
                   ))}
                 </div>
               </div>
 
-              <div className="space-y-4">
-                <div className="flex justify-between items-end mb-2">
-                  <label className="text-[10px] uppercase tracking-[0.2em] font-black text-slate-400">Budget Max</label>
-                  <span className="text-[#D4AF37] font-serif italic text-lg tracking-tighter">2.500.000 €</span>
+              {/* Budget Slider */}
+              <div className="space-y-3">
+                <div className="flex justify-between items-end">
+                  <label className="text-[10px] uppercase tracking-[0.2em] font-black text-slate-400 flex items-center gap-2">
+                    <Euro size={14} className="text-[#D4AF37]"/> Budget Max
+                  </label>
+                  <span className="text-lg font-serif italic text-slate-900">2.5M €</span>
                 </div>
-                <input type="range" min="100000" max="10000000" step="100000" className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer" />
+                <input type="range" min="100000" max="10000000" step="50000" className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#D4AF37]" />
+                <div className="flex justify-between text-[10px] font-bold text-slate-400 uppercase">
+                  <span>100k€</span>
+                  <span>10M€ +</span>
+                </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-6">
+              {/* Chambres & Salles de bain */}
+              <div className="grid grid-cols-2 gap-8">
                 <div className="space-y-3">
-                  <label className="text-[10px] uppercase tracking-[0.2em] font-black text-slate-400">Chambres</label>
-                  <div className="flex items-center bg-white border border-slate-200 rounded-2xl p-1">
-                    {[1, 2, 3, '4+'].map(n => <button key={n} className="flex-1 py-3 text-xs font-bold rounded-xl hover:bg-slate-50">{n}</button>)}
+                  <label className="text-[10px] uppercase tracking-[0.2em] font-black text-slate-400 flex items-center gap-2">
+                    <BedDouble size={14} className="text-[#D4AF37]"/> Chambres
+                  </label>
+                  <div className="flex bg-white border border-slate-200 rounded-xl p-1">
+                    {[1, 2, 3, '4+'].map(n => (
+                      <button key={n} className="flex-1 py-2 text-xs font-bold rounded-lg hover:bg-slate-50">{n}</button>
+                    ))}
                   </div>
                 </div>
                 <div className="space-y-3">
-                  <label className="text-[10px] uppercase tracking-[0.2em] font-black text-slate-400">Salles de bain</label>
-                  <div className="flex items-center bg-white border border-slate-200 rounded-2xl p-1">
-                    {[1, 2, '3+'].map(n => <button key={n} className="flex-1 py-3 text-xs font-bold rounded-xl hover:bg-slate-50">{n}</button>)}
+                  <label className="text-[10px] uppercase tracking-[0.2em] font-black text-slate-400 flex items-center gap-2">
+                    <Bath size={14} className="text-[#D4AF37]"/> Sdb
+                  </label>
+                  <div className="flex bg-white border border-slate-200 rounded-xl p-1">
+                    {[1, 2, '3+'].map(n => (
+                      <button key={n} className="flex-1 py-2 text-xs font-bold rounded-lg hover:bg-slate-50">{n}</button>
+                    ))}
                   </div>
                 </div>
               </div>
+
+              {/* Prestations */}
+              <div className="space-y-3">
+                <label className="text-[10px] uppercase tracking-[0.2em] font-black text-slate-400">Prestations souhaitées</label>
+                <div className="flex flex-wrap gap-2">
+                  {features.map(f => (
+                    <button key={f} className="px-4 py-2 rounded-full border border-slate-200 text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:border-[#D4AF37] hover:text-[#D4AF37] transition-all">
+                      + {f}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
             </div>
 
+            {/* Footer Fixe */}
             <div className="bg-white p-6 border-t border-slate-100 shrink-0">
-              <button className="w-full bg-slate-950 text-white py-6 rounded-3xl font-black uppercase text-[11px] tracking-[0.3em] hover:bg-[#D4AF37] transition-all flex items-center justify-center gap-3 shadow-xl shadow-slate-200">
-                <Search size={18} /> Afficher les résultats
+              <button className="w-full bg-slate-950 text-white py-6 rounded-3xl font-black uppercase text-[11px] tracking-[0.3em] hover:bg-[#D4AF37] transition-all flex items-center justify-center gap-3">
+                <Search size={18} /> Voir les propriétés
               </button>
             </div>
           </div>
