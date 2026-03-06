@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useCallback, useState, useRef, useMemo } from 'react';
-import { createClient } from '@supabase/supabase-js';
 import { useRouter } from 'next/navigation';
 import { 
   Save, Trash2, Loader2, Search, Plus, Zap, UserCheck, 
@@ -12,6 +11,7 @@ import {
   LayoutDashboard, Database, Eye, EyeOff, ArrowRight, Settings,
   AlertCircle, Paperclip, HardDrive, Key
 } from 'lucide-react';
+import { supabase } from '../../../lib/supabase'; // ← import unique
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
