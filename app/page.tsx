@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { 
   Search, MapPin, Home as HomeIcon, ChevronRight, 
-  Loader2, Zap, ShieldCheck, ArrowRight, User, Globe
+  Loader2, Zap, ShieldCheck, ArrowRight, User, Globe, X
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
@@ -19,6 +19,9 @@ export default function Home() {
   const [visibleCount, setVisibleCount] = useState(12);
   const [loading, setLoading] = useState(true);
   const [clientPin, setClientPin] = useState("");
+  
+  // NOUVEL ÉTAT POUR L'OUVERTURE DE LA RECHERCHE
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   const [filters, setFilters] = useState({
     type: "",
@@ -74,6 +77,7 @@ export default function Home() {
   const handleSearch = (newFilters: any) => {
     setFilters({ ...filters, ...newFilters, region: "" });
     setVisibleCount(12);
+    setIsSearchOpen(false); // Ferme la barre après la recherche
     scrollToCollection();
   };
 
@@ -117,11 +121,40 @@ export default function Home() {
       {/* SECTION HERO */}
       <div className="relative">
         <Hero />
+        
+        {/* BOUTON DÉCLENCHEUR DE RECHERCHE (AU CENTRE DU HERO) */}
+        <div className="absolute inset-0 flex items-center justify-center z-40 pointer-events-none">
+           {!isSearchOpen && (
+             <button 
+                onClick={() => setIsSearchOpen(true)}
+                className="pointer-events-auto group flex items-center gap-6 bg-[#020617]/40 backdrop-blur-xl border border-white/10 px-10 py-5 rounded-full hover:border-[#D4AF37]/50 transition-all duration-500 shadow-2xl"
+             >
+                <div className="w-12 h-12 bg-[#D4AF37] rounded-full flex items-center justify-center text-black group-hover:scale-110 transition-transform">
+                  <Search size={20} />
+                </div>
+                <div className="text-left">
+                  <span className="block text-[10px] font-bold text-[#D4AF37] uppercase tracking-[0.3em]">Trouver une villa</span>
+                  <span className="block text-white font-serif italic text-lg leading-none">Lancer la recherche</span>
+                </div>
+             </button>
+           )}
+        </div>
+
         <div className="absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-[#020617] via-[#020617]/80 to-transparent pointer-events-none" />
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 -mt-32 relative z-30">
-        <div className="bg-[#0F172A]/60 backdrop-blur-3xl p-4 rounded-[1.5rem] border border-white/10 shadow-2xl">
+      {/* MODAL DE RECHERCHE (ANIMÉE) */}
+      <div className={`max-w-7xl mx-auto px-6 relative z-50 transition-all duration-700 ease-in-out ${isSearchOpen ? 'opacity-100 -mt-40' : 'opacity-0 pointer-events-none mt-0'}`}>
+        <div className="bg-[#0F172A]/90 backdrop-blur-3xl p-4 rounded-[2.5rem] border border-[#D4AF37]/30 shadow-[0_50px_100px_-20px_rgba(0,0,0,0.7)] relative">
+          
+          {/* Bouton Fermer */}
+          <button 
+            onClick={() => setIsSearchOpen(false)}
+            className="absolute -top-4 -right-4 w-10 h-10 bg-[#D4AF37] text-black rounded-full flex items-center justify-center hover:scale-110 transition-transform shadow-xl z-50"
+          >
+            <X size={20} />
+          </button>
+
           <AdvancedSearch
             properties={allProperties}
             onSearch={handleSearch}
@@ -144,7 +177,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* SECTION : ESPACE PROPRIÉTAIRE (STYLE MAJORQUE SELECT) */}
+      {/* SECTION : ESPACE PROPRIÉTAIRE */}
       <section className="max-w-7xl mx-auto px-6 py-24">
         <div className="bg-[#0F172A]/40 p-12 md:p-24 rounded-[3rem] border border-white/5 relative overflow-hidden shadow-2xl">
           <div className="absolute top-[-10%] right-[-5%] opacity-[0.03] pointer-events-none rotate-12">
