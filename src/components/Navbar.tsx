@@ -35,8 +35,21 @@ export default function Navbar() {
   const langMenuRef = useRef<HTMLDivElement>(null);
   const regionMenuRef = useRef<HTMLDivElement>(null);
 
-  // --- DONNÉES FILTRES ---
-  const regions = ["Costa Blanca", "Costa Calida", "Costa Almeria", "Costa del Sol"];
+  // --- CONFIGURATION (RÉPARÉ : Variable 'languages' ajoutée) ---
+  const regions = [
+    { name: "Costa Blanca", slug: "costa-blanca" },
+    { name: "Costa Calida", slug: "costa-calida" },
+    { name: "Costa Almeria", slug: "costa-almeria" },
+    { name: "Costa del Sol", slug: "costa-del-sol" },
+  ];
+
+  const languages = [
+    { code: "fr", label: "Français" },
+    { code: "en", label: "English" },
+    { code: "es", label: "Español" },
+    { code: "nl", label: "Nederlands" },
+  ];
+
   const propertyTypes = ["Villa", "Appartement", "Penthouse", "Terrain", "Commerce"];
   const features = ["Piscine", "Vue Mer", "Garage", "Jardin", "Neuf", "Solarium"];
 
@@ -64,6 +77,7 @@ export default function Navbar() {
   useEffect(() => {
     setIsMobileMenuOpen(false);
     setIsSearchModalOpen(false);
+    setIsLoginModalOpen(false);
   }, [pathname]);
 
   // --- ACTIONS ---
@@ -142,8 +156,8 @@ export default function Navbar() {
               {showRegionMenu && (
                 <div onMouseLeave={() => setShowRegionMenu(false)} className="absolute top-full left-0 mt-0 bg-[#020617] border border-white/10 rounded-xl p-4 min-w-[200px]">
                   {regions.map((reg) => (
-                    <Link key={reg} href={`/search?region=${reg}`} className="block py-3 text-slate-400 hover:text-[#D4AF37] border-b border-white/5 last:border-0 transition-colors uppercase tracking-[0.2em] text-[9px]">
-                      {reg}
+                    <Link key={reg.slug} href={`/search?region=${reg.name}`} className="block py-3 text-slate-400 hover:text-[#D4AF37] border-b border-white/5 last:border-0 transition-colors uppercase tracking-[0.2em] text-[9px]">
+                      {reg.name}
                     </Link>
                   ))}
                 </div>
@@ -190,26 +204,23 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* --- RECHERCHE BOTTOM SHEET (LE STYLE MODERNE CORRIGÉ) --- */}
+      {/* --- MODAL RECHERCHE BOTTOM SHEET --- */}
       {isSearchModalOpen && (
         <div className="fixed inset-0 z-[300] flex items-end sm:items-center justify-center">
           <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => setIsSearchModalOpen(false)} />
           <div className="relative bg-white w-full sm:max-w-xl sm:rounded-[2.5rem] rounded-t-[2.5rem] overflow-hidden shadow-2xl animate-in slide-in-from-bottom duration-500 flex flex-col max-h-[92vh]">
             
-            {/* Header Fixe avec bouton X bien dégagé */}
             <div className="bg-white px-8 py-6 border-b border-slate-100 flex justify-between items-center shrink-0">
               <div className="flex flex-col">
                 <h3 className="text-xl font-serif italic text-slate-900">Recherche Avancée</h3>
                 <span className="text-[#D4AF37] text-[8px] uppercase tracking-[0.3em] font-black">Trouvez votre résidence d'exception</span>
               </div>
-              <button onClick={() => setIsSearchModalOpen(false)} className="w-12 h-12 bg-[#020617] text-[#D4AF37] rounded-full flex items-center justify-center hover:scale-105 transition-all shadow-xl">
+              <button onClick={() => setIsSearchModalOpen(false)} className="w-12 h-12 bg-[#020617] text-[#D4AF37] rounded-full flex items-center justify-center shadow-xl">
                 <X size={24} />
               </button>
             </div>
 
-            {/* Corps Scrollable avec TOUS les filtres */}
             <div className="p-8 overflow-y-auto space-y-10 pb-32">
-              
               <div className="space-y-4">
                 <label className="text-[10px] uppercase tracking-[0.2em] font-black text-slate-400">Référence Propriété</label>
                 <div className="relative">
@@ -219,20 +230,12 @@ export default function Navbar() {
               </div>
 
               <div className="space-y-4">
-                <label className="text-[10px] uppercase tracking-[0.2em] font-black text-slate-400">Programme / Développement</label>
-                <div className="relative">
-                  <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 text-[#D4AF37]" size={18} />
-                  <input type="text" placeholder="Nom du projet..." className="w-full bg-slate-50 border border-slate-100 pl-12 pr-4 py-4 rounded-2xl outline-none focus:border-[#D4AF37] text-slate-900 font-medium" />
-                </div>
-              </div>
-
-              <div className="space-y-4">
                 <label className="text-[10px] uppercase tracking-[0.2em] font-black text-slate-400">Région (Espagne)</label>
                 <div className="relative">
                   <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-[#D4AF37]" size={18} />
                   <select className="w-full bg-slate-50 border border-slate-100 pl-12 pr-4 py-4 rounded-2xl outline-none appearance-none text-slate-900 font-medium">
                     <option>Espagne (Toutes)</option>
-                    {regions.map(r => <option key={r}>{r}</option>)}
+                    {regions.map(r => <option key={r.slug}>{r.name}</option>)}
                   </select>
                 </div>
               </div>
@@ -271,19 +274,10 @@ export default function Navbar() {
                   </div>
                 </div>
               </div>
-
-              <div className="space-y-4">
-                <label className="text-[10px] uppercase tracking-[0.2em] font-black text-slate-400">Prestations</label>
-                <div className="flex flex-wrap gap-2">
-                  {features.map(f => (
-                    <button key={f} className="px-4 py-2 rounded-full border border-slate-200 bg-white text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:border-[#D4AF37] hover:text-[#D4AF37] transition-all">+ {f}</button>
-                  ))}
-                </div>
-              </div>
             </div>
 
             <div className="bg-white p-6 border-t border-slate-100 shrink-0">
-              <button className="w-full bg-slate-950 text-white py-6 rounded-3xl font-black uppercase text-[11px] tracking-[0.3em] hover:bg-[#D4AF37] transition-all flex items-center justify-center gap-3">
+              <button className="w-full bg-slate-950 text-white py-6 rounded-3xl font-black uppercase text-[11px] tracking-[0.3em] hover:bg-[#D4AF37] transition-all flex items-center justify-center gap-3 shadow-xl shadow-slate-200">
                 <Search size={18} /> Afficher les résultats
               </button>
             </div>
@@ -308,7 +302,7 @@ export default function Navbar() {
             <Link href="/confidentiel">Confidentiel</Link>
             <Link href="/contact">Contact</Link>
           </nav>
-          <div className="mt-auto space-y-4">
+          <div className="mt-auto space-y-6">
             <button onClick={() => {setIsMobileMenuOpen(false); setIsLoginModalOpen(true);}} className="w-full bg-[#D4AF37] text-black py-5 rounded-2xl font-bold uppercase text-[10px] tracking-widest flex items-center justify-center gap-3">
               <User size={16} /> Accès Client
             </button>
@@ -324,7 +318,7 @@ export default function Navbar() {
       {/* --- MODAL LOGIN PIN --- */}
       {isLoginModalOpen && (
         <div className="fixed inset-0 z-[400] flex items-center justify-center bg-[#020617]/95 backdrop-blur-xl p-6">
-          <div className="bg-[#0f172a] w-full max-w-sm rounded-[3rem] p-12 shadow-2xl relative border border-white/5 animate-in zoom-in duration-300">
+          <div className="bg-[#0f172a] w-full max-w-sm rounded-[3rem] p-12 shadow-2xl relative border border-white/5">
             <button onClick={() => setIsLoginModalOpen(false)} className="absolute top-8 right-8 text-slate-500 hover:text-white"><X size={24}/></button>
             <div className="text-center mb-10">
               <div className="w-16 h-16 bg-[#D4AF37]/10 text-[#D4AF37] rounded-3xl flex items-center justify-center mx-auto mb-6 border border-[#D4AF37]/20"><Lock size={28}/></div>
