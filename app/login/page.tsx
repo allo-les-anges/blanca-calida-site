@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, ShieldCheck, RefreshCw, Delete, Key } from "lucide-react";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "../../lib/supabase";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -20,43 +20,52 @@ export default function LoginPage() {
   }, []);
 
   const handleRedirection = async (userId: string, userEmail?: string) => {
-    try {
-      if (userEmail?.toLowerCase().trim() === 'gaetan@amaru-homes.com') {
-        router.replace('/super-admin');
-        return;
-      }
+  try {
+    console.log("=== handleRedirection ===");
+    console.log("userId:", userId);
+    console.log("userEmail:", userEmail);
 
-      const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('role, company_name, email')
-        .or(`id.eq.${userId},email.eq.${userEmail}`)
-        .single();
+    if (userEmail?.toLowerCase().trim() === 'gaetan@amaru-homes.com') {
+      console.log("Redirection spéciale Gaétan vers /super-admin");
+      router.replace('/super-admin');
+      return;
+    }
 
-      if (error || !profile) {
-        setErrorMsg("Profil manquant dans la base.");
-        setLoading(false);
-        return;
-      }
+    const { data: profile, error } = await supabase
+      .from('profiles')
+      .select('role, company_name, email')
+      .or(`id.eq.${userId},email.eq.${userEmail}`)
+      .single();
 
-      localStorage.setItem("staff_session", JSON.stringify({
-        email: profile.email,
-        role: profile.role,
-        company_name: profile.company_name || "Amaru-Homes"
-      }));
+    console.log("Profil reçu :", profile);
+    console.log("Erreur éventuelle :", error);
 
-      if (profile.role === 'super_admin') {
-        router.replace('/super-admin');
-      } else if (profile.role === 'admin' || profile.role === 'staff') {
-        router.replace('/admin/dashboard');
-      } else {
-        setErrorMsg("Rôle non autorisé.");
-        setLoading(false);
-      }
-    } catch (err) {
-      setErrorMsg("Erreur système.");
+    if (error || !profile) {
+      setErrorMsg("Profil manquant dans la base.");
+      setLoading(false);
+      return;
+    }
+
+    localStorage.setItem("staff_session", JSON.stringify({
+      email: profile.email,
+      role: profile.role,
+      company_name: profile.company_name || "Amaru-Homes"
+    }));
+
+    if (profile.role === 'super_admin') {
+      router.replace('/super-admin');
+    } else if (profile.role === 'admin' || profile.role === 'staff') {
+      router.replace('/admin/dashboard');
+    } else {
+      setErrorMsg("Rôle non autorisé.");
       setLoading(false);
     }
-  };
+  } catch (err) {
+    console.error("Erreur dans handleRedirection :", err);
+    setErrorMsg("Erreur système.");
+    setLoading(false);
+  }
+};
 
   const handleLogin = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();

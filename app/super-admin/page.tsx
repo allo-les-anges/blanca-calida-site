@@ -8,7 +8,7 @@ import {
   XCircle, Plus, Trash2, ArrowLeft, Search, 
   Copy, CheckCircle2, LayoutDashboard, Globe
 } from 'lucide-react'; // Correction effectuée ici : lucide-react
-import { supabase } from "@/lib/supabase";
+import { supabase } from "../../lib/supabase";
 
 export default function SuperAdminDashboard() {
   const router = useRouter();
