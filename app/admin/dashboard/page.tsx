@@ -11,15 +11,9 @@ import {
   LayoutDashboard, Database, Eye, EyeOff, ArrowRight, Settings,
   AlertCircle, Paperclip, HardDrive, Key
 } from 'lucide-react';
-import { supabase } from '../../../lib/supabase'; // ← IMPORT UNIQUE (ajustez le chemin si nécessaire)
+import { supabase } from '../../../lib/supabase'; // ← IMPORT UNIQUE
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-
-// Initialisation du client Supabase
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
 
 const PHASES_CHANTIER = [
   "0. Signature & Réservation", 
