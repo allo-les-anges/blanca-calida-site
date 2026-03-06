@@ -1,18 +1,20 @@
 "use client";
 import React, { useState, useEffect, useMemo } from "react";
-import { RotateCcw, Search, Map, Home, Euro, Hash, Bed, Building2 } from "lucide-react";
+import { RotateCcw, Search, Map, Home, Euro, Hash, Bed, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 interface AdvancedSearchProps {
   onSearch: (filters: any) => void;
   properties: any[];
   activeFilters: any;
+  onClose?: () => void; // Ajout d'une prop optionnelle pour fermer la modale
 }
 
 export default function AdvancedSearch({
   onSearch,
   properties = [],
   activeFilters,
+  onClose,
 }: AdvancedSearchProps) {
   const [localFilters, setLocalFilters] = useState(activeFilters);
   const router = useRouter();
@@ -21,27 +23,9 @@ export default function AdvancedSearch({
     setLocalFilters(activeFilters);
   }, [activeFilters]);
 
-  // --- UTILITAIRE : slugify ---
-  const slugify = (text: string) =>
-    text
-      ?.toString()
-      .toLowerCase()
-      .trim()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/\s+/g, "-")
-      .replace(/[^\w-]+/g, "");
-
   // --- LOGIQUE DE DONNÉES ---
   const regions = ["Costa Blanca", "Costa Calida", "Costa del Sol", "Costa Almeria"];
   
-  const developments = useMemo(() => {
-    if (!properties) return [];
-    return [...new Set(properties.map((p) => p.development_name))]
-      .filter((name): name is string => Boolean(name))
-      .sort();
-  }, [properties]);
-
   const types = useMemo(() => {
     const translation: { [key: string]: string } = {
       villa: "Villa", apartment: "Appartement", penthouse: "Penthouse", bungalow: "Bungalow", townhouse: "Maison de ville"
@@ -53,18 +37,14 @@ export default function AdvancedSearch({
 
   // --- ACTIONS ---
   const handleSearchClick = () => {
-    if (localFilters.development && !localFilters.reference) {
-      const slug = slugify(localFilters.development);
-      router.push(`/developpement/${slug}`);
-    } else {
-      onSearch(localFilters);
-    }
+    onSearch(localFilters);
+    if (onClose) onClose(); // Ferme la modale après la recherche
   };
 
   const reset = () => {
     const empty = { 
       region: "", town: "", type: "", beds: "", 
-      minPrice: "100000", maxPrice: "5000000", reference: "", development: "" 
+      minPrice: "100000", maxPrice: "5000000", reference: "" 
     };
     setLocalFilters(empty);
     onSearch(empty);
@@ -84,13 +64,13 @@ export default function AdvancedSearch({
         .custom-slider::-webkit-slider-thumb {
           -webkit-appearance: none;
           appearance: none;
-          width: 16px;
-          height: 16px;
+          width: 20px;
+          height: 20px;
           background: #D4AF37;
           border-radius: 50%;
           cursor: pointer;
-          border: 2px solid white;
-          box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+          border: 3px solid white;
+          box-shadow: 0 4px 10px rgba(0,0,0,0.15);
           transition: transform 0.2s;
         }
         .custom-slider::-webkit-slider-thumb:hover {
@@ -98,12 +78,25 @@ export default function AdvancedSearch({
         }
       `}</style>
 
+      {/* Bouton Fermer (Visible si utilisé dans une modale) */}
+      {onClose && (
+        <button 
+          onClick={onClose}
+          className="absolute -top-16 right-4 w-12 h-12 bg-white text-slate-900 rounded-full flex items-center justify-center shadow-2xl hover:bg-[#D4AF37] transition-all z-[60]"
+        >
+          <X size={24} />
+        </button>
+      )}
+
       {/* Container Principal */}
-      <div className="bg-white rounded-[2.5rem] shadow-[0_30px_100px_rgba(0,0,0,0.12)] border border-slate-100 p-3">
+      <div className="bg-white rounded-[2.5rem] shadow-[0_30px_100px_rgba(0,0,0,0.12)] border border-slate-100 p-3 relative">
         
-        {/* LIGNE 1 : RÉFÉRENCE & DÉVELOPPEMENT */}
-        <div className="flex flex-col lg:flex-row border-b border-slate-50">
-          <div className="flex-1 p-6 lg:p-8 border-b lg:border-b-0 lg:border-r border-slate-50">
+        {/* Barre de préhension (Design Mobile) */}
+        <div className="w-12 h-1.5 bg-slate-100 rounded-full mx-auto mt-2 mb-4 lg:hidden" />
+
+        {/* LIGNE 1 : RÉFÉRENCE SEULE */}
+        <div className="border-b border-slate-50">
+          <div className="p-6 lg:p-8">
             <label className="flex items-center gap-2 text-[9px] uppercase font-black tracking-[0.2em] text-[#D4AF37] mb-2">
               <Hash size={12} /> Référence Propriété
             </label>
@@ -112,25 +105,12 @@ export default function AdvancedSearch({
               placeholder="Ex: REF-1234"
               value={localFilters.reference || ""}
               onChange={(e) => setLocalFilters({ ...localFilters, reference: e.target.value })}
-              className="w-full bg-transparent text-sm font-semibold outline-none placeholder:text-slate-300"
+              className="w-full bg-transparent text-lg font-serif italic outline-none placeholder:text-slate-300"
             />
-          </div>
-          <div className="flex-1 p-6 lg:p-8">
-            <label className="flex items-center gap-2 text-[9px] uppercase font-black tracking-[0.2em] text-slate-400 mb-2">
-              <Building2 size={12} /> Nom du Programme
-            </label>
-            <select 
-              value={localFilters.development || ""}
-              onChange={(e) => setLocalFilters({ ...localFilters, development: e.target.value })}
-              className="w-full bg-transparent text-sm font-semibold outline-none cursor-pointer appearance-none"
-            >
-              <option value="">Tous les projets</option>
-              {developments.map(d => <option key={d} value={d}>{d}</option>)}
-            </select>
           </div>
         </div>
 
-        {/* LIGNE 2 : CRITÈRES */}
+        {/* LIGNE 2 : CRITÈRES (Région, Type, Min, Max, Lits) */}
         <div className="flex flex-col lg:flex-row items-stretch">
           <div className="flex-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-0">
             
@@ -144,7 +124,7 @@ export default function AdvancedSearch({
                 onChange={(e) => setLocalFilters({ ...localFilters, region: e.target.value })}
                 className="w-full bg-transparent text-[13px] font-bold outline-none cursor-pointer appearance-none uppercase"
               >
-                <option value="">Espagne</option>
+                <option value="">Espagne (Toutes)</option>
                 {regions.map(r => <option key={r} value={r}>{r}</option>)}
               </select>
             </div>
@@ -159,17 +139,15 @@ export default function AdvancedSearch({
                 onChange={(e) => setLocalFilters({ ...localFilters, type: e.target.value })}
                 className="w-full bg-transparent text-[13px] font-bold outline-none cursor-pointer appearance-none uppercase"
               >
-                <option value="">Tous les types</option>
+                <option value="">Indifférent</option>
                 {types.map(t => <option key={t.id} value={t.id}>{t.label}</option>)}
               </select>
             </div>
 
-            {/* SLIDER PRIX MIN */}
+            {/* PRIX MIN */}
             <div className="p-6 border-b md:border-b-0 md:border-r border-slate-50">
               <div className="flex justify-between items-center mb-3">
-                <label className="flex items-center gap-2 text-[9px] uppercase font-black tracking-[0.2em] text-slate-400">
-                  <Euro size={12} /> Min
-                </label>
+                <label className="text-[9px] uppercase font-black tracking-[0.2em] text-slate-400">Min</label>
                 <span className="text-[11px] font-bold text-slate-900">
                   {parseInt(localFilters.minPrice || "100000").toLocaleString()} €
                 </span>
@@ -185,12 +163,10 @@ export default function AdvancedSearch({
               />
             </div>
 
-            {/* SLIDER PRIX MAX */}
+            {/* PRIX MAX */}
             <div className="p-6 border-b md:border-b-0 md:border-r border-slate-50">
               <div className="flex justify-between items-center mb-3">
-                <label className="flex items-center gap-2 text-[9px] uppercase font-black tracking-[0.2em] text-slate-400">
-                  <Euro size={12} /> Max
-                </label>
+                <label className="text-[9px] uppercase font-black tracking-[0.2em] text-slate-400">Max</label>
                 <span className="text-[11px] font-bold text-slate-900">
                   {parseInt(localFilters.maxPrice || "5000000").toLocaleString()} €
                 </span>
@@ -200,18 +176,18 @@ export default function AdvancedSearch({
                 min="200000"
                 max="5000000"
                 step="50000"
-                value={localFilters.maxPrice || "5000000"}
+                value={localFilters.maxPrice || "25000000"}
                 onChange={(e) => setLocalFilters({ ...localFilters, maxPrice: e.target.value })}
                 className="custom-slider"
               />
             </div>
 
-            {/* CHAMBRES (BOUTONS) */}
+            {/* CHAMBRES */}
             <div className="p-6">
               <label className="flex items-center gap-2 text-[9px] uppercase font-black tracking-[0.2em] text-slate-400 mb-3">
                 <Bed size={12} /> Chambres
               </label>
-              <div className="flex gap-1.5">
+              <div className="flex gap-1">
                 {[2, 3, 4, 5].map((n) => (
                   <button
                     key={n}
@@ -219,7 +195,7 @@ export default function AdvancedSearch({
                     onClick={() => setLocalFilters({ ...localFilters, beds: n.toString() })}
                     className={`flex-1 h-8 rounded-lg text-[10px] font-black transition-all ${
                       localFilters.beds === n.toString() 
-                      ? "bg-slate-900 text-[#D4AF37] shadow-lg" 
+                      ? "bg-slate-900 text-[#D4AF37]" 
                       : "bg-slate-50 text-slate-400 hover:bg-slate-100"
                     }`}
                   >
@@ -244,10 +220,10 @@ export default function AdvancedSearch({
 
       </div>
 
-      {/* FOOTER BARRE RECHERCHE */}
+      {/* FOOTER */}
       <div className="mt-6 flex justify-between items-center px-8">
         <p className="text-[10px] text-slate-400 font-medium italic">
-          {properties.length} propriétés disponibles
+          {properties.length} propriétés trouvées
         </p>
         <button 
           onClick={reset}
