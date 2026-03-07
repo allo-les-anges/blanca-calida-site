@@ -230,34 +230,46 @@ export default function AdminDashboard() {
   // --- GESTION DU STAFF ---
 
   const handleAddStaff = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setUpdating(true);
+  e.preventDefault();
+  setUpdating(true);
 
+  try {
+    // 1. Créer l'utilisateur dans auth.users avec un mot de passe temporaire
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email: newStaff.email,
+      password: 'TemporaryPassword123!', // mot de passe temporaire, à changer à la première connexion
+    });
+
+    if (authError) throw authError;
+    if (!authData.user) throw new Error("Échec de la création de l'utilisateur");
+
+    const userId = authData.user.id;
     const autoPin = Math.floor(100000 + Math.random() * 900000).toString();
 
-    try {
-        const { error } = await supabase.from('profiles').insert([{
-          nom: newStaff.nom,
-          prenom: newStaff.prenom,
-          email: newStaff.email,
-          role: newStaff.role, 
-          company_name: agencyProfile.company_name,
-          pin_code: autoPin,
-          pack: "Standard"
-        }]);
+    // 2. Insérer le profil avec l'id de l'utilisateur
+    const { error: profileError } = await supabase.from('profiles').insert([{
+      id: userId,
+      nom: newStaff.nom,
+      prenom: newStaff.prenom,
+      email: newStaff.email,
+      role: newStaff.role, 
+      company_name: agencyProfile.company_name,
+      pin_code: autoPin,
+      pack: "Standard"
+    }]);
 
-        if (error) throw error;
+    if (profileError) throw profileError;
 
-        alert(`✅ Collaborateur ajouté ! PIN généré : ${autoPin}`);
-        setShowStaffModal(false);
-        setNewStaff({ nom: "", prenom: "", email: "", role: "agent" });
-        loadData();
-    } catch (err: any) {
-        alert("Erreur lors de l'ajout : " + err.message);
-    } finally {
-        setUpdating(false);
-    }
-  };
+    alert(`✅ Collaborateur ajouté ! PIN généré : ${autoPin}`);
+    setShowStaffModal(false);
+    setNewStaff({ nom: "", prenom: "", email: "", role: "agent" });
+    loadData();
+  } catch (err: any) {
+    alert("Erreur lors de l'ajout : " + err.message);
+  } finally {
+    setUpdating(false);
+  }
+};
 
   const handleDeleteStaff = async (staffId: string, staffEmail: string) => {
     if (staffEmail === agencyProfile.email) {
