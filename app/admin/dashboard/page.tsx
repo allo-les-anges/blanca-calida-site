@@ -11,7 +11,7 @@ import {
   LayoutDashboard, Database, Eye, EyeOff, ArrowRight, Settings,
   AlertCircle, Paperclip, HardDrive, Key
 } from 'lucide-react';
-import { supabase } from '../../../lib/supabase'; // ← IMPORT UNIQUE
+import { supabase } from '../../../lib/supabase';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
@@ -969,12 +969,22 @@ export default function AdminDashboard() {
             <form onSubmit={async (e) => {
               e.preventDefault();
               setUpdating(true);
-              const { error } = await supabase.from("suivi_chantier").insert([{
+              
+              // Préparer l'objet avec les données du formulaire
+              const projectData = {
                 ...newProject,
                 company_name: agencyProfile.company_name,
                 pin_code: Math.floor(100000 + Math.random() * 900000).toString(),
                 etape_actuelle: PHASES_CHANTIER[0]
-              }]);
+              };
+              
+              // Supprimer la date de livraison si elle est vide pour éviter l'erreur SQL
+              if (projectData.date_livraison_prevue === "") {
+                delete projectData.date_livraison_prevue;
+              }
+              
+              const { error } = await supabase.from("suivi_chantier").insert([projectData]);
+              
               if (!error) { 
                 setShowModal(false); 
                 setUpdating(false);
