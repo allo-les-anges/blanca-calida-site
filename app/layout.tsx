@@ -60,6 +60,15 @@ export default function RootLayout({
           #google_translate_element {
             display: none !important;
           }
+
+          /* LE FIX POUR LA DESCRIPTION XML */
+          .description-xml-container, 
+          .description-xml-container *, 
+          .description-xml-container p, 
+          .description-xml-container span {
+          font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif !important;
+          }
+
         `}</style>
       </head>
       <body
