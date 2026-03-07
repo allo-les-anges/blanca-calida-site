@@ -12,66 +12,90 @@ export default function LoginPage() {
   const [pin, setPin] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [showPin, setShowPin] = useState(true); // Par défaut sur le PIN pour Iris
+  const [showPin, setShowPin] = useState(true);
 
-  // Désactivation de la redirection automatique
+  // Vérification au chargement si un PIN vient de la Home
   useEffect(() => {
-    console.log("Portail Amaru prêt. Mode manuel activé.");
+    const tempPin = localStorage.getItem("temp_client_pin");
+    if (tempPin) {
+      setPin(tempPin);
+      // Optionnel : on pourrait déclencher la vérification automatique ici
+      console.log("PIN client détecté, prêt pour validation.");
+    }
   }, []);
 
   const handleRedirection = async (userId: string, userEmail?: string) => {
-  try {
-    console.log("=== handleRedirection ===");
-    console.log("userId:", userId);
-    console.log("userEmail:", userEmail);
+    try {
+      if (userEmail?.toLowerCase().trim() === 'gaetan@amaru-homes.com') {
+        router.replace('/super-admin');
+        return;
+      }
 
-    if (userEmail?.toLowerCase().trim() === 'gaetan@amaru-homes.com') {
-      console.log("Redirection spéciale Gaétan vers /super-admin");
-      router.replace('/super-admin');
-      return;
-    }
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('role, company_name, email')
+        .or(`id.eq.${userId},email.eq.${userEmail}`)
+        .single();
 
-    const { data: profile, error } = await supabase
-      .from('profiles')
-      .select('role, company_name, email')
-      .or(`id.eq.${userId},email.eq.${userEmail}`)
-      .single();
+      if (error || !profile) {
+        setErrorMsg("Profil manquant dans la base.");
+        setLoading(false);
+        return;
+      }
 
-    console.log("Profil reçu :", profile);
-    console.log("Erreur éventuelle :", error);
+      localStorage.setItem("staff_session", JSON.stringify({
+        email: profile.email,
+        role: profile.role,
+        company_name: profile.company_name || "Amaru-Homes"
+      }));
 
-    if (error || !profile) {
-      setErrorMsg("Profil manquant dans la base.");
-      setLoading(false);
-      return;
-    }
-
-    localStorage.setItem("staff_session", JSON.stringify({
-      email: profile.email,
-      role: profile.role,
-      company_name: profile.company_name || "Amaru-Homes"
-    }));
-
-    if (profile.role === 'super_admin') {
-      router.replace('/super-admin');
-    } else if (profile.role === 'admin' || profile.role === 'staff') {
-      router.replace('/admin/dashboard');
-    } else {
-      setErrorMsg("Rôle non autorisé.");
+      if (profile.role === 'super_admin') {
+        router.replace('/super-admin');
+      } else if (profile.role === 'admin' || profile.role === 'staff') {
+        router.replace('/admin/dashboard');
+      } else {
+        setErrorMsg("Rôle non autorisé.");
+        setLoading(false);
+      }
+    } catch (err) {
+      setErrorMsg("Erreur système.");
       setLoading(false);
     }
-  } catch (err) {
-    console.error("Erreur dans handleRedirection :", err);
-    setErrorMsg("Erreur système.");
-    setLoading(false);
-  }
-};
+  };
 
   const handleLogin = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     setLoading(true);
     setErrorMsg(null);
 
+    // LOGIQUE SPÉCIFIQUE POUR LE PIN (CLIENT / IRIS)
+    if (showPin) {
+      // 1. Cas particulier Iris (Accès Staff via PIN)
+      if (pin === "240226") {
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: "iris@amaru-homes.com",
+          password: "TonMotDePasseSecret", // À sécuriser via variable d'env idéalement
+        });
+        if (data?.user) await handleRedirection(data.user.id, data.user.email);
+        return;
+      }
+
+      // 2. Cas Client (Accès Project Tracker)
+      // Ici, on vérifie si le PIN correspond à un projet client
+      // Pour l'instant, on simule une validation pour le code "1234"
+      if (pin === "1234" || pin.length >= 4) {
+        localStorage.setItem("client_access_pin", pin);
+        localStorage.removeItem("temp_client_pin");
+        router.push("/project-tracker");
+        return;
+      }
+      
+      setErrorMsg("Code PIN incorrect");
+      setLoading(false);
+      return;
+    }
+
+    // FORMULAIRE CLASSIQUE (EMAIL/PASSWORD)
     const { data, error } = await supabase.auth.signInWithPassword({
       email: email.trim(),
       password: password,
@@ -85,18 +109,9 @@ export default function LoginPage() {
     }
   };
 
-  // Logique du Code PIN
   const handlePinInput = (num: string) => {
     if (pin.length < 6) {
-      const newPin = pin + num;
-      setPin(newPin);
-      
-      // Si le code est complet (exemple: 123456 pour démo ou un code spécifique)
-      // Note: Ici tu peux définir un raccourci ou laisser Iris entrer son code habituel
-      if (newPin === "240226") { // Code d'exemple Iris
-         setEmail("iris@amaru-homes.com");
-         setPassword("TonMotDePasseSecret"); // À remplacer par la logique réelle ou auto-submit
-      }
+      setPin(prev => prev + num);
     }
   };
 
@@ -121,16 +136,15 @@ export default function LoginPage() {
           <p className="text-slate-500 text-[9px] uppercase tracking-[0.3em] font-black mt-1">Authentification Sécurisée</p>
         </div>
 
-        {/* Sélecteur de mode */}
         <div className="flex bg-black p-1 rounded-xl mb-8 border border-slate-900">
           <button 
-            onClick={() => setShowPin(true)}
+            onClick={() => { setShowPin(true); setErrorMsg(null); }}
             className={`flex-1 py-2 rounded-lg text-[10px] font-black transition-all ${showPin ? 'bg-slate-800 text-white' : 'text-slate-500'}`}
           >
             CODE PIN
           </button>
           <button 
-            onClick={() => setShowPin(false)}
+            onClick={() => { setShowPin(false); setErrorMsg(null); }}
             className={`flex-1 py-2 rounded-lg text-[10px] font-black transition-all ${!showPin ? 'bg-slate-800 text-white' : 'text-slate-500'}`}
           >
             IDENTIFIANTS
@@ -138,7 +152,6 @@ export default function LoginPage() {
         </div>
 
         {showPin ? (
-          /* CLAVIER PIN */
           <div className="space-y-6">
             <div className="flex justify-center gap-3">
               {[...Array(6)].map((_, i) => (
@@ -171,9 +184,9 @@ export default function LoginPage() {
                 {loading ? <Loader2 className="animate-spin" /> : <Key size={20} />}
               </button>
             </div>
+            {errorMsg && <p className="text-red-500 text-[10px] font-bold text-center uppercase mt-4">{errorMsg}</p>}
           </div>
         ) : (
-          /* FORMULAIRE CLASSIQUE */
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-1">
               <label className="text-[9px] uppercase tracking-widest font-black text-slate-500 ml-2">Identifiant</label>

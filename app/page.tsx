@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import { useRouter } from "next/navigation"; // Importation du router
 import { 
   Search, Loader2, ShieldCheck, ArrowRight, User, X
 } from "lucide-react";
@@ -14,6 +15,7 @@ import Footer from "@/components/Footer";
 type Property = any;
 
 export default function Home() {
+  const router = useRouter(); // Initialisation du router
   const [allProperties, setAllProperties] = useState<Property[]>([]);
   const [visibleCount, setVisibleCount] = useState(12);
   const [loading, setLoading] = useState(true);
@@ -78,11 +80,17 @@ export default function Home() {
     }
   };
 
+  // --- MODIFICATION ICI : REDIRECTION VERS LOGIN ---
   const handleClientLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (clientPin.length >= 4) {
+      // On stocke le PIN pour que la page de destination puisse le vérifier
       localStorage.setItem("client_access_pin", clientPin);
-      window.location.href = "/suivi-chantier";
+      
+      // CORRECTION : On pointe vers le nom du dossier réel "project-tracker"
+      window.location.href = "/project-tracker"; 
+    } else {
+      alert("Veuillez entrer un code PIN valide.");
     }
   };
 
@@ -103,7 +111,7 @@ export default function Home() {
       <div className="relative h-[85vh] md:h-screen flex flex-col items-center justify-center">
         <Hero />
         
-        {/* BOUTON DÉCLENCHEUR - Repositionné pour ne pas masquer le titre */}
+        {/* BOUTON DÉCLENCHEUR */}
         <div className="absolute bottom-[10%] md:bottom-[15%] z-40">
            {!isSearchOpen && (
              <button 
@@ -124,14 +132,11 @@ export default function Home() {
         <div className="absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-[#020617] via-[#020617]/80 to-transparent pointer-events-none" />
       </div>
 
-      {/* MODAL DE RECHERCHE - Correction du bug d'affichage sur smartphone */}
+      {/* MODAL DE RECHERCHE */}
       <div className={`fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8 transition-all duration-500 ${isSearchOpen ? 'visible opacity-100' : 'invisible opacity-0'}`}>
-        {/* Overlay flou en arrière-plan */}
         <div className="absolute inset-0 bg-[#020617]/90 backdrop-blur-md" onClick={() => setIsSearchOpen(false)} />
         
         <div className={`relative w-full max-w-6xl bg-white rounded-[2rem] md:rounded-[3rem] overflow-hidden shadow-[0_0_100px_rgba(212,175,55,0.1)] transition-transform duration-500 ${isSearchOpen ? 'scale-100 translate-y-0' : 'scale-95 translate-y-10'}`}>
-          
-          {/* Fermeture */}
           <button 
             onClick={() => setIsSearchOpen(false)}
             className="absolute top-5 right-5 w-10 h-10 bg-[#020617] text-[#D4AF37] rounded-full flex items-center justify-center hover:scale-110 transition-transform z-50 shadow-lg"
@@ -188,7 +193,7 @@ export default function Home() {
                       className="w-full bg-transparent border-b border-white/10 py-4 text-center text-2xl md:text-3xl font-light tracking-[0.8em] text-white outline-none focus:border-[#D4AF37] transition-all"
                     />
                   </div>
-                  <button className="w-full bg-[#D4AF37] text-black py-5 md:py-6 rounded-full font-bold text-[10px] md:text-[11px] uppercase tracking-[0.3em] hover:bg-white transition-all flex items-center justify-center gap-4">
+                  <button type="submit" className="w-full bg-[#D4AF37] text-black py-5 md:py-6 rounded-full font-bold text-[10px] md:text-[11px] uppercase tracking-[0.3em] hover:bg-white transition-all flex items-center justify-center gap-4">
                     Accéder au chantier <ArrowRight size={18} />
                   </button>
                </form>
@@ -238,12 +243,10 @@ export default function Home() {
         
         .font-serif { font-family: 'Cormorant Garamond', serif; }
         
-        /* Personnalisation Scrollbar Gold */
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-track { background: #020617; }
         ::-webkit-scrollbar-thumb { background: #D4AF37; border-radius: 10px; }
 
-        /* Correction pour iOS (évite le scroll derrière la modal) */
         ${isSearchOpen ? 'body { overflow: hidden; }' : ''}
       `}</style>
     </main>
