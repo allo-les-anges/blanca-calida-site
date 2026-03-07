@@ -43,7 +43,6 @@ const REGIONS_CONFIG = [
 
 export default function RegionGrid({ properties, onRegionClick }: RegionGridProps) {
   
-  // SYSTÈME DE COMPTAGE
   const getCount = (matchKeywords: string[]) => {
     if (!properties || !Array.isArray(properties)) return 0;
     return properties.filter(p => {
@@ -66,53 +65,59 @@ export default function RegionGrid({ properties, onRegionClick }: RegionGridProp
             viewport={{ once: true }}
             transition={{ delay: index * 0.1 }}
             onClick={() => onRegionClick(region.name)}
-            className="group relative h-[550px] rounded-[3rem] overflow-hidden cursor-pointer bg-slate-900 shadow-2xl transition-all duration-700 hover:shadow-[#D4AF37]/10"
+            className="group relative h-[500px] rounded-[2.5rem] overflow-hidden cursor-pointer bg-slate-900 shadow-2xl transition-all duration-700"
           >
-            {/* IMAGE AVEC OVERLAY LUXE */}
+            {/* IMAGE DE FOND */}
             <div className="absolute inset-0 z-0">
               <img
                 src={region.image}
                 alt={region.name}
-                className="w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-110 group-hover:rotate-1"
+                className="w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-110"
               />
-              {/* Gradient plus profond et élégant */}
-              <div className="absolute inset-0 bg-gradient-to-t from-[#020617] via-[#020617]/40 to-transparent opacity-80 group-hover:opacity-95 transition-opacity duration-700" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#020617] via-[#020617]/50 to-transparent opacity-90" />
             </div>
 
-            {/* CONTENU HARMONISÉ PAGE CONTACT */}
-            <div className="absolute inset-0 z-10 p-10 flex flex-col justify-end">
-              <div className="space-y-6 translate-y-4 group-hover:translate-y-0 transition-transform duration-700 ease-out">
-                
-                {/* COMPTEUR STYLE BADGE LUXE */}
-                <div className="inline-flex items-center gap-3 px-4 py-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-full w-fit">
-                  <div className="w-1.5 h-1.5 bg-[#D4AF37] rounded-full shadow-[0_0_10px_#D4AF37]" />
-                  <span className="text-[10px] font-bold text-white uppercase tracking-[0.3em]">
+            {/* CONTENU ALIGNÉ */}
+            <div className="absolute inset-0 z-10 p-8 flex flex-col">
+              
+              {/* 1. BADGE (En haut) */}
+              <div className="flex justify-center">
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full">
+                  <div className="w-1.5 h-1.5 bg-[#D4AF37] rounded-full shadow-[0_0_8px_#D4AF37]" />
+                  <span className="text-[10px] font-bold text-white uppercase tracking-[0.2em]">
                     {count} {count > 1 ? 'Propriétés' : 'Propriété'}
                   </span>
                 </div>
+              </div>
 
-                <div className="space-y-3">
-                  {/* TITRE EN SERIF ITALIC (COMME LA PAGE CONTACT) */}
-                  <h3 className="text-4xl font-serif italic text-white leading-tight">
+              {/* 2. ESPACE FLEXIBLE pour pousser le texte en bas */}
+              <div className="flex-grow" />
+
+              {/* 3. BLOC TEXTE ALIGNÉ (Hauteur fixe pour uniformité) */}
+              <div className="flex flex-col items-center text-center space-y-4">
+                
+                {/* Conteneur de titre avec hauteur fixe pour forcer l'alignement */}
+                <div className="h-[80px] flex items-center justify-center">
+                  <h3 className="text-3xl md:text-4xl font-serif italic text-white leading-tight">
                     {region.name}
                   </h3>
-                  
-                  {/* DESCRIPTION ÉPURÉE */}
-                  <p className="text-[#D4AF37] text-[11px] font-medium uppercase tracking-[0.2em] opacity-0 group-hover:opacity-100 transition-all duration-700 delay-100">
-                    {region.description}
-                  </p>
                 </div>
 
-                {/* CALL TO ACTION RAFFINÉ */}
-                <div className="flex items-center gap-3 text-white/80 text-[10px] font-bold uppercase tracking-[0.4em] pt-4 opacity-0 group-hover:opacity-100 transition-all duration-700 delay-200">
-                  <span className="border-b border-[#D4AF37]/50 pb-1">Découvrir</span>
-                  <ChevronRight size={14} className="text-[#D4AF37]" />
+                {/* Description et Action (apparaissent au hover) */}
+                <div className="overflow-hidden h-0 group-hover:h-20 transition-all duration-500 ease-in-out">
+                    <p className="text-[#D4AF37] text-[10px] font-bold uppercase tracking-[0.2em] mb-4">
+                        {region.description}
+                    </p>
+                    <div className="flex items-center justify-center gap-2 text-white text-[9px] font-black uppercase tracking-[0.3em]">
+                        Explorer <ChevronRight size={14} className="text-[#D4AF37]" />
+                    </div>
                 </div>
+                
               </div>
             </div>
 
-            {/* EFFET DE BALAYAGE LUMINEUX (SHINE) DISCRET */}
-            <div className="absolute -inset-full top-0 z-20 block h-full w-1/2 -skew-x-12 bg-gradient-to-r from-transparent via-white/5 to-transparent group-hover:animate-[shine_1.5s_ease-in-out]" />
+            {/* EFFET DE BRILLANCE AU SURVOL */}
+            <div className="absolute -inset-full top-0 z-20 block h-full w-1/2 -skew-x-12 bg-gradient-to-r from-transparent via-white/10 to-transparent group-hover:animate-[shine_1.5s_ease-in-out]" />
           </motion.div>
         );
       })}
