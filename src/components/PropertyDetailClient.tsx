@@ -6,7 +6,7 @@ import Footer from "@/components/Footer";
 import { 
   Bed, Bath, Maximize, MapPin, MessageCircle, ArrowLeft, 
   Loader2, Image as ImageIcon, Home, Map as MapIcon, 
-  Navigation, Waves, Car, Ship 
+  Navigation, Waves, Car, Ship, ShieldCheck, Wallet
 } from "lucide-react";
 import Link from "next/link";
 
@@ -67,6 +67,10 @@ export default function PropertyDetailClient({ id }: { id: string }) {
 
   const images = property.images || [];
   
+  // Calcul du Cashback (1% du prix)
+  const numericPrice = Number(property.price || property.prix || 0);
+  const cashbackAmount = Math.floor(numericPrice * 0.01);
+
   // Correction de l'URL Google Maps
   const mapUrl = property.latitude && property.longitude 
     ? `https://maps.google.com/maps?q=${property.latitude},${property.longitude}&z=15&output=embed`
@@ -103,7 +107,7 @@ export default function PropertyDetailClient({ id }: { id: string }) {
               <button 
                 key={idx} 
                 onClick={() => { setActiveImage(idx); scrollContainerRef.current?.scrollTo({ left: idx * scrollContainerRef.current.clientWidth, behavior: 'smooth' }); }} 
-                className={`relative h-24 min-h-[96px] rounded-2xl overflow-hidden border-2 transition-all ${activeImage === idx ? 'border-emerald-500 scale-95' : 'border-transparent opacity-50 hover:opacity-100'}`}
+                className={`relative h-24 min-h-[96px] rounded-2xl overflow-hidden border-2 transition-all ${activeImage === idx ? 'border-[#D4AF37] scale-95' : 'border-transparent opacity-50 hover:opacity-100'}`}
               >
                 <img src={img} className="w-full h-full object-cover" alt="" />
               </button>
@@ -148,7 +152,7 @@ export default function PropertyDetailClient({ id }: { id: string }) {
             </div>
           </div>
 
-          {/* QUICK STATS (6 colonnes pour tout inclure) */}
+          {/* QUICK STATS */}
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-16">
             <div className="bg-slate-50 p-6 rounded-3xl text-center border border-slate-100">
               <Bed className="mx-auto mb-2 text-emerald-600" size={22} />
@@ -213,23 +217,59 @@ export default function PropertyDetailClient({ id }: { id: string }) {
           </div>
         </div>
 
-        {/* SIDEBAR PRIX */}
+        {/* SIDEBAR PRIX + MACARON CASHBACK */}
         <div className="lg:col-span-1">
-          <div className="sticky top-40 bg-white border border-slate-100 p-10 rounded-[2.5rem] shadow-2xl">
-            <p className="text-[10px] uppercase text-gray-400 mb-2 font-bold tracking-widest">Prix du modèle</p>
-            <p className="text-5xl font-serif text-slate-900 leading-none mb-10">
-              {Number(property.price || property.prix || 0).toLocaleString("fr-FR")} €
-            </p>
-            <button className="w-full bg-slate-900 text-white py-6 rounded-2xl font-bold uppercase text-[11px] tracking-widest hover:bg-emerald-800 transition-all mb-4">
-              Réserver une visite
-            </button>
-            <a 
-              href={`https://wa.me/34627768233?text=Information sur la villa ref: ${property.ref || property.id_externe}`} 
-              target="_blank" 
-              className="w-full border border-slate-200 flex items-center justify-center gap-3 py-6 rounded-2xl font-bold uppercase text-[11px] text-slate-700 hover:bg-slate-50 transition-all"
-            >
-              <MessageCircle size={20} className="text-green-500" /> WhatsApp
-            </a>
+          <div className="sticky top-40 space-y-6">
+            
+            {/* MACARON CASHBACK PRIVILÈGE (LUXE) */}
+            {cashbackAmount > 0 && (
+              <Link 
+                href={`/contact-cashback?Property_ID=${property.id_externe || property.id}`}
+                className="group relative block w-full overflow-hidden rounded-[2rem] bg-slate-900 p-[1px] transition-all duration-500 hover:scale-[1.02] shadow-2xl"
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-[#D4AF37] via-[#D4AF37]/20 to-transparent opacity-30 group-hover:opacity-50 transition-opacity" />
+                <div className="relative bg-slate-950 rounded-[2rem] p-6 flex items-center gap-5">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/20 group-hover:bg-[#D4AF37] group-hover:text-black transition-all duration-500 shadow-[0_0_15px_rgba(212,175,55,0.3)]">
+                    <ShieldCheck size={28} />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#D4AF37] mb-1">
+                      Privilège Amaru
+                    </span>
+                    <span className="text-sm text-white font-medium">
+                      Activer votre Cashback :
+                    </span>
+                    <span className="text-xl font-serif italic text-white">
+                      +{cashbackAmount.toLocaleString("fr-FR")} €
+                    </span>
+                  </div>
+                  <div className="ml-auto bg-white/5 p-2 rounded-full text-[#D4AF37] group-hover:translate-x-1 transition-transform">
+                    <ArrowLeft size={16} className="rotate-180" />
+                  </div>
+                </div>
+              </Link>
+            )}
+
+            {/* CARD PRIX STANDARD */}
+            <div className="bg-white border border-slate-100 p-10 rounded-[2.5rem] shadow-2xl">
+              <p className="text-[10px] uppercase text-gray-400 mb-2 font-bold tracking-widest">Prix du modèle</p>
+              <p className="text-5xl font-serif text-slate-900 leading-none mb-10">
+                {numericPrice.toLocaleString("fr-FR")} €
+              </p>
+              
+              <button className="w-full bg-slate-900 text-white py-6 rounded-2xl font-bold uppercase text-[11px] tracking-widest hover:bg-emerald-800 transition-all mb-4 shadow-xl shadow-slate-900/10">
+                Réserver une visite
+              </button>
+              
+              <a 
+                href={`https://wa.me/34627768233?text=Information sur la villa ref: ${property.ref || property.id_externe}`} 
+                target="_blank" 
+                className="w-full border border-slate-200 flex items-center justify-center gap-3 py-6 rounded-2xl font-bold uppercase text-[11px] text-slate-700 hover:bg-slate-50 transition-all"
+              >
+                <MessageCircle size={20} className="text-green-500" /> WhatsApp
+              </a>
+            </div>
+
           </div>
         </div>
       </section>
