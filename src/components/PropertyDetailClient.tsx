@@ -6,7 +6,7 @@ import Footer from "@/components/Footer";
 import { 
   Bed, Bath, Maximize, MapPin, MessageCircle, ArrowLeft, 
   Loader2, Image as ImageIcon, Home, Map as MapIcon, 
-  Navigation, Waves, Car, Ship, ShieldCheck, Wallet
+  Navigation, Waves, Car, Ship, ShieldCheck
 } from "lucide-react";
 import Link from "next/link";
 
@@ -51,7 +51,7 @@ export default function PropertyDetailClient({ id }: { id: string }) {
 
   if (loading) return (
     <div className="h-screen flex flex-col items-center justify-center bg-white italic font-serif text-slate-400">
-      <Loader2 className="animate-spin text-emerald-500 mb-4" size={40} />
+      <Loader2 className="animate-spin text-[#D4AF37] mb-4" size={40} />
       Chargement de la villa...
     </div>
   );
@@ -66,14 +66,11 @@ export default function PropertyDetailClient({ id }: { id: string }) {
   );
 
   const images = property.images || [];
-  
-  // Calcul du Cashback (1% du prix)
   const numericPrice = Number(property.price || property.prix || 0);
-  const cashbackAmount = Math.floor(numericPrice * 0.01);
 
-  // Correction de l'URL Google Maps
+  // URL Google Maps corrigée
   const mapUrl = property.latitude && property.longitude 
-    ? `https://maps.google.com/maps?q=${property.latitude},${property.longitude}&z=15&output=embed`
+    ? `https://www.google.com/maps/embed/v1/view?key=VOTRE_CLE_API&center=${property.latitude},${property.longitude}&zoom=15`
     : null;
 
   return (
@@ -121,30 +118,15 @@ export default function PropertyDetailClient({ id }: { id: string }) {
           <h1 className="text-4xl md:text-6xl font-serif mb-8 text-slate-900 leading-[1.1]">{property.titre || "Villa Moderne"}</h1>
           
           <div className="flex items-center gap-3 text-gray-400 mb-8 text-[11px] uppercase tracking-[0.2em] font-bold">
-            <MapPin size={18} className="text-emerald-500" />
+            <MapPin size={18} className="text-[#D4AF37]" />
             {property.town || property.ville} • {property.region}
           </div>
 
-          {/* BADGES ÉQUIPEMENTS DYNAMIQUES */}
+          {/* BADGES ÉQUIPEMENTS */}
           <div className="flex flex-wrap gap-3 mb-12">
             {property.pool === "Oui" && (
-              <div className="flex items-center gap-2 bg-sky-50 text-sky-700 px-4 py-2 rounded-full border border-sky-100 text-[9px] uppercase font-bold tracking-wider">
-                <Waves size={14} /> Piscine Privée
-              </div>
-            )}
-            {property.distance_beach && (
-              <div className="flex items-center gap-2 bg-amber-50 text-amber-700 px-4 py-2 rounded-full border border-amber-100 text-[9px] uppercase font-bold tracking-wider">
-                <Ship size={14} /> Plage à {property.distance_beach}m
-              </div>
-            )}
-            {property.distance_golf && (
-              <div className="flex items-center gap-2 bg-emerald-50 text-emerald-700 px-4 py-2 rounded-full border border-emerald-100 text-[9px] uppercase font-bold tracking-wider">
-                <Navigation size={14} className="rotate-45" /> Golf à {property.distance_golf}m
-              </div>
-            )}
-            {property.distance_town && (
               <div className="flex items-center gap-2 bg-slate-50 text-slate-700 px-4 py-2 rounded-full border border-slate-100 text-[9px] uppercase font-bold tracking-wider">
-                <Home size={14} /> Centre à {property.distance_town}m
+                <Waves size={14} /> Piscine Privée
               </div>
             )}
             <div className="flex items-center gap-2 bg-slate-50 text-slate-700 px-4 py-2 rounded-full border border-slate-100 text-[9px] uppercase font-bold tracking-wider">
@@ -155,32 +137,32 @@ export default function PropertyDetailClient({ id }: { id: string }) {
           {/* QUICK STATS */}
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-16">
             <div className="bg-slate-50 p-6 rounded-3xl text-center border border-slate-100">
-              <Bed className="mx-auto mb-2 text-emerald-600" size={22} />
+              <Bed className="mx-auto mb-2 text-[#D4AF37]" size={22} />
               <p className="text-2xl font-serif">{property.beds || "0"}</p>
               <p className="text-[8px] uppercase text-gray-400 font-bold tracking-widest">Chambres</p>
             </div>
             <div className="bg-slate-50 p-6 rounded-3xl text-center border border-slate-100">
-              <Bath className="mx-auto mb-2 text-emerald-600" size={22} />
+              <Bath className="mx-auto mb-2 text-[#D4AF37]" size={22} />
               <p className="text-2xl font-serif">{property.baths || "0"}</p>
               <p className="text-[8px] uppercase text-gray-400 font-bold tracking-widest">Bains</p>
             </div>
             <div className="bg-slate-50 p-6 rounded-3xl text-center border border-slate-100">
-              <Maximize className="mx-auto mb-2 text-emerald-600" size={22} />
+              <Maximize className="mx-auto mb-2 text-[#D4AF37]" size={22} />
               <p className="text-2xl font-serif">{property.surface_built || "0"}</p>
               <p className="text-[8px] uppercase text-gray-400 font-bold tracking-widest">Bâti m²</p>
             </div>
             <div className="bg-slate-50 p-6 rounded-3xl text-center border border-slate-100">
-              <Home className="mx-auto mb-2 text-emerald-600" size={22} />
+              <Home className="mx-auto mb-2 text-[#D4AF37]" size={22} />
               <p className="text-2xl font-serif">{property.surface_plot || "0"}</p>
               <p className="text-[8px] uppercase text-gray-400 font-bold tracking-widest">Terrain m²</p>
             </div>
             <div className="bg-slate-50 p-6 rounded-3xl text-center border border-slate-100">
-              <Waves className="mx-auto mb-2 text-emerald-600" size={22} />
+              <Waves className="mx-auto mb-2 text-[#D4AF37]" size={22} />
               <p className="text-xl font-serif mt-1">{property.pool === "Oui" || property.pool === "1" ? "Privée" : "Non"}</p>
               <p className="text-[8px] uppercase text-gray-400 font-bold tracking-widest">Piscine</p>
             </div>
             <div className="bg-slate-50 p-6 rounded-3xl text-center border border-slate-100">
-              <Car className="mx-auto mb-2 text-emerald-600" size={22} />
+              <Car className="mx-auto mb-2 text-[#D4AF37]" size={22} />
               <p className="text-xl font-serif mt-1">Privé</p>
               <p className="text-[8px] uppercase text-gray-400 font-bold tracking-widest">Parking</p>
             </div>
@@ -197,7 +179,7 @@ export default function PropertyDetailClient({ id }: { id: string }) {
             <h2 className="text-3xl font-serif italic mb-8 text-slate-800">Localisation</h2>
             {property.adresse && (
               <div className="flex items-center gap-4 mb-8 p-6 bg-slate-50 rounded-2xl border border-slate-100">
-                <div className="p-3 bg-white rounded-full shadow-sm text-emerald-600"><Navigation size={20}/></div>
+                <div className="p-3 bg-white rounded-full shadow-sm text-[#D4AF37]"><Navigation size={20}/></div>
                 <div>
                   <p className="text-[9px] uppercase text-gray-400 font-bold tracking-widest mb-1">Situation</p>
                   <p className="font-medium text-slate-700">{property.adresse}</p>
@@ -217,47 +199,42 @@ export default function PropertyDetailClient({ id }: { id: string }) {
           </div>
         </div>
 
-        {/* SIDEBAR PRIX + MACARON CASHBACK */}
+        {/* SIDEBAR PRIX + MACARON REDIRECTION */}
         <div className="lg:col-span-1">
           <div className="sticky top-40 space-y-6">
             
-            {/* MACARON CASHBACK PRIVILÈGE (LUXE) */}
-            {cashbackAmount > 0 && (
-              <Link 
-                href={`/contact-cashback?Property_ID=${property.id_externe || property.id}`}
-                className="group relative block w-full overflow-hidden rounded-[2rem] bg-slate-900 p-[1px] transition-all duration-500 hover:scale-[1.02] shadow-2xl"
-              >
-                <div className="absolute inset-0 bg-gradient-to-br from-[#D4AF37] via-[#D4AF37]/20 to-transparent opacity-30 group-hover:opacity-50 transition-opacity" />
-                <div className="relative bg-slate-950 rounded-[2rem] p-6 flex items-center gap-5">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/20 group-hover:bg-[#D4AF37] group-hover:text-black transition-all duration-500 shadow-[0_0_15px_rgba(212,175,55,0.3)]">
-                    <ShieldCheck size={28} />
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#D4AF37] mb-1">
-                      Privilège Amaru
-                    </span>
-                    <span className="text-sm text-white font-medium">
-                      Activer votre Cashback :
-                    </span>
-                    <span className="text-xl font-serif italic text-white">
-                      +{cashbackAmount.toLocaleString("fr-FR")} €
-                    </span>
-                  </div>
-                  <div className="ml-auto bg-white/5 p-2 rounded-full text-[#D4AF37] group-hover:translate-x-1 transition-transform">
-                    <ArrowLeft size={16} className="rotate-180" />
-                  </div>
+            {/* MACARON CASHBACK (Redirection vers formulaire) */}
+            <Link 
+              href={`/contact-cashback?Property_ID=${property.id_externe || property.id}`}
+              className="group relative block w-full overflow-hidden rounded-[2rem] bg-slate-900 p-[1px] transition-all duration-500 hover:scale-[1.02] shadow-2xl"
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-[#D4AF37] via-[#D4AF37]/20 to-transparent opacity-30 group-hover:opacity-50 transition-opacity" />
+              <div className="relative bg-slate-950 rounded-[2rem] p-6 flex items-center gap-5">
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/20 group-hover:bg-[#D4AF37] group-hover:text-black transition-all duration-500 shadow-[0_0_15px_rgba(212,175,55,0.3)]">
+                  <ShieldCheck size={28} />
                 </div>
-              </Link>
-            )}
+                <div className="flex flex-col">
+                  <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-[#D4AF37] mb-1">
+                    Offre Exclusive
+                  </span>
+                  <span className="text-lg font-serif italic text-white leading-tight">
+                    Activer mon <br /> programme Cashback
+                  </span>
+                </div>
+                <div className="ml-auto bg-white/5 p-2 rounded-full text-[#D4AF37] group-hover:translate-x-1 transition-transform">
+                  <ArrowLeft size={16} className="rotate-180" />
+                </div>
+              </div>
+            </Link>
 
-            {/* CARD PRIX STANDARD */}
+            {/* CARD PRIX */}
             <div className="bg-white border border-slate-100 p-10 rounded-[2.5rem] shadow-2xl">
-              <p className="text-[10px] uppercase text-gray-400 mb-2 font-bold tracking-widest">Prix du modèle</p>
+              <p className="text-[10px] uppercase text-gray-400 mb-2 font-bold tracking-widest">Prix de la propriété</p>
               <p className="text-5xl font-serif text-slate-900 leading-none mb-10">
                 {numericPrice.toLocaleString("fr-FR")} €
               </p>
               
-              <button className="w-full bg-slate-900 text-white py-6 rounded-2xl font-bold uppercase text-[11px] tracking-widest hover:bg-emerald-800 transition-all mb-4 shadow-xl shadow-slate-900/10">
+              <button className="w-full bg-slate-900 text-white py-6 rounded-2xl font-bold uppercase text-[11px] tracking-widest hover:bg-[#D4AF37] hover:text-black transition-all mb-4 shadow-xl shadow-slate-900/10">
                 Réserver une visite
               </button>
               
