@@ -50,7 +50,6 @@ export default function Navbar() {
 
   const navLinks = [
     { name: "Accueil", href: "/" },
-    { name: "Propriétés", href: "/proprietes" },
     { name: "Confidentiel", href: "/confidentiel" },
     { name: "Contact", href: "/contact" },
   ];
