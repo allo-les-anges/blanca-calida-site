@@ -104,7 +104,7 @@ export default function CashbackInfo() {
         {/* Section FAQ / Info */}
         <div className="border-t border-slate-100 pt-20">
             <div className="max-w-2xl">
-              <h2 className="text-4xl font-serif italic mb-10 text-slate-900 text-left">L'exclusivité Amaru</h2>
+              <h2 className="text-4xl font-serif italic mb-10 text-slate-900 text-left">L'exclusivité data_home</h2>
               <div className="space-y-8 text-slate-500 text-lg leading-relaxed">
                 <p>
                   Le programme <span className="text-slate-900 font-medium">Cashback</span> est une offre signée **Amaru Properties**. Il s'active dès que vous réservez une villa éligible via notre plateforme digitale.
