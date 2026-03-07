@@ -413,7 +413,7 @@ const analyseLines = doc.splitTextToSize(analyse, 115);
 
   columnStyles: {
     0: { cellWidth: 45 },
-    1: { cellWidth: 'auto' }
+    1: { cellWidth: 120 }
   },
 
   styles: {
@@ -425,7 +425,6 @@ const analyseLines = doc.splitTextToSize(analyse, 115);
 
   margin: { left: 14, right: 14 }
 });
-
     // Annexe photo
     doc.addPage();
 
