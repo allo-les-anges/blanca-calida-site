@@ -7,7 +7,7 @@ import {
   Bed, Bath, Maximize, MapPin, MessageCircle, ArrowLeft, 
   Loader2, Image as ImageIcon, Home, Map as MapIcon, 
   Navigation, Waves, Car, Ship, ShieldCheck, Wallet
-} from "lucide-react"; // Correction ici : lucide-react
+} from "lucide-react";
 import Link from "next/link";
 
 export default function PropertyDetailClient({ id }: { id: string }) {
@@ -47,7 +47,6 @@ export default function PropertyDetailClient({ id }: { id: string }) {
     }
   };
 
-  // Nettoyage agressif du HTML importé pour forcer la police
   const cleanDescription = (html: string) => {
     if (!html) return "";
     return html
@@ -93,7 +92,7 @@ export default function PropertyDetailClient({ id }: { id: string }) {
         </Link>
       </div>
 
-      {/* GALERIE PHOTOS */}
+      {/* GALERIE PHOTOS COMPLÈTE */}
       <section className="max-w-7xl mx-auto px-6 mb-16">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:h-[550px]">
           <div className="md:col-span-3 relative rounded-[2rem] md:rounded-[2.5rem] overflow-hidden shadow-2xl bg-slate-100 h-[400px] md:h-full">
@@ -131,6 +130,7 @@ export default function PropertyDetailClient({ id }: { id: string }) {
             {property.town || property.ville} • {property.region}
           </div>
 
+          {/* TOUS LES BADGES ÉQUIPEMENTS */}
           <div className="flex flex-wrap gap-3 mb-12">
             {property.pool === "Oui" && (
               <div className="flex items-center gap-2 bg-slate-50 text-slate-700 px-4 py-2 rounded-full border border-slate-100 text-[9px] uppercase font-bold tracking-wider">
@@ -157,7 +157,7 @@ export default function PropertyDetailClient({ id }: { id: string }) {
             </div>
           </div>
 
-          {/* QUICK STATS */}
+          {/* TOUTES LES QUICK STATS */}
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-16">
             <div className="bg-slate-50 p-6 rounded-3xl text-center border border-slate-100">
               <Bed className="mx-auto mb-2 text-[#D4AF37]" size={22} />
@@ -191,25 +191,18 @@ export default function PropertyDetailClient({ id }: { id: string }) {
             </div>
           </div>
 
+          {/* DESCRIPTION AVEC CLASSE DE LIAISON LAYOUT */}
           <div className="max-w-none mb-20 pt-10 border-t border-slate-100">
             <h2 className="text-3xl font-serif italic mb-8 text-slate-800">L'Art de Vivre</h2>
-            
             <div 
-              className="
-                text-gray-600 
-                text-lg 
-                leading-relaxed 
-                font-sans
-                [&_*]:!font-sans 
-                [&_*]:!font-normal
-                [&_p]:!mb-6
-              "
+              className="description-xml-container text-gray-600 text-lg leading-relaxed font-sans"
               dangerouslySetInnerHTML={{ 
                 __html: cleanDescription(property.description || "Description en cours de rédaction...") 
               }} 
             />
           </div>
 
+          {/* LOCALISATION COMPLÈTE */}
           <div className="mb-20 pt-10 border-t border-slate-100">
             <h2 className="text-3xl font-serif italic mb-8 text-slate-800">Localisation</h2>
             {property.adresse && (
@@ -234,8 +227,10 @@ export default function PropertyDetailClient({ id }: { id: string }) {
           </div>
         </div>
 
+        {/* SIDEBAR COMPLÈTE AVEC CASHBACK */}
         <div className="lg:col-span-1">
           <div className="sticky top-40 space-y-6">
+            
             <Link 
               href={`/contact-cashback?Property_ID=${property.id_externe || property.id}`}
               className="group relative block w-full overflow-hidden rounded-[2rem] bg-slate-900 p-[1px] transition-all duration-500 hover:scale-[1.02] shadow-2xl"
@@ -264,13 +259,20 @@ export default function PropertyDetailClient({ id }: { id: string }) {
               <p className="text-5xl font-serif text-slate-900 leading-none mb-10">
                 {numericPrice.toLocaleString("fr-FR")} €
               </p>
+              
               <button className="w-full bg-slate-900 text-white py-6 rounded-2xl font-bold uppercase text-[11px] tracking-widest hover:bg-[#D4AF37] hover:text-black transition-all mb-4 shadow-xl shadow-slate-900/10">
                 Réserver une visite
               </button>
-              <a href={`https://wa.me/34627768233?text=Villa ref: ${property.ref || property.id_externe}`} target="_blank" className="w-full border border-slate-200 flex items-center justify-center gap-3 py-6 rounded-2xl font-bold uppercase text-[11px] text-slate-700 hover:bg-slate-50 transition-all">
+              
+              <a 
+                href={`https://wa.me/34627768233?text=Information sur la villa ref: ${property.ref || property.id_externe}`} 
+                target="_blank" 
+                className="w-full border border-slate-200 flex items-center justify-center gap-3 py-6 rounded-2xl font-bold uppercase text-[11px] text-slate-700 hover:bg-slate-50 transition-all"
+              >
                 <MessageCircle size={20} className="text-green-500" /> WhatsApp
               </a>
             </div>
+
           </div>
         </div>
       </section>
