@@ -20,6 +20,19 @@ export default function Home() {
   const [clientPin, setClientPin] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
+  // 1. DÉFINITION DU FILTRE LUXE PAR DÉFAUT (500,000 €)
+  const [filters, setFilters] = useState({
+    type: "", 
+    town: "", 
+    region: "", 
+    beds: "",
+    minPrice: "500000", // Valeur initiale pour n'afficher que le luxe
+    maxPrice: "", 
+    reference: "", 
+    development: "", 
+    availableOnly: false,
+  });
+
   useEffect(() => {
     async function loadData() {
       try {
@@ -35,11 +48,7 @@ export default function Home() {
     loadData();
   }, []);
 
-  const [filters, setFilters] = useState({
-    type: "", town: "", region: "", beds: "",
-    minPrice: "", maxPrice: "", reference: "", development: "", availableOnly: false,
-  });
-
+  // 2. FILTRAGE GLOBAL (Utilisé par la liste ET par les vignettes de régions)
   const filteredProperties = useMemo(() => {
     return allProperties.filter((p) => {
       const matchDev = !filters.development || p.development_name?.toLowerCase().trim() === filters.development.toLowerCase().trim();
@@ -47,15 +56,34 @@ export default function Home() {
       const matchRegion = !filters.region || p.region === filters.region;
       const matchType = !filters.type || p.type?.toLowerCase().includes(filters.type.toLowerCase());
       const matchBeds = !filters.beds || Number(p.beds) >= Number(filters.beds);
+      
+      // Nettoyage et conversion du prix
       const price = Number(p.price);
       const matchMin = !filters.minPrice || price >= Number(filters.minPrice);
       const matchMax = !filters.maxPrice || price <= Number(filters.maxPrice);
+      
       const matchRef = !filters.reference || p.ref?.toLowerCase().includes(filters.reference.toLowerCase());
+      
       return matchDev && matchTown && matchRegion && matchType && matchBeds && matchMin && matchMax && matchRef;
     });
   }, [allProperties, filters]);
 
-  const hasActiveFilters = Object.values(filters).some((v) => v !== "" && v !== false);
+  // 3. LOGIQUE D'AFFICHAGE ET DE PAGINATION
+  // On considère comme "filtre actif" toute recherche spécifique au-delà du filtre de prix par défaut
+  const hasActiveFilters = useMemo(() => {
+    return (
+      filters.type !== "" || 
+      filters.town !== "" || 
+      filters.region !== "" || 
+      filters.beds !== "" || 
+      filters.maxPrice !== "" || 
+      filters.reference !== "" || 
+      filters.development !== "" || 
+      filters.availableOnly !== false ||
+      (filters.minPrice !== "500000" && filters.minPrice !== "")
+    );
+  }, [filters]);
+
   const propertiesToShow = hasActiveFilters ? filteredProperties : filteredProperties.slice(0, visibleCount);
 
   const handleSearch = (newFilters: any) => {
@@ -66,7 +94,18 @@ export default function Home() {
   };
 
   const handleRegionClick = (regionName: string) => {
-    setFilters({ type: "", town: "", region: regionName, beds: "", minPrice: "", maxPrice: "", reference: "", development: "", availableOnly: false });
+    // On garde le filtre de prix à 500k lors du clic sur une région pour rester dans l'univers prestige
+    setFilters({ 
+      type: "", 
+      town: "", 
+      region: regionName, 
+      beds: "", 
+      minPrice: "500000", 
+      maxPrice: "", 
+      reference: "", 
+      development: "", 
+      availableOnly: false 
+    });
     setVisibleCount(12);
     scrollToCollection();
   };
@@ -103,7 +142,6 @@ export default function Home() {
       <div className="relative h-[85vh] md:h-screen flex flex-col items-center justify-center">
         <Hero />
         
-        {/* BOUTON DÉCLENCHEUR - Repositionné pour ne pas masquer le titre */}
         <div className="absolute bottom-[10%] md:bottom-[15%] z-40">
            {!isSearchOpen && (
              <button 
@@ -124,14 +162,11 @@ export default function Home() {
         <div className="absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-[#020617] via-[#020617]/80 to-transparent pointer-events-none" />
       </div>
 
-      {/* MODAL DE RECHERCHE - Correction du bug d'affichage sur smartphone */}
+      {/* MODAL DE RECHERCHE */}
       <div className={`fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8 transition-all duration-500 ${isSearchOpen ? 'visible opacity-100' : 'invisible opacity-0'}`}>
-        {/* Overlay flou en arrière-plan */}
         <div className="absolute inset-0 bg-[#020617]/90 backdrop-blur-md" onClick={() => setIsSearchOpen(false)} />
         
         <div className={`relative w-full max-w-6xl bg-white rounded-[2rem] md:rounded-[3rem] overflow-hidden shadow-[0_0_100px_rgba(212,175,55,0.1)] transition-transform duration-500 ${isSearchOpen ? 'scale-100 translate-y-0' : 'scale-95 translate-y-10'}`}>
-          
-          {/* Fermeture */}
           <button 
             onClick={() => setIsSearchOpen(false)}
             className="absolute top-5 right-5 w-10 h-10 bg-[#020617] text-[#D4AF37] rounded-full flex items-center justify-center hover:scale-110 transition-transform z-50 shadow-lg"
@@ -153,14 +188,14 @@ export default function Home() {
         </div>
       </div>
 
-      {/* SECTION RÉGIONS */}
+      {/* SECTION RÉGIONS : Utilise filteredProperties pour des compteurs cohérents (> 500k) */}
       <section className="py-24 md:py-32">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16 md:mb-24 space-y-4">
             <h2 className="text-[#D4AF37] text-[11px] font-bold uppercase tracking-[0.6em]">Destinations d'Exception</h2>
             <div className="h-px w-24 bg-[#D4AF37] mx-auto opacity-50"></div>
           </div>
-          <RegionGrid properties={allProperties} onRegionClick={handleRegionClick} />
+          <RegionGrid properties={filteredProperties} onRegionClick={handleRegionClick} />
         </div>
       </section>
 
@@ -206,7 +241,7 @@ export default function Home() {
             </h3>
             <p className="text-[#D4AF37] text-[11px] font-bold uppercase tracking-[0.5em] flex items-center justify-center gap-4">
                <span className="w-4 h-px bg-[#D4AF37]/40"></span>
-               {filteredProperties.length} Propriétés Sélectionnées
+               {filteredProperties.length} Propriétés de Prestige
                <span className="w-4 h-px bg-[#D4AF37]/40"></span>
             </p>
           </header>
@@ -215,6 +250,7 @@ export default function Home() {
             <PropertyGrid activeFilters={filters} properties={propertiesToShow} />
           </div>
 
+          {/* Bouton Explorer plus : Apparaît si on n'a pas fait de recherche spécifique et qu'il reste des villas premium */}
           {!hasActiveFilters && visibleCount < filteredProperties.length && (
             <div className="text-center mt-24">
               <button onClick={() => setVisibleCount((prev) => prev + 12)} className="px-16 py-6 md:px-20 md:py-8 border border-[#D4AF37]/40 text-[#D4AF37] rounded-full uppercase text-[10px] tracking-[0.5em] font-bold hover:bg-[#D4AF37] hover:text-black transition-all duration-500">
@@ -238,12 +274,10 @@ export default function Home() {
         
         .font-serif { font-family: 'Cormorant Garamond', serif; }
         
-        /* Personnalisation Scrollbar Gold */
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-track { background: #020617; }
         ::-webkit-scrollbar-thumb { background: #D4AF37; border-radius: 10px; }
 
-        /* Correction pour iOS (évite le scroll derrière la modal) */
         ${isSearchOpen ? 'body { overflow: hidden; }' : ''}
       `}</style>
     </main>
