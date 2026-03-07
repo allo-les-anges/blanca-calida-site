@@ -84,13 +84,12 @@ export default function Home() {
   const handleClientLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (clientPin.length >= 4) {
-      // On stocke le PIN pour que la page de destination puisse le vérifier
-      localStorage.setItem("client_access_pin", clientPin);
+      // On stocke le PIN et on marque que c'est une tentative "Client"
+      localStorage.setItem("temp_client_pin", clientPin);
+      localStorage.setItem("login_mode", "client"); 
       
-      // CORRECTION : On pointe vers le nom du dossier réel "project-tracker"
-      window.location.href = "/project-tracker"; 
-    } else {
-      alert("Veuillez entrer un code PIN valide.");
+      // On envoie vers le dispatcher (Login)
+      router.push("/login"); 
     }
   };
 

@@ -19,8 +19,7 @@ export default function LoginPage() {
     const tempPin = localStorage.getItem("temp_client_pin");
     if (tempPin) {
       setPin(tempPin);
-      // Optionnel : on pourrait déclencher la vérification automatique ici
-      console.log("PIN client détecté, prêt pour validation.");
+      console.log("PIN client détecté depuis la Home.");
     }
   }, []);
 
@@ -68,34 +67,47 @@ export default function LoginPage() {
     setLoading(true);
     setErrorMsg(null);
 
-    // LOGIQUE SPÉCIFIQUE POUR LE PIN (CLIENT / IRIS)
+    // --- LOGIQUE CODE PIN ---
     if (showPin) {
-      // 1. Cas particulier Iris (Accès Staff via PIN)
-      if (pin === "240226") {
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email: "iris@amaru-homes.com",
-          password: "TonMotDePasseSecret", // À sécuriser via variable d'env idéalement
-        });
-        if (data?.user) await handleRedirection(data.user.id, data.user.email);
-        return;
-      }
+      try {
+        // 1. CAS IRIS (Accès Staff via PIN 240226)
+        if (pin === "240226") {
+          const { data, error } = await supabase.auth.signInWithPassword({
+            email: "iris@amaru-homes.com",
+            password: "TonMotDePasseSecret", // À remplacer par la réalité
+          });
+          if (data?.user) {
+            await handleRedirection(data.user.id, data.user.email);
+            return;
+          }
+        }
 
-      // 2. Cas Client (Accès Project Tracker)
-      // Ici, on vérifie si le PIN correspond à un projet client
-      // Pour l'instant, on simule une validation pour le code "1234"
-      if (pin === "1234" || pin.length >= 4) {
-        localStorage.setItem("client_access_pin", pin);
-        localStorage.removeItem("temp_client_pin");
-        router.push("/project-tracker");
-        return;
+        // 2. CAS CLIENT (Vérification dans la table suivi_chantier)
+        const { data: chantier, error: chantierError } = await supabase
+          .from('suivi_chantier')
+          .select('*')
+          .eq('pin_code', pin) // On suppose que la colonne s'appelle pin_code
+          .single();
+
+        if (chantier) {
+          localStorage.setItem("client_access_pin", pin);
+          localStorage.setItem("active_project_id", chantier.id);
+          localStorage.removeItem("temp_client_pin");
+          router.push("/project-tracker"); // Redirection vers la page client
+          return;
+        }
+
+        // Si rien n'est trouvé
+        setErrorMsg("Code PIN invalide");
+      } catch (err) {
+        setErrorMsg("Erreur de validation");
+      } finally {
+        setLoading(false);
       }
-      
-      setErrorMsg("Code PIN incorrect");
-      setLoading(false);
       return;
     }
 
-    // FORMULAIRE CLASSIQUE (EMAIL/PASSWORD)
+    // --- LOGIQUE FORMULAIRE CLASSIQUE ---
     const { data, error } = await supabase.auth.signInWithPassword({
       email: email.trim(),
       password: password,
@@ -184,7 +196,7 @@ export default function LoginPage() {
                 {loading ? <Loader2 className="animate-spin" /> : <Key size={20} />}
               </button>
             </div>
-            {errorMsg && <p className="text-red-500 text-[10px] font-bold text-center uppercase mt-4">{errorMsg}</p>}
+            {errorMsg && <p className="text-red-500 text-[10px] font-bold text-center uppercase mt-4 tracking-widest">{errorMsg}</p>}
           </div>
         ) : (
           <form onSubmit={handleLogin} className="space-y-4">
