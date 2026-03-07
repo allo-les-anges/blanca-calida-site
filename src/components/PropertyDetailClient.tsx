@@ -7,7 +7,7 @@ import {
   Bed, Bath, Maximize, MapPin, MessageCircle, ArrowLeft, 
   Loader2, Image as ImageIcon, Home, Map as MapIcon, 
   Navigation, Waves, Car, Ship, ShieldCheck, Wallet
-} from "lucide-react";
+} from "lucide-center";
 import Link from "next/link";
 
 export default function PropertyDetailClient({ id }: { id: string }) {
@@ -47,11 +47,14 @@ export default function PropertyDetailClient({ id }: { id: string }) {
     }
   };
 
-  // Fonction pour nettoyer le HTML du XML (supprime les styles inline et polices forcées)
+  // Nettoyage agressif du HTML importé
   const cleanDescription = (html: string) => {
     if (!html) return "";
-    // Supprime tous les attributs style="..." pour laisser Tailwind prendre le relais
-    return html.replace(/style="[^"]*"/gi, '');
+    return html
+      .replace(/style="[^"]*"/gi, '') // Supprime les styles inline
+      .replace(/face="[^"]*"/gi, '')  // Supprime les polices des balises <font>
+      .replace(/<font[^>]*>/gi, '')   // Supprime l'ouverture des balises <font>
+      .replace(/<\/font>/gi, '');     // Supprime la fermeture des balises <font>
   };
 
   if (!mounted) return null;
@@ -189,7 +192,7 @@ export default function PropertyDetailClient({ id }: { id: string }) {
             </div>
           </div>
 
-          {/* DESCRIPTION AVEC NETTOYAGE DES STYLES INLINE */}
+          {/* DESCRIPTION AVEC "DEEP RESET" CSS */}
           <div className="max-w-none mb-20 pt-10 border-t border-slate-100">
             <h2 className="text-3xl font-serif italic mb-8 text-slate-800">L'Art de Vivre</h2>
             
@@ -198,12 +201,12 @@ export default function PropertyDetailClient({ id }: { id: string }) {
                 text-gray-600 
                 text-lg 
                 leading-relaxed 
-                font-sans 
-                prose 
-                prose-slate 
-                max-w-none 
-                [&_*]:font-sans 
-                [&_p]:mb-6
+                /* LE FIX ULTIME : On cible TOUT avec !important */
+                [&_*]:!font-sans 
+                [&_*]:!font-normal
+                [&_p]:!mb-6
+                [&_span]:!font-sans
+                [&_font]:!font-sans
               "
               dangerouslySetInnerHTML={{ 
                 __html: cleanDescription(property.description || "Description en cours de rédaction...") 
@@ -236,11 +239,9 @@ export default function PropertyDetailClient({ id }: { id: string }) {
           </div>
         </div>
 
-        {/* SIDEBAR PRIX + MACARON REDIRECTION */}
+        {/* SIDEBAR PRIX + MACARON */}
         <div className="lg:col-span-1">
           <div className="sticky top-40 space-y-6">
-            
-            {/* MACARON CASHBACK */}
             <Link 
               href={`/contact-cashback?Property_ID=${property.id_externe || property.id}`}
               className="group relative block w-full overflow-hidden rounded-[2rem] bg-slate-900 p-[1px] transition-all duration-500 hover:scale-[1.02] shadow-2xl"
@@ -264,26 +265,18 @@ export default function PropertyDetailClient({ id }: { id: string }) {
               </div>
             </Link>
 
-            {/* CARD PRIX */}
             <div className="bg-white border border-slate-100 p-10 rounded-[2.5rem] shadow-2xl">
               <p className="text-[10px] uppercase text-gray-400 mb-2 font-bold tracking-widest">Prix de la propriété</p>
               <p className="text-5xl font-serif text-slate-900 leading-none mb-10">
                 {numericPrice.toLocaleString("fr-FR")} €
               </p>
-              
               <button className="w-full bg-slate-900 text-white py-6 rounded-2xl font-bold uppercase text-[11px] tracking-widest hover:bg-[#D4AF37] hover:text-black transition-all mb-4 shadow-xl shadow-slate-900/10">
                 Réserver une visite
               </button>
-              
-              <a 
-                href={`https://wa.me/34627768233?text=Information sur la villa ref: ${property.ref || property.id_externe}`} 
-                target="_blank" 
-                className="w-full border border-slate-200 flex items-center justify-center gap-3 py-6 rounded-2xl font-bold uppercase text-[11px] text-slate-700 hover:bg-slate-50 transition-all"
-              >
+              <a href={`https://wa.me/34627768233?text=Villa ref: ${property.ref || property.id_externe}`} target="_blank" className="w-full border border-slate-200 flex items-center justify-center gap-3 py-6 rounded-2xl font-bold uppercase text-[11px] text-slate-700 hover:bg-slate-50 transition-all">
                 <MessageCircle size={20} className="text-green-500" /> WhatsApp
               </a>
             </div>
-
           </div>
         </div>
       </section>
