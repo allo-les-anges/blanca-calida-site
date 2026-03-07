@@ -359,7 +359,7 @@ export default function AdminDashboard() {
     doc.setFont("helvetica", "normal");
     doc.text(expertNom, 110, 60);
 
-    // Tableau des constats avec gestion du texte long
+    // Tableau des constats – avec gestion du texte long
     autoTable(doc, {
       startY: 75,
       head: [['RÉFÉRENCE PHOTO', 'ANALYSE TECHNIQUE & OBSERVATIONS']],
@@ -370,21 +370,21 @@ export default function AdminDashboard() {
       theme: 'striped',
       headStyles: { fillColor: [15, 23, 42], fontSize: 9 },
       columnStyles: {
-        0: { cellWidth: 45, fontSize: 8 },   // largeur fixe pour la référence
-        1: { cellWidth: 'auto', fontSize: 8 } // la seconde colonne s'ajuste
+        0: { cellWidth: 45 },          // largeur fixe pour la référence
+        1: { cellWidth: 'auto' }        // la colonne d'analyse prend le reste
       },
       styles: {
-        overflow: 'linebreak',  // active le retour à la ligne automatique
+        overflow: 'linebreak',           // active le retour à la ligne automatique
         cellPadding: 2,
-        fontSize: 8
+        fontSize: 8                      // police réduite pour tout le tableau
       }
     });
 
-    // Annexe photo avec texte ajusté
+    // Annexe photo – avec texte ajusté
     doc.addPage();
     doc.setFont("helvetica", "bold");
     doc.text("ANNEXE PHOTOGRAPHIQUE ET GÉOLOCALISATION", 14, 20);
-    
+
     let yPos = 30;
     for (let i = 0; i < dailyConstats.length; i++) {
       const c = dailyConstats[i];
@@ -395,7 +395,6 @@ export default function AdminDashboard() {
         doc.text("(Image non disponible)", 14, yPos + 20);
       }
       doc.setFontSize(8);
-      // Découpage du texte pour éviter le débordement
       const text = `Illustration #${i + 1} - Capturée le ${new Date(c.created_at).toLocaleString()}`;
       const lines = doc.splitTextToSize(text, 160);
       doc.text(lines, 14, yPos + 82);
