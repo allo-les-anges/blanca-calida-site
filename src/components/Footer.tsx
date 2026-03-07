@@ -1,6 +1,30 @@
 "use client";
 
+import React from "react";
 import { Instagram, Linkedin, Facebook, MapPin, Mail, Phone } from "lucide-react";
+
+// --- DÉFINITION DU COMPOSANT LOGO SVG (Identique à la Navbar pour la cohérence) ---
+const DataHomeLogo = ({ className }: { className?: string }) => (
+  <svg 
+    viewBox="0 0 150 35" 
+    fill="none" 
+    xmlns="http://www.w3.org/2000/svg" 
+    className={className}
+  >
+    <path d="M15 12L20 5L25 12H15Z" fill="currentColor" />
+    <text 
+      x="10" 
+      y="28" 
+      fontFamily="sans-serif" 
+      fontSize="22" 
+      fontWeight="300" 
+      fill="currentColor" 
+      letterSpacing="-0.02em"
+    >
+      data home
+    </text>
+  </svg>
+);
 
 export default function Footer() {
   return (
@@ -11,9 +35,11 @@ export default function Footer() {
           {/* LOGO & BRAND DESCRIPTION */}
           <div className="col-span-1 lg:col-span-1 space-y-8">
             <div className="space-y-2">
-               <h3 className="font-serif text-4xl italic tracking-tighter text-white">
-                 Amaru <span className="text-[#D4AF37] not-italic font-sans font-light text-2xl tracking-[0.3em] uppercase block mt-1">Excellence</span>
-               </h3>
+               {/* REMPLACEMENT D'AMARU PAR LE LOGO SVG */}
+               <DataHomeLogo className="h-12 w-auto text-white transition-colors hover:text-[#D4AF37]" />
+               <span className="text-[#D4AF37] font-sans font-light text-[10px] tracking-[0.3em] uppercase block mt-2 ml-1">
+                 Excellence Immobilière
+               </span>
             </div>
             <p className="text-slate-500 font-light leading-relaxed text-sm max-w-xs italic">
               L'art de l'immobilier d'exception. Nous forgeons des passerelles entre vos ambitions et les propriétés les plus prestigieuses de la côte.
@@ -82,7 +108,7 @@ export default function Footer() {
               </div>
               <div className="flex items-center gap-4">
                 <Mail size={18} className="text-[#D4AF37] flex-shrink-0 opacity-80" />
-                <p className="hover:text-white transition-colors cursor-pointer">contact@amaru-excellence.com</p>
+                <p className="hover:text-white transition-colors cursor-pointer">contact@data-home.com</p>
               </div>
               <div className="flex items-center gap-4">
                 <Phone size={18} className="text-[#D4AF37] flex-shrink-0 opacity-80" />
@@ -96,7 +122,7 @@ export default function Footer() {
         <div className="border-t border-white/5 pt-12 flex flex-col md:flex-row justify-between items-center gap-8">
           <div className="flex flex-col md:flex-row items-center gap-10">
               <p className="text-[9px] uppercase tracking-[0.3em] text-slate-600">
-                © 2026 Amaru Excellence Estates
+                © 2026 Data Home Estates
               </p>
               <div className="flex gap-8 text-[9px] uppercase tracking-[0.3em] text-slate-500 font-bold">
                 <a href="#" className="hover:text-[#D4AF37] transition-all">Confidentialité</a>
