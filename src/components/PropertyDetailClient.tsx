@@ -183,15 +183,26 @@ export default function PropertyDetailClient({ id }: { id: string }) {
             </div>
           </div>
 
-          {/* DESCRIPTION AVEC FORMATAGE XML/HTML */}
+          {/* DESCRIPTION AVEC FIX DE POLICE IMPÉRATIF */}
           <div className="max-w-none mb-20 pt-10 border-t border-slate-100">
             <h2 className="text-3xl font-serif italic mb-8 text-slate-800">L'Art de Vivre</h2>
             
-            {/* Ici, on applique des classes "sans-serif" (ou le font par défaut du projet) 
-                et on force la police sur tous les enfants du texte injecté.
-            */}
             <div 
-              className="text-gray-600 text-lg leading-relaxed font-sans [&_*]:font-sans"
+              className="
+                text-gray-600 
+                text-lg 
+                leading-relaxed 
+                font-sans 
+                prose 
+                prose-slate 
+                max-w-none 
+                /* Les lignes ci-dessous forcent la police sur tous les éléments injectés */
+                [&_*]:font-sans 
+                [&_p]:font-sans 
+                [&_span]:font-sans 
+                [&_div]:font-sans
+                [&_p]:mb-6
+              "
               dangerouslySetInnerHTML={{ __html: property.description || "Description en cours de rédaction..." }} 
             />
           </div>
