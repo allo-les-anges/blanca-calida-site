@@ -7,7 +7,7 @@ import {
   Bed, Bath, Maximize, MapPin, MessageCircle, ArrowLeft, 
   Loader2, Image as ImageIcon, Home, Map as MapIcon, 
   Navigation, Waves, Car, Ship, ShieldCheck, Wallet
-} from "lucide-center";
+} from "lucide-react"; // Correction ici : lucide-react
 import Link from "next/link";
 
 export default function PropertyDetailClient({ id }: { id: string }) {
@@ -47,14 +47,14 @@ export default function PropertyDetailClient({ id }: { id: string }) {
     }
   };
 
-  // Nettoyage agressif du HTML importé
+  // Nettoyage agressif du HTML importé pour forcer la police
   const cleanDescription = (html: string) => {
     if (!html) return "";
     return html
-      .replace(/style="[^"]*"/gi, '') // Supprime les styles inline
-      .replace(/face="[^"]*"/gi, '')  // Supprime les polices des balises <font>
-      .replace(/<font[^>]*>/gi, '')   // Supprime l'ouverture des balises <font>
-      .replace(/<\/font>/gi, '');     // Supprime la fermeture des balises <font>
+      .replace(/style="[^"]*"/gi, '') 
+      .replace(/face="[^"]*"/gi, '')  
+      .replace(/<font[^>]*>/gi, '')   
+      .replace(/<\/font>/gi, '');     
   };
 
   if (!mounted) return null;
@@ -131,7 +131,6 @@ export default function PropertyDetailClient({ id }: { id: string }) {
             {property.town || property.ville} • {property.region}
           </div>
 
-          {/* BADGES ÉQUIPEMENTS */}
           <div className="flex flex-wrap gap-3 mb-12">
             {property.pool === "Oui" && (
               <div className="flex items-center gap-2 bg-slate-50 text-slate-700 px-4 py-2 rounded-full border border-slate-100 text-[9px] uppercase font-bold tracking-wider">
@@ -192,7 +191,6 @@ export default function PropertyDetailClient({ id }: { id: string }) {
             </div>
           </div>
 
-          {/* DESCRIPTION AVEC "DEEP RESET" CSS */}
           <div className="max-w-none mb-20 pt-10 border-t border-slate-100">
             <h2 className="text-3xl font-serif italic mb-8 text-slate-800">L'Art de Vivre</h2>
             
@@ -201,12 +199,10 @@ export default function PropertyDetailClient({ id }: { id: string }) {
                 text-gray-600 
                 text-lg 
                 leading-relaxed 
-                /* LE FIX ULTIME : On cible TOUT avec !important */
+                font-sans
                 [&_*]:!font-sans 
                 [&_*]:!font-normal
                 [&_p]:!mb-6
-                [&_span]:!font-sans
-                [&_font]:!font-sans
               "
               dangerouslySetInnerHTML={{ 
                 __html: cleanDescription(property.description || "Description en cours de rédaction...") 
@@ -214,7 +210,6 @@ export default function PropertyDetailClient({ id }: { id: string }) {
             />
           </div>
 
-          {/* LOCALISATION */}
           <div className="mb-20 pt-10 border-t border-slate-100">
             <h2 className="text-3xl font-serif italic mb-8 text-slate-800">Localisation</h2>
             {property.adresse && (
@@ -239,7 +234,6 @@ export default function PropertyDetailClient({ id }: { id: string }) {
           </div>
         </div>
 
-        {/* SIDEBAR PRIX + MACARON */}
         <div className="lg:col-span-1">
           <div className="sticky top-40 space-y-6">
             <Link 
