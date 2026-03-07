@@ -319,20 +319,24 @@ export default function AdminDashboard() {
   const generateConstatsPDF = async (date: string, dailyConstats: any[], action: 'save' | 'preview') => {
   if (isGeneratingPDF) return;
   setIsGeneratingPDF(true);
+
   try {
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
 
-    // En-tête professionnel
+    // En-tête
     doc.setFillColor(245, 245, 245);
     doc.rect(0, 0, pageWidth, 45, 'F');
+
     doc.setFont("helvetica", "bold");
     doc.setFontSize(18);
     doc.setTextColor(15, 23, 42);
     doc.text(agencyProfile.company_name || "AMARU-HOMES", 14, 20);
+
     doc.setFontSize(9);
     doc.setTextColor(100, 100, 100);
     doc.text("Département Contrôle Technique & Qualité", 14, 26);
+
     doc.setDrawColor(16, 185, 129);
     doc.setLineWidth(1);
     doc.line(14, 32, 60, 32);
@@ -341,6 +345,7 @@ export default function AdminDashboard() {
     doc.setFontSize(10);
     doc.setTextColor(15, 23, 42);
     doc.text(`Rapport de Constat : #RC-${date.replace(/ /g, '')}`, 140, 20);
+
     doc.setFont("helvetica", "normal");
     doc.text(`Date de visite : ${date}`, 140, 26);
     doc.text(`Phase : ${selectedProjet?.etape_actuelle || "N/A"}`, 140, 32);
@@ -348,76 +353,137 @@ export default function AdminDashboard() {
     // Destinataire
     doc.setFont("helvetica", "bold");
     doc.text("DESTINATAIRE :", 14, 55);
+
     doc.setFont("helvetica", "normal");
     doc.text(`${selectedProjet?.client_prenom} ${selectedProjet?.client_nom}`, 14, 60);
     doc.text(`Projet : ${selectedProjet?.nom_villa}`, 14, 65);
 
-    // Expert référent
-    const expertNom = agencyProfile?.prenom && agencyProfile?.nom ? `${agencyProfile.prenom} ${agencyProfile.nom}` : "Gaëtan Mukeba";
+    // Expert
+    const expertNom =
+      agencyProfile?.prenom && agencyProfile?.nom
+        ? `${agencyProfile.prenom} ${agencyProfile.nom}`
+        : "Gaëtan Mukeba";
+
     doc.setFont("helvetica", "bold");
     doc.text("EXPERT RÉFÉRENT :", 110, 55);
+
     doc.setFont("helvetica", "normal");
     doc.text(expertNom, 110, 60);
 
-    // Tableau des constats – avec gestion du texte long
-    autoTable(doc, {
-      startY: 75,
-      head: [['RÉFÉRENCE PHOTO', 'ANALYSE TECHNIQUE & OBSERVATIONS']],
-      body: dailyConstats.map((c, i) => [
-        `Prise de vue #${i+1}\n\nGPS : ${c.latitude || 'N/A'}\n${c.longitude || 'N/A'}`,
-        `STATUT : CONFORME\n\n${c.note_expert || "Aucune anomalie détectée lors de l'inspection visuelle."}`
-      ]),
-      theme: 'striped',
-      headStyles: { fillColor: [15, 23, 42], fontSize: 9 },
-      columnStyles: {
-        0: { cellWidth: 45 },          // largeur fixe pour la référence
-        1: { cellWidth: 'auto' }        // la colonne d'analyse prend le reste
-      },
-      styles: {
-        overflow: 'linebreak',           // active le retour à la ligne automatique
-        cellPadding: 2,
-        fontSize: 8                      // police réduite pour tout le tableau
-      }
+    // Construction du body avec texte sécurisé
+    const bodyData = dailyConstats.map((c, i) => {
+
+      const note =
+        c.note_expert ||
+        "Aucune anomalie détectée lors de l'inspection visuelle.";
+
+      const analyse = `STATUT : CONFORME\n\n${note}`;
+
+      // Découpage sécurisé du texte pour éviter débordement
+      const analyseLines = doc.splitTextToSize(analyse, 115);
+
+      return [
+        `Prise de vue #${i + 1}\n\nGPS : ${c.latitude || 'N/A'}\n${c.longitude || 'N/A'}`,
+        analyseLines
+      ];
     });
 
-    // Annexe photo – avec texte ajusté
+    autoTable(doc, {
+      startY: 75,
+
+      head: [['RÉFÉRENCE PHOTO', 'ANALYSE TECHNIQUE & OBSERVATIONS']],
+
+      body: bodyData,
+
+      theme: 'striped',
+
+      headStyles: {
+        fillColor: [15, 23, 42],
+        fontSize: 9
+      },
+
+      columnStyles: {
+        0: { cellWidth: 40 },
+        1: { cellWidth: 115 }
+      },
+
+      styles: {
+        fontSize: 7,
+        cellPadding: 3,
+        overflow: 'linebreak',
+        valign: 'top'
+      },
+
+      margin: { left: 14, right: 14 }
+    });
+
+    // Annexe photo
     doc.addPage();
+
     doc.setFont("helvetica", "bold");
     doc.text("ANNEXE PHOTOGRAPHIQUE ET GÉOLOCALISATION", 14, 20);
 
     let yPos = 30;
+
     for (let i = 0; i < dailyConstats.length; i++) {
+
       const c = dailyConstats[i];
-      if (yPos > 220) { doc.addPage(); yPos = 20; }
+
+      if (yPos > 220) {
+        doc.addPage();
+        yPos = 20;
+      }
+
       try {
         doc.addImage(c.url_image, 'JPEG', 14, yPos, 120, 75);
       } catch (e) {
         doc.text("(Image non disponible)", 14, yPos + 20);
       }
+
       doc.setFontSize(8);
+
       const text = `Illustration #${i + 1} - Capturée le ${new Date(c.created_at).toLocaleString()}`;
+
       const lines = doc.splitTextToSize(text, 160);
+
       doc.text(lines, 14, yPos + 82);
+
       yPos += 95;
     }
 
     // Certification
     const finalY = doc.internal.pageSize.getHeight() - 40;
+
     doc.setDrawColor(200, 200, 200);
     doc.line(14, finalY, pageWidth - 14, finalY);
+
     doc.setFontSize(8);
     doc.setFont("helvetica", "italic");
-    doc.text("CERTIFICATION :", 14, finalY + 10);
-    doc.text(`Je soussigné, ${expertNom}, certifie que les informations, relevés GPS et photographies contenus dans ce rapport`, 14, finalY + 15);
-    doc.text(`reflètent fidèlement l'état d'avancement réel du chantier à la date mentionnée. Document édité par le système Amaru Admin.`, 14, finalY + 19);
 
-    if (action === 'save') doc.save(`Rapport_Technique_${date}.pdf`);
-    else window.open(doc.output('bloburl'), '_blank');
+    doc.text("CERTIFICATION :", 14, finalY + 10);
+
+    const certifText =
+      `Je soussigné, ${expertNom}, certifie que les informations, relevés GPS et photographies contenus dans ce rapport reflètent fidèlement l'état d'avancement réel du chantier à la date mentionnée. Document édité par le système Amaru Admin.`;
+
+    const certifLines = doc.splitTextToSize(certifText, 180);
+
+    doc.text(certifLines, 14, finalY + 15);
+
+    if (action === 'save') {
+      doc.save(`Rapport_Technique_${date}.pdf`);
+    } else {
+      window.open(doc.output('bloburl'), '_blank');
+    }
+
   } catch (e) {
+
     console.error(e);
     alert("Erreur lors de la génération du PDF");
+
   } finally {
+
     setIsGeneratingPDF(false);
+
   }
 };
 
