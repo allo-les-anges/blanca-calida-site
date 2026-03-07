@@ -398,35 +398,34 @@ const analyseLines = doc.splitTextToSize(analyse, 115);
     });
 
     autoTable(doc, {
-      startY: 75,
+  startY: 75,
 
-      head: [['RÉFÉRENCE PHOTO', 'ANALYSE TECHNIQUE & OBSERVATIONS']],
+  head: [['RÉFÉRENCE PHOTO', 'ANALYSE TECHNIQUE & OBSERVATIONS']],
 
-      body: bodyData,
+  body: bodyData,
 
-      theme: 'striped',
+  theme: 'striped',
 
-      headStyles: {
-        fillColor: [15, 23, 42],
-        fontSize: 9
-      },
+  headStyles: {
+    fillColor: [15, 23, 42],
+    fontSize: 9
+  },
 
-      columnStyles: {
-      0: { cellWidth: 45 },
-      1: { cellWidth: 'auto' }
-      }
+  columnStyles: {
+    0: { cellWidth: 45 },
+    1: { cellWidth: 'auto' }
+  }, // ← virgule manquante
 
-      styles: {
-        fontSize: 8,
-        cellPadding: 4,
-        overflow: 'linebreak',
-        valign: 'top',
-        lineHeight: 1.4
-      }
+  styles: {
+    fontSize: 8,
+    cellPadding: 4,
+    overflow: 'linebreak',
+    valign: 'top',
+    lineHeight: 1.4
+  }, // ← virgule manquante
 
-      margin: { left: 14, right: 14 }
-    });
-
+  margin: { left: 14, right: 14 }
+});
     // Annexe photo
     doc.addPage();
 
