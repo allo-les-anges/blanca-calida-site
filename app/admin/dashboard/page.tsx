@@ -373,29 +373,22 @@ export default function AdminDashboard() {
     // Construction du body avec texte sécurisé
     const bodyData = dailyConstats.map((c, i) => {
 
-      // Texte brut venant de la base
-const rawNote =
-  c.note_expert ||
-  "Aucune anomalie détectée lors de l'inspection visuelle.";
+  const rawNote =
+    c.note_expert ||
+    "Aucune anomalie détectée lors de l'inspection visuelle.";
 
-// Nettoyage complet du texte
-const cleanNote = rawNote
-  .replace(/\u00A0/g, " ")      // espaces insécables
-  .replace(/\s+/g, " ")        // espaces multiples
-  .replace(/(\r\n|\n|\r)/gm, "\n")
-  .trim();
+  const cleanNote = rawNote
+    .replace(/\u00A0/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 
-// Construction analyse
-const analyse = `STATUT : CONFORME\n\n${cleanNote}`;
+  const analyse = `STATUT : CONFORME\n\n${cleanNote}`;
 
-// Découpe sécurisée pour la largeur du tableau
-const analyseLines = doc.splitTextToSize(analyse, 115);
-
-      return [
-        `Prise de vue #${i + 1}\n\nGPS : ${c.latitude || 'N/A'}\n${c.longitude || 'N/A'}`,
-        analyseLines
-      ];
-    });
+  return [
+    `Prise de vue #${i + 1}\n\nGPS : ${c.latitude || 'N/A'}\n${c.longitude || 'N/A'}`,
+    analyse
+  ];
+});
 
   autoTable(doc, {
   startY: 75,
