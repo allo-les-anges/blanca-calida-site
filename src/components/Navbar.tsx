@@ -115,18 +115,10 @@ export default function Navbar() {
         <div className="max-w-[1600px] w-full mx-auto px-4 md:px-10 flex justify-between items-center">
           
           {/* LOGO REMPLACÉ PAR L'IMAGE */}
-          <Link href="/" className="z-[110] flex items-center group transition-transform hover:scale-105">
-            <div className="relative">
-              <Image 
-                public="/logo.png" 
-                alt="Data Home Logo" 
-                width={175} // Largeur adaptée proportionnellement
-                height={40} // Hauteur adaptée pour la navbar
-                className="object-contain h-auto w-auto max-h-[45px] md:max-h-[50px]"
-                priority
-              />
-            </div>
-          </Link>
+          {/* LOGO DATA HOME (VERSION SVG SANS FOND) */}
+<Link href="/" className="z-[110] flex items-center group transition-transform hover:scale-105">
+  <DataHomeLogo className="h-10 w-auto text-slate-900 dark:text-white transition-colors group-hover:text-[#D4AF37]" />
+</Link>
 
           {/* LIENS NAV */}
           <div className="hidden md:flex items-center space-x-6 lg:space-x-10">
