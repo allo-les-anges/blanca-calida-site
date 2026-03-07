@@ -118,7 +118,7 @@ export default function Navbar() {
           <Link href="/" className="z-[110] flex items-center group transition-transform hover:scale-105">
             <div className="relative">
               <Image 
-                src="/logo.jpeg" 
+                src="/logo.png" 
                 alt="Data Home Logo" 
                 width={175} // Largeur adaptée proportionnellement
                 height={40} // Hauteur adaptée pour la navbar
