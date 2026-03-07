@@ -397,7 +397,7 @@ const analyseLines = doc.splitTextToSize(analyse, 115);
       ];
     });
 
-    autoTable(doc, {
+  autoTable(doc, {
   startY: 75,
 
   head: [['RÉFÉRENCE PHOTO', 'ANALYSE TECHNIQUE & OBSERVATIONS']],
@@ -414,18 +414,18 @@ const analyseLines = doc.splitTextToSize(analyse, 115);
   columnStyles: {
     0: { cellWidth: 45 },
     1: { cellWidth: 'auto' }
-  }, // ← virgule manquante
+  },
 
   styles: {
     fontSize: 8,
     cellPadding: 4,
     overflow: 'linebreak',
-    valign: 'top',
-    lineHeight: 1.4
-  }, // ← virgule manquante
+    valign: 'top'
+  },
 
   margin: { left: 14, right: 14 }
 });
+
     // Annexe photo
     doc.addPage();
 
