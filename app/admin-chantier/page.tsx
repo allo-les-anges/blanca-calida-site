@@ -5,7 +5,7 @@ import { createClient } from '@supabase/supabase-js';
 import { 
   Camera, Lock, Loader2, ArrowRight, 
   Search, MapPin, HardHat, LogOut, ChevronDown, 
-  Trash2, Send, X, Home // Import de Home ajouté
+  Trash2, Send, X, Home
 } from 'lucide-react';
 
 const supabase = createClient(
@@ -37,10 +37,30 @@ export default function AdminChantier() {
   const checkPin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { data } = await supabase.from('staff_prestataires').select('prenom, nom').eq('pin_code', pin).maybeSingle();
+    // Recherche dans la table profiles avec le pin_code
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('prenom, nom, role')
+      .eq('pin_code', pin)
+      .maybeSingle();
+
+    if (error) {
+      console.error("Erreur de recherche PIN :", error);
+      alert("Erreur lors de la vérification du PIN.");
+      setLoading(false);
+      return;
+    }
+
     if (data) {
-      setAgentName(`${data.prenom} ${data.nom}`);
-      setIsAuthorized(true);
+      // Vérifier que le rôle est autorisé (agent, prestataire, admin, etc.)
+      const rolesAutorises = ['agent', 'prestataire', 'admin', 'super_admin'];
+      if (rolesAutorises.includes(data.role)) {
+        setAgentName(`${data.prenom} ${data.nom}`);
+        setIsAuthorized(true);
+      } else {
+        alert("Ce compte n'a pas les droits d'accès à l'interface chantier.");
+        setPin("");
+      }
     } else {
       alert("PIN invalide.");
       setPin("");
@@ -160,8 +180,15 @@ export default function AdminChantier() {
             <p className="text-slate-500 text-[10px] uppercase tracking-[0.4em] font-bold">Terrain & Reporting</p>
           </div>
           <form onSubmit={checkPin} className="space-y-6">
-            <input type="password" inputMode="numeric" placeholder="••••" value={pin} onChange={(e) => setPin(e.target.value)} 
-              className="w-full bg-white/5 border border-white/10 rounded-[2rem] py-6 text-center text-3xl tracking-[1em] font-black focus:border-indigo-500 outline-none transition-all" />
+            <input 
+              type="password" 
+              inputMode="numeric" 
+              placeholder="••••••" 
+              maxLength={6}
+              value={pin} 
+              onChange={(e) => setPin(e.target.value)} 
+              className="w-full bg-white/5 border border-white/10 rounded-[2rem] py-6 text-center text-3xl tracking-[1em] font-black focus:border-indigo-500 outline-none transition-all" 
+            />
             <button className="w-full bg-white text-black py-6 rounded-[2rem] font-black uppercase text-xs tracking-widest flex items-center justify-center gap-3">
               Connecter <ArrowRight size={18} />
             </button>
