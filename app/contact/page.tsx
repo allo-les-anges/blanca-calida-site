@@ -7,7 +7,7 @@ import {
   ShieldCheck, Globe, Award, Briefcase, GraduationCap
 } from "lucide-react";
 
-// --- CONFIGURATION DES AGENTS (ORDRE ET CHEMINS MIS À JOUR) ---
+// --- CONFIGURATION DES AGENTS ---
 const teamMembers = [
   {
     id: 1,
@@ -62,18 +62,30 @@ export default function ContactPage() {
   return (
     <div className={`min-h-screen transition-colors duration-1000 ${isDarkMode ? "bg-[#020617] text-white" : "bg-slate-50 text-slate-900"}`}>
       
-      {/* SECTION HÉRO */}
-      <section className="relative h-[55vh] w-full overflow-hidden">
-        <div className="absolute inset-0 bg-black">
-          {/* Remplacer par votre photo de bannière quand disponible */}
-          <div className={`w-full h-full bg-slate-800 transition-opacity duration-1000 ${isDarkMode ? "opacity-40" : "opacity-60"}`} />
+      {/* SECTION HÉRO AVEC PLANISPHÈRE */}
+      <section className={`relative h-[60vh] w-full overflow-hidden flex items-center justify-center transition-colors duration-1000 ${isDarkMode ? "bg-[#020617]" : "bg-slate-900"}`}>
+        
+        {/* PLANISPHÈRE EN ARRIÈRE-PLAN (SVG) */}
+        <div className="absolute inset-0 z-0 opacity-20 pointer-events-none flex items-center justify-center">
+          <svg 
+            viewBox="0 0 1000 500" 
+            className={`w-full h-full object-contain p-10 transition-colors duration-1000 ${isDarkMode ? "fill-[#D4AF37]/30" : "fill-white/20"}`}
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            {/* Version simplifiée des continents pour l'aspect design */}
+            <path d="M150,120 L180,110 L220,130 L250,180 L230,250 L180,280 L140,240 Z M350,100 L450,80 L520,120 L550,200 L500,300 L400,320 L320,250 Z M650,150 L750,140 L820,180 L800,280 L700,350 L620,300 Z M200,350 L280,380 L300,450 L220,480 L150,420 Z M750,380 L850,400 L880,480 L780,460 Z" />
+            <circle cx="480" cy="180" r="3" fill="#D4AF37" className="animate-pulse" /> {/* Point Espagne/Europe */}
+          </svg>
         </div>
+
+        {/* EFFET DE GRADIENT POUR PROFONDEUR */}
+        <div className={`absolute inset-0 z-1 bg-gradient-to-b ${isDarkMode ? "from-transparent via-[#020617]/50 to-[#020617]" : "from-transparent via-slate-900/50 to-slate-900"}`} />
 
         {/* SWITCHER AMBIANCE */}
         <div className="absolute bottom-12 right-12 z-30">
           <button
             onClick={() => setIsDarkMode(!isDarkMode)}
-            className="group flex items-center gap-4 bg-white/10 backdrop-blur-2xl border border-white/20 p-2 pl-6 rounded-full hover:bg-[#D4AF37] transition-all duration-500 shadow-2xl"
+            className="group flex items-center gap-4 bg-white/5 backdrop-blur-xl border border-white/10 p-2 pl-6 rounded-full hover:bg-[#D4AF37] transition-all duration-500 shadow-2xl"
           >
             <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white">
               {isDarkMode ? "Switch Jour" : "Switch Nuit"}
@@ -84,29 +96,33 @@ export default function ContactPage() {
           </button>
         </div>
 
-        <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
-          <motion.span 
-            initial={{ opacity: 0, y: 10 }}
+        {/* TEXTE HÉRO */}
+        <div className="relative z-10 text-center px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-[#D4AF37] text-[12px] font-black uppercase tracking-[0.5em] mb-4"
+            transition={{ duration: 1 }}
           >
-            L'Élite à votre service
-          </motion.span>
-          <h1 className="text-5xl md:text-7xl font-serif italic text-white">
-            Vos conseillers Amaru
-          </h1>
+            <span className="text-[#D4AF37] text-[12px] font-black uppercase tracking-[0.6em] mb-6 block">
+              Rayonnement International
+            </span>
+            <h1 className="text-5xl md:text-8xl font-serif italic text-white mb-4">
+              Vos conseillers Amaru
+            </h1>
+            <div className="h-[1px] w-32 bg-[#D4AF37] mx-auto mt-8 opacity-50" />
+          </motion.div>
         </div>
       </section>
 
-      {/* SECTION PRINCIPALE */}
+      {/* SECTION PRINCIPALE (CONTENU IDENTIQUE) */}
       <section className="max-w-[1400px] mx-auto px-6 py-24 grid grid-cols-1 xl:grid-cols-12 gap-20">
         
-        {/* COLONNE GAUCHE : L'ÉQUIPE (ORDRE DEMANDÉ) */}
+        {/* COLONNE GAUCHE : L'ÉQUIPE */}
         <div className="xl:col-span-7 space-y-16">
           <div className="max-w-xl">
-            <h2 className="text-4xl font-serif italic mb-6">Expertise & Rayon d'action</h2>
+            <h2 className="text-4xl font-serif italic mb-6">Expertise & Vision</h2>
             <p className={`text-lg leading-relaxed ${isDarkMode ? "text-slate-400" : "text-slate-600"}`}>
-              Notre force réside dans la complémentarité de nos parcours. Voici les experts qui vous accompagneront dans votre projet.
+              Chaque conseiller Amaru apporte une pièce unique à l'édifice de votre projet. Notre équipe pluridisciplinaire sécurise vos investissements en Espagne.
             </p>
           </div>
 
@@ -160,11 +176,11 @@ export default function ContactPage() {
           </div>
         </div>
 
-        {/* COLONNE DROITE : FORMULAIRE FIXE */}
+        {/* COLONNE DROITE : FORMULAIRE */}
         <div className="xl:col-span-5">
           <div className={`sticky top-32 p-12 rounded-[3.5rem] transition-all duration-700 ${
             isDarkMode 
-              ? "bg-[#0f172a] border border-white/5" 
+              ? "bg-[#0f172a] border border-white/5 shadow-2xl shadow-black/50" 
               : "bg-white border border-slate-100 shadow-2xl"
           }`}>
             <h3 className="text-3xl font-serif italic mb-2">Prendre contact</h3>
