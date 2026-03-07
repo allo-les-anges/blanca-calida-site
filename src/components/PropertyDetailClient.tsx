@@ -183,10 +183,17 @@ export default function PropertyDetailClient({ id }: { id: string }) {
             </div>
           </div>
 
-          {/* DESCRIPTION */}
-          <div className="prose prose-slate max-w-none text-gray-600 text-lg mb-20 pt-10 border-t border-slate-100">
+          {/* DESCRIPTION AVEC FORMATAGE XML/HTML */}
+          <div className="max-w-none mb-20 pt-10 border-t border-slate-100">
             <h2 className="text-3xl font-serif italic mb-8 text-slate-800">L'Art de Vivre</h2>
-            <div dangerouslySetInnerHTML={{ __html: property.description || "Description en cours de rédaction..." }} />
+            
+            {/* Ici, on applique des classes "sans-serif" (ou le font par défaut du projet) 
+                et on force la police sur tous les enfants du texte injecté.
+            */}
+            <div 
+              className="text-gray-600 text-lg leading-relaxed font-sans [&_*]:font-sans"
+              dangerouslySetInnerHTML={{ __html: property.description || "Description en cours de rédaction..." }} 
+            />
           </div>
 
           {/* LOCALISATION */}
@@ -218,7 +225,7 @@ export default function PropertyDetailClient({ id }: { id: string }) {
         <div className="lg:col-span-1">
           <div className="sticky top-40 space-y-6">
             
-            {/* MACARON CASHBACK (Lien direct vers formulaire) */}
+            {/* MACARON CASHBACK */}
             <Link 
               href={`/contact-cashback?Property_ID=${property.id_externe || property.id}`}
               className="group relative block w-full overflow-hidden rounded-[2rem] bg-slate-900 p-[1px] transition-all duration-500 hover:scale-[1.02] shadow-2xl"
