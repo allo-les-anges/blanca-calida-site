@@ -61,28 +61,29 @@ export default function RootLayout({
             display: none !important;
           }
 
-          /* LE FIX POUR LA DESCRIPTION XML */
+          /* LE FIX FINAL POUR LA DESCRIPTION XML */
+          /* On cible toutes les balises possibles injectées par le XML */
           .description-xml-container, 
           .description-xml-container *, 
           .description-xml-container p, 
-          .description-xml-container span {
-          font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif !important;
+          .description-xml-container span,
+          .description-xml-container div,
+          .description-xml-container font {
+            font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system, Arial, sans-serif !important;
+            font-size: 1.125rem !important; /* Pour correspondre à text-lg */
+            line-height: 1.75rem !important; /* Pour correspondre à leading-relaxed */
           }
-
         `}</style>
       </head>
       <body
         className={`${inter.variable} ${playfair.variable} font-sans antialiased bg-white text-slate-900`}
       >
-        {/* Point d'ancrage Google obligatoire mais caché */}
         <div id="google_translate_element"></div>
 
         {children}
 
-        {/* SCRIPT DE NETTOYAGE ET INITIALISATION */}
         <Script id="google-translate-logic" strategy="afterInteractive">
           {`
-            // Fonction pour supprimer les traces de la barre Google
             function cleanGoogleTranslate() {
               document.documentElement.style.marginTop = '0px';
               document.body.style.top = '0px';
@@ -90,7 +91,6 @@ export default function RootLayout({
               if (frame) frame.remove();
             }
 
-            // Initialisation Google Translate
             function googleTranslateElementInit() {
               new google.translate.TranslateElement({
                 pageLanguage: 'fr',
@@ -98,7 +98,6 @@ export default function RootLayout({
                 autoDisplay: false
               }, 'google_translate_element');
 
-              // Détection automatique de la langue du navigateur
               const userLang = navigator.language.split('-')[0];
               const supportedLangs = ['en', 'es', 'nl', 'de', 'fr'];
               const hasCookie = document.cookie.includes('googtrans');
@@ -109,7 +108,6 @@ export default function RootLayout({
               }
             }
 
-            // Surveillance active du DOM pour bloquer la barre dès qu'elle apparaît
             const observer = new MutationObserver(() => {
               cleanGoogleTranslate();
             });
@@ -119,12 +117,10 @@ export default function RootLayout({
               attributeFilter: ['style'] 
             });
 
-            // Sécurité supplémentaire : intervalle régulier
             setInterval(cleanGoogleTranslate, 1000);
           `}
         </Script>
 
-        {/* CHARGEMENT DU SCRIPT GOOGLE */}
         <Script
           src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
           strategy="afterInteractive"

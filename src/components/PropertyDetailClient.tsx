@@ -47,13 +47,16 @@ export default function PropertyDetailClient({ id }: { id: string }) {
     }
   };
 
+  // NETTOYAGE AGRESSIF DU XML
   const cleanDescription = (html: string) => {
     if (!html) return "";
     return html
-      .replace(/style="[^"]*"/gi, '') 
-      .replace(/face="[^"]*"/gi, '')  
-      .replace(/<font[^>]*>/gi, '')   
-      .replace(/<\/font>/gi, '');     
+      .replace(/style="[^"]*"/gi, '')  // Supprime les styles inline
+      .replace(/face="[^"]*"/gi, '')   // Supprime les polices forcées (ex: face="Times")
+      .replace(/size="[^"]*"/gi, '')   // Supprime les tailles HTML anciennes
+      .replace(/<font[^>]*>/gi, '')    // Supprime la balise ouvrante font
+      .replace(/<\/font>/gi, '')       // Supprime la balise fermante font
+      .replace(/&nbsp;/g, ' ');        // Nettoie les espaces insécables
   };
 
   if (!mounted) return null;
@@ -130,7 +133,6 @@ export default function PropertyDetailClient({ id }: { id: string }) {
             {property.town || property.ville} • {property.region}
           </div>
 
-          {/* TOUS LES BADGES ÉQUIPEMENTS */}
           <div className="flex flex-wrap gap-3 mb-12">
             {property.pool === "Oui" && (
               <div className="flex items-center gap-2 bg-slate-50 text-slate-700 px-4 py-2 rounded-full border border-slate-100 text-[9px] uppercase font-bold tracking-wider">
@@ -157,7 +159,6 @@ export default function PropertyDetailClient({ id }: { id: string }) {
             </div>
           </div>
 
-          {/* TOUTES LES QUICK STATS */}
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-16">
             <div className="bg-slate-50 p-6 rounded-3xl text-center border border-slate-100">
               <Bed className="mx-auto mb-2 text-[#D4AF37]" size={22} />
@@ -191,18 +192,18 @@ export default function PropertyDetailClient({ id }: { id: string }) {
             </div>
           </div>
 
-          {/* DESCRIPTION AVEC CLASSE DE LIAISON LAYOUT */}
+          {/* SECTION DESCRIPTION FIXÉE */}
           <div className="max-w-none mb-20 pt-10 border-t border-slate-100">
             <h2 className="text-3xl font-serif italic mb-8 text-slate-800">L'Art de Vivre</h2>
+            {/* Note: on enlève text-gray-600 et text-lg d'ici car on les force via le layout.tsx pour être sûr que ça marche */}
             <div 
-              className="description-xml-container text-gray-600 text-lg leading-relaxed font-sans"
+              className="description-xml-container"
               dangerouslySetInnerHTML={{ 
                 __html: cleanDescription(property.description || "Description en cours de rédaction...") 
               }} 
             />
           </div>
 
-          {/* LOCALISATION COMPLÈTE */}
           <div className="mb-20 pt-10 border-t border-slate-100">
             <h2 className="text-3xl font-serif italic mb-8 text-slate-800">Localisation</h2>
             {property.adresse && (
@@ -227,10 +228,8 @@ export default function PropertyDetailClient({ id }: { id: string }) {
           </div>
         </div>
 
-        {/* SIDEBAR COMPLÈTE AVEC CASHBACK */}
         <div className="lg:col-span-1">
           <div className="sticky top-40 space-y-6">
-            
             <Link 
               href={`/contact-cashback?Property_ID=${property.id_externe || property.id}`}
               className="group relative block w-full overflow-hidden rounded-[2rem] bg-slate-900 p-[1px] transition-all duration-500 hover:scale-[1.02] shadow-2xl"
@@ -272,7 +271,6 @@ export default function PropertyDetailClient({ id }: { id: string }) {
                 <MessageCircle size={20} className="text-green-500" /> WhatsApp
               </a>
             </div>
-
           </div>
         </div>
       </section>
