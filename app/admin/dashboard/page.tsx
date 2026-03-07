@@ -971,17 +971,17 @@ export default function AdminDashboard() {
               setUpdating(true);
               
               // Préparer l'objet avec les données du formulaire
-              const projectData = {
+              const baseProjectData = {
                 ...newProject,
                 company_name: agencyProfile.company_name,
                 pin_code: Math.floor(100000 + Math.random() * 900000).toString(),
                 etape_actuelle: PHASES_CHANTIER[0]
               };
               
-              // Supprimer la date de livraison si elle est vide pour éviter l'erreur SQL
-              if (projectData.date_livraison_prevue === "") {
-                delete projectData.date_livraison_prevue;
-              }
+              // Si la date de livraison est vide, on l'exclut pour éviter l'erreur SQL
+              const projectData = baseProjectData.date_livraison_prevue === ""
+                ? (({ date_livraison_prevue, ...rest }) => rest)(baseProjectData)
+                : baseProjectData;
               
               const { error } = await supabase.from("suivi_chantier").insert([projectData]);
               
