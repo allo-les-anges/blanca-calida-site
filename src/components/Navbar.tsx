@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import Image from "next/image"; // Importation nécessaire
 import { useRouter, usePathname } from "next/navigation";
 import { 
   Globe, ChevronDown, Menu, X, ArrowRight, User, 
@@ -34,11 +35,10 @@ export default function Navbar() {
 
   const langMenuRef = useRef<HTMLDivElement>(null);
 
-  const regions = [
-    { name: "Costa Blanca", slug: "costa-blanca" },
-    { name: "Costa Calida", slug: "costa-calida" },
-    { name: "Costa Almeria", slug: "costa-almeria" },
-    { name: "Costa del Sol", slug: "costa-del-sol" },
+  const navLinks = [
+    { name: "Accueil", href: "/" },
+    { name: "Cashback-Info", href: "/cashback-info" },
+    { name: "Contact", href: "/contact" },
   ];
 
   const languages = [
@@ -46,12 +46,6 @@ export default function Navbar() {
     { code: "en", label: "English" },
     { code: "es", label: "Español" },
     { code: "nl", label: "Nederlands" },
-  ];
-
-  const navLinks = [
-    { name: "Accueil", href: "/" },
-    { name: "Cashback-Info", href: "/cashback-info" },
-    { name: "Contact", href: "/contact" },
   ];
 
   useEffect(() => {
@@ -120,13 +114,21 @@ export default function Navbar() {
       }`}>
         <div className="max-w-[1600px] w-full mx-auto px-4 md:px-10 flex justify-between items-center">
           
-          {/* LOGO */}
-          <Link href="/" className="z-[110] flex flex-col items-start group min-w-[100px]">
-            <span className="text-2xl md:text-3xl font-serif italic tracking-tighter text-slate-900 dark:text-white transition-colors group-hover:text-[#D4AF37]">Amaru</span>
-            <span className="text-[#D4AF37] font-sans text-[8px] md:text-[10px] tracking-[0.4em] uppercase font-light -mt-1">Excellence</span>
+          {/* LOGO REMPLACÉ PAR L'IMAGE */}
+          <Link href="/" className="z-[110] flex items-center group transition-transform hover:scale-105">
+            <div className="relative">
+              <Image 
+                src="/logo.jpeg" 
+                alt="Data Home Logo" 
+                width={175} // Largeur adaptée proportionnellement
+                height={40} // Hauteur adaptée pour la navbar
+                className="object-contain h-auto w-auto max-h-[45px] md:max-h-[50px]"
+                priority
+              />
+            </div>
           </Link>
 
-          {/* --- LIENS CORRIGÉS : md:flex au lieu de lg:flex --- */}
+          {/* LIENS NAV */}
           <div className="hidden md:flex items-center space-x-6 lg:space-x-10">
             {navLinks.map((link) => (
               <Link 
@@ -144,12 +146,10 @@ export default function Navbar() {
 
           {/* ACTIONS DROITE */}
           <div className="flex items-center space-x-2 md:space-x-4 z-[110]">
-            
             <div className="hidden sm:block">
               <ThemeToggle />
             </div>
 
-            {/* Langues - Visible sur Desktop */}
             <div className="relative hidden xl:block" ref={langMenuRef}>
               <button onClick={() => setShowLangMenu(!showLangMenu)} className="flex items-center space-x-2 text-[10px] font-bold tracking-widest text-slate-900 dark:text-white hover:text-[#D4AF37] transition-colors">
                 <Globe size={14} className="text-[#D4AF37]" /> <span>{currentLang}</span>
@@ -165,7 +165,6 @@ export default function Navbar() {
               )}
             </div>
 
-            {/* Recherche */}
             <button 
               onClick={() => setIsSearchModalOpen(true)}
               className="p-2.5 md:p-3 bg-slate-100 dark:bg-white/10 rounded-full text-[#D4AF37] border border-slate-200 dark:border-white/10 hover:bg-[#D4AF37] hover:text-white transition-all"
@@ -173,12 +172,10 @@ export default function Navbar() {
               <Search size={18} />
             </button>
 
-            {/* Accès Client - Adaptatif */}
             <button onClick={() => setIsLoginModalOpen(true)} className="hidden sm:flex items-center space-x-2 text-[9px] lg:text-[10px] font-bold uppercase tracking-widest px-4 lg:px-6 py-3 rounded-full border border-[#D4AF37]/20 bg-[#D4AF37]/5 text-slate-900 dark:text-white hover:bg-[#D4AF37] hover:text-black transition-all">
               <User size={14} /> <span className="hidden lg:inline">Accès Client</span>
             </button>
 
-            {/* Menu Burger - Mobile et Tablette portrait */}
             <button onClick={() => setIsMobileMenuOpen(true)} className="md:hidden text-slate-900 dark:text-white p-2">
               <Menu size={28} />
             </button>
@@ -186,9 +183,6 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* --- RESTE DES MODALS (SEARCH, MOBILE MENU, LOGIN) --- */}
-      {/* ... (Je garde le reste de votre logique intacte pour la recherche et le menu mobile) ... */}
-      
       {/* MODAL RECHERCHE */}
       {isSearchModalOpen && (
         <div className="fixed inset-0 z-[300] flex items-end sm:items-center justify-center">
@@ -202,7 +196,6 @@ export default function Navbar() {
               <button onClick={() => setIsSearchModalOpen(false)} className="w-10 h-10 bg-slate-100 dark:bg-white/5 text-slate-900 dark:text-white rounded-full flex items-center justify-center hover:bg-[#D4AF37] transition-colors"><X size={20} /></button>
             </div>
             <div className="p-8 overflow-y-auto space-y-8 pb-32">
-               {/* Champs de recherche... */}
                <div className="space-y-4">
                 <div className="flex justify-between items-end">
                   <label className="text-[10px] uppercase tracking-[0.2em] font-black text-slate-400 flex items-center gap-2">
@@ -220,12 +213,13 @@ export default function Navbar() {
         </div>
       )}
 
-      {/* MENU MOBILE (Identique mais s'active sous md) */}
+      {/* MENU MOBILE */}
       <div className={`fixed inset-0 z-[200] transition-transform duration-500 md:hidden ${isMobileMenuOpen ? "translate-x-0" : "translate-x-full"}`}>
         <div className="absolute inset-0 bg-white dark:bg-[#020617]" />
         <div className="relative h-full flex flex-col p-8">
            <div className="flex justify-between items-center mb-12">
-             <span className="text-2xl font-serif italic text-slate-900 dark:text-white">Amaru Excellence</span>
+             {/* Logo en haut du menu mobile également */}
+             <Image src="/logo.jpeg" alt="Logo" width={120} height={28} className="object-contain dark:brightness-200" />
              <button onClick={() => setIsMobileMenuOpen(false)}><X size={28} /></button>
            </div>
            <nav className="flex flex-col space-y-8 text-2xl font-serif italic">
