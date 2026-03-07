@@ -378,9 +378,10 @@ export default function AdminDashboard() {
     "Aucune anomalie détectée lors de l'inspection visuelle.";
 
   const cleanNote = rawNote
-    .replace(/\u00A0/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
+  .normalize("NFKD")
+  .replace(/[^\x00-\x7F]/g, " ")
+  .replace(/\s+/g, " ")
+  .trim();
 
   const analyse = `STATUT : CONFORME\n\n${cleanNote}`;
 
