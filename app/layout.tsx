@@ -62,26 +62,29 @@ export default function RootLayout({
           }
 
           /* LE FIX FINAL POUR LA DESCRIPTION XML */
-          /* On cible toutes les balises possibles injectées par le XML */
+          /* On force la police Inter partout dans le conteneur de description */
           .description-xml-container, 
           .description-xml-container *, 
           .description-xml-container p, 
           .description-xml-container span,
           .description-xml-container div,
           .description-xml-container font {
-            font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system, Arial, sans-serif !important;
-            font-size: 1.125rem !important; /* Pour correspondre à text-lg */
-            line-height: 1.75rem !important; /* Pour correspondre à leading-relaxed */
+            font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system, sans-serif !important;
+            font-size: 1.125rem !important; /* Taille moderne (18px) */
+            line-height: 1.75rem !important; /* Espacement aéré */
+            color: #4b5563 !important; /* Gris élégant (slate-600) */
           }
         `}</style>
       </head>
       <body
         className={`${inter.variable} ${playfair.variable} font-sans antialiased bg-white text-slate-900`}
       >
+        {/* Point d'ancrage Google obligatoire mais caché */}
         <div id="google_translate_element"></div>
 
         {children}
 
+        {/* SCRIPT DE NETTOYAGE ET INITIALISATION */}
         <Script id="google-translate-logic" strategy="afterInteractive">
           {`
             function cleanGoogleTranslate() {
@@ -121,6 +124,7 @@ export default function RootLayout({
           `}
         </Script>
 
+        {/* CHARGEMENT DU SCRIPT GOOGLE */}
         <Script
           src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
           strategy="afterInteractive"
