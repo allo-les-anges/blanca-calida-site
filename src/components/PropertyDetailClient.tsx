@@ -6,7 +6,7 @@ import Footer from "@/components/Footer";
 import { 
   Bed, Bath, Maximize, MapPin, MessageCircle, ArrowLeft, 
   Loader2, Image as ImageIcon, Home, Map as MapIcon, 
-  Navigation, Waves, Car, Ship, ShieldCheck
+  Navigation, Waves, Car, Ship, ShieldCheck, Wallet
 } from "lucide-react";
 import Link from "next/link";
 
@@ -68,9 +68,9 @@ export default function PropertyDetailClient({ id }: { id: string }) {
   const images = property.images || [];
   const numericPrice = Number(property.price || property.prix || 0);
 
-  // URL Google Maps corrigée
+  // URL Google Maps
   const mapUrl = property.latitude && property.longitude 
-    ? `https://www.google.com/maps/embed/v1/view?key=VOTRE_CLE_API&center=${property.latitude},${property.longitude}&zoom=15`
+    ? `https://maps.google.com/maps?q=${property.latitude},${property.longitude}&z=15&output=embed`
     : null;
 
   return (
@@ -122,15 +122,30 @@ export default function PropertyDetailClient({ id }: { id: string }) {
             {property.town || property.ville} • {property.region}
           </div>
 
-          {/* BADGES ÉQUIPEMENTS */}
+          {/* BADGES ÉQUIPEMENTS DYNAMIQUES */}
           <div className="flex flex-wrap gap-3 mb-12">
             {property.pool === "Oui" && (
               <div className="flex items-center gap-2 bg-slate-50 text-slate-700 px-4 py-2 rounded-full border border-slate-100 text-[9px] uppercase font-bold tracking-wider">
-                <Waves size={14} /> Piscine Privée
+                <Waves size={14} className="text-sky-500" /> Piscine Privée
+              </div>
+            )}
+            {property.distance_beach && (
+              <div className="flex items-center gap-2 bg-slate-50 text-slate-700 px-4 py-2 rounded-full border border-slate-100 text-[9px] uppercase font-bold tracking-wider">
+                <Ship size={14} className="text-amber-600" /> Plage à {property.distance_beach}m
+              </div>
+            )}
+            {property.distance_golf && (
+              <div className="flex items-center gap-2 bg-slate-50 text-slate-700 px-4 py-2 rounded-full border border-slate-100 text-[9px] uppercase font-bold tracking-wider">
+                <Navigation size={14} className="rotate-45 text-emerald-600" /> Golf à {property.distance_golf}m
+              </div>
+            )}
+            {property.distance_town && (
+              <div className="flex items-center gap-2 bg-slate-50 text-slate-700 px-4 py-2 rounded-full border border-slate-100 text-[9px] uppercase font-bold tracking-wider">
+                <Home size={14} className="text-slate-400" /> Centre à {property.distance_town}m
               </div>
             )}
             <div className="flex items-center gap-2 bg-slate-50 text-slate-700 px-4 py-2 rounded-full border border-slate-100 text-[9px] uppercase font-bold tracking-wider">
-              <Car size={14} /> Parking inclus
+              <Car size={14} className="text-[#D4AF37]" /> Parking inclus
             </div>
           </div>
 
@@ -203,7 +218,7 @@ export default function PropertyDetailClient({ id }: { id: string }) {
         <div className="lg:col-span-1">
           <div className="sticky top-40 space-y-6">
             
-            {/* MACARON CASHBACK (Redirection vers formulaire) */}
+            {/* MACARON CASHBACK (Lien direct vers formulaire) */}
             <Link 
               href={`/contact-cashback?Property_ID=${property.id_externe || property.id}`}
               className="group relative block w-full overflow-hidden rounded-[2rem] bg-slate-900 p-[1px] transition-all duration-500 hover:scale-[1.02] shadow-2xl"
