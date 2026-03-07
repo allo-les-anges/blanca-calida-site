@@ -373,14 +373,23 @@ export default function AdminDashboard() {
     // Construction du body avec texte sécurisé
     const bodyData = dailyConstats.map((c, i) => {
 
-      const note =
-        c.note_expert ||
-        "Aucune anomalie détectée lors de l'inspection visuelle.";
+      // Texte brut venant de la base
+const rawNote =
+  c.note_expert ||
+  "Aucune anomalie détectée lors de l'inspection visuelle.";
 
-      const analyse = `STATUT : CONFORME\n\n${note}`;
+// Nettoyage complet du texte
+const cleanNote = rawNote
+  .replace(/\u00A0/g, " ")      // espaces insécables
+  .replace(/\s+/g, " ")        // espaces multiples
+  .replace(/(\r\n|\n|\r)/gm, "\n")
+  .trim();
 
-      // Découpage sécurisé du texte pour éviter débordement
-      const analyseLines = doc.splitTextToSize(analyse, 115);
+// Construction analyse
+const analyse = `STATUT : CONFORME\n\n${cleanNote}`;
+
+// Découpe sécurisée pour la largeur du tableau
+const analyseLines = doc.splitTextToSize(analyse, 115);
 
       return [
         `Prise de vue #${i + 1}\n\nGPS : ${c.latitude || 'N/A'}\n${c.longitude || 'N/A'}`,
@@ -403,16 +412,17 @@ export default function AdminDashboard() {
       },
 
       columnStyles: {
-        0: { cellWidth: 40 },
-        1: { cellWidth: 115 }
-      },
+      0: { cellWidth: 45 },
+      1: { cellWidth: 'auto' }
+      }
 
       styles: {
-        fontSize: 7,
-        cellPadding: 3,
+        fontSize: 8,
+        cellPadding: 4,
         overflow: 'linebreak',
-        valign: 'top'
-      },
+        valign: 'top',
+        lineHeight: 1.4
+      }
 
       margin: { left: 14, right: 14 }
     });
