@@ -47,6 +47,13 @@ export default function PropertyDetailClient({ id }: { id: string }) {
     }
   };
 
+  // Fonction pour nettoyer le HTML du XML (supprime les styles inline et polices forcées)
+  const cleanDescription = (html: string) => {
+    if (!html) return "";
+    // Supprime tous les attributs style="..." pour laisser Tailwind prendre le relais
+    return html.replace(/style="[^"]*"/gi, '');
+  };
+
   if (!mounted) return null;
 
   if (loading) return (
@@ -68,7 +75,6 @@ export default function PropertyDetailClient({ id }: { id: string }) {
   const images = property.images || [];
   const numericPrice = Number(property.price || property.prix || 0);
 
-  // URL Google Maps
   const mapUrl = property.latitude && property.longitude 
     ? `https://maps.google.com/maps?q=${property.latitude},${property.longitude}&z=15&output=embed`
     : null;
@@ -122,7 +128,7 @@ export default function PropertyDetailClient({ id }: { id: string }) {
             {property.town || property.ville} • {property.region}
           </div>
 
-          {/* BADGES ÉQUIPEMENTS DYNAMIQUES */}
+          {/* BADGES ÉQUIPEMENTS */}
           <div className="flex flex-wrap gap-3 mb-12">
             {property.pool === "Oui" && (
               <div className="flex items-center gap-2 bg-slate-50 text-slate-700 px-4 py-2 rounded-full border border-slate-100 text-[9px] uppercase font-bold tracking-wider">
@@ -183,7 +189,7 @@ export default function PropertyDetailClient({ id }: { id: string }) {
             </div>
           </div>
 
-          {/* DESCRIPTION AVEC FIX DE POLICE IMPÉRATIF */}
+          {/* DESCRIPTION AVEC NETTOYAGE DES STYLES INLINE */}
           <div className="max-w-none mb-20 pt-10 border-t border-slate-100">
             <h2 className="text-3xl font-serif italic mb-8 text-slate-800">L'Art de Vivre</h2>
             
@@ -196,14 +202,12 @@ export default function PropertyDetailClient({ id }: { id: string }) {
                 prose 
                 prose-slate 
                 max-w-none 
-                /* Les lignes ci-dessous forcent la police sur tous les éléments injectés */
                 [&_*]:font-sans 
-                [&_p]:font-sans 
-                [&_span]:font-sans 
-                [&_div]:font-sans
                 [&_p]:mb-6
               "
-              dangerouslySetInnerHTML={{ __html: property.description || "Description en cours de rédaction..." }} 
+              dangerouslySetInnerHTML={{ 
+                __html: cleanDescription(property.description || "Description en cours de rédaction...") 
+              }} 
             />
           </div>
 
