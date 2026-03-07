@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import Image from "next/image"; // Importation nécessaire
 import { useRouter, usePathname } from "next/navigation";
 import { 
   Globe, ChevronDown, Menu, X, ArrowRight, User, 
@@ -11,6 +10,29 @@ import {
 } from "lucide-react";
 import { createBrowserClient } from '@supabase/ssr';
 import ThemeToggle from "./ThemeToggle";
+
+// --- DÉFINITION DU COMPOSANT LOGO SVG ---
+const DataHomeLogo = ({ className }: { className?: string }) => (
+  <svg 
+    viewBox="0 0 150 35" 
+    fill="none" 
+    xmlns="http://www.w3.org/2000/svg" 
+    className={className}
+  >
+    <path d="M15 12L20 5L25 12H15Z" fill="currentColor" />
+    <text 
+      x="10" 
+      y="28" 
+      fontFamily="sans-serif" 
+      fontSize="22" 
+      fontWeight="300" 
+      fill="currentColor" 
+      letterSpacing="-0.02em"
+    >
+      data home
+    </text>
+  </svg>
+);
 
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -114,11 +136,10 @@ export default function Navbar() {
       }`}>
         <div className="max-w-[1600px] w-full mx-auto px-4 md:px-10 flex justify-between items-center">
           
-          {/* LOGO REMPLACÉ PAR L'IMAGE */}
           {/* LOGO DATA HOME (VERSION SVG SANS FOND) */}
-<Link href="/" className="z-[110] flex items-center group transition-transform hover:scale-105">
-  <DataHomeLogo className="h-10 w-auto text-slate-900 dark:text-white transition-colors group-hover:text-[#D4AF37]" />
-</Link>
+          <Link href="/" className="z-[110] flex items-center group transition-transform hover:scale-105">
+            <DataHomeLogo className="h-10 w-auto text-slate-900 dark:text-white transition-colors group-hover:text-[#D4AF37]" />
+          </Link>
 
           {/* LIENS NAV */}
           <div className="hidden md:flex items-center space-x-6 lg:space-x-10">
@@ -210,8 +231,7 @@ export default function Navbar() {
         <div className="absolute inset-0 bg-white dark:bg-[#020617]" />
         <div className="relative h-full flex flex-col p-8">
            <div className="flex justify-between items-center mb-12">
-             {/* Logo en haut du menu mobile également */}
-             <Image src="/logo.jpeg" alt="Logo" width={120} height={28} className="object-contain dark:brightness-200" />
+             <DataHomeLogo className="h-8 w-auto text-slate-900 dark:text-white" />
              <button onClick={() => setIsMobileMenuOpen(false)}><X size={28} /></button>
            </div>
            <nav className="flex flex-col space-y-8 text-2xl font-serif italic">
