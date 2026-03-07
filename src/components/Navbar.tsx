@@ -50,7 +50,7 @@ export default function Navbar() {
 
   const navLinks = [
     { name: "Accueil", href: "/" },
-    { name: "Confidentiel", href: "/confidentiel" },
+    { name: "Cashback-Info", href: "/cashback-info" },
     { name: "Contact", href: "/contact" },
   ];
 
