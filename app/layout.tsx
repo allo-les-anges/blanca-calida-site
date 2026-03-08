@@ -14,7 +14,7 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "Luxury Estates Spain | Agence Immobilière de Prestige",
+  title: "Data Home | Immobilier de Prestige",
   description: "Découvrez notre sélection exclusive de villas et appartements de luxe sur la Costa Blanca.",
 };
 
@@ -24,8 +24,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr" className="scroll-smooth">
+    // AJOUT DE "notranslate" ICI : Empêche Google de modifier les balises racines et de faire crash React
+    <html lang="fr" className="scroll-smooth notranslate">
       <head>
+        {/* Méta-balise pour dire explicitement à Google de ne pas proposer la traduction auto qui casse le site */}
+        <meta name="google" content="notranslate" />
         <style>{`
           /* 1. CACHER TOUS LES ÉLÉMENTS GOOGLE TRANSLATE */
           .goog-te-banner-frame, 
@@ -61,8 +64,6 @@ export default function RootLayout({
             display: none !important;
           }
 
-          /* LE FIX FINAL POUR LA DESCRIPTION XML */
-          /* On force la police Inter partout dans le conteneur de description */
           .description-xml-container, 
           .description-xml-container *, 
           .description-xml-container p, 
@@ -70,47 +71,42 @@ export default function RootLayout({
           .description-xml-container div,
           .description-xml-container font {
             font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system, sans-serif !important;
-            font-size: 1.125rem !important; /* Taille moderne (18px) */
-            line-height: 1.75rem !important; /* Espacement aéré */
-            color: #4b5563 !important; /* Gris élégant (slate-600) */
+            font-size: 1.125rem !important;
+            line-height: 1.75rem !important;
+            color: #4b5563 !important;
           }
         `}</style>
       </head>
       <body
         className={`${inter.variable} ${playfair.variable} font-sans antialiased bg-white text-slate-900`}
       >
-        {/* Point d'ancrage Google obligatoire mais caché */}
-        <div id="google_translate_element"></div>
+        {/* On enveloppe le contenu dans une div notranslate pour protéger les composants critiques comme la Navbar */}
+        <div className="notranslate">
+          <div id="google_translate_element"></div>
+        </div>
 
         {children}
 
-        {/* SCRIPT DE NETTOYAGE ET INITIALISATION */}
+        {/* SCRIPT DE NETTOYAGE SÉCURISÉ */}
         <Script id="google-translate-logic" strategy="afterInteractive">
           {`
             function cleanGoogleTranslate() {
               document.documentElement.style.marginTop = '0px';
               document.body.style.top = '0px';
-              const frame = document.querySelector('.goog-te-banner-frame');
-              if (frame) frame.remove();
             }
 
-            function googleTranslateElementInit() {
-              new google.translate.TranslateElement({
-                pageLanguage: 'fr',
-                includedLanguages: 'en,es,nl,de,fr',
-                autoDisplay: false
-              }, 'google_translate_element');
-
-              const userLang = navigator.language.split('-')[0];
-              const supportedLangs = ['en', 'es', 'nl', 'de', 'fr'];
-              const hasCookie = document.cookie.includes('googtrans');
-              
-              if (!hasCookie && supportedLangs.includes(userLang) && userLang !== 'fr') {
-                document.cookie = "googtrans=/fr/" + userLang + "; path=/";
-                window.location.reload();
+            // Initialisation uniquement si l'objet google existe
+            window.googleTranslateElementInit = function() {
+              if (window.google && google.translate) {
+                new google.translate.TranslateElement({
+                  pageLanguage: 'fr',
+                  includedLanguages: 'en,es,nl,de,fr',
+                  autoDisplay: false
+                }, 'google_translate_element');
               }
             }
 
+            // On retire le remove() brutal de la frame qui peut faire crash React
             const observer = new MutationObserver(() => {
               cleanGoogleTranslate();
             });
@@ -124,7 +120,6 @@ export default function RootLayout({
           `}
         </Script>
 
-        {/* CHARGEMENT DU SCRIPT GOOGLE */}
         <Script
           src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
           strategy="afterInteractive"
