@@ -59,24 +59,21 @@ export default function ProjectTracker() {
       const doc = new jsPDF();
       const pageWidth = doc.internal.pageSize.getWidth();
 
-      // --- EN-TÊTE PROFESSIONNEL ---
+      // En-tête professionnel
       doc.setFillColor(245, 245, 245);
       doc.rect(0, 0, pageWidth, 45, 'F');
-      
       doc.setFont("helvetica", "bold");
       doc.setFontSize(18);
       doc.setTextColor(15, 23, 42);
       doc.text(NOM_AGENCE, 14, 20);
-      
       doc.setFontSize(9);
       doc.setTextColor(100, 100, 100);
       doc.text(BUREAU_ETUDE, 14, 26);
-      
       doc.setDrawColor(16, 185, 129);
       doc.setLineWidth(1);
       doc.line(14, 32, 60, 32);
 
-      // --- INFOS DOSSIER ---
+      // Infos dossier
       doc.setFontSize(10);
       doc.setTextColor(15, 23, 42);
       doc.text(`Rapport de Constat : #RC-${date.replace(/ /g, '')}`, 140, 20);
@@ -84,46 +81,77 @@ export default function ProjectTracker() {
       doc.text(`Date de visite : ${date}`, 140, 26);
       doc.text(`Phase : ${projet?.etape_actuelle || "N/A"}`, 140, 32);
 
-      // --- RÉCAPITULATIF PROJET ---
+      // Destinataire
       doc.setFont("helvetica", "bold");
       doc.text("DESTINATAIRE :", 14, 55);
       doc.setFont("helvetica", "normal");
       doc.text(`${projet?.client_prenom} ${projet?.client_nom}`, 14, 60);
       doc.text(`Projet : ${projet?.nom_villa}`, 14, 65);
 
+      // Expert référent
       doc.setFont("helvetica", "bold");
       doc.text("EXPERT RÉFÉRENT :", 110, 55);
       doc.setFont("helvetica", "normal");
       doc.text(EXPERT_NOM, 110, 60);
 
-      // --- TABLEAU DES CONSTATS ---
+      // Préparation des données du tableau avec nettoyage des caractères spéciaux
+      const bodyData = dailyPhotos.map((p, i) => {
+        const rawNote = p.note_expert || "Aucune anomalie détectée lors de l'inspection visuelle.";
+        // Supprime les caractères non-ASCII pour éviter les problèmes d'encodage
+        const cleanNote = rawNote
+          .normalize("NFKD")
+          .replace(/[^\x00-\x7F]/g, " ")
+          .replace(/\s+/g, " ")
+          .trim();
+        const analyse = `STATUT : CONFORME\n\n${cleanNote}`;
+        return [
+          `Prise de vue #${i+1}\n\nGPS : ${p.latitude || 'N/A'}\n${p.longitude || 'N/A'}`,
+          analyse
+        ];
+      });
+
+      // Tableau avec largeurs fixes et retour à la ligne automatique
       autoTable(doc, {
         startY: 75,
         head: [['RÉFÉRENCE PHOTO', 'ANALYSE TECHNIQUE & OBSERVATIONS']],
-        body: dailyPhotos.map((p, i) => [
-          `Prise de vue #${i+1}\n\nGPS : ${p.latitude || 'N/A'}\n${p.longitude || 'N/A'}`,
-          `STATUT : CONFORME\n\n${p.note_expert || "Aucune anomalie détectée lors de l'inspection visuelle."}`
-        ]),
+        body: bodyData,
         theme: 'striped',
         headStyles: { fillColor: [15, 23, 42], fontSize: 9 },
-        columnStyles: { 0: { cellWidth: 45 }, 1: { fontSize: 10 } },
+        columnStyles: {
+          0: { cellWidth: 45 },   // largeur fixe pour la colonne de gauche
+          1: { cellWidth: 120 }    // largeur fixe pour la colonne de droite
+        },
+        styles: {
+          fontSize: 8,              // police réduite
+          cellPadding: 4,
+          overflow: 'linebreak',    // retour à la ligne automatique
+          valign: 'top'
+        },
+        margin: { left: 14, right: 14 }
       });
 
-      // --- INSERTION DES PHOTOS (Nouvelle page pour clarté si besoin) ---
+      // Annexe photo – légendes ajustées
       doc.addPage();
       doc.setFont("helvetica", "bold");
       doc.text("ANNEXE PHOTOGRAPHIQUE ET GÉOLOCALISATION", 14, 20);
-      
-      let yPos = 30;
-      dailyPhotos.forEach((p, index) => {
-        if (yPos > 220) { doc.addPage(); yPos = 20; }
-        doc.addImage(p.url_image, 'JPEG', 14, yPos, 120, 75);
-        doc.setFontSize(8);
-        doc.text(`Illustration #${index + 1} - Capturée le ${new Date(p.created_at).toLocaleString()}`, 14, yPos + 82);
-        yPos += 95;
-      });
 
-      // --- CERTIFICATION FINALE ---
+      let yPos = 30;
+      for (let i = 0; i < dailyPhotos.length; i++) {
+        const p = dailyPhotos[i];
+        if (yPos > 220) { doc.addPage(); yPos = 20; }
+        try {
+          doc.addImage(p.url_image, 'JPEG', 14, yPos, 120, 75);
+        } catch (e) {
+          doc.text("(Image non disponible)", 14, yPos + 20);
+        }
+        doc.setFontSize(8);
+        const text = `Illustration #${i + 1} - Capturée le ${new Date(p.created_at).toLocaleString()}`;
+        const lines = doc.splitTextToSize(text, 160);
+        doc.text(lines, 14, yPos + 82);
+        yPos += 95;
+      }
+
+      // Certification finale
       const finalY = doc.internal.pageSize.getHeight() - 40;
       doc.setDrawColor(200, 200, 200);
       doc.line(14, finalY, pageWidth - 14, finalY);
@@ -135,7 +163,11 @@ export default function ProjectTracker() {
 
       if (action === 'save') doc.save(`Rapport_Technique_${date}.pdf`);
       else window.open(doc.output('bloburl'), '_blank');
-    } catch (e) { alert("Erreur génération PDF"); } finally { setIsProcessing(false); }
+    } catch (e) {
+      alert("Erreur génération PDF");
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   if (loading) return <div className="h-screen flex items-center justify-center bg-[#020617]"><Loader2 className="animate-spin text-emerald-500" size={40} /></div>;
