@@ -3,7 +3,7 @@
 import React from "react";
 import { Instagram, Linkedin, Facebook, MapPin, Mail, Phone } from "lucide-react";
 
-// --- DÉFINITION DU COMPOSANT LOGO SVG (Identique à la Navbar pour la cohérence) ---
+// --- DÉFINITION DU COMPOSANT LOGO SVG ---
 const DataHomeLogo = ({ className }: { className?: string }) => (
   <svg 
     viewBox="0 0 150 35" 
@@ -35,8 +35,8 @@ export default function Footer() {
           {/* LOGO & BRAND DESCRIPTION */}
           <div className="col-span-1 lg:col-span-1 space-y-8">
             <div className="space-y-2">
-               {/* REMPLACEMENT D'AMARU PAR LE LOGO SVG */}
-               <DataHomeLogo className="h-12 w-auto text-white transition-colors hover:text-[#D4AF37]" />
+               {/* ICI LE LOGO REMPLACE AMARU EXCELLENCE */}
+               <DataHomeLogo className="h-10 md:h-12 w-auto text-white transition-colors hover:text-[#D4AF37]" />
                <span className="text-[#D4AF37] font-sans font-light text-[10px] tracking-[0.3em] uppercase block mt-2 ml-1">
                  Excellence Immobilière
                </span>
@@ -104,11 +104,11 @@ export default function Footer() {
             <div className="space-y-6 text-[13px] text-slate-400 font-light">
               <div className="flex items-start gap-4">
                 <MapPin size={18} className="text-[#D4AF37] mt-1 flex-shrink-0 opacity-80" />
-                <p className="leading-relaxed">Calle Mayor, 42<br /><span className="text-white font-medium">Alicante, Espagne</span></p>
+                <p className="leading-relaxed">Calle Pablo Picass 1<br /><span className="text-white font-medium">Orihuela Costa, Espagne</span></p>
               </div>
               <div className="flex items-center gap-4">
                 <Mail size={18} className="text-[#D4AF37] flex-shrink-0 opacity-80" />
-                <p className="hover:text-white transition-colors cursor-pointer">contact@data-home.com</p>
+                <p className="hover:text-white transition-colors cursor-pointer">contact@data-home.io</p>
               </div>
               <div className="flex items-center gap-4">
                 <Phone size={18} className="text-[#D4AF37] flex-shrink-0 opacity-80" />
