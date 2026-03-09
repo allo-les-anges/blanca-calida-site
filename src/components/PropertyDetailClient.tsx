@@ -6,7 +6,7 @@ import Footer from "@/components/Footer";
 import { 
   Bed, Bath, Maximize, MapPin, MessageCircle, ArrowLeft, 
   Loader2, Image as ImageIcon, Home, Map as MapIcon, 
-  Navigation, Waves, Car, Ship, ShieldCheck
+  Waves, Car, ShieldCheck
 } from "lucide-react";
 import Link from "next/link";
 
@@ -61,15 +61,15 @@ export default function PropertyDetailClient({ id }: { id: string }) {
   if (!mounted) return null;
 
   if (loading) return (
-    <div className="h-screen flex flex-col items-center justify-center bg-[#0A0A0A] italic font-serif text-[#FFE7C2]">
+    <div className="h-screen flex flex-col items-center justify-center bg-white dark:bg-[#0A0A0A] italic font-serif text-[#FFE7C2]/70">
       <Loader2 className="animate-spin text-[#FFE7C2] mb-4" size={40} />
-      Initialisation de la propriété...
+      AMARU Excellence • Chargement...
     </div>
   );
 
   if (!property) return (
-    <div className="h-screen flex flex-col items-center justify-center bg-[#0A0A0A] p-6 text-center">
-      <h1 className="text-2xl font-serif mb-4 text-white">Propriété non trouvée</h1>
+    <div className="h-screen flex flex-col items-center justify-center bg-white dark:bg-[#0A0A0A] p-6 text-center">
+      <h1 className="text-2xl font-serif mb-4 text-slate-900 dark:text-white">Propriété non trouvée</h1>
       <Link href="/" className="px-6 py-3 bg-[#FFE7C2] text-black text-[10px] uppercase tracking-widest rounded-full font-bold">
         Retour au catalogue
       </Link>
@@ -78,43 +78,41 @@ export default function PropertyDetailClient({ id }: { id: string }) {
 
   const images = property.images || [];
   const numericPrice = Number(property.price || property.prix || 0);
+  // Correction URL Google Maps sécurisée
   const mapUrl = property.latitude && property.longitude 
-    ? `https://www.google.com/maps/embed/v1/view?key=VOTRE_CLE_API&center=${property.latitude},${property.longitude}&zoom=15`
+    ? `https://www.google.com/maps/embed/v1/place?key=VOTRE_CLE_API&q=${property.latitude},${property.longitude}`
     : null;
 
   return (
-    <main className="bg-[#E9E3DA] dark:bg-[#0A0A0A] min-h-screen text-slate-900 dark:text-slate-100 transition-colors duration-500">
+    <main className="bg-white dark:bg-[#020617] min-h-screen text-slate-900 dark:text-white selection:bg-[#FFE7C2]/30 font-sans overflow-x-hidden transition-colors duration-500">
       <style jsx global>{`
+        /* 1. Correction Filtre Images : naturelles au survol */
         .property-image-filter {
           transition: filter 0.5s ease;
         }
         .dark .property-image-filter {
-            filter: brightness(0.85) contrast(1.05);
+            filter: brightness(0.9);
         }
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #D4AF37; border-radius: 10px; }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-        
-        /* Correction forcé pour le texte injecté via dangerouslySetInnerHTML */
-        .description-content p, .description-content span, .description-content div {
-          color: inherit !important;
-        }
       `}</style>
 
       <Navbar />
       <div className="h-24 md:h-32" />
 
+      {/* --- RETOUR --- */}
       <div className="max-w-7xl mx-auto px-6 mb-8">
-        <Link href="/" className="group inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.3em] text-slate-500 dark:text-[#FFE7C2] hover:underline transition-all font-bold">
+        <Link href="/" className="group inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.3em] text-slate-500 dark:text-[#FFE7C2]/70 hover:text-[#FFE7C2] transition-all font-bold">
           <ArrowLeft size={14} /> Retour à la sélection
         </Link>
       </div>
 
-      {/* --- SECTION IMAGES --- */}
+      {/* --- GALERIE PHOTO (Lumineuse) --- */}
       <section className="max-w-7xl mx-auto px-6 mb-16">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:h-[550px]">
-          <div className="md:col-span-3 relative rounded-[2.5rem] md:rounded-[3rem] overflow-hidden shadow-2xl bg-slate-200 dark:bg-[#111] h-[400px] md:h-full group">
+          <div className="md:col-span-3 relative rounded-[2.5rem] md:rounded-[3rem] overflow-hidden shadow-2xl bg-slate-100 dark:bg-[#1A1A1A] h-[400px] md:h-full group">
             <div ref={scrollContainerRef} onScroll={handleScroll} className="flex md:block h-full overflow-x-auto md:overflow-x-hidden snap-x snap-mandatory scrollbar-hide">
               {images.map((img: string, idx: number) => (
                 <div key={idx} className="min-w-full h-full snap-center md:absolute md:inset-0 md:transition-opacity md:duration-700" style={{ opacity: activeImage === idx ? 1 : 0, zIndex: activeImage === idx ? 10 : 0 }}>
@@ -122,17 +120,18 @@ export default function PropertyDetailClient({ id }: { id: string }) {
                 </div>
               ))}
             </div>
-            <div className="absolute bottom-6 left-6 bg-black/60 backdrop-blur-md text-white px-4 py-2 rounded-full text-[10px] uppercase tracking-widest flex items-center gap-2 z-20 border border-white/20">
+            <div className="absolute bottom-6 left-6 bg-black/60 backdrop-blur-md text-white px-4 py-2 rounded-full text-[10px] uppercase tracking-widest flex items-center gap-2 z-20 border border-white/20 shadow-lg">
               <ImageIcon size={14} /> {activeImage + 1} / {images.length}
             </div>
           </div>
           
+          {/* Thumbnails */}
           <div className="hidden md:flex flex-col gap-4 overflow-y-auto pr-2 custom-scrollbar">
             {images.map((img: string, idx: number) => (
               <button 
                 key={idx} 
                 onClick={() => { setActiveImage(idx); scrollContainerRef.current?.scrollTo({ left: idx * (scrollContainerRef.current?.clientWidth || 0), behavior: 'smooth' }); }} 
-                className={`relative h-24 min-h-[96px] rounded-2xl overflow-hidden border-2 transition-all ${activeImage === idx ? 'border-[#D4AF37] scale-95' : 'border-transparent opacity-60'}`}
+                className={`relative h-24 min-h-[96px] rounded-2xl overflow-hidden border-2 transition-all ${activeImage === idx ? 'border-[#D4AF37] scale-95' : 'border-transparent opacity-60 hover:opacity-100'}`}
               >
                 <img src={img} className="w-full h-full object-cover" alt="" />
               </button>
@@ -141,34 +140,37 @@ export default function PropertyDetailClient({ id }: { id: string }) {
         </div>
       </section>
 
-      {/* --- INFOS PRINCIPALES --- */}
+      {/* --- CONTENU --- */}
       <section className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-3 gap-16 pb-24">
         <div className="lg:col-span-2">
-          <h1 className="text-4xl md:text-6xl font-serif mb-8 leading-[1.1] text-slate-900 dark:text-white">
+          
+          {/* 2. CORRECTION TITRE : Adaptatif Noir -> Blanc */}
+          <h1 className="text-4xl md:text-7xl font-serif mb-8 leading-[1.1] text-slate-900 dark:text-white italic transition-colors duration-500">
             {property.titre || "Villa d'Exception"}
           </h1>
           
-          <div className="flex items-center gap-3 text-slate-600 dark:text-[#FFE7C2] mb-8 text-[11px] uppercase tracking-[0.2em] font-bold">
+          {/* 3. CORRECTION LOCALISATION : Gris foncé -> Gris clair */}
+          <div className="flex items-center gap-3 text-slate-600 dark:text-[#FFE7C2]/80 mb-8 text-[11px] uppercase tracking-[0.2em] font-bold transition-colors duration-500">
             <MapPin size={18} className="text-[#D4AF37]" />
             {property.town || property.ville} • {property.region}
           </div>
 
-          {/* Badges */}
+          {/* 4. CORRECTION BADGES : Fond s'adapte au mode sombre */}
           <div className="flex flex-wrap gap-3 mb-12">
-            <div className="flex items-center gap-2 bg-white dark:bg-white/10 px-4 py-2 rounded-full border border-slate-200 dark:border-white/20 text-[9px] uppercase font-bold tracking-wider dark:text-white">
+            <div className="flex items-center gap-2 bg-white dark:bg-white/5 px-4 py-2 rounded-full border border-slate-200 dark:border-white/10 text-[9px] uppercase font-bold tracking-wider dark:text-[#FFE7C2] shadow-sm">
               <ShieldCheck size={14} className="text-[#D4AF37]" /> Amaru Certified
             </div>
             {property.pool === "Oui" && (
-              <div className="flex items-center gap-2 bg-white dark:bg-white/10 px-4 py-2 rounded-full border border-slate-200 dark:border-white/20 text-[9px] uppercase font-bold tracking-wider text-sky-600 dark:text-sky-300">
+              <div className="flex items-center gap-2 bg-white dark:bg-white/5 px-4 py-2 rounded-full border border-slate-200 dark:border-white/10 text-[9px] uppercase font-bold tracking-wider text-sky-600 dark:text-sky-300 shadow-sm">
                 <Waves size={14} /> Piscine Privée
               </div>
             )}
-            <div className="flex items-center gap-2 bg-white dark:bg-white/10 px-4 py-2 rounded-full border border-slate-200 dark:border-white/20 text-[9px] uppercase font-bold tracking-wider dark:text-slate-200">
+            <div className="flex items-center gap-2 bg-white dark:bg-white/5 px-4 py-2 rounded-full border border-slate-200 dark:border-white/10 text-[9px] uppercase font-bold tracking-wider dark:text-slate-300 shadow-sm">
               <Car size={14} className="text-[#D4AF37]" /> Parking Inclus
             </div>
           </div>
 
-          {/* Grille technique corrigée (Icônes + Texte) */}
+          {/* 5. CORRECTION GRILLE TECHNIQUE : Contrastée */}
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-16">
             {[
               { icon: Bed, val: property.beds, label: "Chambres" },
@@ -178,19 +180,19 @@ export default function PropertyDetailClient({ id }: { id: string }) {
               { icon: Waves, val: (property.pool === "Oui" ? "Privée" : "Non"), label: "Piscine" },
               { icon: Car, val: "Privé", label: "Parking" }
             ].map((item, i) => (
-              <div key={i} className="bg-white dark:bg-white/5 p-6 rounded-3xl text-center border border-slate-200 dark:border-white/10 shadow-sm">
+              <div key={i} className="bg-white dark:bg-white/5 p-6 rounded-3xl text-center border border-slate-200 dark:border-white/10 shadow-lg">
                 <item.icon className="mx-auto mb-2 text-[#D4AF37]" size={22} />
-                <p className="text-2xl font-serif text-slate-900 dark:text-white">{item.val || "0"}</p>
-                <p className="text-[8px] uppercase text-slate-400 dark:text-slate-300 font-bold tracking-widest">{item.label}</p>
+                <p className="text-2xl font-serif text-slate-900 dark:text-white transition-colors">{item.val || "0"}</p>
+                <p className="text-[8px] uppercase text-slate-400 dark:text-slate-500 font-bold tracking-widest">{item.label}</p>
               </div>
             ))}
           </div>
 
-          {/* --- DESCRIPTION (L'Art de Vivre) : CORRECTION LISIBILITÉ --- */}
-          <div className="max-w-none mb-20 pt-10 border-t border-slate-200 dark:border-white/20">
+          {/* --- DESCRIPTION (Art de Vivre) : Contrastée --- */}
+          <div className="max-w-none mb-20 pt-10 border-t border-slate-200 dark:border-white/10 transition-colors">
             <h2 className="text-3xl font-serif italic mb-8 text-slate-900 dark:text-white">L'Art de Vivre</h2>
             <div 
-              className="description-content text-lg leading-relaxed text-slate-700 dark:text-slate-200"
+              className="description-xml-container text-lg leading-relaxed text-slate-800 dark:text-slate-200 opacity-90 transition-colors"
               dangerouslySetInnerHTML={{ 
                 __html: cleanDescription(property.description || "Description en cours de rédaction...") 
               }} 
@@ -198,48 +200,57 @@ export default function PropertyDetailClient({ id }: { id: string }) {
           </div>
 
           {/* --- LOCALISATION --- */}
-          <div className="mb-20 pt-10 border-t border-slate-200 dark:border-white/20">
+          <div className="mb-20 pt-10 border-t border-slate-200 dark:border-white/10 transition-colors">
             <h2 className="text-3xl font-serif italic mb-8 text-slate-900 dark:text-white">Localisation</h2>
-            <div className="w-full h-[400px] rounded-[2.5rem] overflow-hidden shadow-inner bg-slate-100 dark:bg-[#111] border border-slate-200 dark:border-white/10 flex items-center justify-center">
-              <MapIcon size={32} className="text-slate-300 dark:text-slate-700 animate-pulse" />
-              <p className="ml-4 text-slate-400">Carte interactive en cours de chargement...</p>
-            </div>
+            {mapUrl ? (
+              <div className="w-full h-[400px] rounded-[2.5rem] overflow-hidden shadow-inner bg-slate-100 dark:bg-[#1A1A1A] border border-slate-200 dark:border-white/10 transition-colors">
+                <iframe width="100%" height="100%" style={{ border: 0 }} loading="lazy" allowFullScreen src={mapUrl}></iframe>
+              </div>
+            ) : (
+              <div className="h-40 flex flex-col items-center justify-center bg-white dark:bg-white/5 rounded-[2.5rem] border border-dashed border-slate-200 dark:border-white/10 text-slate-400">
+                <MapIcon size={32} className="mb-2 opacity-20" />
+                <p className="text-sm italic">Carte indisponible</p>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* --- SIDEBAR DE PRIX --- */}
+        {/* --- SIDEBAR DE PRIX (Stickée) --- */}
         <div className="lg:col-span-1">
           <div className="sticky top-40 space-y-6">
+            
+            {/* CASHBACK */}
             <Link 
               href={`/contact-cashback?Property_ID=${property.id_externe || property.id}`}
-              className="group relative block w-full overflow-hidden rounded-[2.5rem] bg-[#111] p-[1px] shadow-2xl transition-transform hover:scale-[1.02]"
+              className="group relative block w-full overflow-hidden rounded-[2.5rem] bg-[#0A0A0A] p-[1px] transition-all duration-500 hover:scale-[1.02] shadow-2xl"
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-[#D4AF37] to-transparent opacity-30" />
-              <div className="relative bg-[#0A0A0A] rounded-[2.5rem] p-8 flex items-center gap-5">
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/30">
+              <div className="absolute inset-0 bg-gradient-to-br from-[#D4AF37] via-transparent to-transparent opacity-20 group-hover:opacity-40 transition-opacity" />
+              <div className="relative bg-[#1A1A1A] rounded-[2.5rem] p-8 flex items-center gap-5">
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/20 group-hover:bg-[#D4AF37] group-hover:text-black transition-all duration-500">
                   <ShieldCheck size={28} />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-[#D4AF37] mb-1">Privilège Amaru</span>
+                  <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-[#D4AF37] mb-1">Offre Exclusive Amaru</span>
                   <span className="text-xl font-serif italic text-white leading-tight">Activer mon Cashback</span>
                 </div>
               </div>
             </Link>
 
-            <div className="bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 p-10 rounded-[3rem] shadow-2xl">
-              <p className="text-[10px] uppercase text-slate-400 dark:text-[#FFE7C2] mb-2 font-bold tracking-widest">Prix de vente</p>
-              <p className="text-5xl font-serif text-slate-900 dark:text-white leading-none mb-10">
+            {/* PRIX ET ACTIONS */}
+            <div className="bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 p-10 rounded-[3rem] shadow-2xl transition-colors">
+              <p className="text-[10px] uppercase text-slate-400 dark:text-[#FFE7C2]/60 mb-2 font-bold tracking-widest">Prix de vente</p>
+              <p className="text-5xl font-serif text-slate-900 dark:text-[#FFE7C2] leading-none mb-10 transition-colors">
                 {numericPrice.toLocaleString("fr-FR")} €
               </p>
               
-              <button className="w-full bg-slate-900 dark:bg-[#D4AF37] text-white dark:text-black py-6 rounded-2xl font-bold uppercase text-[11px] tracking-widest hover:opacity-90 transition-all mb-4">
+              <button className="w-full bg-slate-900 dark:bg-[#D4AF37] text-white dark:text-black py-6 rounded-2xl font-bold uppercase text-[11px] tracking-widest hover:opacity-90 transition-all mb-4 shadow-xl">
                 Réserver une visite
               </button>
               
               <a 
                 href={`https://wa.me/34627768233?text=Information sur la villa ref: ${property.ref || property.id_externe}`} 
                 target="_blank" 
-                className="w-full border border-slate-200 dark:border-white/10 flex items-center justify-center gap-3 py-6 rounded-2xl font-bold uppercase text-[11px] text-slate-900 dark:text-slate-100 hover:bg-slate-50 dark:hover:bg-white/5 transition-all"
+                className="w-full border border-slate-200 dark:border-white/10 flex items-center justify-center gap-3 py-6 rounded-2xl font-bold uppercase text-[11px] text-slate-900 dark:text-[#FFE7C2] hover:bg-slate-50 dark:hover:bg-white/5 transition-all shadow-sm"
               >
                 <MessageCircle size={20} className="text-green-500" /> WhatsApp Direct
               </a>
@@ -247,6 +258,7 @@ export default function PropertyDetailClient({ id }: { id: string }) {
           </div>
         </div>
       </section>
+
       <Footer />
     </main>
   );
