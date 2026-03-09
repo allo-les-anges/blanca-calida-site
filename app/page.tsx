@@ -32,6 +32,15 @@ export default function Home() {
     setMounted(true);
   }, []);
 
+  // Gestion du scroll quand la modal de recherche est ouverte
+  useEffect(() => {
+    if (isSearchOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+  }, [isSearchOpen]);
+
   useEffect(() => {
     async function loadData() {
       try {
@@ -99,7 +108,6 @@ export default function Home() {
     }
   };
 
-  // Tant que le composant n'est pas monté, on ne rend rien pour éviter le flash
   if (!mounted) return null;
 
   if (loading) {
@@ -228,16 +236,6 @@ export default function Home() {
       </section>
 
       <Footer />
-
-        /* Suppression des styles forçant la couleur de fond */
-        .font-serif { font-family: 'Cormorant Garamond', serif; }
-        
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #D4AF37; border-radius: 10px; }
-
-        ${isSearchOpen ? 'body { overflow: hidden; }' : ''}
-      `}</style>
     </main>
   );
 }
