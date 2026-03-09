@@ -54,7 +54,6 @@ export default function RootLayout({
           }
         `}</style>
       </head>
-      // app/layout.tsx
       <body
         className={`${inter.variable} ${playfair.variable} font-sans antialiased bg-white dark:bg-[#0A0A0A] text-slate-900 dark:text-slate-100 transition-colors duration-300`}
         >
