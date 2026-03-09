@@ -1,131 +1,183 @@
 "use client";
 
-import React from 'react';
-import { Bed, Bath, Waves, Car, Maximize, Map, ChevronRight, Heart } from 'lucide-react';
-import Link from 'next/link';
+import React, { useMemo } from 'react';
+import { ChevronRight } from 'lucide-react';
+import { motion } from 'framer-motion';
 
-interface PropertyCardProps {
-  property: any;
+interface Property {
+  id: string;
+  town?: string;
+  ville?: string;
+  region?: string;
 }
 
-export default function PropertyCard({ property }: PropertyCardProps) {
-  // Formatage propre : 3.725.000 €
-  const priceFormatted = new Intl.NumberFormat('de-DE').format(property.price || property.prix || 0);
+interface RegionGridProps {
+  properties: Property[];
+  onRegionClick: (regionName: string) => void;
+}
+
+// ETAPE 1 : Dictionnaire de correspondance (Ville -> Région)
+// Ce dictionnaire permet de classer les 2500 propriétés même si la colonne 'region' est vide dans le CSV
+const CITY_TO_REGION_MAP: Record<string, string> = {
+  // COSTA BLANCA
+  "alicante": "Costa Blanca",
+  "benidorm": "Costa Blanca",
+  "altea": "Costa Blanca",
+  "calpe": "Costa Blanca",
+  "denia": "Costa Blanca",
+  "javea": "Costa Blanca",
+  "xabia": "Costa Blanca",
+  "moraira": "Costa Blanca",
+  "torrevieja": "Costa Blanca",
+  "orihuela": "Costa Blanca",
+  "orihuela costa": "Costa Blanca",
+  "guardamar": "Costa Blanca",
+  "santa pola": "Costa Blanca",
+  "finestrat": "Costa Blanca",
+  "villajoyosa": "Costa Blanca",
+  "polop": "Costa Blanca",
+  "elche": "Costa Blanca",
+  "el campello": "Costa Blanca",
+  "busot": "Costa Blanca",
+  "cumbre del sol": "Costa Blanca",
+
+  // COSTA DEL SOL
+  "marbella": "Costa del Sol",
+  "estepona": "Costa del Sol",
+  "mijas": "Costa del Sol",
+  "fuengirola": "Costa del Sol",
+  "benalmadena": "Costa del Sol",
+  "torremolinos": "Costa del Sol",
+  "malaga": "Costa del Sol",
+  "nerja": "Costa del Sol",
+  "casares": "Costa del Sol",
+  "manilva": "Costa del Sol",
+  "sotogrande": "Costa del Sol",
+  "san pedro de alcantara": "Costa del Sol",
+  "benahavis": "Costa del Sol",
+  "cancelada": "Costa del Sol",
+
+  // COSTA CALIDA
+  "murcia": "Costa Calida",
+  "cartagena": "Costa Calida",
+  "los alcazares": "Costa Calida",
+  "san javier": "Costa Calida",
+  "san pedro del pinatar": "Costa Calida",
+  "mazarron": "Costa Calida",
+  "aguilas": "Costa Calida",
+  "la manga": "Costa Calida",
+  "sucina": "Costa Calida",
+  "bano y mendigo": "Costa Calida",
+
+  // COSTA ALMERIA
+  "almeria": "Costa Almeria",
+  "roquetas de mar": "Costa Almeria",
+  "mojacar": "Costa Almeria",
+  "vera": "Costa Almeria",
+  "san juan de los terreros": "Costa Almeria",
+  "pulpi": "Costa Almeria",
+  "cuevas del almanzora": "Costa Almeria"
+};
+
+// ETAPE 2 : Configuration de l'affichage avec vos images locales
+const REGIONS_DISPLAY = [
+  { name: "Costa Blanca", image: "/images/regions/1.jpg" },
+  { name: "Costa del Sol", image: "/images/regions/2.jpg" },
+  { name: "Costa Calida", image: "/images/regions/3.jpg" },
+  { name: "Costa Almeria", image: "/images/regions/4.jpg" }
+];
+
+export default function RegionGrid({ properties, onRegionClick }: RegionGridProps) {
+  
+  // Calcul des compteurs basé sur la base de données complète
+  const regionCounts = useMemo(() => {
+    const counts: Record<string, number> = {
+      "Costa Blanca": 0,
+      "Costa del Sol": 0,
+      "Costa Calida": 0,
+      "Costa Almeria": 0
+    };
+
+    if (!properties || properties.length === 0) return counts;
+
+    properties.forEach(p => {
+      // 1. On nettoie la ville du CSV (soit 'town' soit 'ville')
+      const rawCity = (p.town || p.ville || "").toLowerCase().trim();
+      
+      // 2. On cherche la région correspondante dans notre dictionnaire
+      const regionFound = CITY_TO_REGION_MAP[rawCity];
+      
+      if (regionFound) {
+        counts[regionFound]++;
+      } else {
+        // Optionnel : Secours si la ville n'est pas dans le dictionnaire
+        // mais que la colonne 'region' est déjà correcte dans le CSV
+        const rawRegion = p.region?.trim();
+        if (rawRegion && counts[rawRegion] !== undefined) {
+          counts[rawRegion]++;
+        }
+      }
+    });
+
+    return counts;
+  }, [properties]);
 
   return (
-    <Link 
-      href={`/property/${property.id_externe || property.id}`} 
-      className="group flex flex-col w-full max-w-[400px] transition-all duration-500"
-    >
-      {/* --- IMAGE & BADGES --- */}
-      <div className="relative h-[420px] overflow-hidden rounded-[2.5rem] shadow-2xl border border-slate-200 dark:border-white/5 bg-slate-100 dark:bg-slate-900">
-        <img 
-          src={property.images?.[0] || "/placeholder-house.jpg"} 
-          alt={property.titre}
-          className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
-        />
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 px-4">
+      {REGIONS_DISPLAY.map((region, index) => {
+        const count = regionCounts[region.name] || 0;
         
-        {/* Overlay dégradé pour la lecture des badges */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-80" />
+        return (
+          <motion.div
+            key={region.name}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: index * 0.1, duration: 0.8 }}
+            onClick={() => onRegionClick(region.name)}
+            className="group relative h-[520px] rounded-[3rem] overflow-hidden cursor-pointer bg-slate-900 shadow-2xl transition-all duration-700 hover:shadow-[#D4AF37]/10"
+          >
+            {/* Arrière-plan avec vos images locales */}
+            <div className="absolute inset-0">
+              <img 
+                src={region.image} 
+                alt={region.name} 
+                className="w-full h-full object-cover transition-transform duration-1000 scale-105 group-hover:scale-110 opacity-60 group-hover:opacity-40" 
+              />
+              <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#020617]/20 to-[#020617]" />
+            </div>
 
-        {/* Badges stylisés */}
-        <div className="absolute bottom-6 left-6 flex flex-wrap gap-2 max-w-[70%]">
-          <span className="bg-[#D4AF37] text-black text-[9px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest shadow-lg">
-            REF: {property.ref || property.id_externe}
-          </span>
-          <span className="bg-white/10 backdrop-blur-md text-white border border-white/20 text-[8px] font-bold px-4 py-1.5 rounded-full uppercase tracking-[0.2em]">
-            {property.type || 'EXCLUSIVITÉ'}
-          </span>
-        </div>
+            {/* Contenu de la carte */}
+            <div className="absolute inset-0 z-10 p-10 flex flex-col items-center text-center">
+              {/* Badge du nombre de propriétés */}
+              <div className="inline-flex items-center gap-3 px-4 py-2 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full shadow-xl">
+                <div className="w-1.5 h-1.5 bg-[#D4AF37] rounded-full" />
+                <span className="text-[10px] font-bold text-white uppercase tracking-[0.3em]">
+                  {count} Propriétés
+                </span>
+              </div>
 
-        {/* Boutons flottants d'action */}
-        <div className="absolute bottom-6 right-6 flex flex-col gap-3">
-          <button className="bg-white/10 backdrop-blur-md p-3 rounded-full border border-white/20 text-white hover:bg-[#D4AF37] hover:text-black transition-all duration-300">
-            <Heart size={18} strokeWidth={1.5} />
-          </button>
-          <div className="bg-[#D4AF37] p-3 rounded-full text-black shadow-xl transform group-hover:translate-x-1 transition-transform">
-            <ChevronRight size={20} strokeWidth={2.5} />
-          </div>
-        </div>
-      </div>
+              <div className="flex-grow" />
 
-      {/* --- INFOS : TITRE ET PRIX (CORRIGÉ POUR LIGHT MODE) --- */}
-      <div className="py-8 px-2">
-        <div className="flex justify-between items-start gap-4 mb-3">
-          {/* Titre : Noir en light mode, Blanc en dark mode */}
-          <h3 className="font-serif text-2xl text-slate-900 dark:text-white italic leading-tight flex-grow line-clamp-1">
-            {property.titre || property.type || 'Villa de Prestige'}
-          </h3>
-          
-          {/* Prix : Toujours Or */}
-          <span className="text-xl font-bold text-[#D4AF37] whitespace-nowrap pt-1">
-            {priceFormatted} €
-          </span>
-        </div>
+              <div className="space-y-6">
+                <h3 className="text-4xl md:text-5xl font-serif italic text-white leading-tight">
+                  {region.name}
+                </h3>
+                
+                <div className="flex flex-col items-center gap-4">
+                  <div className="w-12 h-px bg-[#D4AF37]/50" />
+                  <div className="flex items-center gap-2 text-[#D4AF37] text-[10px] font-bold uppercase tracking-[0.4em] opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-4 group-hover:translate-y-0">
+                    Explorer <ChevronRight size={14} />
+                  </div>
+                </div>
+              </div>
+            </div>
 
-        {/* Localisation : Gris foncé en light, Gris clair en dark */}
-        <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-[10px] tracking-[0.3em] uppercase font-bold">
-          <span className="text-[#D4AF37]">●</span>
-          {property.town} <span className="opacity-30">|</span> {property.region || 'Costa Blanca'}
-        </div>
-      </div>
-
-      {/* --- ICONES TECHNIQUES : ADAPTATIVES --- */}
-      <div className="grid grid-cols-3 gap-y-6 pt-6 border-t border-slate-100 dark:border-white/5">
-        
-        {/* Surface */}
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center">
-            <Maximize size={14} className="text-[#D4AF37]" />
-          </div>
-          <span className="text-[11px] font-medium text-slate-700 dark:text-slate-300">{property.surface_built || '0'} m²</span>
-        </div>
-        
-        {/* Chambres */}
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center">
-            <Bed size={14} className="text-[#D4AF37]" />
-          </div>
-          <span className="text-[11px] font-medium text-slate-700 dark:text-slate-300">{property.beds || '0'} lits</span>
-        </div>
-
-        {/* Salles de bain */}
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center">
-            <Bath size={14} className="text-[#D4AF37]" />
-          </div>
-          <span className="text-[11px] font-medium text-slate-700 dark:text-slate-300">{property.baths || '0'} sdb</span>
-        </div>
-
-        {/* Piscine */}
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center">
-            <Waves size={14} className="text-[#D4AF37]" />
-          </div>
-          <span className="text-[11px] font-medium text-slate-700 dark:text-slate-300 uppercase">
-            {property.pool === "Oui" ? "Piscine" : "Sans"}
-          </span>
-        </div>
-
-        {/* Terrain */}
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center">
-            <Map size={14} className="text-[#D4AF37]" />
-          </div>
-          <span className="text-[11px] font-medium text-slate-700 dark:text-slate-300 truncate">
-            {property.surface_plot || '0'} m² terrain
-          </span>
-        </div>
-
-        {/* Garage */}
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center">
-            <Car size={14} className="text-[#D4AF37]" />
-          </div>
-          <span className="text-[11px] font-medium text-slate-700 dark:text-slate-300">Garage</span>
-        </div>
-        
-      </div>
-    </Link>
+            {/* Bordure interactive au survol */}
+            <div className="absolute inset-0 border border-white/0 group-hover:border-[#D4AF37]/30 rounded-[3rem] transition-colors duration-700" />
+          </motion.div>
+        );
+      })}
+    </div>
   );
 }
