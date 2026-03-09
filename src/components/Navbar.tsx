@@ -11,7 +11,7 @@ import {
 import { createBrowserClient } from '@supabase/ssr';
 import ThemeToggle from "./ThemeToggle";
 
-// --- DÉFINITION DU COMPOSANT LOGO SVG ---
+// --- LOGO SVG ---
 const DataHomeLogo = ({ className }: { className?: string }) => (
   <svg 
     viewBox="0 0 150 35" 
@@ -133,7 +133,7 @@ export default function Navbar() {
 
       <nav className={`fixed w-full top-0 left-0 z-[100] transition-all duration-700 h-24 flex items-center ${
         isScrolled 
-          ? "bg-white/95 dark:bg-[#020617]/95 backdrop-blur-md shadow-xl border-b border-slate-100 dark:border-white/5" 
+          ? "bg-white/90 dark:bg-[#020617]/90 backdrop-blur-md shadow-xl border-b border-slate-100 dark:border-white/5" 
           : "bg-transparent"
       }`}>
         <div className="max-w-[1600px] w-full mx-auto px-4 md:px-10 flex justify-between items-center">
@@ -167,7 +167,7 @@ export default function Navbar() {
                 <Globe size={14} className="text-[#D4AF37]" /> <span>{currentLang}</span>
               </button>
               {showLangMenu && (
-                <div className="absolute top-full right-0 mt-4 bg-white dark:bg-[#0f172a] border border-slate-100 dark:border-white/10 rounded-xl p-2 min-w-[140px] shadow-2xl">
+                <div className="absolute top-full right-0 mt-4 bg-white dark:bg-[#0f172a] border border-slate-100 dark:border-white/10 rounded-xl p-2 min-w-[140px] shadow-2xl overflow-hidden">
                   {languages.map((l) => (
                     <button key={l.code} onClick={() => changeLanguage(l.code)} className="w-full text-left px-4 py-2 text-[10px] font-bold uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-white/5 text-slate-600 dark:text-slate-300 hover:text-[#D4AF37] transition-colors">
                       {l.label}
@@ -179,7 +179,7 @@ export default function Navbar() {
 
             <button 
               onClick={() => setIsSearchModalOpen(true)}
-              className="p-2.5 md:p-3 bg-slate-100 dark:bg-white/10 rounded-full text-[#D4AF37] border border-slate-200 dark:border-white/10 hover:bg-[#D4AF37] hover:text-white transition-all"
+              className="p-2.5 md:p-3 bg-slate-100 dark:bg-white/10 rounded-full text-[#D4AF37] border border-slate-200 dark:border-white/10 hover:bg-[#D4AF37] hover:text-white transition-all shadow-sm"
             >
               <Search size={18} />
             </button>
@@ -198,14 +198,14 @@ export default function Navbar() {
       {/* MODAL RECHERCHE */}
       {isSearchModalOpen && (
         <div className="fixed inset-0 z-[300] flex items-end sm:items-center justify-center">
-          <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => setIsSearchModalOpen(false)} />
-          <div className="relative bg-white dark:bg-[#0f172a] w-full sm:max-w-lg sm:rounded-[2.5rem] rounded-t-[2.5rem] overflow-hidden shadow-2xl animate-in slide-in-from-bottom duration-500 flex flex-col max-h-[92vh]">
-            <div className="bg-white dark:bg-[#1e293b] px-8 py-6 border-b border-slate-100 dark:border-white/5 flex justify-between items-center">
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-md transition-opacity" onClick={() => setIsSearchModalOpen(false)} />
+          <div className="relative bg-white dark:bg-[#0f172a] w-full sm:max-w-lg sm:rounded-[2.5rem] rounded-t-[2.5rem] overflow-hidden shadow-2xl animate-in slide-in-from-bottom duration-500 flex flex-col max-h-[92vh] border border-slate-100 dark:border-white/10">
+            <div className="bg-slate-50 dark:bg-[#1e293b]/50 px-8 py-6 border-b border-slate-100 dark:border-white/5 flex justify-between items-center">
               <div>
                 <h3 className="text-xl font-serif italic text-slate-900 dark:text-white">Recherche</h3>
                 <p className="text-[9px] uppercase tracking-widest text-[#D4AF37] font-bold">Trouvez votre villa idéale</p>
               </div>
-              <button onClick={() => setIsSearchModalOpen(false)} className="w-10 h-10 bg-slate-100 dark:bg-white/5 text-slate-900 dark:text-white rounded-full flex items-center justify-center hover:bg-[#D4AF37] transition-colors"><X size={20} /></button>
+              <button onClick={() => setIsSearchModalOpen(false)} className="w-10 h-10 bg-white dark:bg-white/5 text-slate-900 dark:text-white rounded-full flex items-center justify-center hover:bg-[#D4AF37] hover:text-white transition-colors"><X size={20} /></button>
             </div>
             <div className="p-8 overflow-y-auto space-y-8 pb-32">
                <div className="space-y-4">
@@ -235,7 +235,7 @@ export default function Navbar() {
            </div>
            <nav className="flex flex-col space-y-8 text-2xl font-serif italic text-slate-900 dark:text-white">
              {navLinks.map(link => (
-               <Link key={link.href} href={link.href} onClick={() => setIsMobileMenuOpen(false)}>
+               <Link key={link.href} href={link.href} onClick={() => setIsMobileMenuOpen(false)} className="hover:text-[#D4AF37] transition-colors">
                  {link.name}
                </Link>
              ))}
@@ -245,19 +245,19 @@ export default function Navbar() {
 
       {/* MODAL LOGIN PIN */}
       {isLoginModalOpen && (
-        <div className="fixed inset-0 z-[400] flex items-center justify-center bg-[#020617]/95 backdrop-blur-xl p-6">
-          <div className="bg-white dark:bg-[#0f172a] w-full max-w-sm rounded-[2.5rem] p-10 shadow-2xl relative border border-slate-100 dark:border-white/5 text-center text-slate-900 dark:text-white">
-            <button onClick={() => setIsLoginModalOpen(false)} className="absolute top-6 right-6"><X size={20}/></button>
-            <h2 className="text-xl font-serif italic mb-8">Accès Privé</h2>
+        <div className="fixed inset-0 z-[400] flex items-center justify-center bg-[#020617]/95 backdrop-blur-xl p-6 transition-all">
+          <div className="bg-white dark:bg-[#0f172a] w-full max-w-sm rounded-[2.5rem] p-10 shadow-2xl relative border border-slate-100 dark:border-white/10 text-center">
+            <button onClick={() => setIsLoginModalOpen(false)} className="absolute top-6 right-6 text-slate-400 hover:text-[#D4AF37] transition-colors"><X size={20}/></button>
+            <h2 className="text-xl font-serif italic mb-8 text-slate-900 dark:text-white">Accès Privé</h2>
             <form onSubmit={handleAuthSubmit} className="space-y-4">
               <input 
                 type="password" 
                 value={passwordInput} 
                 onChange={(e) => setPasswordInput(e.target.value)} 
                 placeholder="PIN" 
-                className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 p-4 rounded-xl text-center text-2xl tracking-widest font-black text-[#D4AF37] focus:outline-none focus:border-[#D4AF37]" 
+                className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 p-4 rounded-xl text-center text-2xl tracking-widest font-black text-[#D4AF37] focus:outline-none focus:border-[#D4AF37] transition-all" 
               />
-              <button type="submit" className="w-full bg-[#D4AF37] text-black py-4 rounded-xl font-bold uppercase text-[10px]">Valider</button>
+              <button type="submit" className="w-full bg-[#D4AF37] text-black py-4 rounded-xl font-bold uppercase text-[10px] tracking-widest hover:bg-slate-900 hover:text-white transition-all">Valider</button>
             </form>
           </div>
         </div>
