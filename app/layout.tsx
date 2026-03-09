@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import Script from "next/script";
+import { ThemeProvider } from "@/components/ThemeProvider"; // Assurez-vous que le chemin est correct
 
 const inter = Inter({ 
   subsets: ["latin"], 
@@ -24,45 +25,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    // AJOUT DE "notranslate" ICI : Empêche Google de modifier les balises racines et de faire crash React
-    <html lang="fr" className="scroll-smooth notranslate">
+    // AJOUT DE suppressHydrationWarning : Indispensable pour next-themes
+    <html lang="fr" className="scroll-smooth notranslate" suppressHydrationWarning>
       <head>
-        {/* Méta-balise pour dire explicitement à Google de ne pas proposer la traduction auto qui casse le site */}
         <meta name="google" content="notranslate" />
         <style>{`
-          /* 1. CACHER TOUS LES ÉLÉMENTS GOOGLE TRANSLATE */
-          .goog-te-banner-frame, 
-          .goog-te-banner-frame.skiptranslate,
-          .goog-te-banner,
-          .skiptranslate,
-          #goog-gt-tt,
-          .goog-te-balloon-frame,
-          iframe.goog-te-banner-frame { 
+          .goog-te-banner-frame, .goog-te-banner-frame.skiptranslate, .goog-te-banner, .skiptranslate, #goog-gt-tt, .goog-te-balloon-frame, iframe.goog-te-banner-frame { 
             display: none !important; 
             visibility: hidden !important;
             opacity: 0 !important;
             height: 0 !important;
           }
-          
-          /* 2. FORCER LE CONTENU À RESTER EN HAUT */
-          html {
-            margin-top: 0px !important;
-          }
-          body { 
-            top: 0px !important; 
-            position: static !important;
-          }
-
-          /* 3. NETTOYAGE DES EFFETS DE SURVOL */
-          .goog-text-highlight {
-            background-color: transparent !important;
-            box-shadow: none !important;
-          }
-
-          /* 4. MASQUER LE WIDGET ORIGINAL */
-          #google_translate_element {
-            display: none !important;
-          }
+          html { margin-top: 0px !important; }
+          body { top: 0px !important; position: static !important; }
+          .goog-text-highlight { background-color: transparent !important; box-shadow: none !important; }
+          #google_translate_element { display: none !important; }
 
           .description-xml-container, 
           .description-xml-container *, 
@@ -73,29 +50,27 @@ export default function RootLayout({
             font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system, sans-serif !important;
             font-size: 1.125rem !important;
             line-height: 1.75rem !important;
-            color: #4b5563 !important;
+            /* On enlève le color: #4b5563 !important; pour laisser le dark mode gérer la couleur du texte */
           }
         `}</style>
       </head>
       <body
-        className={`${inter.variable} ${playfair.variable} font-sans antialiased bg-white text-slate-900`}
+        className={`${inter.variable} ${playfair.variable} font-sans antialiased bg-white dark:bg-[#0A0A0A] text-slate-900 dark:text-white transition-colors duration-300`}
       >
-        {/* On enveloppe le contenu dans une div notranslate pour protéger les composants critiques comme la Navbar */}
-        <div className="notranslate">
-          <div id="google_translate_element"></div>
-        </div>
+        <ThemeProvider>
+          <div className="notranslate">
+            <div id="google_translate_element"></div>
+          </div>
 
-        {children}
+          {children}
+        </ThemeProvider>
 
-        {/* SCRIPT DE NETTOYAGE SÉCURISÉ */}
         <Script id="google-translate-logic" strategy="afterInteractive">
           {`
             function cleanGoogleTranslate() {
               document.documentElement.style.marginTop = '0px';
               document.body.style.top = '0px';
             }
-
-            // Initialisation uniquement si l'objet google existe
             window.googleTranslateElementInit = function() {
               if (window.google && google.translate) {
                 new google.translate.TranslateElement({
@@ -105,17 +80,13 @@ export default function RootLayout({
                 }, 'google_translate_element');
               }
             }
-
-            // On retire le remove() brutal de la frame qui peut faire crash React
             const observer = new MutationObserver(() => {
               cleanGoogleTranslate();
             });
-
             observer.observe(document.documentElement, { 
               attributes: true, 
               attributeFilter: ['style'] 
             });
-
             setInterval(cleanGoogleTranslate, 1000);
           `}
         </Script>
