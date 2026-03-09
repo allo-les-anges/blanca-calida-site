@@ -17,15 +17,15 @@ export default function PropertyCard({ property }: PropertyCardProps) {
       href={`/property/${property.id_externe || property.id}`} 
       className="group flex flex-col w-full max-w-[400px] transition-all duration-500"
     >
-      {/* --- IMAGE & BADGES : BORDS RONDS PRONONCÉS --- */}
-      <div className="relative h-[420px] overflow-hidden rounded-[2.5rem] shadow-2xl border border-white/5">
+      {/* --- IMAGE & BADGES --- */}
+      <div className="relative h-[420px] overflow-hidden rounded-[2.5rem] shadow-2xl border border-slate-200 dark:border-white/5 bg-slate-100 dark:bg-slate-900">
         <img 
           src={property.images?.[0] || "/placeholder-house.jpg"} 
           alt={property.titre}
           className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
         />
         
-        {/* Overlay dégradé pour améliorer la lecture des badges */}
+        {/* Overlay dégradé pour la lecture des badges */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-80" />
 
         {/* Badges stylisés */}
@@ -49,69 +49,82 @@ export default function PropertyCard({ property }: PropertyCardProps) {
         </div>
       </div>
 
-      {/* --- INFOS : TITRE ET PRIX (CORRECTION CHEVAUCHEMENT) --- */}
+      {/* --- INFOS : TITRE ET PRIX (CORRIGÉ POUR LIGHT MODE) --- */}
       <div className="py-8 px-2">
         <div className="flex justify-between items-start gap-4 mb-3">
-          {/* Titre avec line-clamp pour éviter qu'il ne pousse le prix vers le bas */}
-          <h3 className="font-serif text-2xl text-white italic leading-tight flex-grow line-clamp-1">
+          {/* Titre : Noir en light mode, Blanc en dark mode */}
+          <h3 className="font-serif text-2xl text-slate-900 dark:text-white italic leading-tight flex-grow line-clamp-1">
             {property.titre || property.type || 'Villa de Prestige'}
           </h3>
           
-          {/* Prix avec fond doré subtil pour le faire ressortir */}
+          {/* Prix : Toujours Or */}
           <span className="text-xl font-bold text-[#D4AF37] whitespace-nowrap pt-1">
             {priceFormatted} €
           </span>
         </div>
 
-        <div className="flex items-center gap-2 text-slate-400 text-[10px] tracking-[0.3em] uppercase font-bold">
+        {/* Localisation : Gris foncé en light, Gris clair en dark */}
+        <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-[10px] tracking-[0.3em] uppercase font-bold">
           <span className="text-[#D4AF37]">●</span>
           {property.town} <span className="opacity-30">|</span> {property.region || 'Costa Blanca'}
         </div>
       </div>
 
-      {/* --- ICONES TECHNIQUES : DARK THEME --- */}
-      <div className="grid grid-cols-3 gap-y-6 pt-6 border-t border-white/5 text-slate-400">
+      {/* --- ICONES TECHNIQUES : ADAPTATIVES --- */}
+      <div className="grid grid-cols-3 gap-y-6 pt-6 border-t border-slate-100 dark:border-white/5">
+        
+        {/* Surface */}
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center">
             <Maximize size={14} className="text-[#D4AF37]" />
           </div>
-          <span className="text-[11px] font-medium text-slate-300">{property.surface_built || '0'} m²</span>
+          <span className="text-[11px] font-medium text-slate-700 dark:text-slate-300">{property.surface_built || '0'} m²</span>
         </div>
         
+        {/* Chambres */}
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center">
             <Bed size={14} className="text-[#D4AF37]" />
           </div>
-          <span className="text-[11px] font-medium text-slate-300">{property.beds || '0'} lits</span>
+          <span className="text-[11px] font-medium text-slate-700 dark:text-slate-300">{property.beds || '0'} lits</span>
         </div>
 
+        {/* Salles de bain */}
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center">
             <Bath size={14} className="text-[#D4AF37]" />
           </div>
-          <span className="text-[11px] font-medium text-slate-300">{property.baths || '0'} sdb</span>
+          <span className="text-[11px] font-medium text-slate-700 dark:text-slate-300">{property.baths || '0'} sdb</span>
         </div>
 
+        {/* Piscine */}
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center">
             <Waves size={14} className="text-[#D4AF37]" />
           </div>
-          <span className="text-[11px] font-medium text-slate-300 uppercase">{property.pool === "Oui" ? "Piscine" : "Sans"}</span>
+          <span className="text-[11px] font-medium text-slate-700 dark:text-slate-300 uppercase">
+            {property.pool === "Oui" ? "Piscine" : "Sans"}
+          </span>
         </div>
 
+        {/* Terrain */}
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center">
             <Map size={14} className="text-[#D4AF37]" />
           </div>
-          <span className="text-[11px] font-medium text-slate-300 truncate">{property.surface_plot || '0'} m² terrain</span>
+          <span className="text-[11px] font-medium text-slate-700 dark:text-slate-300 truncate">
+            {property.surface_plot || '0'} m² terrain
+          </span>
         </div>
 
+        {/* Garage */}
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center">
             <Car size={14} className="text-[#D4AF37]" />
           </div>
-          <span className="text-[11px] font-medium text-slate-300">Garage</span>
+          <span className="text-[11px] font-medium text-slate-700 dark:text-slate-300">Garage</span>
         </div>
+        
       </div>
     </Link>
   );
