@@ -132,18 +132,16 @@ export default function Navbar() {
       `}</style>
 
       <nav className={`fixed w-full top-0 left-0 z-[100] transition-all duration-700 h-24 flex items-center ${
-      isScrolled 
-    ? "bg-white/90 dark:bg-[#020617]/90 backdrop-blur-md shadow-xl border-b border-slate-100 dark:border-white/5" 
-    : "bg-transparent"
-          }`}>
+        isScrolled 
+          ? "bg-white/95 dark:bg-[#020617]/95 backdrop-blur-md shadow-xl border-b border-slate-100 dark:border-white/5" 
+          : "bg-transparent"
+      }`}>
         <div className="max-w-[1600px] w-full mx-auto px-4 md:px-10 flex justify-between items-center">
           
-          {/* LOGO DATA HOME (VERSION SVG SANS FOND) */}
           <Link href="/" className="z-[110] flex items-center group transition-transform hover:scale-105">
             <DataHomeLogo className="h-10 w-auto text-slate-900 dark:text-white transition-colors group-hover:text-[#D4AF37]" />
           </Link>
 
-          {/* LIENS NAV */}
           <div className="hidden md:flex items-center space-x-6 lg:space-x-10">
             {navLinks.map((link) => (
               <Link 
@@ -159,7 +157,6 @@ export default function Navbar() {
             ))}
           </div>
 
-          {/* ACTIONS DROITE */}
           <div className="flex items-center space-x-2 md:space-x-4 z-[110]">
             <div className="hidden sm:block">
               <ThemeToggle />
@@ -170,7 +167,7 @@ export default function Navbar() {
                 <Globe size={14} className="text-[#D4AF37]" /> <span>{currentLang}</span>
               </button>
               {showLangMenu && (
-                <div className="absolute top-full right-0 mt-4 bg-white dark:bg-[#020617] border border-slate-100 dark:border-white/10 rounded-xl p-2 min-w-[140px] shadow-2xl">
+                <div className="absolute top-full right-0 mt-4 bg-white dark:bg-[#0f172a] border border-slate-100 dark:border-white/10 rounded-xl p-2 min-w-[140px] shadow-2xl">
                   {languages.map((l) => (
                     <button key={l.code} onClick={() => changeLanguage(l.code)} className="w-full text-left px-4 py-2 text-[10px] font-bold uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-white/5 text-slate-600 dark:text-slate-300 hover:text-[#D4AF37] transition-colors">
                       {l.label}
@@ -202,7 +199,7 @@ export default function Navbar() {
       {isSearchModalOpen && (
         <div className="fixed inset-0 z-[300] flex items-end sm:items-center justify-center">
           <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => setIsSearchModalOpen(false)} />
-          <div className="relative bg-[#F8FAFC] dark:bg-[#0f172a] w-full sm:max-w-lg sm:rounded-[2.5rem] rounded-t-[2.5rem] overflow-hidden shadow-2xl animate-in slide-in-from-bottom duration-500 flex flex-col max-h-[92vh]">
+          <div className="relative bg-white dark:bg-[#0f172a] w-full sm:max-w-lg sm:rounded-[2.5rem] rounded-t-[2.5rem] overflow-hidden shadow-2xl animate-in slide-in-from-bottom duration-500 flex flex-col max-h-[92vh]">
             <div className="bg-white dark:bg-[#1e293b] px-8 py-6 border-b border-slate-100 dark:border-white/5 flex justify-between items-center">
               <div>
                 <h3 className="text-xl font-serif italic text-slate-900 dark:text-white">Recherche</h3>
@@ -234,9 +231,9 @@ export default function Navbar() {
         <div className="relative h-full flex flex-col p-8">
            <div className="flex justify-between items-center mb-12">
              <DataHomeLogo className="h-8 w-auto text-slate-900 dark:text-white" />
-             <button onClick={() => setIsMobileMenuOpen(false)}><X size={28} /></button>
+             <button onClick={() => setIsMobileMenuOpen(false)} className="text-slate-900 dark:text-white"><X size={28} /></button>
            </div>
-           <nav className="flex flex-col space-y-8 text-2xl font-serif italic">
+           <nav className="flex flex-col space-y-8 text-2xl font-serif italic text-slate-900 dark:text-white">
              {navLinks.map(link => (
                <Link key={link.href} href={link.href} onClick={() => setIsMobileMenuOpen(false)}>
                  {link.name}
@@ -249,7 +246,7 @@ export default function Navbar() {
       {/* MODAL LOGIN PIN */}
       {isLoginModalOpen && (
         <div className="fixed inset-0 z-[400] flex items-center justify-center bg-[#020617]/95 backdrop-blur-xl p-6">
-          <div className="bg-white dark:bg-[#0f172a] w-full max-w-sm rounded-[2.5rem] p-10 shadow-2xl relative border border-slate-100 dark:border-white/5 text-center">
+          <div className="bg-white dark:bg-[#0f172a] w-full max-w-sm rounded-[2.5rem] p-10 shadow-2xl relative border border-slate-100 dark:border-white/5 text-center text-slate-900 dark:text-white">
             <button onClick={() => setIsLoginModalOpen(false)} className="absolute top-6 right-6"><X size={20}/></button>
             <h2 className="text-xl font-serif italic mb-8">Accès Privé</h2>
             <form onSubmit={handleAuthSubmit} className="space-y-4">
@@ -258,7 +255,7 @@ export default function Navbar() {
                 value={passwordInput} 
                 onChange={(e) => setPasswordInput(e.target.value)} 
                 placeholder="PIN" 
-                className="w-full bg-slate-50 dark:bg-black/40 border p-4 rounded-xl text-center text-2xl tracking-widest font-black text-[#D4AF37]" 
+                className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 p-4 rounded-xl text-center text-2xl tracking-widest font-black text-[#D4AF37] focus:outline-none focus:border-[#D4AF37]" 
               />
               <button type="submit" className="w-full bg-[#D4AF37] text-black py-4 rounded-xl font-bold uppercase text-[10px]">Valider</button>
             </form>
