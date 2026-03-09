@@ -76,8 +76,7 @@ export default function RegionGrid({ properties, onRegionClick }: RegionGridProp
   }, [properties]);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 px-4">
-      {REGIONS_DISPLAY.map((region, index) => {
+        <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/20 dark:via-black/40 to-black/70 dark:to-[#020617] transition-colors duration-500" />      {REGIONS_DISPLAY.map((region, index) => {
         const count = regionCounts[region.name] || 0;
         
         return (
