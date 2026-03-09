@@ -18,7 +18,6 @@ export default function PropertyGrid({ activeFilters, properties }: PropertyGrid
     
     setIsAnimating(true);
     
-    // Logique de filtrage
     const result = properties.filter((p) => {
       const matchType = !activeFilters.type || p.type?.toLowerCase().includes(activeFilters.type.toLowerCase());
       const matchTown = !activeFilters.town || p.town?.toLowerCase().includes(activeFilters.town.toLowerCase());
@@ -42,7 +41,7 @@ export default function PropertyGrid({ activeFilters, properties }: PropertyGrid
     return () => clearTimeout(timer);
   }, [activeFilters, properties]);
 
-  // ÉTAT DE CHARGEMENT
+  // ÉTAT DE CHARGEMENT : Couleur Or consistante
   if (isAnimating && filtered.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-40 space-y-4">
@@ -54,7 +53,7 @@ export default function PropertyGrid({ activeFilters, properties }: PropertyGrid
     );
   }
 
-  // ÉTAT : AUCUN RÉSULTAT
+  // ÉTAT : AUCUN RÉSULTAT (Adapté pour passer du Noir au Blanc proprement)
   if (filtered.length === 0 && !isAnimating) {
     return (
       <div className="flex flex-col items-center justify-center py-24 md:py-40 px-6 space-y-6">
@@ -63,9 +62,11 @@ export default function PropertyGrid({ activeFilters, properties }: PropertyGrid
         </div>
         <div className="text-center space-y-3">
           <p className="text-[#D4AF37] text-[10px] font-bold uppercase tracking-[0.4em]">Aucune correspondance</p>
+          {/* Le titre passe de Slate-900 à Blanc pur */}
           <p className="text-slate-900 dark:text-white font-serif italic text-xl md:text-2xl leading-relaxed">
             Nous n'avons pas trouvé de propriété <br className="hidden md:block" /> correspondant à vos critères actuels.
           </p>
+          {/* Le sous-texte passe de Slate-500 à Slate-400 */}
           <p className="text-slate-500 dark:text-slate-400 text-sm font-light italic">
             Essayez d'élargir vos filtres de recherche.
           </p>
@@ -82,6 +83,7 @@ export default function PropertyGrid({ activeFilters, properties }: PropertyGrid
 
   return (
     <div className="w-full max-w-7xl mx-auto px-4 md:px-0">
+      {/* L'effet de flou (blur) pendant l'animation aide à la sensation de fluidité */}
       <div className={`transition-all duration-700 ease-in-out ${isAnimating ? 'opacity-30 blur-sm scale-[0.99]' : 'opacity-100 blur-0 scale-100'}`}>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12 md:gap-x-12 md:gap-y-24">
           {filtered.map((p, index) => (
@@ -90,6 +92,7 @@ export default function PropertyGrid({ activeFilters, properties }: PropertyGrid
               className="group animate-in fade-in slide-in-from-bottom-10 duration-1000 fill-mode-forwards"
               style={{ animationDelay: `${index * 150}ms` }}
             >
+              {/* Le composant PropertyCard recevra maintenant les propriétés CSS pour le texte noir/blanc */}
               <PropertyCard property={p} />
             </div>
           ))}
