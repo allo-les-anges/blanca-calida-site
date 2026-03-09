@@ -56,18 +56,20 @@ export default function PropertyGrid({ activeFilters, properties }: PropertyGrid
   if (filtered.length === 0 && !isAnimating) {
     return (
       <div className="flex flex-col items-center justify-center py-24 md:py-40 px-6 space-y-6">
-        <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-[#D4AF37]/5 flex items-center justify-center border border-[#D4AF37]/20">
-          <SearchX size={32} className="text-[#D4AF37] opacity-40" />
+        <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-[#D4AF37]/10 flex items-center justify-center border border-[#D4AF37]/20">
+          <SearchX size={32} className="text-[#D4AF37] opacity-60" />
         </div>
         <div className="text-center space-y-3">
           <p className="text-[#D4AF37] text-[10px] font-bold uppercase tracking-[0.4em]">Aucune correspondance</p>
-          <p className="text-white font-serif italic text-xl md:text-2xl opacity-60 leading-relaxed">
+          {/* CORRECTION : Couleur adaptative pour la lisibilité en Light Mode */}
+          <p className="text-slate-900 dark:text-white font-serif italic text-xl md:text-2xl opacity-80 leading-relaxed">
             Nous n'avons pas trouvé de propriété <br className="hidden md:block" /> correspondant à vos critères actuels.
           </p>
         </div>
         <button 
           onClick={() => window.location.reload()}
-          className="mt-4 text-[10px] uppercase font-bold tracking-widest text-white border-b border-[#D4AF37] pb-1 hover:text-[#D4AF37] transition-colors"
+          /* CORRECTION : Couleur du bouton adaptée au mode clair */
+          className="mt-4 text-[10px] uppercase font-bold tracking-widest text-slate-900 dark:text-white border-b border-[#D4AF37] pb-1 hover:text-[#D4AF37] transition-colors"
         >
           Réinitialiser les filtres
         </button>
@@ -78,11 +80,7 @@ export default function PropertyGrid({ activeFilters, properties }: PropertyGrid
   return (
     <div className="w-full max-w-7xl mx-auto px-4 md:px-0">
       <div className={`transition-all duration-700 ease-in-out ${isAnimating ? 'opacity-30 blur-sm scale-[0.99]' : 'opacity-100 blur-0 scale-100'}`}>
-        {/* GRID RESPONSIVE : 
-            - 1 colonne sur mobile (gap-y-12)
-            - 2 colonnes sur tablettes (gap-x-8)
-            - 3 colonnes sur PC (gap-x-12 gap-y-24)
-        */}
+        {/* GRID RESPONSIVE */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12 md:gap-x-12 md:gap-y-24">
           {filtered.map((p, index) => (
             <div 

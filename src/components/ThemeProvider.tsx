@@ -1,14 +1,10 @@
-"use client";
-
-import { ThemeProvider as NextThemesProvider } from "next-themes";
-import { ReactNode } from "react";
-
+// components/ThemeProvider.tsx
 export function ThemeProvider({ children }: { children: ReactNode }) {
   return (
     <NextThemesProvider 
-      attribute="class" // <--- C'est cela qui ajoute la classe .dark à <html>
-      defaultTheme="light" 
-      enableSystem={true}
+      attribute="class" 
+      defaultTheme="dark" // <-- Changez "light" par "dark" ici
+      enableSystem={false} // Désactivez le système pour forcer votre choix
     >
       {children}
     </NextThemesProvider>
