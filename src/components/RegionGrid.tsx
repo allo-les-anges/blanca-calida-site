@@ -88,23 +88,24 @@ export default function RegionGrid({ properties, onRegionClick }: RegionGridProp
             viewport={{ once: true }}
             transition={{ delay: index * 0.1, duration: 0.8 }}
             onClick={() => onRegionClick(region.name)}
-            className="group relative h-[520px] rounded-[3rem] overflow-hidden cursor-pointer bg-[#020617] shadow-2xl transition-all duration-700 hover:shadow-[#D4AF37]/20"
+            className="group relative h-[520px] rounded-[3rem] overflow-hidden cursor-pointer bg-slate-900 shadow-2xl transition-all duration-700 hover:shadow-[#D4AF37]/20"
           >
-            {/* Image avec opacité réduite pour le contraste */}
+            {/* Image avec opacité réduite */}
             <div className="absolute inset-0">
               <img 
                 src={region.image} 
                 alt={region.name} 
-                className="w-full h-full object-cover transition-transform duration-1000 scale-105 group-hover:scale-110 opacity-40 group-hover:opacity-30" 
+                className="w-full h-full object-cover transition-transform duration-1000 scale-105 group-hover:scale-110 opacity-50 group-hover:opacity-40" 
               />
-              {/* Overlay dégradé plus sombre en bas pour détacher le texte blanc */}
-              <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/40 to-[#020617]" />
+              {/* Overlay dégradé noir pour assurer que le texte blanc soit toujours lisible */}
+              <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/40 to-black/80" />
             </div>
 
             {/* Contenu */}
             <div className="absolute inset-0 z-10 p-10 flex flex-col items-center text-center">
+              {/* Badge "Propriétés" : Toujours blanc/glass car sur fond sombre */}
               <div className="inline-flex items-center gap-3 px-4 py-2 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full shadow-xl">
-                <div className="w-1.5 h-1.5 bg-[#D4AF37] rounded-full" />
+                <div className="w-1.5 h-1.5 bg-[#D4AF37] rounded-full shadow-[0_0_8px_#D4AF37]" />
                 <span className="text-[10px] font-bold text-white uppercase tracking-[0.3em]">
                   {count} Propriétés
                 </span>
@@ -113,21 +114,21 @@ export default function RegionGrid({ properties, onRegionClick }: RegionGridProp
               <div className="flex-grow" />
 
               <div className="space-y-6">
-                {/* Ajout d'une ombre portée sur le texte pour la lisibilité sur fond clair */}
-                <h3 className="text-4xl md:text-5xl font-serif italic text-white leading-tight drop-shadow-lg">
+                {/* Nom de la région : Toujours blanc pur */}
+                <h3 className="text-4xl md:text-5xl font-serif italic text-white leading-tight drop-shadow-2xl">
                   {region.name}
                 </h3>
                 
                 <div className="flex flex-col items-center gap-4">
                   <div className="w-12 h-px bg-[#D4AF37]/50" />
-                  <div className="flex items-center gap-2 text-[#D4AF37] text-[10px] font-bold uppercase tracking-[0.4em] opacity-80 group-hover:opacity-100 transition-all duration-500 translate-y-4 group-hover:translate-y-0">
+                  <div className="flex items-center gap-2 text-[#D4AF37] text-[10px] font-bold uppercase tracking-[0.4em] opacity-90 group-hover:opacity-100 transition-all duration-500 translate-y-4 group-hover:translate-y-0">
                     Explorer <ChevronRight size={14} />
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Bordure de focus au survol */}
+            {/* Bordure subtile de survol */}
             <div className="absolute inset-0 border border-white/0 group-hover:border-[#D4AF37]/30 rounded-[3rem] transition-colors duration-700" />
           </motion.div>
         );
