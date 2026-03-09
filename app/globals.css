@@ -1,35 +1,36 @@
 @import "tailwindcss";
 
-@theme {
-  --color-brand-primary: #1a2a3a;
-  --color-brand-secondary: #c5a358;
-  --font-serif: "Playfair Display", serif;
-  --font-sans: "Inter", sans-serif;
+/* 1. Définition des couleurs de base */
+:root {
+  --background: #ffffff;
+  --foreground: #0f172a;
 }
 
-/* --- FORCE BRUTE POUR LE DARK MODE --- */
-/* On cible la balise HTML directement pour être sûr */
-html {
-  background-color: #ffffff !important;
-  color: #0f172a !important;
+/* 2. Couleurs en mode sombre (forcées) */
+html.dark, 
+[data-theme='dark'], 
+[style*="color-scheme: dark"] {
+  --background: #020617 !important;
+  --foreground: #f8fafc !important;
+  color-scheme: dark;
 }
 
-html.dark {
-  background-color: #020617 !important;
-  color: #f8fafc !important;
-}
-
-/* On s'assure que le body hérite et ne bloque rien */
-body {
-  background-color: inherit !important;
-  color: inherit !important;
-  min-height: 100vh;
+/* 3. Application universelle du fond */
+html, body, main {
+  background-color: var(--background) !important;
+  color: var(--foreground) !important;
   transition: background-color 0.3s ease;
 }
 
-/* --- NETTOYAGE GOOGLE ET SCROLLBAR --- */
-.goog-te-banner-frame, #goog-gt-tt, .goog-te-balloon-frame { display: none !important; }
-html { margin-top: 0px !important; }
-
+/* 4. Nettoyage de la barre de défilement */
 ::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #D4AF37; border-radius: 10px; }
+
+/* 5. Masquage forcé de Google Translate */
+.goog-te-banner-frame, 
+.skiptranslate, 
+#goog-gt-tt { 
+  display: none !important; 
+  visibility: hidden !important; 
+}

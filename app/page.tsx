@@ -120,8 +120,7 @@ export default function Home() {
   }
 
   return (
-    <main className="bg-white dark:bg-[#020617] min-h-screen text-slate-900 dark:text-slate-200 selection:bg-[#D4AF37]/30 font-sans overflow-x-hidden transition-colors duration-500">
-      <Navbar />
+<main className="min-h-screen text-slate-900 dark:text-slate-200 selection:bg-[#D4AF37]/30 font-sans overflow-x-hidden transition-colors duration-500">      <Navbar />
       
       {/* SECTION HERO */}
       <div className="relative h-[85vh] md:h-screen flex flex-col items-center justify-center bg-[#020617]">

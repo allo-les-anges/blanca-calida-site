@@ -30,40 +30,36 @@ export default function RootLayout({
         <meta name="google" content="notranslate" />
         {/* Ces styles forcent le fond sombre même si Google Translate essaie d'injecter du blanc */}
         <style>{`
-          .goog-te-banner-frame, .goog-te-banner-frame.skiptranslate, .goog-te-banner, .skiptranslate, #goog-gt-tt, .goog-te-balloon-frame, iframe.goog-te-banner-frame { 
-            display: none !important; 
-            visibility: hidden !important;
-            opacity: 0 !important;
-            height: 0 !important;
-          }
-          html { margin-top: 0px !important; }
-          
-          /* Modification critique ici pour le fond */
-          body { 
-            top: 0px !important; 
-            position: static !important; 
-            background-color: transparent !important; 
-          }
-          
-          html.dark body {
-            background-color: #020617 !important;
-            color: #ffffff !important;
-          }
+  /* Masquage Google Translate */
+  .goog-te-banner-frame, .goog-te-banner-frame.skiptranslate, .goog-te-banner, .skiptranslate, #goog-gt-tt, .goog-te-balloon-frame, iframe.goog-te-banner-frame { 
+    display: none !important; 
+    visibility: hidden !important;
+  }
 
-          .goog-text-highlight { background-color: transparent !important; box-shadow: none !important; }
-          #google_translate_element { display: none !important; }
+  /* RESET GLOBAL DU FOND */
+  html { 
+    background-color: #ffffff !important; 
+    margin-top: 0px !important; 
+  }
+  
+  html.dark { 
+    background-color: #020617 !important; 
+  }
 
-          .description-xml-container, 
-          .description-xml-container *, 
-          .description-xml-container p, 
-          .description-xml-container span,
-          .description-xml-container div,
-          .description-xml-container font {
-            font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system, sans-serif !important;
-            font-size: 1.125rem !important;
-            line-height: 1.75rem !important;
-          }
-        `}</style>
+  /* On force le body et le main à être invisibles pour laisser voir le fond du html */
+  body, main {
+    background-color: transparent !important;
+    top: 0px !important;
+    position: static !important;
+  }
+
+  /* Si un élément bloque encore, on force le texte */
+  html.dark body {
+    color: #ffffff !important;
+  }
+
+  .goog-text-highlight { background-color: transparent !important; box-shadow: none !important; }
+`}</style>
       </head>
       {/* Suppression de bg-white ici pour laisser le CSS de globals et du head gérer le fond */}
       <body className={`${inter.variable} ${playfair.variable} font-sans antialiased`}>
