@@ -55,7 +55,7 @@ export default function PropertyDetailClient({ id }: { id: string }) {
       .replace(/size="[^"]*"/gi, '')
       .replace(/<font[^>]*>/gi, '')
       .replace(/<\/font>/gi, '')
-      .replace(/&nbsp;/g, ' ');
+      .replace(/ /g, ' ');
   };
 
   if (!mounted) return null;
@@ -83,17 +83,17 @@ export default function PropertyDetailClient({ id }: { id: string }) {
     : null;
 
   return (
-    <main className="bg-[#E9E3DA] dark:bg-[#0A0A0A] min-h-screen text-[#1A1A1A] dark:text-white transition-colors duration-500">
+    <main className="bg-[#E9E3DA] dark:bg-[#0A0A0A] min-h-screen text-slate-900 dark:text-white transition-colors duration-500">
       <style jsx global>{`
         .property-image-filter {
-          filter: brightness(0.95) contrast(0.95) saturate(0.9);
           transition: filter 0.5s ease;
         }
+        /* Suppression du filtre sombre forcé sur les images */
         .dark .property-image-filter {
-            filter: brightness(0.7) contrast(1.1) saturate(0.8);
+            filter: brightness(0.9);
         }
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #FFE7C2; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #D4AF37; border-radius: 10px; }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
@@ -102,23 +102,23 @@ export default function PropertyDetailClient({ id }: { id: string }) {
       <div className="h-24 md:h-32" />
 
       <div className="max-w-7xl mx-auto px-6 mb-8">
-        <Link href="/" className="group inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.3em] text-gray-500 dark:text-[#FFE7C2]/50 hover:text-[#FFE7C2] transition-all">
+        <Link href="/" className="group inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.3em] text-slate-500 dark:text-[#FFE7C2]/70 hover:text-[#FFE7C2] transition-all font-bold">
           <ArrowLeft size={14} /> Retour à la sélection
         </Link>
       </div>
 
+      {/* --- GALERIE --- */}
       <section className="max-w-7xl mx-auto px-6 mb-16">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:h-[550px]">
-          <div className="md:col-span-3 relative rounded-[2rem] md:rounded-[3rem] overflow-hidden shadow-2xl bg-[#1A1A1A] h-[400px] md:h-full group">
+          <div className="md:col-span-3 relative rounded-[2.5rem] md:rounded-[3rem] overflow-hidden shadow-2xl bg-slate-200 dark:bg-[#1A1A1A] h-[400px] md:h-full group">
             <div ref={scrollContainerRef} onScroll={handleScroll} className="flex md:block h-full overflow-x-auto md:overflow-x-hidden snap-x snap-mandatory scrollbar-hide">
               {images.map((img: string, idx: number) => (
                 <div key={idx} className="min-w-full h-full snap-center md:absolute md:inset-0 md:transition-opacity md:duration-700" style={{ opacity: activeImage === idx ? 1 : 0, zIndex: activeImage === idx ? 10 : 0 }}>
-                  <div className="absolute inset-0 bg-black/10 z-10 pointer-events-none" />
                   <img src={img} className="w-full h-full object-cover property-image-filter" alt="" />
                 </div>
               ))}
             </div>
-            <div className="absolute bottom-6 left-6 bg-[#0A0A0A]/70 backdrop-blur-md text-[#FFE7C2] px-4 py-2 rounded-full text-[10px] uppercase tracking-widest flex items-center gap-2 z-20 border border-[#FFE7C2]/20 shadow-lg">
+            <div className="absolute bottom-6 left-6 bg-black/60 backdrop-blur-md text-white px-4 py-2 rounded-full text-[10px] uppercase tracking-widest flex items-center gap-2 z-20 border border-white/20 shadow-lg">
               <ImageIcon size={14} /> {activeImage + 1} / {images.length}
             </div>
           </div>
@@ -128,35 +128,38 @@ export default function PropertyDetailClient({ id }: { id: string }) {
               <button 
                 key={idx} 
                 onClick={() => { setActiveImage(idx); scrollContainerRef.current?.scrollTo({ left: idx * (scrollContainerRef.current?.clientWidth || 0), behavior: 'smooth' }); }} 
-                className={`relative h-24 min-h-[96px] rounded-2xl overflow-hidden border-2 transition-all ${activeImage === idx ? 'border-[#FFE7C2] scale-95' : 'border-transparent opacity-40 hover:opacity-100'}`}
+                className={`relative h-24 min-h-[96px] rounded-2xl overflow-hidden border-2 transition-all ${activeImage === idx ? 'border-[#D4AF37] scale-95' : 'border-transparent opacity-60 hover:opacity-100'}`}
               >
-                <img src={img} className="w-full h-full object-cover property-image-filter" alt="" />
+                <img src={img} className="w-full h-full object-cover" alt="" />
               </button>
             ))}
           </div>
         </div>
       </section>
 
+      {/* --- CONTENU --- */}
       <section className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-3 gap-16 pb-24">
         <div className="lg:col-span-2">
-          <h1 className="text-4xl md:text-6xl font-serif mb-8 leading-[1.1] text-[#1A1A1A] dark:text-white">{property.titre || "Villa d'Exception"}</h1>
+          <h1 className="text-4xl md:text-6xl font-serif mb-8 leading-[1.1] text-slate-900 dark:text-white">
+            {property.titre || "Villa d'Exception"}
+          </h1>
           
-          <div className="flex items-center gap-3 text-gray-500 dark:text-[#FFE7C2]/60 mb-8 text-[11px] uppercase tracking-[0.2em] font-bold">
-            <MapPin size={18} className="text-[#FFE7C2]" />
+          <div className="flex items-center gap-3 text-slate-600 dark:text-[#FFE7C2] mb-8 text-[11px] uppercase tracking-[0.2em] font-bold">
+            <MapPin size={18} className="text-[#D4AF37]" />
             {property.town || property.ville} • {property.region}
           </div>
 
           <div className="flex flex-wrap gap-3 mb-12">
-            <div className="flex items-center gap-2 bg-white dark:bg-[#1A1A1A] px-4 py-2 rounded-full border border-black/5 dark:border-[#FFE7C2]/10 text-[9px] uppercase font-bold tracking-wider dark:text-[#FFE7C2]">
-              <ShieldCheck size={14} className="text-[#FFE7C2]" /> Amaru Certified • Spain
+            <div className="flex items-center gap-2 bg-white dark:bg-white/5 px-4 py-2 rounded-full border border-slate-200 dark:border-white/10 text-[9px] uppercase font-bold tracking-wider dark:text-[#FFE7C2]">
+              <ShieldCheck size={14} className="text-[#D4AF37]" /> Amaru Certified • Spain
             </div>
             {property.pool === "Oui" && (
-              <div className="flex items-center gap-2 bg-white dark:bg-[#1A1A1A] px-4 py-2 rounded-full border border-black/5 dark:border-[#FFE7C2]/10 text-[9px] uppercase font-bold tracking-wider dark:text-sky-400">
-                <Waves size={14} className="text-sky-400" /> Piscine Privée
+              <div className="flex items-center gap-2 bg-white dark:bg-white/5 px-4 py-2 rounded-full border border-slate-200 dark:border-white/10 text-[9px] uppercase font-bold tracking-wider text-sky-600 dark:text-sky-400">
+                <Waves size={14} /> Piscine Privée
               </div>
             )}
-            <div className="flex items-center gap-2 bg-white dark:bg-[#1A1A1A] px-4 py-2 rounded-full border border-black/5 dark:border-[#FFE7C2]/10 text-[9px] uppercase font-bold tracking-wider dark:text-[#FFE7C2]">
-              <Car size={14} className="text-[#FFE7C2]" /> Parking Inclus
+            <div className="flex items-center gap-2 bg-white dark:bg-white/5 px-4 py-2 rounded-full border border-slate-200 dark:border-white/10 text-[9px] uppercase font-bold tracking-wider dark:text-slate-300">
+              <Car size={14} className="text-[#D4AF37]" /> Parking Inclus
             </div>
           </div>
 
@@ -169,32 +172,34 @@ export default function PropertyDetailClient({ id }: { id: string }) {
               { icon: Waves, val: (property.pool === "Oui" ? "Privée" : "Non"), label: "Piscine" },
               { icon: Car, val: "Privé", label: "Parking" }
             ].map((item, i) => (
-              <div key={i} className="bg-white dark:bg-[#1A1A1A] p-6 rounded-3xl text-center border border-black/5 dark:border-[#FFE7C2]/5 shadow-sm">
-                <item.icon className="mx-auto mb-2 text-[#FFE7C2]" size={22} />
-                <p className="text-2xl font-serif text-[#1A1A1A] dark:text-white">{item.val || "0"}</p>
-                <p className="text-[8px] uppercase text-gray-400 dark:text-gray-500 font-bold tracking-widest">{item.label}</p>
+              <div key={i} className="bg-white dark:bg-white/5 p-6 rounded-3xl text-center border border-slate-200 dark:border-white/10 shadow-sm">
+                <item.icon className="mx-auto mb-2 text-[#D4AF37]" size={22} />
+                <p className="text-2xl font-serif text-slate-900 dark:text-white">{item.val || "0"}</p>
+                <p className="text-[8px] uppercase text-slate-400 dark:text-slate-500 font-bold tracking-widest">{item.label}</p>
               </div>
             ))}
           </div>
 
-          <div className="max-w-none mb-20 pt-10 border-t border-black/5 dark:border-[#FFE7C2]/10">
-            <h2 className="text-3xl font-serif italic mb-8 text-[#1A1A1A] dark:text-white">L'Art de Vivre</h2>
+          {/* --- DESCRIPTION --- */}
+          <div className="max-w-none mb-20 pt-10 border-t border-slate-200 dark:border-white/10">
+            <h2 className="text-3xl font-serif italic mb-8 text-slate-900 dark:text-white">L'Art de Vivre</h2>
             <div 
-              className="description-xml-container text-lg leading-relaxed text-[#1A1A1A] dark:text-gray-300 opacity-90"
+              className="description-xml-container text-lg leading-relaxed text-slate-800 dark:text-slate-200 opacity-90"
               dangerouslySetInnerHTML={{ 
                 __html: cleanDescription(property.description || "Description en cours de rédaction...") 
               }} 
             />
           </div>
 
-          <div className="mb-20 pt-10 border-t border-black/5 dark:border-[#FFE7C2]/10">
-            <h2 className="text-3xl font-serif italic mb-8 text-[#1A1A1A] dark:text-white">Localisation</h2>
+          {/* --- CARTE --- */}
+          <div className="mb-20 pt-10 border-t border-slate-200 dark:border-white/10">
+            <h2 className="text-3xl font-serif italic mb-8 text-slate-900 dark:text-white">Localisation</h2>
             {mapUrl ? (
-              <div className="w-full h-[400px] rounded-[2.5rem] overflow-hidden shadow-inner bg-[#1A1A1A] border border-black/5 dark:border-[#FFE7C2]/10">
+              <div className="w-full h-[400px] rounded-[2.5rem] overflow-hidden shadow-inner bg-slate-100 dark:bg-[#1A1A1A] border border-slate-200 dark:border-white/10">
                 <iframe width="100%" height="100%" style={{ border: 0 }} loading="lazy" allowFullScreen src={mapUrl}></iframe>
               </div>
             ) : (
-              <div className="h-40 flex flex-col items-center justify-center bg-white dark:bg-[#1A1A1A] rounded-[2.5rem] border border-dashed border-gray-200 dark:border-[#FFE7C2]/10 text-gray-400">
+              <div className="h-40 flex flex-col items-center justify-center bg-white dark:bg-white/5 rounded-[2.5rem] border border-dashed border-slate-200 dark:border-white/10 text-slate-400">
                 <MapIcon size={32} className="mb-2 opacity-20" />
                 <p className="text-sm italic">Carte indisponible</p>
               </div>
@@ -202,38 +207,39 @@ export default function PropertyDetailClient({ id }: { id: string }) {
           </div>
         </div>
 
+        {/* --- SIDEBAR --- */}
         <div className="lg:col-span-1">
           <div className="sticky top-40 space-y-6">
             <Link 
               href={`/contact-cashback?Property_ID=${property.id_externe || property.id}`}
               className="group relative block w-full overflow-hidden rounded-[2.5rem] bg-[#0A0A0A] p-[1px] transition-all duration-500 hover:scale-[1.02] shadow-2xl"
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-[#FFE7C2] via-transparent to-transparent opacity-20 group-hover:opacity-40 transition-opacity" />
+              <div className="absolute inset-0 bg-gradient-to-br from-[#D4AF37] via-transparent to-transparent opacity-20 group-hover:opacity-40 transition-opacity" />
               <div className="relative bg-[#1A1A1A] rounded-[2.5rem] p-8 flex items-center gap-5">
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#FFE7C2]/10 text-[#FFE7C2] border border-[#FFE7C2]/20 group-hover:bg-[#FFE7C2] group-hover:text-black transition-all duration-500">
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/20 group-hover:bg-[#D4AF37] group-hover:text-black transition-all duration-500">
                   <ShieldCheck size={28} />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-[#FFE7C2] mb-1">Offre Exclusive Amaru</span>
+                  <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-[#D4AF37] mb-1">Offre Exclusive Amaru</span>
                   <span className="text-xl font-serif italic text-white leading-tight">Activer mon Cashback</span>
                 </div>
               </div>
             </Link>
 
-            <div className="bg-white dark:bg-[#1A1A1A] border border-black/5 dark:border-[#FFE7C2]/10 p-10 rounded-[3rem] shadow-2xl">
-              <p className="text-[10px] uppercase text-gray-400 dark:text-[#FFE7C2]/40 mb-2 font-bold tracking-widest">Prix de vente</p>
-              <p className="text-5xl font-serif text-[#1A1A1A] dark:text-[#FFE7C2] leading-none mb-10">
+            <div className="bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 p-10 rounded-[3rem] shadow-2xl">
+              <p className="text-[10px] uppercase text-slate-400 dark:text-[#FFE7C2]/60 mb-2 font-bold tracking-widest">Prix de vente</p>
+              <p className="text-5xl font-serif text-slate-900 dark:text-[#FFE7C2] leading-none mb-10">
                 {numericPrice.toLocaleString("fr-FR")} €
               </p>
               
-              <button className="w-full bg-[#1A1A1A] dark:bg-[#FFE7C2] text-white dark:text-black py-6 rounded-2xl font-bold uppercase text-[11px] tracking-widest hover:opacity-90 transition-all mb-4 shadow-xl">
+              <button className="w-full bg-slate-900 dark:bg-[#D4AF37] text-white dark:text-black py-6 rounded-2xl font-bold uppercase text-[11px] tracking-widest hover:opacity-90 transition-all mb-4 shadow-xl">
                 Réserver une visite
               </button>
               
               <a 
                 href={`https://wa.me/34627768233?text=Information sur la villa ref: ${property.ref || property.id_externe}`} 
                 target="_blank" 
-                className="w-full border border-black/10 dark:border-[#FFE7C2]/20 flex items-center justify-center gap-3 py-6 rounded-2xl font-bold uppercase text-[11px] text-[#1A1A1A] dark:text-[#FFE7C2] hover:bg-black/5 dark:hover:bg-white/5 transition-all"
+                className="w-full border border-slate-200 dark:border-white/10 flex items-center justify-center gap-3 py-6 rounded-2xl font-bold uppercase text-[11px] text-slate-900 dark:text-[#FFE7C2] hover:bg-slate-50 dark:hover:bg-white/5 transition-all"
               >
                 <MessageCircle size={20} className="text-green-500" /> WhatsApp Direct
               </a>
