@@ -18,7 +18,7 @@ export default function PropertyGrid({ activeFilters, properties }: PropertyGrid
     
     setIsAnimating(true);
     
-    // Logique de filtrage robuste incluant la région
+    // Logique de filtrage robuste
     const result = properties.filter((p) => {
       const matchType = !activeFilters.type || p.type?.toLowerCase().includes(activeFilters.type.toLowerCase());
       const matchTown = !activeFilters.town || p.town?.toLowerCase().includes(activeFilters.town.toLowerCase());
@@ -34,7 +34,6 @@ export default function PropertyGrid({ activeFilters, properties }: PropertyGrid
       return matchType && matchTown && matchRegion && matchMin && matchMax && matchBeds && matchRef;
     });
 
-    // Délai pour une transition fluide
     const timer = setTimeout(() => {
       setFiltered(result);
       setIsAnimating(false);
@@ -46,8 +45,11 @@ export default function PropertyGrid({ activeFilters, properties }: PropertyGrid
   // ÉTAT DE CHARGEMENT / ANIMATION
   if (isAnimating && filtered.length === 0) {
     return (
-      <div className="flex justify-center py-40">
+      <div className="flex flex-col items-center justify-center py-40 space-y-4">
         <Loader2 className="animate-spin text-[#D4AF37]" size={40} />
+        <p className="text-[#D4AF37] text-[10px] font-bold uppercase tracking-[0.4em] animate-pulse">
+          Mise à jour de la collection...
+        </p>
       </div>
     );
   }
@@ -61,15 +63,18 @@ export default function PropertyGrid({ activeFilters, properties }: PropertyGrid
         </div>
         <div className="text-center space-y-3">
           <p className="text-[#D4AF37] text-[10px] font-bold uppercase tracking-[0.4em]">Aucune correspondance</p>
-          {/* CORRECTION : Couleur adaptative pour la lisibilité en Light Mode */}
-          <p className="text-slate-900 dark:text-white font-serif italic text-xl md:text-2xl opacity-80 leading-relaxed">
+          {/* Correction : dark:text-white pour le titre d'erreur */}
+          <p className="text-slate-900 dark:text-white font-serif italic text-xl md:text-2xl leading-relaxed">
             Nous n'avons pas trouvé de propriété <br className="hidden md:block" /> correspondant à vos critères actuels.
+          </p>
+          {/* Sous-texte en gris clair en mode sombre */}
+          <p className="text-slate-500 dark:text-slate-400 text-sm font-light italic">
+            Essayez d'élargir vos filtres de recherche.
           </p>
         </div>
         <button 
           onClick={() => window.location.reload()}
-          /* CORRECTION : Couleur du bouton adaptée au mode clair */
-          className="mt-4 text-[10px] uppercase font-bold tracking-widest text-slate-900 dark:text-white border-b border-[#D4AF37] pb-1 hover:text-[#D4AF37] transition-colors"
+          className="mt-4 text-[10px] uppercase font-bold tracking-widest text-slate-900 dark:text-white border-b border-[#D4AF37] pb-1 hover:text-[#D4AF37] transition-all duration-300"
         >
           Réinitialiser les filtres
         </button>
@@ -80,7 +85,6 @@ export default function PropertyGrid({ activeFilters, properties }: PropertyGrid
   return (
     <div className="w-full max-w-7xl mx-auto px-4 md:px-0">
       <div className={`transition-all duration-700 ease-in-out ${isAnimating ? 'opacity-30 blur-sm scale-[0.99]' : 'opacity-100 blur-0 scale-100'}`}>
-        {/* GRID RESPONSIVE */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12 md:gap-x-12 md:gap-y-24">
           {filtered.map((p, index) => (
             <div 
