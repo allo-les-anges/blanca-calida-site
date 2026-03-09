@@ -27,12 +27,10 @@ export default function Home() {
   const [clientPin, setClientPin] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
-  // Empêche le décalage d'hydratation
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Gestion du scroll quand la modal de recherche est ouverte
   useEffect(() => {
     if (isSearchOpen) {
       document.body.style.overflow = "hidden";
@@ -120,7 +118,7 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen text-slate-900 dark:text-slate-100 selection:bg-[#D4AF37]/30 font-sans overflow-x-hidden transition-colors duration-500">
+    <main className="min-h-screen text-slate-900 dark:text-slate-100 selection:bg-[#D4AF37]/30 font-sans overflow-x-hidden transition-colors duration-500 bg-white dark:bg-[#020617]">
       <Navbar />
       
       {/* SECTION HERO */}
@@ -144,6 +142,7 @@ export default function Home() {
            )}
         </div>
 
+        {/* TRANSITION GRADIENT : Adaptatif selon le mode */}
         <div className="absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-white dark:from-[#020617] via-white/80 dark:via-[#020617]/80 to-transparent pointer-events-none transition-colors duration-500" />
       </div>
 
@@ -161,6 +160,7 @@ export default function Home() {
 
           <div className="p-6 md:p-12 max-h-[85vh] overflow-y-auto">
             <div className="mb-8 border-b border-slate-100 dark:border-white/10 pb-6 hidden md:block">
+              {/* TITRE MODAL : Adaptatif */}
               <h3 className="text-slate-900 dark:text-white font-serif text-3xl italic">Filtres de Sélection</h3>
               <p className="text-slate-400 text-[10px] uppercase font-bold tracking-[0.2em] mt-1">Personnalisez votre recherche immobilière</p>
             </div>
@@ -174,7 +174,7 @@ export default function Home() {
       </div>
 
       {/* SECTION RÉGIONS */}
-      <section className="py-24 md:py-32">
+      <section className="py-24 md:py-32 bg-white dark:bg-[#020617]">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16 md:mb-24 space-y-4">
             <h2 className="text-[#D4AF37] text-[11px] font-bold uppercase tracking-[0.6em]">Destinations d'Exception</h2>
@@ -184,7 +184,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* SECTION ESPACE PROPRIÉTAIRE */}
+      {/* SECTION ESPACE PROPRIÉTAIRE : CORRECTIONS DE CONTRASTE */}
       <section className="max-w-7xl mx-auto px-4 md:px-6 py-12 md:py-24">
         <div className="bg-slate-50 dark:bg-[#0F172A]/40 p-8 md:p-24 rounded-[2.5rem] md:rounded-[4rem] border border-slate-200 dark:border-white/5 relative overflow-hidden transition-colors duration-500">
           <div className="absolute top-[-10%] right-[-5%] opacity-[0.03] pointer-events-none rotate-12">
@@ -194,21 +194,30 @@ export default function Home() {
             <div className="space-y-6 md:space-y-10">
               <div className="space-y-4 text-center lg:text-left">
                 <span className="text-[#D4AF37] text-[10px] font-bold uppercase tracking-[0.4em]">Propriétaires Amaru</span>
-                <h2 className="text-4xl md:text-7xl font-serif text-slate-900 dark:text-white leading-[1.1] italic">Suivez votre vision <br /> <span className="text-[#D4AF37] not-italic font-sans font-light tracking-tighter text-3xl md:text-6xl uppercase">en temps réel.</span></h2>
+                {/* TITRE : Adaptatif Noir -> Blanc */}
+                <h2 className="text-4xl md:text-7xl font-serif text-slate-900 dark:text-white leading-[1.1] italic">
+                  Suivez votre vision <br /> 
+                  <span className="text-[#D4AF37] not-italic font-sans font-light tracking-tighter text-3xl md:text-6xl uppercase">en temps réel.</span>
+                </h2>
               </div>
-              <p className="text-slate-500 dark:text-slate-400 text-base md:text-lg font-light leading-relaxed max-w-lg border-l-0 lg:border-l border-slate-200 dark:border-white/10 pl-0 lg:pl-8 italic text-center lg:text-left">Accédez à votre cockpit de construction privé.</p>
+              <p className="text-slate-500 dark:text-slate-400 text-base md:text-lg font-light leading-relaxed max-w-lg border-l-0 lg:border-l border-slate-200 dark:border-white/10 pl-0 lg:pl-8 italic text-center lg:text-left">
+                Accédez à votre cockpit de construction privé.
+              </p>
             </div>
-            <div className="bg-white dark:bg-[#020617]/80 p-8 md:p-12 rounded-[2rem] border border-slate-200 dark:border-[#D4AF37]/20 backdrop-blur-xl shadow-xl">
+            
+            {/* CARTE LOGIN : Fond s'adapte au mode sombre */}
+            <div className="bg-white dark:bg-[#020617] p-8 md:p-12 rounded-[2rem] border border-slate-200 dark:border-[#D4AF37]/20 backdrop-blur-xl shadow-xl">
                <form onSubmit={handleClientLogin} className="space-y-8 text-center">
                   <User size={32} className="text-[#D4AF37] mx-auto mb-2 opacity-80" />
                   <div className="relative group">
+                    {/* INPUT PIN : Texte Noir en light, Blanc en dark */}
                     <input 
                       type="password" placeholder="CODE PIN" value={clientPin}
                       onChange={(e) => setClientPin(e.target.value)}
                       className="w-full bg-transparent border-b border-slate-200 dark:border-white/10 py-4 text-center text-2xl md:text-3xl font-light tracking-[0.8em] text-slate-900 dark:text-white outline-none focus:border-[#D4AF37] transition-all"
                     />
                   </div>
-                  <button type="submit" className="w-full bg-[#D4AF37] text-black py-5 md:py-6 rounded-full font-bold text-[10px] md:text-[11px] uppercase tracking-[0.3em] hover:bg-slate-900 hover:text-white dark:hover:bg-white transition-all flex items-center justify-center gap-4">
+                  <button type="submit" className="w-full bg-[#D4AF37] text-black py-5 md:py-6 rounded-full font-bold text-[10px] md:text-[11px] uppercase tracking-[0.3em] hover:bg-slate-900 hover:text-white dark:hover:bg-white dark:hover:text-black transition-all flex items-center justify-center gap-4 shadow-lg shadow-[#D4AF37]/20">
                     Accéder au chantier <ArrowRight size={18} />
                   </button>
                </form>
@@ -218,9 +227,10 @@ export default function Home() {
       </section>
 
       {/* SECTION COLLECTION */}
-      <section id="collection" className="py-24 md:py-32 relative">
+      <section id="collection" className="py-24 md:py-32 relative bg-white dark:bg-[#020617]">
         <div className="max-w-7xl mx-auto px-4 md:px-6">
           <header className="mb-16 md:mb-24 text-center space-y-4">
+            {/* TITRE COLLECTION : Adaptatif */}
             <h3 className="text-5xl md:text-8xl font-serif italic text-slate-900 dark:text-white leading-none">
               {filters.region ? filters.region : "Portfolio Privé"}
             </h3>
