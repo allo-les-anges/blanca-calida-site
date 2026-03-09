@@ -12,15 +12,20 @@
   --brand-secondary: #c5a358;
 }
 
-/* Ce bloc force le changement de couleur même si un autre style essaie de bloquer */
-@layer base {
-  body {
-    @apply bg-white text-slate-900 transition-colors duration-500 !important;
-  }
+/* --- FORCE LE FOND (CSS PUR POUR ÉVITER LES ERREURS TAILWIND) --- */
+body {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  transition: background-color 0.5s ease, color 0.5s ease;
+  top: 0px !important;
+  position: static !important;
+  font-family: var(--font-sans);
+}
 
-  .dark body {
-    @apply bg-[#020617] text-white !important;
-  }
+/* Quand la classe .dark est sur <html>, on force le fond sombre sur body */
+.dark body {
+  background-color: #020617 !important;
+  color: #ffffff !important;
 }
 
 h1, h2, h3, .font-serif {
@@ -37,28 +42,6 @@ h1, h2, h3, .font-serif {
 }
 
 html { margin-top: 0px !important; }
-
-#google_translate_element { font-family: var(--font-serif); }
-
-.goog-te-gadget-simple {
-  background-color: transparent !important;
-  border: none !important;
-  font-size: 10px !important;
-  text-transform: uppercase;
-  letter-spacing: 0.2em;
-  @apply text-slate-900 dark:text-white;
-}
-
-.goog-te-gadget-icon { display: none !important; }
-.goog-tooltip { display: none !important; }
-
-/* --- TEXTE DANS LES CONTENEURS XML --- */
-.description-xml-container, 
-.description-xml-container * {
-  font-family: var(--font-sans) !important;
-  font-size: 1.125rem !important;
-  line-height: 1.75rem !important;
-}
 
 /* --- CUSTOM SCROLLBAR --- */
 ::-webkit-scrollbar { width: 6px; }
