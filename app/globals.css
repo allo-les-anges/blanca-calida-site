@@ -4,6 +4,7 @@
   --color-brand-primary: #1a2a3a;
   --color-brand-secondary: #c5a358;
   --font-serif: "Playfair Display", serif;
+  --font-sans: "Inter", sans-serif;
 }
 
 :root {
@@ -11,14 +12,18 @@
   --brand-secondary: #c5a358;
 }
 
-/* CORRECTION CRITIQUE : 
-   On utilise @apply pour que Tailwind puisse alterner les couleurs 
-   entre le mode clair (bg-white) et le mode sombre (dark:bg-[#020617]).
+/* FORCE LA PRIORITÉ DU DARK MODE
+   L'utilisation de html.dark assure que si la classe dark est présente,
+   les styles sombres s'appliquent quoi qu'il arrive.
 */
 body {
-  @apply bg-white text-slate-900 dark:bg-[#020617] dark:text-white transition-colors duration-500;
+  @apply bg-white text-slate-900 transition-colors duration-500 font-sans;
   top: 0px !important;
   position: static !important;
+}
+
+html.dark body {
+  @apply bg-[#020617] text-white;
 }
 
 h1, h2, h3, .font-serif {
@@ -26,8 +31,6 @@ h1, h2, h3, .font-serif {
 }
 
 /* --- GOOGLE TRANSLATE CLEANUP --- */
-
-/* Cacher la bannière Google en haut */
 .goog-te-banner-frame.skiptranslate, 
 .goog-te-banner-frame, 
 #goog-gt-tt, 
@@ -36,15 +39,9 @@ h1, h2, h3, .font-serif {
   visibility: hidden !important;
 }
 
-/* Empêcher le décalage du contenu par Google Translate */
-html { 
-  margin-top: 0px !important; 
-}
+html { margin-top: 0px !important; }
 
-/* Style du widget pour correspondre à l'esthétique Data Home */
-#google_translate_element {
-  font-family: var(--font-serif);
-}
+#google_translate_element { font-family: var(--font-serif); }
 
 .goog-te-gadget-simple {
   background-color: transparent !important;
@@ -55,46 +52,20 @@ html {
   @apply text-slate-900 dark:text-white;
 }
 
-.goog-te-gadget-icon { 
-  display: none !important; 
-}
+.goog-te-gadget-icon { display: none !important; }
+.goog-tooltip { display: none !important; }
 
-.goog-tooltip {
-  display: none !important;
-}
-
-.goog-text-highlight {
-  background-color: transparent !important;
-  box-shadow: none !important;
-}
-
-/* --- TEXTE DANS LES CONTENEURS XML (DÉTAILS PROPRIÉTÉS) --- */
+/* --- TEXTE DANS LES CONTENEURS XML --- */
 .description-xml-container, 
-.description-xml-container *, 
-.description-xml-container p, 
-.description-xml-container span,
-.description-xml-container div {
-  font-family: ui-sans-serif, system-ui, -apple-system, sans-serif !important;
+.description-xml-container * {
+  font-family: var(--font-sans) !important;
   font-size: 1.125rem !important;
   line-height: 1.75rem !important;
-  /* On ne force pas de couleur ici pour laisser le dark mode agir */
 }
 
 /* --- CUSTOM SCROLLBAR --- */
-::-webkit-scrollbar {
-  width: 6px;
-}
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #D4AF37; border-radius: 10px; }
 
-::-webkit-scrollbar-track {
-  @apply bg-transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #D4AF37;
-  border-radius: 10px;
-}
-
-/* --- UTILS --- */
-.notranslate {
-  translate: no !important;
-}
+.notranslate { translate: no !important; }

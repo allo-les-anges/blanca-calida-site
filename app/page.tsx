@@ -229,14 +229,6 @@ export default function Home() {
 
       <Footer />
 
-      <style jsx global>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300;1,600&family=Inter:wght@300;400;700&display=swap');
-        
-        body { 
-          font-family: 'Inter', sans-serif; 
-          scroll-behavior: smooth;
-        }
-        
         /* Suppression des styles forçant la couleur de fond */
         .font-serif { font-family: 'Cormorant Garamond', serif; }
         
