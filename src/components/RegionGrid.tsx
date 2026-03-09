@@ -84,22 +84,27 @@ export default function RegionGrid({ properties, onRegionClick }: RegionGridProp
             viewport={{ once: true }}
             transition={{ delay: index * 0.1, duration: 0.8 }}
             onClick={() => onRegionClick(region.name)}
-            className="group relative h-[520px] rounded-[3rem] overflow-hidden cursor-pointer bg-slate-900 shadow-2xl transition-all duration-700 hover:shadow-[#D4AF37]/20"
+            // Correction 1: bg-white en mode clair pour ne pas assombrir l'image par dessous
+            className="group relative h-[520px] rounded-[3rem] overflow-hidden cursor-pointer bg-white dark:bg-slate-900 shadow-2xl transition-all duration-700 hover:shadow-[#D4AF37]/20"
           >
             {/* Image & Overlay */}
             <div className="absolute inset-0">
               <img 
                 src={region.image} 
                 alt={region.name} 
-                className="w-full h-full object-cover transition-transform duration-1000 scale-105 group-hover:scale-110 opacity-50 group-hover:opacity-40" 
+                // Correction 2: Opacité à 100% en mode clair (opacity-100) pour des couleurs pures
+                className="w-full h-full object-cover transition-transform duration-1000 scale-105 group-hover:scale-110 opacity-100 dark:opacity-40" 
               />
-              {/* L'overlay adaptatif bien placé à l'intérieur de la carte */}
-              <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/20 dark:via-black/40 to-black/70 dark:to-[#020617] transition-colors duration-500" />
+              
+              {/* Correction 3: Overlay "Vignette" uniquement en bas. 
+                  Le haut (from-transparent) reste 100% clair pour voir le ciel/mer */}
+              <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/80 transition-opacity duration-500" />
             </div>
 
             {/* Contenu */}
             <div className="absolute inset-0 z-10 p-10 flex flex-col items-center text-center">
-              <div className="inline-flex items-center gap-3 px-4 py-2 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full shadow-xl">
+              {/* Badge "Propriétés" avec un fond un peu plus sombre pour rester lisible sur image claire */}
+              <div className="inline-flex items-center gap-3 px-4 py-2 bg-black/30 backdrop-blur-md border border-white/20 rounded-full shadow-xl">
                 <div className="w-1.5 h-1.5 bg-[#D4AF37] rounded-full shadow-[0_0_8px_#D4AF37]" />
                 <span className="text-[10px] font-bold text-white uppercase tracking-[0.3em]">
                   {count} Propriétés
@@ -109,13 +114,14 @@ export default function RegionGrid({ properties, onRegionClick }: RegionGridProp
               <div className="flex-grow" />
 
               <div className="space-y-6">
-                <h3 className="text-4xl md:text-5xl font-serif italic text-white leading-tight drop-shadow-2xl">
+                {/* On force une ombre sur le texte (drop-shadow) car l'image derrière est maintenant claire */}
+                <h3 className="text-4xl md:text-5xl font-serif italic text-white leading-tight drop-shadow-[0_4px_10px_rgba(0,0,0,0.9)]">
                   {region.name}
                 </h3>
                 
                 <div className="flex flex-col items-center gap-4">
-                  <div className="w-12 h-px bg-[#D4AF37]/50" />
-                  <div className="flex items-center gap-2 text-[#D4AF37] text-[10px] font-bold uppercase tracking-[0.4em] opacity-90 group-hover:opacity-100 transition-all duration-500 translate-y-4 group-hover:translate-y-0">
+                  <div className="w-12 h-px bg-[#D4AF37]" />
+                  <div className="flex items-center gap-2 text-[#D4AF37] text-[10px] font-bold uppercase tracking-[0.4em] drop-shadow-md">
                     Explorer <ChevronRight size={14} />
                   </div>
                 </div>
@@ -125,7 +131,3 @@ export default function RegionGrid({ properties, onRegionClick }: RegionGridProp
             <div className="absolute inset-0 border border-white/0 group-hover:border-[#D4AF37]/30 rounded-[3rem] transition-colors duration-700" />
           </motion.div>
         );
-      })}
-    </div>
-  );
-}
