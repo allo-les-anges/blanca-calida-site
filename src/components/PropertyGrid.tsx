@@ -18,7 +18,7 @@ export default function PropertyGrid({ activeFilters, properties }: PropertyGrid
     
     setIsAnimating(true);
     
-    // Logique de filtrage robuste
+    // Logique de filtrage
     const result = properties.filter((p) => {
       const matchType = !activeFilters.type || p.type?.toLowerCase().includes(activeFilters.type.toLowerCase());
       const matchTown = !activeFilters.town || p.town?.toLowerCase().includes(activeFilters.town.toLowerCase());
@@ -42,7 +42,7 @@ export default function PropertyGrid({ activeFilters, properties }: PropertyGrid
     return () => clearTimeout(timer);
   }, [activeFilters, properties]);
 
-  // ÉTAT DE CHARGEMENT / ANIMATION
+  // ÉTAT DE CHARGEMENT
   if (isAnimating && filtered.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-40 space-y-4">
@@ -63,11 +63,9 @@ export default function PropertyGrid({ activeFilters, properties }: PropertyGrid
         </div>
         <div className="text-center space-y-3">
           <p className="text-[#D4AF37] text-[10px] font-bold uppercase tracking-[0.4em]">Aucune correspondance</p>
-          {/* Correction : dark:text-white pour le titre d'erreur */}
           <p className="text-slate-900 dark:text-white font-serif italic text-xl md:text-2xl leading-relaxed">
             Nous n'avons pas trouvé de propriété <br className="hidden md:block" /> correspondant à vos critères actuels.
           </p>
-          {/* Sous-texte en gris clair en mode sombre */}
           <p className="text-slate-500 dark:text-slate-400 text-sm font-light italic">
             Essayez d'élargir vos filtres de recherche.
           </p>
