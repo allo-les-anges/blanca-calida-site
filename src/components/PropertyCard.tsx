@@ -49,7 +49,7 @@ export default function PropertyCard({ property }: { property: any }) {
       {/* --- INFOS : TITRE ET PRIX --- */}
       <div className="py-8 px-2">
         <div className="flex justify-between items-start gap-4 mb-3">
-          {/* CORRECTION : h3 utilise 'dark:text-white' pour être blanc sur fond sombre */}
+          {/* TITRE : Passe de Slate-900 (Noir) à White (Blanc) */}
           <h3 className="font-serif text-2xl text-slate-900 dark:text-white italic leading-tight flex-grow line-clamp-1">
             {property.titre || property.type || 'Villa de Prestige'}
           </h3>
@@ -60,8 +60,8 @@ export default function PropertyCard({ property }: { property: any }) {
           </span>
         </div>
 
-        {/* CORRECTION : Localisation passe de 'text-slate-500' à 'dark:text-slate-400' (gris clair) */}
-        <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-[10px] tracking-[0.3em] uppercase font-bold">
+        {/* LOCALISATION : Gris foncé en Light, Gris très clair en Dark */}
+        <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300 text-[10px] tracking-[0.3em] uppercase font-bold">
           <span className="text-[#D4AF37]">●</span>
           {property.town} <span className="opacity-30">|</span> {property.region || 'Costa Blanca'}
         </div>
@@ -70,13 +70,14 @@ export default function PropertyCard({ property }: { property: any }) {
       {/* --- ICONES TECHNIQUES : ADAPTATIVES --- */}
       <div className="grid grid-cols-3 gap-y-6 pt-6 border-t border-slate-100 dark:border-white/5">
         
+        {/* Chaque bloc technique suit la même logique : Noir/Gris foncé -> Blanc/Gris clair */}
+        
         {/* Surface */}
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center">
             <Maximize size={14} className="text-[#D4AF37]" />
           </div>
-          {/* CORRECTION : Les spans de texte utilisent 'dark:text-slate-200' (gris très clair) */}
-          <span className="text-[11px] font-medium text-slate-700 dark:text-slate-200">{property.surface_built || '0'} m²</span>
+          <span className="text-[11px] font-medium text-slate-800 dark:text-slate-100">{property.surface_built || '0'} m²</span>
         </div>
         
         {/* Chambres */}
@@ -84,7 +85,7 @@ export default function PropertyCard({ property }: { property: any }) {
           <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center">
             <Bed size={14} className="text-[#D4AF37]" />
           </div>
-          <span className="text-[11px] font-medium text-slate-700 dark:text-slate-200">{property.beds || '0'} lits</span>
+          <span className="text-[11px] font-medium text-slate-800 dark:text-slate-100">{property.beds || '0'} lits</span>
         </div>
 
         {/* Salles de bain */}
@@ -92,7 +93,7 @@ export default function PropertyCard({ property }: { property: any }) {
           <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center">
             <Bath size={14} className="text-[#D4AF37]" />
           </div>
-          <span className="text-[11px] font-medium text-slate-700 dark:text-slate-200">{property.baths || '0'} sdb</span>
+          <span className="text-[11px] font-medium text-slate-800 dark:text-slate-100">{property.baths || '0'} sdb</span>
         </div>
 
         {/* Piscine */}
@@ -100,7 +101,7 @@ export default function PropertyCard({ property }: { property: any }) {
           <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center">
             <Waves size={14} className="text-[#D4AF37]" />
           </div>
-          <span className="text-[11px] font-medium text-slate-700 dark:text-slate-200 uppercase">
+          <span className="text-[11px] font-medium text-slate-800 dark:text-slate-100 uppercase">
             {property.pool === "Oui" ? "Piscine" : "Sans"}
           </span>
         </div>
@@ -110,7 +111,7 @@ export default function PropertyCard({ property }: { property: any }) {
           <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center">
             <Map size={14} className="text-[#D4AF37]" />
           </div>
-          <span className="text-[11px] font-medium text-slate-700 dark:text-slate-200 truncate">
+          <span className="text-[11px] font-medium text-slate-800 dark:text-slate-100 truncate">
             {property.surface_plot || '0'} m² terrain
           </span>
         </div>
@@ -120,7 +121,7 @@ export default function PropertyCard({ property }: { property: any }) {
           <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center">
             <Car size={14} className="text-[#D4AF37]" />
           </div>
-          <span className="text-[11px] font-medium text-slate-700 dark:text-slate-200">Garage</span>
+          <span className="text-[11px] font-medium text-slate-800 dark:text-slate-100">Garage</span>
         </div>
         
       </div>
