@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { 
   Search, Loader2, ShieldCheck, ArrowRight, User, X
 } from "lucide-react";
-import { useTheme } from "next-themes"; // Import important
+import { useTheme } from "next-themes";
 
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
@@ -27,7 +27,7 @@ export default function Home() {
   const [clientPin, setClientPin] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
-  // Sécurité pour l'hydratation (évite les erreurs de rendu entre serveur et client)
+  // Empêche le décalage d'hydratation
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -99,7 +99,7 @@ export default function Home() {
     }
   };
 
-  // Ne rien afficher tant que le thème n'est pas monté pour éviter le flash blanc
+  // Tant que le composant n'est pas monté, on ne rend rien pour éviter le flash
   if (!mounted) return null;
 
   if (loading) {
@@ -115,7 +115,7 @@ export default function Home() {
     <main className="bg-white dark:bg-[#020617] min-h-screen text-slate-900 dark:text-slate-200 selection:bg-[#D4AF37]/30 font-sans overflow-x-hidden transition-colors duration-500">
       <Navbar />
       
-      {/* SECTION HERO (Toujours sombre pour le style luxe) */}
+      {/* SECTION HERO */}
       <div className="relative h-[85vh] md:h-screen flex flex-col items-center justify-center bg-[#020617]">
         <Hero />
         
@@ -136,7 +136,6 @@ export default function Home() {
            )}
         </div>
 
-        {/* Transition dégradée adaptative */}
         <div className="absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-white dark:from-[#020617] via-white/80 dark:via-[#020617]/80 to-transparent pointer-events-none transition-colors duration-500" />
       </div>
 
@@ -233,12 +232,12 @@ export default function Home() {
       <style jsx global>{`
         @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300;1,600&family=Inter:wght@300;400;700&display=swap');
         
-        /* Correction ici : On retire la couleur fixe du body pour laisser Tailwind gérer */
         body { 
           font-family: 'Inter', sans-serif; 
           scroll-behavior: smooth;
         }
         
+        /* Suppression des styles forçant la couleur de fond */
         .font-serif { font-family: 'Cormorant Garamond', serif; }
         
         ::-webkit-scrollbar { width: 5px; }
