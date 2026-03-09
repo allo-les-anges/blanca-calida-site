@@ -89,10 +89,8 @@ export default function PropertyDetailClient({ id }: { id: string }) {
           filter: brightness(0.95) contrast(0.95) saturate(0.9);
           transition: filter 0.5s ease;
         }
-        @media (prefers-color-scheme: dark) {
-          .property-image-filter {
-            filter: brightness(0.8) contrast(0.9) saturate(0.85);
-          }
+        .dark .property-image-filter {
+            filter: brightness(0.7) contrast(1.1) saturate(0.8);
         }
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #FFE7C2; border-radius: 10px; }
@@ -149,25 +147,15 @@ export default function PropertyDetailClient({ id }: { id: string }) {
           </div>
 
           <div className="flex flex-wrap gap-3 mb-12">
-            <div className="flex items-center gap-2 bg-white dark:bg-[#1A1A1A] px-4 py-2 rounded-full border border-black/5 dark:border-[#FFE7C2]/10 text-[9px] uppercase font-bold tracking-wider">
+            <div className="flex items-center gap-2 bg-white dark:bg-[#1A1A1A] px-4 py-2 rounded-full border border-black/5 dark:border-[#FFE7C2]/10 text-[9px] uppercase font-bold tracking-wider dark:text-[#FFE7C2]">
               <ShieldCheck size={14} className="text-[#FFE7C2]" /> Amaru Certified • Spain
             </div>
             {property.pool === "Oui" && (
-              <div className="flex items-center gap-2 bg-white dark:bg-[#1A1A1A] px-4 py-2 rounded-full border border-black/5 dark:border-[#FFE7C2]/10 text-[9px] uppercase font-bold tracking-wider">
+              <div className="flex items-center gap-2 bg-white dark:bg-[#1A1A1A] px-4 py-2 rounded-full border border-black/5 dark:border-[#FFE7C2]/10 text-[9px] uppercase font-bold tracking-wider dark:text-sky-400">
                 <Waves size={14} className="text-sky-400" /> Piscine Privée
               </div>
             )}
-            {property.distance_beach && (
-              <div className="flex items-center gap-2 bg-white dark:bg-[#1A1A1A] px-4 py-2 rounded-full border border-black/5 dark:border-[#FFE7C2]/10 text-[9px] uppercase font-bold tracking-wider">
-                <Ship size={14} className="text-[#FFE7C2]" /> Plage : {property.distance_beach}m
-              </div>
-            )}
-            {property.distance_golf && (
-              <div className="flex items-center gap-2 bg-white dark:bg-[#1A1A1A] px-4 py-2 rounded-full border border-black/5 dark:border-[#FFE7C2]/10 text-[9px] uppercase font-bold tracking-wider">
-                <Navigation size={14} className="rotate-45 text-[#FFE7C2]" /> Golf : {property.distance_golf}m
-              </div>
-            )}
-            <div className="flex items-center gap-2 bg-white dark:bg-[#1A1A1A] px-4 py-2 rounded-full border border-black/5 dark:border-[#FFE7C2]/10 text-[9px] uppercase font-bold tracking-wider">
+            <div className="flex items-center gap-2 bg-white dark:bg-[#1A1A1A] px-4 py-2 rounded-full border border-black/5 dark:border-[#FFE7C2]/10 text-[9px] uppercase font-bold tracking-wider dark:text-[#FFE7C2]">
               <Car size={14} className="text-[#FFE7C2]" /> Parking Inclus
             </div>
           </div>
@@ -184,7 +172,7 @@ export default function PropertyDetailClient({ id }: { id: string }) {
               <div key={i} className="bg-white dark:bg-[#1A1A1A] p-6 rounded-3xl text-center border border-black/5 dark:border-[#FFE7C2]/5 shadow-sm">
                 <item.icon className="mx-auto mb-2 text-[#FFE7C2]" size={22} />
                 <p className="text-2xl font-serif text-[#1A1A1A] dark:text-white">{item.val || "0"}</p>
-                <p className="text-[8px] uppercase text-gray-400 font-bold tracking-widest">{item.label}</p>
+                <p className="text-[8px] uppercase text-gray-400 dark:text-gray-500 font-bold tracking-widest">{item.label}</p>
               </div>
             ))}
           </div>
@@ -192,7 +180,7 @@ export default function PropertyDetailClient({ id }: { id: string }) {
           <div className="max-w-none mb-20 pt-10 border-t border-black/5 dark:border-[#FFE7C2]/10">
             <h2 className="text-3xl font-serif italic mb-8 text-[#1A1A1A] dark:text-white">L'Art de Vivre</h2>
             <div 
-              className="description-xml-container text-lg leading-relaxed opacity-80 text-[#1A1A1A] dark:text-gray-300"
+              className="description-xml-container text-lg leading-relaxed text-[#1A1A1A] dark:text-gray-300 opacity-90"
               dangerouslySetInnerHTML={{ 
                 __html: cleanDescription(property.description || "Description en cours de rédaction...") 
               }} 
@@ -233,7 +221,7 @@ export default function PropertyDetailClient({ id }: { id: string }) {
             </Link>
 
             <div className="bg-white dark:bg-[#1A1A1A] border border-black/5 dark:border-[#FFE7C2]/10 p-10 rounded-[3rem] shadow-2xl">
-              <p className="text-[10px] uppercase text-gray-400 mb-2 font-bold tracking-widest">Prix de vente</p>
+              <p className="text-[10px] uppercase text-gray-400 dark:text-[#FFE7C2]/40 mb-2 font-bold tracking-widest">Prix de vente</p>
               <p className="text-5xl font-serif text-[#1A1A1A] dark:text-[#FFE7C2] leading-none mb-10">
                 {numericPrice.toLocaleString("fr-FR")} €
               </p>
