@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { 
   Search, Loader2, ShieldCheck, ArrowRight, User, X
 } from "lucide-react";
+import { useTheme } from "next-themes"; // Import important
+
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import AdvancedSearch from "@/components/AdvancedSearch";
@@ -16,11 +18,19 @@ type Property = any;
 
 export default function Home() {
   const router = useRouter();
+  const { theme, resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
   const [allProperties, setAllProperties] = useState<Property[]>([]);
   const [visibleCount, setVisibleCount] = useState(12);
   const [loading, setLoading] = useState(true);
   const [clientPin, setClientPin] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+
+  // Sécurité pour l'hydratation (évite les erreurs de rendu entre serveur et client)
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     async function loadData() {
@@ -89,6 +99,9 @@ export default function Home() {
     }
   };
 
+  // Ne rien afficher tant que le thème n'est pas monté pour éviter le flash blanc
+  if (!mounted) return null;
+
   if (loading) {
     return (
       <div className="h-screen bg-[#020617] flex flex-col items-center justify-center">
@@ -102,11 +115,10 @@ export default function Home() {
     <main className="bg-white dark:bg-[#020617] min-h-screen text-slate-900 dark:text-slate-200 selection:bg-[#D4AF37]/30 font-sans overflow-x-hidden transition-colors duration-500">
       <Navbar />
       
-      {/* SECTION HERO */}
+      {/* SECTION HERO (Toujours sombre pour le style luxe) */}
       <div className="relative h-[85vh] md:h-screen flex flex-col items-center justify-center bg-[#020617]">
         <Hero />
         
-        {/* BOUTON DÉCLENCHEUR */}
         <div className="absolute bottom-[10%] md:bottom-[15%] z-40">
            {!isSearchOpen && (
              <button 
@@ -124,24 +136,25 @@ export default function Home() {
            )}
         </div>
 
+        {/* Transition dégradée adaptative */}
         <div className="absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-white dark:from-[#020617] via-white/80 dark:via-[#020617]/80 to-transparent pointer-events-none transition-colors duration-500" />
       </div>
 
       {/* MODAL DE RECHERCHE */}
       <div className={`fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8 transition-all duration-500 ${isSearchOpen ? 'visible opacity-100' : 'invisible opacity-0'}`}>
-        <div className="absolute inset-0 bg-[#020617]/90 backdrop-blur-md" onClick={() => setIsSearchOpen(false)} />
+        <div className="absolute inset-0 bg-black/90 backdrop-blur-md" onClick={() => setIsSearchOpen(false)} />
         
-        <div className={`relative w-full max-w-6xl bg-white dark:bg-slate-900 rounded-[2rem] md:rounded-[3rem] overflow-hidden shadow-[0_0_100px_rgba(212,175,55,0.1)] transition-transform duration-500 ${isSearchOpen ? 'scale-100 translate-y-0' : 'scale-95 translate-y-10'}`}>
+        <div className={`relative w-full max-w-6xl bg-white dark:bg-[#0A0A0A] rounded-[2rem] md:rounded-[3rem] overflow-hidden shadow-2xl transition-transform duration-500 ${isSearchOpen ? 'scale-100 translate-y-0' : 'scale-95 translate-y-10'}`}>
           <button 
             onClick={() => setIsSearchOpen(false)}
-            className="absolute top-5 right-5 w-10 h-10 bg-[#020617] text-[#D4AF37] rounded-full flex items-center justify-center hover:scale-110 transition-transform z-50 shadow-lg"
+            className="absolute top-5 right-5 w-10 h-10 bg-black text-[#D4AF37] rounded-full flex items-center justify-center hover:scale-110 transition-transform z-50"
           >
             <X size={20} />
           </button>
 
           <div className="p-6 md:p-12 max-h-[85vh] overflow-y-auto">
-            <div className="mb-8 border-b border-slate-100 dark:border-white/5 pb-6 hidden md:block">
-              <h3 className="text-[#020617] dark:text-white font-serif text-3xl italic">Filtres de Sélection</h3>
+            <div className="mb-8 border-b border-slate-100 dark:border-white/10 pb-6 hidden md:block">
+              <h3 className="text-slate-900 dark:text-white font-serif text-3xl italic">Filtres de Sélection</h3>
               <p className="text-slate-400 text-[10px] uppercase font-bold tracking-[0.2em] mt-1">Personnalisez votre recherche immobilière</p>
             </div>
             <AdvancedSearch
@@ -166,7 +179,7 @@ export default function Home() {
 
       {/* SECTION ESPACE PROPRIÉTAIRE */}
       <section className="max-w-7xl mx-auto px-4 md:px-6 py-12 md:py-24">
-        <div className="bg-slate-50 dark:bg-[#0F172A]/40 p-8 md:p-24 rounded-[2.5rem] md:rounded-[4rem] border border-slate-200 dark:border-white/5 relative overflow-hidden shadow-2xl transition-colors duration-500">
+        <div className="bg-slate-50 dark:bg-[#0F172A]/40 p-8 md:p-24 rounded-[2.5rem] md:rounded-[4rem] border border-slate-200 dark:border-white/5 relative overflow-hidden transition-colors duration-500">
           <div className="absolute top-[-10%] right-[-5%] opacity-[0.03] pointer-events-none rotate-12">
             <ShieldCheck size={600} className="text-[#D4AF37]" />
           </div>
@@ -176,9 +189,9 @@ export default function Home() {
                 <span className="text-[#D4AF37] text-[10px] font-bold uppercase tracking-[0.4em]">Propriétaires Amaru</span>
                 <h2 className="text-4xl md:text-7xl font-serif text-slate-900 dark:text-white leading-[1.1] italic">Suivez votre vision <br /> <span className="text-[#D4AF37] not-italic font-sans font-light tracking-tighter text-3xl md:text-6xl uppercase">en temps réel.</span></h2>
               </div>
-              <p className="text-slate-500 dark:text-slate-400 text-base md:text-lg font-light leading-relaxed max-w-lg border-l-0 lg:border-l border-slate-200 dark:border-white/10 pl-0 lg:pl-8 italic text-center lg:text-left">Accédez à votre cockpit de construction privé, partout dans le monde.</p>
+              <p className="text-slate-500 dark:text-slate-400 text-base md:text-lg font-light leading-relaxed max-w-lg border-l-0 lg:border-l border-slate-200 dark:border-white/10 pl-0 lg:pl-8 italic text-center lg:text-left">Accédez à votre cockpit de construction privé.</p>
             </div>
-            <div className="bg-white dark:bg-[#020617]/80 p-8 md:p-12 rounded-[2rem] border border-slate-200 dark:border-[#D4AF37]/20 backdrop-blur-xl shadow-xl dark:shadow-none">
+            <div className="bg-white dark:bg-[#020617]/80 p-8 md:p-12 rounded-[2rem] border border-slate-200 dark:border-[#D4AF37]/20 backdrop-blur-xl shadow-xl">
                <form onSubmit={handleClientLogin} className="space-y-8 text-center">
                   <User size={32} className="text-[#D4AF37] mx-auto mb-2 opacity-80" />
                   <div className="relative group">
@@ -188,7 +201,7 @@ export default function Home() {
                       className="w-full bg-transparent border-b border-slate-200 dark:border-white/10 py-4 text-center text-2xl md:text-3xl font-light tracking-[0.8em] text-slate-900 dark:text-white outline-none focus:border-[#D4AF37] transition-all"
                     />
                   </div>
-                  <button type="submit" className="w-full bg-[#D4AF37] text-black py-5 md:py-6 rounded-full font-bold text-[10px] md:text-[11px] uppercase tracking-[0.3em] hover:bg-slate-900 hover:text-white dark:hover:bg-white dark:hover:text-black transition-all flex items-center justify-center gap-4 shadow-lg">
+                  <button type="submit" className="w-full bg-[#D4AF37] text-black py-5 md:py-6 rounded-full font-bold text-[10px] md:text-[11px] uppercase tracking-[0.3em] hover:bg-slate-900 hover:text-white dark:hover:bg-white transition-all flex items-center justify-center gap-4">
                     Accéder au chantier <ArrowRight size={18} />
                   </button>
                </form>
@@ -211,17 +224,7 @@ export default function Home() {
             </p>
           </header>
           
-          <div className="w-full">
-            <PropertyGrid activeFilters={filters} properties={propertiesToShow} />
-          </div>
-
-          {!hasActiveFilters && visibleCount < filteredProperties.length && (
-            <div className="text-center mt-24">
-              <button onClick={() => setVisibleCount((prev) => prev + 12)} className="px-16 py-6 md:px-20 md:py-8 border border-[#D4AF37]/40 text-[#D4AF37] rounded-full uppercase text-[10px] tracking-[0.5em] font-bold hover:bg-[#D4AF37] hover:text-black transition-all duration-500">
-                Explorer plus
-              </button>
-            </div>
-          )}
+          <PropertyGrid activeFilters={filters} properties={propertiesToShow} />
         </div>
       </section>
 
@@ -230,6 +233,7 @@ export default function Home() {
       <style jsx global>{`
         @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300;1,600&family=Inter:wght@300;400;700&display=swap');
         
+        /* Correction ici : On retire la couleur fixe du body pour laisser Tailwind gérer */
         body { 
           font-family: 'Inter', sans-serif; 
           scroll-behavior: smooth;
