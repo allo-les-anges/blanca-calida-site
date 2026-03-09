@@ -12,18 +12,15 @@
   --brand-secondary: #c5a358;
 }
 
-/* FORCE LA PRIORITÉ DU DARK MODE
-   L'utilisation de html.dark assure que si la classe dark est présente,
-   les styles sombres s'appliquent quoi qu'il arrive.
-*/
-body {
-  @apply bg-white text-slate-900 transition-colors duration-500 font-sans;
-  top: 0px !important;
-  position: static !important;
-}
+/* Ce bloc force le changement de couleur même si un autre style essaie de bloquer */
+@layer base {
+  body {
+    @apply bg-white text-slate-900 transition-colors duration-500 !important;
+  }
 
-html.dark body {
-  @apply bg-[#020617] text-white;
+  .dark body {
+    @apply bg-[#020617] text-white !important;
+  }
 }
 
 h1, h2, h3, .font-serif {
