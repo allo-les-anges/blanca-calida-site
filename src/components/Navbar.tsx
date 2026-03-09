@@ -132,8 +132,10 @@ export default function Navbar() {
       `}</style>
 
       <nav className={`fixed w-full top-0 left-0 z-[100] transition-all duration-700 h-24 flex items-center ${
-        isScrolled ? "bg-white dark:bg-[#020617] shadow-xl border-b border-slate-100 dark:border-white/5" : "bg-transparent backdrop-blur-sm"
-      }`}>
+      isScrolled 
+    ? "bg-white/90 dark:bg-[#020617]/90 backdrop-blur-md shadow-xl border-b border-slate-100 dark:border-white/5" 
+    : "bg-transparent"
+          }`}>
         <div className="max-w-[1600px] w-full mx-auto px-4 md:px-10 flex justify-between items-center">
           
           {/* LOGO DATA HOME (VERSION SVG SANS FOND) */}

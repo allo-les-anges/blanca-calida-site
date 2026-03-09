@@ -11,22 +11,39 @@
   --brand-secondary: #c5a358;
 }
 
+/* CORRECTION CRITIQUE : 
+   On utilise @apply pour que Tailwind puisse alterner les couleurs 
+   entre le mode clair (bg-white) et le mode sombre (dark:bg-[#020617]).
+*/
 body {
-  background-color: white;
-  color: #0f172a; /* slate-900 */
+  @apply bg-white text-slate-900 dark:bg-[#020617] dark:text-white transition-colors duration-500;
+  top: 0px !important;
+  position: static !important;
 }
 
 h1, h2, h3, .font-serif {
   font-family: var(--font-serif);
 }
 
-/* Cacher la bannière Google en haut */
-.goog-te-banner-frame.skiptranslate { display: none !important; }
-body { top: 0px !important; }
+/* --- GOOGLE TRANSLATE CLEANUP --- */
 
-/* Style du widget pour correspondre à Blanca Calida */
+/* Cacher la bannière Google en haut */
+.goog-te-banner-frame.skiptranslate, 
+.goog-te-banner-frame, 
+#goog-gt-tt, 
+.goog-te-balloon-frame { 
+  display: none !important; 
+  visibility: hidden !important;
+}
+
+/* Empêcher le décalage du contenu par Google Translate */
+html { 
+  margin-top: 0px !important; 
+}
+
+/* Style du widget pour correspondre à l'esthétique Data Home */
 #google_translate_element {
-  font-family: serif;
+  font-family: var(--font-serif);
 }
 
 .goog-te-gadget-simple {
@@ -35,6 +52,49 @@ body { top: 0px !important; }
   font-size: 10px !important;
   text-transform: uppercase;
   letter-spacing: 0.2em;
+  @apply text-slate-900 dark:text-white;
 }
 
-.goog-te-gadget-icon { display: none; }
+.goog-te-gadget-icon { 
+  display: none !important; 
+}
+
+.goog-tooltip {
+  display: none !important;
+}
+
+.goog-text-highlight {
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* --- TEXTE DANS LES CONTENEURS XML (DÉTAILS PROPRIÉTÉS) --- */
+.description-xml-container, 
+.description-xml-container *, 
+.description-xml-container p, 
+.description-xml-container span,
+.description-xml-container div {
+  font-family: ui-sans-serif, system-ui, -apple-system, sans-serif !important;
+  font-size: 1.125rem !important;
+  line-height: 1.75rem !important;
+  /* On ne force pas de couleur ici pour laisser le dark mode agir */
+}
+
+/* --- CUSTOM SCROLLBAR --- */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #D4AF37;
+  border-radius: 10px;
+}
+
+/* --- UTILS --- */
+.notranslate {
+  translate: no !important;
+}
