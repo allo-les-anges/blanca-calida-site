@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { 
-  Sun, Moon, Globe, Target, MapPin, Languages, Compass 
+  Globe, Target, MapPin, Languages, Compass, Sun, Moon 
 } from "lucide-react";
+import { useTheme } from "next-themes";
 
 // --- IMPORTATION DES COMPOSANTS DE NAVIGATION ---
 import Navbar from "@/components/Navbar";
@@ -64,33 +65,27 @@ const teamMembers = [
 ];
 
 export default function ContactPage() {
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  // Sécurité pour l'hydratation
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
+
+  const isDark = resolvedTheme === "dark";
 
   return (
-    <div className={`min-h-screen transition-colors duration-1000 ${isDarkMode ? "bg-[#020617] text-white" : "bg-white text-slate-900"}`}>
+    <div className="min-h-screen transition-colors duration-500 bg-white dark:bg-[#0A0A0A] text-slate-900 dark:text-white">
       
-      {/* NAVBAR : Permet le retour à l'accueil via le logo ou le menu */}
       <Navbar />
 
       <main>
         {/* SECTION HÉRO */}
-        <section className={`relative h-[65vh] w-full flex items-center justify-center transition-colors duration-1000 ${isDarkMode ? "bg-[#020617]" : "bg-slate-900"}`}>
-          <div className={`absolute inset-0 z-0 opacity-50 ${isDarkMode ? "bg-black" : "bg-slate-900"}`} />
-
-          {/* SWITCHER AMBIANCE */}
-          <div className="absolute bottom-12 right-12 z-30">
-            <button
-              onClick={() => setIsDarkMode(!isDarkMode)}
-              className="group flex items-center gap-4 bg-white/5 backdrop-blur-xl border border-white/10 p-2 pl-6 rounded-full hover:bg-[#D4AF37] transition-all duration-500 shadow-2xl"
-            >
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white">
-                {isDarkMode ? "Jour" : "Nuit"}
-              </span>
-              <div className="bg-white rounded-full p-3 text-black transition-transform duration-500 group-hover:rotate-12">
-                {isDarkMode ? <Sun size={20} className="text-orange-500" /> : <Moon size={20} className="text-indigo-600" />}
-              </div>
-            </button>
-          </div>
+        <section className="relative h-[65vh] w-full flex items-center justify-center transition-colors duration-1000 bg-slate-900 dark:bg-[#020617]">
+          <div className="absolute inset-0 z-0 opacity-50 bg-slate-900 dark:bg-black" />
 
           <div className="relative z-10 text-center px-6 max-w-5xl pt-20">
             <motion.div
@@ -121,18 +116,16 @@ export default function ContactPage() {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                className={`p-8 md:p-12 rounded-[2.5rem] border transition-all duration-700 ${
-                  isDarkMode ? "bg-white/5 border-white/10 shadow-2xl shadow-black/40" : "bg-white border-slate-100 shadow-xl"
-                }`}
+                className="p-8 md:p-12 rounded-[2.5rem] border transition-all duration-700 bg-white dark:bg-white/5 border-slate-100 dark:border-white/10 shadow-xl dark:shadow-2xl dark:shadow-black/40"
               >
                 <div className="flex flex-col md:flex-row gap-10">
-                  <div className="relative w-full md:w-48 h-60 shrink-0 overflow-hidden rounded-[2rem] bg-slate-100">
+                  <div className="relative w-full md:w-48 h-60 shrink-0 overflow-hidden rounded-[2rem] bg-slate-100 dark:bg-white/5">
                     <img 
                       src={member.photoDay} 
-                      className={`w-full h-full object-cover transition-all duration-1000 ${isDarkMode ? "brightness-75 grayscale-[0.5]" : "brightness-100"}`}
+                      className={`w-full h-full object-cover transition-all duration-1000 ${isDark ? "brightness-75 grayscale-[0.3]" : "brightness-100"}`}
                       alt={member.name}
                     />
-                    <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-md p-2 rounded-xl text-[#D4AF37]">
+                    <div className="absolute top-4 left-4 bg-white/90 dark:bg-black/80 backdrop-blur-md p-2 rounded-xl text-[#D4AF37]">
                       <Target size={16} />
                     </div>
                   </div>
@@ -153,7 +146,7 @@ export default function ContactPage() {
                       </div>
                     </div>
 
-                    <p className={`text-base leading-relaxed font-light ${isDarkMode ? "text-slate-300" : "text-slate-600"}`}>
+                    <p className="text-base leading-relaxed font-light text-slate-600 dark:text-slate-300">
                       {member.background}
                     </p>
 
@@ -172,20 +165,34 @@ export default function ContactPage() {
 
           {/* COLONNE FORMULAIRE */}
           <div className="xl:col-span-5">
-            <div className={`sticky top-32 p-12 rounded-[3.5rem] transition-all duration-700 ${
-              isDarkMode ? "bg-slate-900/50 border border-white/5 shadow-2xl" : "bg-slate-50 border border-slate-200 shadow-2xl shadow-slate-200/50"
-            }`}>
+            <div className="sticky top-32 p-12 rounded-[3.5rem] transition-all duration-700 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 shadow-2xl shadow-slate-200/50 dark:shadow-none">
               <h3 className="text-3xl font-serif italic mb-2">Connectons-nous</h3>
               <p className="text-[#D4AF37] text-[10px] font-black uppercase tracking-widest mb-10">L'Excellence Amaru à votre service</p>
               
               <form className="space-y-6">
-                <input type="text" placeholder="NOM COMPLET" className={`w-full px-8 py-5 rounded-2xl outline-none transition-all text-[10px] font-black tracking-widest ${isDarkMode ? "bg-black/40 border-white/5 text-white" : "bg-white border-slate-200"} border-2 focus:border-[#D4AF37]`} />
+                <input 
+                  type="text" 
+                  placeholder="NOM COMPLET" 
+                  className="w-full px-8 py-5 rounded-2xl outline-none transition-all text-[10px] font-black tracking-widest bg-white dark:bg-black/40 border-2 border-slate-200 dark:border-white/5 text-slate-900 dark:text-white focus:border-[#D4AF37] dark:focus:border-[#D4AF37]" 
+                />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <input type="email" placeholder="EMAIL" className={`w-full px-8 py-5 rounded-2xl outline-none transition-all text-[10px] font-black tracking-widest ${isDarkMode ? "bg-black/40 border-white/5 text-white" : "bg-white border-slate-200"} border-2 focus:border-[#D4AF37]`} />
-                  <input type="text" placeholder="PAYS / RÉGION" className={`w-full px-8 py-5 rounded-2xl outline-none transition-all text-[10px] font-black tracking-widest ${isDarkMode ? "bg-black/40 border-white/5 text-white" : "bg-white border-slate-200"} border-2 focus:border-[#D4AF37]`} />
+                  <input 
+                    type="email" 
+                    placeholder="EMAIL" 
+                    className="w-full px-8 py-5 rounded-2xl outline-none transition-all text-[10px] font-black tracking-widest bg-white dark:bg-black/40 border-2 border-slate-200 dark:border-white/5 text-slate-900 dark:text-white focus:border-[#D4AF37] dark:focus:border-[#D4AF37]" 
+                  />
+                  <input 
+                    type="text" 
+                    placeholder="PAYS / RÉGION" 
+                    className="w-full px-8 py-5 rounded-2xl outline-none transition-all text-[10px] font-black tracking-widest bg-white dark:bg-black/40 border-2 border-slate-200 dark:border-white/5 text-slate-900 dark:text-white focus:border-[#D4AF37] dark:focus:border-[#D4AF37]" 
+                  />
                 </div>
-                <textarea rows={4} placeholder="DÉTAILS DE VOTRE PROJET..." className={`w-full px-8 py-5 rounded-2xl outline-none transition-all text-[10px] font-black tracking-widest resize-none ${isDarkMode ? "bg-black/40 border-white/5 text-white" : "bg-white border-slate-200"} border-2 focus:border-[#D4AF37]`} />
-                <button className="w-full bg-[#D4AF37] text-black py-6 rounded-2xl font-black uppercase text-[10px] tracking-[0.4em] hover:bg-black hover:text-[#D4AF37] dark:hover:bg-white dark:hover:text-black transition-all">
+                <textarea 
+                  rows={4} 
+                  placeholder="DÉTAILS DE VOTRE PROJET..." 
+                  className="w-full px-8 py-5 rounded-2xl outline-none transition-all text-[10px] font-black tracking-widest resize-none bg-white dark:bg-black/40 border-2 border-slate-200 dark:border-white/5 text-slate-900 dark:text-white focus:border-[#D4AF37] dark:focus:border-[#D4AF37]" 
+                />
+                <button className="w-full bg-[#D4AF37] text-black py-6 rounded-2xl font-black uppercase text-[10px] tracking-[0.4em] hover:bg-black hover:text-[#D4AF37] dark:hover:bg-white dark:hover:text-black transition-all shadow-xl">
                   Contacter l'Expert Dédié
                 </button>
               </form>
@@ -194,7 +201,6 @@ export default function ContactPage() {
         </section>
       </main>
 
-      {/* FOOTER : Informations légales et réseaux */}
       <Footer />
     </div>
   );
