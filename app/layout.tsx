@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import Script from "next/script";
-import { ThemeProvider } from "@/components/ThemeProvider"; // Assurez-vous que le chemin est correct
+import { ThemeProvider } from "@/components/ThemeProvider";
 
 const inter = Inter({ 
   subsets: ["latin"], 
@@ -25,10 +25,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    // AJOUT DE suppressHydrationWarning : Indispensable pour next-themes
     <html lang="fr" className="scroll-smooth notranslate" suppressHydrationWarning>
       <head>
         <meta name="google" content="notranslate" />
+        {/* Ces styles forcent le fond sombre même si Google Translate essaie d'injecter du blanc */}
         <style>{`
           .goog-te-banner-frame, .goog-te-banner-frame.skiptranslate, .goog-te-banner, .skiptranslate, #goog-gt-tt, .goog-te-balloon-frame, iframe.goog-te-banner-frame { 
             display: none !important; 
@@ -37,7 +37,19 @@ export default function RootLayout({
             height: 0 !important;
           }
           html { margin-top: 0px !important; }
-          body { top: 0px !important; position: static !important; }
+          
+          /* Modification critique ici pour le fond */
+          body { 
+            top: 0px !important; 
+            position: static !important; 
+            background-color: transparent !important; 
+          }
+          
+          html.dark body {
+            background-color: #020617 !important;
+            color: #ffffff !important;
+          }
+
           .goog-text-highlight { background-color: transparent !important; box-shadow: none !important; }
           #google_translate_element { display: none !important; }
 
@@ -50,16 +62,15 @@ export default function RootLayout({
             font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system, sans-serif !important;
             font-size: 1.125rem !important;
             line-height: 1.75rem !important;
-            /* On enlève le color: #4b5563 !important; pour laisser le dark mode gérer la couleur du texte */
           }
         `}</style>
       </head>
-      <body className={`${inter.variable} ${playfair.variable} font-sans antialiased transition-colors duration-300`}>
+      {/* Suppression de bg-white ici pour laisser le CSS de globals et du head gérer le fond */}
+      <body className={`${inter.variable} ${playfair.variable} font-sans antialiased`}>
         <ThemeProvider>
           <div className="notranslate">
             <div id="google_translate_element"></div>
           </div>
-
           {children}
         </ThemeProvider>
 

@@ -7,45 +7,29 @@
   --font-sans: "Inter", sans-serif;
 }
 
-:root {
-  --brand-primary: #1a2a3a;
-  --brand-secondary: #c5a358;
-}
-
-/* --- FORCE LE FOND (CSS PUR POUR ÉVITER LES ERREURS TAILWIND) --- */
-body {
+/* --- FORCE BRUTE POUR LE DARK MODE --- */
+/* On cible la balise HTML directement pour être sûr */
+html {
   background-color: #ffffff !important;
   color: #0f172a !important;
-  transition: background-color 0.5s ease, color 0.5s ease;
-  top: 0px !important;
-  position: static !important;
-  font-family: var(--font-sans);
 }
 
-/* Quand la classe .dark est sur <html>, on force le fond sombre sur body */
-.dark body {
+html.dark {
   background-color: #020617 !important;
-  color: #ffffff !important;
+  color: #f8fafc !important;
 }
 
-h1, h2, h3, .font-serif {
-  font-family: var(--font-serif);
+/* On s'assure que le body hérite et ne bloque rien */
+body {
+  background-color: inherit !important;
+  color: inherit !important;
+  min-height: 100vh;
+  transition: background-color 0.3s ease;
 }
 
-/* --- GOOGLE TRANSLATE CLEANUP --- */
-.goog-te-banner-frame.skiptranslate, 
-.goog-te-banner-frame, 
-#goog-gt-tt, 
-.goog-te-balloon-frame { 
-  display: none !important; 
-  visibility: hidden !important;
-}
-
+/* --- NETTOYAGE GOOGLE ET SCROLLBAR --- */
+.goog-te-banner-frame, #goog-gt-tt, .goog-te-balloon-frame { display: none !important; }
 html { margin-top: 0px !important; }
 
-/* --- CUSTOM SCROLLBAR --- */
 ::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #D4AF37; border-radius: 10px; }
-
-.notranslate { translate: no !important; }
