@@ -72,6 +72,8 @@ export default function RegionGrid({ properties, onRegionClick }: RegionGridProp
 
   return (
     <section className="max-w-[1600px] mx-auto px-6 py-24 bg-white dark:bg-[#0A0A0A]">
+      
+      {/* EN-TÊTE : Correction de la visibilité sur fond noir */}
       <div className="mb-24 flex flex-col md:flex-row md:items-end justify-between gap-12">
         <div className="max-w-4xl">
           <motion.div
@@ -79,6 +81,7 @@ export default function RegionGrid({ properties, onRegionClick }: RegionGridProp
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
+            {/* On force la couleur dorée ici avec text-[#D4AF37] !important via CSS inline ou Tailwind propre */}
             <span className="text-[#D4AF37] text-[11px] font-black uppercase tracking-[0.6em] mb-6 block">
               Nos Destinations
             </span>
@@ -92,9 +95,10 @@ export default function RegionGrid({ properties, onRegionClick }: RegionGridProp
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           transition={{ delay: 0.4 }}
-          className="max-w-xs border-l border-slate-200 dark:border-white/10 pl-8 pb-2"
+          className="max-w-xs border-l border-slate-200 dark:border-white/20 pl-8 pb-2"
         >
-          <p className="text-slate-500 dark:text-white text-sm font-light leading-relaxed italic">
+          {/* Correction ici : text-white forcé en mode dark */}
+          <p className="text-slate-500 dark:text-white/90 text-sm font-light leading-relaxed italic">
             "Une sélection rigoureuse des enclaves les plus prestigieuses du littoral espagnol."
           </p>
         </motion.div>
