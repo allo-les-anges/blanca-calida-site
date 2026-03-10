@@ -25,26 +25,32 @@ html, body {
     @apply transition-colors duration-300 antialiased min-h-screen;
   }
 
-  /* 2. LE CORRECTEUR UNIVERSEL DE TEXTE DARK MODE */
-  /* On cible tout ce qui pourrait être gris/noir sous les vignettes et dans le footer */
-  .dark h1, .dark h2, .dark h3, .dark h4, 
-  .dark p, .dark span, .dark li, .dark a, .dark label, .dark div {
-    /* On ne change la couleur que si ce n'est pas un bouton blanc */
+  /* 2. LE CORRECTEUR "BOMBE ATOMIQUE" */
+  /* On force le blanc sur TOUT ce qui descend d'un élément .dark */
+  /* Le sélecteur " .dark *" est le plus radical possible */
+  
+  .dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6,
+  .dark p, .dark span, .dark li, .dark a, .dark label, .dark div:not(.bg-white) {
     color: #f8fafc !important;
   }
 
-  /* 3. CIBLAGE SPÉCIFIQUE DES TEXTES SECONDAIRES (Slate/Gray) */
-  .dark .text-slate-500, 
-  .dark .text-slate-600, 
-  .dark .text-gray-500,
-  .dark .text-gray-400 {
-    color: #cbd5e1 !important; /* Gris très clair pour les sous-titres */
+  /* 3. ÉCRASEMENT DES CLASSES TAILWIND SPÉCIFIQUES */
+  /* On cible les classes de gris foncé qui bloquent vos vignettes et footer */
+  .dark .text-slate-900, 
+  .dark .text-slate-800, 
+  .dark .text-slate-700, 
+  .dark .text-slate-600,
+  .dark .text-slate-500,
+  .dark .text-gray-900,
+  .dark .text-gray-600 {
+    color: #f8fafc !important;
   }
 
-  /* 4. FORCE LES FONDS DE SECTIONS ET CARTES */
+  /* 4. FORCE LES FONDS DE SECTIONS ET FOOTER */
   .dark section, 
   .dark footer,
   .dark main,
+  .dark .property-card,
   .dark .bg-white:not(button):not(.keep-white),
   .dark .bg-slate-50,
   .dark .bg-gray-50 {
@@ -52,11 +58,11 @@ html, body {
   }
 
   /* 5. EXCEPTIONS POUR LES ÉLÉMENTS SUR FOND BLANC (Boutons) */
-  .dark button.bg-white span, 
+  /* On veut que le texte reste NOIR sur les boutons qui restent BLANCS */
+  .dark button.bg-white,
+  .dark .bg-white button,
   .dark .bg-white p,
-  .dark .bg-white span,
-  .dark a.bg-white span,
-  .dark .recherche-privee-btn span {
+  .dark .bg-white span {
     color: #020617 !important;
   }
 
