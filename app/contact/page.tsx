@@ -77,7 +77,7 @@ export default function ContactPage() {
 
   const isDark = resolvedTheme === "dark";
 
-  // Classe utilitaire pour les inputs pour centraliser la correction de lisibilité
+  // Classe utilitaire pour les inputs avec contraste renforcé
   const inputClasses = `
     w-full px-8 py-5 rounded-2xl outline-none transition-all 
     text-[10px] font-black tracking-widest 
@@ -175,52 +175,51 @@ export default function ContactPage() {
             ))}
           </div>
 
-          {/* COLONNE FORMULAIRE */}
-<div className="xl:col-span-5">
-  <div className="sticky top-32 p-12 rounded-[3.5rem] transition-all duration-700 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 shadow-2xl shadow-slate-200/50 dark:shadow-none">
-    
-    {/* TITRE : Correction de la couleur pour le mode Dark (text-white) */}
-    <h3 className="text-3xl md:text-4xl font-serif italic mb-2 text-slate-900 dark:text-white transition-colors duration-500">
-      Contactez nous
-    </h3>
-    
-    {/* SOUS-TITRE : Or Amaru */}
-    <p className="text-[#D4AF37] text-[10px] font-black uppercase tracking-[0.2em] mb-10 opacity-90">
-      L'Excellence Amaru à votre service
-    </p>
-    
-    <form className="space-y-6">
-      <input 
-        type="text" 
-        placeholder="NOM COMPLET" 
-        className="w-full px-8 py-5 rounded-2xl outline-none transition-all text-[10px] font-black tracking-widest bg-white dark:bg-black/40 border-2 border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-white/20 focus:border-[#D4AF37] dark:focus:border-[#D4AF37]" 
-      />
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <input 
-          type="email" 
-          placeholder="EMAIL" 
-          className="w-full px-8 py-5 rounded-2xl outline-none transition-all text-[10px] font-black tracking-widest bg-white dark:bg-black/40 border-2 border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-white/20 focus:border-[#D4AF37] dark:focus:border-[#D4AF37]" 
-        />
-        <input 
-          type="text" 
-          placeholder="PAYS / RÉGION" 
-          className="w-full px-8 py-5 rounded-2xl outline-none transition-all text-[10px] font-black tracking-widest bg-white dark:bg-black/40 border-2 border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-white/20 focus:border-[#D4AF37] dark:focus:border-[#D4AF37]" 
-        />
-      </div>
-      
-      <textarea 
-        rows={4} 
-        placeholder="DÉTAILS DE VOTRE PROJET..." 
-        className="w-full px-8 py-5 rounded-2xl outline-none transition-all text-[10px] font-black tracking-widest resize-none bg-white dark:bg-black/40 border-2 border-slate-200 dark:border-white/10 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-white/20 focus:border-[#D4AF37] dark:focus:border-[#D4AF37]" 
-      />
-      
-      <button className="w-full bg-[#D4AF37] text-black py-6 rounded-2xl font-black uppercase text-[10px] tracking-[0.4em] hover:bg-black hover:text-[#D4AF37] dark:hover:bg-white dark:hover:text-black transition-all shadow-xl">
-        Contacter l'Expert Dédié
-      </button>
-    </form>
-  </div>
-</div>
+          {/* COLONNE FORMULAIRE CORRIGÉE */}
+          <div className="xl:col-span-5">
+            <div className="sticky top-32 p-12 rounded-[3.5rem] transition-all duration-700 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 shadow-2xl shadow-slate-200/50 dark:shadow-none">
+              
+              {/* TITRE : text-white ajouté pour la lisibilité Dark Mode */}
+              <h3 className="text-3xl md:text-4xl font-serif italic mb-2 text-slate-900 dark:text-white transition-colors duration-500">
+                Contactez-nous
+              </h3>
+              
+              <p className="text-[#D4AF37] text-[10px] font-black uppercase tracking-[0.2em] mb-10 opacity-90">
+                L'Excellence Amaru à votre service
+              </p>
+              
+              <form className="space-y-6">
+                <input 
+                  type="text" 
+                  placeholder="NOM COMPLET" 
+                  className={inputClasses}
+                />
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <input 
+                    type="email" 
+                    placeholder="EMAIL" 
+                    className={inputClasses}
+                  />
+                  <input 
+                    type="text" 
+                    placeholder="PAYS / RÉGION" 
+                    className={inputClasses}
+                  />
+                </div>
+                
+                <textarea 
+                  rows={4} 
+                  placeholder="DÉTAILS DE VOTRE PROJET..." 
+                  className={`${inputClasses} resize-none`}
+                />
+                
+                <button className="w-full bg-[#D4AF37] text-black py-6 rounded-2xl font-black uppercase text-[10px] tracking-[0.4em] hover:bg-black hover:text-[#D4AF37] dark:hover:bg-white dark:hover:text-black transition-all shadow-xl shadow-[#D4AF37]/10">
+                  Contacter l'Expert Dédié
+                </button>
+              </form>
+            </div>
+          </div>
         </section>
       </main>
 
