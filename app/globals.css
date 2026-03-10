@@ -53,3 +53,8 @@ html, body {
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #D4AF37; border-radius: 10px; }
+
+/* TEST TEMPORAIRE - À SUPPRIMER APRÈS VÉRIFICATION */
+.dark body {
+  background-color: red !important;
+}
