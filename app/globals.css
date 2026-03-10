@@ -4,7 +4,6 @@
 html, body {
   margin: 0 !important;
   padding: 0 !important;
-  top: 0 !important;
   width: 100%;
 }
 
@@ -14,9 +13,10 @@ html, body {
     --foreground: #0f172a;
   }
 
-  .dark {
-    --background: #020617;
-    --foreground: #f8fafc;
+  /* Force les variables au niveau le plus haut */
+  html.dark {
+    --background: #020617 !important;
+    --foreground: #f8fafc !important;
   }
 
   body {
@@ -25,57 +25,53 @@ html, body {
     @apply transition-colors duration-300 antialiased min-h-screen;
   }
 
-  /* 2. LE CORRECTEUR "BOMBE ATOMIQUE" */
-  /* On force le blanc sur TOUT ce qui descend d'un élément .dark */
-  /* Le sélecteur " .dark *" est le plus radical possible */
-  
-  .dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6,
-  .dark p, .dark span, .dark li, .dark a, .dark label, .dark div:not(.bg-white) {
+  /* 2. LE SÉLECTEUR "MARTEAU-PIQUEUR" */
+  /* On force le blanc sur TOUTES les classes de texte sombres de Tailwind quand le mode dark est ON */
+  html.dark .text-slate-900, 
+  html.dark .text-slate-800, 
+  html.dark .text-slate-700, 
+  html.dark .text-slate-600,
+  html.dark .text-slate-500,
+  html.dark .text-gray-900,
+  html.dark .text-gray-600,
+  html.dark h1, html.dark h2, html.dark h3, html.dark h4, 
+  html.dark p, html.dark span:not(.bg-[#D4AF37] span), 
+  html.dark li, html.dark a {
     color: #f8fafc !important;
   }
 
-  /* 3. ÉCRASEMENT DES CLASSES TAILWIND SPÉCIFIQUES */
-  /* On cible les classes de gris foncé qui bloquent vos vignettes et footer */
-  .dark .text-slate-900, 
-  .dark .text-slate-800, 
-  .dark .text-slate-700, 
-  .dark .text-slate-600,
-  .dark .text-slate-500,
-  .dark .text-gray-900,
-  .dark .text-gray-600 {
-    color: #f8fafc !important;
-  }
-
-  /* 4. FORCE LES FONDS DE SECTIONS ET FOOTER */
-  .dark section, 
-  .dark footer,
-  .dark main,
-  .dark .property-card,
-  .dark .bg-white:not(button):not(.keep-white),
-  .dark .bg-slate-50,
-  .dark .bg-gray-50 {
+  /* 3. LES VIGNETTES ET LE FOOTER */
+  /* On force le fond à devenir bleu nuit, même si la div a la classe "bg-white" */
+  html.dark .bg-white:not(button):not(.recherche-privee-btn),
+  html.dark section,
+  html.dark footer,
+  html.dark main,
+  html.dark .property-card,
+  html.dark .bg-slate-50,
+  html.dark .bg-gray-50 {
     background-color: #020617 !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
   }
 
-  /* 5. EXCEPTIONS POUR LES ÉLÉMENTS SUR FOND BLANC (Boutons) */
-  /* On veut que le texte reste NOIR sur les boutons qui restent BLANCS */
-  .dark button.bg-white,
-  .dark .bg-white button,
-  .dark .bg-white p,
-  .dark .bg-white span {
+  /* 4. LES ICONES TECHNIQUES (Cercle autour des icônes) */
+  html.dark .bg-slate-100 {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+  }
+
+  /* 5. EXCEPTIONS (Boutons blancs et éléments dorés) */
+  html.dark button.bg-white span,
+  html.dark .bg-white button span,
+  html.dark .recherche-privee-btn span {
     color: #020617 !important;
   }
 
-  /* 6. DORÉ (Accent de luxe) */
-  .dark .text-gold, 
-  .dark [class*="text-[#D4AF37]"],
-  .dark [class*="text-accent"] {
+  html.dark .text-[#D4AF37], html.dark .text-gold {
     color: #D4AF37 !important;
   }
 }
 
-/* 7. SCROLLBAR & PIN */
-.dark input[type="password"] {
+/* 6. FIX ZONE PIN ET SCROLLBAR */
+html.dark input[type="password"] {
   background-color: #1e293b !important;
   color: #D4AF37 !important;
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
@@ -84,6 +80,3 @@ html, body {
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #D4AF37; border-radius: 10px; }
-
-/* 8. FIX LAYOUT */
-main { margin-top: 0 !important; padding-top: 0 !important; }
