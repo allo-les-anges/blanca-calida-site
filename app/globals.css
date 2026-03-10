@@ -25,33 +25,33 @@ html, body {
     @apply transition-colors duration-300 antialiased min-h-screen;
   }
 
-  /* 2. FORÇAGE TEXTES (Vignettes & Footer) */
+  /* 2. LE CORRECTEUR UNIVERSEL DE TEXTE DARK MODE */
+  /* On cible tout ce qui pourrait être gris/noir sous les vignettes et dans le footer */
   .dark h1, .dark h2, .dark h3, .dark h4, 
-  .dark p, .dark span, .dark label, .dark li, .dark a {
+  .dark p, .dark span, .dark li, .dark a, .dark label, .dark div {
+    /* On ne change la couleur que si ce n'est pas un bouton blanc */
     color: #f8fafc !important;
   }
 
-  /* 3. CIBLAGE PRÉCIS DES GRIS (Sous les vignettes et Footer) */
-  /* Force tous les textes secondaires gris à devenir blancs ou dorés en mode dark */
+  /* 3. CIBLAGE SPÉCIFIQUE DES TEXTES SECONDAIRES (Slate/Gray) */
   .dark .text-slate-500, 
-  .dark .text-slate-400, 
-  .dark .text-gray-500, 
-  .dark .text-gray-400,
-  .dark .text-slate-600 {
-    color: #cbd5e1 !important; /* Gris très clair pour la lisibilité */
+  .dark .text-slate-600, 
+  .dark .text-gray-500,
+  .dark .text-gray-400 {
+    color: #cbd5e1 !important; /* Gris très clair pour les sous-titres */
   }
 
-  /* 4. SECTIONS & FONDS */
+  /* 4. FORCE LES FONDS DE SECTIONS ET CARTES */
   .dark section, 
-  .dark main, 
   .dark footer,
+  .dark main,
   .dark .bg-white:not(button):not(.keep-white),
   .dark .bg-slate-50,
   .dark .bg-gray-50 {
     background-color: #020617 !important;
   }
 
-  /* 5. EXCEPTIONS ÉLÉMENTS CLAIRS (Boutons) */
+  /* 5. EXCEPTIONS POUR LES ÉLÉMENTS SUR FOND BLANC (Boutons) */
   .dark button.bg-white span, 
   .dark .bg-white p,
   .dark .bg-white span,
@@ -60,10 +60,10 @@ html, body {
     color: #020617 !important;
   }
 
-  /* 6. DORÉ (Prix et liens importants) */
+  /* 6. DORÉ (Accent de luxe) */
   .dark .text-gold, 
   .dark [class*="text-[#D4AF37]"],
-  .dark .active-link {
+  .dark [class*="text-accent"] {
     color: #D4AF37 !important;
   }
 }
@@ -79,8 +79,5 @@ html, body {
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #D4AF37; border-radius: 10px; }
 
-/* 8. FIX NAVBAR & HERO */
-main {
-  margin-top: 0 !important;
-  padding-top: 0 !important;
-}
+/* 8. FIX LAYOUT */
+main { margin-top: 0 !important; padding-top: 0 !important; }
