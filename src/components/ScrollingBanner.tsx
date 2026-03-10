@@ -1,46 +1,79 @@
 "use client";
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import { useTheme } from "next-themes";
 
 const BANNER_TEXTS = [
   "Portfolio Exclusif",
-  "Service Conciergerie",
-  "Ventes Privées",
-  "Expertise Locale",
-  "Investissements Sur-mesure",
-  "Gestion Locative Prestige"
+  "Conciergerie Privée",
+  "Ventes Off-Market",
+  "Expertise Architecturale",
+  "Investissements",
+  "Gestion Prestige"
 ];
 
 export default function ScrollingBanner() {
-  // On triple la liste pour assurer un défilement infini sans trou visuel
-  const duplicatedTexts = [...BANNER_TEXTS, ...BANNER_TEXTS, ...BANNER_TEXTS];
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
+
+  const isDark = resolvedTheme === "dark";
+  const duplicatedTexts = [...BANNER_TEXTS, ...BANNER_TEXTS, ...BANNER_TEXTS, ...BANNER_TEXTS];
 
   return (
-    <div className="relative w-full overflow-hidden bg-white dark:bg-[#0A0A0A] py-12 border-y border-slate-100 dark:border-white/5">
+    <div 
+      className="relative w-full overflow-hidden py-10 border-y transition-colors duration-500"
+      style={{ 
+        backgroundColor: isDark ? '#020617' : '#FFFFFF',
+        borderColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(15,23,42,0.05)'
+      }}
+    >
       <div className="flex whitespace-nowrap">
         <motion.div
-          className="flex gap-16 items-center"
+          className="flex gap-12 items-center"
           animate={{
-            x: [0, -1000], // Ajustez selon la longueur du texte
+            x: [0, -2000],
           }}
           transition={{
-            duration: 30, // Plus le chiffre est élevé, plus c'est lent/luxueux
+            duration: 35,
             ease: "linear",
             repeat: Infinity,
           }}
         >
           {duplicatedTexts.map((text, idx) => (
-            <div key={idx} className="flex items-center gap-16">
-              <span className="text-2xl md:text-4xl font-serif italic text-slate-900 dark:text-white uppercase tracking-wider">
+            <div key={idx} className="flex items-center gap-12">
+              {/* Texte Alterné : Plein vs Outline pour un style galerie d'art */}
+              <span 
+                className={`text-4xl md:text-7xl font-black uppercase tracking-tighter transition-all duration-700 ${
+                  idx % 2 === 0 
+                    ? "text-slate-900 dark:text-white" 
+                    : "text-transparent stroke-text"
+                }`}
+                style={{
+                  WebkitTextStroke: idx % 2 !== 0 ? `1px ${isDark ? '#334155' : '#e2e8f0'}` : 'none'
+                }}
+              >
                 {text}
               </span>
-              {/* Le petit point doré séparateur style Mallorca Select */}
-              <div className="w-2 h-2 rounded-full bg-[#D4AF37]" />
+              
+              {/* Séparateur minimaliste (Barre verticale fine) */}
+              <div className="h-8 md:h-12 w-[1px] bg-[#D4AF37] opacity-50" />
             </div>
           ))}
         </motion.div>
       </div>
+
+      <style jsx>{`
+        .stroke-text {
+          paint-order: stroke fill;
+        }
+      `}</style>
     </div>
   );
 }
