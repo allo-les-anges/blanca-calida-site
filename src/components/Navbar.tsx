@@ -4,33 +4,51 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { 
-  Globe, ChevronDown, Menu, X, ArrowRight, User, 
-  Lock, Gift, LayoutDashboard, LogOut, ShieldCheck, Search,
-  Home, MapPin, Euro, BedDouble, Bath
+  Globe, ChevronDown, Menu, X, Search, User, Euro 
 } from "lucide-react";
 import { createBrowserClient } from '@supabase/ssr';
 import ThemeToggle from "./ThemeToggle";
 
-// --- LOGO SVG ---
+// --- DICTIONNAIRE DE TRADUCTION ---
+const translations = {
+  fr: {
+    home: "Accueil", contact: "Contact", access: "Accès Client", search: "Recherche", 
+    budget: "Budget Max", results: "Afficher les résultats", private: "Accès Privé",
+    placeholder: "PIN", validate: "Valider", sub: "Trouvez votre villa idéale"
+  },
+  en: {
+    home: "Home", contact: "Contact", access: "Client Access", search: "Search", 
+    budget: "Max Budget", results: "Show results", private: "Private Access",
+    placeholder: "PIN", validate: "Validate", sub: "Find your ideal villa"
+  },
+  es: {
+    home: "Inicio", contact: "Contacto", access: "Acceso Cliente", search: "Buscar", 
+    budget: "Presupuesto Máx", results: "Ver resultados", private: "Acceso Privado",
+    placeholder: "PIN", validate: "Validar", sub: "Encuentre su villa ideal"
+  },
+  nl: {
+    home: "Home", contact: "Contact", access: "Klantentoegang", search: "Zoeken", 
+    budget: "Max Budget", results: "Resultaten tonen", private: "Privé Toegang",
+    placeholder: "PIN", validate: "Bevestigen", sub: "Vind uw ideale villa"
+  },
+  ar: {
+    home: "الرئيسية", contact: "اتصل بنا", access: "دخول العملاء", search: "بحث", 
+    budget: "الميزانية القصوى", results: "عرض النتائج", private: "دخول خاص",
+    placeholder: "الرمز", validate: "تأكيد", sub: "ابحث عن فيلتك المثالية"
+  },
+  pl: {
+    home: "Strona główna", contact: "Kontakt", access: "Panel klienta", search: "Szukaj", 
+    budget: "Max Budżet", results: "Pokaż wyniki", private: "Dostęp Prywatny",
+    placeholder: "PIN", validate: "Zatwierdź", sub: "Znajdź swoją idealną willę"
+  }
+};
+
+type Language = keyof typeof translations;
+
 const DataHomeLogo = ({ className }: { className?: string }) => (
-  <svg 
-    viewBox="0 0 150 35" 
-    fill="none" 
-    xmlns="http://www.w3.org/2000/svg" 
-    className={className}
-  >
+  <svg viewBox="0 0 150 35" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
     <path d="M15 12L20 5L25 12H15Z" fill="currentColor" />
-    <text 
-      x="10" 
-      y="28" 
-      fontFamily="sans-serif" 
-      fontSize="22" 
-      fontWeight="300" 
-      fill="currentColor" 
-      letterSpacing="-0.02em"
-    >
-      data home
-    </text>
+    <text x="10" y="28" fontFamily="sans-serif" fontSize="22" fontWeight="300" fill="currentColor" letterSpacing="-0.02em">data home</text>
   </svg>
 );
 
@@ -47,28 +65,28 @@ export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false); 
-  const [currentLang, setCurrentLang] = useState("FR");
+  const [currentLang, setCurrentLang] = useState<Language>("fr");
   const [passwordInput, setPasswordInput] = useState("");
-  const [user, setUser] = useState<any>(null);
-  const [clientPin, setClientPin] = useState<string | null>(null);
-  const [authLoading, setAuthLoading] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [maxPrice, setMaxPrice] = useState(2500000);
 
   const langMenuRef = useRef<HTMLDivElement>(null);
+  const t = translations[currentLang];
 
   const navLinks = [
-    { name: "Accueil", href: "/" },
+    { name: t.home, href: "/" },
     { name: "Cashback-Info", href: "/cashback-info" },
-    { name: "Contact", href: "/contact" },
+    { name: t.contact, href: "/contact" },
   ];
 
   const languages = [
-    { code: "fr", label: "Français" },
-    { code: "en", label: "English" },
-    { code: "es", label: "Español" },
-    { code: "nl", label: "Nederlands" },
-  ];
+    { code: "fr", label: "FR" },
+    { code: "en", label: "EN" },
+    { code: "es", label: "ES" },
+    { code: "nl", label: "NL" },
+    { code: "ar", label: "AR" },
+    { code: "pl", label: "PL" },
+  ] as const;
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
@@ -77,99 +95,59 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
-    const checkUser = async () => {
-      const { data: { user: currentUser } } = await supabase.auth.getUser();
-      setUser(currentUser);
+    const handleClickOutside = (event: MouseEvent) => {
+      if (langMenuRef.current && !langMenuRef.current.contains(event.target as Node)) {
+        setShowLangMenu(false);
+      }
     };
-    checkUser();
-    const savedPin = localStorage.getItem("client_access_pin");
-    if (savedPin) setClientPin(savedPin);
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-    });
-    return () => subscription.unsubscribe();
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-
-  useEffect(() => {
-    setIsMobileMenuOpen(false);
-    setIsSearchModalOpen(false);
-    setIsLoginModalOpen(false);
-  }, [pathname]);
-
-  const changeLanguage = (langCode: string) => {
-    const select = document.querySelector('.goog-te-combo') as HTMLSelectElement;
-    if (select) {
-      select.value = langCode;
-      select.dispatchEvent(new Event('change'));
-      setCurrentLang(langCode.toUpperCase());
-      setShowLangMenu(false);
-    }
-  };
 
   const handleAuthSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setAuthLoading(true);
     const { data } = await supabase.from('suivi_chantier').select('pin_code').eq('pin_code', passwordInput).maybeSingle();
     if (data) {
       localStorage.setItem("client_access_pin", data.pin_code);
-      setClientPin(data.pin_code);
       setIsLoginModalOpen(false);
-      setPasswordInput("");
       router.push('/project-tracker');
     } else {
-      alert("Code PIN incorrect.");
+      alert(currentLang === 'fr' ? "Code PIN incorrect." : "Incorrect PIN.");
     }
-    setAuthLoading(false);
   };
 
   return (
     <>
-      <style jsx global>{`
-        .goog-te-banner-frame.skiptranslate, .goog-te-gadget-icon { display: none !important; }
-        body { top: 0px !important; }
-        .goog-tooltip { display: none !important; }
-        ${(isMobileMenuOpen || isSearchModalOpen || isLoginModalOpen) ? 'body { overflow: hidden; }' : ''}
-      `}</style>
-
       <nav className={`fixed w-full top-0 left-0 z-[100] transition-all duration-700 h-24 flex items-center ${
-        isScrolled 
-          ? "bg-white/90 dark:bg-[#020617]/90 backdrop-blur-md shadow-xl border-b border-slate-100 dark:border-white/5" 
-          : "bg-transparent"
+        isScrolled ? "bg-white/90 dark:bg-[#020617]/90 backdrop-blur-md shadow-xl border-b border-slate-100 dark:border-white/5" : "bg-transparent"
       }`}>
         <div className="max-w-[1600px] w-full mx-auto px-4 md:px-10 flex justify-between items-center">
           
-          <Link href="/" className="z-[110] flex items-center group transition-transform hover:scale-105">
+          <Link href="/" className="z-[110] flex items-center group">
             <DataHomeLogo className="h-10 w-auto text-slate-900 dark:text-white transition-colors group-hover:text-[#D4AF37]" />
           </Link>
 
-          <div className="hidden md:flex items-center space-x-6 lg:space-x-10">
+          <div className="hidden md:flex items-center space-x-10">
             {navLinks.map((link) => (
-              <Link 
-                key={link.href} 
-                href={link.href}
-                className={`text-[9px] lg:text-[10px] font-black uppercase tracking-[0.2em] lg:tracking-[0.25em] transition-all duration-300 relative group ${
-                  pathname === link.href ? "text-[#D4AF37]" : "text-slate-600 dark:text-white/70 hover:text-[#D4AF37]"
-                }`}
-              >
+              <Link key={link.href} href={link.href} className={`text-[10px] font-black uppercase tracking-[0.25em] transition-all relative group ${pathname === link.href ? "text-[#D4AF37]" : "text-slate-600 dark:text-white/70 hover:text-[#D4AF37]"}`}>
                 {link.name}
                 <span className={`absolute -bottom-1 left-0 w-0 h-[1px] bg-[#D4AF37] transition-all duration-300 group-hover:w-full ${pathname === link.href ? 'w-full' : ''}`} />
               </Link>
             ))}
           </div>
 
-          <div className="flex items-center space-x-2 md:space-x-4 z-[110]">
-            <div className="hidden sm:block">
-              <ThemeToggle />
-            </div>
+          <div className="flex items-center space-x-4 z-[110]">
+            <ThemeToggle />
 
+            {/* SÉLECTEUR DE LANGUE PROPRE */}
             <div className="relative hidden xl:block" ref={langMenuRef}>
-              <button onClick={() => setShowLangMenu(!showLangMenu)} className="flex items-center space-x-2 text-[10px] font-bold tracking-widest text-slate-900 dark:text-white hover:text-[#D4AF37] transition-colors">
-                <Globe size={14} className="text-[#D4AF37]" /> <span>{currentLang}</span>
+              <button onClick={() => setShowLangMenu(!showLangMenu)} className="flex items-center space-x-2 text-[10px] font-bold tracking-widest text-slate-900 dark:text-white hover:text-[#D4AF37]">
+                <Globe size={14} className="text-[#D4AF37]" /> <span>{currentLang.toUpperCase()}</span>
               </button>
               {showLangMenu && (
-                <div className="absolute top-full right-0 mt-4 bg-white dark:bg-[#0f172a] border border-slate-100 dark:border-white/10 rounded-xl p-2 min-w-[140px] shadow-2xl overflow-hidden">
+                <div className="absolute top-full right-0 mt-4 bg-white dark:bg-[#0f172a] border border-slate-100 dark:border-white/10 rounded-xl p-2 min-w-[100px] shadow-2xl">
                   {languages.map((l) => (
-                    <button key={l.code} onClick={() => changeLanguage(l.code)} className="w-full text-left px-4 py-2 text-[10px] font-bold uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-white/5 text-slate-600 dark:text-slate-300 hover:text-[#D4AF37] transition-colors">
+                    <button key={l.code} onClick={() => { setCurrentLang(l.code); setShowLangMenu(false); }} className="w-full text-left px-4 py-2 text-[10px] font-bold uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-white/5 text-slate-600 dark:text-slate-300 hover:text-[#D4AF37]">
                       {l.label}
                     </button>
                   ))}
@@ -177,15 +155,12 @@ export default function Navbar() {
               )}
             </div>
 
-            <button 
-              onClick={() => setIsSearchModalOpen(true)}
-              className="p-2.5 md:p-3 bg-slate-100 dark:bg-white/10 rounded-full text-[#D4AF37] border border-slate-200 dark:border-white/10 hover:bg-[#D4AF37] hover:text-white transition-all shadow-sm"
-            >
+            <button onClick={() => setIsSearchModalOpen(true)} className="p-3 bg-slate-100 dark:bg-white/10 rounded-full text-[#D4AF37] border border-slate-200 dark:border-white/10 hover:bg-[#D4AF37] hover:text-white transition-all">
               <Search size={18} />
             </button>
 
-            <button onClick={() => setIsLoginModalOpen(true)} className="hidden sm:flex items-center space-x-2 text-[9px] lg:text-[10px] font-bold uppercase tracking-widest px-4 lg:px-6 py-3 rounded-full border border-[#D4AF37]/20 bg-[#D4AF37]/5 text-slate-900 dark:text-white hover:bg-[#D4AF37] hover:text-black transition-all">
-              <User size={14} /> <span className="hidden lg:inline">Accès Client</span>
+            <button onClick={() => setIsLoginModalOpen(true)} className="hidden sm:flex items-center space-x-2 text-[10px] font-bold uppercase tracking-widest px-6 py-3 rounded-full border border-[#D4AF37]/20 bg-[#D4AF37]/5 text-slate-900 dark:text-white hover:bg-[#D4AF37] hover:text-black transition-all">
+              <User size={14} /> <span className="hidden lg:inline">{t.access}</span>
             </button>
 
             <button onClick={() => setIsMobileMenuOpen(true)} className="md:hidden text-slate-900 dark:text-white p-2">
@@ -197,67 +172,45 @@ export default function Navbar() {
 
       {/* MODAL RECHERCHE */}
       {isSearchModalOpen && (
-        <div className="fixed inset-0 z-[300] flex items-end sm:items-center justify-center">
-          <div className="absolute inset-0 bg-black/80 backdrop-blur-md transition-opacity" onClick={() => setIsSearchModalOpen(false)} />
-          <div className="relative bg-white dark:bg-[#0f172a] w-full sm:max-w-lg sm:rounded-[2.5rem] rounded-t-[2.5rem] overflow-hidden shadow-2xl animate-in slide-in-from-bottom duration-500 flex flex-col max-h-[92vh] border border-slate-100 dark:border-white/10">
-            <div className="bg-slate-50 dark:bg-[#1e293b]/50 px-8 py-6 border-b border-slate-100 dark:border-white/5 flex justify-between items-center">
+        <div className="fixed inset-0 z-[300] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => setIsSearchModalOpen(false)} />
+          <div className="relative bg-white dark:bg-[#0f172a] w-full max-w-lg rounded-[2.5rem] overflow-hidden border border-white/10">
+            <div className="px-8 py-6 border-b border-slate-100 dark:border-white/5 flex justify-between items-center">
               <div>
-                <h3 className="text-xl font-serif italic text-slate-900 dark:text-white">Recherche</h3>
-                <p className="text-[9px] uppercase tracking-widest text-[#D4AF37] font-bold">Trouvez votre villa idéale</p>
+                <h3 className="text-xl font-serif italic text-slate-900 dark:text-white">{t.search}</h3>
+                <p className="text-[9px] uppercase tracking-widest text-[#D4AF37] font-bold">{t.sub}</p>
               </div>
-              <button onClick={() => setIsSearchModalOpen(false)} className="w-10 h-10 bg-white dark:bg-white/5 text-slate-900 dark:text-white rounded-full flex items-center justify-center hover:bg-[#D4AF37] hover:text-white transition-colors"><X size={20} /></button>
+              <button onClick={() => setIsSearchModalOpen(false)} className="w-10 h-10 bg-slate-100 dark:bg-white/5 text-slate-900 dark:text-white rounded-full flex items-center justify-center hover:bg-[#D4AF37]"><X size={20} /></button>
             </div>
-            <div className="p-8 overflow-y-auto space-y-8 pb-32">
-               <div className="space-y-4">
+            <div className="p-8 space-y-8">
+              <div className="space-y-4">
                 <div className="flex justify-between items-end">
-                  <label className="text-[10px] uppercase tracking-[0.2em] font-black text-slate-400 flex items-center gap-2">
-                     <Euro size={14} className="text-[#D4AF37]"/> Budget Max
-                  </label>
+                  <label className="text-[10px] uppercase tracking-[0.2em] font-black text-slate-400 flex items-center gap-2"><Euro size={14} className="text-[#D4AF37]"/> {t.budget}</label>
                   <span className="text-lg font-serif italic text-slate-900 dark:text-white">{maxPrice.toLocaleString()} €</span>
                 </div>
-                <input type="range" min="100000" max="5000000" step="50000" value={maxPrice} onChange={(e) => setMaxPrice(parseInt(e.target.value))} className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-[#D4AF37]" />
+                <input type="range" min="100000" max="5000000" step="50000" value={maxPrice} onChange={(e) => setMaxPrice(parseInt(e.target.value))} className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none accent-[#D4AF37]" />
               </div>
-            </div>
-            <div className="absolute bottom-0 left-0 w-full p-6 bg-white dark:bg-[#1e293b] border-t border-slate-100 dark:border-white/5 flex gap-3">
-              <button onClick={() => setIsSearchModalOpen(false)} className="flex-1 bg-slate-900 dark:bg-[#D4AF37] text-white dark:text-black py-5 rounded-2xl font-bold uppercase text-[10px] tracking-widest hover:opacity-90 transition-all shadow-xl">Afficher les résultats</button>
+              <button onClick={() => setIsSearchModalOpen(false)} className="w-full bg-[#D4AF37] text-black py-5 rounded-2xl font-bold uppercase text-[10px] tracking-widest hover:bg-slate-900 hover:text-white transition-all">{t.results}</button>
             </div>
           </div>
         </div>
       )}
 
-      {/* MENU MOBILE */}
-      <div className={`fixed inset-0 z-[200] transition-transform duration-500 md:hidden ${isMobileMenuOpen ? "translate-x-0" : "translate-x-full"}`}>
-        <div className="absolute inset-0 bg-white dark:bg-[#020617]" />
-        <div className="relative h-full flex flex-col p-8">
-           <div className="flex justify-between items-center mb-12">
-             <DataHomeLogo className="h-8 w-auto text-slate-900 dark:text-white" />
-             <button onClick={() => setIsMobileMenuOpen(false)} className="text-slate-900 dark:text-white"><X size={28} /></button>
-           </div>
-           <nav className="flex flex-col space-y-8 text-2xl font-serif italic text-slate-900 dark:text-white">
-             {navLinks.map(link => (
-               <Link key={link.href} href={link.href} onClick={() => setIsMobileMenuOpen(false)} className="hover:text-[#D4AF37] transition-colors">
-                 {link.name}
-               </Link>
-             ))}
-           </nav>
-        </div>
-      </div>
-
-      {/* MODAL LOGIN PIN */}
+      {/* MODAL LOGIN PIN - CORRIGÉE POUR LE DARK MODE */}
       {isLoginModalOpen && (
-        <div className="fixed inset-0 z-[400] flex items-center justify-center bg-[#020617]/95 backdrop-blur-xl p-6 transition-all">
-          <div className="bg-white dark:bg-[#0f172a] w-full max-w-sm rounded-[2.5rem] p-10 shadow-2xl relative border border-slate-100 dark:border-white/10 text-center">
-            <button onClick={() => setIsLoginModalOpen(false)} className="absolute top-6 right-6 text-slate-400 hover:text-[#D4AF37] transition-colors"><X size={20}/></button>
-            <h2 className="text-xl font-serif italic mb-8 text-slate-900 dark:text-white">Accès Privé</h2>
+        <div className="fixed inset-0 z-[400] flex items-center justify-center bg-[#020617]/95 backdrop-blur-xl p-6">
+          <div className="bg-white dark:bg-[#0f172a] w-full max-w-sm rounded-[2.5rem] p-10 shadow-2xl relative border border-white/10 text-center">
+            <button onClick={() => setIsLoginModalOpen(false)} className="absolute top-6 right-6 text-slate-400 hover:text-[#D4AF37]"><X size={20}/></button>
+            <h2 className="text-xl font-serif italic mb-8 text-slate-900 dark:text-white">{t.private}</h2>
             <form onSubmit={handleAuthSubmit} className="space-y-4">
               <input 
                 type="password" 
                 value={passwordInput} 
                 onChange={(e) => setPasswordInput(e.target.value)} 
-                placeholder="PIN" 
-                className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 p-4 rounded-xl text-center text-2xl tracking-widest font-black text-[#D4AF37] focus:outline-none focus:border-[#D4AF37] transition-all" 
+                placeholder={t.placeholder} 
+                className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 p-4 rounded-xl text-center text-2xl tracking-widest font-black text-[#D4AF37] focus:border-[#D4AF37] outline-none" 
               />
-              <button type="submit" className="w-full bg-[#D4AF37] text-black py-4 rounded-xl font-bold uppercase text-[10px] tracking-widest hover:bg-slate-900 hover:text-white transition-all">Valider</button>
+              <button type="submit" className="w-full bg-[#D4AF37] text-black py-4 rounded-xl font-bold uppercase text-[10px] tracking-widest hover:bg-white hover:text-black transition-all">{t.validate}</button>
             </form>
           </div>
         </div>
