@@ -1,16 +1,15 @@
 @import "tailwindcss";
 
-/* 1. RESET RADICAL DU LAYOUT */
+/* 1. RESET LAYOUT (Zéro bande blanche) */
 html, body {
   margin: 0 !important;
   padding: 0 !important;
   top: 0 !important;
   width: 100%;
-  height: 100%;
 }
 
-/* On s'assure que le conteneur Next.js ne crée pas de décalage */
-#__next, main {
+/* On s'assure que le conteneur principal ne décale rien */
+main {
   margin-top: 0 !important;
   padding-top: 0 !important;
 }
@@ -26,44 +25,28 @@ html, body {
     --foreground: #f8fafc;
   }
 
+  /* On applique les variables SANS !important pour laisser le Dark Mode respirer */
   body {
     background-color: var(--background);
     color: var(--foreground);
-    @apply antialiased;
+    @apply transition-colors duration-300 antialiased;
   }
 
-  /* 2. CORRECTION DARK MODE (TEXTES) */
-  .dark h1, .dark h2, .dark h3, .dark h4, .dark p, .dark span, .dark label, .dark a {
+  /* 2. FORÇAGE TEXTE DARK MODE */
+  /* On ne cible que les textes qui posent problème, pas tout le site */
+  .dark .text-slate-900, 
+  .dark .text-slate-800 {
     color: #f8fafc !important;
   }
 
-  /* Exceptions pour les boutons à fond blanc en mode dark */
-  .dark .bg-white span, 
-  .dark .bg-white p, 
-  .dark button.bg-white {
+  /* 3. LE BOUTON DE RECHERCHE (Doit rester sombre sur fond blanc) */
+  .dark button.bg-white span,
+  .dark button.bg-white p {
     color: #0f172a !important;
   }
-
-  /* 3. CORRECTION ZONE CODE PIN */
-  .dark input[type="password"], 
-  .dark input[placeholder="PIN"],
-  .dark .code-pin-input {
-    background-color: rgba(0, 0, 0, 0.4) !important;
-    color: #D4AF37 !important;
-    border-color: rgba(255, 255, 255, 0.1) !important;
-  }
 }
 
-/* 4. LE FIX DE LA BANDE (FORCE LA VIDÉO EN HAUT) */
-/* Si votre section hero a une classe spécifique, utilisez-la ici */
-section:first-of-type, 
-.hero-section {
-  margin-top: 0 !important;
-  padding-top: 0 !important;
-  position: relative;
-}
-
-/* 5. DESIGN ELEMENTS */
+/* Scrollbar Dorée */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #D4AF37; border-radius: 10px; }
