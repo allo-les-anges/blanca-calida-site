@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* 1. RESET STRUCTUREL (Zéro bande blanche) */
+/* 1. RESET STRUCTUREL (Zéro bande blanche / Nettoyage résidus) */
 html, body {
   margin: 0 !important;
   padding: 0 !important;
@@ -15,51 +15,66 @@ html, body {
   }
 
   .dark {
-    --background: #020617; /* Votre bleu nuit de luxe */
+    --background: #020617; /* Bleu nuit de luxe */
     --foreground: #f8fafc;
   }
 
   body {
-    /* On force l'application de la variable qui change selon .dark */
     background-color: var(--background) !important;
     color: var(--foreground) !important;
     @apply transition-colors duration-300 antialiased min-h-screen;
   }
 
-  /* FORÇAGE DES TEXTES EN DARK MODE */
+  /* 2. FORÇAGE LISIBILITÉ TEXTES EN DARK MODE */
   .dark h1, .dark h2, .dark h3, .dark h4, 
-  .dark p, .dark span, .dark label, .dark div:not(.bg-white) {
+  .dark p, .dark span, .dark label {
     color: #f8fafc !important;
   }
 
-  /* Exceptions pour les éléments sur fond blanc (Boutons/Modales) */
-  .dark .bg-white span, 
+  /* Force les sections et cartes qui ont des classes de fond claires à devenir sombres */
+  .dark section, 
+  .dark main, 
+  .dark .bg-white:not(button):not(.keep-white),
+  .dark .bg-slate-50,
+  .dark .bg-gray-50 {
+    background-color: #020617 !important;
+  }
+
+  /* 3. EXCEPTIONS : BOUTONS & ÉLÉMENTS SUR FOND BLANC */
+  /* Le texte doit rester sombre à l'intérieur des boutons blancs pour être lisible */
+  .dark button.bg-white span, 
   .dark .bg-white p,
-  .dark button.bg-white {
+  .dark .bg-white span,
+  .dark a.bg-white span {
     color: #020617 !important;
+  }
+
+  /* Maintien du doré pour les prix et éléments de luxe */
+  .dark .text-gold, 
+  .dark [class*="text-[#D4AF37]"] {
+    color: #D4AF37 !important;
   }
 }
 
-/* 2. FIX ZONE CODE PIN */
-.dark input[type="password"] {
+/* 4. FIX ZONE CODE PIN */
+.dark input[type="password"],
+.dark input[placeholder="PIN"] {
   background-color: #1e293b !important;
   color: #D4AF37 !important;
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
 
-/* 3. SCROLLBAR LUXE (La zone qui était rouge deviendra bleue) */
+/* 5. SCROLLBAR LUXE */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #D4AF37; border-radius: 10px; }
 
-/* Empêcher tout décalage du contenu principal */
+/* 6. FIX LAYOUT NAVBAR & HERO */
 main {
   margin-top: 0 !important;
   padding-top: 0 !important;
 }
 
-.dark section, 
-.dark main, 
-.dark .bg-white:not(button):not(.keep-white) {
-  background-color: #020617 !important;
+header, nav {
+  top: 0 !important;
 }
