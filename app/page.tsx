@@ -178,7 +178,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* SECTION ESPACE PROPRIÉTAIRE (CORRECTION VISIBILITÉ) */}
+      {/* SECTION ESPACE PROPRIÉTAIRE */}
       <section className="max-w-7xl mx-auto px-4 md:px-6 py-12 md:py-24 bg-white dark:bg-[#020617] transition-colors duration-500">
         <div className="bg-slate-50 dark:bg-[#0F172A]/40 p-8 md:p-24 rounded-[2.5rem] md:rounded-[4rem] border border-slate-200 dark:border-white/5 relative overflow-hidden transition-colors duration-500">
           <div className="absolute top-[-10%] right-[-5%] opacity-[0.03] pointer-events-none rotate-12">
@@ -188,8 +188,6 @@ export default function Home() {
             <div className="space-y-6 md:space-y-10">
               <div className="space-y-4 text-center lg:text-left">
                 <span className="text-[#D4AF37] text-[10px] font-bold uppercase tracking-[0.4em]">Propriétaires Amaru</span>
-                
-                {/* MODIFICATION ICI : dark:text-white !important via style inline pour bypasser tout conflit */}
                 <h2 
                    className="text-4xl md:text-7xl font-serif text-slate-900 dark:text-white leading-[1.1] italic"
                    style={{ color: resolvedTheme === 'dark' ? '#ffffff' : undefined }}
@@ -198,7 +196,6 @@ export default function Home() {
                   <span className="text-[#D4AF37] not-italic font-sans font-extrabold tracking-tighter text-3xl md:text-6xl uppercase">en temps réel.</span>
                 </h2>
               </div>
-              
               <p className="text-slate-500 dark:text-white text-base md:text-lg font-light leading-relaxed max-w-lg border-l-0 lg:border-l border-slate-200 dark:border-white/10 pl-0 lg:pl-8 italic text-center lg:text-left opacity-90">
                 Accédez à votre cockpit de construction privé pour suivre chaque étape de la réalisation de votre villa d'exception.
               </p>
@@ -227,9 +224,15 @@ export default function Home() {
       <section id="collection" className="py-24 md:py-32 relative bg-white dark:bg-[#020617] transition-colors duration-500">
         <div className="max-w-7xl mx-auto px-4 md:px-6">
           <header className="mb-16 md:mb-24 text-center space-y-4">
-            <h3 className="text-5xl md:text-8xl font-serif italic text-slate-900 dark:text-white leading-none">
+            
+            {/* CORRECTION PORTFOLIO PRIVÉ : Blanc pur en mode sombre */}
+            <h3 
+              className="text-5xl md:text-8xl font-serif italic text-slate-900 dark:text-white leading-none"
+              style={{ color: resolvedTheme === 'dark' ? '#ffffff' : undefined }}
+            >
               {filters.region ? filters.region : "Portfolio Privé"}
             </h3>
+
             <p className="text-[#D4AF37] text-[11px] font-bold uppercase tracking-[0.5em] flex items-center justify-center gap-4">
                <span className="w-4 h-px bg-[#D4AF37]/40"></span>
                {filteredProperties.length} Propriétés Sélectionnées

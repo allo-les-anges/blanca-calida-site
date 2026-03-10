@@ -1,11 +1,19 @@
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Bed, Bath, Waves, Car, Maximize, Map, ChevronRight, Heart } from 'lucide-react';
 import Link from 'next/link';
+import { useTheme } from "next-themes";
 
 export default function PropertyCard({ property }: { property: any }) {
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
   const priceFormatted = new Intl.NumberFormat('de-DE').format(property.price || property.prix || 0);
+
+  // Sécurité pour éviter les erreurs d'hydratation
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   return (
     <Link 
@@ -44,7 +52,12 @@ export default function PropertyCard({ property }: { property: any }) {
       {/* --- INFOS : TITRE ET PRIX --- */}
       <div className="py-8 px-2">
         <div className="flex justify-between items-start gap-4 mb-3">
-          <h3 className="font-serif text-2xl text-slate-900 dark:text-white italic leading-tight flex-grow line-clamp-1">
+          
+          {/* TITRE DU PROJET : Forcé en blanc pur en mode sombre */}
+          <h3 
+            className="font-serif text-2xl text-slate-900 dark:text-white italic leading-tight flex-grow line-clamp-1"
+            style={{ color: (mounted && resolvedTheme === 'dark') ? '#ffffff' : undefined }}
+          >
             {property.titre || property.type || 'Villa de Prestige'}
           </h3>
           
@@ -53,7 +66,7 @@ export default function PropertyCard({ property }: { property: any }) {
           </span>
         </div>
 
-        <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300 text-[10px] tracking-[0.3em] uppercase font-bold">
+        <div className="flex items-center gap-2 text-slate-600 dark:text-slate-200 text-[10px] tracking-[0.3em] uppercase font-bold">
           <span className="text-[#D4AF37]">●</span>
           {property.town} <span className="opacity-30">|</span> {property.region || 'Costa Blanca'}
         </div>
