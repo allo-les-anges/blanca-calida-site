@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect, useMemo } from "react";
-import { RotateCcw, Search, Map, Home, Euro, Hash, Bed, X } from "lucide-react";
+import { RotateCcw, Search, Map, Home, Hash, Bed, X } from "lucide-react";
 
 interface AdvancedSearchProps {
   onSearch: (filters: any) => void;
@@ -35,12 +35,14 @@ export default function AdvancedSearch({
 
   // --- ACTIONS ---
   const handleSearchClick = () => {
-    // Normalisation des données avant envoi
     const cleanedFilters = {
       ...localFilters,
       reference: localFilters.reference?.trim().toLowerCase() || "",
       region: localFilters.region || "",
-      type: localFilters.type || ""
+      type: localFilters.type || "",
+      beds: localFilters.beds || "",
+      minPrice: localFilters.minPrice || "100000",
+      maxPrice: localFilters.maxPrice || "5000000"
     };
     onSearch(cleanedFilters);
     if (onClose) onClose();
@@ -56,13 +58,13 @@ export default function AdvancedSearch({
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 -mt-24 relative z-[50]">
+    <div className="max-w-7xl mx-auto px-4 relative z-[100]">
       <style jsx>{`
         .custom-slider {
           -webkit-appearance: none;
           width: 100%;
           height: 4px;
-          background: #334155; /* Slate 700 pour visibilité dark */
+          background: #334155;
           border-radius: 5px;
           outline: none;
         }
@@ -79,23 +81,31 @@ export default function AdvancedSearch({
         }
       `}</style>
 
+      {/* En-tête de la modale pour la clarté visuelle */}
+      <div className="mb-8 flex flex-col items-center md:items-start">
+        <h2 className="text-3xl font-serif italic text-slate-900 dark:text-white transition-colors">
+          Filtres de Sélection
+        </h2>
+        <div className="h-1 w-20 bg-[#D4AF37] mt-2"></div>
+      </div>
+
       {/* Bouton Fermer */}
       {onClose && (
         <button 
           onClick={onClose}
-          className="absolute -top-16 right-4 w-12 h-12 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-full flex items-center justify-center shadow-2xl hover:bg-[#D4AF37] transition-all z-[60] border border-slate-200 dark:border-slate-700"
+          className="absolute -top-6 -right-2 md:right-4 w-12 h-12 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-full flex items-center justify-center shadow-2xl hover:bg-[#D4AF37] hover:text-white transition-all z-[110] border border-slate-200 dark:border-slate-700"
         >
           <X size={24} />
         </button>
       )}
 
       {/* Container Principal */}
-      <div className="bg-white dark:bg-[#111827] rounded-[2.5rem] shadow-[0_30px_100px_rgba(0,0,0,0.3)] border border-slate-100 dark:border-slate-800 p-3 relative">
+      <div className="bg-white dark:bg-[#0f172a] rounded-[2.5rem] shadow-[0_30px_100px_rgba(0,0,0,0.4)] border border-slate-100 dark:border-slate-800 p-3 relative">
         
         <div className="w-12 h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full mx-auto mt-2 mb-4 lg:hidden" />
 
         {/* LIGNE 1 : RÉFÉRENCE */}
-        <div className="border-b border-slate-50 dark:border-slate-800">
+        <div className="border-b border-slate-50 dark:border-slate-800/50">
           <div className="p-6 lg:p-8">
             <label className="flex items-center gap-2 text-[9px] uppercase font-black tracking-[0.2em] text-[#D4AF37] mb-2">
               <Hash size={12} /> Référence Propriété
@@ -115,7 +125,7 @@ export default function AdvancedSearch({
           <div className="flex-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-0">
             
             {/* RÉGION */}
-            <div className="p-6 border-b md:border-b-0 md:border-r border-slate-50 dark:border-slate-800">
+            <div className="p-6 border-b md:border-b-0 md:border-r border-slate-50 dark:border-slate-800/50">
               <label className="flex items-center gap-2 text-[9px] uppercase font-black tracking-[0.2em] text-slate-400 mb-2">
                 <Map size={12} /> Région
               </label>
@@ -124,13 +134,13 @@ export default function AdvancedSearch({
                 onChange={(e) => setLocalFilters({ ...localFilters, region: e.target.value })}
                 className="w-full bg-transparent text-[13px] font-bold outline-none cursor-pointer appearance-none uppercase text-slate-900 dark:text-white"
               >
-                <option value="" className="dark:bg-slate-900">Espagne (Toutes)</option>
-                {regions.map(r => <option key={r} value={r} className="dark:bg-slate-900">{r}</option>)}
+                <option value="" className="dark:bg-[#0f172a]">Espagne (Toutes)</option>
+                {regions.map(r => <option key={r} value={r} className="dark:bg-[#0f172a]">{r}</option>)}
               </select>
             </div>
 
             {/* TYPE */}
-            <div className="p-6 border-b md:border-b-0 md:border-r border-slate-50 dark:border-slate-800">
+            <div className="p-6 border-b md:border-b-0 md:border-r border-slate-50 dark:border-slate-800/50">
               <label className="flex items-center gap-2 text-[9px] uppercase font-black tracking-[0.2em] text-slate-400 mb-2">
                 <Home size={12} /> Type
               </label>
@@ -139,13 +149,13 @@ export default function AdvancedSearch({
                 onChange={(e) => setLocalFilters({ ...localFilters, type: e.target.value })}
                 className="w-full bg-transparent text-[13px] font-bold outline-none cursor-pointer appearance-none uppercase text-slate-900 dark:text-white"
               >
-                <option value="" className="dark:bg-slate-900">Indifférent</option>
-                {types.map(t => <option key={t.id} value={t.id} className="dark:bg-slate-900">{t.label}</option>)}
+                <option value="" className="dark:bg-[#0f172a]">Indifférent</option>
+                {types.map(t => <option key={t.id} value={t.id} className="dark:bg-[#0f172a]">{t.label}</option>)}
               </select>
             </div>
 
             {/* PRIX MIN */}
-            <div className="p-6 border-b md:border-b-0 md:border-r border-slate-50 dark:border-slate-800">
+            <div className="p-6 border-b md:border-b-0 md:border-r border-slate-50 dark:border-slate-800/50">
               <div className="flex justify-between items-center mb-3">
                 <label className="text-[9px] uppercase font-black tracking-[0.2em] text-slate-400">Min</label>
                 <span className="text-[11px] font-bold text-slate-900 dark:text-[#D4AF37]">
@@ -164,7 +174,7 @@ export default function AdvancedSearch({
             </div>
 
             {/* PRIX MAX */}
-            <div className="p-6 border-b md:border-b-0 md:border-r border-slate-50 dark:border-slate-800">
+            <div className="p-6 border-b md:border-b-0 md:border-r border-slate-50 dark:border-slate-800/50">
               <div className="flex justify-between items-center mb-3">
                 <label className="text-[9px] uppercase font-black tracking-[0.2em] text-slate-400">Max</label>
                 <span className="text-[11px] font-bold text-slate-900 dark:text-[#D4AF37]">
@@ -195,7 +205,7 @@ export default function AdvancedSearch({
                     onClick={() => setLocalFilters({ ...localFilters, beds: n.toString() })}
                     className={`flex-1 h-8 rounded-lg text-[10px] font-black transition-all ${
                       localFilters.beds === n.toString() 
-                      ? "bg-[#D4AF37] text-black" 
+                      ? "bg-[#D4AF37] text-white" 
                       : "bg-slate-50 dark:bg-slate-800 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700"
                     }`}
                   >
@@ -208,10 +218,10 @@ export default function AdvancedSearch({
           </div>
 
           {/* BOUTON RECHERCHE */}
-          <div className="p-4 flex items-center justify-center">
+          <div className="p-4 flex items-center justify-center lg:bg-slate-50/30 dark:lg:bg-slate-800/30 rounded-r-[2.5rem]">
             <button 
               onClick={handleSearchClick}
-              className="w-full lg:w-20 h-16 lg:h-20 bg-slate-950 dark:bg-[#D4AF37] text-white dark:text-black rounded-3xl flex items-center justify-center hover:scale-105 transition-all duration-300 shadow-xl"
+              className="w-full lg:w-20 h-16 lg:h-20 bg-slate-950 dark:bg-[#D4AF37] text-white dark:text-slate-900 rounded-3xl flex items-center justify-center hover:scale-105 transition-all duration-300 shadow-xl"
             >
               <Search size={24} strokeWidth={2.5} />
             </button>
