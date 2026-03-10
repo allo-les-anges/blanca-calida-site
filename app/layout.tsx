@@ -28,16 +28,11 @@ export default function RootLayout({
       <head>
         {/* Plus besoin de meta notranslate puisque nous gérons nos propres textes */}
       </head>
-      <body 
-        className={`${inter.variable} ${playfair.variable} font-sans antialiased bg-white dark:bg-[#020617] text-slate-900 dark:text-slate-100 transition-colors duration-300`}
-      >
-        <ThemeProvider>
-          {/* L'id "google_translate_element" a été supprimé. 
-              Cela règle définitivement le problème de la bande blanche au-dessus de la vidéo.
-          */}
-          {children}
-        </ThemeProvider>
-      </body>
+      <body className={`${inter.variable} ${playfair.variable} font-sans antialiased transition-colors duration-300`}>
+  <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+    {children}
+  </ThemeProvider>
+</body>
     </html>
   );
 }

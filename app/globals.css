@@ -1,63 +1,55 @@
 @import "tailwindcss";
 
-/* 1. RESET LAYOUT (Zéro bande blanche) */
+/* 1. RESET STRUCTUREL (SANS COULEUR FORCEE) */
 html, body {
   margin: 0 !important;
   padding: 0 !important;
   top: 0 !important;
   width: 100%;
-}
-
-/* On s'assure que le conteneur principal ne décale rien */
-main {
-  margin-top: 0 !important;
-  padding-top: 0 !important;
+  /* On ne met PAS de background-color ici avec !important */
 }
 
 @layer base {
   :root {
-    --background: #ffffff;
-    --foreground: #0f172a;
+    --background: 255 255 255; /* Blanc */
+    --foreground: 15 23 42;    /* Sombre */
   }
 
   .dark {
-    --background: #020617;
-    --foreground: #f8fafc;
+    --background: 2 6 23;      /* Bleu nuit profond #020617 */
+    --foreground: 248 250 252; /* Blanc cassé */
   }
 
-  /* On applique les variables SANS !important pour laisser le Dark Mode respirer */
   body {
-    background-color: var(--background);
-    color: var(--foreground);
-    @apply transition-colors duration-300 antialiased;
+    /* Utilisation des variables Tailwind standards */
+    background-color: rgb(var(--background));
+    color: rgb(var(--foreground));
+    @apply transition-colors duration-300 antialiased min-h-screen;
   }
 
-  /* 2. FORÇAGE TEXTE DARK MODE */
-  /* On ne cible que les textes qui posent problème, pas tout le site */
-  .dark .text-slate-900, 
-  .dark .text-slate-800 {
+  /* FORÇAGE DES TEXTES EN DARK MODE */
+  .dark h1, .dark h2, .dark h3, .dark h4, 
+  .dark p, .dark span, .dark label, .dark div:not(.bg-white) {
     color: #f8fafc !important;
   }
 
-  /* 3. LE BOUTON DE RECHERCHE (Doit rester sombre sur fond blanc) */
-  .dark button.bg-white span,
-  .dark button.bg-white p {
-    color: #0f172a !important;
+  /* Cas particulier : Le bouton "Accès Client" et "Recherche" qui sont blancs */
+  /* Ils doivent garder du texte sombre même en Dark Mode pour être lisibles */
+  .dark .bg-white span, 
+  .dark .bg-white p,
+  .dark button.bg-white {
+    color: #020617 !important;
   }
 }
 
-/* Scrollbar Dorée */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #D4AF37; border-radius: 10px; }
-
-/* Correction spécifique pour la zone PIN */
+/* 2. LE FIX DU CODE PIN (Invisibilité réglée) */
 .dark input[type="password"] {
   background-color: #1e293b !important;
   color: #D4AF37 !important;
-  border: 1px solid rgba(255,255,255,0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
 
-.dark h2.font-serif {
-  color: #ffffff !important;
-}
+/* 3. SCROLLBAR LUXE */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #D4AF37; border-radius: 10px; }
