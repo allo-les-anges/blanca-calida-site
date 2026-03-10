@@ -34,3 +34,19 @@ html, body, main {
   display: none !important; 
   visibility: hidden !important; 
 }
+
+/* 6. Forçage des sections récalcitrantes en mode sombre */
+.dark section, 
+.dark div[class*="bg-white"], 
+.dark div[class*="bg-slate-50"],
+.dark div[class*="bg-gray-50"] {
+  background-color: var(--background) !important;
+  color: var(--foreground) !important;
+}
+
+/* 7. Correction spécifique pour les cartes (Cards) */
+.dark .card, 
+.dark .bg-white.rounded-xl {
+  background-color: #1e293b !important; /* Un gris très sombre pour détacher les cartes du fond */
+  border-color: #334155 !important;
+}
