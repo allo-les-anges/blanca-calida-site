@@ -7,6 +7,7 @@ import {
   Globe, ChevronDown, Menu, X, Search, User, Euro 
 } from "lucide-react";
 import { createBrowserClient } from '@supabase/ssr';
+import { useTheme } from "next-themes"; // Importation nécessaire pour le mode sombre
 import ThemeToggle from "./ThemeToggle";
 
 // --- DICTIONNAIRE DE TRADUCTION ---
@@ -60,6 +61,7 @@ const supabase = createBrowserClient(
 export default function Navbar() {
   const router = useRouter();
   const pathname = usePathname(); 
+  const { resolvedTheme } = useTheme(); // Détection du thème
   
   const [showLangMenu, setShowLangMenu] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -68,6 +70,7 @@ export default function Navbar() {
   const [currentLang, setCurrentLang] = useState<Language>("fr");
   const [passwordInput, setPasswordInput] = useState("");
   const [isScrolled, setIsScrolled] = useState(false);
+  const [mounted, setMounted] = useState(false); // Sécurité hydratation
   const [maxPrice, setMaxPrice] = useState(2500000);
 
   const langMenuRef = useRef<HTMLDivElement>(null);
@@ -89,6 +92,7 @@ export default function Navbar() {
   ] as const;
 
   useEffect(() => {
+    setMounted(true); // Indique que le composant est monté côté client
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
@@ -129,7 +133,11 @@ export default function Navbar() {
 
           <div className="hidden md:flex items-center space-x-10">
             {navLinks.map((link) => (
-              <Link key={link.href} href={link.href} className={`text-[10px] font-black uppercase tracking-[0.25em] transition-all relative group ${pathname === link.href ? "text-[#D4AF37]" : "text-slate-600 dark:text-white/70 hover:text-[#D4AF37]"}`}>
+              <Link 
+                key={link.href} 
+                href={link.href} 
+                className={`text-[10px] font-black uppercase tracking-[0.25em] transition-all relative group ${pathname === link.href ? "text-[#D4AF37]" : "text-slate-600 dark:text-white/70 hover:text-[#D4AF37]"}`}
+              >
                 {link.name}
                 <span className={`absolute -bottom-1 left-0 w-0 h-[1px] bg-[#D4AF37] transition-all duration-300 group-hover:w-full ${pathname === link.href ? 'w-full' : ''}`} />
               </Link>
@@ -173,7 +181,6 @@ export default function Navbar() {
       {/* --- MENU MOBILE HAMBURGER CORRIGÉ --- */}
       {isMobileMenuOpen && (
         <div className="fixed inset-0 z-[500] md:hidden">
-          {/* Overlay sombre */}
           <div className="absolute inset-0 bg-[#020617]/95 backdrop-blur-xl" onClick={() => setIsMobileMenuOpen(false)} />
           
           <div className="absolute right-0 top-0 h-full w-[85%] max-w-sm bg-white dark:bg-[#020617] shadow-2xl p-8 flex flex-col border-l border-white/5">
@@ -191,6 +198,7 @@ export default function Navbar() {
                   href={link.href} 
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="text-2xl font-serif italic text-slate-900 dark:text-white hover:text-[#D4AF37] transition-colors"
+                  style={{ color: (mounted && resolvedTheme === 'dark') ? '#ffffff' : undefined }}
                 >
                   {link.name}
                 </Link>
@@ -198,12 +206,13 @@ export default function Navbar() {
               <button 
                 onClick={() => { setIsMobileMenuOpen(false); setIsLoginModalOpen(true); }}
                 className="text-left text-2xl font-serif italic text-slate-900 dark:text-white hover:text-[#D4AF37]"
+                style={{ color: (mounted && resolvedTheme === 'dark') ? '#ffffff' : undefined }}
               >
                 {t.access}
               </button>
             </nav>
 
-            {/* SÉLECTEUR DE LANGUE MOBILE INTÉGRÉ */}
+            {/* SÉLECTEUR DE LANGUE MOBILE */}
             <div className="mt-auto pt-10 border-t border-slate-100 dark:border-white/10">
               <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-6 flex items-center gap-2">
                 <Globe size={14} className="text-[#D4AF37]"/> Langue / Language
@@ -228,7 +237,7 @@ export default function Navbar() {
         </div>
       )}
 
-      {/* MODAL RECHERCHE */}
+      {/* ... MODALS RECHERCHE ET LOGIN (Inchangées mais complètes dans votre fichier) ... */}
       {isSearchModalOpen && (
         <div className="fixed inset-0 z-[300] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => setIsSearchModalOpen(false)} />
@@ -254,7 +263,6 @@ export default function Navbar() {
         </div>
       )}
 
-      {/* MODAL LOGIN PIN */}
       {isLoginModalOpen && (
         <div className="fixed inset-0 z-[400] flex items-center justify-center bg-[#020617]/95 backdrop-blur-xl p-6">
           <div className="bg-white dark:bg-[#0f172a] w-full max-w-sm rounded-[2.5rem] p-10 shadow-2xl relative border border-white/10 text-center">
