@@ -77,6 +77,18 @@ export default function ContactPage() {
 
   const isDark = resolvedTheme === "dark";
 
+  // Classe utilitaire pour les inputs pour centraliser la correction de lisibilité
+  const inputClasses = `
+    w-full px-8 py-5 rounded-2xl outline-none transition-all 
+    text-[10px] font-black tracking-widest 
+    bg-white dark:bg-black/60 
+    border-2 border-slate-200 dark:border-white/10 
+    text-slate-900 dark:text-white 
+    placeholder:text-slate-400 dark:placeholder:text-white/30
+    focus:border-[#D4AF37] dark:focus:border-[#D4AF37]
+    focus:bg-white dark:focus:bg-black
+  `;
+
   return (
     <div className="min-h-screen transition-colors duration-500 bg-white dark:bg-[#0A0A0A] text-slate-900 dark:text-white">
       
@@ -173,24 +185,24 @@ export default function ContactPage() {
                 <input 
                   type="text" 
                   placeholder="NOM COMPLET" 
-                  className="w-full px-8 py-5 rounded-2xl outline-none transition-all text-[10px] font-black tracking-widest bg-white dark:bg-black/40 border-2 border-slate-200 dark:border-white/5 text-slate-900 dark:text-white focus:border-[#D4AF37] dark:focus:border-[#D4AF37]" 
+                  className={inputClasses} 
                 />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <input 
                     type="email" 
                     placeholder="EMAIL" 
-                    className="w-full px-8 py-5 rounded-2xl outline-none transition-all text-[10px] font-black tracking-widest bg-white dark:bg-black/40 border-2 border-slate-200 dark:border-white/5 text-slate-900 dark:text-white focus:border-[#D4AF37] dark:focus:border-[#D4AF37]" 
+                    className={inputClasses} 
                   />
                   <input 
                     type="text" 
                     placeholder="PAYS / RÉGION" 
-                    className="w-full px-8 py-5 rounded-2xl outline-none transition-all text-[10px] font-black tracking-widest bg-white dark:bg-black/40 border-2 border-slate-200 dark:border-white/5 text-slate-900 dark:text-white focus:border-[#D4AF37] dark:focus:border-[#D4AF37]" 
+                    className={inputClasses} 
                   />
                 </div>
                 <textarea 
                   rows={4} 
                   placeholder="DÉTAILS DE VOTRE PROJET..." 
-                  className="w-full px-8 py-5 rounded-2xl outline-none transition-all text-[10px] font-black tracking-widest resize-none bg-white dark:bg-black/40 border-2 border-slate-200 dark:border-white/5 text-slate-900 dark:text-white focus:border-[#D4AF37] dark:focus:border-[#D4AF37]" 
+                  className={`${inputClasses} resize-none`} 
                 />
                 <button className="w-full bg-[#D4AF37] text-black py-6 rounded-2xl font-black uppercase text-[10px] tracking-[0.4em] hover:bg-black hover:text-[#D4AF37] dark:hover:bg-white dark:hover:text-black transition-all shadow-xl">
                   Contacter l'Expert Dédié
