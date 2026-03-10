@@ -1,29 +1,28 @@
 @import "tailwindcss";
 
-/* 1. RESET STRUCTUREL (SANS COULEUR FORCEE) */
+/* 1. RESET STRUCTUREL (Zéro bande blanche) */
 html, body {
   margin: 0 !important;
   padding: 0 !important;
   top: 0 !important;
   width: 100%;
-  /* On ne met PAS de background-color ici avec !important */
 }
 
 @layer base {
   :root {
-    --background: 255 255 255; /* Blanc */
-    --foreground: 15 23 42;    /* Sombre */
+    --background: #ffffff;
+    --foreground: #0f172a;
   }
 
   .dark {
-    --background: 2 6 23;      /* Bleu nuit profond #020617 */
-    --foreground: 248 250 252; /* Blanc cassé */
+    --background: #020617; /* Votre bleu nuit de luxe */
+    --foreground: #f8fafc;
   }
 
   body {
-    /* Utilisation des variables Tailwind standards */
-    background-color: rgb(var(--background));
-    color: rgb(var(--foreground));
+    /* On force l'application de la variable qui change selon .dark */
+    background-color: var(--background) !important;
+    color: var(--foreground) !important;
     @apply transition-colors duration-300 antialiased min-h-screen;
   }
 
@@ -33,8 +32,7 @@ html, body {
     color: #f8fafc !important;
   }
 
-  /* Cas particulier : Le bouton "Accès Client" et "Recherche" qui sont blancs */
-  /* Ils doivent garder du texte sombre même en Dark Mode pour être lisibles */
+  /* Exceptions pour les éléments sur fond blanc (Boutons/Modales) */
   .dark .bg-white span, 
   .dark .bg-white p,
   .dark button.bg-white {
@@ -42,15 +40,20 @@ html, body {
   }
 }
 
-/* 2. LE FIX DU CODE PIN (Invisibilité réglée) */
+/* 2. FIX ZONE CODE PIN */
 .dark input[type="password"] {
   background-color: #1e293b !important;
   color: #D4AF37 !important;
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
 
-/* 3. SCROLLBAR LUXE */
+/* 3. SCROLLBAR LUXE (La zone qui était rouge deviendra bleue) */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #D4AF37; border-radius: 10px; }
 
+/* Empêcher tout décalage du contenu principal */
+main {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
