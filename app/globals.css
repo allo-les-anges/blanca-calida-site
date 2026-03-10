@@ -1,3 +1,25 @@
+/* globals.css */
+
+/* On neutralise le décalage forcé par Google */
+html {
+  margin-top: 0px !important;
+  top: 0px !important;
+}
+
+body {
+  top: 0px !important;
+  position: static !important;
+}
+
+/* On masque les éléments invisibles de Google qui créent cet espace */
+.goog-te-banner-frame, 
+.skiptranslate, 
+iframe.goog-te-banner-frame,
+#goog-gt-tt {
+  display: none !important;
+  visibility: hidden !important;
+}
+
 @import "tailwindcss";
 
 @layer base {
@@ -80,3 +102,16 @@ iframe.goog-te-banner-frame {
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #D4AF37; border-radius: 10px; }
+
+/* Correction du bouton de recherche en mode Dark */
+.dark .recherche-privee-btn, 
+.dark button[class*="recherche"],
+.dark div[class*="recherche"] span,
+.dark div[class*="recherche"] p {
+  color: #0f172a !important; /* Force le texte en bleu très foncé/noir */
+}
+
+/* Si vous voulez que le texte soit doré pour rappeler le standing */
+.dark .recherche-privee-btn span {
+  color: #D4AF37 !important;
+}
