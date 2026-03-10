@@ -66,3 +66,30 @@ html, body, main {
     color: #cbd5e1 !important; /* Gris clair (slate-300) */
   }
 }
+
+/* globals.css */
+
+/* On force l'élément HTML à rester en haut, peu importe ce que dit Google */
+html {
+  top: 0 !important;
+  margin-top: 0 !important;
+}
+
+/* On empêche le décalage du corps de la page */
+body {
+  top: 0 !important;
+  position: static !important;
+}
+
+/* On s'assure que le widget invisible ne prend pas de place */
+.goog-te-banner-frame, 
+.goog-te-banner, 
+.skiptranslate {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+/* Parfois Google injecte une iframe tout en haut */
+iframe.goog-te-banner-frame {
+  display: none !important;
+}
