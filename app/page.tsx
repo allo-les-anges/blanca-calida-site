@@ -10,6 +10,7 @@ import { useTheme } from "next-themes";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import AdvancedSearch from "@/components/AdvancedSearch";
+import ScrollingBanner from "@/components/ScrollingBanner"; // Nouveau
 import RegionGrid from "@/components/RegionGrid";
 import PropertyGrid from "@/components/PropertyGrid";
 import Footer from "@/components/Footer";
@@ -18,7 +19,7 @@ type Property = any;
 
 export default function Home() {
   const router = useRouter();
-  const { theme, resolvedTheme } = useTheme();
+  const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
   const [allProperties, setAllProperties] = useState<Property[]>([]);
@@ -108,6 +109,8 @@ export default function Home() {
 
   if (!mounted) return null;
 
+  const isDark = resolvedTheme === "dark";
+
   if (loading) {
     return (
       <div className="h-screen bg-[#020617] flex flex-col items-center justify-center">
@@ -136,7 +139,12 @@ export default function Home() {
                 </div>
                 <div className="text-left">
                   <span className="block text-[8px] md:text-[9px] font-bold text-[#D4AF37] uppercase tracking-[0.3em]">Recherche Privée</span>
-                  <span className="block text-slate-900 dark:text-white font-serif italic text-sm md:text-base tracking-wide">Trouver votre villa</span>
+                  <span 
+                    className="block font-serif italic text-sm md:text-base tracking-wide"
+                    style={{ color: isDark ? '#FFFFFF' : '#0f172a' }}
+                  >
+                    Trouver votre villa
+                  </span>
                 </div>
              </button>
            )}
@@ -144,6 +152,9 @@ export default function Home() {
 
         <div className="absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-white dark:from-[#020617] via-white/80 dark:via-[#020617]/80 to-transparent pointer-events-none transition-colors duration-500" />
       </div>
+
+      {/* BANDEAU DÉROULANT (Entre Hero et Destinations) */}
+      <ScrollingBanner />
 
       {/* MODAL DE RECHERCHE */}
       <div className={`fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8 transition-all duration-500 ${isSearchOpen ? 'visible opacity-100' : 'invisible opacity-0'}`}>
@@ -167,13 +178,9 @@ export default function Home() {
         </div>
       </div>
 
-      {/* SECTION RÉGIONS */}
+      {/* SECTION RÉGIONS (Intègre désormais le code RegionGrid avec option A) */}
       <section className="py-24 md:py-32 bg-white dark:bg-[#020617] transition-colors duration-500">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16 md:mb-24 space-y-4">
-            <h2 className="text-[#D4AF37] text-[11px] font-bold uppercase tracking-[0.6em]">Destinations d'Exception</h2>
-            <div className="h-px w-24 bg-[#D4AF37] mx-auto opacity-50"></div>
-          </div>
           <RegionGrid properties={allProperties} onRegionClick={handleRegionClick} />
         </div>
       </section>
@@ -189,14 +196,17 @@ export default function Home() {
               <div className="space-y-4 text-center lg:text-left">
                 <span className="text-[#D4AF37] text-[10px] font-bold uppercase tracking-[0.4em]">Propriétaires Amaru</span>
                 <h2 
-                   className="text-4xl md:text-7xl font-serif text-slate-900 dark:text-white leading-[1.1] italic"
-                   style={{ color: resolvedTheme === 'dark' ? '#ffffff' : undefined }}
+                   className="text-4xl md:text-7xl font-serif leading-[1.1] italic"
+                   style={{ color: isDark ? '#ffffff' : '#0f172a' }}
                 >
                   Suivez votre projet <br /> 
                   <span className="text-[#D4AF37] not-italic font-sans font-extrabold tracking-tighter text-3xl md:text-6xl uppercase">en temps réel.</span>
                 </h2>
               </div>
-              <p className="text-slate-500 dark:text-white text-base md:text-lg font-light leading-relaxed max-w-lg border-l-0 lg:border-l border-slate-200 dark:border-white/10 pl-0 lg:pl-8 italic text-center lg:text-left opacity-90">
+              <p 
+                className="text-base md:text-lg font-light leading-relaxed max-w-lg border-l-0 lg:border-l border-slate-200 dark:border-white/10 pl-0 lg:pl-8 italic text-center lg:text-left opacity-90"
+                style={{ color: isDark ? '#CBD5E1' : '#64748b' }}
+              >
                 Accédez à votre cockpit de construction privé pour suivre chaque étape de la réalisation de votre villa d'exception.
               </p>
             </div>
@@ -208,7 +218,8 @@ export default function Home() {
                     <input 
                       type="password" placeholder="CODE PIN" value={clientPin}
                       onChange={(e) => setClientPin(e.target.value)}
-                      className="w-full bg-transparent border-b border-slate-200 dark:border-white/10 py-4 text-center text-2xl md:text-3xl font-black tracking-[0.8em] text-slate-900 dark:text-white outline-none focus:border-[#D4AF37] transition-all"
+                      className="w-full bg-transparent border-b border-slate-200 dark:border-white/10 py-4 text-center text-2xl md:text-3xl font-black tracking-[0.8em] outline-none focus:border-[#D4AF37] transition-all"
+                      style={{ color: isDark ? '#FFFFFF' : '#0f172a' }}
                     />
                   </div>
                   <button type="submit" className="w-full bg-[#D4AF37] text-black py-5 md:py-6 rounded-full font-bold text-[10px] md:text-[11px] uppercase tracking-[0.3em] hover:bg-slate-900 hover:text-white dark:hover:bg-white dark:hover:text-black transition-all flex items-center justify-center gap-4 shadow-lg shadow-[#D4AF37]/20">
@@ -224,11 +235,9 @@ export default function Home() {
       <section id="collection" className="py-24 md:py-32 relative bg-white dark:bg-[#020617] transition-colors duration-500">
         <div className="max-w-7xl mx-auto px-4 md:px-6">
           <header className="mb-16 md:mb-24 text-center space-y-4">
-            
-            {/* CORRECTION PORTFOLIO PRIVÉ : Blanc pur en mode sombre */}
             <h3 
-              className="text-5xl md:text-8xl font-serif italic text-slate-900 dark:text-white leading-none"
-              style={{ color: resolvedTheme === 'dark' ? '#ffffff' : undefined }}
+              className="text-5xl md:text-8xl font-serif italic leading-none"
+              style={{ color: isDark ? '#ffffff' : '#0f172a' }}
             >
               {filters.region ? filters.region : "Portfolio Privé"}
             </h3>
