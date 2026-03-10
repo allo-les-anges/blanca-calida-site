@@ -1,95 +1,72 @@
 @import "tailwindcss";
 
-/* 1. Définition des couleurs de base */
-:root {
-  --background: #ffffff;
-  --foreground: #0f172a;
-}
-
-/* 2. Couleurs en mode sombre (forcées) */
-html.dark, 
-[data-theme='dark'], 
-[style*="color-scheme: dark"] {
-  --background: #020617 !important;
-  --foreground: #f8fafc !important;
-  color-scheme: dark;
-}
-
-/* 3. Application universelle du fond */
-html, body, main {
-  background-color: var(--background) !important;
-  color: var(--foreground) !important;
-  transition: background-color 0.3s ease;
-}
-
-/* 4. Nettoyage de la barre de défilement */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #D4AF37; border-radius: 10px; }
-
-/* 5. Masquage forcé de Google Translate */
-.goog-te-banner-frame, 
-.skiptranslate, 
-#goog-gt-tt { 
-  display: none !important; 
-  visibility: hidden !important; 
-}
-
-/* 6. Forçage des sections récalcitrantes en mode sombre */
-.dark section, 
-.dark div[class*="bg-white"], 
-.dark div[class*="bg-slate-50"],
-.dark div[class*="bg-gray-50"] {
-  background-color: var(--background) !important;
-  color: var(--foreground) !important;
-}
-
-/* 7. Correction spécifique pour les cartes (Cards) */
-.dark .card, 
-.dark .bg-white.rounded-xl {
-  background-color: #1e293b !important; /* Un gris très sombre pour détacher les cartes du fond */
-  border-color: #334155 !important;
-}
-
-/* globals.css */
-
 @layer base {
-  /* On cible les textes noirs/gris pour les forcer en blanc en mode dark */
-  .dark h1, .dark h2, .dark h3, .dark h4, .dark p, .dark span {
-    color: #f8fafc !important; /* Couleur proche du blanc (slate-50) */
+  :root {
+    --background: #ffffff;
+    --foreground: #0f172a;
   }
 
-  /* On cible spécifiquement les textes gris-bleu de vos sous-titres */
+  .dark {
+    --background: #020617;
+    --foreground: #f8fafc;
+  }
+
+  /* 1. SUPPRESSION RADICALE DE LA BANDE GOOGLE */
+  html {
+    margin-top: 0px !important;
+    top: 0px !important;
+    background-color: var(--background) !important;
+  }
+
+  body {
+    top: 0px !important;
+    position: static !important;
+    background-color: var(--background) !important;
+    color: var(--foreground) !important;
+    min-height: 100vh;
+  }
+
+  /* 2. FORÇAGE DU TEXTE EN BLANC (MODE DARK) */
+  /* On cible les titres et paragraphes pour qu'ils basculent en blanc */
+  .dark h1, 
+  .dark h2, 
+  .dark h3, 
+  .dark h4, 
+  .dark p, 
+  .dark span,
+  .dark label,
+  .dark .text-slate-900,
+  .dark .text-slate-600 {
+    color: #f8fafc !important;
+  }
+
+  /* On garde une teinte légèrement plus grise pour les sous-titres */
   .dark .text-slate-600, 
-  .dark .text-slate-700,
-  .dark .text-gray-600 {
-    color: #cbd5e1 !important; /* Gris clair (slate-300) */
+  .dark .text-gray-500 {
+    color: #cbd5e1 !important;
+  }
+
+  /* 3. FORÇAGE DES FONDS DE SECTION (S'ils restent blancs) */
+  .dark section, 
+  .dark main,
+  .dark div[class*="bg-white"],
+  .dark div[class*="bg-slate-50"] {
+    background-color: #020617 !important;
   }
 }
 
-/* globals.css */
-
-/* On force l'élément HTML à rester en haut, peu importe ce que dit Google */
-html {
-  top: 0 !important;
-  margin-top: 0 !important;
-}
-
-/* On empêche le décalage du corps de la page */
-body {
-  top: 0 !important;
-  position: static !important;
-}
-
-/* On s'assure que le widget invisible ne prend pas de place */
+/* 4. MASQUAGE DES ÉLÉMENTS VISUELS DE GOOGLE */
 .goog-te-banner-frame, 
 .goog-te-banner, 
-.skiptranslate {
+.skiptranslate, 
+#goog-gt-tt, 
+.goog-te-balloon-frame,
+iframe.goog-te-banner-frame {
   display: none !important;
   visibility: hidden !important;
 }
 
-/* Parfois Google injecte une iframe tout en haut */
-iframe.goog-te-banner-frame {
-  display: none !important;
-}
+/* 5. SCROLLBAR DORÉE */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #D4AF37; border-radius: 10px; }
