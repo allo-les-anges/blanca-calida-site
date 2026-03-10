@@ -1,8 +1,3 @@
-Voici le code complet et corrigé, utilisant l'**Option A** (Le Prestige).
-
-J'ai appliqué les correctifs de contraste pour que le texte blanc soit parfaitement lisible, même sur des images lumineuses, en renforçant l'overlay dégradé et en forçant les couleurs de texte en blanc pur pour les éléments à l'intérieur des cartes.
-
-```tsx
 "use client";
 
 import React, { useMemo } from 'react';
@@ -77,8 +72,6 @@ export default function RegionGrid({ properties, onRegionClick }: RegionGridProp
 
   return (
     <section className="max-w-[1600px] mx-auto px-6 py-24 bg-white dark:bg-[#0A0A0A]">
-      
-      {/* EN-TÊTE : Option A - Prestige & Lisibilité corrigée */}
       <div className="mb-24 flex flex-col md:flex-row md:items-end justify-between gap-12">
         <div className="max-w-4xl">
           <motion.div
@@ -107,7 +100,6 @@ export default function RegionGrid({ properties, onRegionClick }: RegionGridProp
         </motion.div>
       </div>
 
-      {/* GRILLE : Design Asymétrique Mallorca Select */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[350px] md:auto-rows-[480px]">
         {REGIONS_DISPLAY.map((region, index) => {
           const count = regionCounts[region.name] || 0;
@@ -128,11 +120,9 @@ export default function RegionGrid({ properties, onRegionClick }: RegionGridProp
                   alt={region.name} 
                   className="w-full h-full object-cover transition-transform duration-[5s] ease-out group-hover:scale-110 opacity-90 group-hover:opacity-80 transition-opacity" 
                 />
-                {/* Gradient renforcé pour garantir la lecture du blanc sur les images claires */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent opacity-90 group-hover:opacity-100 transition-opacity duration-700" />
               </div>
 
-              {/* TEXTES EN BLANC PUR */}
               <div className="absolute inset-0 p-12 flex flex-col justify-end items-start text-white">
                 <motion.div 
                   initial={{ opacity: 0, y: 10 }}
@@ -144,12 +134,11 @@ export default function RegionGrid({ properties, onRegionClick }: RegionGridProp
                     {count} Propriétés
                   </p>
                   
-                  <h3 className="text-3xl md:text-5xl font-serif italic leading-none text-white drop-shadow-2xl">
+                  <h3 className="text-3xl md:text-5xl font-serif italic leading-none text-white">
                     {region.name}
                   </h3>
                   
                   <div className="relative pt-6">
-                    {/* Ligne blanche de navigation */}
                     <div className="absolute top-0 left-0 w-12 h-[1px] bg-white/60 group-hover:w-full transition-all duration-1000 ease-in-out" />
                     <div className="flex items-center justify-between pt-4 opacity-0 group-hover:opacity-100 transition-all duration-700 delay-300">
                       <span className="text-[9px] uppercase tracking-[0.5em] font-light text-white">
@@ -161,7 +150,6 @@ export default function RegionGrid({ properties, onRegionClick }: RegionGridProp
                 </motion.div>
               </div>
 
-              {/* Bordure fine interne pour la finition luxe */}
               <div className="absolute inset-0 border border-white/5 pointer-events-none" />
             </motion.div>
           );
@@ -170,5 +158,3 @@ export default function RegionGrid({ properties, onRegionClick }: RegionGridProp
     </section>
   );
 }
-
-```
