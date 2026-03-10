@@ -68,7 +68,6 @@ export default function ContactPage() {
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
-  // Sécurité pour l'hydratation
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -77,16 +76,18 @@ export default function ContactPage() {
 
   const isDark = resolvedTheme === "dark";
 
-  // Classe utilitaire pour les inputs avec contraste renforcé
+  // Styles forcés pour garantir la visibilité en mode sombre
+  const inputStyle = {
+    color: isDark ? '#ffffff' : '#0f172a',
+    backgroundColor: isDark ? 'rgba(0, 0, 0, 0.6)' : '#ffffff',
+  };
+
   const inputClasses = `
     w-full px-8 py-5 rounded-2xl outline-none transition-all 
     text-[10px] font-black tracking-widest 
-    bg-white dark:bg-black/60 
-    border-2 border-slate-200 dark:border-white/10 
-    text-slate-900 dark:text-white 
-    placeholder:text-slate-400 dark:placeholder:text-white/30
+    border-2 border-slate-200 dark:border-white/20 
+    placeholder:text-slate-400 dark:placeholder:text-white/40
     focus:border-[#D4AF37] dark:focus:border-[#D4AF37]
-    focus:bg-white dark:focus:bg-black
   `;
 
   return (
@@ -98,13 +99,8 @@ export default function ContactPage() {
         {/* SECTION HÉRO */}
         <section className="relative h-[65vh] w-full flex items-center justify-center transition-colors duration-1000 bg-slate-900 dark:bg-[#020617]">
           <div className="absolute inset-0 z-0 opacity-50 bg-slate-900 dark:bg-black" />
-
           <div className="relative z-10 text-center px-6 max-w-5xl pt-20">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-            >
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
               <span className="text-[#D4AF37] text-[12px] font-black uppercase tracking-[0.6em] mb-6 block">
                 🌍 Our Human Edge
               </span>
@@ -112,7 +108,7 @@ export default function ContactPage() {
                 Une Expertise Sans Frontières
               </h1>
               <p className="text-white/70 text-base md:text-lg font-light max-w-3xl mx-auto leading-relaxed italic">
-                "Notre force réside dans notre capacité à connecter les marchés locaux aux opportunités mondiales. Chaque membre de notre équipe apporte une connaissance approfondie des dynamiques régionales et des réseaux d'investisseurs."
+                "Notre force réside dans notre capacité à connecter les marchés locaux aux opportunités mondiales."
               </p>
             </motion.div>
           </div>
@@ -128,40 +124,21 @@ export default function ContactPage() {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                className="p-8 md:p-12 rounded-[2.5rem] border transition-all duration-700 bg-white dark:bg-white/5 border-slate-100 dark:border-white/10 shadow-xl dark:shadow-2xl dark:shadow-black/40"
+                className="p-8 md:p-12 rounded-[2.5rem] border transition-all duration-700 bg-white dark:bg-white/5 border-slate-100 dark:border-white/10 shadow-xl"
               >
                 <div className="flex flex-col md:flex-row gap-10">
                   <div className="relative w-full md:w-48 h-60 shrink-0 overflow-hidden rounded-[2rem] bg-slate-100 dark:bg-white/5">
                     <img 
                       src={member.photoDay} 
-                      className={`w-full h-full object-cover transition-all duration-1000 ${isDark ? "brightness-75 grayscale-[0.3]" : "brightness-100"}`}
+                      className={`w-full h-full object-cover ${isDark ? "brightness-75 grayscale-[0.3]" : ""}`}
                       alt={member.name}
                     />
-                    <div className="absolute top-4 left-4 bg-white/90 dark:bg-black/80 backdrop-blur-md p-2 rounded-xl text-[#D4AF37]">
-                      <Target size={16} />
-                    </div>
                   </div>
-
                   <div className="flex-1 space-y-5">
-                    <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
-                      <div>
-                        <h3 className="text-3xl font-serif italic text-[#D4AF37]">{member.name}</h3>
-                        <p className="text-[11px] font-black uppercase tracking-[0.15em] text-slate-500 dark:text-slate-400 mt-1">
-                          {member.role}
-                        </p>
-                      </div>
-                      <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-100 dark:bg-white/10 border border-slate-200 dark:border-white/10">
-                        <Globe size={12} className="text-[#D4AF37]" />
-                        <span className="text-[9px] font-bold uppercase tracking-widest text-slate-600 dark:text-slate-300">
-                          {member.worldRegion}
-                        </span>
-                      </div>
-                    </div>
-
+                    <h3 className="text-3xl font-serif italic text-[#D4AF37]">{member.name}</h3>
                     <p className="text-base leading-relaxed font-light text-slate-600 dark:text-slate-300">
                       {member.background}
                     </p>
-
                     <div className="flex flex-wrap gap-2 pt-4">
                       {member.skills.map((skill, i) => (
                         <span key={i} className="text-[9px] font-black uppercase tracking-widest px-3 py-1 bg-[#D4AF37]/10 text-[#D4AF37] rounded-md border border-[#D4AF37]/20">
@@ -175,16 +152,19 @@ export default function ContactPage() {
             ))}
           </div>
 
-          {/* COLONNE FORMULAIRE CORRIGÉE */}
+          {/* COLONNE FORMULAIRE - CORRECTION FINALE */}
           <div className="xl:col-span-5">
-            <div className="sticky top-32 p-12 rounded-[3.5rem] transition-all duration-700 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 shadow-2xl shadow-slate-200/50 dark:shadow-none">
+            <div className="sticky top-32 p-12 rounded-[3.5rem] transition-all duration-700 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 shadow-2xl">
               
-              {/* TITRE : text-white ajouté pour la lisibilité Dark Mode */}
-              <h3 className="text-3xl md:text-4xl font-serif italic mb-2 text-slate-900 dark:text-white transition-colors duration-500">
+              {/* TITRE FORCÉ EN BLANC (Mode Dark) ou NOIR (Mode Light) */}
+              <h3 
+                className="text-3xl md:text-4xl font-serif italic mb-2"
+                style={{ color: isDark ? '#FFFFFF' : '#0f172a' }}
+              >
                 Contactez-nous
               </h3>
               
-              <p className="text-[#D4AF37] text-[10px] font-black uppercase tracking-[0.2em] mb-10 opacity-90">
+              <p className="text-[#D4AF37] text-[10px] font-black uppercase tracking-[0.2em] mb-10">
                 L'Excellence Amaru à votre service
               </p>
               
@@ -192,6 +172,7 @@ export default function ContactPage() {
                 <input 
                   type="text" 
                   placeholder="NOM COMPLET" 
+                  style={inputStyle}
                   className={inputClasses}
                 />
                 
@@ -199,11 +180,13 @@ export default function ContactPage() {
                   <input 
                     type="email" 
                     placeholder="EMAIL" 
+                    style={inputStyle}
                     className={inputClasses}
                   />
                   <input 
                     type="text" 
                     placeholder="PAYS / RÉGION" 
+                    style={inputStyle}
                     className={inputClasses}
                   />
                 </div>
@@ -211,10 +194,11 @@ export default function ContactPage() {
                 <textarea 
                   rows={4} 
                   placeholder="DÉTAILS DE VOTRE PROJET..." 
+                  style={inputStyle}
                   className={`${inputClasses} resize-none`}
                 />
                 
-                <button className="w-full bg-[#D4AF37] text-black py-6 rounded-2xl font-black uppercase text-[10px] tracking-[0.4em] hover:bg-black hover:text-[#D4AF37] dark:hover:bg-white dark:hover:text-black transition-all shadow-xl shadow-[#D4AF37]/10">
+                <button className="w-full bg-[#D4AF37] text-black py-6 rounded-2xl font-black uppercase text-[10px] tracking-[0.4em] hover:bg-white transition-all shadow-xl">
                   Contacter l'Expert Dédié
                 </button>
               </form>
