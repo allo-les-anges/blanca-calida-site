@@ -77,32 +77,25 @@ export default function RegionGrid({ properties, onRegionClick }: RegionGridProp
 
   const isDark = resolvedTheme === "dark";
 
-  // Définition des styles dynamiques pour forcer la lisibilité
-  const themeStyles = {
-    title: { color: isDark ? '#FFFFFF' : '#0f172a' },
-    desc: { color: isDark ? '#CBD5E1' : '#64748b' },
-    border: { borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(15,23,42,0.1)' }
-  };
-
   return (
-    <section className="max-w-[1600px] mx-auto px-6 py-24 bg-white dark:bg-[#0A0A0A] transition-colors duration-500">
+    <section className="max-w-[1600px] mx-auto px-6 py-12 bg-white dark:bg-[#0A0A0A] transition-colors duration-500">
       
-      {/* HEADER AVEC STYLES DYNAMIQUES */}
-      <div className="mb-24 flex flex-col md:flex-row md:items-end justify-between gap-12">
-        <div className="max-w-4xl">
+      {/* HEADER AJUSTÉ : Espaces réduits et Texte plus fin */}
+      <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-8">
+        <div className="max-w-2xl">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 15 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <span className="text-[#D4AF37] text-[11px] font-black uppercase tracking-[0.6em] mb-6 block">
+            <span className="text-[#D4AF37] text-[10px] font-black uppercase tracking-[0.4em] mb-3 block">
               Nos Destinations
             </span>
             <h2 
-              className="text-5xl md:text-8xl font-serif italic leading-[1.1]"
-              style={themeStyles.title}
+              className="text-4xl md:text-6xl font-serif italic leading-tight"
+              style={{ color: isDark ? '#FFFFFF' : '#0f172a' }}
             >
-              Destinations <br /> d'Exception
+              Lieux d'Exception
             </h2>
           </motion.div>
         </div>
@@ -110,72 +103,65 @@ export default function RegionGrid({ properties, onRegionClick }: RegionGridProp
         <motion.div 
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
-          transition={{ delay: 0.4 }}
-          className="max-w-xs border-l pl-8 pb-2"
-          style={themeStyles.border}
+          transition={{ delay: 0.2 }}
+          className="max-w-xs border-l border-slate-200 dark:border-white/10 pl-6 pb-1"
         >
           <p 
-            className="text-sm font-light leading-relaxed italic"
-            style={themeStyles.desc}
+            className="text-xs font-light leading-relaxed italic"
+            style={{ color: isDark ? '#CBD5E1' : '#64748b' }}
           >
-            "Une sélection rigoureuse des enclaves les plus prestigieuses du littoral espagnol."
+            Une sélection rigoureuse des enclaves les plus prestigieuses du littoral.
           </p>
         </motion.div>
       </div>
 
-      {/* GRILLE */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[350px] md:auto-rows-[480px]">
+      {/* GRILLE : Ratios ajustés */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 auto-rows-[300px] md:auto-rows-[400px]">
         {REGIONS_DISPLAY.map((region, index) => {
           const count = regionCounts[region.name] || 0;
           
           return (
             <motion.div
               key={region.name}
-              initial={{ opacity: 0, scale: 0.98 }}
+              initial={{ opacity: 0, scale: 0.99 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
-              transition={{ delay: index * 0.1, duration: 1.5, ease: [0.19, 1, 0.22, 1] }}
+              transition={{ delay: index * 0.05, duration: 1, ease: [0.19, 1, 0.22, 1] }}
               onClick={() => onRegionClick(region.name)}
-              className={`${region.size} group relative overflow-hidden cursor-pointer bg-slate-900 rounded-sm`}
+              className={`${region.size} group relative overflow-hidden cursor-pointer bg-slate-900 rounded-none`}
             >
               <div className="absolute inset-0">
                 <img 
                   src={region.image} 
                   alt={region.name} 
-                  className="w-full h-full object-cover transition-transform duration-[5s] ease-out group-hover:scale-110 opacity-90 group-hover:opacity-80 transition-opacity" 
+                  className="w-full h-full object-cover transition-transform duration-[4s] ease-out group-hover:scale-105 opacity-90 group-hover:opacity-80" 
                 />
-                {/* Overlay sombre profond pour forcer le contraste du texte blanc */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent opacity-90 group-hover:opacity-100 transition-opacity duration-700" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-80" />
               </div>
 
-              {/* CONTENU TEXTE (Toujours blanc pur ici car sur image sombre) */}
-              <div className="absolute inset-0 p-12 flex flex-col justify-end items-start text-white">
-                <motion.div 
-                  initial={{ opacity: 0, y: 10 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.5 + index * 0.1 }}
-                  className="space-y-4 w-full"
-                >
-                  <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-[#D4AF37]">
+              {/* CONTENU TEXTE RÉDUIT */}
+              <div className="absolute inset-0 p-8 flex flex-col justify-end items-start text-white">
+                <motion.div className="space-y-2 w-full">
+                  <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-[#D4AF37]">
                     {count} Propriétés
                   </p>
                   
-                  <h3 className="text-3xl md:text-5xl font-serif italic leading-none text-white drop-shadow-2xl">
+                  <h3 className="text-2xl md:text-4xl font-serif italic leading-none text-white">
                     {region.name}
                   </h3>
                   
-                  <div className="relative pt-6">
-                    <div className="absolute top-0 left-0 w-12 h-[1px] bg-white/60 group-hover:w-full transition-all duration-1000 ease-in-out" />
-                    <div className="flex items-center justify-between pt-4 opacity-0 group-hover:opacity-100 transition-all duration-700 delay-300">
-                      <span className="text-[9px] uppercase tracking-[0.5em] font-light text-white">
-                        Explorer le portfolio
+                  <div className="relative pt-4">
+                    <div className="absolute top-0 left-0 w-8 h-[1px] bg-white/40 group-hover:w-full transition-all duration-700" />
+                    <div className="flex items-center justify-between pt-3 opacity-0 group-hover:opacity-100 transition-all duration-500">
+                      <span className="text-[8px] uppercase tracking-[0.4em] font-light text-white">
+                        Découvrir
                       </span>
-                      <div className="w-1 h-1 rounded-full bg-[#D4AF37]" />
                     </div>
                   </div>
                 </motion.div>
               </div>
 
+              {/* Bordure intérieure carrée */}
               <div className="absolute inset-0 border border-white/5 pointer-events-none" />
             </motion.div>
           );
