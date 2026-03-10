@@ -81,14 +81,6 @@ export default function AdvancedSearch({
         }
       `}</style>
 
-      {/* En-tête de la modale pour la clarté visuelle */}
-      <div className="mb-8 flex flex-col items-center md:items-start">
-        <h2 className="text-3xl font-serif italic text-slate-900 dark:text-white transition-colors">
-          Filtres de Sélection
-        </h2>
-        <div className="h-1 w-20 bg-[#D4AF37] mt-2"></div>
-      </div>
-
       {/* Bouton Fermer */}
       {onClose && (
         <button 
