@@ -11,7 +11,7 @@
     --foreground: #f8fafc;
   }
 
-  /* 1. SUPPRESSION RADICALE DE LA BANDE GOOGLE */
+  /* 1. SUPPRESSION DU DÉCALAGE GOOGLE (LA BANDE) */
   html {
     margin-top: 0px !important;
     top: 0px !important;
@@ -26,36 +26,41 @@
     min-height: 100vh;
   }
 
-  /* 2. FORÇAGE DU TEXTE EN BLANC (MODE DARK) */
-  /* On cible les titres et paragraphes pour qu'ils basculent en blanc */
+  /* 2. FORÇAGE DU TEXTE EN BLANC EN MODE DARK */
+  /* On cible toutes les balises de texte pour écraser les classes Tailwind sombres */
   .dark h1, 
   .dark h2, 
   .dark h3, 
   .dark h4, 
   .dark p, 
   .dark span,
+  .dark a,
   .dark label,
+  /* Cible spécifique pour vos classes actuelles */
   .dark .text-slate-900,
+  .dark .text-slate-800,
   .dark .text-slate-600 {
     color: #f8fafc !important;
   }
 
-  /* On garde une teinte légèrement plus grise pour les sous-titres */
-  .dark .text-slate-600, 
+  /* Pour les textes secondaires (gris clair en mode sombre) */
+  .dark .text-slate-500,
   .dark .text-gray-500 {
-    color: #cbd5e1 !important;
+    color: #94a3b8 !important;
   }
 
-  /* 3. FORÇAGE DES FONDS DE SECTION (S'ils restent blancs) */
-  .dark section, 
+  /* 3. FORÇAGE DES FONDS DE SECTION */
+  .dark section,
   .dark main,
+  .dark header,
+  /* Si vos sections ont des classes de fond blanc en dur */
   .dark div[class*="bg-white"],
   .dark div[class*="bg-slate-50"] {
     background-color: #020617 !important;
   }
 }
 
-/* 4. MASQUAGE DES ÉLÉMENTS VISUELS DE GOOGLE */
+/* 4. MASQUAGE COMPLET DES IFRAMES GOOGLE */
 .goog-te-banner-frame, 
 .goog-te-banner, 
 .skiptranslate, 
@@ -64,6 +69,11 @@
 iframe.goog-te-banner-frame {
   display: none !important;
   visibility: hidden !important;
+}
+
+/* On retire l'espace que Google réserve en haut de page */
+#google_translate_element {
+  display: none !important;
 }
 
 /* 5. SCROLLBAR DORÉE */
