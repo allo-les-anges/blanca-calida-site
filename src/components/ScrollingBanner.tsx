@@ -26,23 +26,28 @@ export default function ScrollingBanner() {
   const isDark = resolvedTheme === "dark";
   const duplicatedTexts = [...BANNER_TEXTS, ...BANNER_TEXTS, ...BANNER_TEXTS, ...BANNER_TEXTS];
 
-  // Couleurs dynamiques selon le mode
+  // Configuration des couleurs pour le gris doux et le contraste
   const styles = {
-    containerBg: isDark ? '#020617' : '#FFFFFF',
-    borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(15,23,42,0.05)',
+    // Gris doux (Slate 50) en Light, et Bleu-Gris très sombre en Dark
+    containerBg: isDark ? '#0F172A' : '#F8FAFC', 
+    borderColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(15,23,42,0.05)',
     fullTextColor: isDark ? '#FFFFFF' : '#0F172A',
-    outlineStroke: isDark ? '#334155' : '#CBD5E1', // Gris moyen en light pour être visible sans être lourd
+    outlineStroke: isDark ? '#334155' : '#CBD5E1', 
     separatorColor: '#D4AF37'
   };
 
   return (
     <div 
-      className="relative w-full overflow-hidden py-10 border-y transition-colors duration-500"
+      className="relative w-full overflow-hidden py-14 border-y transition-colors duration-500"
       style={{ 
         backgroundColor: styles.containerBg,
         borderColor: styles.borderColor
       }}
     >
+      {/* Optionnel : Ajout d'un léger dégradé sur les bords pour l'effet de profondeur */}
+      <div className="absolute inset-y-0 left-0 w-20 bg-gradient-to-r from-inherit to-transparent z-10 pointer-events-none" />
+      <div className="absolute inset-y-0 right-0 w-20 bg-gradient-to-l from-inherit to-transparent z-10 pointer-events-none" />
+
       <div className="flex whitespace-nowrap">
         <motion.div
           className="flex gap-12 items-center"
@@ -50,7 +55,7 @@ export default function ScrollingBanner() {
             x: [0, -2000],
           }}
           transition={{
-            duration: 35,
+            duration: 45, // Ralenti pour plus d'élégance sur fond gris
             ease: "linear",
             repeat: Infinity,
           }}
@@ -69,9 +74,8 @@ export default function ScrollingBanner() {
                 {text}
               </span>
               
-              {/* Séparateur minimaliste */}
               <div 
-                className="h-8 md:h-12 w-[1px] opacity-50" 
+                className="h-10 md:h-16 w-[1px] opacity-40" 
                 style={{ backgroundColor: styles.separatorColor }}
               />
             </div>
