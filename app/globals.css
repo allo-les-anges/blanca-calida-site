@@ -1,3 +1,17 @@
+/* Nettoyage définitif des résidus Google */
+html, 
+body {
+  margin-top: 0px !important;
+  padding-top: 0px !important;
+  top: 0px !important;
+  position: relative !important;
+}
+
+/* On s'assure que rien ne pousse la navbar */
+nav, header {
+  top: 0 !important;
+}
+
 /* FORCE ZERO OFFSET - Supprime la bande Google */
 html, 
 html[style] {
