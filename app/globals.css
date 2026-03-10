@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* 1. RESET STRUCTUREL (Zéro bande blanche / Nettoyage résidus) */
+/* 1. RESET STRUCTUREL */
 html, body {
   margin: 0 !important;
   padding: 0 !important;
@@ -15,7 +15,7 @@ html, body {
   }
 
   .dark {
-    --background: #020617; /* Bleu nuit de luxe */
+    --background: #020617;
     --foreground: #f8fafc;
   }
 
@@ -25,56 +25,62 @@ html, body {
     @apply transition-colors duration-300 antialiased min-h-screen;
   }
 
-  /* 2. FORÇAGE LISIBILITÉ TEXTES EN DARK MODE */
+  /* 2. FORÇAGE TEXTES (Vignettes & Footer) */
   .dark h1, .dark h2, .dark h3, .dark h4, 
-  .dark p, .dark span, .dark label {
+  .dark p, .dark span, .dark label, .dark li, .dark a {
     color: #f8fafc !important;
   }
 
-  /* Force les sections et cartes qui ont des classes de fond claires à devenir sombres */
+  /* 3. CIBLAGE PRÉCIS DES GRIS (Sous les vignettes et Footer) */
+  /* Force tous les textes secondaires gris à devenir blancs ou dorés en mode dark */
+  .dark .text-slate-500, 
+  .dark .text-slate-400, 
+  .dark .text-gray-500, 
+  .dark .text-gray-400,
+  .dark .text-slate-600 {
+    color: #cbd5e1 !important; /* Gris très clair pour la lisibilité */
+  }
+
+  /* 4. SECTIONS & FONDS */
   .dark section, 
   .dark main, 
+  .dark footer,
   .dark .bg-white:not(button):not(.keep-white),
   .dark .bg-slate-50,
   .dark .bg-gray-50 {
     background-color: #020617 !important;
   }
 
-  /* 3. EXCEPTIONS : BOUTONS & ÉLÉMENTS SUR FOND BLANC */
-  /* Le texte doit rester sombre à l'intérieur des boutons blancs pour être lisible */
+  /* 5. EXCEPTIONS ÉLÉMENTS CLAIRS (Boutons) */
   .dark button.bg-white span, 
   .dark .bg-white p,
   .dark .bg-white span,
-  .dark a.bg-white span {
+  .dark a.bg-white span,
+  .dark .recherche-privee-btn span {
     color: #020617 !important;
   }
 
-  /* Maintien du doré pour les prix et éléments de luxe */
+  /* 6. DORÉ (Prix et liens importants) */
   .dark .text-gold, 
-  .dark [class*="text-[#D4AF37]"] {
+  .dark [class*="text-[#D4AF37]"],
+  .dark .active-link {
     color: #D4AF37 !important;
   }
 }
 
-/* 4. FIX ZONE CODE PIN */
-.dark input[type="password"],
-.dark input[placeholder="PIN"] {
+/* 7. SCROLLBAR & PIN */
+.dark input[type="password"] {
   background-color: #1e293b !important;
   color: #D4AF37 !important;
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
 
-/* 5. SCROLLBAR LUXE */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #D4AF37; border-radius: 10px; }
 
-/* 6. FIX LAYOUT NAVBAR & HERO */
+/* 8. FIX NAVBAR & HERO */
 main {
   margin-top: 0 !important;
   padding-top: 0 !important;
-}
-
-header, nav {
-  top: 0 !important;
 }
