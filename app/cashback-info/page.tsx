@@ -30,8 +30,9 @@ export default function CashbackInfo() {
   // Configuration des couleurs forcées pour une lisibilité garantie
   const themeStyles = {
     title: { color: isDark ? '#FFFFFF' : '#0f172a' },
-    text: { color: isDark ? '#CBD5E1' : '#64748b' }, // Slate-300 en dark, Slate-500 en light
-    heading: { color: isDark ? '#D4AF37' : '#0f172a' }
+    text: { color: isDark ? '#CBD5E1' : '#64748b' },
+    heading: { color: isDark ? '#D4AF37' : '#0f172a' },
+    iconColor: isDark ? '#FFFFFF' : '#0f172a'
   };
 
   return (
@@ -72,9 +73,12 @@ export default function CashbackInfo() {
                 <h2 className="text-[10px] uppercase tracking-[0.4em] font-bold text-[#D4AF37] mb-3">Simulation Exceptionnelle</h2>
                 <p className="text-3xl font-serif italic text-white">Villa de prestige à 1 500 000 €</p>
               </div>
-              <div className="bg-white/5 backdrop-blur-md px-8 py-6 rounded-[2rem] border border-[#D4AF37]/30">
+              <div className="bg-white/5 backdrop-blur-md px-6 md:px-8 py-6 rounded-[2rem] border border-[#D4AF37]/30">
                 <span className="text-[9px] uppercase tracking-[0.2em] font-bold text-[#D4AF37] block mb-2 text-center">Votre Avantage Amaru</span>
-                <span className="text-4xl font-light text-white tabular-nums">15 000 €<span className="text-[#D4AF37] ml-1">*</span></span>
+                {/* Taille réduite sur mobile (text-2xl) et blocage du retour à la ligne (whitespace-nowrap) */}
+                <span className="text-2xl md:text-4xl font-light text-white tabular-nums whitespace-nowrap">
+                  15 000 €<span className="text-[#D4AF37] ml-1">*</span>
+                </span>
               </div>
             </div>
             
@@ -103,8 +107,13 @@ export default function CashbackInfo() {
             { icon: ShieldCheck, title: "Sérénité Juridique", desc: "Un processus rigoureusement encadré, transparent et validé par nos experts." }
           ].map((item, idx) => (
             <div key={idx} className="group space-y-6">
-              <div className="w-14 h-14 bg-slate-50 dark:bg-white/5 text-slate-900 dark:text-white rounded-2xl flex items-center justify-center group-hover:bg-[#D4AF37] group-hover:text-white transition-all duration-500 shadow-sm">
-                <item.icon size={28} strokeWidth={1.5} />
+              <div className="w-14 h-14 bg-slate-50 dark:bg-white/5 rounded-2xl flex items-center justify-center group-hover:bg-[#D4AF37] transition-all duration-500 shadow-sm">
+                <item.icon 
+                  size={28} 
+                  strokeWidth={1.5} 
+                  color={themeStyles.iconColor} 
+                  className="group-hover:stroke-white transition-colors"
+                />
               </div>
               <h3 className="font-bold uppercase text-[11px] tracking-[0.2em]" style={themeStyles.title}>{item.title}</h3>
               <p className="text-sm leading-relaxed" style={themeStyles.text}>{item.desc}</p>
