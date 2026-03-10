@@ -1,61 +1,18 @@
-/* Nettoyage définitif des résidus Google */
-html, 
-body {
-  margin-top: 0px !important;
-  padding-top: 0px !important;
-  top: 0px !important;
-  position: relative !important;
-}
-
-/* On s'assure que rien ne pousse la navbar */
-nav, header {
-  top: 0 !important;
-}
-
-/* FORCE ZERO OFFSET - Supprime la bande Google */
-html, 
-html[style] {
-  margin-top: 0px !important;
-  top: 0px !important;
-}
-
-body, 
-body[style] {
-  margin-top: 0px !important;
-  top: 0px !important;
-  position: static !important;
-}
-
-/* On fait disparaître physiquement le widget Google s'il est en haut */
-.goog-te-banner-frame, 
-.skiptranslate, 
-iframe.goog-te-banner-frame {
-  display: none !important;
-  visibility: hidden !important;
-  height: 0px !important;
-}
-
 @import "tailwindcss";
 
-/* 1. FORCE BRUTE CONTRE LA BANDE GOOGLE */
-/* On cible absolument tout ce qui pourrait décaler le haut du site */
+/* 1. RESET RADICAL DU LAYOUT */
 html, body {
-  margin-top: 0px !important;
-  padding-top: 0px !important;
-  top: 0px !important;
-  position: relative !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  top: 0 !important;
+  width: 100%;
+  height: 100%;
 }
 
-/* On fait disparaître l'espace réservé par Google de façon radicale */
-.skiptranslate, 
-iframe.goog-te-banner-frame, 
-.goog-te-banner-frame, 
-#goog-gt-tt, 
-.goog-te-balloon-frame {
-  display: none !important;
-  visibility: hidden !important;
-  height: 0 !important;
-  width: 0 !important;
+/* On s'assure que le conteneur Next.js ne crée pas de décalage */
+#__next, main {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
 }
 
 @layer base {
@@ -70,57 +27,43 @@ iframe.goog-te-banner-frame,
   }
 
   body {
-    background-color: var(--background) !important;
-    color: var(--foreground) !important;
+    background-color: var(--background);
+    color: var(--foreground);
+    @apply antialiased;
   }
 
-  /* 2. TEXTE BLANC EN MODE DARK (Correction globale) */
+  /* 2. CORRECTION DARK MODE (TEXTES) */
   .dark h1, .dark h2, .dark h3, .dark h4, .dark p, .dark span, .dark label, .dark a {
     color: #f8fafc !important;
   }
 
-  /* 3. LE BOUTON DE RECHERCHE (Correction spécifique) */
-  /* On force le texte à rester noir/bleu foncé à l'intérieur du bouton blanc */
-  .dark .recherche-privee-btn,
-  .dark button[class*="bg-white"] span,
-  .dark button[class*="bg-white"] p,
-  .dark .bg-white button span {
+  /* Exceptions pour les boutons à fond blanc en mode dark */
+  .dark .bg-white span, 
+  .dark .bg-white p, 
+  .dark button.bg-white {
     color: #0f172a !important;
   }
 
-  /* 4. FONDS DE SECTION REBELLE */
-  .dark section, .dark main, .dark .bg-white:not(button) {
-    background-color: #020617 !important;
+  /* 3. CORRECTION ZONE CODE PIN */
+  .dark input[type="password"], 
+  .dark input[placeholder="PIN"],
+  .dark .code-pin-input {
+    background-color: rgba(0, 0, 0, 0.4) !important;
+    color: #D4AF37 !important;
+    border-color: rgba(255, 255, 255, 0.1) !important;
   }
 }
 
-/* 5. FIX NAVBAR (Si elle est décalée) */
-header, nav {
-  top: 0 !important;
+/* 4. LE FIX DE LA BANDE (FORCE LA VIDÉO EN HAUT) */
+/* Si votre section hero a une classe spécifique, utilisez-la ici */
+section:first-of-type, 
+.hero-section {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+  position: relative;
 }
 
-/* Scrollbar */
+/* 5. DESIGN ELEMENTS */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #D4AF37; border-radius: 10px; }
-
-/* Correction zone CODE PIN en mode Dark */
-.dark .code-pin-container, 
-.dark div[class*="code-pin"],
-.dark input[name="pin"],
-.dark .bg-black\/5 { /* Si vous utilisez une opacité Tailwind */
-  background-color: #111827 !important; /* Fond gris très foncé */
-  color: #ffffff !important; /* Force le texte en blanc */
-}
-
-/* Ciblage direct des lettres "C O D E P I N" */
-.dark span[class*="letter"], 
-.dark p[class*="label"],
-.dark .text-slate-900 {
-  color: #f8fafc !important;
-}
-
-/* Si c'est un placeholder d'input */
-.dark input::placeholder {
-  color: #94a3b8 !important;
-}

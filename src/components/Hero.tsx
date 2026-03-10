@@ -2,13 +2,15 @@
 
 export default function Hero() {
   return (
-    <section className="relative h-[90vh] w-full flex items-center justify-center overflow-hidden">
+    /* Changement de h-[90vh] à h-screen (ou h-[100vh]) */
+    <section className="relative h-screen w-full flex items-center justify-center overflow-hidden bg-black">
       <video 
         key="hero-video-fixed" 
         autoPlay 
         muted 
         loop 
         playsInline 
+        /* absolute inset-0 garantit que la vidéo colle aux bords */
         className="absolute inset-0 w-full h-full object-cover brightness-[0.5]"
       >
         <source src="/hero-video.mp4" type="video/mp4" />
