@@ -57,3 +57,9 @@ main {
   margin-top: 0 !important;
   padding-top: 0 !important;
 }
+
+.dark section, 
+.dark main, 
+.dark .bg-white:not(button):not(.keep-white) {
+  background-color: #020617 !important;
+}
