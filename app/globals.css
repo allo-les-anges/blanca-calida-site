@@ -25,8 +25,8 @@ html, body {
     @apply transition-colors duration-300 antialiased min-h-screen;
   }
 
-  /* 2. LE SÉLECTEUR "MARTEAU-PIQUEUR" */
-  /* On force le blanc sur TOUTES les classes de texte sombres de Tailwind quand le mode dark est ON */
+  /* 2. LE SÉLECTEUR "ÉCLAT PUR" */
+  /* On force le blanc pur (#FFFFFF) et on retire toute opacité héritée */
   html.dark .text-slate-900, 
   html.dark .text-slate-800, 
   html.dark .text-slate-700, 
@@ -37,26 +37,28 @@ html, body {
   html.dark h1, html.dark h2, html.dark h3, html.dark h4, 
   html.dark p, html.dark span:not(.bg-[#D4AF37] span), 
   html.dark li, html.dark a {
-    color: #f8fafc !important;
+    color: #ffffff !important; /* Blanc pur */
+    opacity: 1 !important;      /* Force l'opacité à 100% */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2); /* Donne du relief au texte blanc */
   }
 
-  /* 3. LES VIGNETTES ET LE FOOTER */
-  /* On force le fond à devenir bleu nuit, même si la div a la classe "bg-white" */
-  html.dark .bg-white:not(button):not(.recherche-privee-btn),
-  html.dark section,
-  html.dark footer,
-  html.dark main,
-  html.dark .property-card,
-  html.dark .bg-slate-50,
-  html.dark .bg-gray-50 {
-    background-color: #020617 !important;
-    border-color: rgba(255, 255, 255, 0.1) !important;
+  /* 3. LISIBILITÉ DES SOUS-TITRES (Villes, Régions) */
+  /* Si vous voulez que certains textes soient un peu plus doux mais restent très clairs */
+  html.dark .text-slate-400,
+  html.dark .text-slate-300,
+  html.dark .grid-smart-subtext {
+    color: #e2e8f0 !important; /* Gris perle très clair */
+    opacity: 1 !important;
   }
 
-  /* 4. LES ICONES TECHNIQUES (Cercle autour des icônes) */
-  html.dark .bg-slate-100 {
-    background-color: rgba(255, 255, 255, 0.05) !important;
+  /* 4. ÉPAISSEUR DU TEXTE (Optionnel mais recommandé pour le Dark Mode) */
+  /* Le texte blanc sur fond noir parait souvent plus fin qu'il ne l'est */
+  html.dark h3, html.dark .font-serif {
+    font-weight: 500 !important;
   }
+}
 
   /* 5. EXCEPTIONS (Boutons blancs et éléments dorés) */
   html.dark button.bg-white span,
