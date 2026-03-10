@@ -16,7 +16,7 @@ html, body {
   /* Force les variables au niveau le plus haut */
   html.dark {
     --background: #020617 !important;
-    --foreground: #f8fafc !important;
+    --foreground: #ffffff !important; /* Blanc pur ici aussi */
   }
 
   body {
@@ -25,40 +25,55 @@ html, body {
     @apply transition-colors duration-300 antialiased min-h-screen;
   }
 
-  /* 2. LE SÉLECTEUR "ÉCLAT PUR" (Correction lisibilité Dark Mode) */
+  /* 2. LE SÉLECTEUR "ÉCLAT PUR" (VIGNETTES ET TEXTES) */
+  /* On force le BLANC PUR (#FFFFFF) et l'OPACITÉ TOTALE */
   html.dark .text-slate-900, 
   html.dark .text-slate-800, 
   html.dark .text-slate-700, 
   html.dark .text-slate-600,
   html.dark .text-slate-500,
+  html.dark .text-slate-400,
   html.dark .text-gray-900,
   html.dark .text-gray-600,
+  html.dark .text-gray-500,
+  html.dark .text-gray-400,
   html.dark h1, html.dark h2, html.dark h3, html.dark h4, 
   html.dark p, html.dark span:not(.bg-[#D4AF37] span), 
   html.dark li, html.dark a {
-    color: #ffffff !important;
-    opacity: 1 !important;
+    color: #ffffff !important; /* Blanc pur absolu */
+    opacity: 1 !important;      /* Supprime l'effet gris/bleu transparent */
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
   /* 3. LES VIGNETTES ET LE FOOTER */
+  /* On s'assure que les fonds ne sont plus blancs */
   html.dark .bg-white:not(button):not(.recherche-privee-btn),
   html.dark section,
   html.dark footer,
   html.dark main,
   html.dark .property-card,
   html.dark .bg-slate-50,
-  html.dark .bg-gray-50 {
+  html.dark .bg-gray-50,
+  html.dark .bg-slate-100 {
     background-color: #020617 !important;
-    border-color: rgba(255, 255, 255, 0.1) !important;
+    border-color: rgba(255, 255, 255, 0.2) !important; /* Bordures plus visibles */
   }
 
-  /* 4. EXCEPTIONS (Boutons blancs et éléments dorés) */
+  /* 4. ÉLÉMENTS DE VIGNETTE (Icones techniques) */
+  /* On force les petits labels (ex: "3 lits") à être très blancs */
+  html.dark .text-slate-800, 
+  html.dark .text-slate-100,
+  html.dark .font-medium {
+    color: #ffffff !important;
+  }
+
+  /* 5. EXCEPTIONS (Boutons blancs et éléments dorés) */
   html.dark button.bg-white span,
   html.dark .bg-white button span,
   html.dark .recherche-privee-btn span {
     color: #020617 !important;
+    font-weight: 700 !important; /* Plus de gras pour la lisibilité sur bouton */
   }
 
   html.dark .text-[#D4AF37], html.dark .text-gold {
@@ -66,7 +81,7 @@ html, body {
   }
 }
 
-/* 5. SCROLLBAR & PIN (Hors @layer pour éviter les conflits) */
+/* 6. SCROLLBAR & PIN */
 html.dark input[type="password"] {
   background-color: #1e293b !important;
   color: #D4AF37 !important;
@@ -86,7 +101,7 @@ html.dark input[type="password"] {
   border-radius: 10px; 
 }
 
-/* 6. FIX LAYOUT */
+/* 7. FIX LAYOUT */
 main { 
   margin-top: 0 !important; 
   padding-top: 0 !important; 
