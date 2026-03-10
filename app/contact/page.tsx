@@ -67,6 +67,16 @@ const teamMembers = [
 export default function ContactPage() {
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  
+  // États pour le formulaire
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    region: "",
+    message: ""
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
 
   useEffect(() => {
     setMounted(true);
@@ -76,7 +86,33 @@ export default function ContactPage() {
 
   const isDark = resolvedTheme === "dark";
 
-  // Styles forcés pour garantir la visibilité en mode sombre
+  // Gestion de la soumission
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setStatus("idle");
+
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        setStatus("success");
+        setFormData({ name: "", email: "", region: "", message: "" });
+      } else {
+        setStatus("error");
+      }
+    } catch (error) {
+      console.error("Erreur soumission:", error);
+      setStatus("error");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const inputStyle = {
     color: isDark ? '#ffffff' : '#0f172a',
     backgroundColor: isDark ? 'rgba(0, 0, 0, 0.6)' : '#ffffff',
@@ -152,11 +188,10 @@ export default function ContactPage() {
             ))}
           </div>
 
-          {/* COLONNE FORMULAIRE - CORRECTION FINALE */}
+          {/* COLONNE FORMULAIRE */}
           <div className="xl:col-span-5">
             <div className="sticky top-32 p-12 rounded-[3.5rem] transition-all duration-700 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 shadow-2xl">
               
-              {/* TITRE FORCÉ EN BLANC (Mode Dark) ou NOIR (Mode Light) */}
               <h3 
                 className="text-3xl md:text-4xl font-serif italic mb-2"
                 style={{ color: isDark ? '#FFFFFF' : '#0f172a' }}
@@ -168,39 +203,65 @@ export default function ContactPage() {
                 L'Excellence Amaru à votre service
               </p>
               
-              <form className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-6">
                 <input 
+                  required
                   type="text" 
                   placeholder="NOM COMPLET" 
                   style={inputStyle}
                   className={inputClasses}
+                  value={formData.name}
+                  onChange={(e) => setFormData({...formData, name: e.target.value})}
                 />
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <input 
+                    required
                     type="email" 
                     placeholder="EMAIL" 
                     style={inputStyle}
                     className={inputClasses}
+                    value={formData.email}
+                    onChange={(e) => setFormData({...formData, email: e.target.value})}
                   />
                   <input 
                     type="text" 
                     placeholder="PAYS / RÉGION" 
                     style={inputStyle}
                     className={inputClasses}
+                    value={formData.region}
+                    onChange={(e) => setFormData({...formData, region: e.target.value})}
                   />
                 </div>
                 
                 <textarea 
+                  required
                   rows={4} 
                   placeholder="DÉTAILS DE VOTRE PROJET..." 
                   style={inputStyle}
                   className={`${inputClasses} resize-none`}
+                  value={formData.message}
+                  onChange={(e) => setFormData({...formData, message: e.target.value})}
                 />
                 
-                <button className="w-full bg-[#D4AF37] text-black py-6 rounded-2xl font-black uppercase text-[10px] tracking-[0.4em] hover:bg-white transition-all shadow-xl">
-                  Contacter l'Expert Dédié
+                <button 
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full bg-[#D4AF37] text-black py-6 rounded-2xl font-black uppercase text-[10px] tracking-[0.4em] hover:bg-white transition-all shadow-xl disabled:opacity-50"
+                >
+                  {isSubmitting ? "ENVOI EN COURS..." : "Contacter l'Expert Dédié"}
                 </button>
+
+                {status === "success" && (
+                  <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-green-600 dark:text-green-400 text-center font-bold text-[10px] tracking-widest uppercase mt-4">
+                    Message envoyé ! Gillian reviendra vers vous.
+                  </motion.p>
+                )}
+                {status === "error" && (
+                  <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-red-500 text-center font-bold text-[10px] tracking-widest uppercase mt-4">
+                    Erreur. Veuillez réessayer.
+                  </motion.p>
+                )}
               </form>
             </div>
           </div>

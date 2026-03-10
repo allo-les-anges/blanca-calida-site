@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useMemo } from 'react';
-import { ChevronRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface Property {
@@ -39,10 +38,10 @@ const CITY_TO_REGION_MAP: Record<string, string> = {
 };
 
 const REGIONS_DISPLAY = [
-  { name: "Costa Blanca", image: "/images/regions/1.jpg" },
-  { name: "Costa del Sol", image: "/images/regions/2.jpg" },
-  { name: "Costa Calida", image: "/images/regions/3.jpg" },
-  { name: "Costa Almeria", image: "/images/regions/4.jpg" }
+  { name: "Costa Blanca", image: "/images/regions/1.jpg", size: "md:col-span-2 md:row-span-1" },
+  { name: "Costa del Sol", image: "/images/regions/2.jpg", size: "md:col-span-1 md:row-span-2" },
+  { name: "Costa Calida", image: "/images/regions/3.jpg", size: "md:col-span-1 md:row-span-1" },
+  { name: "Costa Almeria", image: "/images/regions/4.jpg", size: "md:col-span-1 md:row-span-1" }
 ];
 
 export default function RegionGrid({ properties, onRegionClick }: RegionGridProps) {
@@ -72,61 +71,73 @@ export default function RegionGrid({ properties, onRegionClick }: RegionGridProp
   }, [properties]);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 px-4">
-      {REGIONS_DISPLAY.map((region, index) => {
-        const count = regionCounts[region.name] || 0;
-        
-        return (
-          <motion.div
-            key={region.name}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: index * 0.1, duration: 0.8 }}
-            onClick={() => onRegionClick(region.name)}
-            className="group relative h-[520px] rounded-[3rem] overflow-hidden cursor-pointer bg-white dark:bg-slate-900 shadow-2xl transition-all duration-700 hover:shadow-[#D4AF37]/20"
-          >
-            {/* Image éclatante sans voile sombre */}
-            <div className="absolute inset-0">
-              <img 
-                src={region.image} 
-                alt={region.name} 
-                className="w-full h-full object-cover transition-transform duration-1000 scale-105 group-hover:scale-110 opacity-100 dark:opacity-40" 
-              />
-              
-              {/* Vignette uniquement en bas pour la lecture du texte */}
-              <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/80 transition-opacity duration-500" />
-            </div>
+    <section className="max-w-[1400px] mx-auto px-6 py-24 bg-white dark:bg-[#0A0A0A]">
+      {/* En-tête minimaliste */}
+      <div className="mb-20">
+        <h2 className="text-[10px] font-black uppercase tracking-[0.5em] text-[#D4AF37] mb-4">
+          Destinations d'exception
+        </h2>
+        <p className="text-4xl md:text-6xl font-serif italic text-slate-900 dark:text-white leading-tight">
+          Explorez nos régions <br /> les plus prisées.
+        </p>
+      </div>
 
-            {/* Contenu */}
-            <div className="absolute inset-0 z-10 p-10 flex flex-col items-center text-center">
-              <div className="inline-flex items-center gap-3 px-4 py-2 bg-black/30 backdrop-blur-md border border-white/20 rounded-full shadow-xl">
-                <div className="w-1.5 h-1.5 bg-[#D4AF37] rounded-full shadow-[0_0_8px_#D4AF37]" />
-                <span className="text-[10px] font-bold text-white uppercase tracking-[0.3em]">
-                  {count} Propriétés
+      {/* Grille Asymétrique */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 auto-rows-[300px] md:auto-rows-[400px]">
+        {REGIONS_DISPLAY.map((region, index) => {
+          const count = regionCounts[region.name] || 0;
+          
+          return (
+            <motion.div
+              key={region.name}
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.1, duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+              onClick={() => onRegionClick(region.name)}
+              className={`${region.size} group relative overflow-hidden cursor-pointer`}
+            >
+              {/* Image avec zoom progressif */}
+              <div className="absolute inset-0">
+                <img 
+                  src={region.image} 
+                  alt={region.name} 
+                  className="w-full h-full object-cover transition-transform duration-[3s] ease-out group-hover:scale-110" 
+                />
+                {/* Overlay dégradé subtil */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-70 group-hover:opacity-90 transition-opacity duration-700" />
+              </div>
+
+              {/* Contenu textuel */}
+              <div className="absolute inset-0 p-10 flex flex-col justify-end">
+                <div className="overflow-hidden">
+                  <motion.p 
+                    initial={{ y: 20, opacity: 0 }}
+                    whileInView={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.3 + index * 0.1 }}
+                    className="text-[9px] font-bold uppercase tracking-[0.3em] text-[#D4AF37] mb-2"
+                  >
+                    {count} Propriétés disponibles
+                  </motion.p>
+                </div>
+                
+                <h3 className="text-3xl md:text-4xl font-serif italic text-white mb-6 transform group-hover:-translate-y-2 transition-transform duration-700">
+                  {region.name}
+                </h3>
+
+                {/* Bouton fantôme qui apparaît au survol */}
+                <div className="h-px bg-white/30 w-0 group-hover:w-full transition-all duration-1000 ease-in-out" />
+                <span className="mt-4 text-[8px] uppercase tracking-[0.4em] text-white opacity-0 group-hover:opacity-100 transition-opacity duration-700 delay-200">
+                  Découvrir la collection
                 </span>
               </div>
 
-              <div className="flex-grow" />
-
-              <div className="space-y-6">
-                <h3 className="text-4xl md:text-5xl font-serif italic text-white leading-tight drop-shadow-[0_4px_10px_rgba(0,0,0,0.9)]">
-                  {region.name}
-                </h3>
-                
-                <div className="flex flex-col items-center gap-4">
-                  <div className="w-12 h-px bg-[#D4AF37]" />
-                  <div className="flex items-center gap-2 text-[#D4AF37] text-[10px] font-bold uppercase tracking-[0.4em] drop-shadow-md">
-                    Explorer <ChevronRight size={14} />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="absolute inset-0 border border-white/0 group-hover:border-[#D4AF37]/30 rounded-[3rem] transition-colors duration-700" />
-          </motion.div>
-        );
-      })}
-    </div>
+              {/* Bordure de finition fine */}
+              <div className="absolute inset-0 border border-white/5 pointer-events-none" />
+            </motion.div>
+          );
+        })}
+      </div>
+    </section>
   );
 }
