@@ -26,12 +26,21 @@ export default function ScrollingBanner() {
   const isDark = resolvedTheme === "dark";
   const duplicatedTexts = [...BANNER_TEXTS, ...BANNER_TEXTS, ...BANNER_TEXTS, ...BANNER_TEXTS];
 
+  // Couleurs dynamiques selon le mode
+  const styles = {
+    containerBg: isDark ? '#020617' : '#FFFFFF',
+    borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(15,23,42,0.05)',
+    fullTextColor: isDark ? '#FFFFFF' : '#0F172A',
+    outlineStroke: isDark ? '#334155' : '#CBD5E1', // Gris moyen en light pour être visible sans être lourd
+    separatorColor: '#D4AF37'
+  };
+
   return (
     <div 
       className="relative w-full overflow-hidden py-10 border-y transition-colors duration-500"
       style={{ 
-        backgroundColor: isDark ? '#020617' : '#FFFFFF',
-        borderColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(15,23,42,0.05)'
+        backgroundColor: styles.containerBg,
+        borderColor: styles.borderColor
       }}
     >
       <div className="flex whitespace-nowrap">
@@ -48,32 +57,27 @@ export default function ScrollingBanner() {
         >
           {duplicatedTexts.map((text, idx) => (
             <div key={idx} className="flex items-center gap-12">
-              {/* Texte Alterné : Plein vs Outline pour un style galerie d'art */}
               <span 
                 className={`text-4xl md:text-7xl font-black uppercase tracking-tighter transition-all duration-700 ${
-                  idx % 2 === 0 
-                    ? "text-slate-900 dark:text-white" 
-                    : "text-transparent stroke-text"
+                  idx % 2 === 0 ? "" : "text-transparent"
                 }`}
                 style={{
-                  WebkitTextStroke: idx % 2 !== 0 ? `1px ${isDark ? '#334155' : '#e2e8f0'}` : 'none'
+                  color: idx % 2 === 0 ? styles.fullTextColor : 'transparent',
+                  WebkitTextStroke: idx % 2 !== 0 ? `1px ${styles.outlineStroke}` : 'none'
                 }}
               >
                 {text}
               </span>
               
-              {/* Séparateur minimaliste (Barre verticale fine) */}
-              <div className="h-8 md:h-12 w-[1px] bg-[#D4AF37] opacity-50" />
+              {/* Séparateur minimaliste */}
+              <div 
+                className="h-8 md:h-12 w-[1px] opacity-50" 
+                style={{ backgroundColor: styles.separatorColor }}
+              />
             </div>
           ))}
         </motion.div>
       </div>
-
-      <style jsx>{`
-        .stroke-text {
-          paint-order: stroke fill;
-        }
-      `}</style>
     </div>
   );
 }
