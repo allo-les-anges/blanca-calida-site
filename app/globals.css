@@ -50,3 +50,19 @@ html, body, main {
   background-color: #1e293b !important; /* Un gris très sombre pour détacher les cartes du fond */
   border-color: #334155 !important;
 }
+
+/* globals.css */
+
+@layer base {
+  /* On cible les textes noirs/gris pour les forcer en blanc en mode dark */
+  .dark h1, .dark h2, .dark h3, .dark h4, .dark p, .dark span {
+    color: #f8fafc !important; /* Couleur proche du blanc (slate-50) */
+  }
+
+  /* On cible spécifiquement les textes gris-bleu de vos sous-titres */
+  .dark .text-slate-600, 
+  .dark .text-slate-700,
+  .dark .text-gray-600 {
+    color: #cbd5e1 !important; /* Gris clair (slate-300) */
+  }
+}
