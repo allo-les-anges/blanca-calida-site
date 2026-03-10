@@ -4,9 +4,7 @@ import React from 'react';
 import { Bed, Bath, Waves, Car, Maximize, Map, ChevronRight, Heart } from 'lucide-react';
 import Link from 'next/link';
 
-// Nous simplifions le typage pour éviter l'erreur RegionGridProps lors du build
 export default function PropertyCard({ property }: { property: any }) {
-  // Formatage propre : 3.725.000 €
   const priceFormatted = new Intl.NumberFormat('de-DE').format(property.price || property.prix || 0);
 
   return (
@@ -22,10 +20,8 @@ export default function PropertyCard({ property }: { property: any }) {
           className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
         />
         
-        {/* Overlay dégradé pour la lecture des badges */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-80" />
 
-        {/* Badges stylisés */}
         <div className="absolute bottom-6 left-6 flex flex-wrap gap-2 max-w-[70%]">
           <span className="bg-[#D4AF37] text-black text-[9px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest shadow-lg">
             REF: {property.ref || property.id_externe}
@@ -35,7 +31,6 @@ export default function PropertyCard({ property }: { property: any }) {
           </span>
         </div>
 
-        {/* Boutons flottants d'action */}
         <div className="absolute bottom-6 right-6 flex flex-col gap-3">
           <button className="bg-white/10 backdrop-blur-md p-3 rounded-full border border-white/20 text-white hover:bg-[#D4AF37] hover:text-black transition-all duration-300">
             <Heart size={18} strokeWidth={1.5} />
@@ -49,28 +44,23 @@ export default function PropertyCard({ property }: { property: any }) {
       {/* --- INFOS : TITRE ET PRIX --- */}
       <div className="py-8 px-2">
         <div className="flex justify-between items-start gap-4 mb-3">
-          {/* TITRE : Passe de Slate-900 (Noir) à White (Blanc) */}
           <h3 className="font-serif text-2xl text-slate-900 dark:text-white italic leading-tight flex-grow line-clamp-1">
             {property.titre || property.type || 'Villa de Prestige'}
           </h3>
           
-          {/* Prix : Toujours Or */}
           <span className="text-xl font-bold text-[#D4AF37] whitespace-nowrap pt-1">
             {priceFormatted} €
           </span>
         </div>
 
-        {/* LOCALISATION : Gris foncé en Light, Gris très clair en Dark */}
         <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300 text-[10px] tracking-[0.3em] uppercase font-bold">
           <span className="text-[#D4AF37]">●</span>
           {property.town} <span className="opacity-30">|</span> {property.region || 'Costa Blanca'}
         </div>
       </div>
 
-      {/* --- ICONES TECHNIQUES : ADAPTATIVES --- */}
-      <div className="grid grid-cols-3 gap-y-6 pt-6 border-t border-slate-100 dark:border-white/5">
-        
-        {/* Chaque bloc technique suit la même logique : Noir/Gris foncé -> Blanc/Gris clair */}
+      {/* --- ICONES TECHNIQUES --- */}
+      <div className="grid grid-cols-3 gap-y-6 pt-6 border-t border-slate-100 dark:border-white/10">
         
         {/* Surface */}
         <div className="flex items-center gap-3">
@@ -123,7 +113,6 @@ export default function PropertyCard({ property }: { property: any }) {
           </div>
           <span className="text-[11px] font-medium text-slate-800 dark:text-slate-100">Garage</span>
         </div>
-        
       </div>
     </Link>
   );
