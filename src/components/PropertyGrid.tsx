@@ -53,59 +53,52 @@ export default function PropertyGrid({ activeFilters, properties }: PropertyGrid
   const isDark = resolvedTheme === "dark";
 
   return (
-    <div className="w-full max-w-[1600px] mx-auto px-6 transition-colors duration-500">
+    <div className="w-full max-w-7xl mx-auto px-4 md:px-0 transition-colors duration-500">
       
       {/* ÉTAT DE CHARGEMENT */}
       {isAnimating && filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-40 space-y-4">
           <Loader2 className="animate-spin text-[#D4AF37]" size={40} />
           <p className="text-[#D4AF37] text-[10px] font-bold uppercase tracking-[0.4em] animate-pulse">
-            Filtrage du Portfolio...
+            Mise à jour...
           </p>
         </div>
       ) : filtered.length === 0 && !isAnimating ? (
         /* ÉTAT VIDE */
         <div className="flex flex-col items-center justify-center py-24 md:py-40 px-6 space-y-6">
-          <div className="w-20 h-20 rounded-full bg-[#D4AF37]/5 flex items-center justify-center border border-[#D4AF37]/10">
+          <div className="w-16 h-16 md:w-20 md:h-20 rounded-none bg-[#D4AF37]/10 flex items-center justify-center border border-[#D4AF37]/20">
             <SearchX size={32} className="text-[#D4AF37] opacity-60" />
           </div>
-          <div className="text-center space-y-4">
-            <p className="text-[#D4AF37] text-[10px] font-bold uppercase tracking-[0.6em]">Aucun résultat</p>
-            <h3 
-              className="font-serif italic text-3xl md:text-5xl leading-tight"
+          <div className="text-center space-y-3">
+            <p className="text-[#D4AF37] text-[10px] font-bold uppercase tracking-[0.4em]">Aucune correspondance</p>
+            <p 
+              className="font-serif italic text-xl md:text-2xl leading-relaxed"
               style={{ color: isDark ? '#FFFFFF' : '#0F172A' }}
             >
-              Cette sélection est <br /> actuellement indisponible.
-            </h3>
-            <p 
-              className="text-sm font-light italic opacity-60"
-              style={{ color: isDark ? '#CBD5E1' : '#64748b' }}
-            >
-              Veuillez ajuster vos critères de recherche.
+              Nous n'avons pas trouvé de propriété <br className="hidden md:block" /> correspondant à vos critères.
+            </p>
+            <p className="text-slate-500 dark:text-slate-400 text-sm font-light italic">
+              Essayez d'élargir vos filtres.
             </p>
           </div>
           <button 
             onClick={() => window.location.reload()}
-            className="mt-8 text-[10px] uppercase font-bold tracking-[0.3em] px-8 py-4 border border-[#D4AF37]/30 hover:bg-[#D4AF37] hover:text-black transition-all duration-500"
+            className="mt-4 text-[10px] uppercase font-bold tracking-widest border-b border-[#D4AF37] pb-1 hover:text-[#D4AF37] transition-all"
             style={{ color: isDark ? '#FFFFFF' : '#0F172A' }}
           >
             Réinitialiser
           </button>
         </div>
       ) : (
-        /* GRILLE DE VIGNETTES RECTANGULAIRES */
-        <div className={`transition-all duration-1000 ease-out ${isAnimating ? 'opacity-20 blur-xl scale-[0.98]' : 'opacity-100 blur-0 scale-100'}`}>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-16 md:gap-y-24">
+        /* GRILLE DE CARTES - 3 COLONNES - BORDS CARRÉS */
+        <div className={`transition-all duration-700 ease-in-out ${isAnimating ? 'opacity-30 blur-sm scale-[0.99]' : 'opacity-100 blur-0 scale-100'}`}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12 md:gap-x-10 md:gap-y-20">
             {filtered.map((p, index) => (
               <div 
                 key={p.id || p.id_externe || index}
-                className="group relative animate-in fade-in slide-in-from-bottom-12 duration-1000 fill-mode-forwards"
-                style={{ animationDelay: `${index * 100}ms` }}
+                className="group animate-in fade-in slide-in-from-bottom-10 duration-1000 fill-mode-forwards rounded-none overflow-hidden"
+                style={{ animationDelay: `${index * 150}ms` }}
               >
-                {/* Note : Pour que les vignettes soient parfaitement rectangulaires (paysage), 
-                   assurez-vous que votre composant PropertyCard utilise un aspect-ratio 
-                   de type aspect-[16/9] ou aspect-[3/2] sur son conteneur d'image.
-                */}
                 <PropertyCard property={p} />
               </div>
             ))}
