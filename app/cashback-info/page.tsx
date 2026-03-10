@@ -74,7 +74,7 @@ export default function CashbackInfo() {
                 <span className="text-[9px] uppercase tracking-[0.2em] font-bold text-[#D4AF37] block mb-4 text-center">Exemple de dotation</span>
                 <div className="flex flex-col items-center gap-2">
                     <span className="text-2xl md:text-3xl font-light text-white tabular-nums whitespace-nowrap">
-                        15 000 €<span className="text-[#D4AF37] ml-1">*</span>
+                         2 500 €<span className="text-[#D4AF37] ml-1">*</span>
                     </span>
                     <span className="text-[10px] text-slate-400 uppercase tracking-tighter">ou équivalent mobilier / services</span>
                 </div>
