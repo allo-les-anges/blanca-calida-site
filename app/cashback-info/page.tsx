@@ -3,15 +3,14 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { 
-  Gift, 
   ShieldCheck, 
   ArrowLeft, 
   Sofa, 
   Banknote, 
   CheckCircle2, 
   Home, 
-  Sparkles,
-  Gem
+  Gavel,
+  Scale
 } from 'lucide-react';
 import { useTheme } from "next-themes";
 
@@ -27,7 +26,6 @@ export default function CashbackInfo() {
 
   const isDark = resolvedTheme === "dark";
 
-  // Configuration des couleurs forcées pour une lisibilité garantie
   const themeStyles = {
     title: { color: isDark ? '#FFFFFF' : '#0f172a' },
     text: { color: isDark ? '#CBD5E1' : '#64748b' },
@@ -52,33 +50,34 @@ export default function CashbackInfo() {
             style={themeStyles.title}
           >
             Le Programme <br />
-            <span className="italic text-[#D4AF37]">Cashback Privilège</span>
+            <span className="italic text-[#D4AF37]">Avantages Négociés</span>
           </h1>
           <p 
             className="text-xl max-w-2xl leading-relaxed"
             style={themeStyles.text}
           >
-            Nous réinventons l'immobilier de luxe en transformant une partie de la transaction en un avantage exclusif. 
-            Investissez sereinement, récupérez de la valeur dès la remise des clés.
+            Chez Amaru, chaque transaction est unique. Le "Cashback" n'est pas un barème fixe, mais une condition pré-négociée avec nos partenaires pour maximiser la valeur de votre investissement dès l'acquisition.
           </p>
         </div>
 
-        {/* --- SECTION EXEMPLE CONCRET --- */}
+        {/* --- SECTION EXEMPLE CONCRET (MODIFIÉE) --- */}
         <div className="relative overflow-hidden bg-[#0F172A] rounded-[3rem] p-8 md:p-16 mb-20 shadow-2xl border border-white/5">
           <div className="absolute top-0 right-0 w-64 h-64 bg-[#D4AF37] opacity-10 blur-[100px] -mr-32 -mt-32" />
           
           <div className="relative z-10">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6">
-              <div>
-                <h2 className="text-[10px] uppercase tracking-[0.4em] font-bold text-[#D4AF37] mb-3">Simulation Exceptionnelle</h2>
-                <p className="text-3xl font-serif italic text-white">Villa de prestige à 1 500 000 €</p>
+              <div className="max-w-md">
+                <h2 className="text-[10px] uppercase tracking-[0.4em] font-bold text-[#D4AF37] mb-3">Flexibilité Totale</h2>
+                <p className="text-3xl font-serif italic text-white leading-tight">Un avantage sur-mesure adapté à votre projet</p>
               </div>
-              <div className="bg-white/5 backdrop-blur-md px-6 md:px-8 py-6 rounded-[2rem] border border-[#D4AF37]/30">
-                <span className="text-[9px] uppercase tracking-[0.2em] font-bold text-[#D4AF37] block mb-2 text-center">Votre Avantage Amaru</span>
-                {/* Taille réduite sur mobile (text-2xl) et blocage du retour à la ligne (whitespace-nowrap) */}
-                <span className="text-2xl md:text-4xl font-light text-white tabular-nums whitespace-nowrap">
-                  15 000 €<span className="text-[#D4AF37] ml-1">*</span>
-                </span>
+              <div className="bg-white/5 backdrop-blur-md px-6 py-8 rounded-[2rem] border border-[#D4AF37]/30 min-w-[240px]">
+                <span className="text-[9px] uppercase tracking-[0.2em] font-bold text-[#D4AF37] block mb-4 text-center">Exemple de dotation</span>
+                <div className="flex flex-col items-center gap-2">
+                    <span className="text-2xl md:text-3xl font-light text-white tabular-nums whitespace-nowrap">
+                        15 000 €<span className="text-[#D4AF37] ml-1">*</span>
+                    </span>
+                    <span className="text-[10px] text-slate-400 uppercase tracking-tighter">ou équivalent mobilier / services</span>
+                </div>
               </div>
             </div>
             
@@ -87,24 +86,36 @@ export default function CashbackInfo() {
                 <div className="bg-[#D4AF37]/10 p-2 rounded-full">
                   <CheckCircle2 className="text-[#D4AF37]" size={20} />
                 </div>
-                <p className="text-sm text-slate-300 leading-relaxed">Disponible immédiatement après la signature de l'acte authentique chez le notaire.</p>
+                <p className="text-sm text-slate-300 leading-relaxed">Condition négociée en amont avec l'agence ou le promoteur partenaire.</p>
               </div>
               <div className="flex items-start gap-4">
                 <div className="bg-[#D4AF37]/10 p-2 rounded-full">
                   <CheckCircle2 className="text-[#D4AF37]" size={20} />
                 </div>
-                <p className="text-sm text-slate-300 leading-relaxed">Une totale transparence : aucun frais caché ni démarche administrative complexe.</p>
+                <p className="text-sm text-slate-300 leading-relaxed">Choix libre entre versement, pack mobilier ou prise en charge de frais.</p>
               </div>
             </div>
           </div>
         </div>
 
-        {/* --- GRILLE D'AVANTAGES --- */}
+        {/* --- GRILLE D'AVANTAGES (MISE À JOUR) --- */}
         <div className="grid md:grid-cols-3 gap-16 mb-24">
           {[
-            { icon: Banknote, title: "Versement Direct", desc: "Un virement bancaire pour couvrir vos frais de notaire ou optimiser votre trésorerie." },
-            { icon: Sofa, title: "Art de Vivre", desc: "Financez l'aménagement de votre nouvelle demeure : mobilier de designer ou décoration." },
-            { icon: ShieldCheck, title: "Sérénité Juridique", desc: "Un processus rigoureusement encadré, transparent et validé par nos experts." }
+            { 
+              icon: Banknote, 
+              title: "En Numéraire", 
+              desc: "Un apport de trésorerie direct pour optimiser votre plan de financement ou vos frais annexes." 
+            },
+            { 
+              icon: Sofa, 
+              title: "Mobilier & Design", 
+              desc: "Une dotation dédiée à l'ameublement de prestige pour emménager dans une villa prête à vivre." 
+            },
+            { 
+              icon: Scale, 
+              title: "Services & Honoraires", 
+              desc: "Prise en charge de vos frais d'avocat ou de conseil pour une transaction en toute sérénité." 
+            }
           ].map((item, idx) => (
             <div key={idx} className="group space-y-6">
               <div className="w-14 h-14 bg-slate-50 dark:bg-white/5 rounded-2xl flex items-center justify-center group-hover:bg-[#D4AF37] transition-all duration-500 shadow-sm">
@@ -124,21 +135,20 @@ export default function CashbackInfo() {
         {/* Section FAQ / Info */}
         <div className="border-t border-slate-100 dark:border-white/10 pt-20">
             <div className="max-w-2xl">
-              <h2 className="text-4xl font-serif italic mb-10 text-left" style={themeStyles.title}>L'exclusivité Amaru</h2>
+              <h2 className="text-4xl font-serif italic mb-10 text-left" style={themeStyles.title}>Modalités d'activation</h2>
               <div className="space-y-8 text-lg leading-relaxed">
                 <p style={themeStyles.text}>
-                  Le programme <span style={themeStyles.heading} className="font-medium">Cashback</span> est une offre signée **Amaru Properties**. Il s'active dès que vous réservez une villa éligible via notre plateforme digitale.
+                  Ce système de <span style={themeStyles.heading} className="font-medium">Cashback</span> est le fruit d'accords spécifiques entre **Amaru Properties** et ses partenaires immobiliers. Chaque montant ou service est validé lors de la réservation de votre propriété.
                 </p>
                 <p style={themeStyles.text}>
-                  Vous conservez la liberté absolue de choisir la destination de ce capital : qu'il s'agisse de réduire votre apport ou de transformer votre intérieur.
+                  Selon vos besoins, cet avantage peut être converti en fourniture de mobilier de designer ou en règlement d'honoraires juridiques, offrant ainsi une flexibilité fiscale et opérationnelle majeure.
                 </p>
               </div>
 
-              {/* BOUTON RETOUR */}
               <div className="mt-16">
                 <Link 
                     href="/" 
-                    className="group inline-flex items-center gap-4 bg-slate-900 dark:bg-white text-white dark:text-black px-12 py-6 rounded-2xl font-bold uppercase text-[11px] tracking-[0.3em] hover:bg-[#D4AF37] dark:hover:bg-[#D4AF37] transition-all duration-500 shadow-2xl"
+                    className="group inline-flex items-center gap-4 bg-slate-900 dark:bg-white text-white dark:text-black px-12 py-6 rounded-2xl font-bold uppercase text-[11px] tracking-[0.3em] hover:bg-[#D4AF37] transition-all duration-500 shadow-2xl"
                 >
                     <Home size={18} className="group-hover:scale-110 transition-transform" />
                     Retour à l'accueil
