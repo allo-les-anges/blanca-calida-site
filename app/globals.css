@@ -1,26 +1,25 @@
-/* globals.css */
+@import "tailwindcss";
 
-/* On neutralise le décalage forcé par Google */
-html {
+/* 1. FORCE BRUTE CONTRE LA BANDE GOOGLE */
+/* On cible absolument tout ce qui pourrait décaler le haut du site */
+html, body {
   margin-top: 0px !important;
+  padding-top: 0px !important;
   top: 0px !important;
+  position: relative !important;
 }
 
-body {
-  top: 0px !important;
-  position: static !important;
-}
-
-/* On masque les éléments invisibles de Google qui créent cet espace */
-.goog-te-banner-frame, 
+/* On fait disparaître l'espace réservé par Google de façon radicale */
 .skiptranslate, 
-iframe.goog-te-banner-frame,
-#goog-gt-tt {
+iframe.goog-te-banner-frame, 
+.goog-te-banner-frame, 
+#goog-gt-tt, 
+.goog-te-balloon-frame {
   display: none !important;
   visibility: hidden !important;
+  height: 0 !important;
+  width: 0 !important;
 }
-
-@import "tailwindcss";
 
 @layer base {
   :root {
@@ -33,85 +32,37 @@ iframe.goog-te-banner-frame,
     --foreground: #f8fafc;
   }
 
-  /* 1. SUPPRESSION DU DÉCALAGE GOOGLE (LA BANDE) */
-  html {
-    margin-top: 0px !important;
-    top: 0px !important;
-    background-color: var(--background) !important;
-  }
-
   body {
-    top: 0px !important;
-    position: static !important;
     background-color: var(--background) !important;
     color: var(--foreground) !important;
-    min-height: 100vh;
   }
 
-  /* 2. FORÇAGE DU TEXTE EN BLANC EN MODE DARK */
-  /* On cible toutes les balises de texte pour écraser les classes Tailwind sombres */
-  .dark h1, 
-  .dark h2, 
-  .dark h3, 
-  .dark h4, 
-  .dark p, 
-  .dark span,
-  .dark a,
-  .dark label,
-  /* Cible spécifique pour vos classes actuelles */
-  .dark .text-slate-900,
-  .dark .text-slate-800,
-  .dark .text-slate-600 {
+  /* 2. TEXTE BLANC EN MODE DARK (Correction globale) */
+  .dark h1, .dark h2, .dark h3, .dark h4, .dark p, .dark span, .dark label, .dark a {
     color: #f8fafc !important;
   }
 
-  /* Pour les textes secondaires (gris clair en mode sombre) */
-  .dark .text-slate-500,
-  .dark .text-gray-500 {
-    color: #94a3b8 !important;
+  /* 3. LE BOUTON DE RECHERCHE (Correction spécifique) */
+  /* On force le texte à rester noir/bleu foncé à l'intérieur du bouton blanc */
+  .dark .recherche-privee-btn,
+  .dark button[class*="bg-white"] span,
+  .dark button[class*="bg-white"] p,
+  .dark .bg-white button span {
+    color: #0f172a !important;
   }
 
-  /* 3. FORÇAGE DES FONDS DE SECTION */
-  .dark section,
-  .dark main,
-  .dark header,
-  /* Si vos sections ont des classes de fond blanc en dur */
-  .dark div[class*="bg-white"],
-  .dark div[class*="bg-slate-50"] {
+  /* 4. FONDS DE SECTION REBELLE */
+  .dark section, .dark main, .dark .bg-white:not(button) {
     background-color: #020617 !important;
   }
 }
 
-/* 4. MASQUAGE COMPLET DES IFRAMES GOOGLE */
-.goog-te-banner-frame, 
-.goog-te-banner, 
-.skiptranslate, 
-#goog-gt-tt, 
-.goog-te-balloon-frame,
-iframe.goog-te-banner-frame {
-  display: none !important;
-  visibility: hidden !important;
+/* 5. FIX NAVBAR (Si elle est décalée) */
+header, nav {
+  top: 0 !important;
 }
 
-/* On retire l'espace que Google réserve en haut de page */
-#google_translate_element {
-  display: none !important;
-}
-
-/* 5. SCROLLBAR DORÉE */
+/* Scrollbar */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #D4AF37; border-radius: 10px; }
-
-/* Correction du bouton de recherche en mode Dark */
-.dark .recherche-privee-btn, 
-.dark button[class*="recherche"],
-.dark div[class*="recherche"] span,
-.dark div[class*="recherche"] p {
-  color: #0f172a !important; /* Force le texte en bleu très foncé/noir */
-}
-
-/* Si vous voulez que le texte soit doré pour rappeler le standing */
-.dark .recherche-privee-btn span {
-  color: #D4AF37 !important;
-}
