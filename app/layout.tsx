@@ -28,41 +28,20 @@ export default function RootLayout({
     <html lang="fr" className="scroll-smooth notranslate" suppressHydrationWarning>
       <head>
         <meta name="google" content="notranslate" />
-        {/* Ces styles forcent le fond sombre même si Google Translate essaie d'injecter du blanc */}
         <style>{`
-  /* Masquage Google Translate */
-  .goog-te-banner-frame, .goog-te-banner-frame.skiptranslate, .goog-te-banner, .skiptranslate, #goog-gt-tt, .goog-te-balloon-frame, iframe.goog-te-banner-frame { 
-    display: none !important; 
-    visibility: hidden !important;
-  }
-
-  /* RESET GLOBAL DU FOND */
-  html { 
-    background-color: #ffffff !important; 
-    margin-top: 0px !important; 
-  }
-  
-  html.dark { 
-    background-color: #020617 !important; 
-  }
-
-  /* On force le body et le main à être invisibles pour laisser voir le fond du html */
-  body, main {
-    background-color: transparent !important;
-    top: 0px !important;
-    position: static !important;
-  }
-
-  /* Si un élément bloque encore, on force le texte */
-  html.dark body {
-    color: #ffffff !important;
-  }
-
-  .goog-text-highlight { background-color: transparent !important; box-shadow: none !important; }
-`}</style>
+          /* Masquage Google Translate */
+          .goog-te-banner-frame, .goog-te-banner-frame.skiptranslate, .goog-te-banner, .skiptranslate, #goog-gt-tt, .goog-te-balloon-frame, iframe.goog-te-banner-frame { 
+            display: none !important; 
+            visibility: hidden !important;
+          }
+          /* On retire les marges parasites de Google Translate sans casser le fond */
+          html { margin-top: 0px !important; }
+          body { top: 0px !important; position: static !important; }
+          .goog-text-highlight { background-color: transparent !important; box-shadow: none !important; }
+        `}</style>
       </head>
-      {/* Suppression de bg-white ici pour laisser le CSS de globals et du head gérer le fond */}
-      <body className={`${inter.variable} ${playfair.variable} font-sans antialiased`}>
+      {/* On applique le fond ici pour éviter le flash blanc au chargement */}
+      <body className={`${inter.variable} ${playfair.variable} font-sans antialiased bg-white dark:bg-[#020617] text-slate-900 dark:text-slate-100 transition-colors duration-300`}>
         <ThemeProvider>
           <div className="notranslate">
             <div id="google_translate_element"></div>

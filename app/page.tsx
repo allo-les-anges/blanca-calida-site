@@ -118,52 +118,48 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen text-slate-900 dark:text-slate-100 selection:bg-[#D4AF37]/30 font-sans overflow-x-hidden transition-colors duration-500 bg-white dark:bg-[#020617]">
+    <main className="min-h-screen selection:bg-[#D4AF37]/30 font-sans overflow-x-hidden transition-colors duration-500 bg-white dark:bg-[#020617]">
       <Navbar />
       
-      {/* SECTION HERO */}
-      <div className="relative h-[85vh] md:h-screen flex flex-col items-center justify-center bg-[#020617]">
+      {/* SECTION HERO - Correction : bg-slate-50 en light pour le contraste */}
+      <div className="relative h-[85vh] md:h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-[#020617] transition-colors duration-500">
         <Hero />
         
         <div className="absolute bottom-[10%] md:bottom-[15%] z-40">
            {!isSearchOpen && (
              <button 
                 onClick={() => setIsSearchOpen(true)}
-                className="group flex items-center gap-4 md:gap-6 bg-black/60 backdrop-blur-xl border border-white/10 px-6 py-3 md:px-8 md:py-4 rounded-full hover:border-[#D4AF37]/50 transition-all duration-500 shadow-2xl"
+                className="group flex items-center gap-4 md:gap-6 bg-white/80 dark:bg-black/60 backdrop-blur-xl border border-slate-200 dark:border-white/10 px-6 py-3 md:px-8 md:py-4 rounded-full hover:border-[#D4AF37]/50 transition-all duration-500 shadow-2xl"
              >
                 <div className="w-8 h-8 md:w-10 md:h-10 bg-[#D4AF37] rounded-full flex items-center justify-center text-black group-hover:rotate-90 transition-transform duration-500">
                   <Search size={16} />
                 </div>
                 <div className="text-left">
                   <span className="block text-[8px] md:text-[9px] font-bold text-[#D4AF37] uppercase tracking-[0.3em]">Recherche Privée</span>
-                  <span className="block text-white font-serif italic text-sm md:text-base tracking-wide">Trouver votre villa</span>
+                  <span className="block text-slate-900 dark:text-white font-serif italic text-sm md:text-base tracking-wide">Trouver votre villa</span>
                 </div>
              </button>
            )}
         </div>
 
-        {/* TRANSITION GRADIENT : Adaptatif selon le mode */}
+        {/* TRANSITION GRADIENT : Correction des couleurs */}
         <div className="absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-white dark:from-[#020617] via-white/80 dark:via-[#020617]/80 to-transparent pointer-events-none transition-colors duration-500" />
       </div>
 
       {/* MODAL DE RECHERCHE */}
       <div className={`fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8 transition-all duration-500 ${isSearchOpen ? 'visible opacity-100' : 'invisible opacity-0'}`}>
-        <div className="absolute inset-0 bg-black/90 backdrop-blur-md" onClick={() => setIsSearchOpen(false)} />
+        <div className="absolute inset-0 bg-slate-900/60 dark:bg-black/90 backdrop-blur-md" onClick={() => setIsSearchOpen(false)} />
         
-        <div className={`relative w-full max-w-6xl bg-white dark:bg-[#0A0A0A] rounded-[2rem] md:rounded-[3rem] overflow-hidden shadow-2xl transition-transform duration-500 ${isSearchOpen ? 'scale-100 translate-y-0' : 'scale-95 translate-y-10'}`}>
+        <div className={`relative w-full max-w-6xl bg-white dark:bg-[#0f172a] rounded-[2rem] md:rounded-[3rem] overflow-hidden shadow-2xl transition-transform duration-500 ${isSearchOpen ? 'scale-100 translate-y-0' : 'scale-95 translate-y-10'}`}>
           <button 
             onClick={() => setIsSearchOpen(false)}
-            className="absolute top-5 right-5 w-10 h-10 bg-black text-[#D4AF37] rounded-full flex items-center justify-center hover:scale-110 transition-transform z-50"
+            className="absolute top-5 right-5 w-10 h-10 bg-slate-900 dark:bg-black text-[#D4AF37] rounded-full flex items-center justify-center hover:scale-110 transition-transform z-50"
           >
             <X size={20} />
           </button>
 
           <div className="p-6 md:p-12 max-h-[85vh] overflow-y-auto">
-            <div className="mb-8 border-b border-slate-100 dark:border-white/10 pb-6 hidden md:block">
-              {/* TITRE MODAL : Adaptatif */}
-              <h3 className="text-slate-900 dark:text-white font-serif text-3xl italic">Filtres de Sélection</h3>
-              <p className="text-slate-400 text-[10px] uppercase font-bold tracking-[0.2em] mt-1">Personnalisez votre recherche immobilière</p>
-            </div>
+            {/* On a retiré le titre ici s'il fait doublon avec AdvancedSearch */}
             <AdvancedSearch
               properties={allProperties}
               onSearch={handleSearch}
@@ -174,7 +170,7 @@ export default function Home() {
       </div>
 
       {/* SECTION RÉGIONS */}
-      <section className="py-24 md:py-32 bg-white dark:bg-[#020617]">
+      <section className="py-24 md:py-32 bg-white dark:bg-[#020617] transition-colors duration-500">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16 md:mb-24 space-y-4">
             <h2 className="text-[#D4AF37] text-[11px] font-bold uppercase tracking-[0.6em]">Destinations d'Exception</h2>
@@ -184,8 +180,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* SECTION ESPACE PROPRIÉTAIRE : CORRECTIONS DE CONTRASTE */}
-      <section className="max-w-7xl mx-auto px-4 md:px-6 py-12 md:py-24">
+      {/* SECTION ESPACE PROPRIÉTAIRE */}
+      <section className="max-w-7xl mx-auto px-4 md:px-6 py-12 md:py-24 bg-white dark:bg-[#020617] transition-colors duration-500">
         <div className="bg-slate-50 dark:bg-[#0F172A]/40 p-8 md:p-24 rounded-[2.5rem] md:rounded-[4rem] border border-slate-200 dark:border-white/5 relative overflow-hidden transition-colors duration-500">
           <div className="absolute top-[-10%] right-[-5%] opacity-[0.03] pointer-events-none rotate-12">
             <ShieldCheck size={600} className="text-[#D4AF37]" />
@@ -194,7 +190,6 @@ export default function Home() {
             <div className="space-y-6 md:space-y-10">
               <div className="space-y-4 text-center lg:text-left">
                 <span className="text-[#D4AF37] text-[10px] font-bold uppercase tracking-[0.4em]">Propriétaires Amaru</span>
-                {/* TITRE : Adaptatif Noir -> Blanc */}
                 <h2 className="text-4xl md:text-7xl font-serif text-slate-900 dark:text-white leading-[1.1] italic">
                   Suivez votre vision <br /> 
                   <span className="text-[#D4AF37] not-italic font-sans font-light tracking-tighter text-3xl md:text-6xl uppercase">en temps réel.</span>
@@ -205,12 +200,10 @@ export default function Home() {
               </p>
             </div>
             
-            {/* CARTE LOGIN : Fond s'adapte au mode sombre */}
             <div className="bg-white dark:bg-[#020617] p-8 md:p-12 rounded-[2rem] border border-slate-200 dark:border-[#D4AF37]/20 backdrop-blur-xl shadow-xl">
                <form onSubmit={handleClientLogin} className="space-y-8 text-center">
                   <User size={32} className="text-[#D4AF37] mx-auto mb-2 opacity-80" />
                   <div className="relative group">
-                    {/* INPUT PIN : Texte Noir en light, Blanc en dark */}
                     <input 
                       type="password" placeholder="CODE PIN" value={clientPin}
                       onChange={(e) => setClientPin(e.target.value)}
@@ -227,10 +220,9 @@ export default function Home() {
       </section>
 
       {/* SECTION COLLECTION */}
-      <section id="collection" className="py-24 md:py-32 relative bg-white dark:bg-[#020617]">
+      <section id="collection" className="py-24 md:py-32 relative bg-white dark:bg-[#020617] transition-colors duration-500">
         <div className="max-w-7xl mx-auto px-4 md:px-6">
           <header className="mb-16 md:mb-24 text-center space-y-4">
-            {/* TITRE COLLECTION : Adaptatif */}
             <h3 className="text-5xl md:text-8xl font-serif italic text-slate-900 dark:text-white leading-none">
               {filters.region ? filters.region : "Portfolio Privé"}
             </h3>
