@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import { useTheme } from "next-themes";
 
 interface Property {
   id: string;
@@ -45,18 +46,21 @@ const REGIONS_DISPLAY = [
 ];
 
 export default function RegionGrid({ properties, onRegionClick }: RegionGridProps) {
-  
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const regionCounts = useMemo(() => {
     const counts: Record<string, number> = {
       "Costa Blanca": 0, "Costa del Sol": 0, "Costa Calida": 0, "Costa Almeria": 0
     };
-
     if (!properties || properties.length === 0) return counts;
-
     properties.forEach(p => {
       const rawCity = (p.town || p.ville || "").toLowerCase().trim();
       const regionFound = CITY_TO_REGION_MAP[rawCity];
-      
       if (regionFound) {
         counts[regionFound]++;
       } else {
@@ -66,14 +70,24 @@ export default function RegionGrid({ properties, onRegionClick }: RegionGridProp
         }
       }
     });
-
     return counts;
   }, [properties]);
 
+  if (!mounted) return null;
+
+  const isDark = resolvedTheme === "dark";
+
+  // Définition des styles dynamiques pour forcer la lisibilité
+  const themeStyles = {
+    title: { color: isDark ? '#FFFFFF' : '#0f172a' },
+    desc: { color: isDark ? '#CBD5E1' : '#64748b' },
+    border: { borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(15,23,42,0.1)' }
+  };
+
   return (
-    <section className="max-w-[1600px] mx-auto px-6 py-24 bg-white dark:bg-[#0A0A0A]">
+    <section className="max-w-[1600px] mx-auto px-6 py-24 bg-white dark:bg-[#0A0A0A] transition-colors duration-500">
       
-      {/* EN-TÊTE : Correction de la visibilité sur fond noir */}
+      {/* HEADER AVEC STYLES DYNAMIQUES */}
       <div className="mb-24 flex flex-col md:flex-row md:items-end justify-between gap-12">
         <div className="max-w-4xl">
           <motion.div
@@ -81,11 +95,13 @@ export default function RegionGrid({ properties, onRegionClick }: RegionGridProp
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            {/* On force la couleur dorée ici avec text-[#D4AF37] !important via CSS inline ou Tailwind propre */}
             <span className="text-[#D4AF37] text-[11px] font-black uppercase tracking-[0.6em] mb-6 block">
               Nos Destinations
             </span>
-            <h2 className="text-5xl md:text-8xl font-serif italic text-slate-900 dark:text-white leading-[1.1]">
+            <h2 
+              className="text-5xl md:text-8xl font-serif italic leading-[1.1]"
+              style={themeStyles.title}
+            >
               Destinations <br /> d'Exception
             </h2>
           </motion.div>
@@ -95,15 +111,19 @@ export default function RegionGrid({ properties, onRegionClick }: RegionGridProp
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           transition={{ delay: 0.4 }}
-          className="max-w-xs border-l border-slate-200 dark:border-white/20 pl-8 pb-2"
+          className="max-w-xs border-l pl-8 pb-2"
+          style={themeStyles.border}
         >
-          {/* Correction ici : text-white forcé en mode dark */}
-          <p className="text-slate-500 dark:text-white/90 text-sm font-light leading-relaxed italic">
+          <p 
+            className="text-sm font-light leading-relaxed italic"
+            style={themeStyles.desc}
+          >
             "Une sélection rigoureuse des enclaves les plus prestigieuses du littoral espagnol."
           </p>
         </motion.div>
       </div>
 
+      {/* GRILLE */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[350px] md:auto-rows-[480px]">
         {REGIONS_DISPLAY.map((region, index) => {
           const count = regionCounts[region.name] || 0;
@@ -124,9 +144,11 @@ export default function RegionGrid({ properties, onRegionClick }: RegionGridProp
                   alt={region.name} 
                   className="w-full h-full object-cover transition-transform duration-[5s] ease-out group-hover:scale-110 opacity-90 group-hover:opacity-80 transition-opacity" 
                 />
+                {/* Overlay sombre profond pour forcer le contraste du texte blanc */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent opacity-90 group-hover:opacity-100 transition-opacity duration-700" />
               </div>
 
+              {/* CONTENU TEXTE (Toujours blanc pur ici car sur image sombre) */}
               <div className="absolute inset-0 p-12 flex flex-col justify-end items-start text-white">
                 <motion.div 
                   initial={{ opacity: 0, y: 10 }}
@@ -138,7 +160,7 @@ export default function RegionGrid({ properties, onRegionClick }: RegionGridProp
                     {count} Propriétés
                   </p>
                   
-                  <h3 className="text-3xl md:text-5xl font-serif italic leading-none text-white">
+                  <h3 className="text-3xl md:text-5xl font-serif italic leading-none text-white drop-shadow-2xl">
                     {region.name}
                   </h3>
                   
