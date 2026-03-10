@@ -10,7 +10,7 @@ import { useTheme } from "next-themes";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import AdvancedSearch from "@/components/AdvancedSearch";
-import ScrollingBanner from "@/components/ScrollingBanner"; // Nouveau
+import ScrollingBanner from "@/components/ScrollingBanner";
 import RegionGrid from "@/components/RegionGrid";
 import PropertyGrid from "@/components/PropertyGrid";
 import Footer from "@/components/Footer";
@@ -125,22 +125,23 @@ export default function Home() {
       <Navbar />
       
       {/* SECTION HERO */}
-      <div className="relative h-[85vh] md:h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-[#020617] transition-colors duration-500">
+      <div className="relative h-[80vh] flex flex-col items-center justify-center bg-slate-50 dark:bg-[#020617] transition-colors duration-500">
         <Hero />
         
-        <div className="absolute bottom-[10%] md:bottom-[15%] z-40">
+        {/* BOUTON RECHERCHE CARRÉ */}
+        <div className="absolute bottom-[10%] z-40">
            {!isSearchOpen && (
              <button 
                 onClick={() => setIsSearchOpen(true)}
-                className="group flex items-center gap-4 md:gap-6 bg-white/80 dark:bg-black/60 backdrop-blur-xl border border-slate-200 dark:border-white/10 px-6 py-3 md:px-8 md:py-4 rounded-full hover:border-[#D4AF37]/50 transition-all duration-500 shadow-2xl"
+                className="group flex items-center gap-6 bg-white/90 dark:bg-black/60 backdrop-blur-xl border border-slate-200 dark:border-white/10 p-4 rounded-none hover:border-[#D4AF37]/50 transition-all duration-500 shadow-2xl"
              >
-                <div className="w-8 h-8 md:w-10 md:h-10 bg-[#D4AF37] rounded-full flex items-center justify-center text-black group-hover:rotate-90 transition-transform duration-500">
-                  <Search size={16} />
+                <div className="w-12 h-12 bg-[#D4AF37] rounded-none flex items-center justify-center text-black group-hover:rotate-12 transition-transform duration-500">
+                  <Search size={20} />
                 </div>
-                <div className="text-left">
-                  <span className="block text-[8px] md:text-[9px] font-bold text-[#D4AF37] uppercase tracking-[0.3em]">Recherche Privée</span>
+                <div className="text-left pr-4">
+                  <span className="block text-[9px] font-black text-[#D4AF37] uppercase tracking-[0.4em] mb-1">Recherche Privée</span>
                   <span 
-                    className="block font-serif italic text-sm md:text-base tracking-wide"
+                    className="block font-serif italic text-base md:text-lg tracking-wide"
                     style={{ color: isDark ? '#FFFFFF' : '#0f172a' }}
                   >
                     Trouver votre villa
@@ -150,79 +151,49 @@ export default function Home() {
            )}
         </div>
 
-        <div className="absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-white dark:from-[#020617] via-white/80 dark:via-[#020617]/80 to-transparent pointer-events-none transition-colors duration-500" />
+        <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-white dark:from-[#020617] to-transparent pointer-events-none transition-colors duration-500" />
       </div>
 
-      {/* BANDEAU DÉROULANT (Entre Hero et Destinations) */}
+      {/* BANDEAU DÉROULANT SLIM */}
       <ScrollingBanner />
 
-      {/* MODAL DE RECHERCHE */}
-      <div className={`fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8 transition-all duration-500 ${isSearchOpen ? 'visible opacity-100' : 'invisible opacity-0'}`}>
-        <div className="absolute inset-0 bg-slate-900/60 dark:bg-black/90 backdrop-blur-md" onClick={() => setIsSearchOpen(false)} />
-        
-        <div className={`relative w-full max-w-6xl bg-white dark:bg-[#0f172a] rounded-[2rem] md:rounded-[3rem] overflow-hidden shadow-2xl transition-transform duration-500 ${isSearchOpen ? 'scale-100 translate-y-0' : 'scale-95 translate-y-10'}`}>
-          <button 
-            onClick={() => setIsSearchOpen(false)}
-            className="absolute top-5 right-5 w-10 h-10 bg-slate-900 dark:bg-black text-[#D4AF37] rounded-full flex items-center justify-center hover:scale-110 transition-transform z-50"
-          >
-            <X size={20} />
-          </button>
-
-          <div className="p-6 md:p-12 max-h-[85vh] overflow-y-auto">
-            <AdvancedSearch
-              properties={allProperties}
-              onSearch={handleSearch}
-              activeFilters={filters}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* SECTION RÉGIONS (Intègre désormais le code RegionGrid avec option A) */}
-      <section className="py-24 md:py-32 bg-white dark:bg-[#020617] transition-colors duration-500">
-        <div className="max-w-7xl mx-auto px-6">
+      {/* SECTION RÉGIONS - Espacements réduits */}
+      <section className="py-12 bg-white dark:bg-[#020617] transition-colors duration-500">
           <RegionGrid properties={allProperties} onRegionClick={handleRegionClick} />
-        </div>
       </section>
 
-      {/* SECTION ESPACE PROPRIÉTAIRE */}
-      <section className="max-w-7xl mx-auto px-4 md:px-6 py-12 md:py-24 bg-white dark:bg-[#020617] transition-colors duration-500">
-        <div className="bg-slate-50 dark:bg-[#0F172A]/40 p-8 md:p-24 rounded-[2.5rem] md:rounded-[4rem] border border-slate-200 dark:border-white/5 relative overflow-hidden transition-colors duration-500">
-          <div className="absolute top-[-10%] right-[-5%] opacity-[0.03] pointer-events-none rotate-12">
-            <ShieldCheck size={600} className="text-[#D4AF37]" />
-          </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 md:gap-20 items-center relative z-10">
-            <div className="space-y-6 md:space-y-10">
-              <div className="space-y-4 text-center lg:text-left">
-                <span className="text-[#D4AF37] text-[10px] font-bold uppercase tracking-[0.4em]">Propriétaires Amaru</span>
-                <h2 
-                   className="text-4xl md:text-7xl font-serif leading-[1.1] italic"
-                   style={{ color: isDark ? '#ffffff' : '#0f172a' }}
-                >
-                  Suivez votre projet <br /> 
-                  <span className="text-[#D4AF37] not-italic font-sans font-extrabold tracking-tighter text-3xl md:text-6xl uppercase">en temps réel.</span>
-                </h2>
-              </div>
+      {/* SECTION ESPACE PROPRIÉTAIRE - Bords carrés */}
+      <section className="max-w-[1600px] mx-auto px-6 py-12 bg-white dark:bg-[#020617]">
+        <div className="bg-slate-50 dark:bg-[#0F172A]/40 p-12 md:p-20 rounded-none border border-slate-200 dark:border-white/5 relative overflow-hidden">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center relative z-10">
+            <div className="space-y-6">
+              <span className="text-[#D4AF37] text-[10px] font-bold uppercase tracking-[0.4em]">Propriétaires Amaru</span>
+              <h2 
+                 className="text-4xl md:text-6xl font-serif leading-tight italic"
+                 style={{ color: isDark ? '#ffffff' : '#0f172a' }}
+              >
+                Suivez votre projet <br /> 
+                <span className="text-[#D4AF37] not-italic font-sans font-extrabold tracking-tighter text-2xl md:text-5xl uppercase">en temps réel.</span>
+              </h2>
               <p 
-                className="text-base md:text-lg font-light leading-relaxed max-w-lg border-l-0 lg:border-l border-slate-200 dark:border-white/10 pl-0 lg:pl-8 italic text-center lg:text-left opacity-90"
+                className="text-sm font-light leading-relaxed max-w-md border-l border-slate-200 dark:border-white/10 pl-6 italic opacity-90"
                 style={{ color: isDark ? '#CBD5E1' : '#64748b' }}
               >
-                Accédez à votre cockpit de construction privé pour suivre chaque étape de la réalisation de votre villa d'exception.
+                Accédez à votre cockpit de construction privé pour suivre chaque étape.
               </p>
             </div>
             
-            <div className="bg-white dark:bg-[#020617] p-8 md:p-12 rounded-[2rem] border border-slate-200 dark:border-[#D4AF37]/20 backdrop-blur-xl shadow-xl">
-               <form onSubmit={handleClientLogin} className="space-y-8 text-center">
-                  <User size={32} className="text-[#D4AF37] mx-auto mb-2 opacity-80" />
+            <div className="bg-white dark:bg-[#020617] p-10 rounded-none border border-slate-200 dark:border-[#D4AF37]/20 shadow-xl">
+               <form onSubmit={handleClientLogin} className="space-y-8">
                   <div className="relative group">
                     <input 
                       type="password" placeholder="CODE PIN" value={clientPin}
                       onChange={(e) => setClientPin(e.target.value)}
-                      className="w-full bg-transparent border-b border-slate-200 dark:border-white/10 py-4 text-center text-2xl md:text-3xl font-black tracking-[0.8em] outline-none focus:border-[#D4AF37] transition-all"
+                      className="w-full bg-transparent border-b border-slate-200 dark:border-white/10 py-4 text-center text-2xl font-black tracking-[0.8em] outline-none focus:border-[#D4AF37] transition-all"
                       style={{ color: isDark ? '#FFFFFF' : '#0f172a' }}
                     />
                   </div>
-                  <button type="submit" className="w-full bg-[#D4AF37] text-black py-5 md:py-6 rounded-full font-bold text-[10px] md:text-[11px] uppercase tracking-[0.3em] hover:bg-slate-900 hover:text-white dark:hover:bg-white dark:hover:text-black transition-all flex items-center justify-center gap-4 shadow-lg shadow-[#D4AF37]/20">
+                  <button type="submit" className="w-full bg-[#D4AF37] text-black py-5 rounded-none font-bold text-[10px] uppercase tracking-[0.3em] hover:bg-slate-900 hover:text-white dark:hover:bg-white dark:hover:text-black transition-all flex items-center justify-center gap-4">
                     Accéder au chantier <ArrowRight size={18} />
                   </button>
                </form>
@@ -232,17 +203,16 @@ export default function Home() {
       </section>
 
       {/* SECTION COLLECTION */}
-      <section id="collection" className="py-24 md:py-32 relative bg-white dark:bg-[#020617] transition-colors duration-500">
-        <div className="max-w-7xl mx-auto px-4 md:px-6">
-          <header className="mb-16 md:mb-24 text-center space-y-4">
+      <section id="collection" className="py-12 relative bg-white dark:bg-[#020617]">
+        <div className="max-w-7xl mx-auto px-6">
+          <header className="mb-12 text-center space-y-4">
             <h3 
-              className="text-5xl md:text-8xl font-serif italic leading-none"
+              className="text-4xl md:text-6xl font-serif italic leading-none"
               style={{ color: isDark ? '#ffffff' : '#0f172a' }}
             >
               {filters.region ? filters.region : "Portfolio Privé"}
             </h3>
-
-            <p className="text-[#D4AF37] text-[11px] font-bold uppercase tracking-[0.5em] flex items-center justify-center gap-4">
+            <p className="text-[#D4AF37] text-[10px] font-bold uppercase tracking-[0.4em] flex items-center justify-center gap-4">
                <span className="w-4 h-px bg-[#D4AF37]/40"></span>
                {filteredProperties.length} Propriétés Sélectionnées
                <span className="w-4 h-px bg-[#D4AF37]/40"></span>
@@ -252,6 +222,27 @@ export default function Home() {
           <PropertyGrid activeFilters={filters} properties={propertiesToShow} />
         </div>
       </section>
+
+      {/* MODAL DE RECHERCHE CARRÉ */}
+      <div className={`fixed inset-0 z-[100] flex items-center justify-center p-4 transition-all duration-500 ${isSearchOpen ? 'visible opacity-100' : 'invisible opacity-0'}`}>
+        <div className="absolute inset-0 bg-slate-900/60 dark:bg-black/95 backdrop-blur-md" onClick={() => setIsSearchOpen(false)} />
+        
+        <div className={`relative w-full max-w-5xl bg-white dark:bg-[#0A0A0A] rounded-none overflow-hidden shadow-2xl transition-transform duration-500 ${isSearchOpen ? 'scale-100 translate-y-0' : 'scale-95 translate-y-10'}`}>
+          <button 
+            onClick={() => setIsSearchOpen(false)}
+            className="absolute top-5 right-5 w-10 h-10 bg-black text-[#D4AF37] rounded-none flex items-center justify-center hover:bg-[#D4AF37] hover:text-black transition-all z-50"
+          >
+            <X size={20} />
+          </button>
+          <div className="p-8 md:p-12 max-h-[85vh] overflow-y-auto">
+            <AdvancedSearch
+              properties={allProperties}
+              onSearch={handleSearch}
+              activeFilters={filters}
+            />
+          </div>
+        </div>
+      </div>
 
       <Footer />
     </main>
