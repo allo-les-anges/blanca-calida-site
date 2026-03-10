@@ -139,7 +139,7 @@ export default function Navbar() {
           <div className="flex items-center space-x-4 z-[110]">
             <ThemeToggle />
 
-            {/* SÉLECTEUR DE LANGUE PROPRE */}
+            {/* SÉLECTEUR DE LANGUE DESKTOP */}
             <div className="relative hidden xl:block" ref={langMenuRef}>
               <button onClick={() => setShowLangMenu(!showLangMenu)} className="flex items-center space-x-2 text-[10px] font-bold tracking-widest text-slate-900 dark:text-white hover:text-[#D4AF37]">
                 <Globe size={14} className="text-[#D4AF37]" /> <span>{currentLang.toUpperCase()}</span>
@@ -147,7 +147,7 @@ export default function Navbar() {
               {showLangMenu && (
                 <div className="absolute top-full right-0 mt-4 bg-white dark:bg-[#0f172a] border border-slate-100 dark:border-white/10 rounded-xl p-2 min-w-[100px] shadow-2xl">
                   {languages.map((l) => (
-                    <button key={l.code} onClick={() => { setCurrentLang(l.code); setShowLangMenu(false); }} className="w-full text-left px-4 py-2 text-[10px] font-bold uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-white/5 text-slate-600 dark:text-slate-300 hover:text-[#D4AF37]">
+                    <button key={l.code} onClick={() => { setCurrentLang(l.code as Language); setShowLangMenu(false); }} className="w-full text-left px-4 py-2 text-[10px] font-bold uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-white/5 text-slate-600 dark:text-slate-300 hover:text-[#D4AF37]">
                       {l.label}
                     </button>
                   ))}
@@ -169,6 +169,64 @@ export default function Navbar() {
           </div>
         </div>
       </nav>
+
+      {/* --- MENU MOBILE HAMBURGER CORRIGÉ --- */}
+      {isMobileMenuOpen && (
+        <div className="fixed inset-0 z-[500] md:hidden">
+          {/* Overlay sombre */}
+          <div className="absolute inset-0 bg-[#020617]/95 backdrop-blur-xl" onClick={() => setIsMobileMenuOpen(false)} />
+          
+          <div className="absolute right-0 top-0 h-full w-[85%] max-w-sm bg-white dark:bg-[#020617] shadow-2xl p-8 flex flex-col border-l border-white/5">
+            <div className="flex justify-between items-center mb-12">
+              <DataHomeLogo className="h-8 w-auto text-slate-900 dark:text-white" />
+              <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 text-slate-900 dark:text-white">
+                <X size={32} />
+              </button>
+            </div>
+
+            <nav className="flex flex-col space-y-8">
+              {navLinks.map((link) => (
+                <Link 
+                  key={link.href} 
+                  href={link.href} 
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="text-2xl font-serif italic text-slate-900 dark:text-white hover:text-[#D4AF37] transition-colors"
+                >
+                  {link.name}
+                </Link>
+              ))}
+              <button 
+                onClick={() => { setIsMobileMenuOpen(false); setIsLoginModalOpen(true); }}
+                className="text-left text-2xl font-serif italic text-slate-900 dark:text-white hover:text-[#D4AF37]"
+              >
+                {t.access}
+              </button>
+            </nav>
+
+            {/* SÉLECTEUR DE LANGUE MOBILE INTÉGRÉ */}
+            <div className="mt-auto pt-10 border-t border-slate-100 dark:border-white/10">
+              <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-6 flex items-center gap-2">
+                <Globe size={14} className="text-[#D4AF37]"/> Langue / Language
+              </p>
+              <div className="grid grid-cols-3 gap-3">
+                {languages.map((l) => (
+                  <button 
+                    key={l.code} 
+                    onClick={() => { setCurrentLang(l.code as Language); setIsMobileMenuOpen(false); }}
+                    className={`py-3 rounded-xl border text-[10px] font-bold transition-all ${
+                      currentLang === l.code 
+                      ? "border-[#D4AF37] bg-[#D4AF37] text-black" 
+                      : "border-slate-100 dark:border-white/10 text-slate-600 dark:text-white hover:border-[#D4AF37]"
+                    }`}
+                  >
+                    {l.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* MODAL RECHERCHE */}
       {isSearchModalOpen && (
@@ -196,7 +254,7 @@ export default function Navbar() {
         </div>
       )}
 
-      {/* MODAL LOGIN PIN - CORRIGÉE POUR LE DARK MODE */}
+      {/* MODAL LOGIN PIN */}
       {isLoginModalOpen && (
         <div className="fixed inset-0 z-[400] flex items-center justify-center bg-[#020617]/95 backdrop-blur-xl p-6">
           <div className="bg-white dark:bg-[#0f172a] w-full max-w-sm rounded-[2.5rem] p-10 shadow-2xl relative border border-white/10 text-center">
