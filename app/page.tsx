@@ -121,7 +121,7 @@ export default function Home() {
     <main className="min-h-screen selection:bg-[#D4AF37]/30 font-sans overflow-x-hidden transition-colors duration-500 bg-white dark:bg-[#020617]">
       <Navbar />
       
-      {/* SECTION HERO - Correction : bg-slate-50 en light pour le contraste */}
+      {/* SECTION HERO */}
       <div className="relative h-[85vh] md:h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-[#020617] transition-colors duration-500">
         <Hero />
         
@@ -142,7 +142,6 @@ export default function Home() {
            )}
         </div>
 
-        {/* TRANSITION GRADIENT : Correction des couleurs */}
         <div className="absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-white dark:from-[#020617] via-white/80 dark:via-[#020617]/80 to-transparent pointer-events-none transition-colors duration-500" />
       </div>
 
@@ -159,7 +158,6 @@ export default function Home() {
           </button>
 
           <div className="p-6 md:p-12 max-h-[85vh] overflow-y-auto">
-            {/* On a retiré le titre ici s'il fait doublon avec AdvancedSearch */}
             <AdvancedSearch
               properties={allProperties}
               onSearch={handleSearch}
@@ -180,7 +178,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* SECTION ESPACE PROPRIÉTAIRE */}
+      {/* SECTION ESPACE PROPRIÉTAIRE (CORRIGÉE) */}
       <section className="max-w-7xl mx-auto px-4 md:px-6 py-12 md:py-24 bg-white dark:bg-[#020617] transition-colors duration-500">
         <div className="bg-slate-50 dark:bg-[#0F172A]/40 p-8 md:p-24 rounded-[2.5rem] md:rounded-[4rem] border border-slate-200 dark:border-white/5 relative overflow-hidden transition-colors duration-500">
           <div className="absolute top-[-10%] right-[-5%] opacity-[0.03] pointer-events-none rotate-12">
@@ -190,13 +188,17 @@ export default function Home() {
             <div className="space-y-6 md:space-y-10">
               <div className="space-y-4 text-center lg:text-left">
                 <span className="text-[#D4AF37] text-[10px] font-bold uppercase tracking-[0.4em]">Propriétaires Amaru</span>
+                
+                {/* TITRE MIS À JOUR ET COULEUR DARK MODE FORCÉE */}
                 <h2 className="text-4xl md:text-7xl font-serif text-slate-900 dark:text-white leading-[1.1] italic">
-                  Suivez votre vision <br /> 
-                  <span className="text-[#D4AF37] not-italic font-sans font-light tracking-tighter text-3xl md:text-6xl uppercase">en temps réel.</span>
+                  Suivez votre projet <br /> 
+                  <span className="text-[#D4AF37] not-italic font-sans font-extrabold tracking-tighter text-3xl md:text-6xl uppercase">en temps réel.</span>
                 </h2>
               </div>
-              <p className="text-slate-500 dark:text-slate-400 text-base md:text-lg font-light leading-relaxed max-w-lg border-l-0 lg:border-l border-slate-200 dark:border-white/10 pl-0 lg:pl-8 italic text-center lg:text-left">
-                Accédez à votre cockpit de construction privé.
+              
+              {/* DESCRIPTION AVEC COULEUR DARK MODE ÉCLATANTE */}
+              <p className="text-slate-500 dark:text-slate-200 text-base md:text-lg font-light leading-relaxed max-w-lg border-l-0 lg:border-l border-slate-200 dark:border-white/10 pl-0 lg:pl-8 italic text-center lg:text-left">
+                Accédez à votre cockpit de construction privé pour suivre chaque étape de la réalisation de votre villa d'exception.
               </p>
             </div>
             
@@ -207,7 +209,7 @@ export default function Home() {
                     <input 
                       type="password" placeholder="CODE PIN" value={clientPin}
                       onChange={(e) => setClientPin(e.target.value)}
-                      className="w-full bg-transparent border-b border-slate-200 dark:border-white/10 py-4 text-center text-2xl md:text-3xl font-light tracking-[0.8em] text-slate-900 dark:text-white outline-none focus:border-[#D4AF37] transition-all"
+                      className="w-full bg-transparent border-b border-slate-200 dark:border-white/10 py-4 text-center text-2xl md:text-3xl font-black tracking-[0.8em] text-slate-900 dark:text-white outline-none focus:border-[#D4AF37] transition-all"
                     />
                   </div>
                   <button type="submit" className="w-full bg-[#D4AF37] text-black py-5 md:py-6 rounded-full font-bold text-[10px] md:text-[11px] uppercase tracking-[0.3em] hover:bg-slate-900 hover:text-white dark:hover:bg-white dark:hover:text-black transition-all flex items-center justify-center gap-4 shadow-lg shadow-[#D4AF37]/20">
