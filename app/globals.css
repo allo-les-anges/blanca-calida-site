@@ -1,3 +1,26 @@
+/* FORCE ZERO OFFSET - Supprime la bande Google */
+html, 
+html[style] {
+  margin-top: 0px !important;
+  top: 0px !important;
+}
+
+body, 
+body[style] {
+  margin-top: 0px !important;
+  top: 0px !important;
+  position: static !important;
+}
+
+/* On fait disparaître physiquement le widget Google s'il est en haut */
+.goog-te-banner-frame, 
+.skiptranslate, 
+iframe.goog-te-banner-frame {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0px !important;
+}
+
 @import "tailwindcss";
 
 /* 1. FORCE BRUTE CONTRE LA BANDE GOOGLE */
@@ -66,3 +89,24 @@ header, nav {
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #D4AF37; border-radius: 10px; }
+
+/* Correction zone CODE PIN en mode Dark */
+.dark .code-pin-container, 
+.dark div[class*="code-pin"],
+.dark input[name="pin"],
+.dark .bg-black\/5 { /* Si vous utilisez une opacité Tailwind */
+  background-color: #111827 !important; /* Fond gris très foncé */
+  color: #ffffff !important; /* Force le texte en blanc */
+}
+
+/* Ciblage direct des lettres "C O D E P I N" */
+.dark span[class*="letter"], 
+.dark p[class*="label"],
+.dark .text-slate-900 {
+  color: #f8fafc !important;
+}
+
+/* Si c'est un placeholder d'input */
+.dark input::placeholder {
+  color: #94a3b8 !important;
+}
