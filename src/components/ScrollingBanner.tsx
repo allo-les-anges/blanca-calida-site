@@ -26,9 +26,7 @@ export default function ScrollingBanner() {
   const isDark = resolvedTheme === "dark";
   const duplicatedTexts = [...BANNER_TEXTS, ...BANNER_TEXTS, ...BANNER_TEXTS, ...BANNER_TEXTS];
 
-  // Configuration des couleurs pour le gris doux et le contraste
   const styles = {
-    // Gris doux (Slate 50) en Light, et Bleu-Gris très sombre en Dark
     containerBg: isDark ? '#0F172A' : '#F8FAFC', 
     borderColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(15,23,42,0.05)',
     fullTextColor: isDark ? '#FFFFFF' : '#0F172A',
@@ -38,32 +36,31 @@ export default function ScrollingBanner() {
 
   return (
     <div 
-      className="relative w-full overflow-hidden py-14 border-y transition-colors duration-500"
+      className="relative w-full overflow-hidden py-6 border-y transition-colors duration-500" // Réduit de py-14 à py-6
       style={{ 
         backgroundColor: styles.containerBg,
         borderColor: styles.borderColor
       }}
     >
-      {/* Optionnel : Ajout d'un léger dégradé sur les bords pour l'effet de profondeur */}
       <div className="absolute inset-y-0 left-0 w-20 bg-gradient-to-r from-inherit to-transparent z-10 pointer-events-none" />
       <div className="absolute inset-y-0 right-0 w-20 bg-gradient-to-l from-inherit to-transparent z-10 pointer-events-none" />
 
       <div className="flex whitespace-nowrap">
         <motion.div
-          className="flex gap-12 items-center"
+          className="flex gap-10 items-center"
           animate={{
             x: [0, -2000],
           }}
           transition={{
-            duration: 45, // Ralenti pour plus d'élégance sur fond gris
+            duration: 50, // Légèrement plus lent pour compenser la taille réduite
             ease: "linear",
             repeat: Infinity,
           }}
         >
           {duplicatedTexts.map((text, idx) => (
-            <div key={idx} className="flex items-center gap-12">
+            <div key={idx} className="flex items-center gap-10">
               <span 
-                className={`text-4xl md:text-7xl font-black uppercase tracking-tighter transition-all duration-700 ${
+                className={`text-2xl md:text-4xl font-black uppercase tracking-tighter transition-all duration-700 ${ // Réduit de 7xl à 4xl
                   idx % 2 === 0 ? "" : "text-transparent"
                 }`}
                 style={{
@@ -75,7 +72,7 @@ export default function ScrollingBanner() {
               </span>
               
               <div 
-                className="h-10 md:h-16 w-[1px] opacity-40" 
+                className="h-6 md:h-8 w-[1px] opacity-30" // Réduit la hauteur du séparateur
                 style={{ backgroundColor: styles.separatorColor }}
               />
             </div>
