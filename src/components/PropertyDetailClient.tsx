@@ -6,7 +6,7 @@ import Footer from "@/components/Footer";
 import { 
   Bed, Bath, Maximize, MapPin, MessageCircle, ArrowLeft, 
   Loader2, Image as ImageIcon, Home, Map as MapIcon, 
-  Waves, Car, ShieldCheck
+  Waves, Car, ShieldCheck, Navigation
 } from "lucide-react";
 import Link from "next/link";
 
@@ -47,7 +47,6 @@ export default function PropertyDetailClient({ id }: { id: string }) {
 
   const cleanDescription = (html: string) => {
     if (!html) return "";
-    // On retire tous les styles "hardcoded" pour laisser le CSS intelligent prendre le relais
     return html
       .replace(/style="[^"]*"/gi, '')
       .replace(/color="[^"]*"/gi, '')
@@ -61,7 +60,7 @@ export default function PropertyDetailClient({ id }: { id: string }) {
   if (loading) return (
     <div className="h-screen flex flex-col items-center justify-center bg-white dark:bg-[#0A0A0A] text-[#D4AF37]">
       <Loader2 className="animate-spin mb-4" size={40} />
-      <span className="font-serif italic">Chargement de la propriété...</span>
+      <span className="font-serif italic text-xl">Chargement de la propriété...</span>
     </div>
   );
 
@@ -76,26 +75,19 @@ export default function PropertyDetailClient({ id }: { id: string }) {
 
   const images = property.images || [];
   const numericPrice = Number(property.price || property.prix || 0);
+  
+  // Génération de l'URL Google Maps basée sur la ville et la région
+  const mapQuery = encodeURIComponent(`${property.town || ""}, ${property.region || ""}, Espagne`);
+  const mapUrl = `https://www.google.com/maps/embed/v1/place?key=VOTRE_CLE_API_GOOGLE&q=${mapQuery}&language=fr`;
+  // Note : Si vous n'avez pas de clé API immédiate, vous pouvez utiliser l'URL de recherche standard :
+  const fallbackMapUrl = `https://maps.google.com/maps?q=${mapQuery}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
 
   return (
     <main className="bg-white dark:bg-[#0A0A0A] min-h-screen transition-colors duration-500">
       <style jsx global>{`
-        /* LE SYSTEME DE TEXTE INTELLIGENT */
-        
-        /* 1. Couleur par défaut (Mode Light) */
-        .smart-text-container, 
-        .smart-text-container *, 
-        .smart-title {
-          color: #1a1a1a !important; 
-        }
-
-        /* 2. Bascule automatique si le parent a la classe .dark */
-        :global(.dark) .smart-text-container, 
-        :global(.dark) .smart-text-container *, 
-        :global(.dark) .smart-title {
-          color: #ffffff !important;
-        }
-
+        .smart-text-container, .smart-text-container *, .smart-title { color: #1a1a1a !important; }
+        :global(.dark) .smart-text-container, :global(.dark) .smart-text-container *, :global(.dark) .smart-title { color: #ffffff !important; }
+        :global(.dark) .map-container { filter: grayscale(1) invert(0.9) contrast(1.2); }
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #D4AF37; border-radius: 10px; }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
@@ -104,7 +96,7 @@ export default function PropertyDetailClient({ id }: { id: string }) {
       <Navbar />
       <div className="h-24 md:h-32" />
 
-      {/* --- RETOUR --- */}
+      {/* --- NAVIGATION --- */}
       <div className="max-w-7xl mx-auto px-6 mb-8">
         <Link href="/" className="group inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.3em] text-[#D4AF37] font-bold">
           <ArrowLeft size={14} /> Retour à la sélection
@@ -139,11 +131,10 @@ export default function PropertyDetailClient({ id }: { id: string }) {
         </div>
       </section>
 
-      {/* --- INFOS --- */}
+      {/* --- CONTENU --- */}
       <section className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-3 gap-16 pb-24">
         <div className="lg:col-span-2">
           
-          {/* TITRE INTELLIGENT */}
           <h1 className="smart-title text-4xl md:text-7xl font-serif mb-8 leading-[1.1]">
             {property.titre || "Villa d'Exception"}
           </h1>
@@ -153,7 +144,6 @@ export default function PropertyDetailClient({ id }: { id: string }) {
             {property.town || property.ville} • {property.region}
           </div>
 
-          {/* GRILLE TECHNIQUE */}
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-16">
             {[
               { icon: Bed, val: property.beds, label: "Chambres" },
@@ -171,21 +161,44 @@ export default function PropertyDetailClient({ id }: { id: string }) {
             ))}
           </div>
 
-          {/* DESCRIPTION INTELLIGENTE */}
           <div className="max-w-none mb-20 pt-10 border-t border-slate-200 dark:border-white/10">
             <h2 className="smart-title text-3xl font-serif italic mb-8">L'Art de Vivre</h2>
             <div 
-              className="smart-text-container text-lg leading-relaxed opacity-90"
+              className="smart-text-container text-lg leading-relaxed opacity-90 mb-16"
               dangerouslySetInnerHTML={{ __html: cleanDescription(property.description || "") }} 
             />
+            
+            {/* --- SECTION GÉOLOCALISATION RÉINTÉGRÉE --- */}
+            <div className="space-y-8">
+              <div className="flex items-center gap-4">
+                <div className="h-12 w-12 rounded-2xl bg-[#D4AF37]/10 flex items-center justify-center text-[#D4AF37]">
+                   <Navigation size={24} />
+                </div>
+                <div>
+                  <h3 className="smart-title text-2xl font-serif italic">Emplacement Privilégié</h3>
+                  <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold">{property.town}, Costa Blanca</p>
+                </div>
+              </div>
+              
+              <div className="relative w-full h-[400px] rounded-[2.5rem] overflow-hidden shadow-xl border border-slate-200 dark:border-white/10 map-container">
+                <iframe 
+                  width="100%" 
+                  height="100%" 
+                  frameBorder="0" 
+                  scrolling="no" 
+                  marginHeight={0} 
+                  marginWidth={0} 
+                  src={fallbackMapUrl}
+                  className="grayscale-[0.5] dark:grayscale-[1]"
+                />
+              </div>
+            </div>
           </div>
         </div>
 
         {/* --- SIDEBAR --- */}
         <div className="lg:col-span-1">
           <div className="sticky top-40 space-y-6">
-            
-            {/* CASHBACK */}
             <Link 
               href={`/contact-cashback?Property_ID=${property.id_externe || property.id}`}
               className="group relative block w-full overflow-hidden rounded-[2.5rem] bg-slate-900 p-[1px] shadow-2xl transition-transform hover:scale-[1.02]"
@@ -202,7 +215,6 @@ export default function PropertyDetailClient({ id }: { id: string }) {
               </div>
             </Link>
 
-            {/* PRIX */}
             <div className="bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 p-10 rounded-[3rem] shadow-2xl">
               <p className="text-[10px] uppercase text-slate-400 dark:text-[#FFE7C2]/60 mb-2 font-bold tracking-widest">Prix de vente</p>
               <p className="smart-title text-5xl font-serif leading-none mb-10">
