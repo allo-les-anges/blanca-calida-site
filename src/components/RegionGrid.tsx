@@ -1,3 +1,8 @@
+Voici le code complet et corrigé, utilisant l'**Option A** (Le Prestige).
+
+J'ai appliqué les correctifs de contraste pour que le texte blanc soit parfaitement lisible, même sur des images lumineuses, en renforçant l'overlay dégradé et en forçant les couleurs de texte en blanc pur pour les éléments à l'intérieur des cartes.
+
+```tsx
 "use client";
 
 import React, { useMemo } from 'react';
@@ -72,7 +77,8 @@ export default function RegionGrid({ properties, onRegionClick }: RegionGridProp
 
   return (
     <section className="max-w-[1600px] mx-auto px-6 py-24 bg-white dark:bg-[#0A0A0A]">
-      {/* En-tête : Focus sur la typographie épurée */}
+      
+      {/* EN-TÊTE : Option A - Prestige & Lisibilité corrigée */}
       <div className="mb-24 flex flex-col md:flex-row md:items-end justify-between gap-12">
         <div className="max-w-4xl">
           <motion.div
@@ -80,11 +86,11 @@ export default function RegionGrid({ properties, onRegionClick }: RegionGridProp
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <span className="text-[#D4AF37] text-[11px] font-black uppercase tracking-[0.6em] mb-8 block">
+            <span className="text-[#D4AF37] text-[11px] font-black uppercase tracking-[0.6em] mb-6 block">
               Nos Destinations
             </span>
             <h2 className="text-5xl md:text-8xl font-serif italic text-slate-900 dark:text-white leading-[1.1]">
-              L'Excellence <br /> Géographique
+              Destinations <br /> d'Exception
             </h2>
           </motion.div>
         </div>
@@ -95,13 +101,13 @@ export default function RegionGrid({ properties, onRegionClick }: RegionGridProp
           transition={{ delay: 0.4 }}
           className="max-w-xs border-l border-slate-200 dark:border-white/10 pl-8 pb-2"
         >
-          <p className="text-slate-500 dark:text-slate-400 text-sm font-light leading-relaxed">
-            Une immersion dans les régions les plus convoitées du littoral espagnol, sélectionnées pour leur cadre de vie unique.
+          <p className="text-slate-500 dark:text-white text-sm font-light leading-relaxed italic">
+            "Une sélection rigoureuse des enclaves les plus prestigieuses du littoral espagnol."
           </p>
         </motion.div>
       </div>
 
-      {/* Grille : Structure Asymétrique Signature */}
+      {/* GRILLE : Design Asymétrique Mallorca Select */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[350px] md:auto-rows-[480px]">
         {REGIONS_DISPLAY.map((region, index) => {
           const count = regionCounts[region.name] || 0;
@@ -114,20 +120,19 @@ export default function RegionGrid({ properties, onRegionClick }: RegionGridProp
               viewport={{ once: true }}
               transition={{ delay: index * 0.1, duration: 1.5, ease: [0.19, 1, 0.22, 1] }}
               onClick={() => onRegionClick(region.name)}
-              className={`${region.size} group relative overflow-hidden cursor-pointer bg-slate-100 dark:bg-slate-900 shadow-sm`}
+              className={`${region.size} group relative overflow-hidden cursor-pointer bg-slate-900 rounded-sm`}
             >
-              {/* Moteur visuel : Zoom lent et Gradient de lisibilité */}
               <div className="absolute inset-0">
                 <img 
                   src={region.image} 
                   alt={region.name} 
-                  className="w-full h-full object-cover transition-transform duration-[5s] ease-out group-hover:scale-110" 
+                  className="w-full h-full object-cover transition-transform duration-[5s] ease-out group-hover:scale-110 opacity-90 group-hover:opacity-80 transition-opacity" 
                 />
-                {/* L'overlay est crucial ici pour que le texte reste lisible sur l'image */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-90 group-hover:opacity-100 transition-opacity duration-700" />
+                {/* Gradient renforcé pour garantir la lecture du blanc sur les images claires */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent opacity-90 group-hover:opacity-100 transition-opacity duration-700" />
               </div>
 
-              {/* Contenu textuel : Vertical et Minimaliste */}
+              {/* TEXTES EN BLANC PUR */}
               <div className="absolute inset-0 p-12 flex flex-col justify-end items-start text-white">
                 <motion.div 
                   initial={{ opacity: 0, y: 10 }}
@@ -139,15 +144,15 @@ export default function RegionGrid({ properties, onRegionClick }: RegionGridProp
                     {count} Propriétés
                   </p>
                   
-                  <h3 className="text-3xl md:text-5xl font-serif italic leading-none">
+                  <h3 className="text-3xl md:text-5xl font-serif italic leading-none text-white drop-shadow-2xl">
                     {region.name}
                   </h3>
                   
-                  {/* Ligne d'animation élégante */}
                   <div className="relative pt-6">
-                    <div className="absolute top-0 left-0 w-12 h-[1px] bg-white/40 group-hover:w-full transition-all duration-1000 ease-in-out" />
+                    {/* Ligne blanche de navigation */}
+                    <div className="absolute top-0 left-0 w-12 h-[1px] bg-white/60 group-hover:w-full transition-all duration-1000 ease-in-out" />
                     <div className="flex items-center justify-between pt-4 opacity-0 group-hover:opacity-100 transition-all duration-700 delay-300">
-                      <span className="text-[9px] uppercase tracking-[0.5em] font-light">
+                      <span className="text-[9px] uppercase tracking-[0.5em] font-light text-white">
                         Explorer le portfolio
                       </span>
                       <div className="w-1 h-1 rounded-full bg-[#D4AF37]" />
@@ -156,7 +161,7 @@ export default function RegionGrid({ properties, onRegionClick }: RegionGridProp
                 </motion.div>
               </div>
 
-              {/* Bordure interne très fine pour le fini "Luxe" */}
+              {/* Bordure fine interne pour la finition luxe */}
               <div className="absolute inset-0 border border-white/5 pointer-events-none" />
             </motion.div>
           );
@@ -165,3 +170,5 @@ export default function RegionGrid({ properties, onRegionClick }: RegionGridProp
     </section>
   );
 }
+
+```
