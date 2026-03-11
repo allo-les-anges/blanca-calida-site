@@ -42,7 +42,7 @@ export default function AdvancedSearch({
       type: localFilters.type || "",
       beds: localFilters.beds || "",
       minPrice: localFilters.minPrice || "100000",
-      maxPrice: localFilters.maxPrice || "5000000"
+      maxPrice: localFilters.maxPrice || "75000000"
     };
     onSearch(cleanedFilters);
     if (onClose) onClose();
