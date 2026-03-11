@@ -122,15 +122,15 @@ export default function ContactPage() {
                     <img 
                       src={member.photo} 
                       className={`w-full h-full object-cover ${isDark ? "brightness-75 grayscale-[0.3]" : ""}`}
-                      alt={t(`contact.team[${idx}].name`)}
+                      alt={t(`contact.team.${idx}.name`)}
                     />
                   </div>
                   <div className="flex-1 space-y-5">
                     <h3 className="text-3xl font-serif italic text-[#D4AF37]">
-                      {t(`contact.team[${idx}].name`)}
+                      {t(`contact.team.${idx}.name`)}
                     </h3>
                     <p className="text-base leading-relaxed font-light text-slate-600 dark:text-slate-300">
-                      {t(`contact.team[${idx}].background`)}
+                      {t(`contact.team.${idx}.background`)}
                     </p>
                     <div className="flex flex-wrap gap-2 pt-4">
                       {[0, 1, 2].map((skillIdx) => (
@@ -138,7 +138,7 @@ export default function ContactPage() {
                           key={skillIdx} 
                           className="text-[9px] font-black uppercase tracking-widest px-3 py-1 bg-[#D4AF37]/10 text-[#D4AF37] rounded-md border border-[#D4AF37]/20"
                         >
-                          {t(`contact.team[${idx}].skills[${skillIdx}]`)}
+                          {t(`contact.team.${idx}.skills.${skillIdx}`)}
                         </span>
                       ))}
                     </div>
