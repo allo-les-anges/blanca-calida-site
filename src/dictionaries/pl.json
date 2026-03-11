@@ -1,0 +1,494 @@
+{
+  "common": {
+    "backToHome": "Powrót do strony głównej",
+    "backToSelection": "Powrót do wyboru",
+    "loading": "Ładowanie...",
+    "save": "Zapisz",
+    "print": "Drukuj",
+    "search": "Szukaj",
+    "reset": "Resetuj",
+    "close": "Zamknij",
+    "confirm": "Potwierdź",
+    "cancel": "Anuluj",
+    "error": "Błąd",
+    "success": "Sukces",
+    "yes": "Tak",
+    "no": "Nie",
+    "optional": "Opcjonalne"
+  },
+  "nav": {
+    "home": "Strona główna",
+    "contact": "Kontakt",
+    "clientAccess": "Panel klienta",
+    "search": "Szukaj",
+    "budget": "Maks. Budżet",
+    "results": "Pokaż wyniki",
+    "private": "Dostęp Prywatny",
+    "pinPlaceholder": "PIN",
+    "validate": "Zatwierdź",
+    "subtitle": "Znajdź swoją idealną willę",
+    "cashbackInfo": "Informacje o Cashback"
+  },
+  "footer": {
+    "excellence": "Doskonałość w Nieruchomościach",
+    "description": "Sztuka wyjątkowych nieruchomości. Tworzymy mosty między Twoimi ambicjami a najbardziej prestiżowymi nieruchomościami na wybrzeżu.",
+    "collections": "Kolekcje",
+    "villasSignature": "Sygnaturowe Wille",
+    "domainsPrestige": "Prestiżowe Domeny",
+    "newDevelopments": "Nowe Inwestycje",
+    "privateClientAccess": "Prywatny Dostęp Klienta",
+    "proSpace": "Przestrzeń Profesjonalna",
+    "siteTracking": "Śledzenie Budowy",
+    "supervisor": "Supervisor",
+    "partnerPortal": "Portal Partnerów",
+    "socialHeadquarters": "Siedziba Główna",
+    "address": "Calle Pablo Picass 1",
+    "city": "Orihuela Costa, Hiszpania",
+    "email": "contact@data-home.io",
+    "phone": "+34 627 76 82 33",
+    "privacy": "Prywatność",
+    "legal": "Informacje Prawne",
+    "eliteEdition": "Elite Edition v2.0"
+  },
+  "home": {
+    "heroSubtitle": "COSTA BLANCA | COSTA DEL SOL",
+    "heroTitle": "Luksusowe Wille i Wyjątkowe Nieruchomości",
+    "findVilla": "Znajdź swoją willę",
+    "ownerSection": {
+      "title": "Śledź swój projekt",
+      "subtitle": "w czasie rzeczywistym.",
+      "description": "Uzyskaj dostęp do swojego prywatnego kokpitu budowy, aby śledzić każdy etap.",
+      "pinPlaceholder": "KOD PIN",
+      "accessButton": "Wejdź na plac budowy"
+    },
+    "collection": {
+      "title": "Prywatny Portfel",
+      "propertiesSelected": "{count} Wybranych Nieruchomości",
+      "noMatch": "Brak dopasowań",
+      "noMatchDescription": "Nie znaleźliśmy nieruchomości spełniającej Twoje kryteria.",
+      "tryWider": "Spróbuj poszerzyć filtry.",
+      "reset": "Resetuj"
+    },
+    "regionGrid": {
+      "ourDestinations": "Nasze Destynacje",
+      "exceptionalPlaces": "Wyjątkowe Miejsca",
+      "description": "Rygorystyczny wybór najbardziej prestiżowych enklaw na wybrzeżu.",
+      "properties": "Nieruchomości",
+      "discover": "Odkryj"
+    },
+    "searchModal": {
+      "search": "Szukaj",
+      "sub": "Znajdź swoją idealną willę",
+      "budget": "Maks. Budżet",
+      "results": "Pokaż wyniki"
+    },
+    "clientLogin": {
+      "private": "Dostęp Prywatny",
+      "pinPlaceholder": "PIN",
+      "validate": "Zatwierdź"
+    },
+    "loading": {
+      "updating": "Aktualizowanie...",
+      "amaruExcellence": "AMARU EXCELLENCE..."
+    }
+  },
+  "propertyCard": {
+    "ref": "REF: {ref}",
+    "exclusivity": "EKSCLUSYWNOŚĆ",
+    "beds": "sypialnie",
+    "baths": "łazienki",
+    "pool": "Basen",
+    "noPool": "Brak",
+    "land": "działka",
+    "garage": "Garaż",
+    "surface": "m²",
+    "plot": "m² działka"
+  },
+  "propertyDetail": {
+    "back": "Powrót do wyboru",
+    "backToProgram": "Powrót do programu {name}",
+    "ref": "Ref: {ref}",
+    "bedrooms": "Sypialnie",
+    "bathrooms": "Łazienki",
+    "built": "Pow. zabudowy m²",
+    "plot": "Działka m²",
+    "pool": "Basen",
+    "poolPrivate": "Prywatny",
+    "poolNo": "Nie",
+    "parking": "Parking",
+    "artOfLiving": "Sztuka Życia",
+    "technicalPlans": "Plany Techniczne",
+    "detailedLayout": "Szczegółowy układ",
+    "price": "Cena Sprzedaży",
+    "brochure": "PDF Brochura",
+    "whatsapp": "Kontakt WhatsApp",
+    "whatsappDirect": "WhatsApp Bezpośredni",
+    "bookVisit": "Zarezerwuj Wizytę",
+    "advisor": "Doradca",
+    "activateCashback": "Aktywuj mój Cashback",
+    "privilege": "Przywilej Amaru",
+    "location": "Uprzywilejowana Lokalizacja",
+    "distanceSea": "{distance}km do morza",
+    "golf": "{distance}km do golfa",
+    "propertyNotFound": "Nie znaleziono nieruchomości",
+    "backToCatalogue": "Powrót do katalogu",
+    "loading": "Ładowanie nieruchomości..."
+  },
+  "cashback": {
+    "title": "Program Wynegocjowanych Korzyści",
+    "description": "W Amaru każda transakcja jest wyjątkowa. „Cashback” nie jest stałą skalą, ale wcześniej wynegocjowanym warunkiem z naszymi partnerami, aby zmaksymalizować wartość Twojej inwestycji od samego początku.",
+    "flexibility": "Całkowita Elastyczność",
+    "flexibilityText": "Dopasowana do Twojego projektu korzyść szyta na miarę",
+    "example": "Przykład przyznania środków",
+    "exampleAmount": "2 500 €*",
+    "orEquipment": "lub równowartość mebli / usług",
+    "points": [
+      "Warunek wynegocjowany wcześniej z agencją lub deweloperem partnerskim.",
+      "Swobodny wybór między wypłatą gotówki, pakietem mebli lub pokryciem kosztów."
+    ],
+    "options": {
+      "cash": {
+        "title": "Gotówka",
+        "desc": "Bezpośredni zastrzyk gotówki w celu optymalizacji planu finansowania lub kosztów dodatkowych."
+      },
+      "furniture": {
+        "title": "Meble & Design",
+        "desc": "Dedykowane środki na prestiżowe umeblowanie, aby wprowadzić się do willi gotowej do zamieszkania."
+      },
+      "services": {
+        "title": "Usługi & Honoraria",
+        "desc": "Pokrycie kosztów prawnika lub doradcy dla bezstresowej transakcji."
+      }
+    },
+    "activation": "Warunki Aktywacji",
+    "activationText": "System Cashback jest wynikiem konkretnych umów między Amaru Properties a jej partnerami w branży nieruchomości. Każda kwota lub usługa jest zatwierdzana przy rezerwacji Twojej nieruchomości.",
+    "activationDetail": "W zależności od potrzeb, ta korzyść może zostać zamieniona na dostawę mebli designerskich lub opłacenie honorariów prawnych, oferując dużą elastyczność podatkową i operacyjną.",
+    "backHome": "Powrót do strony głównej"
+  },
+  "contact": {
+    "heroBadge": "🌍 Nasza Ludzka Przewaga",
+    "heroTitle": "Ekspertyza Bez Granic",
+    "heroQuote": "\"Nasza siła tkwi w zdolności łączenia lokalnych rynków z globalnymi możliwościami.\"",
+    "formTitle": "Skontaktuj Się z Nami",
+    "formSubtitle": "Doskonałość Amaru do Twoich usług",
+    "namePlaceholder": "IMIĘ I NAZWISKO",
+    "emailPlaceholder": "E-MAIL",
+    "regionPlaceholder": "KRAJ / REGION",
+    "messagePlaceholder": "SZCZEGÓŁY TWOJEGO PROJEKTU...",
+    "submit": "Skontaktuj się z dedykowanym ekspertem",
+    "submitting": "WYSYŁANIE...",
+    "success": "Wiadomość wysłana! Gillian wkrótce się z Tobą skontaktuje.",
+    "error": "Błąd. Spróbuj ponownie.",
+    "team": [
+      {
+        "name": "Deborah",
+        "role": "Operational Excellence & Client Experience",
+        "worldRegion": "Global Operations",
+        "background": "Gwarant płynności procesów i zadowolenia klienta. Zapewnia codzienny monitoring operacyjny, aby zagwarantować, że każdy projekt otrzyma spersonalizowaną uwagę i maksymalną precyzję wykonania.",
+        "skills": ["Procesy", "Doświadczenie Klienta", "Precyzja"],
+        "market": "Siedziba Amaru"
+      },
+      {
+        "name": "Gillian",
+        "role": "Benelux, DACH & UK Expert",
+        "worldRegion": "Europa Północna i Wielka Brytania",
+        "background": "Specjalista od rynków o wysokiej sile nabywczej, zwłaszcza Belgii, Holandii, Niemiec i Wielkiej Brytanii. Zapewnia strategiczne połączenie między inwestorami z Europy Północnej a międzynarodowymi możliwościami.",
+        "skills": ["Inwestycje", "Region DACH", "Strategia"],
+        "market": "Międzynarodowy"
+      },
+      {
+        "name": "Joanna Pawelek",
+        "role": "Eastern Europe & Alicante Specialist",
+        "worldRegion": "Europa Wschodnia i anglojęzyczna",
+        "background": "Certyfikowany ekspert (ANAI - API) rynku w Alicante. Pełni rolę strategicznego pomostu dla inwestorów z Europy Wschodniej i świata anglojęzycznego dzięki znajomości polskiego, angielskiego i hiszpańskiego.",
+        "skills": ["Certyfikat ANAI-API", "Rynek Polski", "Alicante"],
+        "market": "Alicante / Costa Blanca"
+      },
+      {
+        "name": "Abdellah Touati",
+        "role": "MENA & Americas Expert",
+        "worldRegion": "Bliski Wschód i Ameryki",
+        "background": "Z doświadczeniem technicznym w inżynierii lądowej i wiedzą o rynku w Dubaju, kieruje ekspansją na rynki wschodzące i Amerykę Północną, łącząc deweloperów z globalnymi sieciami inwestorów.",
+        "skills": ["Inżynieria Lądowa", "Rynek Dubaju", "Globalne Sieci"],
+        "market": "MENA / USA / Kanada"
+      },
+      {
+        "name": "Gaëtan",
+        "role": "Francophonie & Global Strategy",
+        "worldRegion": "Świat Frankofoński",
+        "background": "Architekt strategii handlowej, zapewnia spójność partnerstw z instytucjonalnymi graczami (notariusze, prawnicy, deweloperzy) i ekspansję na globalny rynek francuskojęzyczny, w tym Europę i Kanadę.",
+        "skills": ["Partnerstwa B2B", "Strategia", "Ekspansja"],
+        "market": "Globalna Frankofonia"
+      }
+    ]
+  },
+  "login": {
+    "title": "Amaru Engine",
+    "subtitle": "Bezpieczne Uwierzytelnianie",
+    "pinTab": "KOD PIN",
+    "credentialsTab": "DANE LOGOWANIA",
+    "pinPlaceholder": "••••••",
+    "connect": "Połącz",
+    "emailLabel": "Nazwa użytkownika",
+    "passwordLabel": "Hasło",
+    "validate": "ZALOGUJ SIĘ",
+    "reset": "Resetuj terminal",
+    "invalidPin": "Nieprawidłowy kod PIN",
+    "invalidCredentials": "Nieprawidłowe dane logowania",
+    "validationError": "Błąd walidacji"
+  },
+  "projectTracker": {
+    "agencyName": "AMARU-HOMES",
+    "department": "Dział Kontroli Technicznej i Jakości",
+    "phase": "Obecna Faza: {phase}",
+    "quit": "Wyjdź",
+    "documents": "Załączniki Administracyjne",
+    "technicalReports": "Dokumentacja Techniczna",
+    "reportValidated": "Zatwierdzony Raport z Inspekcji",
+    "expertise": "Ekspertyza",
+    "inspectionReport": "Raport z Inspekcji",
+    "generateReport": "Generuj Raport",
+    "certification": "Zaświadczam, że informacje i zdjęcia przedstawione poniżej zostały zebrane na miejscu przez dział techniczny Amaru-Homes. Współrzędne GPS gwarantują autentyczność inspekcji.",
+    "observation": "Obserwacja techniczna #{number}",
+    "location": "Lokalizacja: {lat}, {lng}"
+  },
+  "adminChantier": {
+    "backHome": "Powrót do Strony Głównej",
+    "title": "Luxury Staff",
+    "subtitle": "Praca w Terenie i Raportowanie",
+    "pinPlaceholder": "••••••",
+    "connect": "Połącz",
+    "agent": "Agent",
+    "whichSite": "Którą budowę odwiedzasz?",
+    "searchPlaceholder": "Np: Villa Bianca...",
+    "changeVilla": "Zmień willę",
+    "constructionPhase": "Faza budowy",
+    "newReport": "Nowy Raport",
+    "observationsPlaceholder": "Obserwacje terenowe...",
+    "locate": "Zlokalizuj",
+    "gpsOk": "GPS OK",
+    "photo": "Zdjęcie",
+    "publish": "Opublikuj raport ({count})",
+    "stepUpdated": "Faza zaktualizowana",
+    "uploading": "Przesyłanie...",
+    "photoAdded": "Zdjęcie dodane!",
+    "publishing": "Publikowanie...",
+    "reportSent": "Raport wysłany!"
+  },
+  "adminDashboard": {
+    "adminControl": "Admin Control",
+    "search": "SZUKAJ...",
+    "projects": "Projekty",
+    "team": "Zespół",
+    "publicSite": "Strona Publiczna",
+    "logout": "Wyloguj",
+    "activeConstructionFile": "Aktywny plik budowy",
+    "ref": "REF: {ref}",
+    "owner": "Właściciel: {name}",
+    "print": "Drukuj",
+    "save": "Zapisz plik",
+    "tabs": {
+      "clientBudget": "Klient i Budżet",
+      "constructionStatus": "Stan Budowy",
+      "documents": "Skarbiec (Dokumenty)"
+    },
+    "clientInfo": {
+      "title": "Dane właściciela",
+      "firstName": "Imię",
+      "lastName": "Nazwisko",
+      "email": "E-mail",
+      "phone": "Telefon"
+    },
+    "address": {
+      "title": "Lokalizacja nieruchomości",
+      "street": "Ulica / Adres",
+      "city": "Miasto",
+      "postal": "Kod pocztowy",
+      "country": "Kraj"
+    },
+    "cashback": {
+      "reward": "Nagroda Cashback",
+      "paidAfterClosure": "Kwota wypłacona po zakończeniu"
+    },
+    "pin": {
+      "code": "Kod PIN logowania",
+      "copy": "Kopiuj kod",
+      "encryption": "Szyfrowanie AES-256 aktywne"
+    },
+    "progress": {
+      "title": "Postęp w Czasie Rzeczywistym",
+      "global": "Postęp Ogólny",
+      "phase": "Wybrana bieżąca faza",
+      "weeklyComments": "Komentarze tygodniowe",
+      "visibleByClient": "Widoczne dla klienta"
+    },
+    "constats": {
+      "title": "Inspekcje techniczne ({count})",
+      "photos": "{count} zdjęć{s}"
+    },
+    "delivery": {
+      "estimated": "Szacowana dostawa",
+      "realTimeUpdate": "Data dostawy jest aktualizowana w czasie rzeczywistym w przestrzeni klienta."
+    },
+    "builder": {
+      "partner": "Partner budowlany",
+      "placeholder": "Np: Porcelanosa / Grupo Isan"
+    },
+    "docs": {
+      "title": "Dokumenty w Chmurze",
+      "subtitle": "Bezpieczna strefa przechowywania klienta",
+      "upload": "Prześlij plik",
+      "processing": "Przetwarzanie...",
+      "noDocuments": "Brak zarchiwizowanych dokumentów"
+    },
+    "staff": {
+      "add": "Dodaj współpracownika",
+      "firstName": "Imię",
+      "lastName": "Nazwisko",
+      "email": "Służbowy e-mail",
+      "role": "Rola i Uprawnienia",
+      "agent": "Agent (Ograniczony dostęp)",
+      "admin": "Administrator Agencji",
+      "superAdmin": "Super Administrator",
+      "security": "Automatyczne Zabezpieczenia",
+      "pinInfo": "Zostanie wygenerowany unikalny 6-cyfrowy kod PIN. Współpracownik będzie mógł zalogować się natychmiast po weryfikacji.",
+      "confirm": "Potwierdź zaproszenie",
+      "copyPin": "Kopiuj PIN",
+      "delete": "Usuń tego współpracownika",
+      "securityCode": "Kod bezpieczeństwa",
+      "cannotDeleteSelf": "Nie możesz usunąć własnego konta."
+    }
+  },
+  "superAdmin": {
+    "initializing": "Inicjowanie terminala...",
+    "accessDenied": "Odmowa Dostępu",
+    "noPrivileges": "Twoje konto nie ma uprawnień Super-Admina.",
+    "logout": "Wyloguj",
+    "title": "Super Control",
+    "subtitle": "System Scentralizowany",
+    "publicSite": "Strona Publiczna",
+    "deploy": "Wdróż konto",
+    "firstName": "Imię",
+    "lastName": "Nazwisko",
+    "agency": "Agencja / Partner",
+    "packLevel": "Poziom Pakietu",
+    "core": "CORE (2 Ekspertów)",
+    "ascent": "ASCENT (10 Ekspertów)",
+    "horizon": "HORIZON (Nieograniczony)",
+    "emailPlaceholder": "E-mail logowania",
+    "passwordPlaceholder": "Hasło",
+    "activate": "AKTYWUJ LICENCJĘ",
+    "activeUsers": "Aktywni Użytkownicy",
+    "database": "Database Live",
+    "search": "Szukaj...",
+    "id": "ID: {id}",
+    "pin": "PIN: {pin}",
+    "deleteConfirm": "Czy na pewno chcesz trwale cofnąć dostęp dla \"{company}\"?"
+  },
+  "contactCashback": {
+    "back": "Powrót do strony głównej",
+    "title": "Aktywacja Cashback",
+    "description": "Uzupełnij swoje dane, aby powiązać tę korzyść ze swoim profilem klienta.",
+    "firstName": "Imię *",
+    "lastName": "Nazwisko *",
+    "email": "E-mail *",
+    "phone": "Telefon",
+    "submit": "Aktywuj mój Cashback"
+  },
+  "merci": {
+    "title": "Prośba Otrzymana",
+    "message": "Twoja prośba o Cashback została wysłana. Skontaktujemy się z Tobą w ciągu 24 godzin, aby przedstawić szczegóły Twojej korzyści.",
+    "backHome": "Powrót do strony głównej",
+    "brand": "Luxury Estates — Nieruchomości na Nowo Zdefiniowane"
+  },
+  "development": {
+    "back": "Powrót do wyboru",
+    "exclusiveDevelopment": "Ekskluzywna Inwestycja",
+    "availability": "Dostępność",
+    "units": "Jednostki",
+    "artOfLiving": "Sztuka Życia",
+    "distanceSea": "Odległość od morza",
+    "airport": "Lotnisko",
+    "unitsAvailable": "Dostępne jednostki i Plany",
+    "selectUnit": "Wybierz działkę, aby zobaczyć szczegóły i plany pięter",
+    "available": "Dostępne",
+    "seeDetails": "Zobacz plany i szczegóły"
+  },
+  "bien": {
+    "backToProgram": "Powrót do programu {name}",
+    "ref": "Ref: {ref}",
+    "bedrooms": "Sypialnie",
+    "baths": "Łazienki",
+    "built": "Pow. zabudowy m²",
+    "pool": "Basen",
+    "artOfLiving": "Sztuka Życia",
+    "technicalPlans": "Plany Techniczne",
+    "detailedLayout": "Szczegółowy układ",
+    "price": "Cena Sprzedaży",
+    "brochure": "PDF Brochura",
+    "whatsapp": "Kontakt WhatsApp",
+    "whatsappMobile": "Czatuj na WhatsApp",
+    "bookVisit": "Zarezerwuj Wizytę",
+    "advisor": "Doradca",
+    "distanceSea": "{distance}km do morza",
+    "golf": "{distance}km do golfa"
+  },
+  "advancedSearch": {
+    "propertyRef": "Referencja Nieruchomości",
+    "refPlaceholder": "Np: REF-1234",
+    "region": "Region",
+    "allSpain": "Hiszpania (Wszystkie)",
+    "costaBlanca": "Costa Blanca",
+    "costaCalida": "Costa Cálida",
+    "costaDelSol": "Costa del Sol",
+    "costaAlmeria": "Costa Almería",
+    "type": "Typ",
+    "anyType": "Dowolny",
+    "villa": "Willa",
+    "apartment": "Apartament",
+    "penthouse": "Penthouse",
+    "bungalow": "Bungalow",
+    "townhouse": "Dom szeregowy",
+    "min": "Min",
+    "max": "Max",
+    "bedrooms": "Sypialnie",
+    "collection": "Kolekcja Amaru • Ekskluzywna Selekcja",
+    "reset": "Resetuj"
+  },
+  "scrollingBanner": {
+    "portfolioExclusif": "Ekskluzywny Portfel",
+    "conciergeriePrivee": "Prywatny Concierge",
+    "ventesOffMarket": "Sprzedaż Off-Market",
+    "expertiseArchitecturale": "Ekspertyza Architektoniczna",
+    "investissements": "Inwestycje",
+    "gestionPrestige": "Zarządzanie Prestiżem"
+  },
+  "testimonials": {
+    "title": "Zaufanie jest wartością fundamentalną",
+    "subtitle": "Zadowolenie naszych klientów jest naszym największym sukcesem.",
+    "reviews": [
+      {
+        "name": "Isabelle Dupont",
+        "text": "Doskonałe doświadczenie z Blanca Calida! Doskonale znają rynek i potrafią doradzić w oparciu o konkretne potrzeby."
+      },
+      {
+        "name": "Sarah Williams",
+        "text": "Professional team, they helped us navigate every detail of the buying process. Highly recommended!"
+      },
+      {
+        "name": "Michael Ford",
+        "text": "Sehr guter Service, von der Besichtigung bis zur Kaufabwicklung. Alles war perfekt organisiert."
+      }
+    ]
+  },
+  "languageSelector": {
+    "label": "Język"
+  },
+  "themeToggle": {
+    "ariaLabel": "Przełącz motyw"
+  },
+  "errors": {
+    "pinIncorrect": "Nieprawidłowy kod PIN.",
+    "incorrectPin": "Nieprawidłowy PIN."
+  }
+}

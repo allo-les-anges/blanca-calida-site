@@ -1,0 +1,494 @@
+{
+  "common": {
+    "backToHome": "العودة إلى الصفحة الرئيسية",
+    "backToSelection": "العودة إلى الاختيار",
+    "loading": "جاري التحميل...",
+    "save": "حفظ",
+    "print": "طباعة",
+    "search": "بحث",
+    "reset": "إعادة تعيين",
+    "close": "إغلاق",
+    "confirm": "تأكيد",
+    "cancel": "إلغاء",
+    "error": "خطأ",
+    "success": "نجاح",
+    "yes": "نعم",
+    "no": "لا",
+    "optional": "اختياري"
+  },
+  "nav": {
+    "home": "الرئيسية",
+    "contact": "اتصل بنا",
+    "clientAccess": "دخول العملاء",
+    "search": "بحث",
+    "budget": "الحد الأقصى للميزانية",
+    "results": "عرض النتائج",
+    "private": "دخول خاص",
+    "pinPlaceholder": "الرمز السري",
+    "validate": "تأكيد",
+    "subtitle": "ابحث عن فيلتك المثالية",
+    "cashbackInfo": "معلومات الكاش باك"
+  },
+  "footer": {
+    "excellence": "التميز العقاري",
+    "description": "فن العقارات الاستثنائية. نبني جسوراً بين طموحاتك وأرقى العقارات على الساحل.",
+    "collections": "مجموعات",
+    "villasSignature": "فلل مميزة",
+    "domainsPrestige": "مناطق مرموقة",
+    "newDevelopments": "تطويرات جديدة",
+    "privateClientAccess": "دخول خاص للعملاء",
+    "proSpace": "مساحة مهنية",
+    "siteTracking": "متابعة الموقع",
+    "supervisor": "مشرف",
+    "partnerPortal": "بوابة الشركاء",
+    "socialHeadquarters": "المقر الرئيسي",
+    "address": "شارع بابلو بيكاس 1",
+    "city": "أوريويلا كوستا، إسبانيا",
+    "email": "contact@data-home.io",
+    "phone": "+34 627 76 82 33",
+    "privacy": "الخصوصية",
+    "legal": "الإشعار القانوني",
+    "eliteEdition": "الإصدار النخبوي v2.0"
+  },
+  "home": {
+    "heroSubtitle": "كوستا بلانكا | كوستا ديل سول",
+    "heroTitle": "فلل فاخرة وعقارات استثنائية",
+    "findVilla": "ابحث عن فيلتك",
+    "ownerSection": {
+      "title": "تابع مشروعك",
+      "subtitle": "في الوقت الفعلي.",
+      "description": "ادخل إلى لوحة قيادة البناء الخاصة بك لتتبع كل خطوة.",
+      "pinPlaceholder": "الرمز السري",
+      "accessButton": "الدخول إلى الموقع"
+    },
+    "collection": {
+      "title": "محفظة خاصة",
+      "propertiesSelected": "{count} عقار مختار",
+      "noMatch": "لا توجد تطابقات",
+      "noMatchDescription": "لم نعثر على عقار يطابق معاييرك.",
+      "tryWider": "حاول توسيع نطاق البحث.",
+      "reset": "إعادة تعيين"
+    },
+    "regionGrid": {
+      "ourDestinations": "وجهاتنا",
+      "exceptionalPlaces": "أماكن استثنائية",
+      "description": "اختيار دقيق لأرقى المواقع على الساحل.",
+      "properties": "عقارات",
+      "discover": "اكتشف"
+    },
+    "searchModal": {
+      "search": "بحث",
+      "sub": "ابحث عن فيلتك المثالية",
+      "budget": "الحد الأقصى للميزانية",
+      "results": "عرض النتائج"
+    },
+    "clientLogin": {
+      "private": "دخول خاص",
+      "pinPlaceholder": "الرمز السري",
+      "validate": "تأكيد"
+    },
+    "loading": {
+      "updating": "جاري التحديث...",
+      "amaruExcellence": "تميز أمارو..."
+    }
+  },
+  "propertyCard": {
+    "ref": "المرجع: {ref}",
+    "exclusivity": "حصري",
+    "beds": "غرف نوم",
+    "baths": "حمامات",
+    "pool": "حمام سباحة",
+    "noPool": "بدون",
+    "land": "أرض",
+    "garage": "مرآب",
+    "surface": "م²",
+    "plot": "م² قطعة أرض"
+  },
+  "propertyDetail": {
+    "back": "العودة إلى الاختيار",
+    "backToProgram": "العودة إلى برنامج {name}",
+    "ref": "المرجع: {ref}",
+    "bedrooms": "غرف نوم",
+    "bathrooms": "حمامات",
+    "built": "مساحة مبنية م²",
+    "plot": "قطعة أرض م²",
+    "pool": "حمام سباحة",
+    "poolPrivate": "خاص",
+    "poolNo": "لا",
+    "parking": "موقف سيارات",
+    "artOfLiving": "فن الحياة",
+    "technicalPlans": "مخططات فنية",
+    "detailedLayout": "تخطيط مفصل",
+    "price": "سعر البيع",
+    "brochure": "كتيب PDF",
+    "whatsapp": "اتصال واتساب",
+    "whatsappDirect": "واتساب مباشر",
+    "bookVisit": "حجز زيارة",
+    "advisor": "مستشار",
+    "activateCashback": "تفعيل الكاش باك الخاص بي",
+    "privilege": "امتياز أمارو",
+    "location": "موقع متميز",
+    "distanceSea": "{distance}كم إلى البحر",
+    "golf": "{distance}كم إلى الجولف",
+    "propertyNotFound": "العقار غير موجود",
+    "backToCatalogue": "العودة إلى الكتالوج",
+    "loading": "جاري تحميل العقار..."
+  },
+  "cashback": {
+    "title": "برنامج المزايا المفاوض عليها",
+    "description": "في Amaru، كل صفقة فريدة من نوعها. \"الكاش باك\" ليس مقياسًا ثابتًا، بل شرط تم التفاوض عليه مسبقًا مع شركائنا لتعظيم قيمة استثمارك منذ البداية.",
+    "flexibility": "مرونة كاملة",
+    "flexibilityText": "ميزة مصممة خصيصًا لمشروعك",
+    "example": "مثال على التخصيص",
+    "exampleAmount": "2 500 €*",
+    "orEquipment": "أو أثاث / خدمات معادلة",
+    "points": [
+      "شرط تم التفاوض عليه مسبقًا مع الوكالة أو المطور الشريك.",
+      "حرية الاختيار بين الدفع النقدي أو حزمة الأثاث أو تغطية الرسوم."
+    ],
+    "options": {
+      "cash": {
+        "title": "نقدًا",
+        "desc": "ضخ نقدي مباشر لتحسين خطة التمويل الخاصة بك أو التكاليف الإضافية."
+      },
+      "furniture": {
+        "title": "أثاث وتصميم",
+        "desc": "مخصصات مخصصة لأثاث فاخر للانتقال إلى فيلا جاهزة للسكن."
+      },
+      "services": {
+        "title": "خدمات ورسوم",
+        "desc": "تغطية أتعاب المحامي أو الاستشاري لصفقة خالية من القلق."
+      }
+    },
+    "activation": "شروط التفعيل",
+    "activationText": "نظام الكاش باك هذا هو نتيجة اتفاقيات محددة بين Amaru Properties وشركائها في العقارات. يتم التحقق من كل مبلغ أو خدمة عند حجز عقارك.",
+    "activationDetail": "وفقًا لاحتياجاتك، يمكن تحويل هذه الميزة إلى توريد أثاث مصمم أو دفع رسوم قانونية، مما يوفر مرونة ضريبية وتشغيلية كبيرة.",
+    "backHome": "العودة إلى الصفحة الرئيسية"
+  },
+  "contact": {
+    "heroBadge": "🌍 ميزتنا البشرية",
+    "heroTitle": "خبرة بلا حدود",
+    "heroQuote": "\"تكمن قوتنا في قدرتنا على ربط الأسواق المحلية بالفرص العالمية.\"",
+    "formTitle": "اتصل بنا",
+    "formSubtitle": "تميز Amaru في خدمتك",
+    "namePlaceholder": "الاسم الكامل",
+    "emailPlaceholder": "البريد الإلكتروني",
+    "regionPlaceholder": "البلد / المنطقة",
+    "messagePlaceholder": "تفاصيل مشروعك...",
+    "submit": "اتصل بالخبير المخصص",
+    "submitting": "جاري الإرسال...",
+    "success": "تم إرسال الرسالة! سيتواصل معك جيليان قريبًا.",
+    "error": "خطأ. حاول مرة أخرى.",
+    "team": [
+      {
+        "name": "Deborah",
+        "role": "Operational Excellence & Client Experience",
+        "worldRegion": "Global Operations",
+        "background": "ضمان سلاسة العمليات ورضا العملاء. تضمن المتابعة التشغيلية اليومية لضمان حصول كل مشروع على اهتمام شخصي وأقصى دقة في التنفيذ.",
+        "skills": ["عمليات", "تجربة العميل", "دقة"],
+        "market": "مقر Amaru"
+      },
+      {
+        "name": "Gillian",
+        "role": "Benelux, DACH & UK Expert",
+        "worldRegion": "شمال أوروبا والمملكة المتحدة",
+        "background": "متخصص في الأسواق ذات القوة الشرائية العالية، ولا سيما بلجيكا وهولندا وألمانيا والمملكة المتحدة. يضمن الارتباط الاستراتيجي بين المستثمرين من شمال أوروبا والفرص الدولية.",
+        "skills": ["استثمار", "منطقة DACH", "استراتيجية"],
+        "market": "دولي"
+      },
+      {
+        "name": "Joanna Pawelek",
+        "role": "Eastern Europe & Alicante Specialist",
+        "worldRegion": "أوروبا الشرقية والناطقة بالإنجليزية",
+        "background": "خبيرة معتمدة (ANAI - API) في سوق أليكانتي. تعمل كجسر استراتيجي للمستثمرين من أوروبا الشرقية والعالم الناطق بالإنجليزية بفضل إتقانها للبولندية والإنجليزية والإسبانية.",
+        "skills": ["معتمدة ANAI-API", "السوق البولندي", "أليكانتي"],
+        "market": "أليكانتي / كوستا بلانكا"
+      },
+      {
+        "name": "Abdellah Touati",
+        "role": "MENA & Americas Expert",
+        "worldRegion": "الشرق الأوسط والأمريكتين",
+        "background": "بفضل خلفيته التقنية في الهندسة المدنية وخبرته في سوق دبي، يقود التوسع إلى الأسواق الناشئة وأمريكا الشمالية، ويربط المطورين بشبكات المستثمرين العالمية.",
+        "skills": ["هندسة مدنية", "سوق دبي", "شبكات عالمية"],
+        "market": "الشرق الأوسط وشمال إفريقيا / الولايات المتحدة الأمريكية / كندا"
+      },
+      {
+        "name": "Gaëtan",
+        "role": "Francophonie & Global Strategy",
+        "worldRegion": "العالم الناطق بالفرنسية",
+        "background": "مهندس الاستراتيجية التجارية، يضمن تماسك الشراكات مع الجهات المؤسسية (كتاب العدل، المحامون، المطورون) والتوسع في السوق الناطقة بالفرنسية عالميًا، بما في ذلك أوروبا وكندا.",
+        "skills": ["شراكات B2B", "استراتيجية", "توسع"],
+        "market": "الفرنكوفونية العالمية"
+      }
+    ]
+  },
+  "login": {
+    "title": "محرك Amaru",
+    "subtitle": "مصادقة آمنة",
+    "pinTab": "الرمز السري",
+    "credentialsTab": "بيانات الدخول",
+    "pinPlaceholder": "••••••",
+    "connect": "اتصال",
+    "emailLabel": "اسم المستخدم",
+    "passwordLabel": "كلمة المرور",
+    "validate": "تسجيل الدخول",
+    "reset": "إعادة تعيين المحطة",
+    "invalidPin": "رمز PIN غير صالح",
+    "invalidCredentials": "بيانات دخول غير صالحة",
+    "validationError": "خطأ في التحقق"
+  },
+  "projectTracker": {
+    "agencyName": "AMARU-HOMES",
+    "department": "قسم المراقبة الفنية والجودة",
+    "phase": "المرحلة الحالية: {phase}",
+    "quit": "خروج",
+    "documents": "المرفقات الإدارية",
+    "technicalReports": "ملف المتابعة الفنية",
+    "reportValidated": "تقرير تفتيش موثق",
+    "expertise": "خبرة",
+    "inspectionReport": "تقرير التفتيش",
+    "generateReport": "إنشاء تقرير",
+    "certification": "أقر بأن المعلومات والصور المعروضة أدناه تم جمعها في الموقع من قبل القسم الفني في Amaru-Homes. تضمن إحداثيات GPS صحة التفتيش.",
+    "observation": "ملاحظة فنية #{number}",
+    "location": "الموقع: {lat}, {lng}"
+  },
+  "adminChantier": {
+    "backHome": "العودة إلى الرئيسية",
+    "title": "Luxury Staff",
+    "subtitle": "العمل الميداني والتقارير",
+    "pinPlaceholder": "••••••",
+    "connect": "اتصال",
+    "agent": "وكيل",
+    "whichSite": "أي موقع تزور؟",
+    "searchPlaceholder": "مثال: Villa Bianca...",
+    "changeVilla": "تغيير الفيلا",
+    "constructionPhase": "مرحلة البناء",
+    "newReport": "تقرير جديد",
+    "observationsPlaceholder": "ملاحظات ميدانية...",
+    "locate": "تحديد الموقع",
+    "gpsOk": "GPS جاهز",
+    "photo": "صورة",
+    "publish": "نشر التقرير ({count})",
+    "stepUpdated": "تم تحديث المرحلة",
+    "uploading": "جاري التحميل...",
+    "photoAdded": "تمت إضافة الصورة!",
+    "publishing": "جاري النشر...",
+    "reportSent": "تم إرسال التقرير!"
+  },
+  "adminDashboard": {
+    "adminControl": "التحكم الإداري",
+    "search": "بحث...",
+    "projects": "المشاريع",
+    "team": "الفريق",
+    "publicSite": "الموقع العام",
+    "logout": "تسجيل الخروج",
+    "activeConstructionFile": "ملف بناء نشط",
+    "ref": "المرجع: {ref}",
+    "owner": "المالك: {name}",
+    "print": "طباعة",
+    "save": "حفظ الملف",
+    "tabs": {
+      "clientBudget": "العميل والميزانية",
+      "constructionStatus": "حالة البناء",
+      "documents": "خزنة المستندات"
+    },
+    "clientInfo": {
+      "title": "بيانات المالك",
+      "firstName": "الاسم الأول",
+      "lastName": "اسم العائلة",
+      "email": "البريد الإلكتروني",
+      "phone": "الهاتف"
+    },
+    "address": {
+      "title": "موقع العقار",
+      "street": "الشارع / العنوان",
+      "city": "المدينة",
+      "postal": "الرمز البريدي",
+      "country": "البلد"
+    },
+    "cashback": {
+      "reward": "مكافأة الكاش باك",
+      "paidAfterClosure": "المبلغ المدفوع بعد الإغلاق"
+    },
+    "pin": {
+      "code": "رمز PIN للدخول",
+      "copy": "نسخ الرمز",
+      "encryption": "تشفير AES-256 نشط"
+    },
+    "progress": {
+      "title": "التقدم في الوقت الفعلي",
+      "global": "التقدم العام",
+      "phase": "المرحلة الحالية المحددة",
+      "weeklyComments": "تعليقات أسبوعية",
+      "visibleByClient": "مرئي للعميل"
+    },
+    "constats": {
+      "title": "الفحوصات الفنية ({count})",
+      "photos": "{count} صورة"
+    },
+    "delivery": {
+      "estimated": "التسليم المتوقع",
+      "realTimeUpdate": "يتم تحديث تاريخ التسليم في الوقت الفعلي في مساحة العميل."
+    },
+    "builder": {
+      "partner": "شريك البناء",
+      "placeholder": "مثال: Porcelanosa / Grupo Isan"
+    },
+    "docs": {
+      "title": "المستندات السحابية",
+      "subtitle": "منطقة تخزين آمنة للعملاء",
+      "upload": "رفع ملف",
+      "processing": "معالجة...",
+      "noDocuments": "لا توجد مستندات مؤرشفة"
+    },
+    "staff": {
+      "add": "إضافة متعاون",
+      "firstName": "الاسم الأول",
+      "lastName": "اسم العائلة",
+      "email": "البريد الإلكتروني المهني",
+      "role": "الدور والامتيازات",
+      "agent": "وكيل (وصول محدود)",
+      "admin": "مسؤول الوكالة",
+      "superAdmin": "المسؤول الأعلى",
+      "security": "الأمان التلقائي",
+      "pinInfo": "سيتم إنشاء رمز PIN فريد مكون من 6 أرقام. يمكن للمتعاون تسجيل الدخول فورًا بعد التحقق.",
+      "confirm": "تأكيد الدعوة",
+      "copyPin": "نسخ PIN",
+      "delete": "حذف هذا المتعاون",
+      "securityCode": "رمز الأمان",
+      "cannotDeleteSelf": "لا يمكنك حذف حسابك الخاص."
+    }
+  },
+  "superAdmin": {
+    "initializing": "جاري تهيئة المحطة...",
+    "accessDenied": "تم رفض الوصول",
+    "noPrivileges": "حسابك لا يتمتع بامتيازات Super-Admin.",
+    "logout": "تسجيل الخروج",
+    "title": "التحكم الفائق",
+    "subtitle": "نظام مركزي",
+    "publicSite": "الموقع العام",
+    "deploy": "نشر حساب",
+    "firstName": "الاسم الأول",
+    "lastName": "اسم العائلة",
+    "agency": "الوكالة / الشريك",
+    "packLevel": "مستوى الحزمة",
+    "core": "CORE (خبيران)",
+    "ascent": "ASCENT (10 خبراء)",
+    "horizon": "HORIZON (غير محدود)",
+    "emailPlaceholder": "البريد الإلكتروني للدخول",
+    "passwordPlaceholder": "كلمة المرور",
+    "activate": "تفعيل الترخيص",
+    "activeUsers": "المستخدمون النشطون",
+    "database": "قاعدة البيانات المباشرة",
+    "search": "بحث...",
+    "id": "المعرف: {id}",
+    "pin": "PIN: {pin}",
+    "deleteConfirm": "هل تريد إلغاء الوصول نهائيًا لـ \"{company}\"؟"
+  },
+  "contactCashback": {
+    "back": "العودة إلى الرئيسية",
+    "title": "تفعيل الكاش باك",
+    "description": "يرجى إكمال معلوماتك لربط هذه الميزة بملف العميل الخاص بك.",
+    "firstName": "الاسم الأول *",
+    "lastName": "اسم العائلة *",
+    "email": "البريد الإلكتروني *",
+    "phone": "الهاتف",
+    "submit": "تفعيل الكاش باك الخاص بي"
+  },
+  "merci": {
+    "title": "تم استلام الطلب",
+    "message": "تم إرسال طلب الكاش باك الخاص بك. سنتصل بك في غضون 24 ساعة لتقديم تفاصيل ميزتك.",
+    "backHome": "العودة إلى الرئيسية",
+    "brand": "Luxury Estates — إعادة تعريف العقارات"
+  },
+  "development": {
+    "back": "العودة إلى الاختيار",
+    "exclusiveDevelopment": "تطوير حصري",
+    "availability": "التوفر",
+    "units": "وحدات",
+    "artOfLiving": "فن الحياة",
+    "distanceSea": "المسافة إلى البحر",
+    "airport": "المطار",
+    "unitsAvailable": "الوحدات المتاحة والخطط",
+    "selectUnit": "حدد قطعة لرؤية التفاصيل ومخططات الطوابق",
+    "available": "متاح",
+    "seeDetails": "عرض المخططات والتفاصيل"
+  },
+  "bien": {
+    "backToProgram": "العودة إلى برنامج {name}",
+    "ref": "المرجع: {ref}",
+    "bedrooms": "غرف نوم",
+    "baths": "حمامات",
+    "built": "مساحة مبنية م²",
+    "pool": "حمام سباحة",
+    "artOfLiving": "فن الحياة",
+    "technicalPlans": "مخططات فنية",
+    "detailedLayout": "تخطيط مفصل",
+    "price": "سعر البيع",
+    "brochure": "كتيب PDF",
+    "whatsapp": "اتصال واتساب",
+    "whatsappMobile": "الدردشة على واتساب",
+    "bookVisit": "حجز زيارة",
+    "advisor": "مستشار",
+    "distanceSea": "{distance}كم إلى البحر",
+    "golf": "{distance}كم إلى الجولف"
+  },
+  "advancedSearch": {
+    "propertyRef": "مرجع العقار",
+    "refPlaceholder": "مثال: REF-1234",
+    "region": "المنطقة",
+    "allSpain": "إسبانيا (الكل)",
+    "costaBlanca": "كوستا بلانكا",
+    "costaCalida": "كوستا كاليدا",
+    "costaDelSol": "كوستا ديل سول",
+    "costaAlmeria": "كوستا ألميريا",
+    "type": "النوع",
+    "anyType": "أي نوع",
+    "villa": "فيلا",
+    "apartment": "شقة",
+    "penthouse": "بنتهاوس",
+    "bungalow": "بنغل",
+    "townhouse": "بيت مستقل",
+    "min": "الحد الأدنى",
+    "max": "الحد الأقصى",
+    "bedrooms": "غرف نوم",
+    "collection": "مجموعة Amaru • اختيار حصري",
+    "reset": "إعادة تعيين"
+  },
+  "scrollingBanner": {
+    "portfolioExclusif": "محفظة حصرية",
+    "conciergeriePrivee": "خدمات كونسيرج خاصة",
+    "ventesOffMarket": "مبيعات خارج السوق",
+    "expertiseArchitecturale": "خبرة معمارية",
+    "investissements": "استثمارات",
+    "gestionPrestige": "إدارة مرموقة"
+  },
+  "testimonials": {
+    "title": "الثقة قيمة أساسية",
+    "subtitle": "رضا عملائنا هو أكبر نجاح لنا.",
+    "reviews": [
+      {
+        "name": "Isabelle Dupont",
+        "text": "تجربة ممتازة مع Blanca Calida! إنهم يعرفون السوق تمامًا ويعرفون كيفية تقديم المشورة بناءً على الاحتياجات المحددة."
+      },
+      {
+        "name": "Sarah Williams",
+        "text": "Professional team, they helped us navigate every detail of the buying process. Highly recommended!"
+      },
+      {
+        "name": "Michael Ford",
+        "text": "Sehr guter Service, von der Besichtigung bis zur Kaufabwicklung. Alles war perfekt organisiert."
+      }
+    ]
+  },
+  "languageSelector": {
+    "label": "اللغة"
+  },
+  "themeToggle": {
+    "ariaLabel": "تبديل السمة"
+  },
+  "errors": {
+    "pinIncorrect": "رمز PIN غير صحيح.",
+    "incorrectPin": "رمز PIN غير صحيح."
+  }
+}
