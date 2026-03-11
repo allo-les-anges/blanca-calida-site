@@ -9,13 +9,26 @@ import {
   Waves, Car, ShieldCheck, Navigation
 } from "lucide-react";
 import Link from "next/link";
+import { useTranslation } from "@/contexts/I18nContext";
 
 export default function PropertyDetailClient({ id }: { id: string }) {
+  const { t } = useTranslation();
   const [property, setProperty] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [activeImage, setActiveImage] = useState(0);
   const [mounted, setMounted] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // Fonction utilitaire pour remplacer les variables
+  const translate = (key: string, params?: Record<string, string>) => {
+    let text = t(key);
+    if (params) {
+      Object.entries(params).forEach(([k, v]) => {
+        text = text.replace(new RegExp(`\\{${k}\\}`, 'g'), v);
+      });
+    }
+    return text;
+  };
 
   useEffect(() => {
     setMounted(true);
@@ -60,15 +73,15 @@ export default function PropertyDetailClient({ id }: { id: string }) {
   if (loading) return (
     <div className="h-screen flex flex-col items-center justify-center bg-white dark:bg-[#0A0A0A] text-[#D4AF37]">
       <Loader2 className="animate-spin mb-4" size={40} />
-      <span className="font-serif italic text-xl">Chargement de la propriété...</span>
+      <span className="font-serif italic text-xl">{t('propertyDetail.loading')}</span>
     </div>
   );
 
   if (!property) return (
     <div className="h-screen flex flex-col items-center justify-center bg-white dark:bg-[#0A0A0A] p-6 text-center">
-      <h1 className="text-2xl mb-4 text-slate-900 dark:text-white font-serif">Propriété non trouvée</h1>
+      <h1 className="text-2xl mb-4 text-slate-900 dark:text-white font-serif">{t('propertyDetail.propertyNotFound')}</h1>
       <Link href="/" className="px-8 py-3 bg-[#D4AF37] text-black rounded-full font-bold uppercase text-[10px] tracking-widest">
-        Retour au catalogue
+        {t('propertyDetail.backToCatalogue')}
       </Link>
     </div>
   );
@@ -79,7 +92,6 @@ export default function PropertyDetailClient({ id }: { id: string }) {
   // Génération de l'URL Google Maps basée sur la ville et la région
   const mapQuery = encodeURIComponent(`${property.town || ""}, ${property.region || ""}, Espagne`);
   const mapUrl = `https://www.google.com/maps/embed/v1/place?key=VOTRE_CLE_API_GOOGLE&q=${mapQuery}&language=fr`;
-  // Note : Si vous n'avez pas de clé API immédiate, vous pouvez utiliser l'URL de recherche standard :
   const fallbackMapUrl = `https://maps.google.com/maps?q=${mapQuery}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
 
   return (
@@ -99,7 +111,7 @@ export default function PropertyDetailClient({ id }: { id: string }) {
       {/* --- NAVIGATION --- */}
       <div className="max-w-7xl mx-auto px-6 mb-8">
         <Link href="/" className="group inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.3em] text-[#D4AF37] font-bold">
-          <ArrowLeft size={14} /> Retour à la sélection
+          <ArrowLeft size={14} /> {t('propertyDetail.back')}
         </Link>
       </div>
 
@@ -136,7 +148,7 @@ export default function PropertyDetailClient({ id }: { id: string }) {
         <div className="lg:col-span-2">
           
           <h1 className="smart-title text-4xl md:text-7xl font-serif mb-8 leading-[1.1]">
-            {property.titre || "Villa d'Exception"}
+            {property.titre || t('propertyDetail.fallbackTitle')}
           </h1>
           
           <div className="flex items-center gap-3 text-slate-500 dark:text-[#FFE7C2] mb-8 text-[11px] uppercase tracking-[0.2em] font-bold">
@@ -146,36 +158,36 @@ export default function PropertyDetailClient({ id }: { id: string }) {
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-16">
             {[
-              { icon: Bed, val: property.beds, label: "Chambres" },
-              { icon: Bath, val: property.baths, label: "Bains" },
-              { icon: Maximize, val: property.surface_built, label: "Bâti m²" },
-              { icon: Home, val: property.surface_plot, label: "Terrain m²" },
-              { icon: Waves, val: (property.pool === "Oui" ? "Privée" : "Non"), label: "Piscine" },
-              { icon: Car, val: "Privé", label: "Parking" }
+              { icon: Bed, key: 'bedrooms', val: property.beds },
+              { icon: Bath, key: 'bathrooms', val: property.baths },
+              { icon: Maximize, key: 'built', val: property.surface_built },
+              { icon: Home, key: 'plot', val: property.surface_plot },
+              { icon: Waves, key: 'pool', val: (property.pool === "Oui" ? t('propertyDetail.poolPrivate') : t('propertyDetail.poolNo')) },
+              { icon: Car, key: 'parking', val: t('propertyDetail.parking') }
             ].map((item, i) => (
               <div key={i} className="bg-slate-50 dark:bg-white/5 p-6 rounded-3xl text-center border border-slate-200 dark:border-white/10">
                 <item.icon className="mx-auto mb-2 text-[#D4AF37]" size={22} />
                 <p className="smart-title text-2xl font-serif">{item.val || "0"}</p>
-                <p className="text-[8px] uppercase text-slate-400 font-bold tracking-widest">{item.label}</p>
+                <p className="text-[8px] uppercase text-slate-400 font-bold tracking-widest">{t(`propertyDetail.${item.key}`)}</p>
               </div>
             ))}
           </div>
 
           <div className="max-w-none mb-20 pt-10 border-t border-slate-200 dark:border-white/10">
-            <h2 className="smart-title text-3xl font-serif italic mb-8">L'Art de Vivre</h2>
+            <h2 className="smart-title text-3xl font-serif italic mb-8">{t('propertyDetail.artOfLiving')}</h2>
             <div 
               className="smart-text-container text-lg leading-relaxed opacity-90 mb-16"
               dangerouslySetInnerHTML={{ __html: cleanDescription(property.description || "") }} 
             />
             
-            {/* --- SECTION GÉOLOCALISATION RÉINTÉGRÉE --- */}
+            {/* --- SECTION GÉOLOCALISATION --- */}
             <div className="space-y-8">
               <div className="flex items-center gap-4">
                 <div className="h-12 w-12 rounded-2xl bg-[#D4AF37]/10 flex items-center justify-center text-[#D4AF37]">
                    <Navigation size={24} />
                 </div>
                 <div>
-                  <h3 className="smart-title text-2xl font-serif italic">Emplacement Privilégié</h3>
+                  <h3 className="smart-title text-2xl font-serif italic">{t('propertyDetail.location')}</h3>
                   <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold">{property.town}, Costa Blanca</p>
                 </div>
               </div>
@@ -209,24 +221,24 @@ export default function PropertyDetailClient({ id }: { id: string }) {
                   <ShieldCheck size={28} />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-[#D4AF37] mb-1">Privilège Amaru</span>
-                  <span className="text-xl font-serif italic text-white leading-tight">Activer mon Cashback</span>
+                  <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-[#D4AF37] mb-1">{t('propertyDetail.privilege')}</span>
+                  <span className="text-xl font-serif italic text-white leading-tight">{t('propertyDetail.activateCashback')}</span>
                 </div>
               </div>
             </Link>
 
             <div className="bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 p-10 rounded-[3rem] shadow-2xl">
-              <p className="text-[10px] uppercase text-slate-400 dark:text-[#FFE7C2]/60 mb-2 font-bold tracking-widest">Prix de vente</p>
+              <p className="text-[10px] uppercase text-slate-400 dark:text-[#FFE7C2]/60 mb-2 font-bold tracking-widest">{t('propertyDetail.price')}</p>
               <p className="smart-title text-5xl font-serif leading-none mb-10">
                 {numericPrice.toLocaleString("fr-FR")} €
               </p>
               
               <button className="w-full bg-[#D4AF37] text-black py-6 rounded-2xl font-bold uppercase text-[11px] tracking-widest hover:brightness-110 transition-all mb-4">
-                Réserver une visite
+                {t('propertyDetail.bookVisit')}
               </button>
               
               <a href={`https://wa.me/34627768233?text=Info ref: ${property.ref}`} target="_blank" className="w-full border border-slate-200 dark:border-white/10 flex items-center justify-center gap-3 py-6 rounded-2xl font-bold uppercase text-[11px] smart-title hover:bg-slate-50 dark:hover:bg-white/5 transition-all">
-                <MessageCircle size={20} className="text-green-500" /> WhatsApp Direct
+                <MessageCircle size={20} className="text-green-500" /> {t('propertyDetail.whatsappDirect')}
               </a>
             </div>
           </div>
