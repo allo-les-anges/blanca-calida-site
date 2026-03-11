@@ -7,21 +7,18 @@ type Language = 'fr' | 'en' | 'nl' | 'es' | 'pl' | 'ar';
 interface I18nContextType {
   locale: Language;
   setLocale: (lang: Language) => void;
-  t: (key: string) => string;
+  t: (key: string, params?: Record<string, string | number>) => string;
   dir: 'ltr' | 'rtl';
 }
 
 const I18nContext = createContext<I18nContextType | undefined>(undefined);
 
-// Chargement dynamique des dictionnaires
 const loadDictionary = async (lang: Language) => {
   try {
-    // On suppose que les fichiers sont dans src/dictionaries/
     const dict = await import(`../dictionaries/${lang}.json`);
     return dict.default;
   } catch (error) {
     console.error(`Failed to load dictionary for ${lang}`, error);
-    // Fallback sur français
     const fallback = await import(`../dictionaries/fr.json`);
     return fallback.default;
   }
@@ -30,15 +27,12 @@ const loadDictionary = async (lang: Language) => {
 export const I18nProvider = ({ children }: { children: React.ReactNode }) => {
   const [locale, setLocale] = useState<Language>('fr');
   const [dictionary, setDictionary] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Récupérer la langue sauvegardée (localStorage)
     const saved = localStorage.getItem('locale') as Language;
     if (saved && ['fr', 'en', 'nl', 'es', 'pl', 'ar'].includes(saved)) {
       setLocale(saved);
     } else {
-      // Détection de la langue du navigateur (optionnel)
       const browserLang = navigator.language.split('-')[0];
       if (browserLang === 'en' || browserLang === 'nl' || browserLang === 'es' || browserLang === 'pl' || browserLang === 'ar') {
         setLocale(browserLang as Language);
@@ -50,21 +44,16 @@ export const I18nProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     const load = async () => {
-      setLoading(true);
       const dict = await loadDictionary(locale);
       setDictionary(dict);
-      setLoading(false);
-      // Sauvegarder la langue
       localStorage.setItem('locale', locale);
-      // Changer la direction du document pour l'arabe
       document.documentElement.dir = locale === 'ar' ? 'rtl' : 'ltr';
-      // Optionnel : changer la langue de la balise html
       document.documentElement.lang = locale;
     };
     load();
   }, [locale]);
 
-  const t = (key: string) => {
+  const t = (key: string, params?: Record<string, string | number>) => {
     if (!dictionary) return key;
     const keys = key.split('.');
     let value = dictionary;
@@ -75,6 +64,14 @@ export const I18nProvider = ({ children }: { children: React.ReactNode }) => {
         console.warn(`Missing translation key: ${key}`);
         return key;
       }
+    }
+    if (typeof value !== 'string') {
+      console.warn(`Translation key ${key} is not a string`);
+      return key;
+    }
+    // Remplacer les paramètres
+    if (params) {
+      return value.replace(/\{(\w+)\}/g, (_, p) => params[p]?.toString() || `{${p}}`);
     }
     return value;
   };
