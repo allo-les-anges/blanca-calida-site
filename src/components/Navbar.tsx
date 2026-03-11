@@ -1,50 +1,15 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { 
-  Globe, ChevronDown, Menu, X, Search, User, Euro 
+  Globe, Menu, X, Search, User, Euro 
 } from "lucide-react";
 import { createBrowserClient } from '@supabase/ssr';
-import { useTheme } from "next-themes"; // Importation nécessaire pour le mode sombre
+import { useTheme } from "next-themes";
 import ThemeToggle from "./ThemeToggle";
-
-// --- DICTIONNAIRE DE TRADUCTION ---
-const translations = {
-  fr: {
-    home: "Accueil", contact: "Contact", access: "Accès Client", search: "Recherche", 
-    budget: "Budget Max", results: "Afficher les résultats", private: "Accès Privé",
-    placeholder: "PIN", validate: "Valider", sub: "Trouvez votre villa idéale"
-  },
-  en: {
-    home: "Home", contact: "Contact", access: "Client Access", search: "Search", 
-    budget: "Max Budget", results: "Show results", private: "Private Access",
-    placeholder: "PIN", validate: "Validate", sub: "Find your ideal villa"
-  },
-  es: {
-    home: "Inicio", contact: "Contacto", access: "Acceso Cliente", search: "Buscar", 
-    budget: "Presupuesto Máx", results: "Ver resultados", private: "Acceso Privado",
-    placeholder: "PIN", validate: "Validar", sub: "Encuentre su villa ideal"
-  },
-  nl: {
-    home: "Home", contact: "Contact", access: "Klantentoegang", search: "Zoeken", 
-    budget: "Max Budget", results: "Resultaten tonen", private: "Privé Toegang",
-    placeholder: "PIN", validate: "Bevestigen", sub: "Vind uw ideale villa"
-  },
-  ar: {
-    home: "الرئيسية", contact: "اتصل بنا", access: "دخول العملاء", search: "بحث", 
-    budget: "الميزانية القصوى", results: "عرض النتائج", private: "دخول خاص",
-    placeholder: "الرمز", validate: "تأكيد", sub: "ابحث عن فيلتك المثالية"
-  },
-  pl: {
-    home: "Strona główna", contact: "Kontakt", access: "Panel klienta", search: "Szukaj", 
-    budget: "Max Budżet", results: "Pokaż wyniki", private: "Dostęp Prywatny",
-    placeholder: "PIN", validate: "Zatwierdź", sub: "Znajdź swoją idealną willę"
-  }
-};
-
-type Language = keyof typeof translations;
+import GoogleTranslate from "./GoogleTranslate";
 
 const DataHomeLogo = ({ className }: { className?: string }) => (
   <svg viewBox="0 0 150 35" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
@@ -61,51 +26,21 @@ const supabase = createBrowserClient(
 export default function Navbar() {
   const router = useRouter();
   const pathname = usePathname(); 
-  const { resolvedTheme } = useTheme(); // Détection du thème
+  const { resolvedTheme } = useTheme();
   
-  const [showLangMenu, setShowLangMenu] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false); 
-  const [currentLang, setCurrentLang] = useState<Language>("fr");
   const [passwordInput, setPasswordInput] = useState("");
   const [isScrolled, setIsScrolled] = useState(false);
-  const [mounted, setMounted] = useState(false); // Sécurité hydratation
+  const [mounted, setMounted] = useState(false);
   const [maxPrice, setMaxPrice] = useState(2500000);
 
-  const langMenuRef = useRef<HTMLDivElement>(null);
-  const t = translations[currentLang];
-
-  const navLinks = [
-    { name: t.home, href: "/" },
-    { name: "Cashback-Info", href: "/cashback-info" },
-    { name: t.contact, href: "/contact" },
-  ];
-
-  const languages = [
-    { code: "fr", label: "FR" },
-    { code: "en", label: "EN" },
-    { code: "es", label: "ES" },
-    { code: "nl", label: "NL" },
-    { code: "ar", label: "AR" },
-    { code: "pl", label: "PL" },
-  ] as const;
-
   useEffect(() => {
-    setMounted(true); // Indique que le composant est monté côté client
+    setMounted(true);
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (langMenuRef.current && !langMenuRef.current.contains(event.target as Node)) {
-        setShowLangMenu(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const handleAuthSubmit = async (e: React.FormEvent) => {
@@ -116,9 +51,15 @@ export default function Navbar() {
       setIsLoginModalOpen(false);
       router.push('/project-tracker');
     } else {
-      alert(currentLang === 'fr' ? "Code PIN incorrect." : "Incorrect PIN.");
+      alert("Code PIN incorrect.");
     }
   };
+
+  const navLinks = [
+    { name: "Accueil", href: "/" },
+    { name: "Cashback-Info", href: "/cashback-info" },
+    { name: "Contact", href: "/contact" },
+  ];
 
   return (
     <>
@@ -147,20 +88,9 @@ export default function Navbar() {
           <div className="flex items-center space-x-4 z-[110]">
             <ThemeToggle />
 
-            {/* SÉLECTEUR DE LANGUE DESKTOP */}
-            <div className="relative hidden xl:block" ref={langMenuRef}>
-              <button onClick={() => setShowLangMenu(!showLangMenu)} className="flex items-center space-x-2 text-[10px] font-bold tracking-widest text-slate-900 dark:text-white hover:text-[#D4AF37]">
-                <Globe size={14} className="text-[#D4AF37]" /> <span>{currentLang.toUpperCase()}</span>
-              </button>
-              {showLangMenu && (
-                <div className="absolute top-full right-0 mt-4 bg-white dark:bg-[#0f172a] border border-slate-100 dark:border-white/10 rounded-xl p-2 min-w-[100px] shadow-2xl">
-                  {languages.map((l) => (
-                    <button key={l.code} onClick={() => { setCurrentLang(l.code as Language); setShowLangMenu(false); }} className="w-full text-left px-4 py-2 text-[10px] font-bold uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-white/5 text-slate-600 dark:text-slate-300 hover:text-[#D4AF37]">
-                      {l.label}
-                    </button>
-                  ))}
-                </div>
-              )}
+            {/* SÉLECTEUR DE LANGUE GOOGLE (DESKTOP) */}
+            <div className="hidden xl:block">
+              <GoogleTranslate />
             </div>
 
             <button onClick={() => setIsSearchModalOpen(true)} className="p-3 bg-slate-100 dark:bg-white/10 rounded-full text-[#D4AF37] border border-slate-200 dark:border-white/10 hover:bg-[#D4AF37] hover:text-white transition-all">
@@ -168,7 +98,7 @@ export default function Navbar() {
             </button>
 
             <button onClick={() => setIsLoginModalOpen(true)} className="hidden sm:flex items-center space-x-2 text-[10px] font-bold uppercase tracking-widest px-6 py-3 rounded-full border border-[#D4AF37]/20 bg-[#D4AF37]/5 text-slate-900 dark:text-white hover:bg-[#D4AF37] hover:text-black transition-all">
-              <User size={14} /> <span className="hidden lg:inline">{t.access}</span>
+              <User size={14} /> <span className="hidden lg:inline">Accès Client</span>
             </button>
 
             <button onClick={() => setIsMobileMenuOpen(true)} className="md:hidden text-slate-900 dark:text-white p-2">
@@ -178,7 +108,7 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* --- MENU MOBILE HAMBURGER CORRIGÉ --- */}
+      {/* MENU MOBILE */}
       {isMobileMenuOpen && (
         <div className="fixed inset-0 z-[500] md:hidden">
           <div className="absolute inset-0 bg-[#020617]/95 backdrop-blur-xl" onClick={() => setIsMobileMenuOpen(false)} />
@@ -198,7 +128,6 @@ export default function Navbar() {
                   href={link.href} 
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="text-2xl font-serif italic text-slate-900 dark:text-white hover:text-[#D4AF37] transition-colors"
-                  style={{ color: (mounted && resolvedTheme === 'dark') ? '#ffffff' : undefined }}
                 >
                   {link.name}
                 </Link>
@@ -206,77 +135,63 @@ export default function Navbar() {
               <button 
                 onClick={() => { setIsMobileMenuOpen(false); setIsLoginModalOpen(true); }}
                 className="text-left text-2xl font-serif italic text-slate-900 dark:text-white hover:text-[#D4AF37]"
-                style={{ color: (mounted && resolvedTheme === 'dark') ? '#ffffff' : undefined }}
               >
-                {t.access}
+                Accès Client
               </button>
             </nav>
 
             {/* SÉLECTEUR DE LANGUE MOBILE */}
             <div className="mt-auto pt-10 border-t border-slate-100 dark:border-white/10">
               <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-6 flex items-center gap-2">
-                <Globe size={14} className="text-[#D4AF37]"/> Langue / Language
+                <Globe size={14} className="text-[#D4AF37]"/> Langue
               </p>
-              <div className="grid grid-cols-3 gap-3">
-                {languages.map((l) => (
-                  <button 
-                    key={l.code} 
-                    onClick={() => { setCurrentLang(l.code as Language); setIsMobileMenuOpen(false); }}
-                    className={`py-3 rounded-xl border text-[10px] font-bold transition-all ${
-                      currentLang === l.code 
-                      ? "border-[#D4AF37] bg-[#D4AF37] text-black" 
-                      : "border-slate-100 dark:border-white/10 text-slate-600 dark:text-white hover:border-[#D4AF37]"
-                    }`}
-                  >
-                    {l.label}
-                  </button>
-                ))}
-              </div>
+              <GoogleTranslate />
             </div>
           </div>
         </div>
       )}
 
-      {/* ... MODALS RECHERCHE ET LOGIN (Inchangées mais complètes dans votre fichier) ... */}
+      {/* MODAL RECHERCHE */}
       {isSearchModalOpen && (
         <div className="fixed inset-0 z-[300] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => setIsSearchModalOpen(false)} />
           <div className="relative bg-white dark:bg-[#0f172a] w-full max-w-lg rounded-[2.5rem] overflow-hidden border border-white/10">
             <div className="px-8 py-6 border-b border-slate-100 dark:border-white/5 flex justify-between items-center">
               <div>
-                <h3 className="text-xl font-serif italic text-slate-900 dark:text-white">{t.search}</h3>
-                <p className="text-[9px] uppercase tracking-widest text-[#D4AF37] font-bold">{t.sub}</p>
+                <h3 className="text-xl font-serif italic text-slate-900 dark:text-white">Recherche</h3>
+                <p className="text-[9px] uppercase tracking-widest text-[#D4AF37] font-bold">Trouvez votre villa idéale</p>
               </div>
               <button onClick={() => setIsSearchModalOpen(false)} className="w-10 h-10 bg-slate-100 dark:bg-white/5 text-slate-900 dark:text-white rounded-full flex items-center justify-center hover:bg-[#D4AF37]"><X size={20} /></button>
             </div>
             <div className="p-8 space-y-8">
               <div className="space-y-4">
                 <div className="flex justify-between items-end">
-                  <label className="text-[10px] uppercase tracking-[0.2em] font-black text-slate-400 flex items-center gap-2"><Euro size={14} className="text-[#D4AF37]"/> {t.budget}</label>
+                  <label className="text-[10px] uppercase tracking-[0.2em] font-black text-slate-400 flex items-center gap-2"><Euro size={14} className="text-[#D4AF37]"/> Budget Max</label>
                   <span className="text-lg font-serif italic text-slate-900 dark:text-white">{maxPrice.toLocaleString()} €</span>
                 </div>
                 <input type="range" min="100000" max="5000000" step="50000" value={maxPrice} onChange={(e) => setMaxPrice(parseInt(e.target.value))} className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none accent-[#D4AF37]" />
               </div>
-              <button onClick={() => setIsSearchModalOpen(false)} className="w-full bg-[#D4AF37] text-black py-5 rounded-2xl font-bold uppercase text-[10px] tracking-widest hover:bg-slate-900 hover:text-white transition-all">{t.results}</button>
+              <button onClick={() => setIsSearchModalOpen(false)} className="w-full bg-[#D4AF37] text-black py-5 rounded-2xl font-bold uppercase text-[10px] tracking-widest hover:bg-slate-900 hover:text-white transition-all">Afficher les résultats</button>
             </div>
           </div>
         </div>
       )}
 
+      {/* MODAL LOGIN */}
       {isLoginModalOpen && (
         <div className="fixed inset-0 z-[400] flex items-center justify-center bg-[#020617]/95 backdrop-blur-xl p-6">
           <div className="bg-white dark:bg-[#0f172a] w-full max-w-sm rounded-[2.5rem] p-10 shadow-2xl relative border border-white/10 text-center">
             <button onClick={() => setIsLoginModalOpen(false)} className="absolute top-6 right-6 text-slate-400 hover:text-[#D4AF37]"><X size={20}/></button>
-            <h2 className="text-xl font-serif italic mb-8 text-slate-900 dark:text-white">{t.private}</h2>
+            <h2 className="text-xl font-serif italic mb-8 text-slate-900 dark:text-white">Accès Privé</h2>
             <form onSubmit={handleAuthSubmit} className="space-y-4">
               <input 
                 type="password" 
                 value={passwordInput} 
                 onChange={(e) => setPasswordInput(e.target.value)} 
-                placeholder={t.placeholder} 
+                placeholder="PIN" 
                 className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 p-4 rounded-xl text-center text-2xl tracking-widest font-black text-[#D4AF37] focus:border-[#D4AF37] outline-none" 
               />
-              <button type="submit" className="w-full bg-[#D4AF37] text-black py-4 rounded-xl font-bold uppercase text-[10px] tracking-widest hover:bg-white hover:text-black transition-all">{t.validate}</button>
+              <button type="submit" className="w-full bg-[#D4AF37] text-black py-4 rounded-xl font-bold uppercase text-[10px] tracking-widest hover:bg-white hover:text-black transition-all">Valider</button>
             </form>
           </div>
         </div>
