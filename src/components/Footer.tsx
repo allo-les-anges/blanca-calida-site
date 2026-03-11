@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Instagram, Linkedin, Facebook, MapPin, Mail, Phone } from "lucide-react";
+import { useTranslation } from "@/contexts/I18nContext";
 
 // --- DÉFINITION DU COMPOSANT LOGO SVG ---
 const DataHomeLogo = ({ className }: { className?: string }) => (
@@ -27,6 +28,8 @@ const DataHomeLogo = ({ className }: { className?: string }) => (
 );
 
 export default function Footer() {
+  const { t } = useTranslation();
+
   return (
     <footer className="bg-[#020617] text-white pt-32 pb-12 px-6 lg:px-10 border-t border-white/5">
       <div className="max-w-7xl mx-auto">
@@ -35,14 +38,13 @@ export default function Footer() {
           {/* LOGO & BRAND DESCRIPTION */}
           <div className="col-span-1 lg:col-span-1 space-y-8">
             <div className="space-y-2">
-               {/* ICI LE LOGO REMPLACE AMARU EXCELLENCE */}
                <DataHomeLogo className="h-10 md:h-12 w-auto text-white transition-colors hover:text-[#D4AF37]" />
                <span className="text-[#D4AF37] font-sans font-light text-[10px] tracking-[0.3em] uppercase block mt-2 ml-1">
-                 Excellence Immobilière
+                 {t('footer.excellence')}
                </span>
             </div>
             <p className="text-slate-500 font-light leading-relaxed text-sm max-w-xs italic">
-              L'art de l'immobilier d'exception. Nous forgeons des passerelles entre vos ambitions et les propriétés les plus prestigieuses de la côte.
+              {t('footer.description')}
             </p>
             <div className="flex gap-6 mt-10">
               <Instagram size={20} className="text-[#D4AF37] hover:text-white cursor-pointer transition-all duration-300" />
@@ -54,16 +56,16 @@ export default function Footer() {
           {/* NAVIGATION */}
           <div>
             <h4 className="text-[10px] uppercase tracking-[0.5em] font-bold mb-10 text-[#D4AF37]">
-              Collections
+              {t('footer.collections')}
             </h4>
             <ul className="space-y-5 text-[13px] text-slate-400 font-light">
-              <li><a href="#" className="hover:text-[#D4AF37] transition-colors duration-300">Villas Signature</a></li>
-              <li><a href="#" className="hover:text-[#D4AF37] transition-colors duration-300">Domaines de Prestige</a></li>
-              <li><a href="#" className="hover:text-[#D4AF37] transition-colors duration-300">Nouveaux Développements</a></li>
+              <li><a href="#" className="hover:text-[#D4AF37] transition-colors duration-300">{t('footer.villasSignature')}</a></li>
+              <li><a href="#" className="hover:text-[#D4AF37] transition-colors duration-300">{t('footer.domainsPrestige')}</a></li>
+              <li><a href="#" className="hover:text-[#D4AF37] transition-colors duration-300">{t('footer.newDevelopments')}</a></li>
               <li>
                 <a href="/login" className="text-white hover:text-[#D4AF37] transition-colors duration-300 italic flex items-center gap-2">
                   <span className="w-1 h-1 bg-[#D4AF37] rounded-full"></span>
-                  Accès Privé Client
+                  {t('footer.privateClientAccess')}
                 </a>
               </li>
             </ul>
@@ -72,25 +74,25 @@ export default function Footer() {
           {/* ESPACE PROFESSIONNEL */}
           <div>
             <h4 className="text-[10px] uppercase tracking-[0.5em] font-bold mb-10 text-slate-500">
-              Espace Pro
+              {t('footer.proSpace')}
             </h4>
             <ul className="space-y-5 text-[13px] text-slate-400 font-light">
               <li>
                 <a href="/admin-chantier" className="hover:text-white transition-all flex items-center gap-3 group">
                   <span className="w-2 h-[1px] bg-[#D4AF37] group-hover:w-4 transition-all"></span>
-                  Suivi de Terrain
+                  {t('footer.siteTracking')}
                 </a>
               </li>
               <li>
                 <a href="/login" className="hover:text-white transition-all flex items-center gap-3 group">
                   <span className="w-2 h-[1px] bg-slate-700 group-hover:bg-[#D4AF37] group-hover:w-4 transition-all"></span>
-                  Superviseur
+                  {t('footer.supervisor')}
                 </a>
               </li>
               <li>
                 <a href="/login" className="hover:text-white transition-all flex items-center gap-3 group">
                   <span className="w-2 h-[1px] bg-slate-700 group-hover:bg-[#D4AF37] group-hover:w-4 transition-all"></span>
-                  Portail Partenaires
+                  {t('footer.partnerPortal')}
                 </a>
               </li>
             </ul>
@@ -99,20 +101,20 @@ export default function Footer() {
           {/* CONTACT & HQ */}
           <div>
             <h4 className="text-[10px] uppercase tracking-[0.5em] font-bold mb-10 text-slate-500">
-              Siège Social
+              {t('footer.socialHeadquarters')}
             </h4>
             <div className="space-y-6 text-[13px] text-slate-400 font-light">
               <div className="flex items-start gap-4">
                 <MapPin size={18} className="text-[#D4AF37] mt-1 flex-shrink-0 opacity-80" />
-                <p className="leading-relaxed">Calle Pablo Picass 1<br /><span className="text-white font-medium">Orihuela Costa, Espagne</span></p>
+                <p className="leading-relaxed">{t('footer.address')}<br /><span className="text-white font-medium">{t('footer.city')}</span></p>
               </div>
               <div className="flex items-center gap-4">
                 <Mail size={18} className="text-[#D4AF37] flex-shrink-0 opacity-80" />
-                <p className="hover:text-white transition-colors cursor-pointer">contact@data-home.io</p>
+                <p className="hover:text-white transition-colors cursor-pointer">{t('footer.email')}</p>
               </div>
               <div className="flex items-center gap-4">
                 <Phone size={18} className="text-[#D4AF37] flex-shrink-0 opacity-80" />
-                <p className="text-white font-medium">+34 627 76 82 33</p>
+                <p className="text-white font-medium">{t('footer.phone')}</p>
               </div>
             </div>
           </div>
@@ -125,14 +127,14 @@ export default function Footer() {
                 © 2026 Data Home Estates
               </p>
               <div className="flex gap-8 text-[9px] uppercase tracking-[0.3em] text-slate-500 font-bold">
-                <a href="#" className="hover:text-[#D4AF37] transition-all">Confidentialité</a>
-                <a href="#" className="hover:text-[#D4AF37] transition-all">Mentions Légales</a>
+                <a href="#" className="hover:text-[#D4AF37] transition-all">{t('footer.privacy')}</a>
+                <a href="#" className="hover:text-[#D4AF37] transition-all">{t('footer.legal')}</a>
               </div>
           </div>
           <div className="flex items-center gap-3">
             <span className="w-2 h-2 bg-[#D4AF37] rounded-full animate-pulse"></span>
             <p className="text-[9px] font-black uppercase tracking-[0.4em] text-slate-800">
-              Elite Edition v2.0
+              {t('footer.eliteEdition')}
             </p>
           </div>
         </div>
