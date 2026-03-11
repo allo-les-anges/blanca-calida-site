@@ -506,7 +506,7 @@
   "errors": {
     "pinIncorrect": "رمز PIN غير صحيح.",
     "incorrectPin": "رمز PIN غير صحيح."
-  }
+  },
  "login": {
   "title": "محرك Amaru",
   "subtitle": "مصادقة آمنة",

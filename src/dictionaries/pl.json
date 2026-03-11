@@ -506,7 +506,7 @@
   "errors": {
     "pinIncorrect": "Nieprawidłowy kod PIN.",
     "incorrectPin": "Nieprawidłowy PIN."
-  }
+  },
  "login": {
   "title": "Amaru Engine",
   "subtitle": "Bezpieczne uwierzytelnianie",

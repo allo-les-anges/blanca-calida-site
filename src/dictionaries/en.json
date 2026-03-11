@@ -513,7 +513,7 @@
   "errors": {
     "pinIncorrect": "Incorrect PIN code.",
     "incorrectPin": "Incorrect PIN."
-  }
+  },
   
 "login": {
   "title": "Amaru Engine",
