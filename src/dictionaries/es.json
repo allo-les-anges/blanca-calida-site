@@ -63,7 +63,7 @@
     },
     "collection": {
       "title": "Portafolio Privado",
-      "propertiesSelected": "{count} Propiedades Seleccionadas",
+      "propertiesSelected": "Propiedades Seleccionadas",
       "noMatch": "Sin coincidencias",
       "noMatchDescription": "No encontramos una propiedad que coincida con sus criterios.",
       "tryWider": "Intente ampliar sus filtros.",

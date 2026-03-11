@@ -63,7 +63,7 @@
     },
     "collection": {
       "title": "Privé Portfolio",
-      "propertiesSelected": "{count} Geselecteerde Eigendommen",
+      "propertiesSelected": "Geselecteerde Eigendommen",
       "noMatch": "Geen overeenkomst",
       "noMatchDescription": "We hebben geen eigendom gevonden dat aan uw criteria voldoet.",
       "tryWider": "Probeer uw filters te verruimen.",

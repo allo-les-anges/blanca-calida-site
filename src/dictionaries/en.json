@@ -72,7 +72,7 @@
     },
     "collection": {
       "title": "Private Portfolio",
-      "propertiesSelected": "{count} Selected Properties",
+      "propertiesSelected": "Selected Properties",
       "noMatch": "No match",
       "noMatchDescription": "We did not find a property matching your criteria.",
       "tryWider": "Try to broaden your filters.",

@@ -63,7 +63,7 @@
     },
     "collection": {
       "title": "محفظة خاصة",
-      "propertiesSelected": "{count} عقار مختار",
+      "propertiesSelected": "عقار مختار",
       "noMatch": "لا توجد تطابقات",
       "noMatchDescription": "لم نعثر على عقار يطابق معاييرك.",
       "tryWider": "حاول توسيع نطاق البحث.",

@@ -63,7 +63,7 @@
     },
     "collection": {
       "title": "Prywatny Portfel",
-      "propertiesSelected": "{count} Wybranych Nieruchomości",
+      "propertiesSelected": "Wybranych Nieruchomości",
       "noMatch": "Brak dopasowań",
       "noMatchDescription": "Nie znaleźliśmy nieruchomości spełniającej Twoje kryteria.",
       "tryWider": "Spróbuj poszerzyć filtry.",
