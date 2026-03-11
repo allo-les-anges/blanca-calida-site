@@ -7,7 +7,7 @@ type Language = 'fr' | 'en' | 'nl' | 'es' | 'pl' | 'ar';
 interface I18nContextType {
   locale: Language;
   setLocale: (lang: Language) => void;
-  t: (key: string, params?: Record<string, string | number>) => string;
+  t: (key: string, params?: Record<string, string | number>) => any; // ← retour any pour accepter tableaux et objets
   dir: 'ltr' | 'rtl';
 }
 
@@ -65,15 +65,11 @@ export const I18nProvider = ({ children }: { children: React.ReactNode }) => {
         return key;
       }
     }
-    if (typeof value !== 'string') {
-      console.warn(`Translation key ${key} is not a string`);
-      return key;
-    }
-    // Remplacer les paramètres
-    if (params) {
+    if (typeof value === 'string' && params) {
+      // Remplacer les paramètres uniquement si c'est une chaîne
       return value.replace(/\{(\w+)\}/g, (_, p) => params[p]?.toString() || `{${p}}`);
     }
-    return value;
+    return value; // peut être string, objet, tableau...
   };
 
   const dir = locale === 'ar' ? 'rtl' : 'ltr';

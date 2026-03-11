@@ -252,7 +252,7 @@ export default function AdminChantier() {
               <div className="relative">
                 <select value={project.etape_actuelle} onChange={(e) => handleUpdatePhase(e.target.value)}
                   className="w-full bg-black border border-white/5 p-6 rounded-2xl text-sm font-bold text-white appearance-none outline-none focus:border-indigo-500 transition-all">
-                  {t('adminChantier.phases', { returnObjects: true }).map((phase: string) => (
+                  {(t('adminChantier.phases') as string[]).map((phase: string) => (
                     <option key={phase} value={phase}>{phase}</option>
                   ))}
                 </select>
