@@ -78,7 +78,7 @@ export default function RegionGrid({ properties, onRegionClick }: RegionGridProp
   const isDark = resolvedTheme === "dark";
 
   return (
-    <section className="max-w-[1600px] mx-auto px-6 py-12 bg-white dark:bg-[#0A0A0A] transition-colors duration-500">
+    <section className="max-w-[1600px] mx-auto px-6 py-6 bg-white dark:bg-[#0A0A0A] transition-colors duration-500">
       
       {/* HEADER AJUSTÉ : Espaces réduits et Texte plus fin */}
       <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-8">
