@@ -15,7 +15,7 @@ const SOURCES = [
 export async function GET() {
   try {
     let totalSynced = 0;
-    let logs: string[] = [];
+    const languages = ['fr', 'en', 'es', 'nl', 'pl', 'ar'];
 
     for (const source of SOURCES) {
       const response = await fetch(source.url, { cache: 'no-store' });
@@ -32,56 +32,64 @@ export async function GET() {
         const loc = p.location || {};
         const dists = p.distances || {}; 
         
-        // Gestion des images
+        // Images
         let imagesArray: string[] = [];
         if (p.images && p.images.image) {
           const rawImages = Array.isArray(p.images.image) ? p.images.image : [p.images.image];
           imagesArray = rawImages.map((img: any) => img.url).filter((u: any) => typeof u === 'string');
         }
 
-        return {
+        // Objet de base (champs non linguistiques)
+        const base: any = {
           id_externe: String(p.id),
           ref: String(p.ref || p.id),
-          // Titre : On prend le nom du projet "Villa Moderna Calpe" en priorité
-          titre: String(p.development_name || p.title?.fr || "Villa Moderne").trim(),
-          description: String(p.desc?.fr || p.desc?.en || "").trim(),
-          
-          // Localisation
           town: String(p.town || loc.town || "Espagne"),
           ville: String(p.town || loc.town || "Espagne"),
           province: String(p.province || ""),
           region: source.defaultRegion,
           latitude: loc.latitude ? parseFloat(loc.latitude) : null,
           longitude: loc.longitude ? parseFloat(loc.longitude) : null,
-          
-          // Caractéristiques (Pour vos vignettes)
           type: String(p.type || "Villa"),
           beds: String(p.beds || "0"),
           baths: String(p.baths || "0"),
-          // Note : Votre XML dit <pool>0</pool> mais la description dit "piscine privée"
-          // On fait confiance à la balise pool, mais on pourrait scanner les features
           pool: (p.pool === "1" || (p.features?.feature && JSON.stringify(p.features.feature).includes("pool"))) ? "Oui" : "Non",
-          
-          // Prix
           price: parseFloat(p.price) || 0,
           prix: parseFloat(p.price) || 0,
           currency: String(p.currency || "EUR"),
-          
-          // --- DISTANCES (Extraction précise du XML) ---
           distance_beach: dists.beach ? String(dists.beach) : null,
           distance_golf: dists.golf ? String(dists.golf) : null,
-          // Puisque 'town' n'existe pas dans le XML, on peut utiliser 'beach' comme fallback 
-          // ou le laisser null pour ne pas mentir au client.
-          distance_town: dists.town_distance || dists.town || null, 
-          
-          // --- SURFACES ---
+          distance_town: dists.town_distance || dists.town || null,
           surface_built: String(surf.built || "0"),
           surface_plot: String(surf.plot || "0"),
           surface_useful: String(surf.useful || "0"),
-          
           images: imagesArray,
           updated_at: new Date().toISOString()
         };
+
+        // Titres et descriptions multilingues
+        const titleObj = p.title || {};
+        const descObj = p.desc || {};
+
+        for (const lang of languages) {
+          // Titre : priorité à development_name, sinon titre dans la langue, sinon fallback français
+          let titre = p.development_name;
+          if (!titre && titleObj[lang]) {
+            titre = titleObj[lang];
+          }
+          if (!titre) {
+            titre = titleObj.fr || titleObj.en || "Villa Moderne";
+          }
+          base[`titre_${lang}`] = String(titre).trim();
+
+          // Description
+          let description = descObj[lang];
+          if (!description) {
+            description = descObj.fr || descObj.en || "";
+          }
+          base[`description_${lang}`] = String(description).trim();
+        }
+
+        return base;
       });
 
       const { error, data } = await supabase

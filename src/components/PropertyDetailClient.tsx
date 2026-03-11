@@ -12,7 +12,7 @@ import Link from "next/link";
 import { useTranslation } from "@/contexts/I18nContext";
 
 export default function PropertyDetailClient({ id }: { id: string }) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation(); // ← ajout de locale
   const [property, setProperty] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [activeImage, setActiveImage] = useState(0);
@@ -34,7 +34,8 @@ export default function PropertyDetailClient({ id }: { id: string }) {
     setMounted(true);
     async function fetchData() {
       try {
-        const res = await fetch("/api/properties");
+        // Utilisation de la langue courante dans l'URL
+        const res = await fetch(`/api/properties?lang=${locale}`);
         const data = await res.json();
         const propertiesArray = Array.isArray(data) ? data : (data.properties || []);
         const current = propertiesArray.find((p: any) => 
@@ -48,7 +49,7 @@ export default function PropertyDetailClient({ id }: { id: string }) {
       }
     }
     fetchData();
-  }, [id]);
+  }, [id, locale]); // ← recharger quand la langue change
 
   const handleScroll = () => {
     if (scrollContainerRef.current) {
@@ -89,9 +90,7 @@ export default function PropertyDetailClient({ id }: { id: string }) {
   const images = property.images || [];
   const numericPrice = Number(property.price || property.prix || 0);
   
-  // Génération de l'URL Google Maps basée sur la ville et la région
   const mapQuery = encodeURIComponent(`${property.town || ""}, ${property.region || ""}, Espagne`);
-  const mapUrl = `https://www.google.com/maps/embed/v1/place?key=VOTRE_CLE_API_GOOGLE&q=${mapQuery}&language=fr`;
   const fallbackMapUrl = `https://maps.google.com/maps?q=${mapQuery}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
 
   return (
@@ -108,14 +107,14 @@ export default function PropertyDetailClient({ id }: { id: string }) {
       <Navbar />
       <div className="h-24 md:h-32" />
 
-      {/* --- NAVIGATION --- */}
+      {/* NAVIGATION */}
       <div className="max-w-7xl mx-auto px-6 mb-8">
         <Link href="/" className="group inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.3em] text-[#D4AF37] font-bold">
           <ArrowLeft size={14} /> {t('propertyDetail.back')}
         </Link>
       </div>
 
-      {/* --- GALERIE --- */}
+      {/* GALERIE */}
       <section className="max-w-7xl mx-auto px-6 mb-16">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:h-[550px]">
           <div className="md:col-span-3 relative rounded-[2.5rem] md:rounded-[3rem] overflow-hidden shadow-2xl bg-slate-100 dark:bg-[#111] h-[400px] md:h-full">
@@ -143,7 +142,7 @@ export default function PropertyDetailClient({ id }: { id: string }) {
         </div>
       </section>
 
-      {/* --- CONTENU --- */}
+      {/* CONTENU */}
       <section className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-3 gap-16 pb-24">
         <div className="lg:col-span-2">
           
@@ -180,7 +179,7 @@ export default function PropertyDetailClient({ id }: { id: string }) {
               dangerouslySetInnerHTML={{ __html: cleanDescription(property.description || "") }} 
             />
             
-            {/* --- SECTION GÉOLOCALISATION --- */}
+            {/* SECTION GÉOLOCALISATION */}
             <div className="space-y-8">
               <div className="flex items-center gap-4">
                 <div className="h-12 w-12 rounded-2xl bg-[#D4AF37]/10 flex items-center justify-center text-[#D4AF37]">
@@ -208,7 +207,7 @@ export default function PropertyDetailClient({ id }: { id: string }) {
           </div>
         </div>
 
-        {/* --- SIDEBAR --- */}
+        {/* SIDEBAR */}
         <div className="lg:col-span-1">
           <div className="sticky top-40 space-y-6">
             <Link 
