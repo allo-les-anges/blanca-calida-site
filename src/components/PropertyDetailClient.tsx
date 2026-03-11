@@ -12,7 +12,7 @@ import Link from "next/link";
 import { useTranslation } from "@/contexts/I18nContext";
 
 export default function PropertyDetailClient({ id }: { id: string }) {
-  const { t, locale } = useTranslation();
+  const { t, locale } = useTranslation(); // ← ajout de locale
   const [property, setProperty] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [activeImage, setActiveImage] = useState(0);
@@ -34,6 +34,7 @@ export default function PropertyDetailClient({ id }: { id: string }) {
     setMounted(true);
     async function fetchData() {
       try {
+        // Utilisation de la langue courante dans l'URL
         const res = await fetch(`/api/properties?lang=${locale}`);
         const data = await res.json();
         const propertiesArray = Array.isArray(data) ? data : (data.properties || []);
@@ -48,7 +49,7 @@ export default function PropertyDetailClient({ id }: { id: string }) {
       }
     }
     fetchData();
-  }, [id, locale]);
+  }, [id, locale]); // ← recharger quand la langue change
 
   const handleScroll = () => {
     if (scrollContainerRef.current) {
@@ -95,6 +96,8 @@ export default function PropertyDetailClient({ id }: { id: string }) {
   return (
     <main className="bg-white dark:bg-[#0A0A0A] min-h-screen transition-colors duration-500">
       <style jsx global>{`
+        .smart-text-container, .smart-text-container *, .smart-title { color: #1a1a1a !important; }
+        :global(.dark) .smart-text-container, :global(.dark) .smart-text-container *, :global(.dark) .smart-title { color: #ffffff !important; }
         :global(.dark) .map-container { filter: grayscale(1) invert(0.9) contrast(1.2); }
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #D4AF37; border-radius: 10px; }
@@ -143,7 +146,7 @@ export default function PropertyDetailClient({ id }: { id: string }) {
       <section className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-3 gap-16 pb-24">
         <div className="lg:col-span-2">
           
-          <h1 className="text-4xl md:text-7xl font-serif mb-8 leading-[1.1] text-slate-900 dark:text-white">
+          <h1 className="smart-title text-4xl md:text-7xl font-serif mb-8 leading-[1.1]">
             {property.titre || t('propertyDetail.fallbackTitle')}
           </h1>
           
@@ -163,16 +166,16 @@ export default function PropertyDetailClient({ id }: { id: string }) {
             ].map((item, i) => (
               <div key={i} className="bg-slate-50 dark:bg-white/5 p-6 rounded-3xl text-center border border-slate-200 dark:border-white/10">
                 <item.icon className="mx-auto mb-2 text-[#D4AF37]" size={22} />
-                <p className="text-slate-900 dark:text-white text-2xl font-serif">{item.val || "0"}</p>
+                <p className="smart-title text-2xl font-serif">{item.val || "0"}</p>
                 <p className="text-[8px] uppercase text-slate-400 font-bold tracking-widest">{t(`propertyDetail.${item.key}`)}</p>
               </div>
             ))}
           </div>
 
           <div className="max-w-none mb-20 pt-10 border-t border-slate-200 dark:border-white/10">
-            <h2 className="text-3xl font-serif italic mb-8 text-slate-900 dark:text-white">{t('propertyDetail.artOfLiving')}</h2>
+            <h2 className="smart-title text-3xl font-serif italic mb-8">{t('propertyDetail.artOfLiving')}</h2>
             <div 
-              className="prose prose-lg max-w-none text-slate-600 dark:text-slate-300 leading-relaxed mb-16"
+              className="smart-text-container text-lg leading-relaxed opacity-90 mb-16"
               dangerouslySetInnerHTML={{ __html: cleanDescription(property.description || "") }} 
             />
             
@@ -183,7 +186,7 @@ export default function PropertyDetailClient({ id }: { id: string }) {
                    <Navigation size={24} />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-serif italic text-slate-900 dark:text-white">{t('propertyDetail.location')}</h3>
+                  <h3 className="smart-title text-2xl font-serif italic">{t('propertyDetail.location')}</h3>
                   <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold">{property.town}, Costa Blanca</p>
                 </div>
               </div>
@@ -225,7 +228,7 @@ export default function PropertyDetailClient({ id }: { id: string }) {
 
             <div className="bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 p-10 rounded-[3rem] shadow-2xl">
               <p className="text-[10px] uppercase text-slate-400 dark:text-[#FFE7C2]/60 mb-2 font-bold tracking-widest">{t('propertyDetail.price')}</p>
-              <p className="text-5xl font-serif leading-none mb-10 text-slate-900 dark:text-white">
+              <p className="smart-title text-5xl font-serif leading-none mb-10">
                 {numericPrice.toLocaleString("fr-FR")} €
               </p>
               
@@ -233,7 +236,7 @@ export default function PropertyDetailClient({ id }: { id: string }) {
                 {t('propertyDetail.bookVisit')}
               </button>
               
-              <a href={`https://wa.me/34627768233?text=Info ref: ${property.ref}`} target="_blank" className="w-full border border-slate-200 dark:border-white/10 flex items-center justify-center gap-3 py-6 rounded-2xl font-bold uppercase text-[11px] text-slate-900 dark:text-white hover:bg-slate-50 dark:hover:bg-white/5 transition-all">
+              <a href={`https://wa.me/34627768233?text=Info ref: ${property.ref}`} target="_blank" className="w-full border border-slate-200 dark:border-white/10 flex items-center justify-center gap-3 py-6 rounded-2xl font-bold uppercase text-[11px] smart-title hover:bg-slate-50 dark:hover:bg-white/5 transition-all">
                 <MessageCircle size={20} className="text-green-500" /> {t('propertyDetail.whatsappDirect')}
               </a>
             </div>
