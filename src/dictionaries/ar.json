@@ -53,7 +53,7 @@
   "home": {
     "heroTitleLine1": "فيلات فاخرة و",
     "heroTitleLine2": "عقارات استثنائية",
-    "heroSubtitle": "COSTA BLANCA | COSTA DEL SOL"
+    "heroSubtitle": "COSTA BLANCA | COSTA DEL SOL",
     "findVilla": "ابحث عن فيلتك",
     "ownerSection": {
       "title": "تابع مشروعك",
@@ -507,4 +507,20 @@
     "pinIncorrect": "رمز PIN غير صحيح.",
     "incorrectPin": "رمز PIN غير صحيح."
   }
+ "login": {
+  "title": "محرك Amaru",
+  "subtitle": "مصادقة آمنة",
+  "pinTab": "الرمز السري",
+  "credentialsTab": "بيانات الدخول",
+  "emailLabel": "اسم المستخدم",
+  "passwordLabel": "كلمة المرور",
+  "validate": "تسجيل الدخول",
+  "reset": "إعادة تعيين المحطة",
+  "invalidPin": "رمز PIN غير صالح",
+  "invalidCredentials": "بيانات دخول غير صالحة",
+  "validationError": "خطأ في التحقق",
+  "profileMissing": "الملف الشخصي مفقود في قاعدة البيانات.",
+  "roleNotAuthorized": "الدور غير مصرح به.",
+  "systemError": "خطأ في النظام."
+}
 }

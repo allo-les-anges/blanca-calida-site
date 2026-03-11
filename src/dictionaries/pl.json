@@ -53,7 +53,7 @@
   "home": {
     "heroTitleLine1": "Luksusowe Wille &",
     "heroTitleLine2": "Wyjątkowe Nieruchomości",
-    "heroSubtitle": "COSTA BLANCA | COSTA DEL SOL"
+    "heroSubtitle": "COSTA BLANCA | COSTA DEL SOL",
     "findVilla": "Znajdź swoją willę",
     "ownerSection": {
       "title": "Śledź swój projekt",
@@ -507,4 +507,20 @@
     "pinIncorrect": "Nieprawidłowy kod PIN.",
     "incorrectPin": "Nieprawidłowy PIN."
   }
+ "login": {
+  "title": "Amaru Engine",
+  "subtitle": "Bezpieczne uwierzytelnianie",
+  "pinTab": "KOD PIN",
+  "credentialsTab": "DANE LOGOWANIA",
+  "emailLabel": "Nazwa użytkownika",
+  "passwordLabel": "Hasło",
+  "validate": "ZALOGUJ SIĘ",
+  "reset": "Resetuj terminal",
+  "invalidPin": "Nieprawidłowy kod PIN",
+  "invalidCredentials": "Nieprawidłowe dane logowania",
+  "validationError": "Błąd walidacji",
+  "profileMissing": "Brak profilu w bazie danych.",
+  "roleNotAuthorized": "Rola nieautoryzowana.",
+  "systemError": "Błąd systemu."
+}
 }
