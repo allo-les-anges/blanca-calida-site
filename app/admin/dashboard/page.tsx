@@ -14,6 +14,7 @@ import {
 import { supabase } from '../../../lib/supabase';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { useTranslation } from '@/contexts/I18nContext';
 
 const PHASES_CHANTIER = [
   "0. Signature & Réservation", 
@@ -33,6 +34,7 @@ const PHASES_CHANTIER = [
 
 export default function AdminDashboard() {
   const router = useRouter();
+  const { t } = useTranslation();
   
   // --- ÉTATS DE L'INTERFACE ---
   const [activeTab, setActiveTab] = useState<'clients' | 'staff'>('clients');
@@ -169,9 +171,9 @@ export default function AdminDashboard() {
       .eq('id', selectedProjet.id);
 
     if (error) {
-      alert("Erreur lors de la mise à jour");
+      alert(t('common.error'));
     } else {
-      alert("✅ Dossier mis à jour avec succès !");
+      alert(t('adminDashboard.saveSuccess'));
       loadData();
     }
     setUpdating(false);
@@ -209,14 +211,14 @@ export default function AdminDashboard() {
         await loadDocuments(selectedProjet.id);
     } catch (err: any) {
         console.error(err);
-        alert("Erreur d'importation : " + err.message);
+        alert(t('adminDashboard.uploadError', { message: err.message }));
     } finally {
         setUploadingDoc(false);
     }
   };
 
   const deleteDocument = async (docId: string, url: string) => {
-    if (!confirm("Êtes-vous sûr de vouloir supprimer définitivement ce document ?")) return;
+    if (!confirm(t('adminDashboard.confirmDeleteDocument'))) return;
     
     const pathParts = url.split('documents-clients/');
     if (pathParts[1]) {
@@ -241,7 +243,7 @@ export default function AdminDashboard() {
     });
 
     if (authError) throw authError;
-    if (!authData.user) throw new Error("Échec de la création de l'utilisateur");
+    if (!authData.user) throw new Error(t('adminStaff.userCreationFailed'));
 
     const userId = authData.user.id;
     const autoPin = Math.floor(100000 + Math.random() * 900000).toString();
@@ -260,12 +262,12 @@ export default function AdminDashboard() {
 
     if (profileError) throw profileError;
 
-    alert(`✅ Collaborateur ajouté ! PIN généré : ${autoPin}`);
+    alert(t('adminStaff.addSuccess', { pin: autoPin }));
     setShowStaffModal(false);
     setNewStaff({ nom: "", prenom: "", email: "", role: "agent" });
     loadData();
   } catch (err: any) {
-    alert("Erreur lors de l'ajout : " + err.message);
+    alert(t('adminStaff.addError', { message: err.message }));
   } finally {
     setUpdating(false);
   }
@@ -273,10 +275,10 @@ export default function AdminDashboard() {
 
   const handleDeleteStaff = async (staffId: string, staffEmail: string) => {
     if (staffEmail === agencyProfile.email) {
-      alert("Vous ne pouvez pas supprimer votre propre compte.");
+      alert(t('adminStaff.cannotDeleteSelf'));
       return;
     }
-    if (!confirm(`Êtes-vous sûr de vouloir supprimer définitivement ce collaborateur ?`)) return;
+    if (!confirm(t('adminStaff.confirmDelete'))) return;
     
     try {
       const { error } = await supabase
@@ -286,10 +288,10 @@ export default function AdminDashboard() {
       
       if (error) throw error;
       
-      alert("Collaborateur supprimé.");
-      loadData(); // Recharger la liste
+      alert(t('adminStaff.deleteSuccess'));
+      loadData();
     } catch (err: any) {
-      alert("Erreur lors de la suppression : " + err.message);
+      alert(t('adminStaff.deleteError', { message: err.message }));
     }
   };
 
@@ -335,7 +337,7 @@ export default function AdminDashboard() {
 
     doc.setFontSize(9);
     doc.setTextColor(100, 100, 100);
-    doc.text("Département Contrôle Technique & Qualité", 14, 26);
+    doc.text(t('projectTracker.department'), 14, 26);
 
     doc.setDrawColor(16, 185, 129);
     doc.setLineWidth(1);
@@ -344,19 +346,19 @@ export default function AdminDashboard() {
     // Infos dossier
     doc.setFontSize(10);
     doc.setTextColor(15, 23, 42);
-    doc.text(`Rapport de Constat : #RC-${date.replace(/ /g, '')}`, 140, 20);
+    doc.text(t('adminDashboard.reportRef', { ref: date.replace(/ /g, '') }), 140, 20);
 
     doc.setFont("helvetica", "normal");
-    doc.text(`Date de visite : ${date}`, 140, 26);
-    doc.text(`Phase : ${selectedProjet?.etape_actuelle || "N/A"}`, 140, 32);
+    doc.text(t('adminDashboard.visitDate', { date }), 140, 26);
+    doc.text(t('adminDashboard.phase', { phase: selectedProjet?.etape_actuelle || "N/A" }), 140, 32);
 
     // Destinataire
     doc.setFont("helvetica", "bold");
-    doc.text("DESTINATAIRE :", 14, 55);
+    doc.text(t('adminDashboard.recipient'), 14, 55);
 
     doc.setFont("helvetica", "normal");
     doc.text(`${selectedProjet?.client_prenom} ${selectedProjet?.client_nom}`, 14, 60);
-    doc.text(`Projet : ${selectedProjet?.nom_villa}`, 14, 65);
+    doc.text(t('adminDashboard.project', { name: selectedProjet?.nom_villa }), 14, 65);
 
     // Expert
     const expertNom =
@@ -365,7 +367,7 @@ export default function AdminDashboard() {
         : "Gaëtan Mukeba";
 
     doc.setFont("helvetica", "bold");
-    doc.text("EXPERT RÉFÉRENT :", 110, 55);
+    doc.text(t('adminDashboard.expert'), 110, 55);
 
     doc.setFont("helvetica", "normal");
     doc.text(expertNom, 110, 60);
@@ -375,7 +377,7 @@ export default function AdminDashboard() {
 
   const rawNote =
     c.note_expert ||
-    "Aucune anomalie détectée lors de l'inspection visuelle.";
+    t('adminDashboard.defaultObservation');
 
   const cleanNote = rawNote
   .normalize("NFKD")
@@ -383,10 +385,10 @@ export default function AdminDashboard() {
   .replace(/\s+/g, " ")
   .trim();
 
-  const analyse = `STATUT : CONFORME\n\n${cleanNote}`;
+  const analyse = t('adminDashboard.statusConforme') + '\n\n' + cleanNote;
 
   return [
-    `Prise de vue #${i + 1}\n\nGPS : ${c.latitude || 'N/A'}\n${c.longitude || 'N/A'}`,
+    t('adminDashboard.photoRef', { num: i + 1, lat: c.latitude || 'N/A', lng: c.longitude || 'N/A' }),
     analyse
   ];
 });
@@ -394,7 +396,7 @@ export default function AdminDashboard() {
   autoTable(doc, {
   startY: 75,
 
-  head: [['RÉFÉRENCE PHOTO', 'ANALYSE TECHNIQUE & OBSERVATIONS']],
+  head: [[t('adminDashboard.photoHeader'), t('adminDashboard.analysisHeader')]],
 
   body: bodyData,
 
@@ -423,7 +425,7 @@ export default function AdminDashboard() {
     doc.addPage();
 
     doc.setFont("helvetica", "bold");
-    doc.text("ANNEXE PHOTOGRAPHIQUE ET GÉOLOCALISATION", 14, 20);
+    doc.text(t('adminDashboard.photoAnnex'), 14, 20);
 
     let yPos = 30;
 
@@ -439,12 +441,12 @@ export default function AdminDashboard() {
       try {
         doc.addImage(c.url_image, 'JPEG', 14, yPos, 120, 75);
       } catch (e) {
-        doc.text("(Image non disponible)", 14, yPos + 20);
+        doc.text(t('adminDashboard.imageNotAvailable'), 14, yPos + 20);
       }
 
       doc.setFontSize(8);
 
-      const text = `Illustration #${i + 1} - Capturée le ${new Date(c.created_at).toLocaleString()}`;
+      const text = t('adminDashboard.imageCaption', { num: i + 1, date: new Date(c.created_at).toLocaleString() });
 
       const lines = doc.splitTextToSize(text, 160);
 
@@ -462,10 +464,9 @@ export default function AdminDashboard() {
     doc.setFontSize(8);
     doc.setFont("helvetica", "italic");
 
-    doc.text("CERTIFICATION :", 14, finalY + 10);
+    doc.text(t('adminDashboard.certificationTitle'), 14, finalY + 10);
 
-    const certifText =
-      `Je soussigné, ${expertNom}, certifie que les informations, relevés GPS et photographies contenus dans ce rapport reflètent fidèlement l'état d'avancement réel du chantier à la date mentionnée. Document édité par le système Amaru Admin.`;
+    const certifText = t('adminDashboard.certificationText', { expert: expertNom });
 
     const certifLines = doc.splitTextToSize(certifText, 180);
 
@@ -480,7 +481,7 @@ export default function AdminDashboard() {
   } catch (e) {
 
     console.error(e);
-    alert("Erreur lors de la génération du PDF");
+    alert(t('adminDashboard.pdfError'));
 
   } finally {
 
@@ -495,7 +496,7 @@ export default function AdminDashboard() {
         <Loader2 className="animate-spin text-emerald-500" size={48} />
         <div className="absolute inset-0 blur-2xl bg-emerald-500/20 animate-pulse"></div>
       </div>
-      <span className="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-500 mt-8 animate-pulse">Initialisation du Terminal Admin</span>
+      <span className="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-500 mt-8 animate-pulse">{t('adminDashboard.initializing')}</span>
     </div>
   );
 
@@ -514,7 +515,7 @@ export default function AdminDashboard() {
               </h1>
               <div className="flex items-center gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span className="text-[9px] font-black uppercase text-emerald-500/80 tracking-widest">Admin Control</span>
+                <span className="text-[9px] font-black uppercase text-emerald-500/80 tracking-widest">{t('adminDashboard.adminControl')}</span>
               </div>
             </div>
             <button 
@@ -531,13 +532,13 @@ export default function AdminDashboard() {
               onClick={() => setActiveTab('clients')} 
               className={`relative z-10 flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-500 flex items-center justify-center gap-2 ${activeTab === 'clients' ? 'text-black' : 'text-slate-500 hover:text-white'}`}
             >
-              <LayoutDashboard size={14} /> Dossiers
+              <LayoutDashboard size={14} /> {t('adminDashboard.projects')}
             </button>
             <button 
               onClick={() => setActiveTab('staff')} 
               className={`relative z-10 flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-500 flex items-center justify-center gap-2 ${activeTab === 'staff' ? 'text-black' : 'text-slate-500 hover:text-white'}`}
             >
-              <UserPlus size={14} /> Équipe
+              <UserPlus size={14} /> {t('adminDashboard.team')}
             </button>
             {/* Indicateur Animé */}
             <div className={`absolute top-1.5 bottom-1.5 left-1.5 w-[calc(50%-6px)] bg-emerald-500 rounded-xl transition-all duration-500 ease-out ${activeTab === 'staff' ? 'translate-x-[100%]' : 'translate-x-0'}`}></div>
@@ -548,7 +549,7 @@ export default function AdminDashboard() {
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-emerald-500 transition-colors" size={14} />
             <input 
               type="text" 
-              placeholder="RECHERCHER..." 
+              placeholder={t('adminDashboard.searchPlaceholder')}
               className="w-full pl-12 pr-4 py-4 bg-white/5 rounded-2xl text-[10px] font-black border border-white/5 outline-none focus:border-emerald-500 focus:bg-white/10 transition-all placeholder:text-slate-600 tracking-widest"
               onChange={(e) => setSearchTerm(e.target.value)} 
             />
@@ -586,7 +587,7 @@ export default function AdminDashboard() {
                       <p className="font-black text-[11px] text-white uppercase tracking-tighter">{s.prenom} {s.nom}</p>
                       <div className="flex items-center gap-2 mt-1">
                         <span className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest ${s.role === 'super_admin' ? 'bg-blue-500/10 text-blue-500' : s.role === 'admin' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-orange-500/10 text-orange-500'}`}>
-                          {s.role}
+                          {s.role === 'super_admin' ? t('adminStaff.superAdmin') : s.role === 'admin' ? t('adminStaff.admin') : t('adminStaff.agent')}
                         </span>
                       </div>
                     </div>
@@ -594,21 +595,21 @@ export default function AdminDashboard() {
                       <button 
                         onClick={() => copyToClipboard(s.pin_code, s.id)}
                         className={`p-2 rounded-xl transition-all duration-300 ${copySuccess === s.id ? 'bg-emerald-500 text-black' : 'bg-white/5 text-slate-400 hover:text-emerald-500'}`}
-                        title="Copier le PIN"
+                        title={t('adminStaff.copyPin')}
                       >
                         {copySuccess === s.id ? <CheckCircle2 size={12} /> : <Copy size={12} />}
                       </button>
                       <button 
                         onClick={() => handleDeleteStaff(s.id, s.email)}
                         className="p-2 bg-white/5 text-slate-400 rounded-xl hover:bg-rose-500 hover:text-white transition-all"
-                        title="Supprimer ce collaborateur"
+                        title={t('adminStaff.delete')}
                       >
                         <Trash2 size={12} />
                       </button>
                     </div>
                   </div>
                   <div className="flex items-center justify-between pt-4 border-t border-white/5">
-                    <p className="text-[9px] font-mono text-slate-500 uppercase">Code de sécurité</p>
+                    <p className="text-[9px] font-mono text-slate-500 uppercase">{t('adminStaff.securityCode')}</p>
                     <p className="text-[11px] font-black text-emerald-500 tracking-[0.2em]">{s.pin_code || '------'}</p>
                   </div>
                 </div>
@@ -619,10 +620,10 @@ export default function AdminDashboard() {
         {/* Footer Sidebar */}
         <div className="p-4 border-t border-white/5 bg-black/20 space-y-2">
             <button onClick={() => router.push('/')} className="w-full flex items-center gap-3 px-5 py-4 text-slate-400 hover:text-white hover:bg-white/5 rounded-2xl transition-all text-[10px] font-black uppercase tracking-widest group">
-              <Home size={16} className="group-hover:scale-110 transition-transform" /> Site Public
+              <Home size={16} className="group-hover:scale-110 transition-transform" /> {t('adminDashboard.publicSite')}
             </button>
             <button onClick={handleLogout} className="w-full flex items-center gap-3 px-5 py-4 text-rose-500/80 hover:text-rose-500 hover:bg-rose-500/10 rounded-2xl transition-all text-[10px] font-black uppercase tracking-widest group">
-              <LogOut size={16} className="group-hover:-translate-x-1 transition-transform" /> Déconnexion
+              <LogOut size={16} className="group-hover:-translate-x-1 transition-transform" /> {t('adminDashboard.logout')}
             </button>
         </div>
       </div>
@@ -641,9 +642,9 @@ export default function AdminDashboard() {
                 <div className="space-y-4">
                     <div className="flex items-center gap-3">
                         <span className="px-4 py-1.5 bg-emerald-500/10 text-emerald-500 rounded-full text-[9px] font-black uppercase border border-emerald-500/20 tracking-widest shadow-lg shadow-emerald-500/5">
-                          Dossier de construction actif
+                          {t('adminDashboard.activeConstructionFile')}
                         </span>
-                        <span className="text-[10px] font-mono text-slate-600 uppercase tracking-widest">REF: {selectedProjet.id.slice(0,8)}</span>
+                        <span className="text-[10px] font-mono text-slate-600 uppercase tracking-widest">{t('adminDashboard.ref', { ref: selectedProjet.id.slice(0,8) })}</span>
                     </div>
                     <h2 className="text-6xl xl:text-7xl font-black text-white uppercase italic tracking-tighter leading-[0.85] animate-in slide-in-from-left duration-700">
                       {editFields.nom_villa}
@@ -654,7 +655,7 @@ export default function AdminDashboard() {
                           <UserCheck size={14} className="text-slate-400" />
                         </div>
                         <p className="text-slate-400 font-bold text-sm">
-                          Propriétaire : <span className="text-white uppercase tracking-tight">{editFields.client_prenom} {editFields.client_nom}</span>
+                          {t('adminDashboard.owner', { name: `${editFields.client_prenom} ${editFields.client_nom}` })}
                         </p>
                       </div>
                       <div className="h-4 w-px bg-white/10"></div>
@@ -667,7 +668,7 @@ export default function AdminDashboard() {
                 
                 <div className="flex flex-wrap gap-4">
                     <button onClick={() => window.print()} className="flex items-center gap-3 px-8 py-5 bg-white/5 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-white/10 border border-white/5 transition-all">
-                      <Printer size={18}/> Imprimer
+                      <Printer size={18}/> {t('common.print')}
                     </button>
                     <button 
                       onClick={handleUpdateDossier} 
@@ -675,7 +676,7 @@ export default function AdminDashboard() {
                       className="group flex items-center gap-3 px-10 py-5 bg-emerald-500 text-black rounded-2xl font-black text-[10px] uppercase tracking-[0.15em] hover:scale-105 active:scale-95 transition-all duration-500 shadow-2xl shadow-emerald-500/20"
                     >
                       {updating ? <Loader2 className="animate-spin" size={18}/> : <Save size={18} className="group-hover:scale-110 transition-transform" />} 
-                      Enregistrer le dossier
+                      {t('adminDashboard.saveFile')}
                     </button>
                 </div>
             </div>
@@ -683,9 +684,9 @@ export default function AdminDashboard() {
             {/* BARRE DE NAVIGATION INTERNE (ONGLETS) */}
             <div className="flex gap-12 border-b border-white/5 relative">
                 {[ 
-                  {id: 'infos', label: 'Client & Budget', icon: UserCheck}, 
-                  {id: 'suivi', label: 'État du Chantier', icon: MapPin}, 
-                  {id: 'docs', label: 'Coffre-fort (Docs)', icon: FileText}
+                  {id: 'infos', label: t('adminDashboard.tabs.clientBudget'), icon: UserCheck}, 
+                  {id: 'suivi', label: t('adminDashboard.tabs.constructionStatus'), icon: MapPin}, 
+                  {id: 'docs', label: t('adminDashboard.tabs.documents'), icon: FileText}
                 ].map((t) => (
                     <button 
                       key={t.id} 
@@ -709,11 +710,11 @@ export default function AdminDashboard() {
                         <section className="bg-white/5 p-10 rounded-[3rem] border border-white/5 hover:border-white/10 transition-all duration-500 group">
                             <h3 className="text-xs font-black uppercase text-white mb-8 flex items-center gap-4 tracking-widest">
                               <div className="p-2 bg-emerald-500/10 rounded-lg text-emerald-500"><Info size={16} /></div>
-                              Coordonnées du propriétaire
+                              {t('adminDashboard.clientInfo.title')}
                             </h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 <div className="space-y-3">
-                                    <label className="text-[9px] uppercase font-black text-slate-500 tracking-widest ml-1">Prénom</label>
+                                    <label className="text-[9px] uppercase font-black text-slate-500 tracking-widest ml-1">{t('adminDashboard.clientInfo.firstName')}</label>
                                     <input 
                                       className="w-full bg-black/40 border border-white/10 p-5 rounded-2xl text-[11px] font-bold text-white focus:border-emerald-500/50 focus:bg-white/5 outline-none transition-all" 
                                       value={editFields.client_prenom || ""} 
@@ -721,7 +722,7 @@ export default function AdminDashboard() {
                                     />
                                 </div>
                                 <div className="space-y-3">
-                                    <label className="text-[9px] uppercase font-black text-slate-500 tracking-widest ml-1">Nom</label>
+                                    <label className="text-[9px] uppercase font-black text-slate-500 tracking-widest ml-1">{t('adminDashboard.clientInfo.lastName')}</label>
                                     <input 
                                       className="w-full bg-black/40 border border-white/10 p-5 rounded-2xl text-[11px] font-bold text-white focus:border-emerald-500/50 focus:bg-white/5 outline-none transition-all" 
                                       value={editFields.client_nom || ""} 
@@ -729,7 +730,7 @@ export default function AdminDashboard() {
                                     />
                                 </div>
                                 <div className="space-y-3">
-                                  <label className="text-[9px] uppercase font-black text-slate-500 tracking-widest ml-1">Email</label>
+                                  <label className="text-[9px] uppercase font-black text-slate-500 tracking-widest ml-1">{t('adminDashboard.clientInfo.email')}</label>
                                   <div className="relative">
                                     <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-600" size={14} />
                                     <input 
@@ -740,7 +741,7 @@ export default function AdminDashboard() {
                                   </div>
                                 </div>
                                 <div className="space-y-3">
-                                  <label className="text-[9px] uppercase font-black text-slate-500 tracking-widest ml-1">Téléphone</label>
+                                  <label className="text-[9px] uppercase font-black text-slate-500 tracking-widest ml-1">{t('adminDashboard.clientInfo.phone')}</label>
                                   <div className="relative">
                                     <Phone className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-600" size={14} />
                                     <input 
@@ -757,11 +758,11 @@ export default function AdminDashboard() {
                         <section className="bg-white/5 p-10 rounded-[3rem] border border-white/5 hover:border-white/10 transition-all duration-500 group">
                             <h3 className="text-xs font-black uppercase text-white mb-8 flex items-center gap-4 tracking-widest">
                               <div className="p-2 bg-emerald-500/10 rounded-lg text-emerald-500"><MapPin size={16} /></div>
-                              Localisation du bien
+                              {t('adminDashboard.address.title')}
                             </h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 <div className="md:col-span-2 space-y-3">
-                                    <label className="text-[9px] uppercase font-black text-slate-500 tracking-widest ml-1">Rue / Adresse</label>
+                                    <label className="text-[9px] uppercase font-black text-slate-500 tracking-widest ml-1">{t('adminDashboard.address.street')}</label>
                                     <input 
                                       className="w-full bg-black/40 border border-white/10 p-5 rounded-2xl text-[11px] font-bold text-white focus:border-emerald-500/50 focus:bg-white/5 outline-none transition-all" 
                                       value={editFields.rue || ""} 
@@ -769,7 +770,7 @@ export default function AdminDashboard() {
                                     />
                                 </div>
                                 <div className="space-y-3">
-                                    <label className="text-[9px] uppercase font-black text-slate-500 tracking-widest ml-1">Ville</label>
+                                    <label className="text-[9px] uppercase font-black text-slate-500 tracking-widest ml-1">{t('adminDashboard.address.city')}</label>
                                     <input 
                                       className="w-full bg-black/40 border border-white/10 p-5 rounded-2xl text-[11px] font-bold text-white focus:border-emerald-500/50 focus:bg-white/5 outline-none transition-all" 
                                       value={editFields.ville || ""} 
@@ -777,7 +778,7 @@ export default function AdminDashboard() {
                                     />
                                 </div>
                                 <div className="space-y-3">
-                                    <label className="text-[9px] uppercase font-black text-slate-500 tracking-widest ml-1">Code Postal</label>
+                                    <label className="text-[9px] uppercase font-black text-slate-500 tracking-widest ml-1">{t('adminDashboard.address.postal')}</label>
                                     <div className="relative">
                                       <Hash className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-600" size={14} />
                                       <input 
@@ -788,7 +789,7 @@ export default function AdminDashboard() {
                                     </div>
                                 </div>
                                 <div className="md:col-span-2 space-y-3">
-                                    <label className="text-[9px] uppercase font-black text-slate-500 tracking-widest ml-1">Pays</label>
+                                    <label className="text-[9px] uppercase font-black text-slate-500 tracking-widest ml-1">{t('adminDashboard.address.country')}</label>
                                     <div className="relative">
                                       <Globe className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-600" size={14} />
                                       <input 
@@ -808,7 +809,7 @@ export default function AdminDashboard() {
                         <div className="relative bg-emerald-500 p-10 rounded-[3rem] text-black overflow-hidden group hover:scale-[1.02] transition-transform duration-500">
                             <Euro size={120} className="absolute -right-8 -bottom-8 opacity-10 rotate-12 group-hover:rotate-0 transition-transform duration-1000" />
                             <div className="relative z-10">
-                              <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-60">Récompense Cashback</p>
+                              <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-60">{t('adminDashboard.cashback.reward')}</p>
                               <div className="flex items-baseline gap-2 mt-4">
                                 <input 
                                   type="number" 
@@ -818,7 +819,7 @@ export default function AdminDashboard() {
                                 />
                                 <span className="text-2xl font-black italic">€</span>
                               </div>
-                              <p className="text-[9px] font-bold uppercase mt-6 bg-black/10 inline-block px-3 py-1 rounded-full italic tracking-widest">Somme versée après clôture</p>
+                              <p className="text-[9px] font-bold uppercase mt-6 bg-black/10 inline-block px-3 py-1 rounded-full italic tracking-widest">{t('adminDashboard.cashback.paidAfterClosure')}</p>
                             </div>
                         </div>
 
@@ -826,7 +827,7 @@ export default function AdminDashboard() {
                         <div className="bg-white/5 p-10 rounded-[3rem] border border-white/5 flex flex-col items-center text-center relative group overflow-hidden">
                             <div className="absolute inset-0 bg-emerald-500/0 group-hover:bg-emerald-500/5 transition-colors duration-700"></div>
                             <ShieldCheck size={40} className="text-emerald-500 mb-6 group-hover:scale-110 transition-transform duration-500" />
-                            <p className="text-[10px] font-black uppercase text-slate-500 tracking-[0.3em]">Code PIN de connexion</p>
+                            <p className="text-[10px] font-black uppercase text-slate-500 tracking-[0.3em]">{t('adminDashboard.pin.code')}</p>
                             <p className="text-4xl font-black text-white tracking-[0.4em] mt-4 ml-4 leading-none italic select-all">
                               {editFields.pin_code}
                             </p>
@@ -834,10 +835,10 @@ export default function AdminDashboard() {
                               onClick={() => copyToClipboard(editFields.pin_code, 'pin')}
                               className="mt-6 text-[9px] font-black text-emerald-500 uppercase tracking-widest flex items-center gap-2 hover:bg-emerald-500/10 px-4 py-2 rounded-xl transition-all"
                             >
-                              <Copy size={12} /> Copier le code
+                              <Copy size={12} /> {t('adminDashboard.pin.copy')}
                             </button>
                             <p className="text-[9px] text-slate-600 font-bold uppercase mt-8 flex items-center gap-2">
-                              <Lock size={10} /> Chiffrement AES-256 Actif
+                              <Lock size={10} /> {t('adminDashboard.pin.encryption')}
                             </p>
                         </div>
                     </div>
@@ -853,18 +854,18 @@ export default function AdminDashboard() {
                             <div className="flex justify-between items-center">
                                 <h3 className="text-xs font-black uppercase text-white tracking-widest flex items-center gap-4">
                                   <div className="p-2 bg-emerald-500/10 rounded-lg text-emerald-500"><LayoutDashboard size={16} /></div>
-                                  Progression Temps Réel
+                                  {t('adminDashboard.progress.title')}
                                 </h3>
                                 <div className="text-right">
                                   <span className="text-[20px] font-black text-emerald-500 leading-none">
                                     {Math.round((PHASES_CHANTIER.indexOf(editFields.etape_actuelle) / (PHASES_CHANTIER.length - 1)) * 100)}%
                                   </span>
-                                  <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mt-1">Avancement Global</p>
+                                  <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mt-1">{t('adminDashboard.progress.global')}</p>
                                 </div>
                             </div>
                             
                             <div className="space-y-4">
-                              <label className="text-[9px] uppercase font-black text-slate-500 tracking-widest ml-1">Étape actuelle sélectionnée</label>
+                              <label className="text-[9px] uppercase font-black text-slate-500 tracking-widest ml-1">{t('adminDashboard.progress.phase')}</label>
                               <div className="relative">
                                 <select 
                                   className="w-full bg-black/60 border border-white/10 p-6 rounded-[1.5rem] text-sm text-emerald-500 font-black outline-none focus:border-emerald-500/50 appearance-none transition-all cursor-pointer shadow-xl" 
@@ -881,15 +882,15 @@ export default function AdminDashboard() {
 
                             <div className="space-y-4">
                               <div className="flex justify-between ml-1">
-                                <label className="text-[9px] uppercase font-black text-slate-500 tracking-widest">Commentaires hebdomadaires</label>
-                                <span className="text-[8px] text-slate-600 font-black uppercase">Visible par le client</span>
+                                <label className="text-[9px] uppercase font-black text-slate-500 tracking-widest">{t('adminDashboard.progress.weeklyComments')}</label>
+                                <span className="text-[8px] text-slate-600 font-black uppercase">{t('adminDashboard.progress.visibleByClient')}</span>
                               </div>
                               <textarea 
                                 rows={6} 
                                 className="w-full bg-black/40 border border-white/10 p-8 rounded-[2rem] text-[11px] font-bold text-white outline-none focus:border-emerald-500/50 focus:bg-white/5 transition-all leading-relaxed placeholder:text-slate-700" 
                                 value={editFields.commentaire_etape_chantier || ""} 
                                 onChange={e => setEditFields({...editFields, commentaire_etape_chantier: e.target.value})} 
-                                placeholder="Détaillez ici les travaux effectués cette semaine (ex: Pose de la dalle béton terminée...)"
+                                placeholder={t('adminDashboard.progress.placeholder')}
                               />
                             </div>
                         </section>
@@ -901,7 +902,7 @@ export default function AdminDashboard() {
                           <section className="bg-white/5 p-10 rounded-[3rem] border border-white/5 space-y-8">
                             <h3 className="text-xs font-black uppercase text-white tracking-widest flex items-center gap-4">
                               <ShieldCheck size={16} className="text-emerald-500" />
-                              Constats techniques ({constats.length})
+                              {t('adminDashboard.constats.title', { count: constats.length })}
                             </h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                               {Object.entries(groupedConstats).map(([date, items]: [string, any]) => (
@@ -915,7 +916,7 @@ export default function AdminDashboard() {
                                     <ChevronRight size={18} className="text-emerald-500 opacity-0 group-hover:opacity-100 transition-opacity" />
                                   </div>
                                   <p className="text-[10px] text-slate-400">
-                                    {(items as any[]).length} photo{(items as any[]).length > 1 ? 's' : ''}
+                                    {t('adminDashboard.constats.photos', { count: items.length })}
                                   </p>
                                 </button>
                               ))}
@@ -928,7 +929,7 @@ export default function AdminDashboard() {
                         {/* Calendrier et constructeur */}
                         <div className="bg-white/5 p-10 rounded-[3rem] border border-white/5 group hover:border-orange-500/30 transition-all duration-500">
                             <Calendar size={32} className="text-orange-400 mb-6 group-hover:rotate-12 transition-transform duration-500" />
-                            <p className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Livraison estimée</p>
+                            <p className="text-[10px] font-black uppercase text-slate-500 tracking-widest">{t('adminDashboard.delivery.estimated')}</p>
                             <input 
                               type="date" 
                               className="w-full bg-transparent text-2xl font-black text-white mt-4 outline-none border-b-2 border-white/10 pb-4 focus:border-orange-500 transition-all appearance-none" 
@@ -937,19 +938,19 @@ export default function AdminDashboard() {
                             />
                             <div className="mt-8 p-4 bg-orange-500/5 rounded-2xl border border-orange-500/10">
                               <p className="text-[8px] font-black text-orange-500/70 uppercase leading-relaxed tracking-widest">
-                                La date de livraison est mise à jour en temps réel sur l'espace client.
+                                {t('adminDashboard.delivery.realTimeUpdate')}
                               </p>
                             </div>
                         </div>
 
                         {/* Constructeur info */}
                         <div className="bg-white/5 p-10 rounded-[3rem] border border-white/5">
-                          <p className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-4">Constructeur partenaire</p>
+                          <p className="text-[10px] font-black uppercase text-slate-500 tracking-widest mb-4">{t('adminDashboard.builder.partner')}</p>
                           <input 
                             className="w-full bg-black/40 border border-white/10 p-5 rounded-2xl text-[11px] font-bold text-white outline-none focus:border-emerald-500 transition-all" 
                             value={editFields.constructeur_info || ""} 
                             onChange={e => setEditFields({...editFields, constructeur_info: e.target.value})} 
-                            placeholder="Ex: Porcelanosa / Grupo Isan"
+                            placeholder={t('adminDashboard.builder.placeholder')}
                           />
                         </div>
                     </div>
@@ -963,13 +964,13 @@ export default function AdminDashboard() {
                         <div className="space-y-2">
                           <h3 className="text-xs font-black uppercase text-white tracking-[0.3em] flex items-center gap-4">
                             <div className="p-2 bg-blue-500/10 rounded-lg text-blue-500"><Database size={16} /></div>
-                            Documents Cloud
+                            {t('adminDashboard.docs.title')}
                           </h3>
-                          <p className="text-[10px] font-bold text-slate-500 uppercase ml-12 tracking-widest">Zone de stockage sécurisée client</p>
+                          <p className="text-[10px] font-bold text-slate-500 uppercase ml-12 tracking-widest">{t('adminDashboard.docs.subtitle')}</p>
                         </div>
                         <label className="group cursor-pointer relative flex items-center gap-4 px-10 py-5 bg-white text-black rounded-[1.5rem] font-black text-[10px] uppercase tracking-[0.2em] hover:bg-emerald-500 transition-all duration-500 shadow-xl shadow-white/5 overflow-hidden active:scale-95">
                             {uploadingDoc ? <Loader2 className="animate-spin" size={18}/> : <Upload size={18} className="group-hover:bounce" />} 
-                            {uploadingDoc ? "Traitement..." : "Uploader un fichier"}
+                            {uploadingDoc ? t('adminDashboard.docs.processing') : t('adminDashboard.docs.upload')}
                             <input type="file" className="hidden" onChange={handleFileUpload} disabled={uploadingDoc} />
                         </label>
                     </div>
@@ -1015,7 +1016,7 @@ export default function AdminDashboard() {
                         ) : (
                           <div className="col-span-full py-24 text-center border-2 border-dashed border-white/5 rounded-[3rem] flex flex-col items-center justify-center space-y-4 opacity-30">
                             <FileText size={48} className="text-slate-600" />
-                            <p className="text-[10px] text-slate-500 uppercase font-black tracking-[0.5em]">Aucun document archivé</p>
+                            <p className="text-[10px] text-slate-500 uppercase font-black tracking-[0.5em]">{t('adminDashboard.docs.noDocuments')}</p>
                           </div>
                         )}
                     </div>
@@ -1030,7 +1031,7 @@ export default function AdminDashboard() {
               <div className="absolute inset-0 blur-3xl bg-emerald-500/5 rounded-full animate-pulse"></div>
             </div>
             <p className="text-3xl font-black uppercase tracking-[0.8em] text-white/5 italic leading-none">AMARU HOMES</p>
-            <p className="text-[9px] font-black text-slate-700 uppercase mt-8 tracking-[0.5em]">Dashboard Terminal v2.4.0</p>
+            <p className="text-[9px] font-black text-slate-700 uppercase mt-8 tracking-[0.5em]">{t('adminDashboard.version')}</p>
             <div className="mt-12 flex gap-4">
                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500/20"></div>
                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500/40 animate-bounce"></div>
@@ -1052,8 +1053,8 @@ export default function AdminDashboard() {
             </button>
             
             <div className="mb-10 space-y-2">
-              <h2 className="text-4xl font-black uppercase text-white italic tracking-tighter">Initialiser Projet</h2>
-              <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Enregistrement d'un nouveau chantier Amaru</p>
+              <h2 className="text-4xl font-black uppercase text-white italic tracking-tighter">{t('adminProject.initialize')}</h2>
+              <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">{t('adminProject.subtitle')}</p>
             </div>
 
             <form onSubmit={async (e) => {
@@ -1080,60 +1081,60 @@ export default function AdminDashboard() {
                 setUpdating(false);
                 loadData(); 
               } else {
-                alert(error.message);
+                alert(t('adminProject.error', { message: error.message }));
                 setUpdating(false);
               }
             }} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">Prénom *</label>
-                  <input required placeholder="John" className="w-full bg-black/50 border border-white/10 rounded-2xl p-5 text-sm text-white outline-none focus:border-emerald-500 transition-all" onChange={e => setNewProject({...newProject, client_prenom: e.target.value})} />
+                  <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">{t('adminProject.firstName')} *</label>
+                  <input required placeholder={t('adminProject.firstNamePlaceholder')} className="w-full bg-black/50 border border-white/10 rounded-2xl p-5 text-sm text-white outline-none focus:border-emerald-500 transition-all" onChange={e => setNewProject({...newProject, client_prenom: e.target.value})} />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">Nom *</label>
-                  <input required placeholder="Doe" className="w-full bg-black/50 border border-white/10 rounded-2xl p-5 text-sm text-white outline-none focus:border-emerald-500 transition-all" onChange={e => setNewProject({...newProject, client_nom: e.target.value})} />
+                  <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">{t('adminProject.lastName')} *</label>
+                  <input required placeholder={t('adminProject.lastNamePlaceholder')} className="w-full bg-black/50 border border-white/10 rounded-2xl p-5 text-sm text-white outline-none focus:border-emerald-500 transition-all" onChange={e => setNewProject({...newProject, client_nom: e.target.value})} />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">Nom de la Villa *</label>
-                <input required placeholder="VILLA AMARU LUXE" className="w-full bg-black/50 border border-white/10 rounded-2xl p-5 text-sm text-white outline-none focus:border-emerald-500 transition-all uppercase italic font-black" onChange={e => setNewProject({...newProject, nom_villa: e.target.value})} />
+                <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">{t('adminProject.villaName')} *</label>
+                <input required placeholder={t('adminProject.villaPlaceholder')} className="w-full bg-black/50 border border-white/10 rounded-2xl p-5 text-sm text-white outline-none focus:border-emerald-500 transition-all uppercase italic font-black" onChange={e => setNewProject({...newProject, nom_villa: e.target.value})} />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">Email client *</label>
-                  <input required type="email" placeholder="client@exemple.com" className="w-full bg-black/50 border border-white/10 rounded-2xl p-5 text-sm text-white outline-none focus:border-emerald-500 transition-all" onChange={e => setNewProject({...newProject, email_client: e.target.value})} />
+                  <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">{t('adminProject.clientEmail')} *</label>
+                  <input required type="email" placeholder={t('adminProject.emailPlaceholder')} className="w-full bg-black/50 border border-white/10 rounded-2xl p-5 text-sm text-white outline-none focus:border-emerald-500 transition-all" onChange={e => setNewProject({...newProject, email_client: e.target.value})} />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">Téléphone</label>
-                  <input placeholder="+33 6 00 00 00 00" className="w-full bg-black/50 border border-white/10 rounded-2xl p-5 text-sm text-white outline-none focus:border-emerald-500 transition-all" onChange={e => setNewProject({...newProject, telephone: e.target.value})} />
+                  <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">{t('adminProject.phone')}</label>
+                  <input placeholder={t('adminProject.phonePlaceholder')} className="w-full bg-black/50 border border-white/10 rounded-2xl p-5 text-sm text-white outline-none focus:border-emerald-500 transition-all" onChange={e => setNewProject({...newProject, telephone: e.target.value})} />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">Rue / Adresse</label>
-                <input placeholder="123 Avenue de la Plage" className="w-full bg-black/50 border border-white/10 rounded-2xl p-5 text-sm text-white outline-none focus:border-emerald-500 transition-all" onChange={e => setNewProject({...newProject, rue: e.target.value})} />
+                <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">{t('adminProject.address')}</label>
+                <input placeholder={t('adminProject.addressPlaceholder')} className="w-full bg-black/50 border border-white/10 rounded-2xl p-5 text-sm text-white outline-none focus:border-emerald-500 transition-all" onChange={e => setNewProject({...newProject, rue: e.target.value})} />
               </div>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="col-span-2 space-y-2">
-                  <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">Ville</label>
-                  <input placeholder="Marbella" className="w-full bg-black/50 border border-white/10 rounded-2xl p-5 text-sm text-white outline-none focus:border-emerald-500 transition-all" onChange={e => setNewProject({...newProject, ville: e.target.value})} />
+                  <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">{t('adminProject.city')}</label>
+                  <input placeholder={t('adminProject.cityPlaceholder')} className="w-full bg-black/50 border border-white/10 rounded-2xl p-5 text-sm text-white outline-none focus:border-emerald-500 transition-all" onChange={e => setNewProject({...newProject, ville: e.target.value})} />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">Code postal</label>
+                  <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">{t('adminProject.postalCode')}</label>
                   <input placeholder="29600" className="w-full bg-black/50 border border-white/10 rounded-2xl p-5 text-sm text-white outline-none focus:border-emerald-500 transition-all" onChange={e => setNewProject({...newProject, code_postal: e.target.value})} />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">Pays</label>
+                  <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">{t('adminProject.country')}</label>
                   <input placeholder="Espagne" value={newProject.pays} className="w-full bg-black/50 border border-white/10 rounded-2xl p-5 text-sm text-white outline-none focus:border-emerald-500 transition-all" onChange={e => setNewProject({...newProject, pays: e.target.value})} />
                 </div>
               </div>
 
               <button type="submit" disabled={updating} className="w-full bg-emerald-500 text-black py-7 rounded-3xl font-black text-[11px] uppercase tracking-[0.3em] shadow-2xl shadow-emerald-500/20 hover:scale-[1.02] active:scale-95 transition-all duration-500 mt-6 flex items-center justify-center gap-4">
                 {updating ? <Loader2 className="animate-spin"/> : <CheckCircle2 size={18} />}
-                Générer le dossier complet
+                {t('adminProject.generate')}
               </button>
             </form>
           </div>
@@ -1152,28 +1153,28 @@ export default function AdminDashboard() {
             </button>
             
             <div className="mb-10 space-y-2">
-              <h2 className="text-3xl font-black uppercase text-white italic tracking-tighter leading-none">Ajouter un collaborateur</h2>
-              <p className="text-[10px] font-black text-blue-500 uppercase tracking-widest">Enrôlement dans l'équipe {agencyProfile.company_name}</p>
+              <h2 className="text-3xl font-black uppercase text-white italic tracking-tighter leading-none">{t('adminStaff.add')}</h2>
+              <p className="text-[10px] font-black text-blue-500 uppercase tracking-widest">{t('adminStaff.enrollment', { company: agencyProfile.company_name })}</p>
             </div>
 
             <form onSubmit={handleAddStaff} className="space-y-6">
               <div className="grid grid-cols-2 gap-4">
-                <input required placeholder="Prénom" className="w-full bg-black/50 border border-white/10 rounded-2xl p-5 text-[11px] font-bold text-white outline-none focus:border-blue-500 transition-all" onChange={e => setNewStaff({...newStaff, prenom: e.target.value})} />
-                <input required placeholder="Nom" className="w-full bg-black/50 border border-white/10 rounded-2xl p-5 text-[11px] font-bold text-white outline-none focus:border-blue-500 transition-all" onChange={e => setNewStaff({...newStaff, nom: e.target.value})} />
+                <input required placeholder={t('adminStaff.firstName')} className="w-full bg-black/50 border border-white/10 rounded-2xl p-5 text-[11px] font-bold text-white outline-none focus:border-blue-500 transition-all" onChange={e => setNewStaff({...newStaff, prenom: e.target.value})} />
+                <input required placeholder={t('adminStaff.lastName')} className="w-full bg-black/50 border border-white/10 rounded-2xl p-5 text-[11px] font-bold text-white outline-none focus:border-blue-500 transition-all" onChange={e => setNewStaff({...newStaff, nom: e.target.value})} />
               </div>
-              <input required type="email" placeholder="Email professionnel" className="w-full bg-black/50 border border-white/10 rounded-2xl p-5 text-[11px] font-bold text-white outline-none focus:border-blue-500 transition-all" onChange={e => setNewStaff({...newStaff, email: e.target.value})} />
+              <input required type="email" placeholder={t('adminStaff.email')} className="w-full bg-black/50 border border-white/10 rounded-2xl p-5 text-[11px] font-bold text-white outline-none focus:border-blue-500 transition-all" onChange={e => setNewStaff({...newStaff, email: e.target.value})} />
               
               <div className="space-y-3">
-                <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">Attribution du rôle & Privilèges</label>
+                <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">{t('adminStaff.role')}</label>
                 <div className="relative">
                   <select 
                     className="w-full bg-black/60 border border-white/10 rounded-2xl p-5 text-[11px] font-black text-blue-500 outline-none focus:border-blue-500/50 appearance-none transition-all cursor-pointer shadow-xl uppercase tracking-widest" 
                     value={newStaff.role} 
                     onChange={e => setNewStaff({...newStaff, role: e.target.value})}
                   >
-                      <option value="agent" className="bg-[#0F172A]">Agent (Accès Limité)</option>
-                      <option value="admin" className="bg-[#0F172A]">Administrateur Agence</option>
-                      <option value="super_admin" className="bg-[#0F172A]">Super Administrateur</option>
+                      <option value="agent" className="bg-[#0F172A]">{t('adminStaff.agent')}</option>
+                      <option value="admin" className="bg-[#0F172A]">{t('adminStaff.admin')}</option>
+                      <option value="super_admin" className="bg-[#0F172A]">{t('adminStaff.superAdmin')}</option>
                   </select>
                   <ChevronRight size={18} className="absolute right-5 top-1/2 -translate-y-1/2 text-blue-500 rotate-90 pointer-events-none" />
                 </div>
@@ -1181,16 +1182,16 @@ export default function AdminDashboard() {
 
               <div className="p-6 bg-blue-500/5 border border-blue-500/10 rounded-3xl text-center space-y-2">
                 <p className="text-[10px] font-black text-blue-400 uppercase tracking-widest flex items-center justify-center gap-2">
-                  <Zap size={12} /> Sécurité Automatique
+                  <Zap size={12} /> {t('adminStaff.security')}
                 </p>
                 <p className="text-[8px] font-bold text-slate-500 uppercase leading-relaxed tracking-tighter">
-                  Un code PIN unique à 6 chiffres sera généré. Le collaborateur pourra se connecter immédiatement après validation.
+                  {t('adminStaff.pinInfo')}
                 </p>
               </div>
 
               <button type="submit" disabled={updating} className="w-full bg-blue-500 text-white py-6 rounded-3xl font-black text-[11px] uppercase tracking-[0.3em] shadow-2xl shadow-blue-500/20 hover:scale-[1.02] active:scale-95 transition-all duration-500 mt-4 flex items-center justify-center gap-4">
                 {updating ? <Loader2 className="animate-spin"/> : <UserPlus size={18} />}
-                Confirmer l'invitation
+                {t('adminStaff.confirm')}
               </button>
             </form>
           </div>
@@ -1203,9 +1204,9 @@ export default function AdminDashboard() {
           <div className="bg-[#0F172A] w-full max-w-5xl rounded-[3rem] border border-white/10 flex flex-col max-h-[92vh] overflow-hidden shadow-2xl">
             <div className="p-10 border-b border-white/5 flex justify-between items-center bg-white/[0.01]">
               <div>
-                <span className="text-[10px] text-emerald-500 font-black uppercase tracking-widest">Rapport d'inspection</span>
+                <span className="text-[10px] text-emerald-500 font-black uppercase tracking-widest">{t('adminDashboard.inspectionReport')}</span>
                 <h3 className="text-3xl font-black text-white">{selectedConstatsDate}</h3>
-                <p className="text-xs text-slate-500 mt-1 uppercase font-bold italic">Phase : {selectedProjet?.etape_actuelle}</p>
+                <p className="text-xs text-slate-500 mt-1 uppercase font-bold italic">{t('adminDashboard.phase', { phase: selectedProjet?.etape_actuelle })}</p>
               </div>
               <div className="flex gap-4">
                 <button 
@@ -1214,7 +1215,7 @@ export default function AdminDashboard() {
                   className="flex items-center gap-2 px-6 py-3 bg-emerald-500 text-black rounded-xl hover:bg-emerald-400 transition-all text-xs font-black uppercase shadow-lg shadow-emerald-500/20 disabled:opacity-50"
                 >
                   {isGeneratingPDF ? <Loader2 className="animate-spin" size={16}/> : <Printer size={16}/>}
-                  Générer Rapport
+                  {t('adminDashboard.generateReport')}
                 </button>
                 <button onClick={() => setSelectedConstatsDate(null)} className="p-3 bg-white/5 text-slate-400 rounded-xl hover:text-white transition-all">
                   <X size={24}/>
@@ -1226,7 +1227,7 @@ export default function AdminDashboard() {
               <div className="bg-emerald-500/5 p-6 rounded-2xl border border-emerald-500/20 flex gap-4 items-center">
                  <ShieldCheck className="text-emerald-500" size={24}/>
                  <p className="text-xs text-slate-300 leading-relaxed italic">
-                   "Je certifie que les informations et les photographies présentées ci-dessous ont été relevées sur site par le département technique Amaru-Homes. Les coordonnées GPS garantissent l'authenticité de l'inspection."
+                   {t('adminDashboard.certification')}
                  </p>
               </div>
 
@@ -1239,11 +1240,11 @@ export default function AdminDashboard() {
                   </div>
                   <div className="space-y-4 py-2">
                     <div className="flex items-center gap-2 text-[10px] font-black uppercase text-slate-500 tracking-tighter">
-                       <MapPin size={14} className="text-emerald-500"/> Localisation : {c.latitude}, {c.longitude}
+                       <MapPin size={14} className="text-emerald-500"/> {t('adminDashboard.location', { lat: c.latitude, lng: c.longitude })}
                     </div>
-                    <h4 className="text-sm font-black text-white uppercase">Observation technique #{i+1}</h4>
+                    <h4 className="text-sm font-black text-white uppercase">{t('adminDashboard.observation', { num: i+1 })}</h4>
                     <p className="text-slate-400 text-sm leading-relaxed border-l-2 border-emerald-500 pl-4 italic">
-                      "{c.note_expert || "Constat visuel conforme aux plans d'exécution et aux normes techniques en vigueur."}"
+                      "{c.note_expert || t('adminDashboard.defaultObservation')}"
                     </p>
                   </div>
                 </div>

@@ -7,21 +7,15 @@ import {
   Search, MapPin, HardHat, LogOut, ChevronDown, 
   Trash2, Send, X, Home
 } from 'lucide-react';
+import { useTranslation } from '@/contexts/I18nContext';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-const PHASES_CHANTIER = [
-  "0. Signature & Réservation", "1. Terrain / Terrassement", "2. Fondations", 
-  "3. Murs / Élévation", "4. Toiture / Charpente", "5. Menuiseries", 
-  "6. Électricité / Plomberie", "7. Isolation", "8. Plâtrerie", 
-  "9. Sols & Carrelages", "10. Peintures / Finitions", "11. Extérieurs / Jardin", 
-  "12. Remise des clés"
-];
-
 export default function AdminChantier() {
+  const { t } = useTranslation();
   const [pin, setPin] = useState("");
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [agentName, setAgentName] = useState("");
@@ -37,7 +31,6 @@ export default function AdminChantier() {
   const checkPin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    // Recherche dans la table profiles avec le pin_code
     const { data, error } = await supabase
       .from('profiles')
       .select('prenom, nom, role')
@@ -46,23 +39,22 @@ export default function AdminChantier() {
 
     if (error) {
       console.error("Erreur de recherche PIN :", error);
-      alert("Erreur lors de la vérification du PIN.");
+      alert(t('adminChantier.pinCheckError'));
       setLoading(false);
       return;
     }
 
     if (data) {
-      // Vérifier que le rôle est autorisé (agent, prestataire, admin, etc.)
       const rolesAutorises = ['agent', 'prestataire', 'admin', 'super_admin'];
       if (rolesAutorises.includes(data.role)) {
         setAgentName(`${data.prenom} ${data.nom}`);
         setIsAuthorized(true);
       } else {
-        alert("Ce compte n'a pas les droits d'accès à l'interface chantier.");
+        alert(t('adminChantier.noAccess'));
         setPin("");
       }
     } else {
-      alert("PIN invalide.");
+      alert(t('adminChantier.invalidPin'));
       setPin("");
     }
     setLoading(false);
@@ -76,7 +68,7 @@ export default function AdminChantier() {
       setProject(data);
       setSearchRef(""); 
     } else {
-      alert("Chantier introuvable.");
+      alert(t('adminChantier.projectNotFound'));
     }
     setLoading(false);
   };
@@ -89,7 +81,7 @@ export default function AdminChantier() {
     }).eq('id', project.id);
     if (!error) {
       setProject({ ...project, etape_actuelle: newPhase });
-      setStatus("Étape mise à jour");
+      setStatus(t('adminChantier.stepUpdated'));
       setTimeout(() => setStatus(""), 2000);
     }
   };
@@ -97,7 +89,7 @@ export default function AdminChantier() {
   const handleCapture = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || !project) return;
     setUploading(true);
-    setStatus("Téléchargement...");
+    setStatus(t('adminChantier.uploading'));
     try {
       const file = e.target.files[0];
       const fileName = `${project.id}/session_${Date.now()}.jpg`;
@@ -106,7 +98,7 @@ export default function AdminChantier() {
       const { data: { publicUrl } } = supabase.storage.from('photos-chantier').getPublicUrl(fileName);
       const newPhoto = {
         url: publicUrl,
-        commentaire: comment || "Photo de suivi",
+        commentaire: comment || t('adminChantier.defaultPhotoComment'),
         date: new Date().toISOString(),
         phase: project.etape_actuelle,
         agent: agentName,
@@ -114,9 +106,9 @@ export default function AdminChantier() {
       };
       setSessionPhotos([...sessionPhotos, newPhoto]);
       setComment(""); 
-      setStatus("Photo ajoutée !");
+      setStatus(t('adminChantier.photoAdded'));
     } catch (err: any) {
-      alert(`Erreur Storage: ${err.message}`);
+      alert(t('adminChantier.storageError', { message: err.message }));
     } finally {
       setUploading(false);
       setTimeout(() => setStatus(""), 2000);
@@ -126,7 +118,7 @@ export default function AdminChantier() {
   const handleFinalSubmit = async () => {
     if (sessionPhotos.length === 0) return;
     setLoading(true);
-    setStatus("Publication...");
+    setStatus(t('adminChantier.publishing'));
 
     try {
       const { error: updateError } = await supabase.from('suivi_chantier').update({ 
@@ -149,26 +141,24 @@ export default function AdminChantier() {
 
       setProject({...project, updates: [...(project.updates || []), ...sessionPhotos]});
       setSessionPhotos([]);
-      setStatus("Rapport envoyé !");
+      setStatus(t('adminChantier.reportSent'));
       
     } catch (err: any) {
-      alert(`Erreur Database: ${err.message || "Une erreur inconnue est survenue"}`);
+      alert(t('adminChantier.databaseError', { message: err.message || t('common.unknownError') }));
     } finally {
       setLoading(false);
       setTimeout(() => setStatus(""), 3000);
     }
   };
 
-  // --- RENDU UI ---
   if (!isAuthorized) {
     return (
       <div className="min-h-screen bg-[#050505] flex items-center justify-center p-8 text-white relative">
-        {/* BOUTON RETOUR ACCUEIL (HORS CONNEXION) */}
         <button 
           onClick={() => window.location.href = '/'}
           className="absolute top-8 left-8 flex items-center gap-2 text-slate-500 hover:text-white transition-colors text-[10px] font-black uppercase tracking-widest"
         >
-          <Home size={16} /> Retour Accueil
+          <Home size={16} /> {t('adminChantier.backHome')}
         </button>
 
         <div className="w-full max-w-md space-y-12 text-center">
@@ -176,21 +166,21 @@ export default function AdminChantier() {
             <div className="w-24 h-24 bg-gradient-to-tr from-indigo-600 to-violet-500 rounded-[2.5rem] flex items-center justify-center mx-auto border border-white/10 shadow-[0_0_50px_rgba(79,70,229,0.3)]">
               <Lock size={38} className="text-white" />
             </div>
-            <h1 className="text-4xl font-serif italic tracking-tight">Luxury Staff</h1>
-            <p className="text-slate-500 text-[10px] uppercase tracking-[0.4em] font-bold">Terrain & Reporting</p>
+            <h1 className="text-4xl font-serif italic tracking-tight">{t('adminChantier.title')}</h1>
+            <p className="text-slate-500 text-[10px] uppercase tracking-[0.4em] font-bold">{t('adminChantier.subtitle')}</p>
           </div>
           <form onSubmit={checkPin} className="space-y-6">
             <input 
               type="password" 
               inputMode="numeric" 
-              placeholder="••••••" 
+              placeholder={t('adminChantier.pinPlaceholder')}
               maxLength={6}
               value={pin} 
               onChange={(e) => setPin(e.target.value)} 
               className="w-full bg-white/5 border border-white/10 rounded-[2rem] py-6 text-center text-3xl tracking-[1em] font-black focus:border-indigo-500 outline-none transition-all" 
             />
             <button className="w-full bg-white text-black py-6 rounded-[2rem] font-black uppercase text-xs tracking-widest flex items-center justify-center gap-3">
-              Connecter <ArrowRight size={18} />
+              {t('adminChantier.connect')} <ArrowRight size={18} />
             </button>
           </form>
         </div>
@@ -203,11 +193,10 @@ export default function AdminChantier() {
       <header className="sticky top-0 z-50 bg-black/60 backdrop-blur-2xl border-b border-white/5 px-6 py-5">
         <div className="max-w-xl mx-auto flex justify-between items-center">
           <div className="flex items-center gap-4">
-            {/* BOUTON HOME DANS LE HEADER (CONNECTÉ) */}
             <button 
               onClick={() => window.location.href = '/'}
               className="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center text-slate-400 hover:text-white border border-white/5 transition-colors"
-              title="Retour à l'accueil"
+              title={t('adminChantier.backHome')}
             >
               <Home size={18} />
             </button>
@@ -217,7 +206,7 @@ export default function AdminChantier() {
                 {agentName.charAt(0)}
               </div>
               <div className="hidden sm:block">
-                <p className="text-[9px] uppercase tracking-widest text-slate-500 font-bold">Agent</p>
+                <p className="text-[9px] uppercase tracking-widest text-slate-500 font-bold">{t('adminChantier.agent')}</p>
                 <h2 className="text-xs font-bold tracking-tight">{agentName}</h2>
               </div>
             </div>
@@ -232,11 +221,11 @@ export default function AdminChantier() {
         {!project ? (
           <div className="space-y-8 pt-10 text-left">
             <div className="space-y-2">
-              <h3 className="text-2xl font-serif italic text-slate-300">Quel chantier visitez-vous ?</h3>
+              <h3 className="text-2xl font-serif italic text-slate-300">{t('adminChantier.whichSite')}</h3>
             </div>
             <div className="relative group">
               <input className="w-full pl-8 pr-20 py-7 bg-white/5 rounded-[2.5rem] border border-white/10 text-lg outline-none focus:border-indigo-500 transition-all" 
-                placeholder="Ex: Villa Bianca..." value={searchRef} onChange={(e) => setSearchRef(e.target.value)} />
+                placeholder={t('adminChantier.searchPlaceholder')} value={searchRef} onChange={(e) => setSearchRef(e.target.value)} />
               <button onClick={handleSearch} className="absolute right-3 top-1/2 -translate-y-1/2 bg-indigo-600 p-4 rounded-full text-white">
                 {loading ? <Loader2 className="animate-spin" /> : <Search size={24} />}
               </button>
@@ -248,7 +237,7 @@ export default function AdminChantier() {
               <div className="absolute top-0 right-0 p-8 opacity-20"><HardHat size={80} /></div>
               <div className="relative z-10 space-y-1">
                 <button onClick={() => setProject(null)} className="text-[10px] font-black uppercase tracking-widest text-indigo-200 mb-4 bg-black/20 px-4 py-1.5 rounded-full flex items-center gap-2 w-fit">
-                   <X size={12}/> Changer de villa
+                   <X size={12}/> {t('adminChantier.changeVilla')}
                 </button>
                 <h2 className="text-4xl font-serif italic leading-none">{project.nom_villa}</h2>
                 <p className="text-indigo-100/70 font-medium">{project.client_prenom} {project.client_nom}</p>
@@ -258,12 +247,14 @@ export default function AdminChantier() {
             <div className="bg-[#111] rounded-[2.5rem] p-7 border border-white/5 space-y-4">
               <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
                 <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-pulse" />
-                Phase de construction
+                {t('adminChantier.constructionPhase')}
               </label>
               <div className="relative">
                 <select value={project.etape_actuelle} onChange={(e) => handleUpdatePhase(e.target.value)}
                   className="w-full bg-black border border-white/5 p-6 rounded-2xl text-sm font-bold text-white appearance-none outline-none focus:border-indigo-500 transition-all">
-                  {PHASES_CHANTIER.map(phase => <option key={phase} value={phase}>{phase}</option>)}
+                  {t('adminChantier.phases', { returnObjects: true }).map((phase: string) => (
+                    <option key={phase} value={phase}>{phase}</option>
+                  ))}
                 </select>
                 <ChevronDown className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" size={18} />
               </div>
@@ -271,7 +262,7 @@ export default function AdminChantier() {
 
             <div className="bg-[#111] rounded-[3rem] p-7 border border-white/5 space-y-6">
               <div className="flex justify-between items-center">
-                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Nouveau Constat</label>
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{t('adminChantier.newReport')}</label>
                 {status && <span className="text-[10px] font-bold text-indigo-400 animate-pulse uppercase tracking-tighter">{status}</span>}
               </div>
 
@@ -290,23 +281,23 @@ export default function AdminChantier() {
               )}
 
               <textarea className="w-full p-6 bg-black rounded-3xl border border-white/5 text-sm min-h-[120px] focus:border-indigo-500 outline-none transition-all placeholder:text-slate-700" 
-                placeholder="Observations sur le terrain..." value={comment} onChange={(e) => setComment(e.target.value)} />
+                placeholder={t('adminChantier.observationsPlaceholder')} value={comment} onChange={(e) => setComment(e.target.value)} />
               
               <div className="grid grid-cols-2 gap-4">
                 <button onClick={() => { if(navigator.geolocation) navigator.geolocation.getCurrentPosition(pos => setLocation({lat: pos.coords.latitude, lng: pos.coords.longitude})) }} 
                   className={`flex items-center justify-center gap-3 p-5 rounded-2xl border text-[10px] font-bold uppercase tracking-widest transition-all ${location ? 'bg-emerald-500/10 border-emerald-500/50 text-emerald-400' : 'bg-black border-white/5 text-slate-500'}`}>
-                  <MapPin size={16} /> {location ? 'GPS OK' : 'Localiser'}
+                  <MapPin size={16} /> {location ? t('adminChantier.gpsOk') : t('adminChantier.locate')}
                 </button>
                 <label className={`flex items-center justify-center gap-3 p-5 rounded-2xl border text-[10px] font-bold uppercase tracking-widest cursor-pointer active:scale-95 transition-all ${uploading ? 'bg-white/5 text-slate-500 border-white/5' : 'bg-white text-black border-white'}`}>
                   <input type="file" accept="image/*" capture="environment" className="hidden" onChange={handleCapture} disabled={uploading} />
-                  {uploading ? <Loader2 className="animate-spin" size={16} /> : <><Camera size={16} /> Photo</>}
+                  {uploading ? <Loader2 className="animate-spin" size={16} /> : <><Camera size={16} /> {t('adminChantier.photo')}</>}
                 </label>
               </div>
 
               {sessionPhotos.length > 0 && (
                 <button onClick={handleFinalSubmit} disabled={loading}
                   className="w-full bg-indigo-600 text-white py-6 rounded-[2rem] font-black uppercase text-xs tracking-[0.2em] flex items-center justify-center gap-3 shadow-xl shadow-indigo-600/20 active:bg-indigo-700 transition-all">
-                  {loading ? <Loader2 className="animate-spin" /> : <><Send size={18} /> Publier le rapport ({sessionPhotos.length})</>}
+                  {loading ? <Loader2 className="animate-spin" /> : <><Send size={18} /> {t('adminChantier.publish', { count: sessionPhotos.length })}</>}
                 </button>
               )}
             </div>

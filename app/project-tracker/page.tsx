@@ -8,10 +8,12 @@ import {
 } from "lucide-react";
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { useTranslation } from "@/contexts/I18nContext";
 
 const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL || "", process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "");
 
 export default function ProjectTracker() {
+  const { t } = useTranslation();
   const [projet, setProjet] = useState<any>(null);
   const [photos, setPhotos] = useState<any[]>([]);
   const [documents, setDocuments] = useState<any[]>([]);
@@ -19,9 +21,9 @@ export default function ProjectTracker() {
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const NOM_AGENCE = "AMARU-HOMES";
-  const BUREAU_ETUDE = "Département Contrôle Technique & Qualité";
-  const EXPERT_NOM = "Gaëtan Mukeba";
+  const NOM_AGENCE = t('projectTracker.agencyName');
+  const BUREAU_ETUDE = t('projectTracker.department');
+  const EXPERT_NOM = t('projectTracker.expertName');
 
   useEffect(() => {
     const fetchInitialData = async () => {
@@ -76,64 +78,63 @@ export default function ProjectTracker() {
       // Infos dossier
       doc.setFontSize(10);
       doc.setTextColor(15, 23, 42);
-      doc.text(`Rapport de Constat : #RC-${date.replace(/ /g, '')}`, 140, 20);
+      doc.text(t('projectTracker.reportRef', { ref: date.replace(/ /g, '') }), 140, 20);
       doc.setFont("helvetica", "normal");
-      doc.text(`Date de visite : ${date}`, 140, 26);
-      doc.text(`Phase : ${projet?.etape_actuelle || "N/A"}`, 140, 32);
+      doc.text(t('projectTracker.visitDate', { date }), 140, 26);
+      doc.text(t('projectTracker.phase', { phase: projet?.etape_actuelle || "N/A" }), 140, 32);
 
       // Destinataire
       doc.setFont("helvetica", "bold");
-      doc.text("DESTINATAIRE :", 14, 55);
+      doc.text(t('projectTracker.recipient'), 14, 55);
       doc.setFont("helvetica", "normal");
       doc.text(`${projet?.client_prenom} ${projet?.client_nom}`, 14, 60);
-      doc.text(`Projet : ${projet?.nom_villa}`, 14, 65);
+      doc.text(t('projectTracker.project', { name: projet?.nom_villa }), 14, 65);
 
       // Expert référent
       doc.setFont("helvetica", "bold");
-      doc.text("EXPERT RÉFÉRENT :", 110, 55);
+      doc.text(t('projectTracker.expert'), 110, 55);
       doc.setFont("helvetica", "normal");
       doc.text(EXPERT_NOM, 110, 60);
 
-      // Préparation des données du tableau avec nettoyage des caractères spéciaux
+      // Préparation des données du tableau
       const bodyData = dailyPhotos.map((p, i) => {
-        const rawNote = p.note_expert || "Aucune anomalie détectée lors de l'inspection visuelle.";
-        // Supprime les caractères non-ASCII pour éviter les problèmes d'encodage
+        const rawNote = p.note_expert || t('projectTracker.defaultObservation');
         const cleanNote = rawNote
           .normalize("NFKD")
           .replace(/[^\x00-\x7F]/g, " ")
           .replace(/\s+/g, " ")
           .trim();
-        const analyse = `STATUT : CONFORME\n\n${cleanNote}`;
+        const analyse = t('projectTracker.statusConforme') + '\n\n' + cleanNote;
         return [
-          `Prise de vue #${i+1}\n\nGPS : ${p.latitude || 'N/A'}\n${p.longitude || 'N/A'}`,
+          t('projectTracker.photoRef', { num: i+1, lat: p.latitude || 'N/A', lng: p.longitude || 'N/A' }),
           analyse
         ];
       });
 
-      // Tableau avec largeurs fixes et retour à la ligne automatique
+      // Tableau
       autoTable(doc, {
         startY: 75,
-        head: [['RÉFÉRENCE PHOTO', 'ANALYSE TECHNIQUE & OBSERVATIONS']],
+        head: [[t('projectTracker.photoHeader'), t('projectTracker.analysisHeader')]],
         body: bodyData,
         theme: 'striped',
         headStyles: { fillColor: [15, 23, 42], fontSize: 9 },
         columnStyles: {
-          0: { cellWidth: 45 },   // largeur fixe pour la colonne de gauche
-          1: { cellWidth: 120 }    // largeur fixe pour la colonne de droite
+          0: { cellWidth: 45 },
+          1: { cellWidth: 120 }
         },
         styles: {
-          fontSize: 8,              // police réduite
+          fontSize: 8,
           cellPadding: 4,
-          overflow: 'linebreak',    // retour à la ligne automatique
+          overflow: 'linebreak',
           valign: 'top'
         },
         margin: { left: 14, right: 14 }
       });
 
-      // Annexe photo – légendes ajustées
+      // Annexe photo
       doc.addPage();
       doc.setFont("helvetica", "bold");
-      doc.text("ANNEXE PHOTOGRAPHIQUE ET GÉOLOCALISATION", 14, 20);
+      doc.text(t('projectTracker.photoAnnex'), 14, 20);
 
       let yPos = 30;
       for (let i = 0; i < dailyPhotos.length; i++) {
@@ -142,10 +143,10 @@ export default function ProjectTracker() {
         try {
           doc.addImage(p.url_image, 'JPEG', 14, yPos, 120, 75);
         } catch (e) {
-          doc.text("(Image non disponible)", 14, yPos + 20);
+          doc.text(t('projectTracker.imageNotAvailable'), 14, yPos + 20);
         }
         doc.setFontSize(8);
-        const text = `Illustration #${i + 1} - Capturée le ${new Date(p.created_at).toLocaleString()}`;
+        const text = t('projectTracker.imageCaption', { num: i+1, date: new Date(p.created_at).toLocaleString() });
         const lines = doc.splitTextToSize(text, 160);
         doc.text(lines, 14, yPos + 82);
         yPos += 95;
@@ -157,14 +158,14 @@ export default function ProjectTracker() {
       doc.line(14, finalY, pageWidth - 14, finalY);
       doc.setFontSize(8);
       doc.setFont("helvetica", "italic");
-      doc.text("CERTIFICATION :", 14, finalY + 10);
-      doc.text(`Je soussigné, ${EXPERT_NOM}, certifie que les informations, relevés GPS et photographies contenus dans ce rapport`, 14, finalY + 15);
-      doc.text(`reflètent fidèlement l'état d'avancement réel du chantier à la date mentionnée. Document édité par le système Amaru Project Tracker.`, 14, finalY + 19);
+      doc.text(t('projectTracker.certificationTitle'), 14, finalY + 10);
+      doc.text(t('projectTracker.certificationText', { expert: EXPERT_NOM }), 14, finalY + 15);
+      doc.text(t('projectTracker.certificationText2'), 14, finalY + 19);
 
       if (action === 'save') doc.save(`Rapport_Technique_${date}.pdf`);
       else window.open(doc.output('bloburl'), '_blank');
     } catch (e) {
-      alert("Erreur génération PDF");
+      alert(t('projectTracker.pdfError'));
     } finally {
       setIsProcessing(false);
     }
@@ -183,19 +184,19 @@ export default function ProjectTracker() {
             <div>
               <h2 className="text-2xl font-black text-white">{NOM_AGENCE}</h2>
               <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">
-                Phase Actuelle : <span className="text-emerald-500">{projet?.etape_actuelle}</span>
+                {t('projectTracker.phaseLabel')} <span className="text-emerald-500">{projet?.etape_actuelle}</span>
               </p>
             </div>
           </div>
           <button onClick={() => {localStorage.clear(); window.location.href="/";}} className="text-slate-500 hover:text-red-500 font-bold text-xs uppercase tracking-widest transition-colors flex items-center gap-2">
-            <LogOut size={16}/> Quitter
+            <LogOut size={16}/> {t('projectTracker.quit')}
           </button>
         </header>
 
         {/* DOCUMENTS SECTION */}
         <section className="bg-[#0F172A]/50 p-8 rounded-[2rem] border border-white/5">
           <h3 className="text-xs font-black uppercase tracking-[0.3em] text-emerald-500 mb-6 flex items-center gap-2">
-            <FileText size={16}/> Pièces Jointes Administratives
+            <FileText size={16}/> {t('projectTracker.documents')}
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {documents.map((doc) => (
@@ -210,7 +211,7 @@ export default function ProjectTracker() {
         {/* LISTE DES RAPPORTS */}
         <section>
           <h3 className="text-xs font-black uppercase tracking-[0.3em] text-emerald-500 mb-6 flex items-center gap-2">
-            <ShieldCheck size={16}/> Dossier de Suivi Technique
+            <ShieldCheck size={16}/> {t('projectTracker.technicalReports')}
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {Object.keys(groupedPhotos).map((date) => (
@@ -220,12 +221,12 @@ export default function ProjectTracker() {
                   <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A] to-transparent" />
                   <div className="absolute bottom-6 left-8">
                     <p className="text-white font-black text-2xl tracking-tighter">{date}</p>
-                    <p className="text-[10px] text-emerald-500 font-bold uppercase mt-1">Rapport de Constat Validé</p>
+                    <p className="text-[10px] text-emerald-500 font-bold uppercase mt-1">{t('projectTracker.reportValidated')}</p>
                   </div>
                 </div>
                 <div className="p-6 flex justify-between items-center bg-white/[0.02]">
                   <div className="flex flex-col">
-                    <span className="text-[9px] font-black text-slate-500 uppercase">Expertise</span>
+                    <span className="text-[9px] font-black text-slate-500 uppercase">{t('projectTracker.expertise')}</span>
                     <span className="text-xs text-slate-300 font-bold">{EXPERT_NOM}</span>
                   </div>
                   <ChevronRight className="text-emerald-500" />
@@ -236,18 +237,20 @@ export default function ProjectTracker() {
         </section>
       </div>
 
-      {/* MODALE PRÉVISUALISATION PROFESSIONNELLE */}
+      {/* MODALE PRÉVISUALISATION */}
       {selectedDay && (
         <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex items-center justify-center p-4">
           <div className="bg-[#0F172A] w-full max-w-5xl rounded-[3rem] border border-white/10 flex flex-col max-h-[92vh] overflow-hidden shadow-2xl">
             <div className="p-10 border-b border-white/5 flex justify-between items-center bg-white/[0.01]">
               <div>
-                <span className="text-[10px] text-emerald-500 font-black uppercase tracking-widest">Rapport d'inspection</span>
+                <span className="text-[10px] text-emerald-500 font-black uppercase tracking-widest">{t('projectTracker.inspectionReport')}</span>
                 <h3 className="text-3xl font-black text-white">{selectedDay}</h3>
-                <p className="text-xs text-slate-500 mt-1 uppercase font-bold italic">Phase : {projet?.etape_actuelle}</p>
+                <p className="text-xs text-slate-500 mt-1 uppercase font-bold italic">{t('projectTracker.phase', { phase: projet?.etape_actuelle })}</p>
               </div>
               <div className="flex gap-4">
-                <button onClick={() => handlePDFAction(selectedDay, groupedPhotos[selectedDay], 'preview')} className="flex items-center gap-2 px-6 py-3 bg-emerald-500 text-black rounded-xl hover:bg-emerald-400 transition-all text-xs font-black uppercase shadow-lg shadow-emerald-500/20"><Printer size={16}/> Générer Rapport</button>
+                <button onClick={() => handlePDFAction(selectedDay, groupedPhotos[selectedDay], 'preview')} className="flex items-center gap-2 px-6 py-3 bg-emerald-500 text-black rounded-xl hover:bg-emerald-400 transition-all text-xs font-black uppercase shadow-lg shadow-emerald-500/20">
+                  <Printer size={16}/> {t('projectTracker.generateReport')}
+                </button>
                 <button onClick={() => setSelectedDay(null)} className="p-3 bg-white/5 text-slate-400 rounded-xl hover:text-white transition-all"><X size={24}/></button>
               </div>
             </div>
@@ -256,7 +259,7 @@ export default function ProjectTracker() {
               <div className="bg-emerald-500/5 p-6 rounded-2xl border border-emerald-500/20 flex gap-4 items-center">
                  <ShieldCheck className="text-emerald-500" size={24}/>
                  <p className="text-xs text-slate-300 leading-relaxed italic">
-                   "Je certifie que les informations et les photographies présentées ci-dessous ont été relevées sur site par le département technique Amaru-Homes. Les coordonnées GPS garantissent l'authenticité de l'inspection."
+                   {t('projectTracker.certification')}
                  </p>
               </div>
 
@@ -267,11 +270,11 @@ export default function ProjectTracker() {
                   </div>
                   <div className="space-y-4 py-2">
                     <div className="flex items-center gap-2 text-[10px] font-black uppercase text-slate-500 tracking-tighter">
-                       <MapPin size={14} className="text-emerald-500"/> Localisation : {p.latitude}, {p.longitude}
+                       <MapPin size={14} className="text-emerald-500"/> {t('projectTracker.location', { lat: p.latitude, lng: p.longitude })}
                     </div>
-                    <h4 className="text-sm font-black text-white uppercase">Observation technique #{i+1}</h4>
+                    <h4 className="text-sm font-black text-white uppercase">{t('projectTracker.observation', { num: i+1 })}</h4>
                     <p className="text-slate-400 text-sm leading-relaxed border-l-2 border-emerald-500 pl-4 italic">
-                      "{p.note_expert || "Constat visuel conforme aux plans d'exécution et aux normes techniques en vigueur."}"
+                      "{p.note_expert || t('projectTracker.defaultObservation')}"
                     </p>
                   </div>
                 </div>
