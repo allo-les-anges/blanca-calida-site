@@ -1,13 +1,4 @@
 {
-  "back": "Back to selection",
-  "rooms": "Bedrooms",
-  "baths": "Baths",
-  "surface": "Built m²",
-  "from": "From",
-  "configurations": "Available configurations",
-  "selected": "Selected",
-  "whatsapp_msg": "Hello, I would like information about"
-}{
   "common": {
     "backToHome": "Back to home",
     "backToSelection": "Back to selection",
@@ -141,7 +132,14 @@
     "golf": "{distance}km to golf",
     "propertyNotFound": "Property not found",
     "backToCatalogue": "Back to catalogue",
-    "loading": "Loading property..."
+    "loading": "Loading property...",
+    "rooms": "Bedrooms",
+    "baths": "Baths",
+    "surface": "Built m²",
+    "from": "From",
+    "configurations": "Available configurations",
+    "selected": "Selected",
+    "whatsapp_msg": "Hello, I would like information about"
   },
   "cashback": {
     "title": "The Negotiated Benefits Program",
