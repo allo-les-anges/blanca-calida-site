@@ -14,9 +14,11 @@ import {
   Scale
 } from 'lucide-react';
 import { useTheme } from "next-themes";
+import { useTranslation } from "@/contexts/I18nContext";
 
 export default function CashbackInfo() {
   const { resolvedTheme } = useTheme();
+  const { t } = useTranslation();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -44,7 +46,7 @@ export default function CashbackInfo() {
             href="/" 
             className="inline-flex items-center gap-2 text-slate-400 hover:text-[#D4AF37] transition-colors mb-12 uppercase text-[10px] tracking-[0.3em] font-bold"
           >
-            <ArrowLeft size={14} /> Retour à la sélection
+            <ArrowLeft size={14} /> {t('cashback.back')}
           </Link>
 
           <div className="mb-16">
@@ -52,14 +54,14 @@ export default function CashbackInfo() {
               className="text-5xl md:text-7xl font-serif mb-8 leading-tight"
               style={themeStyles.title}
             >
-              Le Programme <br />
-              <span className="italic text-[#D4AF37]">Avantages Négociés</span>
+              {t('cashback.title')} <br />
+              <span className="italic text-[#D4AF37]">{t('cashback.subtitle')}</span>
             </h1>
             <p 
               className="text-xl max-w-2xl leading-relaxed"
               style={themeStyles.text}
             >
-              Chez Amaru, chaque transaction est unique. Le "Cashback" n'est pas un barème fixe, mais une condition pré-négociée avec nos partenaires pour maximiser la valeur de votre investissement dès l'acquisition.
+              {t('cashback.description')}
             </p>
           </div>
 
@@ -70,67 +72,44 @@ export default function CashbackInfo() {
             <div className="relative z-10">
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6">
                 <div className="max-w-md">
-                  <h2 className="text-[10px] uppercase tracking-[0.4em] font-bold text-[#D4AF37] mb-3">Flexibilité Totale</h2>
-                  <p className="text-3xl font-serif italic text-white leading-tight">Un avantage sur-mesure adapté à votre projet</p>
+                  <h2 className="text-[10px] uppercase tracking-[0.4em] font-bold text-[#D4AF37] mb-3">{t('cashback.flexibility')}</h2>
+                  <p className="text-3xl font-serif italic text-white leading-tight">{t('cashback.flexibilityText')}</p>
                 </div>
                 <div className="bg-white/5 backdrop-blur-md px-6 py-8 rounded-[2rem] border border-[#D4AF37]/30 min-w-[240px]">
-                  <span className="text-[9px] uppercase tracking-[0.2em] font-bold text-[#D4AF37] block mb-4 text-center">Exemple de dotation</span>
+                  <span className="text-[9px] uppercase tracking-[0.2em] font-bold text-[#D4AF37] block mb-4 text-center">{t('cashback.example')}</span>
                   <div className="flex flex-col items-center gap-2">
                       <span className="text-2xl md:text-3xl font-light text-white tabular-nums whitespace-nowrap">
-                           2 500 €<span className="text-[#D4AF37] ml-1">*</span>
+                           {t('cashback.exampleAmount')}<span className="text-[#D4AF37] ml-1">*</span>
                       </span>
-                      <span className="text-[10px] text-slate-400 uppercase tracking-tighter">ou équivalent mobilier / services</span>
+                      <span className="text-[10px] text-slate-400 uppercase tracking-tighter">{t('cashback.orEquipment')}</span>
                   </div>
                 </div>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 border-t border-white/10 pt-10">
-                <div className="flex items-start gap-4">
-                  <div className="bg-[#D4AF37]/10 p-2 rounded-full">
-                    <CheckCircle2 className="text-[#D4AF37]" size={20} />
+                {[0, 1].map((idx) => (
+                  <div key={idx} className="flex items-start gap-4">
+                    <div className="bg-[#D4AF37]/10 p-2 rounded-full">
+                      <CheckCircle2 className="text-[#D4AF37]" size={20} />
+                    </div>
+                    <p className="text-sm text-slate-300 leading-relaxed">{t(`cashback.points.${idx}`)}</p>
                   </div>
-                  <p className="text-sm text-slate-300 leading-relaxed">Condition négociée en amont avec l'agence ou le promoteur partenaire.</p>
-                </div>
-                <div className="flex items-start gap-4">
-                  <div className="bg-[#D4AF37]/10 p-2 rounded-full">
-                    <CheckCircle2 className="text-[#D4AF37]" size={20} />
-                  </div>
-                  <p className="text-sm text-slate-300 leading-relaxed">Choix libre entre versement, pack mobilier ou prise en charge de frais.</p>
-                </div>
+                ))}
               </div>
             </div>
           </div>
 
           {/* GRILLE D'AVANTAGES */}
           <div className="grid md:grid-cols-3 gap-16 mb-24">
-            {[
-              { 
-                icon: Banknote, 
-                title: "En Numéraire", 
-                desc: "Un apport de trésorerie direct pour optimiser votre plan de financement ou vos frais annexes." 
-              },
-              { 
-                icon: Sofa, 
-                title: "Mobilier & Design", 
-                desc: "Une dotation dédiée à l'ameublement de prestige pour emménager dans une villa prête à vivre." 
-              },
-              { 
-                icon: Scale, 
-                title: "Services & Honoraires", 
-                desc: "Prise en charge de vos frais d'avocat ou de conseil pour une transaction en toute sérénité." 
-              }
-            ].map((item, idx) => (
+            {['cash', 'furniture', 'services'].map((key, idx) => (
               <div key={idx} className="group space-y-6">
                 <div className="w-14 h-14 bg-slate-50 dark:bg-white/5 rounded-2xl flex items-center justify-center group-hover:bg-[#D4AF37] transition-all duration-500 shadow-sm">
-                  <item.icon 
-                    size={28} 
-                    strokeWidth={1.5} 
-                    color={themeStyles.iconColor} 
-                    className="group-hover:stroke-white transition-colors"
-                  />
+                  {key === 'cash' && <Banknote size={28} strokeWidth={1.5} color={themeStyles.iconColor} className="group-hover:stroke-white transition-colors" />}
+                  {key === 'furniture' && <Sofa size={28} strokeWidth={1.5} color={themeStyles.iconColor} className="group-hover:stroke-white transition-colors" />}
+                  {key === 'services' && <Scale size={28} strokeWidth={1.5} color={themeStyles.iconColor} className="group-hover:stroke-white transition-colors" />}
                 </div>
-                <h3 className="font-bold uppercase text-[11px] tracking-[0.2em]" style={themeStyles.title}>{item.title}</h3>
-                <p className="text-sm leading-relaxed" style={themeStyles.text}>{item.desc}</p>
+                <h3 className="font-bold uppercase text-[11px] tracking-[0.2em]" style={themeStyles.title}>{t(`cashback.options.${key}.title`)}</h3>
+                <p className="text-sm leading-relaxed" style={themeStyles.text}>{t(`cashback.options.${key}.desc`)}</p>
               </div>
             ))}
           </div>
@@ -138,13 +117,13 @@ export default function CashbackInfo() {
           {/* Section FAQ / Info */}
           <div className="border-t border-slate-100 dark:border-white/10 pt-20">
               <div className="max-w-2xl">
-                <h2 className="text-4xl font-serif italic mb-10 text-left" style={themeStyles.title}>Modalités d'activation</h2>
+                <h2 className="text-4xl font-serif italic mb-10 text-left" style={themeStyles.title}>{t('cashback.activation')}</h2>
                 <div className="space-y-8 text-lg leading-relaxed">
                   <p style={themeStyles.text}>
-                    Ce système de <span style={themeStyles.heading} className="font-medium">Cashback</span> est le fruit d'accords spécifiques entre **Amaru Properties** et ses partenaires immobiliers. Chaque montant ou service est validé lors de la réservation de votre propriété.
+                    {t('cashback.activationText')}
                   </p>
                   <p style={themeStyles.text}>
-                    Selon vos besoins, cet avantage peut être converti en fourniture de mobilier de designer ou en règlement d'honoraires juridiques, offrant ainsi une flexibilité fiscale et opérationnelle majeure.
+                    {t('cashback.activationDetail')}
                   </p>
                 </div>
 
@@ -154,7 +133,7 @@ export default function CashbackInfo() {
                       className="group inline-flex items-center gap-4 bg-slate-900 dark:bg-white text-white dark:text-black px-12 py-6 rounded-2xl font-bold uppercase text-[11px] tracking-[0.3em] hover:bg-[#D4AF37] transition-all duration-500 shadow-2xl"
                   >
                       <Home size={18} className="group-hover:scale-110 transition-transform" />
-                      Retour à l'accueil
+                      {t('cashback.backHome')}
                   </Link>
                 </div>
               </div>
