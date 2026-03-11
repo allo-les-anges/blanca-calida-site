@@ -281,9 +281,8 @@
     "uploading": "Uploading...",
     "photoAdded": "Photo added!",
     "publishing": "Publishing...",
-    "reportSent": "Report sent!"
-    // anglais (en.json)
-    "phases": [
+    "reportSent": "Report sent!",
+     "phases": [
     "0. Signature & Reservation",
     "1. Site / Earthworks",
     "2. Foundations",
