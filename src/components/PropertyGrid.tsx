@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import PropertyCard from "./PropertyCard";
 import { Loader2, SearchX } from "lucide-react";
 import { useTheme } from "next-themes";
+import { useTranslation } from "@/contexts/I18nContext";
 
 interface PropertyGridProps {
   activeFilters: any;
@@ -12,6 +13,7 @@ interface PropertyGridProps {
 
 export default function PropertyGrid({ activeFilters, properties }: PropertyGridProps) {
   const { resolvedTheme } = useTheme();
+  const { t } = useTranslation();
   const [filtered, setFiltered] = useState<any[]>([]);
   const [isAnimating, setIsAnimating] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -60,7 +62,7 @@ export default function PropertyGrid({ activeFilters, properties }: PropertyGrid
         <div className="flex flex-col items-center justify-center py-40 space-y-4">
           <Loader2 className="animate-spin text-[#D4AF37]" size={40} />
           <p className="text-[#D4AF37] text-[10px] font-bold uppercase tracking-[0.4em] animate-pulse">
-            Mise à jour...
+            {t('home.loading.updating')}
           </p>
         </div>
       ) : filtered.length === 0 && !isAnimating ? (
@@ -70,15 +72,17 @@ export default function PropertyGrid({ activeFilters, properties }: PropertyGrid
             <SearchX size={32} className="text-[#D4AF37] opacity-60" />
           </div>
           <div className="text-center space-y-3">
-            <p className="text-[#D4AF37] text-[10px] font-bold uppercase tracking-[0.4em]">Aucune correspondance</p>
+            <p className="text-[#D4AF37] text-[10px] font-bold uppercase tracking-[0.4em]">
+              {t('home.collection.noMatch')}
+            </p>
             <p 
               className="font-serif italic text-xl md:text-2xl leading-relaxed"
               style={{ color: isDark ? '#FFFFFF' : '#0F172A' }}
             >
-              Nous n'avons pas trouvé de propriété <br className="hidden md:block" /> correspondant à vos critères.
+              {t('home.collection.noMatchDescription')}
             </p>
             <p className="text-slate-500 dark:text-slate-400 text-sm font-light italic">
-              Essayez d'élargir vos filtres.
+              {t('home.collection.tryWider')}
             </p>
           </div>
           <button 
@@ -86,11 +90,11 @@ export default function PropertyGrid({ activeFilters, properties }: PropertyGrid
             className="mt-4 text-[10px] uppercase font-bold tracking-widest border-b border-[#D4AF37] pb-1 hover:text-[#D4AF37] transition-all"
             style={{ color: isDark ? '#FFFFFF' : '#0F172A' }}
           >
-            Réinitialiser
+            {t('home.collection.reset')}
           </button>
         </div>
       ) : (
-        /* GRILLE DE CARTES - 3 COLONNES - BORDS CARRÉS */
+        /* GRILLE DE CARTES */
         <div className={`transition-all duration-700 ease-in-out ${isAnimating ? 'opacity-30 blur-sm scale-[0.99]' : 'opacity-100 blur-0 scale-100'}`}>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12 md:gap-x-10 md:gap-y-20">
             {filtered.map((p, index) => (

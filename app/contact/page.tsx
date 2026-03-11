@@ -6,69 +6,25 @@ import {
   Globe, Target, MapPin, Languages, Compass, Sun, Moon 
 } from "lucide-react";
 import { useTheme } from "next-themes";
+import { useTranslation } from "@/contexts/I18nContext";
 
-// --- IMPORTATION DES COMPOSANTS DE NAVIGATION ---
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
+// Tableau statique des photos (chemins fixes)
 const teamMembers = [
-  {
-    id: 1,
-    name: "Deborah",
-    role: "Operational Excellence & Client Experience",
-    worldRegion: "Global Operations",
-    background: "Garante de la fluidité des processus et de la satisfaction client. Elle assure le suivi opérationnel quotidien pour garantir que chaque projet reçoive une attention personnalisée et une rigueur d'exécution maximale.",
-    skills: ["Processus", "Expérience Client", "Rigueur"],
-    market: "Siège Amaru",
-    photoDay: "/Deborah.jpeg",
-  },
-  {
-    id: 2,
-    name: "Gillian",
-    role: "Benelux, DACH & UK Expert",
-    worldRegion: "Europe du Nord & UK",
-    background: "Spécialiste des marchés à fort pouvoir d'achat, notamment la Belgique, les Pays-Bas, l'Allemagne et le Royaume-Uni. Il assure le lien stratégique entre les investisseurs d'Europe du Nord et les opportunités internationales.",
-    skills: ["Investissement", "DACH Region", "Stratégie"],
-    market: "International",
-    photoDay: "/Gillian.jpeg",
-  },
-  {
-    id: 3,
-    name: "Joanna Pawelek",
-    role: "Eastern Europe & Alicante Specialist",
-    worldRegion: "Europe de l'Est & anglophone",
-    background: "Experte certifiée (ANAI - API) du marché d'Alicante. Elle agit comme un pont stratégique pour les investisseurs d'Europe de l'Est et du monde anglophone grâce à sa maîtrise du polonais, de l'anglais et de l'espagnol.",
-    skills: ["Certifiée ANAI-API", "Marché Polonais", "Alicante"],
-    market: "Alicante / Costa Blanca",
-    photoDay: "/Joanna.jpeg",
-  },
-  {
-    id: 4,
-    name: "Abdellah Touati",
-    role: "MENA & Americas Expert",
-    worldRegion: "Moyen-Orient & Amériques",
-    background: "Fort d'un parcours technique en génie civil et d'une expertise sur le marché de Dubaï, il pilote l'expansion vers les marchés émergents et l'Amérique du Nord, connectant les développeurs aux réseaux d'investisseurs globaux.",
-    skills: ["Génie Civil", "Dubai Market", "Global Networks"],
-    market: "MENA / USA / Canada",
-    photoDay: "/Abdou.jpeg",
-  },
-  {
-    id: 5,
-    name: "Gaëtan",
-    role: "Francophonie & Global Strategy",
-    worldRegion: "Monde Francophone",
-    background: "Architecte de la stratégie commerciale, il assure la cohérence des partenariats avec les acteurs institutionnels (notaires, avocats, promoteurs) et l'expansion sur le marché francophone mondial, incluant l'Europe et le Canada.",
-    skills: ["Partenariats B2B", "Stratégie", "Expansion"],
-    market: "Global Francophonie",
-    photoDay: "/Gaëtan.jpeg",
-  }
+  { id: 1, photo: "/Deborah.jpeg" },
+  { id: 2, photo: "/Gillian.jpeg" },
+  { id: 3, photo: "/Joanna.jpeg" },
+  { id: 4, photo: "/Abdou.jpeg" },
+  { id: 5, photo: "/Gaëtan.jpeg" },
 ];
 
 export default function ContactPage() {
   const { resolvedTheme } = useTheme();
+  const { t } = useTranslation();
   const [mounted, setMounted] = useState(false);
   
-  // États pour le formulaire
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -86,7 +42,6 @@ export default function ContactPage() {
 
   const isDark = resolvedTheme === "dark";
 
-  // Gestion de la soumission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -138,13 +93,13 @@ export default function ContactPage() {
           <div className="relative z-10 text-center px-6 max-w-5xl pt-20">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
               <span className="text-[#D4AF37] text-[12px] font-black uppercase tracking-[0.6em] mb-6 block">
-                🌍 Our Human Edge
+                {t('contact.heroBadge')}
               </span>
               <h1 className="text-4xl md:text-7xl font-serif italic text-white mb-8">
-                Une Expertise Sans Frontières
+                {t('contact.heroTitle')}
               </h1>
               <p className="text-white/70 text-base md:text-lg font-light max-w-3xl mx-auto leading-relaxed italic">
-                "Notre force réside dans notre capacité à connecter les marchés locaux aux opportunités mondiales."
+                {t('contact.heroQuote')}
               </p>
             </motion.div>
           </div>
@@ -153,32 +108,37 @@ export default function ContactPage() {
         {/* SECTION ÉQUIPE */}
         <section className="max-w-[1400px] mx-auto px-6 py-24 grid grid-cols-1 xl:grid-cols-12 gap-20">
           <div className="xl:col-span-7 space-y-12">
-            {teamMembers.map((member, index) => (
+            {teamMembers.map((member, idx) => (
               <motion.div 
                 key={member.id}
                 initial={{ opacity: 0, x: -20 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
+                transition={{ delay: idx * 0.1 }}
                 className="p-8 md:p-12 rounded-[2.5rem] border transition-all duration-700 bg-white dark:bg-white/5 border-slate-100 dark:border-white/10 shadow-xl"
               >
                 <div className="flex flex-col md:flex-row gap-10">
                   <div className="relative w-full md:w-48 h-60 shrink-0 overflow-hidden rounded-[2rem] bg-slate-100 dark:bg-white/5">
                     <img 
-                      src={member.photoDay} 
+                      src={member.photo} 
                       className={`w-full h-full object-cover ${isDark ? "brightness-75 grayscale-[0.3]" : ""}`}
-                      alt={member.name}
+                      alt={t(`contact.team[${idx}].name`)}
                     />
                   </div>
                   <div className="flex-1 space-y-5">
-                    <h3 className="text-3xl font-serif italic text-[#D4AF37]">{member.name}</h3>
+                    <h3 className="text-3xl font-serif italic text-[#D4AF37]">
+                      {t(`contact.team[${idx}].name`)}
+                    </h3>
                     <p className="text-base leading-relaxed font-light text-slate-600 dark:text-slate-300">
-                      {member.background}
+                      {t(`contact.team[${idx}].background`)}
                     </p>
                     <div className="flex flex-wrap gap-2 pt-4">
-                      {member.skills.map((skill, i) => (
-                        <span key={i} className="text-[9px] font-black uppercase tracking-widest px-3 py-1 bg-[#D4AF37]/10 text-[#D4AF37] rounded-md border border-[#D4AF37]/20">
-                          {skill}
+                      {[0, 1, 2].map((skillIdx) => (
+                        <span 
+                          key={skillIdx} 
+                          className="text-[9px] font-black uppercase tracking-widest px-3 py-1 bg-[#D4AF37]/10 text-[#D4AF37] rounded-md border border-[#D4AF37]/20"
+                        >
+                          {t(`contact.team[${idx}].skills[${skillIdx}]`)}
                         </span>
                       ))}
                     </div>
@@ -196,18 +156,18 @@ export default function ContactPage() {
                 className="text-3xl md:text-4xl font-serif italic mb-2"
                 style={{ color: isDark ? '#FFFFFF' : '#0f172a' }}
               >
-                Contactez-nous
+                {t('contact.formTitle')}
               </h3>
               
               <p className="text-[#D4AF37] text-[10px] font-black uppercase tracking-[0.2em] mb-10">
-                L'Excellence Amaru à votre service
+                {t('contact.formSubtitle')}
               </p>
               
               <form onSubmit={handleSubmit} className="space-y-6">
                 <input 
                   required
                   type="text" 
-                  placeholder="NOM COMPLET" 
+                  placeholder={t('contact.namePlaceholder')}
                   style={inputStyle}
                   className={inputClasses}
                   value={formData.name}
@@ -218,7 +178,7 @@ export default function ContactPage() {
                   <input 
                     required
                     type="email" 
-                    placeholder="EMAIL" 
+                    placeholder={t('contact.emailPlaceholder')}
                     style={inputStyle}
                     className={inputClasses}
                     value={formData.email}
@@ -226,7 +186,7 @@ export default function ContactPage() {
                   />
                   <input 
                     type="text" 
-                    placeholder="PAYS / RÉGION" 
+                    placeholder={t('contact.regionPlaceholder')}
                     style={inputStyle}
                     className={inputClasses}
                     value={formData.region}
@@ -237,7 +197,7 @@ export default function ContactPage() {
                 <textarea 
                   required
                   rows={4} 
-                  placeholder="DÉTAILS DE VOTRE PROJET..." 
+                  placeholder={t('contact.messagePlaceholder')}
                   style={inputStyle}
                   className={`${inputClasses} resize-none`}
                   value={formData.message}
@@ -249,17 +209,17 @@ export default function ContactPage() {
                   disabled={isSubmitting}
                   className="w-full bg-[#D4AF37] text-black py-6 rounded-2xl font-black uppercase text-[10px] tracking-[0.4em] hover:bg-white transition-all shadow-xl disabled:opacity-50"
                 >
-                  {isSubmitting ? "ENVOI EN COURS..." : "Contacter l'Expert Dédié"}
+                  {isSubmitting ? t('contact.submitting') : t('contact.submit')}
                 </button>
 
                 {status === "success" && (
                   <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-green-600 dark:text-green-400 text-center font-bold text-[10px] tracking-widest uppercase mt-4">
-                    Message envoyé ! Gillian reviendra vers vous.
+                    {t('contact.success')}
                   </motion.p>
                 )}
                 {status === "error" && (
                   <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-red-500 text-center font-bold text-[10px] tracking-widest uppercase mt-4">
-                    Erreur. Veuillez réessayer.
+                    {t('contact.error')}
                   </motion.p>
                 )}
               </form>

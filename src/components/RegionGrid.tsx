@@ -3,6 +3,7 @@
 import React, { useMemo, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useTheme } from "next-themes";
+import { useTranslation } from "@/contexts/I18nContext";
 
 interface Property {
   id: string;
@@ -47,6 +48,7 @@ const REGIONS_DISPLAY = [
 
 export default function RegionGrid({ properties, onRegionClick }: RegionGridProps) {
   const { resolvedTheme } = useTheme();
+  const { t } = useTranslation();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -80,7 +82,7 @@ export default function RegionGrid({ properties, onRegionClick }: RegionGridProp
   return (
     <section className="max-w-[1600px] mx-auto px-6 py-6 bg-white dark:bg-[#0A0A0A] transition-colors duration-500">
       
-      {/* HEADER AJUSTÉ : Espaces réduits et Texte plus fin */}
+      {/* HEADER */}
       <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-8">
         <div className="max-w-2xl">
           <motion.div
@@ -89,13 +91,13 @@ export default function RegionGrid({ properties, onRegionClick }: RegionGridProp
             viewport={{ once: true }}
           >
             <span className="text-[#D4AF37] text-[10px] font-black uppercase tracking-[0.4em] mb-3 block">
-              Nos Destinations
+              {t('home.regionGrid.ourDestinations')}
             </span>
             <h2 
               className="text-4xl md:text-6xl font-serif italic leading-tight"
               style={{ color: isDark ? '#FFFFFF' : '#0f172a' }}
             >
-              Lieux d'Exception
+              {t('home.regionGrid.exceptionalPlaces')}
             </h2>
           </motion.div>
         </div>
@@ -110,12 +112,12 @@ export default function RegionGrid({ properties, onRegionClick }: RegionGridProp
             className="text-xs font-light leading-relaxed italic"
             style={{ color: isDark ? '#CBD5E1' : '#64748b' }}
           >
-            Une sélection rigoureuse des enclaves les plus prestigieuses du littoral.
+            {t('home.regionGrid.description')}
           </p>
         </motion.div>
       </div>
 
-      {/* GRILLE : Ratios ajustés */}
+      {/* GRILLE */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 auto-rows-[300px] md:auto-rows-[400px]">
         {REGIONS_DISPLAY.map((region, index) => {
           const count = regionCounts[region.name] || 0;
@@ -139,11 +141,11 @@ export default function RegionGrid({ properties, onRegionClick }: RegionGridProp
                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-80" />
               </div>
 
-              {/* CONTENU TEXTE RÉDUIT */}
+              {/* CONTENU TEXTE */}
               <div className="absolute inset-0 p-8 flex flex-col justify-end items-start text-white">
                 <motion.div className="space-y-2 w-full">
                   <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-[#D4AF37]">
-                    {count} Propriétés
+                    {count} {t('home.regionGrid.properties')}
                   </p>
                   
                   <h3 className="text-2xl md:text-4xl font-serif italic leading-none text-white">
@@ -154,7 +156,7 @@ export default function RegionGrid({ properties, onRegionClick }: RegionGridProp
                     <div className="absolute top-0 left-0 w-8 h-[1px] bg-white/40 group-hover:w-full transition-all duration-700" />
                     <div className="flex items-center justify-between pt-3 opacity-0 group-hover:opacity-100 transition-all duration-500">
                       <span className="text-[8px] uppercase tracking-[0.4em] font-light text-white">
-                        Découvrir
+                        {t('home.regionGrid.discover')}
                       </span>
                     </div>
                   </div>
