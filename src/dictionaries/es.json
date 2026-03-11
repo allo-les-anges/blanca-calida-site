@@ -51,8 +51,9 @@
     "eliteEdition": "Elite Edition v2.0"
   },
   "home": {
-    "heroSubtitle": "COSTA BLANCA | COSTA DEL SOL",
-    "heroTitle": "Villas de Lujo y Propiedades de Excepción",
+    "heroTitleLine1": "Villas de Lujo &",
+    "heroTitleLine2": "Propiedades Excepcionales",
+    "heroSubtitle": "COSTA BLANCA | COSTA DEL SOL"
     "findVilla": "Encuentre su villa",
     "ownerSection": {
       "title": "Siga su proyecto",
@@ -274,6 +275,21 @@
     "photoAdded": "¡Foto añadida!",
     "publishing": "Publicando...",
     "reportSent": "¡Informe enviado!"
+    "phases": [
+    "0. Firma y Reserva",
+    "1. Terreno / Movimiento de tierras",
+    "2. Cimientos",
+    "3. Muros / Elevación",
+    "4. Techumbre / Estructura de madera",
+    "5. Carpintería",
+    "6. Electricidad / Fontanería",
+    "7. Aislamiento",
+    "8. Yeso / Enlucido",
+    "9. Suelos y Azulejos",
+    "10. Pintura / Acabados",
+    "11. Exteriores / Jardín",
+    "12. Entrega de llaves"
+    ]
   },
   "adminDashboard": {
     "adminControl": "Admin Control",
@@ -491,4 +507,20 @@
     "pinIncorrect": "Código PIN incorrecto.",
     "incorrectPin": "PIN incorrecto."
   }
+ "login": {
+  "title": "Amaru Engine",
+  "subtitle": "Autenticación segura",
+  "pinTab": "CÓDIGO PIN",
+  "credentialsTab": "CREDENCIALES",
+  "emailLabel": "Usuario",
+  "passwordLabel": "Contraseña",
+  "validate": "INICIAR SESIÓN",
+  "reset": "Reiniciar terminal",
+  "invalidPin": "Código PIN inválido",
+  "invalidCredentials": "Credenciales inválidas",
+  "validationError": "Error de validación",
+  "profileMissing": "Perfil faltante en la base de datos.",
+  "roleNotAuthorized": "Rol no autorizado.",
+  "systemError": "Error del sistema."
+}
 }

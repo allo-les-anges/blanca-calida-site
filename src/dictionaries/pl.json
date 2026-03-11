@@ -51,8 +51,9 @@
     "eliteEdition": "Elite Edition v2.0"
   },
   "home": {
-    "heroSubtitle": "COSTA BLANCA | COSTA DEL SOL",
-    "heroTitle": "Luksusowe Wille i Wyjątkowe Nieruchomości",
+    "heroTitleLine1": "Luksusowe Wille &",
+    "heroTitleLine2": "Wyjątkowe Nieruchomości",
+    "heroSubtitle": "COSTA BLANCA | COSTA DEL SOL"
     "findVilla": "Znajdź swoją willę",
     "ownerSection": {
       "title": "Śledź swój projekt",
@@ -274,6 +275,21 @@
     "photoAdded": "Zdjęcie dodane!",
     "publishing": "Publikowanie...",
     "reportSent": "Raport wysłany!"
+    "phases": [
+    "0. Podpisanie i Rezerwacja",
+    "1. Teren / Roboty ziemne",
+    "2. Fundamenty",
+    "3. Ściany / Wznoszenie",
+    "4. Dach / Więźba dachowa",
+    "5. Stolarka",
+    "6. Elektryka / Hydraulika",
+    "7. Izolacja",
+    "8. Tynkowanie",
+    "9. Podłogi i Płytki",
+    "10. Malowanie / Wykończenia",
+    "11. Elewacja / Ogród",
+    "12. Przekazanie kluczy"
+    ]
   },
   "adminDashboard": {
     "adminControl": "Admin Control",

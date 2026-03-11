@@ -4,9 +4,11 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, ShieldCheck, RefreshCw, Delete, Key } from "lucide-react";
 import { supabase } from "../../lib/supabase";
+import { useTranslation } from "@/contexts/I18nContext";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [pin, setPin] = useState<string>("");
@@ -14,7 +16,6 @@ export default function LoginPage() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [showPin, setShowPin] = useState(true);
 
-  // Vérification au chargement si un PIN vient de la Home
   useEffect(() => {
     const tempPin = localStorage.getItem("temp_client_pin");
     if (tempPin) {
@@ -37,7 +38,7 @@ export default function LoginPage() {
         .single();
 
       if (error || !profile) {
-        setErrorMsg("Profil manquant dans la base.");
+        setErrorMsg(t('login.profileMissing'));
         setLoading(false);
         return;
       }
@@ -53,11 +54,11 @@ export default function LoginPage() {
       } else if (profile.role === 'admin' || profile.role === 'staff') {
         router.replace('/admin/dashboard');
       } else {
-        setErrorMsg("Rôle non autorisé.");
+        setErrorMsg(t('login.roleNotAuthorized'));
         setLoading(false);
       }
     } catch (err) {
-      setErrorMsg("Erreur système.");
+      setErrorMsg(t('login.systemError'));
       setLoading(false);
     }
   };
@@ -67,14 +68,12 @@ export default function LoginPage() {
     setLoading(true);
     setErrorMsg(null);
 
-    // --- LOGIQUE CODE PIN ---
     if (showPin) {
       try {
-        // 1. CAS IRIS (Accès Staff via PIN 240226)
         if (pin === "240226") {
           const { data, error } = await supabase.auth.signInWithPassword({
             email: "iris@amaru-homes.com",
-            password: "TonMotDePasseSecret", // À remplacer par la réalité
+            password: "TonMotDePasseSecret",
           });
           if (data?.user) {
             await handleRedirection(data.user.id, data.user.email);
@@ -82,39 +81,36 @@ export default function LoginPage() {
           }
         }
 
-        // 2. CAS CLIENT (Vérification dans la table suivi_chantier)
         const { data: chantier, error: chantierError } = await supabase
           .from('suivi_chantier')
           .select('*')
-          .eq('pin_code', pin) // On suppose que la colonne s'appelle pin_code
+          .eq('pin_code', pin)
           .single();
 
         if (chantier) {
           localStorage.setItem("client_access_pin", pin);
           localStorage.setItem("active_project_id", chantier.id);
           localStorage.removeItem("temp_client_pin");
-          router.push("/project-tracker"); // Redirection vers la page client
+          router.push("/project-tracker");
           return;
         }
 
-        // Si rien n'est trouvé
-        setErrorMsg("Code PIN invalide");
+        setErrorMsg(t('errors.pinIncorrect'));
       } catch (err) {
-        setErrorMsg("Erreur de validation");
+        setErrorMsg(t('login.validationError'));
       } finally {
         setLoading(false);
       }
       return;
     }
 
-    // --- LOGIQUE FORMULAIRE CLASSIQUE ---
     const { data, error } = await supabase.auth.signInWithPassword({
       email: email.trim(),
       password: password,
     });
 
     if (error) {
-      setErrorMsg(error.message === "Invalid login credentials" ? "Identifiants invalides" : error.message);
+      setErrorMsg(error.message === "Invalid login credentials" ? t('login.invalidCredentials') : error.message);
       setLoading(false);
     } else if (data?.user) {
       await handleRedirection(data.user.id, data.user.email);
@@ -144,8 +140,8 @@ export default function LoginPage() {
           <div className="h-14 w-14 bg-red-600 rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-red-900/20">
             <ShieldCheck size={28} className="text-white" />
           </div>
-          <h1 className="text-xl font-bold text-white">Amaru Engine</h1>
-          <p className="text-slate-500 text-[9px] uppercase tracking-[0.3em] font-black mt-1">Authentification Sécurisée</p>
+          <h1 className="text-xl font-bold text-white">{t('login.title')}</h1>
+          <p className="text-slate-500 text-[9px] uppercase tracking-[0.3em] font-black mt-1">{t('login.subtitle')}</p>
         </div>
 
         <div className="flex bg-black p-1 rounded-xl mb-8 border border-slate-900">
@@ -153,13 +149,13 @@ export default function LoginPage() {
             onClick={() => { setShowPin(true); setErrorMsg(null); }}
             className={`flex-1 py-2 rounded-lg text-[10px] font-black transition-all ${showPin ? 'bg-slate-800 text-white' : 'text-slate-500'}`}
           >
-            CODE PIN
+            {t('login.pinTab')}
           </button>
           <button 
             onClick={() => { setShowPin(false); setErrorMsg(null); }}
             className={`flex-1 py-2 rounded-lg text-[10px] font-black transition-all ${!showPin ? 'bg-slate-800 text-white' : 'text-slate-500'}`}
           >
-            IDENTIFIANTS
+            {t('login.credentialsTab')}
           </button>
         </div>
 
@@ -201,7 +197,7 @@ export default function LoginPage() {
         ) : (
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-1">
-              <label className="text-[9px] uppercase tracking-widest font-black text-slate-500 ml-2">Identifiant</label>
+              <label className="text-[9px] uppercase tracking-widest font-black text-slate-500 ml-2">{t('login.emailLabel')}</label>
               <input 
                 type="email" 
                 value={email}
@@ -213,7 +209,7 @@ export default function LoginPage() {
             </div>
 
             <div className="space-y-1">
-              <label className="text-[9px] uppercase tracking-widest font-black text-slate-500 ml-2">Clé d'accès</label>
+              <label className="text-[9px] uppercase tracking-widest font-black text-slate-500 ml-2">{t('login.passwordLabel')}</label>
               <input 
                 type="password" 
                 value={password}
@@ -235,7 +231,7 @@ export default function LoginPage() {
               disabled={loading} 
               className="w-full bg-red-700 hover:bg-red-600 py-4 mt-4 rounded-xl font-black text-[10px] tracking-[0.2em] text-white flex justify-center items-center transition-all shadow-lg"
             >
-              {loading ? <Loader2 className="animate-spin" size={18} /> : "VALIDER L'ACCÈS"}
+              {loading ? <Loader2 className="animate-spin" size={18} /> : t('login.validate')}
             </button>
           </form>
         )}
@@ -245,7 +241,7 @@ export default function LoginPage() {
             onClick={clearSession}
             className="text-[9px] text-slate-600 hover:text-white transition-colors flex items-center justify-center gap-2 uppercase font-black tracking-widest"
           >
-            <RefreshCw size={12} /> Réinitialiser le terminal
+            <RefreshCw size={12} /> {t('login.reset')}
           </button>
         </div>
       </div>

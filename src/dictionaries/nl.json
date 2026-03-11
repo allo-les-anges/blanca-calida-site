@@ -51,8 +51,9 @@
     "eliteEdition": "Elite Editie v2.0"
   },
   "home": {
-    "heroSubtitle": "COSTA BLANCA | COSTA DEL SOL",
-    "heroTitle": "Luxe Villa's en Uitzonderlijke Woningen",
+    "heroTitleLine1": "Luxe Villa's &",
+    "heroTitleLine2": "Uitzonderlijke Eigendommen",
+    "heroSubtitle": "COSTA BLANCA | COSTA DEL SOL"  
     "findVilla": "Vind uw villa",
     "ownerSection": {
       "title": "Volg uw project",
@@ -274,6 +275,21 @@
     "photoAdded": "Foto toegevoegd!",
     "publishing": "Publiceren...",
     "reportSent": "Rapport verzonden!"
+    "phases": [
+    "0. Ondertekening & Reservering",
+    "1. Terrein / Grondwerk",
+    "2. Funderingen",
+    "3. Muren / Verhoging",
+    "4. Dak / Kapconstructie",
+    "5. Schrijnwerk",
+    "6. Elektriciteit / Loodgieterij",
+    "7. Isolatie",
+    "8. Pleisterwerk",
+    "9. Vloeren & Tegels",
+    "10. Schilderwerk / Afwerking",
+    "11. Buitenkant / Tuin",
+    "12. Sleuteloverdracht"
+    ]
   },
   "adminDashboard": {
     "adminControl": "Admin Control",
@@ -491,4 +507,21 @@
     "pinIncorrect": "Onjuiste pincode.",
     "incorrectPin": "Onjuiste PIN."
   }
+ 
+"login": {
+  "title": "Amaru Engine",
+  "subtitle": "Veilige authenticatie",
+  "pinTab": "PINCODE",
+  "credentialsTab": "INLOGGEGEVENS",
+  "emailLabel": "Gebruikersnaam",
+  "passwordLabel": "Wachtwoord",
+  "validate": "INLOGGEN",
+  "reset": "Terminal resetten",
+  "invalidPin": "Ongeldige pincode",
+  "invalidCredentials": "Ongeldige inloggegevens",
+  "validationError": "Validatiefout",
+  "profileMissing": "Profiel ontbreekt in de database.",
+  "roleNotAuthorized": "Rol niet toegestaan.",
+  "systemError": "Systeemfout."
+}
 }
