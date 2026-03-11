@@ -128,25 +128,25 @@ export default function Home() {
       <div className="relative h-[80vh] flex flex-col items-center justify-center bg-slate-50 dark:bg-[#020617] transition-colors duration-500">
         <Hero />
         
-        {/* BOUTON RECHERCHE CARRÉ */}
-        <div className="absolute bottom-[10%] z-40">
+        {/* BOUTON RECHERCHE DISCRET & TYPOGRAPHIQUE */}
+        <div className="absolute bottom-[12%] z-40">
            {!isSearchOpen && (
              <button 
                 onClick={() => setIsSearchOpen(true)}
-                className="group flex items-center gap-6 bg-white/90 dark:bg-black/60 backdrop-blur-xl border border-slate-200 dark:border-white/10 p-4 rounded-none hover:border-[#D4AF37]/50 transition-all duration-500 shadow-2xl"
+                className="group flex items-center gap-5 transition-all duration-700 ease-in-out"
              >
-                <div className="w-12 h-12 bg-[#D4AF37] rounded-none flex items-center justify-center text-black group-hover:rotate-12 transition-transform duration-500">
-                  <Search size={20} />
+                {/* Cercle Icone Discret */}
+                <div className="w-10 h-10 border border-[#D4AF37]/30 group-hover:bg-[#D4AF37] rounded-full flex items-center justify-center text-[#D4AF37] group-hover:text-black transition-all duration-500">
+                  <Search size={16} strokeWidth={1.5} />
                 </div>
-                <div className="text-left pr-4">
-                  <span className="block text-[9px] font-black text-[#D4AF37] uppercase tracking-[0.4em] mb-1">Recherche Privée</span>
-                  <span 
-                    className="block font-serif italic text-base md:text-lg tracking-wide"
-                    style={{ color: isDark ? '#FFFFFF' : '#0f172a' }}
-                  >
-                    Trouver votre villa
-                  </span>
-                </div>
+
+                {/* Texte Police "Costa Blanca" Style */}
+                <span 
+                  className="text-[11px] md:text-[13px] font-light uppercase tracking-[0.6em] transition-colors duration-500"
+                  style={{ color: isDark ? '#FFFFFF' : '#0f172a' }}
+                >
+                  Trouver votre villa
+                </span>
              </button>
            )}
         </div>
@@ -154,15 +154,13 @@ export default function Home() {
         <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-white dark:from-[#020617] to-transparent pointer-events-none transition-colors duration-500" />
       </div>
 
-      {/* BANDEAU DÉROULANT SLIM */}
       <ScrollingBanner />
 
-      {/* SECTION RÉGIONS - Espacements réduits */}
       <section className="py-12 bg-white dark:bg-[#020617] transition-colors duration-500">
           <RegionGrid properties={allProperties} onRegionClick={handleRegionClick} />
       </section>
 
-      {/* SECTION ESPACE PROPRIÉTAIRE - Bords carrés */}
+      {/* SECTION ESPACE PROPRIÉTAIRE */}
       <section className="max-w-[1600px] mx-auto px-6 py-12 bg-white dark:bg-[#020617]">
         <div className="bg-slate-50 dark:bg-[#0F172A]/40 p-12 md:p-20 rounded-none border border-slate-200 dark:border-white/5 relative overflow-hidden">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center relative z-10">

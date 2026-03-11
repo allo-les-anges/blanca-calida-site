@@ -51,7 +51,7 @@ export default function AdvancedSearch({
   const reset = () => {
     const empty = { 
       region: "", town: "", type: "", beds: "", 
-      minPrice: "100000", maxPrice: "5000000", reference: "" 
+      minPrice: "100000", maxPrice: "75000000", reference: "" 
     };
     setLocalFilters(empty);
     onSearch(empty);
