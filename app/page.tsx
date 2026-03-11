@@ -6,6 +6,7 @@ import {
   Search, Loader2, ShieldCheck, ArrowRight, User, X
 } from "lucide-react";
 import { useTheme } from "next-themes";
+import { useTranslation } from "@/contexts/I18nContext";
 
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
@@ -20,6 +21,7 @@ type Property = any;
 export default function Home() {
   const router = useRouter();
   const { resolvedTheme } = useTheme();
+  const { t } = useTranslation();
   const [mounted, setMounted] = useState(false);
 
   const [allProperties, setAllProperties] = useState<Property[]>([]);
@@ -115,7 +117,9 @@ export default function Home() {
     return (
       <div className="h-screen bg-[#020617] flex flex-col items-center justify-center">
         <Loader2 className="animate-spin text-[#D4AF37] mb-8" size={48} />
-        <span className="text-[10px] font-bold uppercase tracking-[0.5em] text-[#D4AF37] animate-pulse">AMARU EXCELLENCE...</span>
+        <span className="text-[10px] font-bold uppercase tracking-[0.5em] text-[#D4AF37] animate-pulse">
+          {t('home.loading.amaruExcellence')}
+        </span>
       </div>
     );
   }
@@ -128,24 +132,21 @@ export default function Home() {
       <div className="relative h-[80vh] flex flex-col items-center justify-center bg-slate-50 dark:bg-[#020617] transition-colors duration-500">
         <Hero />
         
-        {/* BOUTON RECHERCHE DISCRET & TYPOGRAPHIQUE */}
+        {/* BOUTON RECHERCHE DISCRET */}
         <div className="absolute bottom-[12%] z-40">
            {!isSearchOpen && (
              <button 
                 onClick={() => setIsSearchOpen(true)}
                 className="group flex items-center gap-5 transition-all duration-700 ease-in-out"
              >
-                {/* Cercle Icone Discret */}
                 <div className="w-10 h-10 border border-[#D4AF37]/30 group-hover:bg-[#D4AF37] rounded-full flex items-center justify-center text-[#D4AF37] group-hover:text-black transition-all duration-500">
                   <Search size={16} strokeWidth={1.5} />
                 </div>
-
-                {/* Texte Police "Costa Blanca" Style */}
                 <span 
                   className="text-[11px] md:text-[13px] font-light uppercase tracking-[0.6em] transition-colors duration-500"
                   style={{ color: isDark ? '#FFFFFF' : '#0f172a' }}
                 >
-                  Trouver votre villa
+                  {t('home.findVilla')}
                 </span>
              </button>
            )}
@@ -170,14 +171,16 @@ export default function Home() {
                  className="text-4xl md:text-6xl font-serif leading-tight italic"
                  style={{ color: isDark ? '#ffffff' : '#0f172a' }}
               >
-                Suivez votre projet <br /> 
-                <span className="text-[#D4AF37] not-italic font-sans font-extrabold tracking-tighter text-2xl md:text-5xl uppercase">en temps réel.</span>
+                {t('home.ownerSection.title')} <br /> 
+                <span className="text-[#D4AF37] not-italic font-sans font-extrabold tracking-tighter text-2xl md:text-5xl uppercase">
+                  {t('home.ownerSection.subtitle')}
+                </span>
               </h2>
               <p 
                 className="text-sm font-light leading-relaxed max-w-md border-l border-slate-200 dark:border-white/10 pl-6 italic opacity-90"
                 style={{ color: isDark ? '#CBD5E1' : '#64748b' }}
               >
-                Accédez à votre cockpit de construction privé pour suivre chaque étape.
+                {t('home.ownerSection.description')}
               </p>
             </div>
             
@@ -185,14 +188,16 @@ export default function Home() {
                <form onSubmit={handleClientLogin} className="space-y-8">
                   <div className="relative group">
                     <input 
-                      type="password" placeholder="CODE PIN" value={clientPin}
+                      type="password" 
+                      placeholder={t('home.ownerSection.pinPlaceholder')} 
+                      value={clientPin}
                       onChange={(e) => setClientPin(e.target.value)}
                       className="w-full bg-transparent border-b border-slate-200 dark:border-white/10 py-4 text-center text-2xl font-black tracking-[0.8em] outline-none focus:border-[#D4AF37] transition-all"
                       style={{ color: isDark ? '#FFFFFF' : '#0f172a' }}
                     />
                   </div>
                   <button type="submit" className="w-full bg-[#D4AF37] text-black py-5 rounded-none font-bold text-[10px] uppercase tracking-[0.3em] hover:bg-slate-900 hover:text-white dark:hover:bg-white dark:hover:text-black transition-all flex items-center justify-center gap-4">
-                    Accéder au chantier <ArrowRight size={18} />
+                    {t('home.ownerSection.accessButton')} <ArrowRight size={18} />
                   </button>
                </form>
             </div>
@@ -208,11 +213,11 @@ export default function Home() {
               className="text-4xl md:text-6xl font-serif italic leading-none"
               style={{ color: isDark ? '#ffffff' : '#0f172a' }}
             >
-              {filters.region ? filters.region : "Portfolio Privé"}
+              {filters.region ? filters.region : t('home.collection.title')}
             </h3>
             <p className="text-[#D4AF37] text-[10px] font-bold uppercase tracking-[0.4em] flex items-center justify-center gap-4">
                <span className="w-4 h-px bg-[#D4AF37]/40"></span>
-               {filteredProperties.length} Propriétés Sélectionnées
+               {filteredProperties.length} {t('home.collection.propertiesSelected')}
                <span className="w-4 h-px bg-[#D4AF37]/40"></span>
             </p>
           </header>

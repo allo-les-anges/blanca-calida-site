@@ -7,4 +7,497 @@
   "configurations": "Available configurations",
   "selected": "Selected",
   "whatsapp_msg": "Hello, I would like information about"
+}{
+  "common": {
+    "backToHome": "Back to home",
+    "backToSelection": "Back to selection",
+    "loading": "Loading...",
+    "save": "Save",
+    "print": "Print",
+    "search": "Search",
+    "reset": "Reset",
+    "close": "Close",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "error": "Error",
+    "success": "Success",
+    "yes": "Yes",
+    "no": "No",
+    "optional": "Optional"
+  },
+  "nav": {
+    "home": "Home",
+    "contact": "Contact",
+    "clientAccess": "Client Access",
+    "search": "Search",
+    "budget": "Max Budget",
+    "results": "Show results",
+    "private": "Private Access",
+    "pinPlaceholder": "PIN",
+    "validate": "Validate",
+    "subtitle": "Find your ideal villa",
+    "cashbackInfo": "Cashback Info"
+  },
+  "footer": {
+    "excellence": "Real Estate Excellence",
+    "description": "The art of exceptional real estate. We build bridges between your ambitions and the most prestigious properties on the coast.",
+    "collections": "Collections",
+    "villasSignature": "Signature Villas",
+    "domainsPrestige": "Prestige Domains",
+    "newDevelopments": "New Developments",
+    "privateClientAccess": "Private Client Access",
+    "proSpace": "Pro Space",
+    "siteTracking": "Site Tracking",
+    "supervisor": "Supervisor",
+    "partnerPortal": "Partner Portal",
+    "socialHeadquarters": "Headquarters",
+    "address": "Calle Pablo Picass 1",
+    "city": "Orihuela Costa, Spain",
+    "email": "contact@data-home.io",
+    "phone": "+34 627 76 82 33",
+    "privacy": "Privacy",
+    "legal": "Legal Notice",
+    "eliteEdition": "Elite Edition v2.0"
+  },
+  "home": {
+    "heroSubtitle": "COSTA BLANCA | COSTA DEL SOL",
+    "heroTitle": "Luxury Villas & Exceptional Properties",
+    "findVilla": "Find your villa",
+    "ownerSection": {
+      "title": "Follow your project",
+      "subtitle": "in real time.",
+      "description": "Access your private construction cockpit to track every step.",
+      "pinPlaceholder": "PIN CODE",
+      "accessButton": "Access the site"
+    },
+    "collection": {
+      "title": "Private Portfolio",
+      "propertiesSelected": "{count} Selected Properties",
+      "noMatch": "No match",
+      "noMatchDescription": "We did not find a property matching your criteria.",
+      "tryWider": "Try to broaden your filters.",
+      "reset": "Reset"
+    },
+    "regionGrid": {
+      "ourDestinations": "Our Destinations",
+      "exceptionalPlaces": "Exceptional Places",
+      "description": "A rigorous selection of the most prestigious enclaves on the coast.",
+      "properties": "Properties",
+      "discover": "Discover"
+    },
+    "searchModal": {
+      "search": "Search",
+      "sub": "Find your ideal villa",
+      "budget": "Max Budget",
+      "results": "Show results"
+    },
+    "clientLogin": {
+      "private": "Private Access",
+      "pinPlaceholder": "PIN",
+      "validate": "Validate"
+    },
+    "loading": {
+      "updating": "Updating...",
+      "amaruExcellence": "AMARU EXCELLENCE..."
+    }
+  },
+  "propertyCard": {
+    "ref": "REF: {ref}",
+    "exclusivity": "EXCLUSIVITY",
+    "beds": "beds",
+    "baths": "baths",
+    "pool": "Pool",
+    "noPool": "No pool",
+    "land": "land",
+    "garage": "Garage",
+    "surface": "m²",
+    "plot": "m² plot"
+  },
+  "propertyDetail": {
+    "back": "Back to selection",
+    "backToProgram": "Back to {name} program",
+    "ref": "Ref: {ref}",
+    "bedrooms": "Bedrooms",
+    "bathrooms": "Bathrooms",
+    "built": "Built m²",
+    "plot": "Plot m²",
+    "pool": "Pool",
+    "poolPrivate": "Private",
+    "poolNo": "No",
+    "parking": "Parking",
+    "artOfLiving": "The Art of Living",
+    "technicalPlans": "Technical Plans",
+    "detailedLayout": "Detailed layout",
+    "price": "Sale Price",
+    "brochure": "PDF Brochure",
+    "whatsapp": "WhatsApp Contact",
+    "whatsappDirect": "WhatsApp Direct",
+    "bookVisit": "Book a Visit",
+    "advisor": "Advisor",
+    "activateCashback": "Activate my Cashback",
+    "privilege": "Amaru Privilege",
+    "location": "Prime Location",
+    "distanceSea": "{distance}km to the sea",
+    "golf": "{distance}km to golf",
+    "propertyNotFound": "Property not found",
+    "backToCatalogue": "Back to catalogue",
+    "loading": "Loading property..."
+  },
+  "cashback": {
+    "title": "The Negotiated Benefits Program",
+    "description": "At Amaru, every transaction is unique. \"Cashback\" is not a fixed scale, but a pre-negotiated condition with our partners to maximize the value of your investment from the start.",
+    "flexibility": "Total Flexibility",
+    "flexibilityText": "A tailor-made advantage adapted to your project",
+    "example": "Example of allocation",
+    "exampleAmount": "€2,500*",
+    "orEquipment": "or equivalent furniture / services",
+    "points": [
+      "Condition negotiated upstream with the agency or partner developer.",
+      "Free choice between cash payment, furniture pack or fee coverage."
+    ],
+    "options": {
+      "cash": {
+        "title": "In Cash",
+        "desc": "A direct cash contribution to optimize your financing plan or ancillary costs."
+      },
+      "furniture": {
+        "title": "Furniture & Design",
+        "desc": "A dedicated endowment for prestige furniture to move into a ready-to-live villa."
+      },
+      "services": {
+        "title": "Services & Fees",
+        "desc": "Coverage of your lawyer or consulting fees for a worry-free transaction."
+      }
+    },
+    "activation": "Activation Terms",
+    "activationText": "This Cashback system is the result of specific agreements between Amaru Properties and its real estate partners. Each amount or service is validated when you reserve your property.",
+    "activationDetail": "Depending on your needs, this benefit can be converted into designer furniture supply or payment of legal fees, offering major tax and operational flexibility.",
+    "backHome": "Back to home"
+  },
+  "contact": {
+    "heroBadge": "🌍 Our Human Edge",
+    "heroTitle": "Borderless Expertise",
+    "heroQuote": "\"Our strength lies in our ability to connect local markets with global opportunities.\"",
+    "formTitle": "Contact Us",
+    "formSubtitle": "Amaru Excellence at your service",
+    "namePlaceholder": "FULL NAME",
+    "emailPlaceholder": "EMAIL",
+    "regionPlaceholder": "COUNTRY / REGION",
+    "messagePlaceholder": "YOUR PROJECT DETAILS...",
+    "submit": "Contact the Dedicated Expert",
+    "submitting": "SENDING...",
+    "success": "Message sent! Gillian will get back to you.",
+    "error": "Error. Please try again.",
+    "team": [
+      {
+        "name": "Deborah",
+        "role": "Operational Excellence & Client Experience",
+        "worldRegion": "Global Operations",
+        "background": "Guarantor of process fluidity and client satisfaction. She ensures daily operational monitoring to guarantee that each project receives personalized attention and maximum execution rigor.",
+        "skills": ["Processes", "Client Experience", "Rigor"],
+        "market": "Amaru Headquarters"
+      },
+      {
+        "name": "Gillian",
+        "role": "Benelux, DACH & UK Expert",
+        "worldRegion": "Northern Europe & UK",
+        "background": "Specialist in high-purchasing-power markets, notably Belgium, the Netherlands, Germany and the United Kingdom. He ensures the strategic link between Northern European investors and international opportunities.",
+        "skills": ["Investment", "DACH Region", "Strategy"],
+        "market": "International"
+      },
+      {
+        "name": "Joanna Pawelek",
+        "role": "Eastern Europe & Alicante Specialist",
+        "worldRegion": "Eastern Europe & English-speaking",
+        "background": "Certified expert (ANAI - API) of the Alicante market. She acts as a strategic bridge for investors from Eastern Europe and the English-speaking world thanks to her mastery of Polish, English and Spanish.",
+        "skills": ["ANAI-API Certified", "Polish Market", "Alicante"],
+        "market": "Alicante / Costa Blanca"
+      },
+      {
+        "name": "Abdellah Touati",
+        "role": "MENA & Americas Expert",
+        "worldRegion": "Middle East & Americas",
+        "background": "With a technical background in civil engineering and expertise in the Dubai market, he leads expansion into emerging markets and North America, connecting developers to global investor networks.",
+        "skills": ["Civil Engineering", "Dubai Market", "Global Networks"],
+        "market": "MENA / USA / Canada"
+      },
+      {
+        "name": "Gaëtan",
+        "role": "Francophonie & Global Strategy",
+        "worldRegion": "French-speaking World",
+        "background": "Architect of commercial strategy, he ensures the coherence of partnerships with institutional players (notaries, lawyers, developers) and expansion into the global French-speaking market, including Europe and Canada.",
+        "skills": ["B2B Partnerships", "Strategy", "Expansion"],
+        "market": "Global Francophonie"
+      }
+    ]
+  },
+  "login": {
+    "title": "Amaru Engine",
+    "subtitle": "Secure Authentication",
+    "pinTab": "PIN CODE",
+    "credentialsTab": "CREDENTIALS",
+    "pinPlaceholder": "••••••",
+    "connect": "Connect",
+    "emailLabel": "Username",
+    "passwordLabel": "Password",
+    "validate": "LOGIN",
+    "reset": "Reset terminal",
+    "invalidPin": "Invalid PIN code",
+    "invalidCredentials": "Invalid credentials",
+    "validationError": "Validation error"
+  },
+  "projectTracker": {
+    "agencyName": "AMARU-HOMES",
+    "department": "Technical Control & Quality Department",
+    "phase": "Current Phase: {phase}",
+    "quit": "Quit",
+    "documents": "Administrative Attachments",
+    "technicalReports": "Technical Monitoring File",
+    "reportValidated": "Validated Inspection Report",
+    "expertise": "Expertise",
+    "inspectionReport": "Inspection Report",
+    "generateReport": "Generate Report",
+    "certification": "I certify that the information and photographs presented below were collected on site by the Amaru-Homes technical department. GPS coordinates guarantee the authenticity of the inspection.",
+    "observation": "Technical observation #{number}",
+    "location": "Location: {lat}, {lng}"
+  },
+  "adminChantier": {
+    "backHome": "Back Home",
+    "title": "Luxury Staff",
+    "subtitle": "Field & Reporting",
+    "pinPlaceholder": "••••••",
+    "connect": "Connect",
+    "agent": "Agent",
+    "whichSite": "Which site are you visiting?",
+    "searchPlaceholder": "Ex: Villa Bianca...",
+    "changeVilla": "Change villa",
+    "constructionPhase": "Construction phase",
+    "newReport": "New Report",
+    "observationsPlaceholder": "Field observations...",
+    "locate": "Locate",
+    "gpsOk": "GPS OK",
+    "photo": "Photo",
+    "publish": "Publish report ({count})",
+    "stepUpdated": "Step updated",
+    "uploading": "Uploading...",
+    "photoAdded": "Photo added!",
+    "publishing": "Publishing...",
+    "reportSent": "Report sent!"
+  },
+  "adminDashboard": {
+    "adminControl": "Admin Control",
+    "search": "SEARCH...",
+    "projects": "Projects",
+    "team": "Team",
+    "publicSite": "Public Site",
+    "logout": "Logout",
+    "activeConstructionFile": "Active construction file",
+    "ref": "REF: {ref}",
+    "owner": "Owner: {name}",
+    "print": "Print",
+    "save": "Save file",
+    "tabs": {
+      "clientBudget": "Client & Budget",
+      "constructionStatus": "Construction Status",
+      "documents": "Documents Vault"
+    },
+    "clientInfo": {
+      "title": "Owner details",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "email": "Email",
+      "phone": "Phone"
+    },
+    "address": {
+      "title": "Property location",
+      "street": "Street / Address",
+      "city": "City",
+      "postal": "Postal code",
+      "country": "Country"
+    },
+    "cashback": {
+      "reward": "Cashback reward",
+      "paidAfterClosure": "Amount paid after completion"
+    },
+    "pin": {
+      "code": "Login PIN code",
+      "copy": "Copy code",
+      "encryption": "AES-256 encryption active"
+    },
+    "progress": {
+      "title": "Real‑time progress",
+      "global": "Overall progress",
+      "phase": "Selected current phase",
+      "weeklyComments": "Weekly comments",
+      "visibleByClient": "Visible to client"
+    },
+    "constats": {
+      "title": "Technical inspections ({count})",
+      "photos": "{count} photo{s}"
+    },
+    "delivery": {
+      "estimated": "Estimated delivery",
+      "realTimeUpdate": "The delivery date is updated in real time on the client space."
+    },
+    "builder": {
+      "partner": "Partner builder",
+      "placeholder": "Ex: Porcelanosa / Grupo Isan"
+    },
+    "docs": {
+      "title": "Cloud Documents",
+      "subtitle": "Secured client storage area",
+      "upload": "Upload a file",
+      "processing": "Processing...",
+      "noDocuments": "No documents archived"
+    },
+    "staff": {
+      "add": "Add a collaborator",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "email": "Professional email",
+      "role": "Role & Privileges",
+      "agent": "Agent (Limited access)",
+      "admin": "Agency Administrator",
+      "superAdmin": "Super Administrator",
+      "security": "Automatic Security",
+      "pinInfo": "A unique 6-digit PIN code will be generated. The collaborator can log in immediately after validation.",
+      "confirm": "Confirm invitation",
+      "copyPin": "Copy PIN",
+      "delete": "Delete this collaborator",
+      "securityCode": "Security code",
+      "cannotDeleteSelf": "You cannot delete your own account."
+    }
+  },
+  "superAdmin": {
+    "initializing": "Initializing terminal...",
+    "accessDenied": "Access Denied",
+    "noPrivileges": "Your account does not have Super-Admin privileges.",
+    "logout": "Logout",
+    "title": "Super Control",
+    "subtitle": "Centralized System",
+    "publicSite": "Public Site",
+    "deploy": "Deploy an account",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "agency": "Agency / Partner",
+    "packLevel": "Pack Level",
+    "core": "CORE (2 Experts)",
+    "ascent": "ASCENT (10 Experts)",
+    "horizon": "HORIZON (Unlimited)",
+    "emailPlaceholder": "Login email",
+    "passwordPlaceholder": "Password",
+    "activate": "ACTIVATE LICENSE",
+    "activeUsers": "Active Users",
+    "database": "Database Live",
+    "search": "Search...",
+    "id": "ID: {id}",
+    "pin": "PIN: {pin}",
+    "deleteConfirm": "Permanently revoke access for \"{company}\" ?"
+  },
+  "contactCashback": {
+    "back": "Back to home",
+    "title": "Cashback Activation",
+    "description": "Please complete your information to link this benefit to your client profile.",
+    "firstName": "First name *",
+    "lastName": "Last name *",
+    "email": "Email *",
+    "phone": "Phone",
+    "submit": "Activate my Cashback"
+  },
+  "merci": {
+    "title": "Request Received",
+    "message": "Your Cashback request has been sent. We will get back to you within 24 hours to present the details of your benefit.",
+    "backHome": "Back to home",
+    "brand": "Luxury Estates — Real Estate Redefined"
+  },
+  "development": {
+    "back": "Back to selection",
+    "exclusiveDevelopment": "Exclusive Development",
+    "availability": "Availability",
+    "units": "Units",
+    "artOfLiving": "The Art of Living",
+    "distanceSea": "Distance to sea",
+    "airport": "Airport",
+    "unitsAvailable": "Available units & Plans",
+    "selectUnit": "Select a lot to see details and floor plans",
+    "available": "Available",
+    "seeDetails": "See plans & details"
+  },
+  "bien": {
+    "backToProgram": "Back to {name} program",
+    "ref": "Ref: {ref}",
+    "bedrooms": "Bedrooms",
+    "baths": "Baths",
+    "built": "Built m²",
+    "pool": "Pool",
+    "artOfLiving": "The Art of Living",
+    "technicalPlans": "Technical Plans",
+    "detailedLayout": "Detailed layout",
+    "price": "Sale Price",
+    "brochure": "PDF Brochure",
+    "whatsapp": "WhatsApp Contact",
+    "whatsappMobile": "Chat on WhatsApp",
+    "bookVisit": "Book a Visit",
+    "advisor": "Advisor",
+    "distanceSea": "{distance}km to the sea",
+    "golf": "{distance}km to golf"
+  },
+  "advancedSearch": {
+    "propertyRef": "Property Reference",
+    "refPlaceholder": "Ex: REF-1234",
+    "region": "Region",
+    "allSpain": "Spain (All)",
+    "costaBlanca": "Costa Blanca",
+    "costaCalida": "Costa Calida",
+    "costaDelSol": "Costa del Sol",
+    "costaAlmeria": "Costa Almeria",
+    "type": "Type",
+    "anyType": "Any type",
+    "villa": "Villa",
+    "apartment": "Apartment",
+    "penthouse": "Penthouse",
+    "bungalow": "Bungalow",
+    "townhouse": "Townhouse",
+    "min": "Min",
+    "max": "Max",
+    "bedrooms": "Bedrooms",
+    "collection": "Amaru Collection • Exclusive Selection",
+    "reset": "Reset"
+  },
+  "scrollingBanner": {
+    "portfolioExclusif": "Exclusive Portfolio",
+    "conciergeriePrivee": "Private Concierge",
+    "ventesOffMarket": "Off-Market Sales",
+    "expertiseArchitecturale": "Architectural Expertise",
+    "investissements": "Investments",
+    "gestionPrestige": "Prestige Management"
+  },
+  "testimonials": {
+    "title": "Trust is a fundamental value",
+    "subtitle": "Our clients' satisfaction is our greatest success.",
+    "reviews": [
+      {
+        "name": "Isabelle Dupont",
+        "text": "Excellent experience with Blanca Calida! They know the market perfectly and know how to advise based on specific needs."
+      },
+      {
+        "name": "Sarah Williams",
+        "text": "Professional team, they helped us navigate every detail of the buying process. Highly recommended!"
+      },
+      {
+        "name": "Michael Ford",
+        "text": "Sehr guter Service, von der Besichtigung bis zur Kaufabwicklung. Alles war perfekt organisiert."
+      }
+    ]
+  },
+  "languageSelector": {
+    "label": "Language"
+  },
+  "themeToggle": {
+    "ariaLabel": "Toggle theme"
+  },
+  "errors": {
+    "pinIncorrect": "Incorrect PIN code.",
+    "incorrectPin": "Incorrect PIN."
+  }
 }
