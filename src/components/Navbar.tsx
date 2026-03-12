@@ -154,12 +154,13 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* --- MENU MOBILE HAMBURGER CORRIGÉ --- */}
+      {/* --- MENU MOBILE HAMBURGER CORRIGÉ (lisibilité améliorée) --- */}
       {isMobileMenuOpen && (
         <div className="fixed inset-0 z-[500] md:hidden">
           <div className="absolute inset-0 bg-[#020617]/95 backdrop-blur-xl" onClick={() => setIsMobileMenuOpen(false)} />
           
-          <div className="absolute right-0 top-0 h-full w-[85%] max-w-sm bg-white dark:bg-[#020617] shadow-2xl p-8 flex flex-col border-l border-white/5">
+          {/* Fond du menu : passage à dark:bg-slate-900 pour un meilleur contraste */}
+          <div className="absolute right-0 top-0 h-full w-[85%] max-w-sm bg-white dark:bg-slate-900 shadow-2xl p-8 flex flex-col border-l border-white/5">
             <div className="flex justify-between items-center mb-12">
               <DataHomeLogo className="h-8 w-auto text-slate-900 dark:text-white" />
               <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 text-slate-900 dark:text-white">
@@ -173,20 +174,22 @@ export default function Navbar() {
                   key={link.href}
                   href={link.href}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="text-2xl font-serif italic text-slate-900 dark:text-white hover:text-[#D4AF37] transition-colors"
+                  // Ajout de dark:font-semibold pour renforcer la lisibilité
+                  className="text-2xl font-serif italic text-slate-900 dark:text-white dark:font-semibold hover:text-[#D4AF37] transition-colors"
                 >
                   {link.name}
                 </Link>
               ))}
               <button
                 onClick={() => { setIsMobileMenuOpen(false); setIsLoginModalOpen(true); }}
-                className="text-left text-2xl font-serif italic text-slate-900 dark:text-white hover:text-[#D4AF37]"
+                // Même traitement pour le bouton d'accès client
+                className="text-left text-2xl font-serif italic text-slate-900 dark:text-white dark:font-semibold hover:text-[#D4AF37]"
               >
                 {t('nav.clientAccess')}
               </button>
             </nav>
 
-            {/* SÉLECTEUR DE LANGUE MOBILE */}
+            {/* SÉLECTEUR DE LANGUE MOBILE (inchangé) */}
             <div className="mt-auto pt-10 border-t border-slate-100 dark:border-white/10">
               <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-6 flex items-center gap-2">
                 <Globe size={14} className="text-[#D4AF37]"/> {t('languageSelector.label')}
