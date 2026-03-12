@@ -9,7 +9,7 @@ import {
   ChevronRight, Info, Upload, X, UserPlus, Mail, Lock, Copy,
   CheckCircle2, Clock, Phone, Globe, Hash,
   LayoutDashboard, Database, Eye, EyeOff, ArrowRight, Settings,
-  AlertCircle, Paperclip, HardDrive, Key, Menu,Construction
+  AlertCircle, Paperclip, HardDrive, Key, Menu,Construction, Briefcase
 } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
 import jsPDF from 'jspdf';
@@ -318,6 +318,15 @@ export default function AdminDashboard() {
       return acc;
     }, {});
   }, [constats]);
+
+  // --- STATISTIQUES (pour la vue vide) ---
+  const stats = useMemo(() => {
+  const total = projets.length;
+  const termines = projets.filter(p => p.etape_actuelle?.includes("12")).length;
+  const enCours = total - termines;
+  const cashbackTotal = projets.reduce((acc, curr) => acc + (curr.montant_cashback || 0), 0);
+  return { total, termines, enCours, cashbackTotal };
+  }, [projets]);
 
   const generateConstatsPDF = async (date: string, dailyConstats: any[], action: 'save' | 'preview') => {
   if (isGeneratingPDF) return;
