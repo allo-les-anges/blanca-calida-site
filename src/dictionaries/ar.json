@@ -347,7 +347,13 @@
     "tabs": {
       "clientBudget": "العميل والميزانية",
       "constructionStatus": "حالة البناء",
-      "documents": "خزنة المستندات"
+      "documents": "خزنة المستندات",
+    "pin": {
+      "code": "رمز PIN لتسجيل الدخول",
+      "copy": "نسخ الرمز",
+      "copied": "تم النسخ!",
+      "encryption": "تشفير AES-256 نشط"
+    }
     },
     "clientInfo": {
       "title": "تفاصيل المالك",

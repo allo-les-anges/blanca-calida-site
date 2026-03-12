@@ -347,7 +347,13 @@
     "tabs": {
       "clientBudget": "Client & Budget",
       "constructionStatus": "Construction Status",
-      "documents": "Documents Vault"
+      "documents": "Documents Vault",
+    "pin": {
+      "code": "Login PIN code",
+      "copy": "Copy code",
+      "copied": "Copied!",
+      "encryption": "AES-256 encryption active"
+    }
     },
     "clientInfo": {
       "title": "Owner details",

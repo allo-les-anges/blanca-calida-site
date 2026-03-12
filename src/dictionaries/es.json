@@ -347,7 +347,13 @@
     "tabs": {
       "clientBudget": "Cliente y Presupuesto",
       "constructionStatus": "Estado de la Obra",
-      "documents": "Caja Fuerte de Documentos"
+      "documents": "Caja Fuerte de Documentos",
+    "pin": {
+      "code": "Código PIN de acceso",
+      "copy": "Copiar código",
+      "copied": "¡Copiado!",
+      "encryption": "Cifrado AES-256 activo"
+    }
     },
     "clientInfo": {
       "title": "Datos del propietario",

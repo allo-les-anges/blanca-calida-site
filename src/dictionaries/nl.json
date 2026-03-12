@@ -347,7 +347,13 @@
     "tabs": {
       "clientBudget": "Cliënt & Budget",
       "constructionStatus": "Bouwstatus",
-      "documents": "Documentenkluis"
+      "documents": "Documentenkluis",
+    "pin": {
+      "code": "Login PIN-code",
+      "copy": "Kopieer code",
+      "copied": "Gekopieerd!",
+      "encryption": "AES-256 encryptie actief"
+    }
     },
     "clientInfo": {
       "title": "Eigenaargegevens",

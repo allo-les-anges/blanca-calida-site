@@ -789,41 +789,56 @@ export default function AdminDashboard() {
                       {/* Sidebar de droite : Cashback & PIN */}
                       <div className="lg:col-span-4 space-y-6 lg:space-y-8">
                           {/* Carte Cashback */}
-                          <div className="relative bg-emerald-500 p-8 lg:p-10 rounded-[2rem] lg:rounded-[3rem] text-black overflow-hidden group hover:scale-[1.02] transition-transform duration-500">
-                              <Euro size={100} className="absolute -right-8 -bottom-8 opacity-10 rotate-12 group-hover:rotate-0 transition-transform duration-1000 hidden sm:block" />
-                              <div className="relative z-10">
+                        <div className="relative bg-emerald-500 p-8 lg:p-10 rounded-[2rem] lg:rounded-[3rem] text-black overflow-hidden group hover:scale-[1.02] transition-transform duration-500">
+                            <Euro size={100} className="absolute -right-8 -bottom-8 opacity-10 rotate-12 group-hover:rotate-0 transition-transform duration-1000 hidden sm:block" />
+                            <div className="relative z-10 space-y-4">
                                 <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-60">{t('adminDashboard.cashback.reward')}</p>
-                                <div className="flex items-baseline gap-2 mt-4">
-                                  <input 
-                                    type="number" 
-                                    className="bg-transparent text-4xl sm:text-5xl font-black w-full outline-none border-b-4 border-black/10 focus:border-black/30 transition-all leading-none" 
-                                    value={editFields.montant_cashback || 0} 
-                                    onChange={e => setEditFields({...editFields, montant_cashback: parseFloat(e.target.value)})} 
-                                  />
-                                  <span className="text-2xl font-black italic">€</span>
+                                
+                                <div className="flex justify-between items-end">
+                                    <span className="text-4xl sm:text-5xl font-black leading-none">
+                                        {editFields.montant_cashback?.toLocaleString() || 0} €
+                                    </span>
                                 </div>
-                                <p className="text-[9px] font-bold uppercase mt-6 bg-black/10 inline-block px-3 py-1 rounded-full italic tracking-widest">{t('adminDashboard.cashback.paidAfterClosure')}</p>
-                              </div>
-                          </div>
+
+                                {/* Slider */}
+                                <input 
+                                    type="range" 
+                                    min="0" 
+                                    max="100000" 
+                                    step="1000" 
+                                    value={editFields.montant_cashback || 0} 
+                                    onChange={(e) => setEditFields({...editFields, montant_cashback: parseInt(e.target.value)})} 
+                                    className="w-full h-2 bg-black/20 rounded-lg appearance-none accent-white cursor-pointer" 
+                                />
+
+                                <p className="text-[9px] font-bold uppercase mt-4 bg-black/10 inline-block px-3 py-1 rounded-full italic tracking-widest">
+                                    {t('adminDashboard.cashback.paidAfterClosure')}
+                                </p>
+                            </div>
+                        </div>
 
                           {/* Carte PIN Client */}
-                          <div className="bg-white/5 p-8 lg:p-10 rounded-[2rem] lg:rounded-[3rem] border border-white/5 flex flex-col items-center text-center relative group overflow-hidden">
-                              <div className="absolute inset-0 bg-emerald-500/0 group-hover:bg-emerald-500/5 transition-colors duration-700"></div>
-                              <ShieldCheck size={40} className="text-emerald-500 mb-6 group-hover:scale-110 transition-transform duration-500" />
-                              <p className="text-[10px] font-black uppercase text-slate-500 tracking-[0.3em]">{t('adminDashboard.pin.code')}</p>
-                              <p className="text-3xl sm:text-4xl font-black text-white tracking-[0.4em] mt-4 ml-4 leading-none italic select-all break-all">
-                                {editFields.pin_code}
-                              </p>
-                              <button 
-                                onClick={() => copyToClipboard(editFields.pin_code, 'pin')}
-                                className="mt-6 text-[9px] font-black text-emerald-500 uppercase tracking-widest flex items-center gap-2 hover:bg-emerald-500/10 px-4 py-2 rounded-xl transition-all"
-                              >
-                                <Copy size={12} /> {t('adminDashboard.pin.copy')}
-                              </button>
-                              <p className="text-[9px] text-slate-600 font-bold uppercase mt-8 flex items-center gap-2">
-                                <Lock size={10} /> {t('adminDashboard.pin.encryption')}
-                              </p>
-                          </div>
+                            <div className="bg-white/5 p-8 lg:p-10 rounded-[2rem] lg:rounded-[3rem] border border-white/5 flex flex-col items-center text-center relative group overflow-hidden">
+                                <div className="absolute inset-0 bg-emerald-500/0 group-hover:bg-emerald-500/5 transition-colors duration-700"></div>
+                                <ShieldCheck size={40} className="text-emerald-500 mb-6 group-hover:scale-110 transition-transform duration-500" />
+                                <p className="text-[10px] font-black uppercase text-slate-500 tracking-[0.3em]">{t('adminDashboard.pin.code')}</p>
+                                <p className="text-3xl sm:text-4xl font-black text-white tracking-[0.4em] mt-4 ml-4 leading-none italic select-all break-all">
+                                    {editFields.pin_code}
+                                </p>
+                                
+                                {/* Bouton avec feedback */}
+                                <button 
+                                    onClick={() => copyToClipboard(editFields.pin_code, 'pin')}
+                                    className="mt-6 text-[9px] font-black text-emerald-500 uppercase tracking-widest flex items-center gap-2 hover:bg-emerald-500/10 px-4 py-2 rounded-xl transition-all"
+                                >
+                                    {copySuccess === 'pin' ? <CheckCircle2 size={12} /> : <Copy size={12} />} 
+                                    {copySuccess === 'pin' ? (t('adminDashboard.pin.copied') || 'Copié !') : t('adminDashboard.pin.copy')}
+                                </button>
+                                
+                                <p className="text-[9px] text-slate-600 font-bold uppercase mt-8 flex items-center gap-2">
+                                    <Lock size={10} /> {t('adminDashboard.pin.encryption')}
+                                </p>
+                            </div>
                       </div>
                   </div>
               )}
@@ -949,10 +964,10 @@ export default function AdminDashboard() {
                             </h3>
                             <p className="text-[10px] font-bold text-slate-500 uppercase ml-12 tracking-widest">{t('adminDashboard.docs.subtitle')}</p>
                           </div>
-                          <label className="group cursor-pointer relative flex items-center justify-center gap-3 px-6 lg:px-10 py-4 bg-white text-black rounded-[1.5rem] font-black text-[10px] uppercase tracking-[0.2em] hover:bg-emerald-500 transition-all duration-500 shadow-xl shadow-white/5 overflow-hidden active:scale-95">
-                              {uploadingDoc ? <Loader2 className="animate-spin" size={16}/> : <Upload size={16} className="group-hover:bounce" />} 
+                          <label className="group cursor-pointer relative flex items-center justify-center gap-3 px-6 lg:px-10 py-4 bg-white dark:bg-slate-800 text-black dark:text-white rounded-[1.5rem] font-black text-[10px] uppercase tracking-[0.2em] hover:bg-emerald-500 dark:hover:bg-emerald-600 transition-all duration-500 shadow-xl shadow-white/5 overflow-hidden active:scale-95">
+                            {uploadingDoc ? <Loader2 className="animate-spin" size={16}/> : <Upload size={16} className="group-hover:bounce" />} 
                               {uploadingDoc ? t('adminDashboard.docs.processing') : t('adminDashboard.docs.upload')}
-                              <input type="file" className="hidden" onChange={handleFileUpload} disabled={uploadingDoc} />
+                                <input type="file" className="hidden" onChange={handleFileUpload} disabled={uploadingDoc} />
                           </label>
                       </div>
 
