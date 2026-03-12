@@ -353,8 +353,6 @@
       "copy": "Copier le code",
       "copied": "Copié !",
       "encryption": "Chiffrement AES-256 Actif"
-  }
-}
     },
     "clientInfo": {
       "title": "Coordonnées du propriétaire",
