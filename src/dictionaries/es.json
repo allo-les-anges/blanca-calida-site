@@ -1,3 +1,4 @@
+// src/dictionaries/es.json
 {
   "common": {
     "backToHome": "Volver al inicio",
@@ -22,7 +23,7 @@
     "clientAccess": "Acceso Cliente",
     "search": "Buscar",
     "budget": "Presupuesto Máx",
-    "results": "Mostrar resultados",
+    "results": "Ver resultados",
     "private": "Acceso Privado",
     "pinPlaceholder": "PIN",
     "validate": "Validar",
@@ -31,7 +32,7 @@
   },
   "footer": {
     "excellence": "Excelencia Inmobiliaria",
-    "description": "El arte de la inmobiliaria de excepción. Forjamos puentes entre sus ambiciones y las propiedades más prestigiosas de la costa.",
+    "description": "El arte del inmobiliario excepcional. Construimos puentes entre sus ambiciones y las propiedades más prestigiosas de la costa.",
     "collections": "Colecciones",
     "villasSignature": "Villas Signature",
     "domainsPrestige": "Dominios de Prestigio",
@@ -48,7 +49,7 @@
     "phone": "+34 627 76 82 33",
     "privacy": "Privacidad",
     "legal": "Aviso Legal",
-    "eliteEdition": "Elite Edition v2.0"
+    "eliteEdition": "Edición Élite v2.0"
   },
   "home": {
     "heroTitleLine1": "Villas de Lujo &",
@@ -72,8 +73,8 @@
     },
     "regionGrid": {
       "ourDestinations": "Nuestros Destinos",
-      "exceptionalPlaces": "Lugares de Excepción",
-      "description": "Una selección rigurosa de los enclaves más prestigiosos del litoral.",
+      "exceptionalPlaces": "Lugares Excepcionales",
+      "description": "Una rigurosa selección de los enclaves más prestigiosos de la costa.",
       "properties": "Propiedades",
       "discover": "Descubrir"
     },
@@ -81,7 +82,7 @@
       "search": "Buscar",
       "sub": "Encuentre su villa ideal",
       "budget": "Presupuesto Máx",
-      "results": "Mostrar resultados"
+      "results": "Ver resultados"
     },
     "clientLogin": {
       "private": "Acceso Privado",
@@ -90,7 +91,7 @@
     },
     "loading": {
       "updating": "Actualizando...",
-      "amaruExcellence": "AMARU EXCELLENCE..."
+      "amaruExcellence": "EXCELENCIA AMARU..."
     }
   },
   "propertyCard": {
@@ -99,11 +100,12 @@
     "beds": "dormitorios",
     "baths": "baños",
     "pool": "Piscina",
-    "noPool": "Sin",
+    "noPool": "Sin piscina",
     "land": "terreno",
     "garage": "Garaje",
     "surface": "m²",
-    "plot": "m² parcela"
+    "plot": "m² parcela",
+    "fallbackTitle": "Villa de Prestigio"
   },
   "propertyDetail": {
     "back": "Volver a la selección",
@@ -121,7 +123,7 @@
     "technicalPlans": "Planos Técnicos",
     "detailedLayout": "Distribución detallada",
     "price": "Precio de Venta",
-    "brochure": "Folio PDF",
+    "brochure": "Folleto PDF",
     "whatsapp": "Contacto WhatsApp",
     "whatsappDirect": "WhatsApp Directo",
     "bookVisit": "Reservar Visita",
@@ -133,7 +135,14 @@
     "golf": "{distance}km al golf",
     "propertyNotFound": "Propiedad no encontrada",
     "backToCatalogue": "Volver al catálogo",
-    "loading": "Cargando propiedad..."
+    "loading": "Cargando propiedad...",
+    "rooms": "Dormitorios",
+    "baths": "Baños",
+    "surface": "Construido m²",
+    "from": "Desde",
+    "configurations": "Configuraciones disponibles",
+    "selected": "Seleccionado",
+    "whatsapp_msg": "Hola, me gustaría información sobre"
   },
   "cashback": {
     "title": "El Programa de Beneficios Negociados",
@@ -141,7 +150,7 @@
     "flexibility": "Flexibilidad Total",
     "flexibilityText": "Una ventaja a medida adaptada a su proyecto",
     "example": "Ejemplo de dotación",
-    "exampleAmount": "2 500 €*",
+    "exampleAmount": "2.500 €*",
     "orEquipment": "o mobiliario / servicios equivalentes",
     "points": [
       "Condición negociada previamente con la agencia o el promotor socio.",
@@ -185,8 +194,8 @@
         "name": "Deborah",
         "role": "Operational Excellence & Client Experience",
         "worldRegion": "Global Operations",
-        "background": "Garante de la fluidez de los procesos y la satisfacción del cliente. Asegura el seguimiento operativo diario para garantizar que cada proyecto reciba una atención personalizada y un máximo rigor de ejecución.",
-        "skills": ["Procesos", "Experiencia Cliente", "Rigor"],
+        "background": "Garante de la fluidez de los procesos y la satisfacción del cliente. Asegura el seguimiento operativo diario para garantizar que cada proyecto reciba atención personalizada y máxima rigurosidad en la ejecución.",
+        "skills": ["Procesos", "Experiencia del Cliente", "Rigor"],
         "market": "Sede Amaru"
       },
       {
@@ -200,8 +209,8 @@
       {
         "name": "Joanna Pawelek",
         "role": "Eastern Europe & Alicante Specialist",
-        "worldRegion": "Europa del Este & anglófona",
-        "background": "Experta certificada (ANAI - API) del mercado de Alicante. Actúa como puente estratégico para inversores de Europa del Este y del mundo anglófono gracias a su dominio del polaco, inglés y español.",
+        "worldRegion": "Europa del Este & anglófono",
+        "background": "Experta certificada (ANAI - API) del mercado de Alicante. Actúa como puente estratégico para inversores de Europa del Este y el mundo anglófono gracias a su dominio del polaco, inglés y español.",
         "skills": ["Certificada ANAI-API", "Mercado Polaco", "Alicante"],
         "market": "Alicante / Costa Blanca"
       },
@@ -209,9 +218,9 @@
         "name": "Abdellah Touati",
         "role": "MENA & Americas Expert",
         "worldRegion": "Oriente Medio & Américas",
-        "background": "Con una trayectoria técnica en ingeniería civil y experiencia en el mercado de Dubái, lidera la expansión hacia mercados emergentes y América del Norte, conectando a los desarrolladores con redes globales de inversores.",
+        "background": "Con una formación técnica en ingeniería civil y experiencia en el mercado de Dubái, lidera la expansión hacia mercados emergentes y América del Norte, conectando a los desarrolladores con redes globales de inversores.",
         "skills": ["Ingeniería Civil", "Mercado de Dubái", "Redes Globales"],
-        "market": "MENA / EE.UU. / Canadá"
+        "market": "MENA / EE. UU. / Canadá"
       },
       {
         "name": "Gaëtan",
@@ -236,77 +245,110 @@
     "reset": "Reiniciar terminal",
     "invalidPin": "Código PIN inválido",
     "invalidCredentials": "Credenciales inválidas",
-    "validationError": "Error de validación"
+    "validationError": "Error de validación",
+    "profileMissing": "Perfil faltante en la base de datos.",
+    "roleNotAuthorized": "Rol no autorizado.",
+    "systemError": "Error del sistema."
   },
   "projectTracker": {
     "agencyName": "AMARU-HOMES",
     "department": "Departamento de Control Técnico y Calidad",
     "phase": "Fase Actual: {phase}",
+    "phaseLabel": "Fase Actual:",
     "quit": "Salir",
-    "documents": "Documentos Administrativos",
+    "documents": "Anexos Administrativos",
     "technicalReports": "Expediente de Seguimiento Técnico",
     "reportValidated": "Informe de Inspección Validado",
-    "expertise": "Peritaje",
+    "expertise": "Experticia",
     "inspectionReport": "Informe de Inspección",
     "generateReport": "Generar Informe",
-    "certification": "Certifico que la información y las fotografías presentadas a continuación fueron recogidas in situ por el departamento técnico de Amaru-Homes. Las coordenadas GPS garantizan la autenticidad de la inspección.",
+    "certification": "Certifico que la información y las fotografías presentadas a continuación fueron recopiladas en el sitio por el departamento técnico de Amaru-Homes. Las coordenadas GPS garantizan la autenticidad de la inspección.",
     "observation": "Observación técnica #{number}",
-    "location": "Ubicación: {lat}, {lng}"
+    "location": "Ubicación: {lat}, {lng}",
+    "expertName": "Gaëtan Mukeba",
+    "reportRef": "Informe de Inspección #RC-{ref}",
+    "visitDate": "Fecha de visita: {date}",
+    "recipient": "DESTINATARIO",
+    "project": "Proyecto: {name}",
+    "expert": "EXPERTO",
+    "defaultObservation": "No se detectaron anomalías durante la inspección visual.",
+    "statusConforme": "ESTADO: CONFORME",
+    "photoRef": "Toma #{num}\n\nGPS: {lat}\n{lng}",
+    "photoHeader": "REFERENCIA DE FOTO",
+    "analysisHeader": "ANÁLISIS TÉCNICO Y OBSERVACIONES",
+    "photoAnnex": "ANEXO FOTOGRÁFICO Y GEOLOCALIZACIÓN",
+    "imageNotAvailable": "(Imagen no disponible)",
+    "imageCaption": "Ilustración #{num} - Capturada el {date}",
+    "certificationTitle": "CERTIFICACIÓN:",
+    "certificationText": "Yo, el abajo firmante, {expert}, certifico que la información, los datos GPS y las fotografías contenidas en este informe reflejan fielmente el progreso real de la obra en la fecha mencionada.",
+    "pdfError": "Error al generar el PDF"
   },
   "adminChantier": {
-    "backHome": "Volver al Inicio",
+    "backHome": "Volver Inicio",
     "title": "Luxury Staff",
-    "subtitle": "Terreno y Reportes",
+    "subtitle": "Campo e Informes",
     "pinPlaceholder": "••••••",
     "connect": "Conectar",
     "agent": "Agente",
     "whichSite": "¿Qué obra visita?",
     "searchPlaceholder": "Ej: Villa Bianca...",
-    "changeVilla": "Cambiar de villa",
+    "changeVilla": "Cambiar villa",
     "constructionPhase": "Fase de construcción",
     "newReport": "Nuevo Informe",
-    "observationsPlaceholder": "Observaciones sobre el terreno...",
+    "observationsPlaceholder": "Observaciones de campo...",
     "locate": "Localizar",
     "gpsOk": "GPS OK",
     "photo": "Foto",
     "publish": "Publicar informe ({count})",
-    "stepUpdated": "Fase actualizada",
+    "stepUpdated": "Paso actualizado",
     "uploading": "Subiendo...",
     "photoAdded": "¡Foto añadida!",
     "publishing": "Publicando...",
     "reportSent": "¡Informe enviado!",
     "phases": [
-    "0. Firma y Reserva",
-    "1. Terreno / Movimiento de tierras",
-    "2. Cimientos",
-    "3. Muros / Elevación",
-    "4. Techumbre / Estructura de madera",
-    "5. Carpintería",
-    "6. Electricidad / Fontanería",
-    "7. Aislamiento",
-    "8. Yeso / Enlucido",
-    "9. Suelos y Azulejos",
-    "10. Pintura / Acabados",
-    "11. Exteriores / Jardín",
-    "12. Entrega de llaves"
-    ]
+      "0. Firma y Reserva",
+      "1. Terreno / Movimiento de tierras",
+      "2. Cimientos",
+      "3. Muros / Elevación",
+      "4. Techumbre / Estructura de madera",
+      "5. Carpintería",
+      "6. Electricidad / Fontanería",
+      "7. Aislamiento",
+      "8. Yeso / Enlucido",
+      "9. Suelos y Azulejos",
+      "10. Pintura / Acabados",
+      "11. Exteriores / Jardín",
+      "12. Entrega de llaves"
+    ],
+    "pinCheckError": "Error al comprobar el PIN.",
+    "noAccess": "Esta cuenta no tiene derechos de acceso a la interfaz de obra.",
+    "invalidPin": "PIN inválido.",
+    "projectNotFound": "Obra no encontrada.",
+    "defaultPhotoComment": "Foto de seguimiento",
+    "storageError": "Error de almacenamiento: {message}",
+    "databaseError": "Error de base de datos: {message}"
   },
   "adminDashboard": {
-    "adminControl": "Admin Control",
+    "adminControl": "Control de Administrador",
     "search": "BUSCAR...",
+    "searchPlaceholder": "BUSCAR...",
     "projects": "Proyectos",
     "team": "Equipo",
     "publicSite": "Sitio Público",
-    "logout": "Cerrar sesión",
+    "logout": "Cerrar Sesión",
     "activeConstructionFile": "Expediente de obra activo",
     "ref": "REF: {ref}",
     "owner": "Propietario: {name}",
     "print": "Imprimir",
-    "save": "Guardar expediente",
+    "save": "Guardar archivo",
+    "saveSuccess": "¡Archivo guardado con éxito!",
+    "uploadError": "Error de carga: {message}",
+    "confirmDeleteDocument": "¿Está seguro de que desea eliminar este documento definitivamente?",
+    "saveFile": "Guardar archivo",
     "tabs": {
       "clientBudget": "Cliente y Presupuesto",
       "constructionStatus": "Estado de la Obra",
-      "documents": "Caja fuerte (Docs)"
+      "documents": "Caja Fuerte de Documentos"
     },
     "clientInfo": {
       "title": "Datos del propietario",
@@ -316,7 +358,7 @@
       "phone": "Teléfono"
     },
     "address": {
-      "title": "Ubicación del inmueble",
+      "title": "Ubicación de la propiedad",
       "street": "Calle / Dirección",
       "city": "Ciudad",
       "postal": "Código Postal",
@@ -324,7 +366,7 @@
     },
     "cashback": {
       "reward": "Recompensa Cashback",
-      "paidAfterClosure": "Importe pagado al cierre"
+      "paidAfterClosure": "Importe pagado tras la finalización"
     },
     "pin": {
       "code": "Código PIN de acceso",
@@ -332,11 +374,12 @@
       "encryption": "Cifrado AES-256 activo"
     },
     "progress": {
-      "title": "Progreso en Tiempo Real",
-      "global": "Progreso Global",
+      "title": "Progreso en tiempo real",
+      "global": "Progreso general",
       "phase": "Fase actual seleccionada",
       "weeklyComments": "Comentarios semanales",
-      "visibleByClient": "Visible para el cliente"
+      "visibleByClient": "Visible para el cliente",
+      "placeholder": "Detalle el trabajo realizado esta semana..."
     },
     "constats": {
       "title": "Inspecciones técnicas ({count})",
@@ -347,15 +390,15 @@
       "realTimeUpdate": "La fecha de entrega se actualiza en tiempo real en el espacio del cliente."
     },
     "builder": {
-      "partner": "Constructor socio",
+      "partner": "Constructor asociado",
       "placeholder": "Ej: Porcelanosa / Grupo Isan"
     },
     "docs": {
-      "title": "Documentos Cloud",
-      "subtitle": "Área de almacenamiento seguro del cliente",
-      "upload": "Subir archivo",
+      "title": "Documentos en la Nube",
+      "subtitle": "Área de almacenamiento segura para el cliente",
+      "upload": "Subir un archivo",
       "processing": "Procesando...",
-      "noDocuments": "Ningún documento archivado"
+      "noDocuments": "No hay documentos archivados"
     },
     "staff": {
       "add": "Añadir colaborador",
@@ -365,37 +408,107 @@
       "role": "Rol y Privilegios",
       "agent": "Agente (Acceso limitado)",
       "admin": "Administrador de Agencia",
-      "superAdmin": "Super Administrador",
+      "superAdmin": "Superadministrador",
       "security": "Seguridad Automática",
-      "pinInfo": "Se generará un código PIN único de 6 dígitos. El colaborador podrá conectarse inmediatamente después de la validación.",
+      "pinInfo": "Se generará un código PIN único de 6 dígitos. El colaborador podrá iniciar sesión inmediatamente después de la validación.",
       "confirm": "Confirmar invitación",
       "copyPin": "Copiar PIN",
       "delete": "Eliminar este colaborador",
       "securityCode": "Código de seguridad",
       "cannotDeleteSelf": "No puede eliminar su propia cuenta."
-    }
+    },
+    "inspectionReport": "Informe de Inspección",
+    "observation": "Observación técnica #{num}",
+    "location": "Ubicación: {lat}, {lng}",
+    "certification": "Certifico que la información y las fotografías presentadas a continuación fueron recopiladas en el sitio por el departamento técnico de Amaru-Homes. Las coordenadas GPS garantizan la autenticidad de la inspección.",
+    "generateReport": "Generar Informe",
+    "reportRef": "Informe de Inspección #RC-{ref}",
+    "visitDate": "Fecha de visita: {date}",
+    "phase": "Fase: {phase}",
+    "recipient": "DESTINATARIO",
+    "project": "Proyecto: {name}",
+    "expert": "EXPERTO",
+    "defaultObservation": "No se detectaron anomalías durante la inspección visual.",
+    "statusConforme": "ESTADO: CONFORME",
+    "photoRef": "Toma #{num}\n\nGPS: {lat}\n{lng}",
+    "photoHeader": "REFERENCIA DE FOTO",
+    "analysisHeader": "ANÁLISIS TÉCNICO Y OBSERVACIONES",
+    "photoAnnex": "ANEXO FOTOGRÁFICO Y GEOLOCALIZACIÓN",
+    "imageNotAvailable": "(Imagen no disponible)",
+    "imageCaption": "Ilustración #{num} - Capturada el {date}",
+    "certificationTitle": "CERTIFICACIÓN:",
+    "certificationText": "Yo, el abajo firmante, {expert}, certifico que la información, los datos GPS y las fotografías contenidas en este informe reflejan fielmente el progreso real de la obra en la fecha mencionada.",
+    "pdfError": "Error al generar el PDF",
+    "initializing": "Inicializando Terminal de Administrador",
+    "version": "Dashboard Terminal v2.4.0"
+  },
+  "adminStaff": {
+    "userCreationFailed": "No se pudo crear el usuario.",
+    "addSuccess": "✅ ¡Colaborador añadido! PIN generado: {pin}",
+    "addError": "Error al añadir colaborador: {message}",
+    "cannotDeleteSelf": "No puede eliminar su propia cuenta.",
+    "confirmDelete": "¿Está seguro de que desea eliminar este colaborador definitivamente?",
+    "deleteSuccess": "Colaborador eliminado.",
+    "deleteError": "Error al eliminar colaborador: {message}",
+    "copyPin": "Copiar PIN",
+    "delete": "Eliminar este colaborador",
+    "securityCode": "Código de seguridad",
+    "superAdmin": "Superadministrador",
+    "admin": "Administrador de Agencia",
+    "agent": "Agente (Acceso limitado)",
+    "add": "Añadir colaborador",
+    "enrollment": "Inscripción en el equipo de {company}",
+    "firstName": "Nombre",
+    "lastName": "Apellido",
+    "email": "Email profesional",
+    "role": "Rol y Privilegios",
+    "security": "Seguridad Automática",
+    "pinInfo": "Se generará un código PIN único de 6 dígitos. El colaborador podrá iniciar sesión inmediatamente después de la validación.",
+    "confirm": "Confirmar invitación"
+  },
+  "adminProject": {
+    "initialize": "Inicializar Proyecto",
+    "subtitle": "Registro de una nueva obra de Amaru",
+    "error": "Error: {message}",
+    "firstName": "Nombre",
+    "firstNamePlaceholder": "John",
+    "lastName": "Apellido",
+    "lastNamePlaceholder": "Doe",
+    "villaName": "Nombre de la villa",
+    "villaPlaceholder": "VILLA AMARU LUXE",
+    "clientEmail": "Email del cliente",
+    "emailPlaceholder": "cliente@ejemplo.com",
+    "phone": "Teléfono",
+    "phonePlaceholder": "+34 600 00 00 00",
+    "address": "Calle / Dirección",
+    "addressPlaceholder": "123 Avenida de la Playa",
+    "city": "Ciudad",
+    "cityPlaceholder": "Marbella",
+    "postalCode": "Código postal",
+    "country": "País",
+    "generate": "Generar expediente completo"
   },
   "superAdmin": {
     "initializing": "Inicializando terminal...",
     "accessDenied": "Acceso Denegado",
-    "noPrivileges": "Su cuenta no tiene privilegios de Super-Admin.",
-    "logout": "Cerrar sesión",
+    "noPrivileges": "Su cuenta no tiene privilegios de Superadministrador.",
+    "logout": "Cerrar Sesión",
     "title": "Super Control",
     "subtitle": "Sistema Centralizado",
     "publicSite": "Sitio Público",
-    "deploy": "Desplegar cuenta",
+    "deploy": "Implementar una cuenta",
     "firstName": "Nombre",
     "lastName": "Apellido",
     "agency": "Agencia / Socio",
-    "packLevel": "Nivel del Pack",
+    "packLevel": "Nivel del Paquete",
     "core": "CORE (2 Expertos)",
     "ascent": "ASCENT (10 Expertos)",
     "horizon": "HORIZON (Ilimitado)",
-    "emailPlaceholder": "Email de conexión",
+    "emailPlaceholder": "Email de inicio de sesión",
     "passwordPlaceholder": "Contraseña",
     "activate": "ACTIVAR LICENCIA",
     "activeUsers": "Usuarios Activos",
-    "database": "Database Live",
+    "database": "Base de Datos en Vivo",
     "search": "Buscar...",
     "id": "ID: {id}",
     "pin": "PIN: {pin}",
@@ -403,7 +516,7 @@
   },
   "contactCashback": {
     "back": "Volver al inicio",
-    "title": "Activación Cashback",
+    "title": "Activación de Cashback",
     "description": "Complete su información para vincular este beneficio a su perfil de cliente.",
     "firstName": "Nombre *",
     "lastName": "Apellido *",
@@ -413,7 +526,7 @@
   },
   "merci": {
     "title": "Solicitud Recibida",
-    "message": "Su solicitud de Cashback ha sido transmitida. Nos pondremos en contacto con usted en un plazo de 24 horas para presentarle los detalles de su beneficio.",
+    "message": "Su solicitud de Cashback ha sido enviada. Nos pondremos en contacto con usted en un plazo de 24 horas para presentarle los detalles de su beneficio.",
     "backHome": "Volver al inicio",
     "brand": "Luxury Estates — Inmobiliaria Redefinida"
   },
@@ -426,7 +539,7 @@
     "distanceSea": "Distancia al mar",
     "airport": "Aeropuerto",
     "unitsAvailable": "Unidades disponibles y Planos",
-    "selectUnit": "Seleccione un lote para ver los detalles y planos",
+    "selectUnit": "Seleccione un lote para ver detalles y planos de planta",
     "available": "Disponible",
     "seeDetails": "Ver planos y detalles"
   },
@@ -441,7 +554,7 @@
     "technicalPlans": "Planos Técnicos",
     "detailedLayout": "Distribución detallada",
     "price": "Precio de Venta",
-    "brochure": "Folio PDF",
+    "brochure": "Folleto PDF",
     "whatsapp": "Contacto WhatsApp",
     "whatsappMobile": "Chatear en WhatsApp",
     "bookVisit": "Reservar Visita",
@@ -450,7 +563,7 @@
     "golf": "{distance}km al golf"
   },
   "advancedSearch": {
-    "propertyRef": "Referencia Propiedad",
+    "propertyRef": "Referencia de Propiedad",
     "refPlaceholder": "Ej: REF-1234",
     "region": "Región",
     "allSpain": "España (Todas)",
@@ -459,12 +572,12 @@
     "costaDelSol": "Costa del Sol",
     "costaAlmeria": "Costa Almería",
     "type": "Tipo",
-    "anyType": "Indiferente",
+    "anyType": "Cualquier tipo",
     "villa": "Villa",
     "apartment": "Apartamento",
     "penthouse": "Ático",
     "bungalow": "Bungalow",
-    "townhouse": "Casa adosada",
+    "townhouse": "Adosado",
     "min": "Mín",
     "max": "Máx",
     "bedrooms": "Dormitorios",
@@ -506,21 +619,5 @@
   "errors": {
     "pinIncorrect": "Código PIN incorrecto.",
     "incorrectPin": "PIN incorrecto."
-  },
- "login": {
-  "title": "Amaru Engine",
-  "subtitle": "Autenticación segura",
-  "pinTab": "CÓDIGO PIN",
-  "credentialsTab": "CREDENCIALES",
-  "emailLabel": "Usuario",
-  "passwordLabel": "Contraseña",
-  "validate": "INICIAR SESIÓN",
-  "reset": "Reiniciar terminal",
-  "invalidPin": "Código PIN inválido",
-  "invalidCredentials": "Credenciales inválidas",
-  "validationError": "Error de validación",
-  "profileMissing": "Perfil faltante en la base de datos.",
-  "roleNotAuthorized": "Rol no autorizado.",
-  "systemError": "Error del sistema."
-}
+  }
 }

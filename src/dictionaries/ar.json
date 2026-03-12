@@ -31,10 +31,10 @@
   },
   "footer": {
     "excellence": "التميز العقاري",
-    "description": "فن العقارات الاستثنائية. نبني جسوراً بين طموحاتك وأرقى العقارات على الساحل.",
-    "collections": "مجموعات",
-    "villasSignature": "فلل مميزة",
-    "domainsPrestige": "مناطق مرموقة",
+    "description": "فن العقارات الاستثنائية. نبني جسوراً بين طموحاتكم وأرقى العقارات على الساحل.",
+    "collections": "المجموعات",
+    "villasSignature": "فلل سيغنيتشر",
+    "domainsPrestige": "مناطق راقية",
     "newDevelopments": "تطويرات جديدة",
     "privateClientAccess": "دخول خاص للعملاء",
     "proSpace": "مساحة مهنية",
@@ -53,7 +53,7 @@
   "home": {
     "heroTitleLine1": "فيلات فاخرة و",
     "heroTitleLine2": "عقارات استثنائية",
-    "heroSubtitle": "COSTA BLANCA | COSTA DEL SOL",
+    "heroSubtitle": "كوستا بلانكا | كوستا ديل سول",
     "findVilla": "ابحث عن فيلتك",
     "ownerSection": {
       "title": "تابع مشروعك",
@@ -64,7 +64,7 @@
     },
     "collection": {
       "title": "محفظة خاصة",
-      "propertiesSelected": "عقار مختار",
+      "propertiesSelected": "عقارات مختارة",
       "noMatch": "لا توجد تطابقات",
       "noMatchDescription": "لم نعثر على عقار يطابق معاييرك.",
       "tryWider": "حاول توسيع نطاق البحث.",
@@ -73,7 +73,7 @@
     "regionGrid": {
       "ourDestinations": "وجهاتنا",
       "exceptionalPlaces": "أماكن استثنائية",
-      "description": "اختيار دقيق لأرقى المواقع على الساحل.",
+      "description": "اختيار دقيق لأرقى المناطق الساحلية.",
       "properties": "عقارات",
       "discover": "اكتشف"
     },
@@ -90,7 +90,7 @@
     },
     "loading": {
       "updating": "جاري التحديث...",
-      "amaruExcellence": "تميز أمارو..."
+      "amaruExcellence": "تميز أمرو..."
     }
   },
   "propertyCard": {
@@ -99,11 +99,12 @@
     "beds": "غرف نوم",
     "baths": "حمامات",
     "pool": "حمام سباحة",
-    "noPool": "بدون",
+    "noPool": "بدون مسبح",
     "land": "أرض",
     "garage": "مرآب",
     "surface": "م²",
-    "plot": "م² قطعة أرض"
+    "plot": "م² قطعة أرض",
+    "fallbackTitle": "فيلا فاخرة"
   },
   "propertyDetail": {
     "back": "العودة إلى الاختيار",
@@ -118,7 +119,7 @@
     "poolNo": "لا",
     "parking": "موقف سيارات",
     "artOfLiving": "فن الحياة",
-    "technicalPlans": "مخططات فنية",
+    "technicalPlans": "المخططات الفنية",
     "detailedLayout": "تخطيط مفصل",
     "price": "سعر البيع",
     "brochure": "كتيب PDF",
@@ -127,13 +128,20 @@
     "bookVisit": "حجز زيارة",
     "advisor": "مستشار",
     "activateCashback": "تفعيل الكاش باك الخاص بي",
-    "privilege": "امتياز أمارو",
+    "privilege": "امتياز أمرو",
     "location": "موقع متميز",
     "distanceSea": "{distance}كم إلى البحر",
     "golf": "{distance}كم إلى الجولف",
     "propertyNotFound": "العقار غير موجود",
     "backToCatalogue": "العودة إلى الكتالوج",
-    "loading": "جاري تحميل العقار..."
+    "loading": "جاري تحميل العقار...",
+    "rooms": "غرف نوم",
+    "baths": "حمامات",
+    "surface": "مساحة مبنية م²",
+    "from": "من",
+    "configurations": "تكوينات متاحة",
+    "selected": "محدد",
+    "whatsapp_msg": "مرحبًا، أود الحصول على معلومات حول"
   },
   "cashback": {
     "title": "برنامج المزايا المفاوض عليها",
@@ -141,7 +149,7 @@
     "flexibility": "مرونة كاملة",
     "flexibilityText": "ميزة مصممة خصيصًا لمشروعك",
     "example": "مثال على التخصيص",
-    "exampleAmount": "2 500 €*",
+    "exampleAmount": "2500 €*",
     "orEquipment": "أو أثاث / خدمات معادلة",
     "points": [
       "شرط تم التفاوض عليه مسبقًا مع الوكالة أو المطور الشريك.",
@@ -177,29 +185,29 @@
     "regionPlaceholder": "البلد / المنطقة",
     "messagePlaceholder": "تفاصيل مشروعك...",
     "submit": "اتصل بالخبير المخصص",
-    "submitting": "جاري الإرسال...",
+    "submitting": "جارٍ الإرسال...",
     "success": "تم إرسال الرسالة! سيتواصل معك جيليان قريبًا.",
     "error": "خطأ. حاول مرة أخرى.",
     "team": [
       {
         "name": "Deborah",
-        "role": "Operational Excellence & Client Experience",
-        "worldRegion": "Global Operations",
-        "background": "ضمان سلاسة العمليات ورضا العملاء. تضمن المتابعة التشغيلية اليومية لضمان حصول كل مشروع على اهتمام شخصي وأقصى دقة في التنفيذ.",
-        "skills": ["عمليات", "تجربة العميل", "دقة"],
-        "market": "مقر Amaru"
+        "role": "التميز التشغيلي وتجربة العميل",
+        "worldRegion": "العمليات العالمية",
+        "background": "ضامنة سلاسة العمليات ورضا العملاء. تضمن المتابعة التشغيلية اليومية لضمان حصول كل مشروع على اهتمام شخصي ودقة تنفيذ قصوى.",
+        "skills": ["العمليات", "تجربة العميل", "الدقة"],
+        "market": "المقر الرئيسي لأمارو"
       },
       {
         "name": "Gillian",
-        "role": "Benelux, DACH & UK Expert",
-        "worldRegion": "شمال أوروبا والمملكة المتحدة",
-        "background": "متخصص في الأسواق ذات القوة الشرائية العالية، ولا سيما بلجيكا وهولندا وألمانيا والمملكة المتحدة. يضمن الارتباط الاستراتيجي بين المستثمرين من شمال أوروبا والفرص الدولية.",
-        "skills": ["استثمار", "منطقة DACH", "استراتيجية"],
+        "role": "خبير بنلوكس وألمانيا والمملكة المتحدة",
+        "worldRegion": "أوروبا الشمالية والمملكة المتحدة",
+        "background": "متخصص في الأسواق ذات القوة الشرائية العالية، ولا سيما بلجيكا وهولندا وألمانيا والمملكة المتحدة. يضمن الارتباط الاستراتيجي بين مستثمري شمال أوروبا والفرص الدولية.",
+        "skills": ["الاستثمار", "منطقة DACH", "الاستراتيجية"],
         "market": "دولي"
       },
       {
         "name": "Joanna Pawelek",
-        "role": "Eastern Europe & Alicante Specialist",
+        "role": "أخصائية أوروبا الشرقية وأليكانتي",
         "worldRegion": "أوروبا الشرقية والناطقة بالإنجليزية",
         "background": "خبيرة معتمدة (ANAI - API) في سوق أليكانتي. تعمل كجسر استراتيجي للمستثمرين من أوروبا الشرقية والعالم الناطق بالإنجليزية بفضل إتقانها للبولندية والإنجليزية والإسبانية.",
         "skills": ["معتمدة ANAI-API", "السوق البولندي", "أليكانتي"],
@@ -207,19 +215,19 @@
       },
       {
         "name": "Abdellah Touati",
-        "role": "MENA & Americas Expert",
+        "role": "خبير الشرق الأوسط والأمريكتين",
         "worldRegion": "الشرق الأوسط والأمريكتين",
-        "background": "بفضل خلفيته التقنية في الهندسة المدنية وخبرته في سوق دبي، يقود التوسع إلى الأسواق الناشئة وأمريكا الشمالية، ويربط المطورين بشبكات المستثمرين العالمية.",
-        "skills": ["هندسة مدنية", "سوق دبي", "شبكات عالمية"],
-        "market": "الشرق الأوسط وشمال إفريقيا / الولايات المتحدة الأمريكية / كندا"
+        "background": "بفضل خلفيته التقنية في الهندسة المدنية وخبرته في سوق دبي، يقود التوسع في الأسواق الناشئة وأمريكا الشمالية، ويربط المطورين بشبكات المستثمرين العالمية.",
+        "skills": ["الهندسة المدنية", "سوق دبي", "الشبكات العالمية"],
+        "market": "الشرق الأوسط وشمال إفريقيا / الولايات المتحدة / كندا"
       },
       {
         "name": "Gaëtan",
-        "role": "Francophonie & Global Strategy",
+        "role": "الفرانكوفونية والاستراتيجية العالمية",
         "worldRegion": "العالم الناطق بالفرنسية",
-        "background": "مهندس الاستراتيجية التجارية، يضمن تماسك الشراكات مع الجهات المؤسسية (كتاب العدل، المحامون، المطورون) والتوسع في السوق الناطقة بالفرنسية عالميًا، بما في ذلك أوروبا وكندا.",
-        "skills": ["شراكات B2B", "استراتيجية", "توسع"],
-        "market": "الفرنكوفونية العالمية"
+        "background": "مهندس الاستراتيجية التجارية، يضمن تماسك الشراكات مع اللاعبين المؤسسيين (كتاب العدل، المحامون، المطورون) والتوسع في السوق الناطقة بالفرنسية عالميًا، بما في ذلك أوروبا وكندا.",
+        "skills": ["شراكات B2B", "الاستراتيجية", "التوسع"],
+        "market": "الفرانكوفونية العالمية"
       }
     ]
   },
@@ -236,64 +244,93 @@
     "reset": "إعادة تعيين المحطة",
     "invalidPin": "رمز PIN غير صالح",
     "invalidCredentials": "بيانات دخول غير صالحة",
-    "validationError": "خطأ في التحقق"
+    "validationError": "خطأ في التحقق",
+    "profileMissing": "الملف الشخصي مفقود في قاعدة البيانات.",
+    "roleNotAuthorized": "الدور غير مصرح به.",
+    "systemError": "خطأ في النظام."
   },
   "projectTracker": {
     "agencyName": "AMARU-HOMES",
-    "department": "قسم المراقبة الفنية والجودة",
+    "department": "قسم الرقابة الفنية والجودة",
     "phase": "المرحلة الحالية: {phase}",
+    "phaseLabel": "المرحلة الحالية:",
     "quit": "خروج",
     "documents": "المرفقات الإدارية",
     "technicalReports": "ملف المتابعة الفنية",
-    "reportValidated": "تقرير تفتيش موثق",
+    "reportValidated": "تقرير التفتيش الموثق",
     "expertise": "خبرة",
     "inspectionReport": "تقرير التفتيش",
     "generateReport": "إنشاء تقرير",
-    "certification": "أقر بأن المعلومات والصور المعروضة أدناه تم جمعها في الموقع من قبل القسم الفني في Amaru-Homes. تضمن إحداثيات GPS صحة التفتيش.",
+    "certification": "أشهد أن المعلومات والصور المعروضة أدناه تم جمعها في الموقع من قبل القسم الفني في Amaru-Homes. تضمن إحداثيات GPS صحة التفتيش.",
     "observation": "ملاحظة فنية #{number}",
-    "location": "الموقع: {lat}, {lng}"
+    "location": "الموقع: {lat}, {lng}",
+    "expertName": "Gaëtan Mukeba",
+    "reportRef": "تقرير التفتيش #RC-{ref}",
+    "visitDate": "تاريخ الزيارة: {date}",
+    "recipient": "المستلم",
+    "project": "المشروع: {name}",
+    "expert": "الخبير",
+    "defaultObservation": "لم يتم اكتشاف أي خلل أثناء التفتيش البصري.",
+    "statusConforme": "الحالة: مطابق",
+    "photoRef": "لقطة #{num}\n\nنظام تحديد المواقع: {lat}\n{lng}",
+    "photoHeader": "مرجع الصورة",
+    "analysisHeader": "التحليل الفني والملاحظات",
+    "photoAnnex": "ملحق الصور وتحديد الموقع الجغرافي",
+    "imageNotAvailable": "(الصورة غير متوفرة)",
+    "imageCaption": "رسم توضيحي #{num} - التُقطت في {date}",
+    "certificationTitle": "الشهادة:",
+    "certificationText": "أنا، الموقع أدناه، {expert}، أشهد أن المعلومات وبيانات نظام تحديد المواقع والصور الواردة في هذا التقرير تعكس بدقة التقدم الفعلي للموقع في التاريخ المذكور.",
+    "pdfError": "خطأ في إنشاء PDF"
   },
   "adminChantier": {
-    "backHome": "العودة إلى الرئيسية",
-    "title": "Luxury Staff",
-    "subtitle": "العمل الميداني والتقارير",
+    "backHome": "العودة إلى الصفحة الرئيسية",
+    "title": "طاقم فاخر",
+    "subtitle": "الميدان وإعداد التقارير",
     "pinPlaceholder": "••••••",
     "connect": "اتصال",
     "agent": "وكيل",
     "whichSite": "أي موقع تزور؟",
-    "searchPlaceholder": "مثال: Villa Bianca...",
+    "searchPlaceholder": "مثال: فيلا بيانكا...",
     "changeVilla": "تغيير الفيلا",
     "constructionPhase": "مرحلة البناء",
     "newReport": "تقرير جديد",
     "observationsPlaceholder": "ملاحظات ميدانية...",
     "locate": "تحديد الموقع",
-    "gpsOk": "GPS جاهز",
+    "gpsOk": "نظام تحديد المواقع جاهز",
     "photo": "صورة",
     "publish": "نشر التقرير ({count})",
-    "stepUpdated": "تم تحديث المرحلة",
+    "stepUpdated": "تم تحديث الخطوة",
     "uploading": "جاري التحميل...",
     "photoAdded": "تمت إضافة الصورة!",
     "publishing": "جاري النشر...",
     "reportSent": "تم إرسال التقرير!",
     "phases": [
-    "0. التوقيع والحجز",
-    "1. الأعمال الترابية / تسوية الأرض",
-    "2. الأساسات",
-    "3. الجدران / الرفع",
-    "4. السقف / الهيكل الخشبي",
-    "5. النجارة",
-    "6. الكهرباء / السباكة",
-    "7. العزل",
-    "8. التجصيص",
-    "9. الأرضيات والبلاط",
-    "10. الدهان / التشطيبات",
-    "11. الخارجي / الحديقة",
-    "12. تسليم المفاتيح"
-    ]
+      "0. التوقيع والحجز",
+      "1. الأعمال الترابية / تسوية الأرض",
+      "2. الأساسات",
+      "3. الجدران / الرفع",
+      "4. السقف / الهيكل الخشبي",
+      "5. النجارة",
+      "6. الكهرباء / السباكة",
+      "7. العزل",
+      "8. التجصيص",
+      "9. الأرضيات والبلاط",
+      "10. الدهان / التشطيبات",
+      "11. الخارجي / الحديقة",
+      "12. تسليم المفاتيح"
+    ],
+    "pinCheckError": "خطأ في التحقق من الرقم السري.",
+    "noAccess": "لا يتمتع هذا الحساب بحقوق الوصول إلى واجهة الموقع.",
+    "invalidPin": "الرقم السري غير صالح.",
+    "projectNotFound": "الموقع غير موجود.",
+    "defaultPhotoComment": "صورة متابعة",
+    "storageError": "خطأ في التخزين: {message}",
+    "databaseError": "خطأ في قاعدة البيانات: {message}"
   },
   "adminDashboard": {
-    "adminControl": "التحكم الإداري",
+    "adminControl": "التحكم بالإدارة",
     "search": "بحث...",
+    "searchPlaceholder": "بحث...",
     "projects": "المشاريع",
     "team": "الفريق",
     "publicSite": "الموقع العام",
@@ -303,13 +340,17 @@
     "owner": "المالك: {name}",
     "print": "طباعة",
     "save": "حفظ الملف",
+    "saveSuccess": "تم حفظ الملف بنجاح!",
+    "uploadError": "خطأ في التحميل: {message}",
+    "confirmDeleteDocument": "هل أنت متأكد من رغبتك في حذف هذا المستند نهائيًا؟",
+    "saveFile": "حفظ الملف",
     "tabs": {
       "clientBudget": "العميل والميزانية",
       "constructionStatus": "حالة البناء",
       "documents": "خزنة المستندات"
     },
     "clientInfo": {
-      "title": "بيانات المالك",
+      "title": "تفاصيل المالك",
       "firstName": "الاسم الأول",
       "lastName": "اسم العائلة",
       "email": "البريد الإلكتروني",
@@ -324,10 +365,10 @@
     },
     "cashback": {
       "reward": "مكافأة الكاش باك",
-      "paidAfterClosure": "المبلغ المدفوع بعد الإغلاق"
+      "paidAfterClosure": "المبلغ المدفوع بعد الإنجاز"
     },
     "pin": {
-      "code": "رمز PIN للدخول",
+      "code": "رمز PIN لتسجيل الدخول",
       "copy": "نسخ الرمز",
       "encryption": "تشفير AES-256 نشط"
     },
@@ -336,10 +377,11 @@
       "global": "التقدم العام",
       "phase": "المرحلة الحالية المحددة",
       "weeklyComments": "تعليقات أسبوعية",
-      "visibleByClient": "مرئي للعميل"
+      "visibleByClient": "مرئي للعميل",
+      "placeholder": "فصل العمل المنجز هذا الأسبوع..."
     },
     "constats": {
-      "title": "الفحوصات الفنية ({count})",
+      "title": "عمليات التفتيش الفني ({count})",
       "photos": "{count} صورة"
     },
     "delivery": {
@@ -351,10 +393,10 @@
       "placeholder": "مثال: Porcelanosa / Grupo Isan"
     },
     "docs": {
-      "title": "المستندات السحابية",
+      "title": "مستندات سحابية",
       "subtitle": "منطقة تخزين آمنة للعملاء",
-      "upload": "رفع ملف",
-      "processing": "معالجة...",
+      "upload": "تحميل ملف",
+      "processing": "جاري المعالجة...",
       "noDocuments": "لا توجد مستندات مؤرشفة"
     },
     "staff": {
@@ -365,20 +407,90 @@
       "role": "الدور والامتيازات",
       "agent": "وكيل (وصول محدود)",
       "admin": "مسؤول الوكالة",
-      "superAdmin": "المسؤول الأعلى",
-      "security": "الأمان التلقائي",
+      "superAdmin": "مسؤول فائق",
+      "security": "أمان تلقائي",
       "pinInfo": "سيتم إنشاء رمز PIN فريد مكون من 6 أرقام. يمكن للمتعاون تسجيل الدخول فورًا بعد التحقق.",
       "confirm": "تأكيد الدعوة",
-      "copyPin": "نسخ PIN",
+      "copyPin": "نسخ الرمز السري",
       "delete": "حذف هذا المتعاون",
       "securityCode": "رمز الأمان",
       "cannotDeleteSelf": "لا يمكنك حذف حسابك الخاص."
-    }
+    },
+    "inspectionReport": "تقرير التفتيش",
+    "observation": "ملاحظة فنية #{num}",
+    "location": "الموقع: {lat}, {lng}",
+    "certification": "أشهد أن المعلومات والصور المعروضة أدناه تم جمعها في الموقع من قبل القسم الفني في Amaru-Homes. تضمن إحداثيات GPS صحة التفتيش.",
+    "generateReport": "إنشاء تقرير",
+    "reportRef": "تقرير التفتيش #RC-{ref}",
+    "visitDate": "تاريخ الزيارة: {date}",
+    "phase": "المرحلة: {phase}",
+    "recipient": "المستلم",
+    "project": "المشروع: {name}",
+    "expert": "الخبير",
+    "defaultObservation": "لم يتم اكتشاف أي خلل أثناء التفتيش البصري.",
+    "statusConforme": "الحالة: مطابق",
+    "photoRef": "لقطة #{num}\n\nنظام تحديد المواقع: {lat}\n{lng}",
+    "photoHeader": "مرجع الصورة",
+    "analysisHeader": "التحليل الفني والملاحظات",
+    "photoAnnex": "ملحق الصور وتحديد الموقع الجغرافي",
+    "imageNotAvailable": "(الصورة غير متوفرة)",
+    "imageCaption": "رسم توضيحي #{num} - التُقطت في {date}",
+    "certificationTitle": "الشهادة:",
+    "certificationText": "أنا، الموقع أدناه، {expert}، أشهد أن المعلومات وبيانات نظام تحديد المواقع والصور الواردة في هذا التقرير تعكس بدقة التقدم الفعلي للموقع في التاريخ المذكور.",
+    "pdfError": "خطأ في إنشاء PDF",
+    "initializing": "جارٍ تهيئة محطة المسؤول",
+    "version": "لوحة القيادة v2.4.0"
+  },
+  "adminStaff": {
+    "userCreationFailed": "فشل إنشاء المستخدم.",
+    "addSuccess": "✅ تمت إضافة المتعاون! تم إنشاء الرمز السري: {pin}",
+    "addError": "خطأ في إضافة المتعاون: {message}",
+    "cannotDeleteSelf": "لا يمكنك حذف حسابك الخاص.",
+    "confirmDelete": "هل أنت متأكد من رغبتك في حذف هذا المتعاون نهائيًا؟",
+    "deleteSuccess": "تم حذف المتعاون.",
+    "deleteError": "خطأ في حذف المتعاون: {message}",
+    "copyPin": "نسخ الرمز السري",
+    "delete": "حذف هذا المتعاون",
+    "securityCode": "رمز الأمان",
+    "superAdmin": "مسؤول فائق",
+    "admin": "مسؤول الوكالة",
+    "agent": "وكيل (وصول محدود)",
+    "add": "إضافة متعاون",
+    "enrollment": "التسجيل في فريق {company}",
+    "firstName": "الاسم الأول",
+    "lastName": "اسم العائلة",
+    "email": "البريد الإلكتروني المهني",
+    "role": "الدور والامتيازات",
+    "security": "أمان تلقائي",
+    "pinInfo": "سيتم إنشاء رمز PIN فريد مكون من 6 أرقام. يمكن للمتعاون تسجيل الدخول فورًا بعد التحقق.",
+    "confirm": "تأكيد الدعوة"
+  },
+  "adminProject": {
+    "initialize": "تهيئة المشروع",
+    "subtitle": "تسجيل موقع بناء جديد لأمارو",
+    "error": "خطأ: {message}",
+    "firstName": "الاسم الأول",
+    "firstNamePlaceholder": "جون",
+    "lastName": "اسم العائلة",
+    "lastNamePlaceholder": "دو",
+    "villaName": "اسم الفيلا",
+    "villaPlaceholder": "فيلا أمارو لوكس",
+    "clientEmail": "البريد الإلكتروني للعميل",
+    "emailPlaceholder": "client@example.com",
+    "phone": "الهاتف",
+    "phonePlaceholder": "+33 6 00 00 00 00",
+    "address": "الشارع / العنوان",
+    "addressPlaceholder": "123 جادة الشاطئ",
+    "city": "المدينة",
+    "cityPlaceholder": "ماربيا",
+    "postalCode": "الرمز البريدي",
+    "country": "البلد",
+    "generate": "إنشاء ملف كامل"
   },
   "superAdmin": {
-    "initializing": "جاري تهيئة المحطة...",
+    "initializing": "جارٍ تهيئة المحطة الطرفية...",
     "accessDenied": "تم رفض الوصول",
-    "noPrivileges": "حسابك لا يتمتع بامتيازات Super-Admin.",
+    "noPrivileges": "لا يتمتع حسابك بامتيازات المسؤول الفائق.",
     "logout": "تسجيل الخروج",
     "title": "التحكم الفائق",
     "subtitle": "نظام مركزي",
@@ -388,23 +500,23 @@
     "lastName": "اسم العائلة",
     "agency": "الوكالة / الشريك",
     "packLevel": "مستوى الحزمة",
-    "core": "CORE (خبيران)",
-    "ascent": "ASCENT (10 خبراء)",
-    "horizon": "HORIZON (غير محدود)",
-    "emailPlaceholder": "البريد الإلكتروني للدخول",
+    "core": "الأساسية (خبيران)",
+    "ascent": "الصاعدة (10 خبراء)",
+    "horizon": "الأفق (غير محدود)",
+    "emailPlaceholder": "البريد الإلكتروني لتسجيل الدخول",
     "passwordPlaceholder": "كلمة المرور",
     "activate": "تفعيل الترخيص",
     "activeUsers": "المستخدمون النشطون",
     "database": "قاعدة البيانات المباشرة",
     "search": "بحث...",
     "id": "المعرف: {id}",
-    "pin": "PIN: {pin}",
-    "deleteConfirm": "هل تريد إلغاء الوصول نهائيًا لـ \"{company}\"؟"
+    "pin": "الرقم السري: {pin}",
+    "deleteConfirm": "إلغاء الوصول نهائيًا لـ \"{company}\"؟"
   },
   "contactCashback": {
-    "back": "العودة إلى الرئيسية",
+    "back": "العودة إلى الصفحة الرئيسية",
     "title": "تفعيل الكاش باك",
-    "description": "يرجى إكمال معلوماتك لربط هذه الميزة بملف العميل الخاص بك.",
+    "description": "يرجى إكمال معلوماتك لربط هذه الميزة بملف تعريف العميل الخاص بك.",
     "firstName": "الاسم الأول *",
     "lastName": "اسم العائلة *",
     "email": "البريد الإلكتروني *",
@@ -413,9 +525,9 @@
   },
   "merci": {
     "title": "تم استلام الطلب",
-    "message": "تم إرسال طلب الكاش باك الخاص بك. سنتصل بك في غضون 24 ساعة لتقديم تفاصيل ميزتك.",
-    "backHome": "العودة إلى الرئيسية",
-    "brand": "Luxury Estates — إعادة تعريف العقارات"
+    "message": "تم إرسال طلب الكاش باك الخاص بك. سنعود إليك في غضون 24 ساعة لنقدم لك تفاصيل ميزتك.",
+    "backHome": "العودة إلى الصفحة الرئيسية",
+    "brand": "العقارات الفاخرة - إعادة تعريف العقارات"
   },
   "development": {
     "back": "العودة إلى الاختيار",
@@ -426,9 +538,9 @@
     "distanceSea": "المسافة إلى البحر",
     "airport": "المطار",
     "unitsAvailable": "الوحدات المتاحة والخطط",
-    "selectUnit": "حدد قطعة لرؤية التفاصيل ومخططات الطوابق",
+    "selectUnit": "حدد قطعة أرض لرؤية التفاصيل ومخططات الطوابق",
     "available": "متاح",
-    "seeDetails": "عرض المخططات والتفاصيل"
+    "seeDetails": "عرض الخطط والتفاصيل"
   },
   "bien": {
     "backToProgram": "العودة إلى برنامج {name}",
@@ -438,7 +550,7 @@
     "built": "مساحة مبنية م²",
     "pool": "حمام سباحة",
     "artOfLiving": "فن الحياة",
-    "technicalPlans": "مخططات فنية",
+    "technicalPlans": "المخططات الفنية",
     "detailedLayout": "تخطيط مفصل",
     "price": "سعر البيع",
     "brochure": "كتيب PDF",
@@ -457,13 +569,13 @@
     "costaBlanca": "كوستا بلانكا",
     "costaCalida": "كوستا كاليدا",
     "costaDelSol": "كوستا ديل سول",
-    "costaAlmeria": "كوستا ألميريا",
+    "costaAlmeria": "كوستا الميريا",
     "type": "النوع",
     "anyType": "أي نوع",
     "villa": "فيلا",
     "apartment": "شقة",
     "penthouse": "بنتهاوس",
-    "bungalow": "بنغل",
+    "bungalow": "بنغالو",
     "townhouse": "بيت مستقل",
     "min": "الحد الأدنى",
     "max": "الحد الأقصى",
@@ -473,7 +585,7 @@
   },
   "scrollingBanner": {
     "portfolioExclusif": "محفظة حصرية",
-    "conciergeriePrivee": "خدمات كونسيرج خاصة",
+    "conciergeriePrivee": "كونسيرج خاص",
     "ventesOffMarket": "مبيعات خارج السوق",
     "expertiseArchitecturale": "خبرة معمارية",
     "investissements": "استثمارات",
@@ -484,15 +596,15 @@
     "subtitle": "رضا عملائنا هو أكبر نجاح لنا.",
     "reviews": [
       {
-        "name": "Isabelle Dupont",
+        "name": "إيزابيل دوبون",
         "text": "تجربة ممتازة مع Blanca Calida! إنهم يعرفون السوق تمامًا ويعرفون كيفية تقديم المشورة بناءً على الاحتياجات المحددة."
       },
       {
-        "name": "Sarah Williams",
+        "name": "سارة ويليامز",
         "text": "Professional team, they helped us navigate every detail of the buying process. Highly recommended!"
       },
       {
-        "name": "Michael Ford",
+        "name": "مايكل فورد",
         "text": "Sehr guter Service, von der Besichtigung bis zur Kaufabwicklung. Alles war perfekt organisiert."
       }
     ]
@@ -506,21 +618,5 @@
   "errors": {
     "pinIncorrect": "رمز PIN غير صحيح.",
     "incorrectPin": "رمز PIN غير صحيح."
-  },
- "login": {
-  "title": "محرك Amaru",
-  "subtitle": "مصادقة آمنة",
-  "pinTab": "الرمز السري",
-  "credentialsTab": "بيانات الدخول",
-  "emailLabel": "اسم المستخدم",
-  "passwordLabel": "كلمة المرور",
-  "validate": "تسجيل الدخول",
-  "reset": "إعادة تعيين المحطة",
-  "invalidPin": "رمز PIN غير صالح",
-  "invalidCredentials": "بيانات دخول غير صالحة",
-  "validationError": "خطأ في التحقق",
-  "profileMissing": "الملف الشخصي مفقود في قاعدة البيانات.",
-  "roleNotAuthorized": "الدور غير مصرح به.",
-  "systemError": "خطأ في النظام."
-}
+  }
 }

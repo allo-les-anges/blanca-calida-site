@@ -54,6 +54,7 @@
     "heroTitleLine1": "Villas de Luxe &",
     "heroTitleLine2": "Propriétés d'Exception",
     "heroSubtitle": "COSTA BLANCA | COSTA DEL SOL",
+    "findVilla": "Trouver votre villa",
     "ownerSection": {
       "title": "Suivez votre projet",
       "subtitle": "en temps réel.",
@@ -102,7 +103,8 @@
     "land": "terrain",
     "garage": "Garage",
     "surface": "m²",
-    "plot": "m² terrain"
+    "plot": "m² terrain",
+    "fallbackTitle": "Villa de Prestige"
   },
   "propertyDetail": {
     "back": "Retour à la sélection",
@@ -132,7 +134,14 @@
     "golf": "Golf à {distance}km",
     "propertyNotFound": "Propriété non trouvée",
     "backToCatalogue": "Retour au catalogue",
-    "loading": "Chargement de la propriété..."
+    "loading": "Chargement de la propriété...",
+    "rooms": "Chambres",
+    "baths": "Bains",
+    "surface": "m² Bâti",
+    "from": "À partir de",
+    "configurations": "Configurations disponibles",
+    "selected": "Modèle sélectionné",
+    "whatsapp_msg": "Bonjour, je souhaite plus d'informations sur"
   },
   "cashback": {
     "title": "Le Programme Avantages Négociés",
@@ -235,12 +244,16 @@
     "reset": "Réinitialiser le terminal",
     "invalidPin": "Code PIN invalide",
     "invalidCredentials": "Identifiants invalides",
-    "validationError": "Erreur de validation"
+    "validationError": "Erreur de validation",
+    "profileMissing": "Profil manquant dans la base.",
+    "roleNotAuthorized": "Rôle non autorisé.",
+    "systemError": "Erreur système."
   },
   "projectTracker": {
     "agencyName": "AMARU-HOMES",
     "department": "Département Contrôle Technique & Qualité",
     "phase": "Phase Actuelle : {phase}",
+    "phaseLabel": "Phase Actuelle :",
     "quit": "Quitter",
     "documents": "Pièces Jointes Administratives",
     "technicalReports": "Dossier de Suivi Technique",
@@ -250,7 +263,24 @@
     "generateReport": "Générer Rapport",
     "certification": "Je certifie que les informations et les photographies présentées ci-dessous ont été relevées sur site par le département technique Amaru-Homes. Les coordonnées GPS garantissent l'authenticité de l'inspection.",
     "observation": "Observation technique #{number}",
-    "location": "Localisation : {lat}, {lng}"
+    "location": "Localisation : {lat}, {lng}",
+    "expertName": "Gaëtan Mukeba",
+    "reportRef": "Rapport de Constat #RC-{ref}",
+    "visitDate": "Date de visite : {date}",
+    "recipient": "DESTINATAIRE :",
+    "project": "Projet : {name}",
+    "expert": "EXPERT RÉFÉRENT :",
+    "defaultObservation": "Aucune anomalie détectée lors de l'inspection visuelle.",
+    "statusConforme": "STATUT : CONFORME",
+    "photoRef": "Prise de vue #{num}\n\nGPS : {lat}\n{lng}",
+    "photoHeader": "RÉFÉRENCE PHOTO",
+    "analysisHeader": "ANALYSE TECHNIQUE & OBSERVATIONS",
+    "photoAnnex": "ANNEXE PHOTOGRAPHIQUE ET GÉOLOCALISATION",
+    "imageNotAvailable": "(Image non disponible)",
+    "imageCaption": "Illustration #{num} - Capturée le {date}",
+    "certificationTitle": "CERTIFICATION :",
+    "certificationText": "Je soussigné, {expert}, certifie que les informations, relevés GPS et photographies contenus dans ce rapport reflètent fidèlement l'état d'avancement réel du chantier à la date mentionnée.",
+    "pdfError": "Erreur génération PDF"
   },
   "adminChantier": {
     "backHome": "Retour Accueil",
@@ -288,11 +318,19 @@
       "10. Peintures / Finitions",
       "11. Extérieurs / Jardin",
       "12. Remise des clés"
-    ]
+    ],
+    "pinCheckError": "Erreur lors de la vérification du PIN.",
+    "noAccess": "Ce compte n'a pas les droits d'accès à l'interface chantier.",
+    "invalidPin": "PIN invalide.",
+    "projectNotFound": "Chantier introuvable.",
+    "defaultPhotoComment": "Photo de suivi",
+    "storageError": "Erreur Storage: {message}",
+    "databaseError": "Erreur Database: {message}"
   },
   "adminDashboard": {
     "adminControl": "Admin Control",
     "search": "RECHERCHER...",
+    "searchPlaceholder": "RECHERCHER...",
     "projects": "Dossiers",
     "team": "Équipe",
     "publicSite": "Site Public",
@@ -302,6 +340,10 @@
     "owner": "Propriétaire : {name}",
     "print": "Imprimer",
     "save": "Enregistrer le dossier",
+    "saveSuccess": "✅ Dossier mis à jour avec succès !",
+    "uploadError": "Erreur d'importation : {message}",
+    "confirmDeleteDocument": "Êtes-vous sûr de vouloir supprimer définitivement ce document ?",
+    "saveFile": "Enregistrer le dossier",
     "tabs": {
       "clientBudget": "Client & Budget",
       "constructionStatus": "État du Chantier",
@@ -335,7 +377,8 @@
       "global": "Avancement Global",
       "phase": "Étape actuelle sélectionnée",
       "weeklyComments": "Commentaires hebdomadaires",
-      "visibleByClient": "Visible par le client"
+      "visibleByClient": "Visible par le client",
+      "placeholder": "Détaillez ici les travaux effectués cette semaine (ex: Pose de la dalle béton terminée...)"
     },
     "constats": {
       "title": "Constats techniques ({count})",
@@ -372,7 +415,77 @@
       "delete": "Supprimer ce collaborateur",
       "securityCode": "Code de sécurité",
       "cannotDeleteSelf": "Vous ne pouvez pas supprimer votre propre compte."
-    }
+    },
+    "inspectionReport": "Rapport d'inspection",
+    "observation": "Observation technique #{num}",
+    "location": "Localisation : {lat}, {lng}",
+    "certification": "Je certifie que les informations et les photographies présentées ci-dessous ont été relevées sur site par le département technique Amaru-Homes. Les coordonnées GPS garantissent l'authenticité de l'inspection.",
+    "generateReport": "Générer Rapport",
+    "reportRef": "Rapport de Constat #RC-{ref}",
+    "visitDate": "Date de visite : {date}",
+    "phase": "Phase : {phase}",
+    "recipient": "DESTINATAIRE :",
+    "project": "Projet : {name}",
+    "expert": "EXPERT RÉFÉRENT :",
+    "defaultObservation": "Aucune anomalie détectée lors de l'inspection visuelle.",
+    "statusConforme": "STATUT : CONFORME",
+    "photoRef": "Prise de vue #{num}\n\nGPS : {lat}\n{lng}",
+    "photoHeader": "RÉFÉRENCE PHOTO",
+    "analysisHeader": "ANALYSE TECHNIQUE & OBSERVATIONS",
+    "photoAnnex": "ANNEXE PHOTOGRAPHIQUE ET GÉOLOCALISATION",
+    "imageNotAvailable": "(Image non disponible)",
+    "imageCaption": "Illustration #{num} - Capturée le {date}",
+    "certificationTitle": "CERTIFICATION :",
+    "certificationText": "Je soussigné, {expert}, certifie que les informations, relevés GPS et photographies contenus dans ce rapport reflètent fidèlement l'état d'avancement réel du chantier à la date mentionnée.",
+    "pdfError": "Erreur lors de la génération du PDF",
+    "initializing": "Initialisation du Terminal Admin",
+    "version": "Dashboard Terminal v2.4.0"
+  },
+  "adminStaff": {
+    "userCreationFailed": "Échec de la création de l'utilisateur",
+    "addSuccess": "✅ Collaborateur ajouté ! PIN généré : {pin}",
+    "addError": "Erreur lors de l'ajout : {message}",
+    "cannotDeleteSelf": "Vous ne pouvez pas supprimer votre propre compte.",
+    "confirmDelete": "Êtes-vous sûr de vouloir supprimer définitivement ce collaborateur ?",
+    "deleteSuccess": "Collaborateur supprimé.",
+    "deleteError": "Erreur lors de la suppression : {message}",
+    "copyPin": "Copier le PIN",
+    "delete": "Supprimer ce collaborateur",
+    "securityCode": "Code de sécurité",
+    "superAdmin": "Super Administrateur",
+    "admin": "Administrateur Agence",
+    "agent": "Agent (Accès Limité)",
+    "add": "Ajouter un collaborateur",
+    "enrollment": "Enrôlement dans l'équipe {company}",
+    "firstName": "Prénom",
+    "lastName": "Nom",
+    "email": "Email professionnel",
+    "role": "Attribution du rôle & Privilèges",
+    "security": "Sécurité Automatique",
+    "pinInfo": "Un code PIN unique à 6 chiffres sera généré. Le collaborateur pourra se connecter immédiatement après validation.",
+    "confirm": "Confirmer l'invitation"
+  },
+  "adminProject": {
+    "initialize": "Initialiser Projet",
+    "subtitle": "Enregistrement d'un nouveau chantier Amaru",
+    "error": "Erreur : {message}",
+    "firstName": "Prénom",
+    "firstNamePlaceholder": "John",
+    "lastName": "Nom",
+    "lastNamePlaceholder": "Doe",
+    "villaName": "Nom de la Villa",
+    "villaPlaceholder": "VILLA AMARU LUXE",
+    "clientEmail": "Email client",
+    "emailPlaceholder": "client@exemple.com",
+    "phone": "Téléphone",
+    "phonePlaceholder": "+33 6 00 00 00 00",
+    "address": "Rue / Adresse",
+    "addressPlaceholder": "123 Avenue de la Plage",
+    "city": "Ville",
+    "cityPlaceholder": "Marbella",
+    "postalCode": "Code postal",
+    "country": "Pays",
+    "generate": "Générer le dossier complet"
   },
   "superAdmin": {
     "initializing": "Initialisation du terminal...",
@@ -496,7 +609,6 @@
       }
     ]
   },
-  
   "languageSelector": {
     "label": "Langue / Language"
   },
@@ -506,21 +618,5 @@
   "errors": {
     "pinIncorrect": "Code PIN incorrect.",
     "incorrectPin": "Incorrect PIN."
-  },
-  "login": {
-  "title": "Amaru Engine",
-  "subtitle": "Authentification Sécurisée",
-  "pinTab": "CODE PIN",
-  "credentialsTab": "IDENTIFIANTS",
-  "emailLabel": "Identifiant",
-  "passwordLabel": "Clé d'accès",
-  "validate": "VALIDER L'ACCÈS",
-  "reset": "Réinitialiser le terminal",
-  "invalidPin": "Code PIN invalide",
-  "invalidCredentials": "Identifiants invalides",
-  "validationError": "Erreur de validation",
-  "profileMissing": "Profil manquant dans la base.",
-  "roleNotAuthorized": "Rôle non autorisé.",
-  "systemError": "Erreur système."
-}
+  }
 }

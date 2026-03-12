@@ -1,3 +1,4 @@
+// src/dictionaries/nl.json
 {
   "common": {
     "backToHome": "Terug naar home",
@@ -30,13 +31,13 @@
     "cashbackInfo": "Cashback Info"
   },
   "footer": {
-    "excellence": "Vastgoed Excellence",
-    "description": "De kunst van uitzonderlijk vastgoed. We bouwen bruggen tussen uw ambities en de meest prestigieuze woningen aan de kust.",
+    "excellence": "Vastgoed Excellentie",
+    "description": "De kunst van uitzonderlijk vastgoed. Wij bouwen bruggen tussen uw ambities en de meest prestigieuze eigendommen aan de kust.",
     "collections": "Collecties",
     "villasSignature": "Signature Villa's",
     "domainsPrestige": "Prestigedomeinen",
     "newDevelopments": "Nieuwe Ontwikkelingen",
-    "privateClientAccess": "Privé Klantentoegang",
+    "privateClientAccess": "Privé Cliënt Toegang",
     "proSpace": "Professionele Ruimte",
     "siteTracking": "Bouwopvolging",
     "supervisor": "Supervisor",
@@ -53,7 +54,7 @@
   "home": {
     "heroTitleLine1": "Luxe Villa's &",
     "heroTitleLine2": "Uitzonderlijke Eigendommen",
-    "heroSubtitle": "COSTA BLANCA | COSTA DEL SOL",  
+    "heroSubtitle": "COSTA BLANCA | COSTA DEL SOL",
     "findVilla": "Vind uw villa",
     "ownerSection": {
       "title": "Volg uw project",
@@ -75,7 +76,7 @@
       "exceptionalPlaces": "Uitzonderlijke Plaatsen",
       "description": "Een rigoureuze selectie van de meest prestigieuze enclaves aan de kust.",
       "properties": "Eigendommen",
-      "discover": "Ontdekken"
+      "discover": "Ontdek"
     },
     "searchModal": {
       "search": "Zoeken",
@@ -99,11 +100,12 @@
     "beds": "slaapkamers",
     "baths": "badkamers",
     "pool": "Zwembad",
-    "noPool": "Geen",
+    "noPool": "Geen zwembad",
     "land": "grond",
     "garage": "Garage",
     "surface": "m²",
-    "plot": "m² perceel"
+    "plot": "m² perceel",
+    "fallbackTitle": "Villa de Prestige"
   },
   "propertyDetail": {
     "back": "Terug naar selectie",
@@ -115,7 +117,7 @@
     "plot": "Perceel m²",
     "pool": "Zwembad",
     "poolPrivate": "Privé",
-    "poolNo": "Geen",
+    "poolNo": "Nee",
     "parking": "Parking",
     "artOfLiving": "De Kunst van het Leven",
     "technicalPlans": "Technische Plannen",
@@ -126,14 +128,21 @@
     "whatsappDirect": "WhatsApp Direct",
     "bookVisit": "Bezoek plannen",
     "advisor": "Adviseur",
-    "activateCashback": "Mijn Cashback activeren",
+    "activateCashback": "Activeer mijn Cashback",
     "privilege": "Amaru Privilege",
     "location": "Bevoorrechte Ligging",
-    "distanceSea": "{distance}km naar zee",
+    "distanceSea": "{distance}km naar de zee",
     "golf": "{distance}km naar golf",
     "propertyNotFound": "Eigendom niet gevonden",
     "backToCatalogue": "Terug naar catalogus",
-    "loading": "Eigendom laden..."
+    "loading": "Eigendom laden...",
+    "rooms": "Slaapkamers",
+    "baths": "Badkamers",
+    "surface": "Bebouwd m²",
+    "from": "Vanaf",
+    "configurations": "Beschikbare configuraties",
+    "selected": "Geselecteerd",
+    "whatsapp_msg": "Hallo, ik wil graag informatie over"
   },
   "cashback": {
     "title": "Het Programma van Onderhandelde Voordelen",
@@ -141,7 +150,7 @@
     "flexibility": "Totale Flexibiliteit",
     "flexibilityText": "Een op maat gemaakt voordeel aangepast aan uw project",
     "example": "Voorbeeld van toewijzing",
-    "exampleAmount": "2 500 €*",
+    "exampleAmount": "€2.500*",
     "orEquipment": "of gelijkwaardig meubilair / diensten",
     "points": [
       "Voorwaarde vooraf onderhandeld met het agentschap of de partnerontwikkelaar.",
@@ -167,7 +176,7 @@
     "backHome": "Terug naar home"
   },
   "contact": {
-    "heroBadge": "🌍 Ons Menselijk Voordeel",
+    "heroBadge": "🌍 Onze Menselijke Voorsprong",
     "heroTitle": "Grensoverschrijdende Expertise",
     "heroQuote": "\"Onze kracht ligt in ons vermogen om lokale markten te verbinden met wereldwijde kansen.\"",
     "formTitle": "Contacteer Ons",
@@ -185,15 +194,15 @@
         "name": "Deborah",
         "role": "Operational Excellence & Client Experience",
         "worldRegion": "Global Operations",
-        "background": "Garante van procesvloeiendheid en klanttevredenheid. Ze zorgt voor dagelijkse operationele monitoring om te garanderen dat elk project persoonlijke aandacht en maximale uitvoeringsnauwkeurigheid krijgt.",
+        "background": "Garant van procesvloeiendheid en klanttevredenheid. Zij zorgt voor dagelijkse operationele monitoring om te garanderen dat elk project gepersonaliseerde aandacht en maximale uitvoeringsnauwkeurigheid krijgt.",
         "skills": ["Processen", "Klantervaring", "Nauwkeurigheid"],
         "market": "Amaru Hoofdkantoor"
       },
       {
         "name": "Gillian",
         "role": "Benelux, DACH & UK Expert",
-        "worldRegion": "Noord-Europa & UK",
-        "background": "Specialist in markten met hoge koopkracht, met name België, Nederland, Duitsland en het Verenigd Koninkrijk. Hij zorgt voor de strategische link tussen investeerders uit Noord-Europa en internationale kansen.",
+        "worldRegion": "Noord-Europa & VK",
+        "background": "Specialist in markten met hoge koopkracht, met name België, Nederland, Duitsland en het Verenigd Koninkrijk. Hij zorgt voor de strategische link tussen Noord-Europese investeerders en internationale kansen.",
         "skills": ["Investering", "DACH Regio", "Strategie"],
         "market": "Internationaal"
       },
@@ -201,15 +210,15 @@
         "name": "Joanna Pawelek",
         "role": "Eastern Europe & Alicante Specialist",
         "worldRegion": "Oost-Europa & Engelstalig",
-        "background": "Gecertificeerd expert (ANAI - API) van de Alicante-markt. Ze fungeert als strategische brug voor investeerders uit Oost-Europa en de Engelstalige wereld dankzij haar beheersing van Pools, Engels en Spaans.",
+        "background": "Gecertificeerd expert (ANAI - API) van de Alicante-markt. Zij fungeert als strategische brug voor investeerders uit Oost-Europa en de Engelstalige wereld dankzij haar beheersing van Pools, Engels en Spaans.",
         "skills": ["ANAI-API Gecertificeerd", "Poolse Markt", "Alicante"],
         "market": "Alicante / Costa Blanca"
       },
       {
         "name": "Abdellah Touati",
         "role": "MENA & Americas Expert",
-        "worldRegion": "Midden-Oosten & Amerika",
-        "background": "Met een technische achtergrond in civiele techniek en expertise in de Dubai-markt leidt hij de uitbreiding naar opkomende markten en Noord-Amerika, waarbij hij ontwikkelaars verbindt met wereldwijde investeerdersnetwerken.",
+        "worldRegion": "Midden-Oosten & Amerika's",
+        "background": "Met een technische achtergrond in civiele techniek en expertise in de Dubai-markt, leidt hij de expansie naar opkomende markten en Noord-Amerika, waarbij hij ontwikkelaars verbindt met wereldwijde investeerdersnetwerken.",
         "skills": ["Civiele Techniek", "Dubai Markt", "Wereldwijde Netwerken"],
         "market": "MENA / VS / Canada"
       },
@@ -217,15 +226,15 @@
         "name": "Gaëtan",
         "role": "Francophonie & Global Strategy",
         "worldRegion": "Franstalige Wereld",
-        "background": "Architect van de commerciële strategie, hij zorgt voor de samenhang van partnerschappen met institutionele spelers (notarissen, advocaten, ontwikkelaars) en uitbreiding naar de wereldwijde Franstalige markt, inclusief Europa en Canada.",
-        "skills": ["B2B Partnerschappen", "Strategie", "Uitbreiding"],
-        "market": "Wereldwijde Franstalige markt"
+        "background": "Architect van commerciële strategie, hij zorgt voor de samenhang van partnerschappen met institutionele spelers (notarissen, advocaten, ontwikkelaars) en expansie naar de wereldwijde Franstalige markt, inclusief Europa en Canada.",
+        "skills": ["B2B Partnerschappen", "Strategie", "Expansie"],
+        "market": "Wereldwijde Francofonie"
       }
     ]
   },
   "login": {
     "title": "Amaru Engine",
-    "subtitle": "Veilige Authenticatie",
+    "subtitle": "Veilige authenticatie",
     "pinTab": "PINCODE",
     "credentialsTab": "INLOGGEGEVENS",
     "pinPlaceholder": "••••••",
@@ -236,75 +245,108 @@
     "reset": "Terminal resetten",
     "invalidPin": "Ongeldige pincode",
     "invalidCredentials": "Ongeldige inloggegevens",
-    "validationError": "Validatiefout"
+    "validationError": "Validatiefout",
+    "profileMissing": "Profiel ontbreekt in de database.",
+    "roleNotAuthorized": "Rol niet toegestaan.",
+    "systemError": "Systeemfout."
   },
   "projectTracker": {
     "agencyName": "AMARU-HOMES",
     "department": "Technische Controle & Kwaliteitsafdeling",
     "phase": "Huidige Fase: {phase}",
-    "quit": "Stoppen",
+    "phaseLabel": "Huidige Fase:",
+    "quit": "Afsluiten",
     "documents": "Administratieve Bijlagen",
-    "technicalReports": "Technisch Volgdossier",
-    "reportValidated": "Goedgekeurd Inspectierapport",
+    "technicalReports": "Technisch Monitoringsdossier",
+    "reportValidated": "Geldig Inspectierapport",
     "expertise": "Expertise",
     "inspectionReport": "Inspectierapport",
-    "generateReport": "Rapport genereren",
-    "certification": "Ik verklaar dat de informatie en foto's hieronder ter plaatse zijn verzameld door de technische afdeling van Amaru-Homes. GPS-coördinaten garanderen de authenticiteit van de inspectie.",
+    "generateReport": "Rapport Genereren",
+    "certification": "Ik certificeer dat de onderstaande informatie en foto's ter plaatse zijn verzameld door de technische afdeling van Amaru-Homes. GPS-coördinaten garanderen de authenticiteit van de inspectie.",
     "observation": "Technische observatie #{number}",
-    "location": "Locatie: {lat}, {lng}"
+    "location": "Locatie: {lat}, {lng}",
+    "expertName": "Gaëtan Mukeba",
+    "reportRef": "Inspectierapport #RC-{ref}",
+    "visitDate": "Bezoekdatum: {date}",
+    "recipient": "ONTVANGER",
+    "project": "Project: {name}",
+    "expert": "EXPERT",
+    "defaultObservation": "Geen afwijking gedetecteerd tijdens visuele inspectie.",
+    "statusConforme": "STATUS: CONFORM",
+    "photoRef": "Opname #{num}\n\nGPS: {lat}\n{lng}",
+    "photoHeader": "FOTO REFERENTIE",
+    "analysisHeader": "TECHNISCHE ANALYSE & OBSERVATIES",
+    "photoAnnex": "FOTOGRAFISCHE EN GEOLOCATIE BIJLAGE",
+    "imageNotAvailable": "(Afbeelding niet beschikbaar)",
+    "imageCaption": "Illustratie #{num} - Gemaakt op {date}",
+    "certificationTitle": "CERTIFICERING:",
+    "certificationText": "Ik, ondergetekende, {expert}, certificeer dat de informatie, GPS-gegevens en foto's in dit rapport de werkelijke voortgang van de site op de genoemde datum getrouw weergeven.",
+    "pdfError": "Fout bij genereren PDF"
   },
   "adminChantier": {
-    "backHome": "Terug naar Home",
+    "backHome": "Terug Home",
     "title": "Luxury Staff",
-    "subtitle": "Veldwerk & Rapportage",
+    "subtitle": "Veld & Rapportage",
     "pinPlaceholder": "••••••",
     "connect": "Verbinden",
     "agent": "Agent",
-    "whichSite": "Welke werf bezoekt u?",
+    "whichSite": "Welke locatie bezoekt u?",
     "searchPlaceholder": "Bijv: Villa Bianca...",
-    "changeVilla": "Villa wijzigen",
+    "changeVilla": "Verander villa",
     "constructionPhase": "Bouwfase",
     "newReport": "Nieuw Rapport",
     "observationsPlaceholder": "Veldobservaties...",
-    "locate": "Lokaliseren",
+    "locate": "Lokaliseer",
     "gpsOk": "GPS OK",
     "photo": "Foto",
-    "publish": "Rapport publiceren ({count})",
-    "stepUpdated": "Fase bijgewerkt",
+    "publish": "Publiceer rapport ({count})",
+    "stepUpdated": "Stap bijgewerkt",
     "uploading": "Uploaden...",
     "photoAdded": "Foto toegevoegd!",
     "publishing": "Publiceren...",
     "reportSent": "Rapport verzonden!",
     "phases": [
-    "0. Ondertekening & Reservering",
-    "1. Terrein / Grondwerk",
-    "2. Funderingen",
-    "3. Muren / Verhoging",
-    "4. Dak / Kapconstructie",
-    "5. Schrijnwerk",
-    "6. Elektriciteit / Loodgieterij",
-    "7. Isolatie",
-    "8. Pleisterwerk",
-    "9. Vloeren & Tegels",
-    "10. Schilderwerk / Afwerking",
-    "11. Buitenkant / Tuin",
-    "12. Sleuteloverdracht"
-    ]
+      "0. Ondertekening & Reservering",
+      "1. Terrein / Grondwerk",
+      "2. Funderingen",
+      "3. Muren / Verhoging",
+      "4. Dak / Kapconstructie",
+      "5. Schrijnwerk",
+      "6. Elektriciteit / Loodgieterij",
+      "7. Isolatie",
+      "8. Pleisterwerk",
+      "9. Vloeren & Tegels",
+      "10. Schilderwerk / Afwerking",
+      "11. Buitenkant / Tuin",
+      "12. Sleuteloverdracht"
+    ],
+    "pinCheckError": "Fout bij controleren PIN.",
+    "noAccess": "Dit account heeft geen toegangsrechten tot de site-interface.",
+    "invalidPin": "Ongeldige PIN.",
+    "projectNotFound": "Site niet gevonden.",
+    "defaultPhotoComment": "Volgfoto",
+    "storageError": "Opslagfout: {message}",
+    "databaseError": "Databasefout: {message}"
   },
   "adminDashboard": {
-    "adminControl": "Admin Control",
+    "adminControl": "Admin Controle",
     "search": "ZOEKEN...",
+    "searchPlaceholder": "ZOEKEN...",
     "projects": "Projecten",
     "team": "Team",
-    "publicSite": "Publieke Site",
+    "publicSite": "Openbare Site",
     "logout": "Uitloggen",
     "activeConstructionFile": "Actief bouwdossier",
     "ref": "REF: {ref}",
     "owner": "Eigenaar: {name}",
     "print": "Afdrukken",
-    "save": "Dossier opslaan",
+    "save": "Bestand opslaan",
+    "saveSuccess": "Bestand succesvol opgeslagen!",
+    "uploadError": "Uploadfout: {message}",
+    "confirmDeleteDocument": "Weet u zeker dat u dit document definitief wilt verwijderen?",
+    "saveFile": "Bestand opslaan",
     "tabs": {
-      "clientBudget": "Klant & Budget",
+      "clientBudget": "Cliënt & Budget",
       "constructionStatus": "Bouwstatus",
       "documents": "Documentenkluis"
     },
@@ -316,7 +358,7 @@
       "phone": "Telefoon"
     },
     "address": {
-      "title": "Locatie van het pand",
+      "title": "Eigendom locatie",
       "street": "Straat / Adres",
       "city": "Stad",
       "postal": "Postcode",
@@ -324,11 +366,11 @@
     },
     "cashback": {
       "reward": "Cashback beloning",
-      "paidAfterClosure": "Bedrag betaald na afsluiting"
+      "paidAfterClosure": "Bedrag betaald na oplevering"
     },
     "pin": {
-      "code": "Inlog PIN-code",
-      "copy": "Code kopiëren",
+      "code": "Login PIN-code",
+      "copy": "Kopieer code",
       "encryption": "AES-256 encryptie actief"
     },
     "progress": {
@@ -336,7 +378,8 @@
       "global": "Algemene voortgang",
       "phase": "Geselecteerde huidige fase",
       "weeklyComments": "Wekelijkse opmerkingen",
-      "visibleByClient": "Zichtbaar voor klant"
+      "visibleByClient": "Zichtbaar voor cliënt",
+      "placeholder": "Detailleer het werk dat deze week is uitgevoerd..."
     },
     "constats": {
       "title": "Technische inspecties ({count})",
@@ -344,54 +387,124 @@
     },
     "delivery": {
       "estimated": "Geschatte oplevering",
-      "realTimeUpdate": "De opleverdatum wordt in realtime bijgewerkt in de klantruimte."
+      "realTimeUpdate": "De opleverdatum wordt in realtime bijgewerkt in de cliëntenruimte."
     },
     "builder": {
-      "partner": "Partner bouwer",
+      "partner": "Partnerbouwer",
       "placeholder": "Bijv: Porcelanosa / Grupo Isan"
     },
     "docs": {
       "title": "Cloud Documenten",
-      "subtitle": "Beveiligde klantopslagruimte",
-      "upload": "Bestand uploaden",
+      "subtitle": "Beveiligd cliëntenopslaggebied",
+      "upload": "Upload een bestand",
       "processing": "Verwerken...",
       "noDocuments": "Geen documenten gearchiveerd"
     },
     "staff": {
-      "add": "Medewerker toevoegen",
+      "add": "Voeg een medewerker toe",
       "firstName": "Voornaam",
       "lastName": "Achternaam",
-      "email": "Professioneel e-mail",
+      "email": "Professionele e-mail",
       "role": "Rol & Privileges",
       "agent": "Agent (Beperkte toegang)",
       "admin": "Agentschapsbeheerder",
-      "superAdmin": "Super Administrator",
+      "superAdmin": "Super Beheerder",
       "security": "Automatische Beveiliging",
-      "pinInfo": "Er wordt een unieke 6-cijferige pincode gegenereerd. De medewerker kan direct na validatie inloggen.",
-      "confirm": "Uitnodiging bevestigen",
-      "copyPin": "PIN kopiëren",
-      "delete": "Deze medewerker verwijderen",
+      "pinInfo": "Er wordt een unieke 6-cijferige PIN-code gegenereerd. De medewerker kan direct na validatie inloggen.",
+      "confirm": "Bevestig uitnodiging",
+      "copyPin": "Kopieer PIN",
+      "delete": "Verwijder deze medewerker",
       "securityCode": "Beveiligingscode",
       "cannotDeleteSelf": "U kunt uw eigen account niet verwijderen."
-    }
+    },
+    "inspectionReport": "Inspectierapport",
+    "observation": "Technische observatie #{num}",
+    "location": "Locatie: {lat}, {lng}",
+    "certification": "Ik certificeer dat de onderstaande informatie en foto's ter plaatse zijn verzameld door de technische afdeling van Amaru-Homes. GPS-coördinaten garanderen de authenticiteit van de inspectie.",
+    "generateReport": "Rapport Genereren",
+    "reportRef": "Inspectierapport #RC-{ref}",
+    "visitDate": "Bezoekdatum: {date}",
+    "phase": "Fase: {phase}",
+    "recipient": "ONTVANGER",
+    "project": "Project: {name}",
+    "expert": "EXPERT",
+    "defaultObservation": "Geen afwijking gedetecteerd tijdens visuele inspectie.",
+    "statusConforme": "STATUS: CONFORM",
+    "photoRef": "Opname #{num}\n\nGPS: {lat}\n{lng}",
+    "photoHeader": "FOTO REFERENTIE",
+    "analysisHeader": "TECHNISCHE ANALYSE & OBSERVATIES",
+    "photoAnnex": "FOTOGRAFISCHE EN GEOLOCATIE BIJLAGE",
+    "imageNotAvailable": "(Afbeelding niet beschikbaar)",
+    "imageCaption": "Illustratie #{num} - Gemaakt op {date}",
+    "certificationTitle": "CERTIFICERING:",
+    "certificationText": "Ik, ondergetekende, {expert}, certificeer dat de informatie, GPS-gegevens en foto's in dit rapport de werkelijke voortgang van de site op de genoemde datum getrouw weergeven.",
+    "pdfError": "Fout bij genereren PDF",
+    "initializing": "Beheerdersterminal initialiseren",
+    "version": "Dashboard Terminal v2.4.0"
+  },
+  "adminStaff": {
+    "userCreationFailed": "Kan gebruiker niet aanmaken.",
+    "addSuccess": "✅ Medewerker toegevoegd! PIN gegenereerd: {pin}",
+    "addError": "Fout bij toevoegen medewerker: {message}",
+    "cannotDeleteSelf": "U kunt uw eigen account niet verwijderen.",
+    "confirmDelete": "Weet u zeker dat u deze medewerker definitief wilt verwijderen?",
+    "deleteSuccess": "Medewerker verwijderd.",
+    "deleteError": "Fout bij verwijderen medewerker: {message}",
+    "copyPin": "Kopieer PIN",
+    "delete": "Verwijder deze medewerker",
+    "securityCode": "Beveiligingscode",
+    "superAdmin": "Super Beheerder",
+    "admin": "Agentschapsbeheerder",
+    "agent": "Agent (Beperkte toegang)",
+    "add": "Voeg een medewerker toe",
+    "enrollment": "Inschrijving in het {company} team",
+    "firstName": "Voornaam",
+    "lastName": "Achternaam",
+    "email": "Professionele e-mail",
+    "role": "Rol & Privileges",
+    "security": "Automatische Beveiliging",
+    "pinInfo": "Er wordt een unieke 6-cijferige PIN-code gegenereerd. De medewerker kan direct na validatie inloggen.",
+    "confirm": "Bevestig uitnodiging"
+  },
+  "adminProject": {
+    "initialize": "Project Initialiseren",
+    "subtitle": "Registratie van een nieuwe Amaru bouwplaats",
+    "error": "Fout: {message}",
+    "firstName": "Voornaam",
+    "firstNamePlaceholder": "John",
+    "lastName": "Achternaam",
+    "lastNamePlaceholder": "Doe",
+    "villaName": "Villa naam",
+    "villaPlaceholder": "VILLA AMARU LUXE",
+    "clientEmail": "Cliënt e-mail",
+    "emailPlaceholder": "client@voorbeeld.com",
+    "phone": "Telefoon",
+    "phonePlaceholder": "+33 6 00 00 00 00",
+    "address": "Straat / Adres",
+    "addressPlaceholder": "123 Avenue de la Plage",
+    "city": "Stad",
+    "cityPlaceholder": "Marbella",
+    "postalCode": "Postcode",
+    "country": "Land",
+    "generate": "Volledig bestand genereren"
   },
   "superAdmin": {
     "initializing": "Terminal initialiseren...",
     "accessDenied": "Toegang Geweigerd",
-    "noPrivileges": "Uw account heeft geen Super-Admin-rechten.",
+    "noPrivileges": "Uw account heeft geen Super-Admin-privileges.",
     "logout": "Uitloggen",
     "title": "Super Control",
     "subtitle": "Gecentraliseerd Systeem",
-    "publicSite": "Publieke Site",
+    "publicSite": "Openbare Site",
     "deploy": "Account implementeren",
     "firstName": "Voornaam",
     "lastName": "Achternaam",
     "agency": "Agentschap / Partner",
-    "packLevel": "Pack-niveau",
+    "packLevel": "Pakketniveau",
     "core": "CORE (2 Experts)",
     "ascent": "ASCENT (10 Experts)",
     "horizon": "HORIZON (Onbeperkt)",
-    "emailPlaceholder": "Inlog e-mail",
+    "emailPlaceholder": "Login e-mail",
     "passwordPlaceholder": "Wachtwoord",
     "activate": "LICENTIE ACTIVEREN",
     "activeUsers": "Actieve Gebruikers",
@@ -404,16 +517,16 @@
   "contactCashback": {
     "back": "Terug naar home",
     "title": "Cashback Activering",
-    "description": "Vul uw gegevens in om dit voordeel aan uw klantprofiel te koppelen.",
+    "description": "Vul uw gegevens in om dit voordeel aan uw cliëntprofiel te koppelen.",
     "firstName": "Voornaam *",
     "lastName": "Achternaam *",
     "email": "E-mail *",
     "phone": "Telefoon",
-    "submit": "Mijn Cashback activeren"
+    "submit": "Activeer mijn Cashback"
   },
   "merci": {
     "title": "Verzoek Ontvangen",
-    "message": "Uw Cashback-verzoek is verzonden. We nemen binnen 24 uur contact met u op om de details van uw voordeel te presenteren.",
+    "message": "Uw Cashback-verzoek is verzonden. Binnen 24 uur nemen wij contact met u op om de details van uw voordeel te presenteren.",
     "backHome": "Terug naar home",
     "brand": "Luxury Estates — Vastgoed Opnieuw Gedefinieerd"
   },
@@ -446,20 +559,20 @@
     "whatsappMobile": "Chat op WhatsApp",
     "bookVisit": "Bezoek plannen",
     "advisor": "Adviseur",
-    "distanceSea": "{distance}km naar zee",
+    "distanceSea": "{distance}km naar de zee",
     "golf": "{distance}km naar golf"
   },
   "advancedSearch": {
-    "propertyRef": "Eigendomsreferentie",
+    "propertyRef": "Eigendom Referentie",
     "refPlaceholder": "Bijv: REF-1234",
     "region": "Regio",
     "allSpain": "Spanje (Alle)",
     "costaBlanca": "Costa Blanca",
-    "costaCalida": "Costa Cálida",
+    "costaCalida": "Costa Calida",
     "costaDelSol": "Costa del Sol",
-    "costaAlmeria": "Costa Almería",
+    "costaAlmeria": "Costa Almeria",
     "type": "Type",
-    "anyType": "Onverschillig",
+    "anyType": "Elk type",
     "villa": "Villa",
     "apartment": "Appartement",
     "penthouse": "Penthouse",
@@ -475,13 +588,13 @@
     "portfolioExclusif": "Exclusief Portfolio",
     "conciergeriePrivee": "Privé Conciërge",
     "ventesOffMarket": "Off-Market Verkopen",
-    "expertiseArchitecturale": "Architectonische Expertise",
+    "expertiseArchitecturale": "Architecturale Expertise",
     "investissements": "Investeringen",
     "gestionPrestige": "Prestigebeheer"
   },
   "testimonials": {
     "title": "Vertrouwen is een fundamentele waarde",
-    "subtitle": "De tevredenheid van onze klanten is ons grootste succes.",
+    "subtitle": "De tevredenheid van onze cliënten is ons grootste succes.",
     "reviews": [
       {
         "name": "Isabelle Dupont",
@@ -489,7 +602,7 @@
       },
       {
         "name": "Sarah Williams",
-        "text": "Professional team, they helped us navigate every detail of the buying process. Highly recommended!"
+        "text": "Professioneel team, ze hielpen ons bij elk detail van het aankoopproces. Zeer aanbevolen!"
       },
       {
         "name": "Michael Ford",
@@ -501,27 +614,10 @@
     "label": "Taal"
   },
   "themeToggle": {
-    "ariaLabel": "Thema wijzigen"
+    "ariaLabel": "Schakel thema"
   },
   "errors": {
     "pinIncorrect": "Onjuiste pincode.",
     "incorrectPin": "Onjuiste PIN."
-  },
- 
-"login": {
-  "title": "Amaru Engine",
-  "subtitle": "Veilige authenticatie",
-  "pinTab": "PINCODE",
-  "credentialsTab": "INLOGGEGEVENS",
-  "emailLabel": "Gebruikersnaam",
-  "passwordLabel": "Wachtwoord",
-  "validate": "INLOGGEN",
-  "reset": "Terminal resetten",
-  "invalidPin": "Ongeldige pincode",
-  "invalidCredentials": "Ongeldige inloggegevens",
-  "validationError": "Validatiefout",
-  "profileMissing": "Profiel ontbreekt in de database.",
-  "roleNotAuthorized": "Rol niet toegestaan.",
-  "systemError": "Systeemfout."
-}
+  }
 }

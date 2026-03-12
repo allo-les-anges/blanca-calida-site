@@ -1,3 +1,4 @@
+// src/dictionaries/pl.json
 {
   "common": {
     "backToHome": "Powrót do strony głównej",
@@ -30,11 +31,11 @@
     "cashbackInfo": "Informacje o Cashback"
   },
   "footer": {
-    "excellence": "Doskonałość w Nieruchomościach",
-    "description": "Sztuka wyjątkowych nieruchomości. Tworzymy mosty między Twoimi ambicjami a najbardziej prestiżowymi nieruchomościami na wybrzeżu.",
+    "excellence": "Doskonałość Nieruchomości",
+    "description": "Sztuka wyjątkowego obrotu nieruchomościami. Budujemy pomosty między Twoimi ambicjami a najbardziej prestiżowymi nieruchomościami na wybrzeżu.",
     "collections": "Kolekcje",
     "villasSignature": "Sygnaturowe Wille",
-    "domainsPrestige": "Prestiżowe Domeny",
+    "domainsPrestige": "Domeny Prestiżowe",
     "newDevelopments": "Nowe Inwestycje",
     "privateClientAccess": "Prywatny Dostęp Klienta",
     "proSpace": "Przestrzeń Profesjonalna",
@@ -64,7 +65,7 @@
     },
     "collection": {
       "title": "Prywatny Portfel",
-      "propertiesSelected": "Wybranych Nieruchomości",
+      "propertiesSelected": "Wybrane Nieruchomości",
       "noMatch": "Brak dopasowań",
       "noMatchDescription": "Nie znaleźliśmy nieruchomości spełniającej Twoje kryteria.",
       "tryWider": "Spróbuj poszerzyć filtry.",
@@ -73,7 +74,7 @@
     "regionGrid": {
       "ourDestinations": "Nasze Destynacje",
       "exceptionalPlaces": "Wyjątkowe Miejsca",
-      "description": "Rygorystyczny wybór najbardziej prestiżowych enklaw na wybrzeżu.",
+      "description": "Rygorystyczna selekcja najbardziej prestiżowych enklaw na wybrzeżu.",
       "properties": "Nieruchomości",
       "discover": "Odkryj"
     },
@@ -90,7 +91,7 @@
     },
     "loading": {
       "updating": "Aktualizowanie...",
-      "amaruExcellence": "AMARU EXCELLENCE..."
+      "amaruExcellence": "DOSKONAŁOŚĆ AMARU..."
     }
   },
   "propertyCard": {
@@ -99,11 +100,12 @@
     "beds": "sypialnie",
     "baths": "łazienki",
     "pool": "Basen",
-    "noPool": "Brak",
+    "noPool": "Bez basenu",
     "land": "działka",
     "garage": "Garaż",
     "surface": "m²",
-    "plot": "m² działka"
+    "plot": "m² działka",
+    "fallbackTitle": "Villa Prestiżowa"
   },
   "propertyDetail": {
     "back": "Powrót do wyboru",
@@ -121,9 +123,9 @@
     "technicalPlans": "Plany Techniczne",
     "detailedLayout": "Szczegółowy układ",
     "price": "Cena Sprzedaży",
-    "brochure": "PDF Brochura",
+    "brochure": "Broszura PDF",
     "whatsapp": "Kontakt WhatsApp",
-    "whatsappDirect": "WhatsApp Bezpośredni",
+    "whatsappDirect": "WhatsApp Direct",
     "bookVisit": "Zarezerwuj Wizytę",
     "advisor": "Doradca",
     "activateCashback": "Aktywuj mój Cashback",
@@ -133,7 +135,14 @@
     "golf": "{distance}km do golfa",
     "propertyNotFound": "Nie znaleziono nieruchomości",
     "backToCatalogue": "Powrót do katalogu",
-    "loading": "Ładowanie nieruchomości..."
+    "loading": "Ładowanie nieruchomości...",
+    "rooms": "Sypialnie",
+    "baths": "Łazienki",
+    "surface": "Pow. zabudowy m²",
+    "from": "Od",
+    "configurations": "Dostępne konfiguracje",
+    "selected": "Wybrane",
+    "whatsapp_msg": "Witam, chciałbym uzyskać informacje o"
   },
   "cashback": {
     "title": "Program Wynegocjowanych Korzyści",
@@ -141,7 +150,7 @@
     "flexibility": "Całkowita Elastyczność",
     "flexibilityText": "Dopasowana do Twojego projektu korzyść szyta na miarę",
     "example": "Przykład przyznania środków",
-    "exampleAmount": "2 500 €*",
+    "exampleAmount": "2500 €*",
     "orEquipment": "lub równowartość mebli / usług",
     "points": [
       "Warunek wynegocjowany wcześniej z agencją lub deweloperem partnerskim.",
@@ -201,7 +210,7 @@
         "name": "Joanna Pawelek",
         "role": "Eastern Europe & Alicante Specialist",
         "worldRegion": "Europa Wschodnia i anglojęzyczna",
-        "background": "Certyfikowany ekspert (ANAI - API) rynku w Alicante. Pełni rolę strategicznego pomostu dla inwestorów z Europy Wschodniej i świata anglojęzycznego dzięki znajomości polskiego, angielskiego i hiszpańskiego.",
+        "background": "Certyfikowana ekspertka (ANAI - API) rynku Alicante. Działa jako strategiczny pomost dla inwestorów z Europy Wschodniej i świata anglojęzycznego dzięki znajomości polskiego, angielskiego i hiszpańskiego.",
         "skills": ["Certyfikat ANAI-API", "Rynek Polski", "Alicante"],
         "market": "Alicante / Costa Blanca"
       },
@@ -209,8 +218,8 @@
         "name": "Abdellah Touati",
         "role": "MENA & Americas Expert",
         "worldRegion": "Bliski Wschód i Ameryki",
-        "background": "Z doświadczeniem technicznym w inżynierii lądowej i wiedzą o rynku w Dubaju, kieruje ekspansją na rynki wschodzące i Amerykę Północną, łącząc deweloperów z globalnymi sieciami inwestorów.",
-        "skills": ["Inżynieria Lądowa", "Rynek Dubaju", "Globalne Sieci"],
+        "background": "Dzięki technicznemu wykształceniu w inżynierii lądowej i doświadczeniu na rynku dubajskim, kieruje ekspansją na rynki wschodzące i Amerykę Północną, łącząc deweloperów z globalnymi sieciami inwestorów.",
+        "skills": ["Inżynieria Lądowa", "Rynek Dubaju", "Sieci Globalne"],
         "market": "MENA / USA / Kanada"
       },
       {
@@ -225,7 +234,7 @@
   },
   "login": {
     "title": "Amaru Engine",
-    "subtitle": "Bezpieczne Uwierzytelnianie",
+    "subtitle": "Bezpieczne uwierzytelnianie",
     "pinTab": "KOD PIN",
     "credentialsTab": "DANE LOGOWANIA",
     "pinPlaceholder": "••••••",
@@ -236,27 +245,48 @@
     "reset": "Resetuj terminal",
     "invalidPin": "Nieprawidłowy kod PIN",
     "invalidCredentials": "Nieprawidłowe dane logowania",
-    "validationError": "Błąd walidacji"
+    "validationError": "Błąd walidacji",
+    "profileMissing": "Brak profilu w bazie danych.",
+    "roleNotAuthorized": "Rola nieautoryzowana.",
+    "systemError": "Błąd systemu."
   },
   "projectTracker": {
     "agencyName": "AMARU-HOMES",
     "department": "Dział Kontroli Technicznej i Jakości",
-    "phase": "Obecna Faza: {phase}",
+    "phase": "Aktualna Faza: {phase}",
+    "phaseLabel": "Aktualna Faza:",
     "quit": "Wyjdź",
     "documents": "Załączniki Administracyjne",
-    "technicalReports": "Dokumentacja Techniczna",
-    "reportValidated": "Zatwierdzony Raport z Inspekcji",
+    "technicalReports": "Dokumentacja Monitoringu Technicznego",
+    "reportValidated": "Zweryfikowany Raport z Inspekcji",
     "expertise": "Ekspertyza",
     "inspectionReport": "Raport z Inspekcji",
     "generateReport": "Generuj Raport",
-    "certification": "Zaświadczam, że informacje i zdjęcia przedstawione poniżej zostały zebrane na miejscu przez dział techniczny Amaru-Homes. Współrzędne GPS gwarantują autentyczność inspekcji.",
+    "certification": "Potwierdzam, że informacje i zdjęcia przedstawione poniżej zostały zebrane na miejscu przez dział techniczny Amaru-Homes. Współrzędne GPS gwarantują autentyczność inspekcji.",
     "observation": "Obserwacja techniczna #{number}",
-    "location": "Lokalizacja: {lat}, {lng}"
+    "location": "Lokalizacja: {lat}, {lng}",
+    "expertName": "Gaëtan Mukeba",
+    "reportRef": "Raport z Inspekcji #RC-{ref}",
+    "visitDate": "Data wizyty: {date}",
+    "recipient": "ODBIORCA",
+    "project": "Projekt: {name}",
+    "expert": "EKSPERT",
+    "defaultObservation": "Nie wykryto nieprawidłowości podczas inspekcji wizualnej.",
+    "statusConforme": "STATUS: ZGODNY",
+    "photoRef": "Ujęcie #{num}\n\nGPS: {lat}\n{lng}",
+    "photoHeader": "ODNIESIENIE DO ZDJĘCIA",
+    "analysisHeader": "ANALIZA TECHNICZNA I OBSERWACJE",
+    "photoAnnex": "ZAŁĄCZNIK FOTOGRAFICZNY I GEOLOKALIZACJA",
+    "imageNotAvailable": "(Obraz niedostępny)",
+    "imageCaption": "Ilustracja #{num} - Zarejestrowano {date}",
+    "certificationTitle": "CERTYFIKACJA:",
+    "certificationText": "Ja, niżej podpisany, {expert}, zaświadczam, że informacje, dane GPS i zdjęcia zawarte w niniejszym raporcie wiernie odzwierciedlają rzeczywisty postęp prac na miejscu w podanym terminie.",
+    "pdfError": "Błąd podczas generowania pliku PDF"
   },
   "adminChantier": {
-    "backHome": "Powrót do Strony Głównej",
+    "backHome": "Powrót do strony głównej",
     "title": "Luxury Staff",
-    "subtitle": "Praca w Terenie i Raportowanie",
+    "subtitle": "Prace Terenowe i Raportowanie",
     "pinPlaceholder": "••••••",
     "connect": "Połącz",
     "agent": "Agent",
@@ -270,30 +300,38 @@
     "gpsOk": "GPS OK",
     "photo": "Zdjęcie",
     "publish": "Opublikuj raport ({count})",
-    "stepUpdated": "Faza zaktualizowana",
+    "stepUpdated": "Etap zaktualizowany",
     "uploading": "Przesyłanie...",
     "photoAdded": "Zdjęcie dodane!",
     "publishing": "Publikowanie...",
     "reportSent": "Raport wysłany!",
     "phases": [
-    "0. Podpisanie i Rezerwacja",
-    "1. Teren / Roboty ziemne",
-    "2. Fundamenty",
-    "3. Ściany / Wznoszenie",
-    "4. Dach / Więźba dachowa",
-    "5. Stolarka",
-    "6. Elektryka / Hydraulika",
-    "7. Izolacja",
-    "8. Tynkowanie",
-    "9. Podłogi i Płytki",
-    "10. Malowanie / Wykończenia",
-    "11. Elewacja / Ogród",
-    "12. Przekazanie kluczy"
-    ]
+      "0. Podpisanie i Rezerwacja",
+      "1. Teren / Roboty ziemne",
+      "2. Fundamenty",
+      "3. Ściany / Wznoszenie",
+      "4. Dach / Więźba dachowa",
+      "5. Stolarka",
+      "6. Elektryka / Hydraulika",
+      "7. Izolacja",
+      "8. Tynkowanie",
+      "9. Podłogi i Płytki",
+      "10. Malowanie / Wykończenia",
+      "11. Elewacja / Ogród",
+      "12. Przekazanie kluczy"
+    ],
+    "pinCheckError": "Błąd sprawdzania PIN.",
+    "noAccess": "To konto nie ma uprawnień dostępu do interfejsu budowy.",
+    "invalidPin": "Nieprawidłowy PIN.",
+    "projectNotFound": "Nie znaleziono budowy.",
+    "defaultPhotoComment": "Zdjęcie monitorujące",
+    "storageError": "Błąd przechowywania: {message}",
+    "databaseError": "Błąd bazy danych: {message}"
   },
   "adminDashboard": {
-    "adminControl": "Admin Control",
+    "adminControl": "Panel Administracyjny",
     "search": "SZUKAJ...",
+    "searchPlaceholder": "SZUKAJ...",
     "projects": "Projekty",
     "team": "Zespół",
     "publicSite": "Strona Publiczna",
@@ -303,16 +341,20 @@
     "owner": "Właściciel: {name}",
     "print": "Drukuj",
     "save": "Zapisz plik",
+    "saveSuccess": "Plik zapisany pomyślnie!",
+    "uploadError": "Błąd przesyłania: {message}",
+    "confirmDeleteDocument": "Czy na pewno chcesz trwale usunąć ten dokument?",
+    "saveFile": "Zapisz plik",
     "tabs": {
       "clientBudget": "Klient i Budżet",
-      "constructionStatus": "Stan Budowy",
-      "documents": "Skarbiec (Dokumenty)"
+      "constructionStatus": "Status Budowy",
+      "documents": "Skarbiec Dokumentów"
     },
     "clientInfo": {
       "title": "Dane właściciela",
       "firstName": "Imię",
       "lastName": "Nazwisko",
-      "email": "E-mail",
+      "email": "Email",
       "phone": "Telefon"
     },
     "address": {
@@ -324,23 +366,24 @@
     },
     "cashback": {
       "reward": "Nagroda Cashback",
-      "paidAfterClosure": "Kwota wypłacona po zakończeniu"
+      "paidAfterClosure": "Kwota wypłacana po zakończeniu"
     },
     "pin": {
-      "code": "Kod PIN logowania",
-      "copy": "Kopiuj kod",
+      "code": "Kod PIN do logowania",
+      "copy": "Skopiuj kod",
       "encryption": "Szyfrowanie AES-256 aktywne"
     },
     "progress": {
-      "title": "Postęp w Czasie Rzeczywistym",
-      "global": "Postęp Ogólny",
-      "phase": "Wybrana bieżąca faza",
+      "title": "Postęp w czasie rzeczywistym",
+      "global": "Ogólny postęp",
+      "phase": "Wybrana aktualna faza",
       "weeklyComments": "Komentarze tygodniowe",
-      "visibleByClient": "Widoczne dla klienta"
+      "visibleByClient": "Widoczne dla klienta",
+      "placeholder": "Opisz szczegółowo prace wykonane w tym tygodniu..."
     },
     "constats": {
       "title": "Inspekcje techniczne ({count})",
-      "photos": "{count} zdjęć{s}"
+      "photos": "{count} zdjęć"
     },
     "delivery": {
       "estimated": "Szacowana dostawa",
@@ -361,23 +404,93 @@
       "add": "Dodaj współpracownika",
       "firstName": "Imię",
       "lastName": "Nazwisko",
-      "email": "Służbowy e-mail",
+      "email": "Profesjonalny email",
       "role": "Rola i Uprawnienia",
       "agent": "Agent (Ograniczony dostęp)",
       "admin": "Administrator Agencji",
       "superAdmin": "Super Administrator",
       "security": "Automatyczne Zabezpieczenia",
-      "pinInfo": "Zostanie wygenerowany unikalny 6-cyfrowy kod PIN. Współpracownik będzie mógł zalogować się natychmiast po weryfikacji.",
+      "pinInfo": "Zostanie wygenerowany unikalny 6-cyfrowy kod PIN. Współpracownik będzie mógł zalogować się natychmiast po walidacji.",
       "confirm": "Potwierdź zaproszenie",
       "copyPin": "Kopiuj PIN",
       "delete": "Usuń tego współpracownika",
       "securityCode": "Kod bezpieczeństwa",
       "cannotDeleteSelf": "Nie możesz usunąć własnego konta."
-    }
+    },
+    "inspectionReport": "Raport z Inspekcji",
+    "observation": "Obserwacja techniczna #{num}",
+    "location": "Lokalizacja: {lat}, {lng}",
+    "certification": "Potwierdzam, że informacje i zdjęcia przedstawione poniżej zostały zebrane na miejscu przez dział techniczny Amaru-Homes. Współrzędne GPS gwarantują autentyczność inspekcji.",
+    "generateReport": "Generuj Raport",
+    "reportRef": "Raport z Inspekcji #RC-{ref}",
+    "visitDate": "Data wizyty: {date}",
+    "phase": "Faza: {phase}",
+    "recipient": "ODBIORCA",
+    "project": "Projekt: {name}",
+    "expert": "EKSPERT",
+    "defaultObservation": "Nie wykryto nieprawidłowości podczas inspekcji wizualnej.",
+    "statusConforme": "STATUS: ZGODNY",
+    "photoRef": "Ujęcie #{num}\n\nGPS: {lat}\n{lng}",
+    "photoHeader": "ODNIESIENIE DO ZDJĘCIA",
+    "analysisHeader": "ANALIZA TECHNICZNA I OBSERWACJE",
+    "photoAnnex": "ZAŁĄCZNIK FOTOGRAFICZNY I GEOLOKALIZACJA",
+    "imageNotAvailable": "(Obraz niedostępny)",
+    "imageCaption": "Ilustracja #{num} - Zarejestrowano {date}",
+    "certificationTitle": "CERTYFIKACJA:",
+    "certificationText": "Ja, niżej podpisany, {expert}, zaświadczam, że informacje, dane GPS i zdjęcia zawarte w niniejszym raporcie wiernie odzwierciedlają rzeczywisty postęp prac na miejscu w podanym terminie.",
+    "pdfError": "Błąd podczas generowania pliku PDF",
+    "initializing": "Inicjalizacja Terminala Admina",
+    "version": "Dashboard Terminal v2.4.0"
+  },
+  "adminStaff": {
+    "userCreationFailed": "Nie udało się utworzyć użytkownika.",
+    "addSuccess": "✅ Współpracownik dodany! Wygenerowany PIN: {pin}",
+    "addError": "Błąd podczas dodawania współpracownika: {message}",
+    "cannotDeleteSelf": "Nie możesz usunąć własnego konta.",
+    "confirmDelete": "Czy na pewno chcesz trwale usunąć tego współpracownika?",
+    "deleteSuccess": "Współpracownik usunięty.",
+    "deleteError": "Błąd podczas usuwania współpracownika: {message}",
+    "copyPin": "Kopiuj PIN",
+    "delete": "Usuń tego współpracownika",
+    "securityCode": "Kod bezpieczeństwa",
+    "superAdmin": "Super Administrator",
+    "admin": "Administrator Agencji",
+    "agent": "Agent (Ograniczony dostęp)",
+    "add": "Dodaj współpracownika",
+    "enrollment": "Zapis do zespołu {company}",
+    "firstName": "Imię",
+    "lastName": "Nazwisko",
+    "email": "Profesjonalny email",
+    "role": "Rola i Uprawnienia",
+    "security": "Automatyczne Zabezpieczenia",
+    "pinInfo": "Zostanie wygenerowany unikalny 6-cyfrowy kod PIN. Współpracownik będzie mógł zalogować się natychmiast po walidacji.",
+    "confirm": "Potwierdź zaproszenie"
+  },
+  "adminProject": {
+    "initialize": "Inicjalizuj Projekt",
+    "subtitle": "Rejestracja nowej budowy Amaru",
+    "error": "Błąd: {message}",
+    "firstName": "Imię",
+    "firstNamePlaceholder": "Jan",
+    "lastName": "Nazwisko",
+    "lastNamePlaceholder": "Kowalski",
+    "villaName": "Nazwa willi",
+    "villaPlaceholder": "WILLA AMARU LUXE",
+    "clientEmail": "Email klienta",
+    "emailPlaceholder": "klient@przyklad.pl",
+    "phone": "Telefon",
+    "phonePlaceholder": "+48 600 000 000",
+    "address": "Ulica / Adres",
+    "addressPlaceholder": "123 Aleja Plażowa",
+    "city": "Miasto",
+    "cityPlaceholder": "Marbella",
+    "postalCode": "Kod pocztowy",
+    "country": "Kraj",
+    "generate": "Generuj kompletny plik"
   },
   "superAdmin": {
-    "initializing": "Inicjowanie terminala...",
-    "accessDenied": "Odmowa Dostępu",
+    "initializing": "Inicjalizacja terminala...",
+    "accessDenied": "Odmowa dostępu",
     "noPrivileges": "Twoje konto nie ma uprawnień Super-Admina.",
     "logout": "Wyloguj",
     "title": "Super Control",
@@ -391,11 +504,11 @@
     "core": "CORE (2 Ekspertów)",
     "ascent": "ASCENT (10 Ekspertów)",
     "horizon": "HORIZON (Nieograniczony)",
-    "emailPlaceholder": "E-mail logowania",
+    "emailPlaceholder": "Email logowania",
     "passwordPlaceholder": "Hasło",
     "activate": "AKTYWUJ LICENCJĘ",
     "activeUsers": "Aktywni Użytkownicy",
-    "database": "Database Live",
+    "database": "Baza Danych na Żywo",
     "search": "Szukaj...",
     "id": "ID: {id}",
     "pin": "PIN: {pin}",
@@ -404,7 +517,7 @@
   "contactCashback": {
     "back": "Powrót do strony głównej",
     "title": "Aktywacja Cashback",
-    "description": "Uzupełnij swoje dane, aby powiązać tę korzyść ze swoim profilem klienta.",
+    "description": "Wypełnij swoje dane, aby połączyć tę korzyść ze swoim profilem klienta.",
     "firstName": "Imię *",
     "lastName": "Nazwisko *",
     "email": "E-mail *",
@@ -412,10 +525,10 @@
     "submit": "Aktywuj mój Cashback"
   },
   "merci": {
-    "title": "Prośba Otrzymana",
+    "title": "Wniosek Otrzymany",
     "message": "Twoja prośba o Cashback została wysłana. Skontaktujemy się z Tobą w ciągu 24 godzin, aby przedstawić szczegóły Twojej korzyści.",
     "backHome": "Powrót do strony głównej",
-    "brand": "Luxury Estates — Nieruchomości na Nowo Zdefiniowane"
+    "brand": "Luxury Estates — Nieruchomości Na Nowo Zdefiniowane"
   },
   "development": {
     "back": "Powrót do wyboru",
@@ -423,7 +536,7 @@
     "availability": "Dostępność",
     "units": "Jednostki",
     "artOfLiving": "Sztuka Życia",
-    "distanceSea": "Odległość od morza",
+    "distanceSea": "Odległość do morza",
     "airport": "Lotnisko",
     "unitsAvailable": "Dostępne jednostki i Plany",
     "selectUnit": "Wybierz działkę, aby zobaczyć szczegóły i plany pięter",
@@ -441,7 +554,7 @@
     "technicalPlans": "Plany Techniczne",
     "detailedLayout": "Szczegółowy układ",
     "price": "Cena Sprzedaży",
-    "brochure": "PDF Brochura",
+    "brochure": "Broszura PDF",
     "whatsapp": "Kontakt WhatsApp",
     "whatsappMobile": "Czatuj na WhatsApp",
     "bookVisit": "Zarezerwuj Wizytę",
@@ -450,37 +563,37 @@
     "golf": "{distance}km do golfa"
   },
   "advancedSearch": {
-    "propertyRef": "Referencja Nieruchomości",
+    "propertyRef": "Odniesienie do Nieruchomości",
     "refPlaceholder": "Np: REF-1234",
     "region": "Region",
     "allSpain": "Hiszpania (Wszystkie)",
     "costaBlanca": "Costa Blanca",
-    "costaCalida": "Costa Cálida",
+    "costaCalida": "Costa Calida",
     "costaDelSol": "Costa del Sol",
-    "costaAlmeria": "Costa Almería",
+    "costaAlmeria": "Costa Almeria",
     "type": "Typ",
-    "anyType": "Dowolny",
+    "anyType": "Dowolny typ",
     "villa": "Willa",
-    "apartment": "Apartament",
+    "apartment": "Mieszkanie",
     "penthouse": "Penthouse",
     "bungalow": "Bungalow",
     "townhouse": "Dom szeregowy",
     "min": "Min",
-    "max": "Max",
+    "max": "Maks",
     "bedrooms": "Sypialnie",
-    "collection": "Kolekcja Amaru • Ekskluzywna Selekcja",
+    "collection": "Kolekcja Amaru • Ekskluzywny Wybór",
     "reset": "Resetuj"
   },
   "scrollingBanner": {
-    "portfolioExclusif": "Ekskluzywny Portfel",
+    "portfolioExclusif": "Ekskluzywne Portfolio",
     "conciergeriePrivee": "Prywatny Concierge",
-    "ventesOffMarket": "Sprzedaż Off-Market",
+    "ventesOffMarket": "Sprzedaż Pozarynkowa",
     "expertiseArchitecturale": "Ekspertyza Architektoniczna",
     "investissements": "Inwestycje",
     "gestionPrestige": "Zarządzanie Prestiżem"
   },
   "testimonials": {
-    "title": "Zaufanie jest wartością fundamentalną",
+    "title": "Zaufanie to wartość fundamentalna",
     "subtitle": "Zadowolenie naszych klientów jest naszym największym sukcesem.",
     "reviews": [
       {
@@ -506,21 +619,5 @@
   "errors": {
     "pinIncorrect": "Nieprawidłowy kod PIN.",
     "incorrectPin": "Nieprawidłowy PIN."
-  },
- "login": {
-  "title": "Amaru Engine",
-  "subtitle": "Bezpieczne uwierzytelnianie",
-  "pinTab": "KOD PIN",
-  "credentialsTab": "DANE LOGOWANIA",
-  "emailLabel": "Nazwa użytkownika",
-  "passwordLabel": "Hasło",
-  "validate": "ZALOGUJ SIĘ",
-  "reset": "Resetuj terminal",
-  "invalidPin": "Nieprawidłowy kod PIN",
-  "invalidCredentials": "Nieprawidłowe dane logowania",
-  "validationError": "Błąd walidacji",
-  "profileMissing": "Brak profilu w bazie danych.",
-  "roleNotAuthorized": "Rola nieautoryzowana.",
-  "systemError": "Błąd systemu."
-}
+  }
 }
