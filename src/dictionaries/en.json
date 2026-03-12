@@ -513,22 +513,5 @@
   "errors": {
     "pinIncorrect": "Incorrect PIN code.",
     "incorrectPin": "Incorrect PIN."
-  },
-  
-"login": {
-  "title": "Amaru Engine",
-  "subtitle": "Secure Authentication",
-  "pinTab": "PIN CODE",
-  "credentialsTab": "CREDENTIALS",
-  "emailLabel": "Username",
-  "passwordLabel": "Password",
-  "validate": "LOGIN",
-  "reset": "Reset terminal",
-  "invalidPin": "Invalid PIN code",
-  "invalidCredentials": "Invalid credentials",
-  "validationError": "Validation error",
-  "profileMissing": "Profile missing in database.",
-  "roleNotAuthorized": "Role not authorized.",
-  "systemError": "System error."
-}
+  }
 }
