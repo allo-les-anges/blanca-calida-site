@@ -296,6 +296,13 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    localStorage.clear();
+    sessionStorage.clear();
+    router.push('/login');
+  };
+
   const copyToClipboard = async (text: string, id: string) => {
   if (!text) {
     console.warn('Tentative de copie d\'un code PIN vide');
