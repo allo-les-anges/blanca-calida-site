@@ -559,8 +559,7 @@ export default function AdminDashboard() {
               .map((p) => (
                 <button 
                   key={p.id} 
-                  onClick={() => {alert('Clic détecté ! PIN = ' + editFields.pin_code);
-                  }} 
+                  onClick={() => { setSelectedProjet(p); setIsSidebarOpen(false); }}
                   className={`w-full text-left p-5 rounded-[1.5rem] border transition-all duration-500 group relative overflow-hidden ${selectedProjet?.id === p.id ? 'bg-emerald-500/10 border-emerald-500/50' : 'border-white/5 hover:bg-white/5 hover:border-white/10'}`}
                 >
                   <div className="flex items-center justify-between mb-2">
@@ -854,12 +853,8 @@ export default function AdminDashboard() {
                             {/* Bouton avec feedback et gestion du cas PIN absent */}
                             <button 
                               onClick={() => {
-                                if (editFields.pin_code) {
-                                  copyToClipboard(editFields.pin_code, 'pin');
-                                } else {
-                                  alert('Aucun code PIN défini pour ce projet. Veuillez en générer un via la modification du dossier.');
-                                }
-                              }}
+  alert('Clic détecté ! PIN = ' + editFields.pin_code);
+}}
                               className="mt-6 text-[9px] font-black text-emerald-500 uppercase tracking-widest flex items-center gap-2 hover:bg-emerald-500/10 px-4 py-2 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                               aria-label={copySuccess === 'pin' ? t('adminDashboard.pin.copied') : t('adminDashboard.pin.copy')}
                               disabled={!editFields.pin_code}
