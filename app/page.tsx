@@ -162,48 +162,57 @@ export default function Home() {
       </section>
 
       {/* SECTION ESPACE PROPRIÉTAIRE */}
-      <section className="max-w-[1600px] mx-auto px-6 py-12 bg-white dark:bg-[#020617]">
-        <div className="bg-slate-50 dark:bg-[#0F172A]/40 p-12 md:p-20 rounded-none border border-slate-200 dark:border-white/5 relative overflow-hidden">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center relative z-10">
-            <div className="space-y-6">
-              <span className="text-[#D4AF37] text-[10px] font-bold uppercase tracking-[0.4em]">Propriétaires Amaru</span>
-              <h2 
-                 className="text-4xl md:text-6xl font-serif leading-tight italic"
-                 style={{ color: isDark ? '#ffffff' : '#0f172a' }}
+<section className="max-w-[1600px] mx-auto px-4 sm:px-6 py-8 sm:py-12 bg-white dark:bg-[#020617]">
+  <div className="bg-slate-50 dark:bg-[#0F172A]/40 p-6 sm:p-8 md:p-12 lg:p-20 rounded-none border border-slate-200 dark:border-white/5 relative overflow-hidden">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 items-center relative z-10">
+      
+      {/* Colonne texte */}
+      <div className="space-y-4 sm:space-y-6 text-center lg:text-left">
+        <span className="text-[#D4AF37] text-[10px] font-bold uppercase tracking-[0.4em]">
+          {t('home.ownerSection.badge')}
+        </span>
+        <h2 
+          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif leading-tight italic"
+          style={{ color: isDark ? '#ffffff' : '#0f172a' }}
+        >
+          {t('home.ownerSection.title')} <br className="hidden sm:block" />
+          <span className="text-[#D4AF37] not-italic font-sans font-extrabold tracking-tighter text-xl sm:text-2xl md:text-3xl lg:text-5xl uppercase block sm:inline">
+            {t('home.ownerSection.subtitle')}
+          </span>
+        </h2>
+        <p 
+          className="text-sm sm:text-base font-light leading-relaxed max-w-md mx-auto lg:mx-0 border-l border-slate-200 dark:border-white/10 pl-4 sm:pl-6 italic opacity-90"
+          style={{ color: isDark ? '#CBD5E1' : '#64748b' }}
+        >
+          {t('home.ownerSection.description')}
+        </p>
+      </div>
+
+      {/* Colonne formulaire */}
+          <div className="bg-white dark:bg-[#020617] p-6 sm:p-8 md:p-10 rounded-none border border-slate-200 dark:border-[#D4AF37]/20 shadow-xl max-w-md mx-auto w-full lg:mx-0">
+            <form onSubmit={handleClientLogin} className="space-y-6 sm:space-y-8">
+              <div className="relative group">
+                <input 
+                  type="password" 
+                  placeholder={t('home.ownerSection.pinPlaceholder')} 
+                  value={clientPin}
+                  onChange={(e) => setClientPin(e.target.value)}
+                  className="w-full bg-transparent border-b border-slate-200 dark:border-white/10 py-3 sm:py-4 text-center text-xl sm:text-2xl font-black tracking-[0.6em] sm:tracking-[0.8em] outline-none focus:border-[#D4AF37] transition-all"
+                  style={{ color: isDark ? '#FFFFFF' : '#0f172a' }}
+                />
+              </div>
+              <button 
+                type="submit" 
+                className="w-full bg-[#D4AF37] text-black py-4 sm:py-5 rounded-none font-bold text-[10px] uppercase tracking-[0.2em] sm:tracking-[0.3em] hover:bg-slate-900 hover:text-white dark:hover:bg-white dark:hover:text-black transition-all flex items-center justify-center gap-4"
               >
-                {t('home.ownerSection.title')} <br /> 
-                <span className="text-[#D4AF37] not-italic font-sans font-extrabold tracking-tighter text-2xl md:text-5xl uppercase">
-                  {t('home.ownerSection.subtitle')}
-                </span>
-              </h2>
-              <p 
-                className="text-sm font-light leading-relaxed max-w-md border-l border-slate-200 dark:border-white/10 pl-6 italic opacity-90"
-                style={{ color: isDark ? '#CBD5E1' : '#64748b' }}
-              >
-                {t('home.ownerSection.description')}
-              </p>
-            </div>
-            
-            <div className="bg-white dark:bg-[#020617] p-10 rounded-none border border-slate-200 dark:border-[#D4AF37]/20 shadow-xl">
-               <form onSubmit={handleClientLogin} className="space-y-8">
-                  <div className="relative group">
-                    <input 
-                      type="password" 
-                      placeholder={t('home.ownerSection.pinPlaceholder')} 
-                      value={clientPin}
-                      onChange={(e) => setClientPin(e.target.value)}
-                      className="w-full bg-transparent border-b border-slate-200 dark:border-white/10 py-4 text-center text-2xl font-black tracking-[0.8em] outline-none focus:border-[#D4AF37] transition-all"
-                      style={{ color: isDark ? '#FFFFFF' : '#0f172a' }}
-                    />
-                  </div>
-                  <button type="submit" className="w-full bg-[#D4AF37] text-black py-5 rounded-none font-bold text-[10px] uppercase tracking-[0.3em] hover:bg-slate-900 hover:text-white dark:hover:bg-white dark:hover:text-black transition-all flex items-center justify-center gap-4">
-                    {t('home.ownerSection.accessButton')} <ArrowRight size={18} />
-                  </button>
-               </form>
-            </div>
+                {t('home.ownerSection.accessButton')} <ArrowRight size={18} />
+              </button>
+            </form>
           </div>
+
         </div>
-      </section>
+      </div>
+    </section>
 
       {/* SECTION COLLECTION */}
       <section id="collection" className="py-12 relative bg-white dark:bg-[#020617]">
