@@ -964,12 +964,11 @@ export default function AdminDashboard() {
                             </h3>
                             <p className="text-[10px] font-bold text-slate-500 uppercase ml-12 tracking-widest">{t('adminDashboard.docs.subtitle')}</p>
                           </div>
-                          <label className="group cursor-pointer relative flex items-center justify-center gap-3 px-6 lg:px-10 py-4 bg-white dark:bg-slate-800 text-black dark:text-white rounded-[1.5rem] font-black text-[10px] uppercase tracking-[0.2em] hover:bg-emerald-500 dark:hover:bg-emerald-600 transition-all duration-500 shadow-xl shadow-white/5 overflow-hidden active:scale-95">
-                            {uploadingDoc ? <Loader2 className="animate-spin" size={16}/> : <Upload size={16} className="group-hover:bounce" />} 
-                              {uploadingDoc ? t('adminDashboard.docs.processing') : t('adminDashboard.docs.upload')}
-                                <input type="file" className="hidden" onChange={handleFileUpload} disabled={uploadingDoc} />
+                          <label className="group cursor-pointer relative flex items-center justify-center gap-3 px-6 lg:px-10 py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-[1.5rem] font-black text-[10px] uppercase tracking-[0.2em] transition-all duration-500 shadow-lg shadow-emerald-600/30 overflow-hidden active:scale-95">
+                            {uploadingDoc ? <Loader2 className="animate-spin" size={16} /> : <Upload size={16} className="group-hover:scale-110 transition-transform" />}
+                            {uploadingDoc ? t('adminDashboard.docs.processing') : t('adminDashboard.docs.upload')}
+                            <input type="file" className="hidden" onChange={handleFileUpload} disabled={uploadingDoc} />
                           </label>
-                      </div>
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                           {projectDocs.length > 0 ? (
