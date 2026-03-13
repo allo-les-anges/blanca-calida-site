@@ -852,17 +852,20 @@ export default function AdminDashboard() {
                             
                             {/* Bouton avec feedback et gestion du cas PIN absent */}
                             <button 
-                              onClick={() => {
-  alert('Clic détecté ! PIN = ' + editFields.pin_code);
-}}
-                              className="mt-6 text-[9px] font-black text-emerald-500 uppercase tracking-widest flex items-center gap-2 hover:bg-emerald-500/10 px-4 py-2 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                              aria-label={copySuccess === 'pin' ? t('adminDashboard.pin.copied') : t('adminDashboard.pin.copy')}
-                              disabled={!editFields.pin_code}
-                            >
-                              {copySuccess === 'pin' ? <CheckCircle2 size={12} /> : <Copy size={12} />} 
-                              {copySuccess === 'pin' ? t('adminDashboard.pin.copied') : t('adminDashboard.pin.copy')}
-                            </button>
-                            
+                                  onClick={() => {
+                                    const pin = editFields.pin_code;
+                                    if (pin) {
+                                      copyToClipboard(pin, 'pin');
+                                    } else {
+                                      alert('Le code PIN n\'est pas défini pour ce projet.');
+                                    }
+                                  }}
+                                  className="mt-6 text-[9px] font-black text-emerald-500 uppercase tracking-widest flex items-center gap-2 hover:bg-emerald-500/10 px-4 py-2 rounded-xl transition-all"
+                                  aria-label={copySuccess === 'pin' ? t('adminDashboard.pin.copied') : t('adminDashboard.pin.copy')}
+                                >
+                                  {copySuccess === 'pin' ? <CheckCircle2 size={12} /> : <Copy size={12} />} 
+                                  {copySuccess === 'pin' ? t('adminDashboard.pin.copied') : t('adminDashboard.pin.copy')}
+                                </button>
                             <p className="text-[9px] text-slate-600 font-bold uppercase mt-8 flex items-center gap-2">
                               <Lock size={10} /> {t('adminDashboard.pin.encryption')}
                             </p>
