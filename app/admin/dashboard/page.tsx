@@ -954,69 +954,70 @@ export default function AdminDashboard() {
               )}
 
               {/* CONTENU ONGLET 3 : COFFRE-FORT DOCUMENTS */}
-              {projectTab === 'docs' && (
-                  <section className="bg-white/5 p-6 lg:p-10 rounded-[2rem] lg:rounded-[3rem] border border-white/5 animate-in fade-in slide-in-from-right-4 duration-700">
-                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 mb-10 lg:mb-16">
-                          <div className="space-y-2">
-                            <h3 className="text-xs font-black uppercase text-white tracking-[0.3em] flex items-center gap-4">
-                              <div className="p-2 bg-blue-500/10 rounded-lg text-blue-500"><Database size={16} /></div>
-                              {t('adminDashboard.docs.title')}
-                            </h3>
-                            <p className="text-[10px] font-bold text-slate-500 uppercase ml-12 tracking-widest">{t('adminDashboard.docs.subtitle')}</p>
-                          </div>
-                          <label className="group cursor-pointer relative flex items-center justify-center gap-3 px-6 lg:px-10 py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-[1.5rem] font-black text-[10px] uppercase tracking-[0.2em] transition-all duration-500 shadow-lg shadow-emerald-600/30 overflow-hidden active:scale-95">
-                            {uploadingDoc ? <Loader2 className="animate-spin" size={16} /> : <Upload size={16} className="group-hover:scale-110 transition-transform" />}
-                            {uploadingDoc ? t('adminDashboard.docs.processing') : t('adminDashboard.docs.upload')}
-                            <input type="file" className="hidden" onChange={handleFileUpload} disabled={uploadingDoc} />
-                          </label>
+            {projectTab === 'docs' && (
+              <section className="bg-white/5 p-6 lg:p-10 rounded-[2rem] lg:rounded-[3rem] border border-white/5 animate-in fade-in slide-in-from-right-4 duration-700">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 mb-10 lg:mb-16">
+                  <div className="space-y-2">
+                    <h3 className="text-xs font-black uppercase text-white tracking-[0.3em] flex items-center gap-4">
+                      <div className="p-2 bg-blue-500/10 rounded-lg text-blue-500"><Database size={16} /></div>
+                      {t('adminDashboard.docs.title')}
+                    </h3>
+                    <p className="text-[10px] font-bold text-slate-500 uppercase ml-12 tracking-widest">{t('adminDashboard.docs.subtitle')}</p>
+                  </div>
+                  <label className="group cursor-pointer relative flex items-center justify-center gap-3 px-6 lg:px-10 py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-[1.5rem] font-black text-[10px] uppercase tracking-[0.2em] transition-all duration-500 shadow-lg shadow-emerald-600/30 overflow-hidden active:scale-95">
+                    {uploadingDoc ? <Loader2 className="animate-spin" size={16} /> : <Upload size={16} className="group-hover:scale-110 transition-transform" />}
+                    {uploadingDoc ? t('adminDashboard.docs.processing') : t('adminDashboard.docs.upload')}
+                    <input type="file" className="hidden" onChange={handleFileUpload} disabled={uploadingDoc} />
+                  </label>
+                </div> {/* Fermeture de la div flex-row */}
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                          {projectDocs.length > 0 ? (
-                            projectDocs.map((doc) => (
-                                <div key={doc.id} className="group relative p-6 bg-black/40 border border-white/5 rounded-[2rem] lg:rounded-[2.5rem] flex flex-col gap-6 hover:border-emerald-500/30 hover:bg-white/[0.02] transition-all duration-500 hover:-translate-y-2 shadow-2xl">
-                                    <div className="flex items-center justify-between">
-                                        <div className="p-4 bg-white/5 rounded-2xl text-slate-400 group-hover:text-emerald-500 group-hover:bg-emerald-500/10 transition-all duration-500">
-                                          <FileText size={24} />
-                                        </div>
-                                        <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-500 translate-x-4 group-hover:translate-x-0 transition-transform">
-                                            <a href={doc.url_fichier} target="_blank" rel="noreferrer" className="p-3 bg-white/5 text-white hover:bg-emerald-500 hover:text-black rounded-xl transition-all">
-                                              <ExternalLink size={16} />
-                                            </a>
-                                            <button 
-                                              onClick={() => deleteDocument(doc.id, doc.url_fichier)} 
-                                              className="p-3 bg-white/5 text-white hover:bg-rose-500 rounded-xl transition-all"
-                                            >
-                                              <Trash2 size={16} />
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div className="space-y-2">
-                                      <p className="text-[11px] font-black text-white uppercase tracking-tight truncate pr-4" title={doc.nom_fichier}>
-                                        {doc.nom_fichier}
-                                      </p>
-                                      <div className="flex items-center gap-3">
-                                        <span className="text-[8px] font-black text-slate-500 uppercase bg-white/5 px-2 py-0.5 rounded tracking-widest">
-                                          {doc.type || 'PDF'}
-                                        </span>
-                                        <span className="text-[8px] font-bold text-slate-600">
-                                          {new Date(doc.created_at).toLocaleDateString('fr-FR')}
-                                        </span>
-                                      </div>
-                                    </div>
-                                    <div className="absolute top-0 right-0 p-8">
-                                      <HardDrive size={40} className="text-white/5 rotate-12 group-hover:rotate-0 group-hover:text-emerald-500/10 transition-all duration-700" />
-                                    </div>
-                                </div>
-                            ))
-                          ) : (
-                            <div className="col-span-full py-16 lg:py-24 text-center border-2 border-dashed border-white/5 rounded-[2rem] lg:rounded-[3rem] flex flex-col items-center justify-center space-y-4 opacity-30">
-                              <FileText size={48} className="text-slate-600" />
-                              <p className="text-[10px] text-slate-500 uppercase font-black tracking-[0.5em]">{t('adminDashboard.docs.noDocuments')}</p>
-                            </div>
-                          )}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {projectDocs.length > 0 ? (
+                    projectDocs.map((doc) => (
+                      <div key={doc.id} className="group relative p-6 bg-black/40 border border-white/5 rounded-[2rem] lg:rounded-[2.5rem] flex flex-col gap-6 hover:border-emerald-500/30 hover:bg-white/[0.02] transition-all duration-500 hover:-translate-y-2 shadow-2xl">
+                        <div className="flex items-center justify-between">
+                          <div className="p-4 bg-white/5 rounded-2xl text-slate-400 group-hover:text-emerald-500 group-hover:bg-emerald-500/10 transition-all duration-500">
+                            <FileText size={24} />
+                          </div>
+                          <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-500 translate-x-4 group-hover:translate-x-0 transition-transform">
+                            <a href={doc.url_fichier} target="_blank" rel="noreferrer" className="p-3 bg-white/5 text-white hover:bg-emerald-500 hover:text-black rounded-xl transition-all">
+                              <ExternalLink size={16} />
+                            </a>
+                            <button 
+                              onClick={() => deleteDocument(doc.id, doc.url_fichier)} 
+                              className="p-3 bg-white/5 text-white hover:bg-rose-500 rounded-xl transition-all"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <p className="text-[11px] font-black text-white uppercase tracking-tight truncate pr-4" title={doc.nom_fichier}>
+                            {doc.nom_fichier}
+                          </p>
+                          <div className="flex items-center gap-3">
+                            <span className="text-[8px] font-black text-slate-500 uppercase bg-white/5 px-2 py-0.5 rounded tracking-widest">
+                              {doc.type || 'PDF'}
+                            </span>
+                            <span className="text-[8px] font-bold text-slate-600">
+                              {new Date(doc.created_at).toLocaleDateString('fr-FR')}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="absolute top-0 right-0 p-8">
+                          <HardDrive size={40} className="text-white/5 rotate-12 group-hover:rotate-0 group-hover:text-emerald-500/10 transition-all duration-700" />
+                        </div>
                       </div>
-                  </section>
-              )}
+                    ))
+                  ) : (
+                    <div className="col-span-full py-16 lg:py-24 text-center border-2 border-dashed border-white/5 rounded-[2rem] lg:rounded-[3rem] flex flex-col items-center justify-center space-y-4 opacity-30">
+                      <FileText size={48} className="text-slate-600" />
+                      <p className="text-[10px] text-slate-500 uppercase font-black tracking-[0.5em]">{t('adminDashboard.docs.noDocuments')}</p>
+                    </div>
+                  )}
+                </div>
+              </section>
+            )}
 
             </div>
           ) : (
