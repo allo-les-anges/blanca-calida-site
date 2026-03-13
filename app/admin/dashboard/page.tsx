@@ -559,22 +559,22 @@ export default function AdminDashboard() {
             projets
               .filter(p => `${p.client_prenom} ${p.client_nom} ${p.nom_villa}`.toLowerCase().includes(searchTerm.toLowerCase()))
               .map((p) => (
-                <button 
-  onClick={() => {
-    console.log("PIN:", editFields.pin_code);
-    copyToClipboard(editFields.pin_code, 'pin');
-  }}
-  className="mt-6 text-[9px] font-black text-emerald-500 uppercase tracking-widest flex items-center gap-2 hover:bg-emerald-500/10 px-4 py-2 rounded-xl transition-all"
->
-                  <div className="flex items-center justify-between mb-2">
-                    <p className="font-black text-[11px] text-white uppercase tracking-tighter leading-none">{p.client_prenom} {p.client_nom}</p>
-                    {selectedProjet?.id === p.id && <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-glow"></div>}
-                  </div>
-                  <p className="text-[9px] uppercase font-black text-emerald-500 flex items-center gap-2 tracking-widest opacity-80 group-hover:opacity-100 transition-opacity">
-                    <MapPin size={10} className="shrink-0" /> {p.nom_villa}
-                  </p>
-                  <ChevronRight size={14} className={`absolute right-4 top-1/2 -translate-y-1/2 text-emerald-500/20 transition-all duration-500 ${selectedProjet?.id === p.id ? 'translate-x-0 opacity-100' : 'translate-x-4 opacity-0'}`} />
-                </button>
+        <button 
+              onClick={() => {
+                const pin = editFields.pin_code;
+                if (pin) {
+                  copyToClipboard(pin, 'pin');
+                } else {
+                  console.warn('PIN non disponible pour ce projet', editFields);
+                  alert('Le code PIN n\'est pas disponible pour ce projet.');
+                }
+              }}
+              className="mt-6 text-[9px] font-black text-emerald-500 uppercase tracking-widest flex items-center gap-2 hover:bg-emerald-500/10 px-4 py-2 rounded-xl transition-all"
+              aria-label={copySuccess === 'pin' ? t('adminDashboard.pin.copied') : t('adminDashboard.pin.copy')}
+            >
+              {copySuccess === 'pin' ? <CheckCircle2 size={12} /> : <Copy size={12} />} 
+              {copySuccess === 'pin' ? t('adminDashboard.pin.copied') : t('adminDashboard.pin.copy')}
+            </button>
               ))
           ) : (
             staffList
