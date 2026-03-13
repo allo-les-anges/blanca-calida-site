@@ -296,17 +296,36 @@ export default function AdminDashboard() {
     }
   };
 
-  const copyToClipboard = (text: string, id: string) => {
-    if (!text) return;
-    navigator.clipboard.writeText(text);
+  const copyToClipboard = async (text: string, id: string) => {
+  if (!text) {
+    console.warn('Tentative de copie d\'un code PIN vide');
+    return;
+  }
+  try {
+    // Méthode moderne (async)
+    await navigator.clipboard.writeText(text);
     setCopySuccess(id);
     setTimeout(() => setCopySuccess(null), 2000);
-  };
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    router.push('/login');
-  };
+  } catch (err) {
+    console.error('Échec de la copie avec API Clipboard :', err);
+    // Fallback pour les navigateurs plus anciens / contextes non sécurisés
+    try {
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+      setCopySuccess(id);
+      setTimeout(() => setCopySuccess(null), 2000);
+    } catch (fallbackErr) {
+      console.error('Fallback copy failed:', fallbackErr);
+      alert('Impossible de copier le code. Veuillez le sélectionner manuellement.');
+    }
+  }
+};
 
   // --- GESTION DES CONSTATS ET PDF ---
 
@@ -818,27 +837,28 @@ export default function AdminDashboard() {
                         </div>
 
                           {/* Carte PIN Client */}
-                            <div className="bg-white/5 p-8 lg:p-10 rounded-[2rem] lg:rounded-[3rem] border border-white/5 flex flex-col items-center text-center relative group overflow-hidden">
-                                <div className="absolute inset-0 bg-emerald-500/0 group-hover:bg-emerald-500/5 transition-colors duration-700"></div>
-                                <ShieldCheck size={40} className="text-emerald-500 mb-6 group-hover:scale-110 transition-transform duration-500" />
-                                <p className="text-[10px] font-black uppercase text-slate-500 tracking-[0.3em]">{t('adminDashboard.pin.code')}</p>
-                                <p className="text-3xl sm:text-4xl font-black text-white tracking-[0.4em] mt-4 ml-4 leading-none italic select-all break-all">
-                                    {editFields.pin_code}
-                                </p>
-                                
-                                {/* Bouton avec feedback */}
-                                <button 
-                                    onClick={() => copyToClipboard(editFields.pin_code, 'pin')}
-                                    className="mt-6 text-[9px] font-black text-emerald-500 uppercase tracking-widest flex items-center gap-2 hover:bg-emerald-500/10 px-4 py-2 rounded-xl transition-all"
-                                >
-                                    {copySuccess === 'pin' ? <CheckCircle2 size={12} /> : <Copy size={12} />} 
-                                    {copySuccess === 'pin' ? (t('adminDashboard.pin.copied') || 'Copié !') : t('adminDashboard.pin.copy')}
-                                </button>
-                                
-                                <p className="text-[9px] text-slate-600 font-bold uppercase mt-8 flex items-center gap-2">
-                                    <Lock size={10} /> {t('adminDashboard.pin.encryption')}
-                                </p>
-                            </div>
+                          <div className="bg-white/5 p-8 lg:p-10 rounded-[2rem] lg:rounded-[3rem] border border-white/5 flex flex-col items-center text-center relative group overflow-hidden">
+                            <div className="absolute inset-0 bg-emerald-500/0 group-hover:bg-emerald-500/5 transition-colors duration-700"></div>
+                            <ShieldCheck size={40} className="text-emerald-500 mb-6 group-hover:scale-110 transition-transform duration-500" />
+                            <p className="text-[10px] font-black uppercase text-slate-500 tracking-[0.3em]">{t('adminDashboard.pin.code')}</p>
+                            <p className="text-3xl sm:text-4xl font-black text-white tracking-[0.4em] mt-4 ml-4 leading-none italic select-all break-all">
+                              {editFields.pin_code}
+                            </p>
+                            
+                            {/* Bouton avec feedback */}
+                            <button 
+                              onClick={() => copyToClipboard(editFields.pin_code, 'pin')}
+                              className="mt-6 text-[9px] font-black text-emerald-500 uppercase tracking-widest flex items-center gap-2 hover:bg-emerald-500/10 px-4 py-2 rounded-xl transition-all"
+                              aria-label={copySuccess === 'pin' ? t('adminDashboard.pin.copied') : t('adminDashboard.pin.copy')}
+                            >
+                              {copySuccess === 'pin' ? <CheckCircle2 size={12} /> : <Copy size={12} />} 
+                              {copySuccess === 'pin' ? t('adminDashboard.pin.copied') : t('adminDashboard.pin.copy')}
+                            </button>
+                            
+                            <p className="text-[9px] text-slate-600 font-bold uppercase mt-8 flex items-center gap-2">
+                              <Lock size={10} /> {t('adminDashboard.pin.encryption')}
+                            </p>
+                          </div>
                       </div>
                   </div>
               )}
