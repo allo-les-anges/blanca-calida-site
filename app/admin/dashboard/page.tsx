@@ -560,10 +560,12 @@ export default function AdminDashboard() {
               .filter(p => `${p.client_prenom} ${p.client_nom} ${p.nom_villa}`.toLowerCase().includes(searchTerm.toLowerCase()))
               .map((p) => (
                 <button 
-                  key={p.id} 
-                  onClick={() => { setSelectedProjet(p); setIsSidebarOpen(false); }} 
-                  className={`w-full text-left p-5 rounded-[1.5rem] border transition-all duration-500 group relative overflow-hidden ${selectedProjet?.id === p.id ? 'bg-emerald-500/10 border-emerald-500/50' : 'border-white/5 hover:bg-white/5 hover:border-white/10'}`}
-                >
+  onClick={() => {
+    console.log("PIN:", editFields.pin_code);
+    copyToClipboard(editFields.pin_code, 'pin');
+  }}
+  className="mt-6 text-[9px] font-black text-emerald-500 uppercase tracking-widest flex items-center gap-2 hover:bg-emerald-500/10 px-4 py-2 rounded-xl transition-all"
+>
                   <div className="flex items-center justify-between mb-2">
                     <p className="font-black text-[11px] text-white uppercase tracking-tighter leading-none">{p.client_prenom} {p.client_nom}</p>
                     {selectedProjet?.id === p.id && <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-glow"></div>}

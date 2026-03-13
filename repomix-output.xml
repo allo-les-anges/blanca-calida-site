@@ -4817,6 +4817,391 @@ export default function Navbar() {
 }
 </file>
 
+<file path="app/cashback-info/page.tsx">
+"use client";
+
+import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
+import Navbar from "@/components/Navbar";
+import { 
+  ShieldCheck, 
+  ArrowLeft, 
+  Sofa, 
+  Banknote, 
+  CheckCircle2, 
+  Home, 
+  Gavel,
+  Scale
+} from 'lucide-react';
+import { useTheme } from "next-themes";
+import { useTranslation } from "@/contexts/I18nContext";
+
+export default function CashbackInfo() {
+  const { resolvedTheme } = useTheme();
+  const { t } = useTranslation();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
+
+  const isDark = resolvedTheme === "dark";
+
+  const themeStyles = {
+    title: { color: isDark ? '#FFFFFF' : '#0f172a' },
+    text: { color: isDark ? '#CBD5E1' : '#64748b' },
+    heading: { color: isDark ? '#D4AF37' : '#0f172a' },
+    iconColor: isDark ? '#FFFFFF' : '#0f172a'
+  };
+
+  return (
+    <div className="min-h-screen bg-white dark:bg-[#0A0A0A] transition-colors duration-500">
+      <Navbar />
+      <div className="pt-32 pb-20 px-6">
+        <div className="max-w-4xl mx-auto">
+          {/* Fil d'ariane */}
+          <Link 
+            href="/" 
+            className="inline-flex items-center gap-2 text-slate-400 hover:text-[#D4AF37] transition-colors mb-12 uppercase text-[10px] tracking-[0.3em] font-bold"
+          >
+            <ArrowLeft size={14} /> {t('cashback.back')}
+          </Link>
+
+          <div className="mb-16">
+            <h1 
+              className="text-5xl md:text-7xl font-serif mb-8 leading-tight"
+              style={themeStyles.title}
+            >
+              {t('cashback.title')} <br />
+              <span className="italic text-[#D4AF37]">{t('cashback.subtitle')}</span>
+            </h1>
+            <p 
+              className="text-xl max-w-2xl leading-relaxed"
+              style={themeStyles.text}
+            >
+              {t('cashback.description')}
+            </p>
+          </div>
+
+          {/* SECTION EXEMPLE CONCRET */}
+          <div className="relative overflow-hidden bg-[#0F172A] rounded-[3rem] p-8 md:p-16 mb-20 shadow-2xl border border-white/5">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-[#D4AF37] opacity-10 blur-[100px] -mr-32 -mt-32" />
+            
+            <div className="relative z-10">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6">
+                <div className="max-w-md">
+                  <h2 className="text-[10px] uppercase tracking-[0.4em] font-bold text-[#D4AF37] mb-3">{t('cashback.flexibility')}</h2>
+                  <p className="text-3xl font-serif italic text-white leading-tight">{t('cashback.flexibilityText')}</p>
+                </div>
+                <div className="bg-white/5 backdrop-blur-md px-6 py-8 rounded-[2rem] border border-[#D4AF37]/30 min-w-[240px]">
+                  <span className="text-[9px] uppercase tracking-[0.2em] font-bold text-[#D4AF37] block mb-4 text-center">{t('cashback.example')}</span>
+                  <div className="flex flex-col items-center gap-2">
+                      <span className="text-2xl md:text-3xl font-light text-white tabular-nums whitespace-nowrap">
+                           {t('cashback.exampleAmount')}<span className="text-[#D4AF37] ml-1">*</span>
+                      </span>
+                      <span className="text-[10px] text-slate-400 uppercase tracking-tighter">{t('cashback.orEquipment')}</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 border-t border-white/10 pt-10">
+                {[0, 1].map((idx) => (
+                  <div key={idx} className="flex items-start gap-4">
+                    <div className="bg-[#D4AF37]/10 p-2 rounded-full">
+                      <CheckCircle2 className="text-[#D4AF37]" size={20} />
+                    </div>
+                    <p className="text-sm text-slate-300 leading-relaxed">{t(`cashback.points.${idx}`)}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* GRILLE D'AVANTAGES */}
+          <div className="grid md:grid-cols-3 gap-16 mb-24">
+            {['cash', 'furniture', 'services'].map((key, idx) => (
+              <div key={idx} className="group space-y-6">
+                <div className="w-14 h-14 bg-slate-50 dark:bg-white/5 rounded-2xl flex items-center justify-center group-hover:bg-[#D4AF37] transition-all duration-500 shadow-sm">
+                  {key === 'cash' && <Banknote size={28} strokeWidth={1.5} color={themeStyles.iconColor} className="group-hover:stroke-white transition-colors" />}
+                  {key === 'furniture' && <Sofa size={28} strokeWidth={1.5} color={themeStyles.iconColor} className="group-hover:stroke-white transition-colors" />}
+                  {key === 'services' && <Scale size={28} strokeWidth={1.5} color={themeStyles.iconColor} className="group-hover:stroke-white transition-colors" />}
+                </div>
+                <h3 className="font-bold uppercase text-[11px] tracking-[0.2em]" style={themeStyles.title}>{t(`cashback.options.${key}.title`)}</h3>
+                <p className="text-sm leading-relaxed" style={themeStyles.text}>{t(`cashback.options.${key}.desc`)}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Section FAQ / Info */}
+          <div className="border-t border-slate-100 dark:border-white/10 pt-20">
+              <div className="max-w-2xl">
+                <h2 className="text-4xl font-serif italic mb-10 text-left" style={themeStyles.title}>{t('cashback.activation')}</h2>
+                <div className="space-y-8 text-lg leading-relaxed">
+                  <p style={themeStyles.text}>
+                    {t('cashback.activationText')}
+                  </p>
+                  <p style={themeStyles.text}>
+                    {t('cashback.activationDetail')}
+                  </p>
+                </div>
+
+                <div className="mt-16">
+                  <Link 
+                      href="/" 
+                      className="group inline-flex items-center gap-4 bg-slate-900 dark:bg-white text-white dark:text-black px-12 py-6 rounded-2xl font-bold uppercase text-[11px] tracking-[0.3em] hover:bg-[#D4AF37] transition-all duration-500 shadow-2xl"
+                  >
+                      <Home size={18} className="group-hover:scale-110 transition-transform" />
+                      {t('cashback.backHome')}
+                  </Link>
+                </div>
+              </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+</file>
+
+<file path="app/contact/page.tsx">
+"use client";
+
+import React, { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { 
+  Globe, Target, MapPin, Languages, Compass, Sun, Moon 
+} from "lucide-react";
+import { useTheme } from "next-themes";
+import { useTranslation } from "@/contexts/I18nContext";
+
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+
+// Tableau statique des photos (chemins fixes)
+const teamMembers = [
+  { id: 1, photo: "/Deborah.jpeg" },
+  { id: 2, photo: "/Gillian.jpeg" },
+  { id: 3, photo: "/Joanna.jpeg" },
+  { id: 4, photo: "/Abdou.jpeg" },
+  { id: 5, photo: "/Gaëtan.jpeg" },
+];
+
+export default function ContactPage() {
+  const { resolvedTheme } = useTheme();
+  const { t } = useTranslation();
+  const [mounted, setMounted] = useState(false);
+  
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    region: "",
+    message: ""
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
+
+  const isDark = resolvedTheme === "dark";
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setStatus("idle");
+
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        setStatus("success");
+        setFormData({ name: "", email: "", region: "", message: "" });
+      } else {
+        setStatus("error");
+      }
+    } catch (error) {
+      console.error("Erreur soumission:", error);
+      setStatus("error");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const inputStyle = {
+    color: isDark ? '#ffffff' : '#0f172a',
+    backgroundColor: isDark ? 'rgba(0, 0, 0, 0.6)' : '#ffffff',
+  };
+
+  const inputClasses = `
+    w-full px-8 py-5 rounded-2xl outline-none transition-all 
+    text-[10px] font-black tracking-widest 
+    border-2 border-slate-200 dark:border-white/20 
+    placeholder:text-slate-400 dark:placeholder:text-white/40
+    focus:border-[#D4AF37] dark:focus:border-[#D4AF37]
+  `;
+
+  return (
+    <div className="min-h-screen transition-colors duration-500 bg-white dark:bg-[#0A0A0A] text-slate-900 dark:text-white">
+      
+      <Navbar />
+
+      <main>
+        {/* SECTION HÉRO */}
+        <section className="relative h-[65vh] w-full flex items-center justify-center transition-colors duration-1000 bg-slate-900 dark:bg-[#020617]">
+          <div className="absolute inset-0 z-0 opacity-50 bg-slate-900 dark:bg-black" />
+          <div className="relative z-10 text-center px-6 max-w-5xl pt-20">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
+              <span className="text-[#D4AF37] text-[12px] font-black uppercase tracking-[0.6em] mb-6 block">
+                {t('contact.heroBadge')}
+              </span>
+              <h1 className="text-4xl md:text-7xl font-serif italic text-white mb-8">
+                {t('contact.heroTitle')}
+              </h1>
+              <p className="text-white/70 text-base md:text-lg font-light max-w-3xl mx-auto leading-relaxed italic">
+                {t('contact.heroQuote')}
+              </p>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* SECTION ÉQUIPE */}
+        <section className="max-w-[1400px] mx-auto px-6 py-24 grid grid-cols-1 xl:grid-cols-12 gap-20">
+          <div className="xl:col-span-7 space-y-12">
+            {teamMembers.map((member, idx) => (
+              <motion.div 
+                key={member.id}
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: idx * 0.1 }}
+                className="p-8 md:p-12 rounded-[2.5rem] border transition-all duration-700 bg-white dark:bg-white/5 border-slate-100 dark:border-white/10 shadow-xl"
+              >
+                <div className="flex flex-col md:flex-row gap-10">
+                  <div className="relative w-full md:w-48 h-60 shrink-0 overflow-hidden rounded-[2rem] bg-slate-100 dark:bg-white/5">
+                    <img 
+                      src={member.photo} 
+                      className={`w-full h-full object-cover ${isDark ? "brightness-75 grayscale-[0.3]" : ""}`}
+                      alt={t(`contact.team.${idx}.name`)}
+                    />
+                  </div>
+                  <div className="flex-1 space-y-5">
+                    <h3 className="text-3xl font-serif italic text-[#D4AF37]">
+                      {t(`contact.team.${idx}.name`)}
+                    </h3>
+                    <p className="text-base leading-relaxed font-light text-slate-600 dark:text-slate-300">
+                      {t(`contact.team.${idx}.background`)}
+                    </p>
+                    <div className="flex flex-wrap gap-2 pt-4">
+                      {[0, 1, 2].map((skillIdx) => (
+                        <span 
+                          key={skillIdx} 
+                          className="text-[9px] font-black uppercase tracking-widest px-3 py-1 bg-[#D4AF37]/10 text-[#D4AF37] rounded-md border border-[#D4AF37]/20"
+                        >
+                          {t(`contact.team.${idx}.skills.${skillIdx}`)}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* COLONNE FORMULAIRE */}
+          <div className="xl:col-span-5">
+            <div className="sticky top-32 p-12 rounded-[3.5rem] transition-all duration-700 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 shadow-2xl">
+              
+              <h3 
+                className="text-3xl md:text-4xl font-serif italic mb-2"
+                style={{ color: isDark ? '#FFFFFF' : '#0f172a' }}
+              >
+                {t('contact.formTitle')}
+              </h3>
+              
+              <p className="text-[#D4AF37] text-[10px] font-black uppercase tracking-[0.2em] mb-10">
+                {t('contact.formSubtitle')}
+              </p>
+              
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <input 
+                  required
+                  type="text" 
+                  placeholder={t('contact.namePlaceholder')}
+                  style={inputStyle}
+                  className={inputClasses}
+                  value={formData.name}
+                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                />
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <input 
+                    required
+                    type="email" 
+                    placeholder={t('contact.emailPlaceholder')}
+                    style={inputStyle}
+                    className={inputClasses}
+                    value={formData.email}
+                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                  />
+                  <input 
+                    type="text" 
+                    placeholder={t('contact.regionPlaceholder')}
+                    style={inputStyle}
+                    className={inputClasses}
+                    value={formData.region}
+                    onChange={(e) => setFormData({...formData, region: e.target.value})}
+                  />
+                </div>
+                
+                <textarea 
+                  required
+                  rows={4} 
+                  placeholder={t('contact.messagePlaceholder')}
+                  style={inputStyle}
+                  className={`${inputClasses} resize-none`}
+                  value={formData.message}
+                  onChange={(e) => setFormData({...formData, message: e.target.value})}
+                />
+                
+                <button 
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full bg-[#D4AF37] text-black py-6 rounded-2xl font-black uppercase text-[10px] tracking-[0.4em] hover:bg-white transition-all shadow-xl disabled:opacity-50"
+                >
+                  {isSubmitting ? t('contact.submitting') : t('contact.submit')}
+                </button>
+
+                {status === "success" && (
+                  <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-green-600 dark:text-green-400 text-center font-bold text-[10px] tracking-widest uppercase mt-4">
+                    {t('contact.success')}
+                  </motion.p>
+                )}
+                {status === "error" && (
+                  <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-red-500 text-center font-bold text-[10px] tracking-widest uppercase mt-4">
+                    {t('contact.error')}
+                  </motion.p>
+                )}
+              </form>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <Footer />
+    </div>
+  );
+}
+</file>
+
 <file path="app/admin/dashboard/page.tsx">
 "use client";
 
@@ -5116,19 +5501,26 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    localStorage.clear();
+    sessionStorage.clear();
+    router.push('/login');
+  };
+
   const copyToClipboard = async (text: string, id: string) => {
+  console.log('Tentative de copie :', text);
   if (!text) {
-    console.warn('Tentative de copie d\'un code PIN vide');
+    console.warn('Code PIN vide');
     return;
   }
   try {
-    // Méthode moderne (async)
     await navigator.clipboard.writeText(text);
     setCopySuccess(id);
     setTimeout(() => setCopySuccess(null), 2000);
   } catch (err) {
-    console.error('Échec de la copie avec API Clipboard :', err);
-    // Fallback pour les navigateurs plus anciens / contextes non sécurisés
+    console.error('Erreur API Clipboard :', err);
+    // Fallback pour navigateurs anciens / contexte non sécurisé
     try {
       const textarea = document.createElement('textarea');
       textarea.value = text;
@@ -5141,7 +5533,7 @@ export default function AdminDashboard() {
       setCopySuccess(id);
       setTimeout(() => setCopySuccess(null), 2000);
     } catch (fallbackErr) {
-      console.error('Fallback copy failed:', fallbackErr);
+      console.error('Fallback échoué :', fallbackErr);
       alert('Impossible de copier le code. Veuillez le sélectionner manuellement.');
     }
   }
@@ -6145,391 +6537,6 @@ export default function AdminDashboard() {
           display: none;
         }
       `}</style>
-    </div>
-  );
-}
-</file>
-
-<file path="app/cashback-info/page.tsx">
-"use client";
-
-import React, { useEffect, useState } from 'react';
-import Link from 'next/link';
-import Navbar from "@/components/Navbar";
-import { 
-  ShieldCheck, 
-  ArrowLeft, 
-  Sofa, 
-  Banknote, 
-  CheckCircle2, 
-  Home, 
-  Gavel,
-  Scale
-} from 'lucide-react';
-import { useTheme } from "next-themes";
-import { useTranslation } from "@/contexts/I18nContext";
-
-export default function CashbackInfo() {
-  const { resolvedTheme } = useTheme();
-  const { t } = useTranslation();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) return null;
-
-  const isDark = resolvedTheme === "dark";
-
-  const themeStyles = {
-    title: { color: isDark ? '#FFFFFF' : '#0f172a' },
-    text: { color: isDark ? '#CBD5E1' : '#64748b' },
-    heading: { color: isDark ? '#D4AF37' : '#0f172a' },
-    iconColor: isDark ? '#FFFFFF' : '#0f172a'
-  };
-
-  return (
-    <div className="min-h-screen bg-white dark:bg-[#0A0A0A] transition-colors duration-500">
-      <Navbar />
-      <div className="pt-32 pb-20 px-6">
-        <div className="max-w-4xl mx-auto">
-          {/* Fil d'ariane */}
-          <Link 
-            href="/" 
-            className="inline-flex items-center gap-2 text-slate-400 hover:text-[#D4AF37] transition-colors mb-12 uppercase text-[10px] tracking-[0.3em] font-bold"
-          >
-            <ArrowLeft size={14} /> {t('cashback.back')}
-          </Link>
-
-          <div className="mb-16">
-            <h1 
-              className="text-5xl md:text-7xl font-serif mb-8 leading-tight"
-              style={themeStyles.title}
-            >
-              {t('cashback.title')} <br />
-              <span className="italic text-[#D4AF37]">{t('cashback.subtitle')}</span>
-            </h1>
-            <p 
-              className="text-xl max-w-2xl leading-relaxed"
-              style={themeStyles.text}
-            >
-              {t('cashback.description')}
-            </p>
-          </div>
-
-          {/* SECTION EXEMPLE CONCRET */}
-          <div className="relative overflow-hidden bg-[#0F172A] rounded-[3rem] p-8 md:p-16 mb-20 shadow-2xl border border-white/5">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-[#D4AF37] opacity-10 blur-[100px] -mr-32 -mt-32" />
-            
-            <div className="relative z-10">
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6">
-                <div className="max-w-md">
-                  <h2 className="text-[10px] uppercase tracking-[0.4em] font-bold text-[#D4AF37] mb-3">{t('cashback.flexibility')}</h2>
-                  <p className="text-3xl font-serif italic text-white leading-tight">{t('cashback.flexibilityText')}</p>
-                </div>
-                <div className="bg-white/5 backdrop-blur-md px-6 py-8 rounded-[2rem] border border-[#D4AF37]/30 min-w-[240px]">
-                  <span className="text-[9px] uppercase tracking-[0.2em] font-bold text-[#D4AF37] block mb-4 text-center">{t('cashback.example')}</span>
-                  <div className="flex flex-col items-center gap-2">
-                      <span className="text-2xl md:text-3xl font-light text-white tabular-nums whitespace-nowrap">
-                           {t('cashback.exampleAmount')}<span className="text-[#D4AF37] ml-1">*</span>
-                      </span>
-                      <span className="text-[10px] text-slate-400 uppercase tracking-tighter">{t('cashback.orEquipment')}</span>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 border-t border-white/10 pt-10">
-                {[0, 1].map((idx) => (
-                  <div key={idx} className="flex items-start gap-4">
-                    <div className="bg-[#D4AF37]/10 p-2 rounded-full">
-                      <CheckCircle2 className="text-[#D4AF37]" size={20} />
-                    </div>
-                    <p className="text-sm text-slate-300 leading-relaxed">{t(`cashback.points.${idx}`)}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* GRILLE D'AVANTAGES */}
-          <div className="grid md:grid-cols-3 gap-16 mb-24">
-            {['cash', 'furniture', 'services'].map((key, idx) => (
-              <div key={idx} className="group space-y-6">
-                <div className="w-14 h-14 bg-slate-50 dark:bg-white/5 rounded-2xl flex items-center justify-center group-hover:bg-[#D4AF37] transition-all duration-500 shadow-sm">
-                  {key === 'cash' && <Banknote size={28} strokeWidth={1.5} color={themeStyles.iconColor} className="group-hover:stroke-white transition-colors" />}
-                  {key === 'furniture' && <Sofa size={28} strokeWidth={1.5} color={themeStyles.iconColor} className="group-hover:stroke-white transition-colors" />}
-                  {key === 'services' && <Scale size={28} strokeWidth={1.5} color={themeStyles.iconColor} className="group-hover:stroke-white transition-colors" />}
-                </div>
-                <h3 className="font-bold uppercase text-[11px] tracking-[0.2em]" style={themeStyles.title}>{t(`cashback.options.${key}.title`)}</h3>
-                <p className="text-sm leading-relaxed" style={themeStyles.text}>{t(`cashback.options.${key}.desc`)}</p>
-              </div>
-            ))}
-          </div>
-
-          {/* Section FAQ / Info */}
-          <div className="border-t border-slate-100 dark:border-white/10 pt-20">
-              <div className="max-w-2xl">
-                <h2 className="text-4xl font-serif italic mb-10 text-left" style={themeStyles.title}>{t('cashback.activation')}</h2>
-                <div className="space-y-8 text-lg leading-relaxed">
-                  <p style={themeStyles.text}>
-                    {t('cashback.activationText')}
-                  </p>
-                  <p style={themeStyles.text}>
-                    {t('cashback.activationDetail')}
-                  </p>
-                </div>
-
-                <div className="mt-16">
-                  <Link 
-                      href="/" 
-                      className="group inline-flex items-center gap-4 bg-slate-900 dark:bg-white text-white dark:text-black px-12 py-6 rounded-2xl font-bold uppercase text-[11px] tracking-[0.3em] hover:bg-[#D4AF37] transition-all duration-500 shadow-2xl"
-                  >
-                      <Home size={18} className="group-hover:scale-110 transition-transform" />
-                      {t('cashback.backHome')}
-                  </Link>
-                </div>
-              </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-</file>
-
-<file path="app/contact/page.tsx">
-"use client";
-
-import React, { useEffect, useState } from "react";
-import { motion } from "framer-motion";
-import { 
-  Globe, Target, MapPin, Languages, Compass, Sun, Moon 
-} from "lucide-react";
-import { useTheme } from "next-themes";
-import { useTranslation } from "@/contexts/I18nContext";
-
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-
-// Tableau statique des photos (chemins fixes)
-const teamMembers = [
-  { id: 1, photo: "/Deborah.jpeg" },
-  { id: 2, photo: "/Gillian.jpeg" },
-  { id: 3, photo: "/Joanna.jpeg" },
-  { id: 4, photo: "/Abdou.jpeg" },
-  { id: 5, photo: "/Gaëtan.jpeg" },
-];
-
-export default function ContactPage() {
-  const { resolvedTheme } = useTheme();
-  const { t } = useTranslation();
-  const [mounted, setMounted] = useState(false);
-  
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    region: "",
-    message: ""
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) return null;
-
-  const isDark = resolvedTheme === "dark";
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setStatus("idle");
-
-    try {
-      const response = await fetch("/api/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-
-      if (response.ok) {
-        setStatus("success");
-        setFormData({ name: "", email: "", region: "", message: "" });
-      } else {
-        setStatus("error");
-      }
-    } catch (error) {
-      console.error("Erreur soumission:", error);
-      setStatus("error");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const inputStyle = {
-    color: isDark ? '#ffffff' : '#0f172a',
-    backgroundColor: isDark ? 'rgba(0, 0, 0, 0.6)' : '#ffffff',
-  };
-
-  const inputClasses = `
-    w-full px-8 py-5 rounded-2xl outline-none transition-all 
-    text-[10px] font-black tracking-widest 
-    border-2 border-slate-200 dark:border-white/20 
-    placeholder:text-slate-400 dark:placeholder:text-white/40
-    focus:border-[#D4AF37] dark:focus:border-[#D4AF37]
-  `;
-
-  return (
-    <div className="min-h-screen transition-colors duration-500 bg-white dark:bg-[#0A0A0A] text-slate-900 dark:text-white">
-      
-      <Navbar />
-
-      <main>
-        {/* SECTION HÉRO */}
-        <section className="relative h-[65vh] w-full flex items-center justify-center transition-colors duration-1000 bg-slate-900 dark:bg-[#020617]">
-          <div className="absolute inset-0 z-0 opacity-50 bg-slate-900 dark:bg-black" />
-          <div className="relative z-10 text-center px-6 max-w-5xl pt-20">
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
-              <span className="text-[#D4AF37] text-[12px] font-black uppercase tracking-[0.6em] mb-6 block">
-                {t('contact.heroBadge')}
-              </span>
-              <h1 className="text-4xl md:text-7xl font-serif italic text-white mb-8">
-                {t('contact.heroTitle')}
-              </h1>
-              <p className="text-white/70 text-base md:text-lg font-light max-w-3xl mx-auto leading-relaxed italic">
-                {t('contact.heroQuote')}
-              </p>
-            </motion.div>
-          </div>
-        </section>
-
-        {/* SECTION ÉQUIPE */}
-        <section className="max-w-[1400px] mx-auto px-6 py-24 grid grid-cols-1 xl:grid-cols-12 gap-20">
-          <div className="xl:col-span-7 space-y-12">
-            {teamMembers.map((member, idx) => (
-              <motion.div 
-                key={member.id}
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: idx * 0.1 }}
-                className="p-8 md:p-12 rounded-[2.5rem] border transition-all duration-700 bg-white dark:bg-white/5 border-slate-100 dark:border-white/10 shadow-xl"
-              >
-                <div className="flex flex-col md:flex-row gap-10">
-                  <div className="relative w-full md:w-48 h-60 shrink-0 overflow-hidden rounded-[2rem] bg-slate-100 dark:bg-white/5">
-                    <img 
-                      src={member.photo} 
-                      className={`w-full h-full object-cover ${isDark ? "brightness-75 grayscale-[0.3]" : ""}`}
-                      alt={t(`contact.team.${idx}.name`)}
-                    />
-                  </div>
-                  <div className="flex-1 space-y-5">
-                    <h3 className="text-3xl font-serif italic text-[#D4AF37]">
-                      {t(`contact.team.${idx}.name`)}
-                    </h3>
-                    <p className="text-base leading-relaxed font-light text-slate-600 dark:text-slate-300">
-                      {t(`contact.team.${idx}.background`)}
-                    </p>
-                    <div className="flex flex-wrap gap-2 pt-4">
-                      {[0, 1, 2].map((skillIdx) => (
-                        <span 
-                          key={skillIdx} 
-                          className="text-[9px] font-black uppercase tracking-widest px-3 py-1 bg-[#D4AF37]/10 text-[#D4AF37] rounded-md border border-[#D4AF37]/20"
-                        >
-                          {t(`contact.team.${idx}.skills.${skillIdx}`)}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-
-          {/* COLONNE FORMULAIRE */}
-          <div className="xl:col-span-5">
-            <div className="sticky top-32 p-12 rounded-[3.5rem] transition-all duration-700 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 shadow-2xl">
-              
-              <h3 
-                className="text-3xl md:text-4xl font-serif italic mb-2"
-                style={{ color: isDark ? '#FFFFFF' : '#0f172a' }}
-              >
-                {t('contact.formTitle')}
-              </h3>
-              
-              <p className="text-[#D4AF37] text-[10px] font-black uppercase tracking-[0.2em] mb-10">
-                {t('contact.formSubtitle')}
-              </p>
-              
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <input 
-                  required
-                  type="text" 
-                  placeholder={t('contact.namePlaceholder')}
-                  style={inputStyle}
-                  className={inputClasses}
-                  value={formData.name}
-                  onChange={(e) => setFormData({...formData, name: e.target.value})}
-                />
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <input 
-                    required
-                    type="email" 
-                    placeholder={t('contact.emailPlaceholder')}
-                    style={inputStyle}
-                    className={inputClasses}
-                    value={formData.email}
-                    onChange={(e) => setFormData({...formData, email: e.target.value})}
-                  />
-                  <input 
-                    type="text" 
-                    placeholder={t('contact.regionPlaceholder')}
-                    style={inputStyle}
-                    className={inputClasses}
-                    value={formData.region}
-                    onChange={(e) => setFormData({...formData, region: e.target.value})}
-                  />
-                </div>
-                
-                <textarea 
-                  required
-                  rows={4} 
-                  placeholder={t('contact.messagePlaceholder')}
-                  style={inputStyle}
-                  className={`${inputClasses} resize-none`}
-                  value={formData.message}
-                  onChange={(e) => setFormData({...formData, message: e.target.value})}
-                />
-                
-                <button 
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full bg-[#D4AF37] text-black py-6 rounded-2xl font-black uppercase text-[10px] tracking-[0.4em] hover:bg-white transition-all shadow-xl disabled:opacity-50"
-                >
-                  {isSubmitting ? t('contact.submitting') : t('contact.submit')}
-                </button>
-
-                {status === "success" && (
-                  <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-green-600 dark:text-green-400 text-center font-bold text-[10px] tracking-widest uppercase mt-4">
-                    {t('contact.success')}
-                  </motion.p>
-                )}
-                {status === "error" && (
-                  <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-red-500 text-center font-bold text-[10px] tracking-widest uppercase mt-4">
-                    {t('contact.error')}
-                  </motion.p>
-                )}
-              </form>
-            </div>
-          </div>
-        </section>
-      </main>
-
-      <Footer />
     </div>
   );
 }
