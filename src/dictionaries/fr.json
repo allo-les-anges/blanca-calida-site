@@ -347,12 +347,7 @@
     "tabs": {
       "clientBudget": "Client & Budget",
       "constructionStatus": "État du Chantier",
-      "documents": "Coffre-fort (Docs)",
-    "pin": {
-      "code": "Code PIN de connexion",
-      "copy": "Copier le code",
-      "copied": "Copié !",
-      "encryption": "Chiffrement AES-256 Actif"
+      "documents": "Coffre-fort (Docs)"
     },
     "clientInfo": {
       "title": "Coordonnées du propriétaire",
@@ -375,6 +370,7 @@
     "pin": {
       "code": "Code PIN de connexion",
       "copy": "Copier le code",
+      "copied": "Copié !",
       "encryption": "Chiffrement AES-256 Actif"
     },
     "progress": {

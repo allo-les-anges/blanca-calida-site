@@ -347,12 +347,7 @@
     "tabs": {
       "clientBudget": "Klient i Budżet",
       "constructionStatus": "Status Budowy",
-      "documents": "Skarbiec Dokumentów",
-    "pin": {
-      "code": "Kod PIN do logowania",
-      "copy": "Skopiuj kod",
-      "copied": "Skopiowano!",
-      "encryption": "Szyfrowanie AES-256 aktywne"
+      "documents": "Skarbiec Dokumentów"
     },
     "clientInfo": {
       "title": "Dane właściciela",
@@ -375,6 +370,7 @@
     "pin": {
       "code": "Kod PIN do logowania",
       "copy": "Skopiuj kod",
+      "copied": "Skopiowano!",
       "encryption": "Szyfrowanie AES-256 aktywne"
     },
     "progress": {
