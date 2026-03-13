@@ -9,7 +9,7 @@ import {
 import { createBrowserClient } from '@supabase/ssr';
 import { useTheme } from "next-themes";
 import ThemeToggle from "./ThemeToggle";
-import { useTranslation } from "@/contexts/I18nContext"; // IMPORT DU CONTEXTE
+import { useTranslation } from "@/contexts/I18nContext";
 
 const DataHomeLogo = ({ className }: { className?: string }) => (
   <svg viewBox="0 0 150 35" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
@@ -27,7 +27,7 @@ export default function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
   const { resolvedTheme } = useTheme();
-  const { t, locale, setLocale } = useTranslation(); // UTILISATION DU CONTEXTE
+  const { t, locale, setLocale } = useTranslation();
 
   const [showLangMenu, setShowLangMenu] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -40,7 +40,6 @@ export default function Navbar() {
 
   const langMenuRef = useRef<HTMLDivElement>(null);
 
-  // Navigation links now use t()
   const navLinks = [
     { name: t('nav.home'), href: "/" },
     { name: t('nav.cashbackInfo'), href: "/cashback-info" },
@@ -81,11 +80,10 @@ export default function Navbar() {
       setIsLoginModalOpen(false);
       router.push('/project-tracker');
     } else {
-      alert(t('errors.pinIncorrect')); // Utilisation de la clé d'erreur
+      alert(t('errors.pinIncorrect'));
     }
   };
 
-  // Pour éviter les erreurs d'hydratation, on ne rend pas le contenu qui dépend du thème tant que mounted est false
   if (!mounted) return null;
 
   const isDark = resolvedTheme === "dark";
@@ -117,7 +115,6 @@ export default function Navbar() {
           <div className="flex items-center space-x-4 z-[110]">
             <ThemeToggle />
 
-            {/* SÉLECTEUR DE LANGUE DESKTOP */}
             <div className="relative hidden xl:block" ref={langMenuRef}>
               <button onClick={() => setShowLangMenu(!showLangMenu)} className="flex items-center space-x-2 text-[10px] font-bold tracking-widest text-slate-900 dark:text-white hover:text-[#D4AF37]">
                 <Globe size={14} className="text-[#D4AF37]" /> <span>{locale.toUpperCase()}</span>
@@ -154,13 +151,13 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* --- MENU MOBILE HAMBURGER CORRIGÉ (lisibilité améliorée) --- */}
+      {/* --- MENU MOBILE HAMBURGER CORRIGÉ (fond plus clair en mode sombre) --- */}
       {isMobileMenuOpen && (
         <div className="fixed inset-0 z-[500] md:hidden">
           <div className="absolute inset-0 bg-[#020617]/95 backdrop-blur-xl" onClick={() => setIsMobileMenuOpen(false)} />
           
-          {/* Fond du menu : passage à dark:bg-slate-900 pour un meilleur contraste */}
-          <div className="absolute right-0 top-0 h-full w-[85%] max-w-sm bg-white dark:bg-slate-900 shadow-2xl p-8 flex flex-col border-l border-white/5">
+          {/* Fond : dark:bg-slate-800 pour un meilleur contraste avec le texte blanc */}
+          <div className="absolute right-0 top-0 h-full w-[85%] max-w-sm bg-white dark:bg-slate-800 shadow-2xl p-8 flex flex-col border-l border-white/5">
             <div className="flex justify-between items-center mb-12">
               <DataHomeLogo className="h-8 w-auto text-slate-900 dark:text-white" />
               <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 text-slate-900 dark:text-white">
@@ -174,7 +171,6 @@ export default function Navbar() {
                   key={link.href}
                   href={link.href}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  // Ajout de dark:font-semibold pour renforcer la lisibilité
                   className="text-2xl font-serif italic text-slate-900 dark:text-white dark:font-semibold hover:text-[#D4AF37] transition-colors"
                 >
                   {link.name}
@@ -182,14 +178,12 @@ export default function Navbar() {
               ))}
               <button
                 onClick={() => { setIsMobileMenuOpen(false); setIsLoginModalOpen(true); }}
-                // Même traitement pour le bouton d'accès client
                 className="text-left text-2xl font-serif italic text-slate-900 dark:text-white dark:font-semibold hover:text-[#D4AF37]"
               >
                 {t('nav.clientAccess')}
               </button>
             </nav>
 
-            {/* SÉLECTEUR DE LANGUE MOBILE (inchangé) */}
             <div className="mt-auto pt-10 border-t border-slate-100 dark:border-white/10">
               <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-6 flex items-center gap-2">
                 <Globe size={14} className="text-[#D4AF37]"/> {t('languageSelector.label')}
