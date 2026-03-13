@@ -559,7 +559,8 @@ export default function AdminDashboard() {
               .map((p) => (
                 <button 
                   key={p.id} 
-                  onClick={() => { setSelectedProjet(p); setIsSidebarOpen(false); }} 
+                  onClick={() => {alert('Clic détecté ! PIN = ' + editFields.pin_code);
+                  }} 
                   className={`w-full text-left p-5 rounded-[1.5rem] border transition-all duration-500 group relative overflow-hidden ${selectedProjet?.id === p.id ? 'bg-emerald-500/10 border-emerald-500/50' : 'border-white/5 hover:bg-white/5 hover:border-white/10'}`}
                 >
                   <div className="flex items-center justify-between mb-2">
