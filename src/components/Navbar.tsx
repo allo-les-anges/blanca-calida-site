@@ -151,12 +151,11 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* --- MENU MOBILE HAMBURGER CORRIGÉ (fond plus clair en mode sombre) --- */}
+      {/* --- MENU MOBILE HAMBURGER CORRIGÉ (avec classe mobile-menu-link) --- */}
       {isMobileMenuOpen && (
         <div className="fixed inset-0 z-[500] md:hidden">
           <div className="absolute inset-0 bg-[#020617]/95 backdrop-blur-xl" onClick={() => setIsMobileMenuOpen(false)} />
           
-          {/* Fond : dark:bg-slate-800 pour un meilleur contraste avec le texte blanc */}
           <div className="absolute right-0 top-0 h-full w-[85%] max-w-sm bg-white dark:bg-slate-800 shadow-2xl p-8 flex flex-col border-l border-white/5">
             <div className="flex justify-between items-center mb-12">
               <DataHomeLogo className="h-8 w-auto text-slate-900 dark:text-white" />
@@ -171,14 +170,14 @@ export default function Navbar() {
                   key={link.href}
                   href={link.href}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="text-2xl font-serif italic text-slate-900 dark:text-white dark:font-semibold hover:text-[#D4AF37] transition-colors"
+                  className="mobile-menu-link text-2xl font-serif italic text-slate-900 dark:text-white dark:font-semibold hover:text-[#D4AF37] transition-colors"
                 >
                   {link.name}
                 </Link>
               ))}
               <button
                 onClick={() => { setIsMobileMenuOpen(false); setIsLoginModalOpen(true); }}
-                className="text-left text-2xl font-serif italic text-slate-900 dark:text-white dark:font-semibold hover:text-[#D4AF37]"
+                className="mobile-menu-link text-left text-2xl font-serif italic text-slate-900 dark:text-white dark:font-semibold hover:text-[#D4AF37]"
               >
                 {t('nav.clientAccess')}
               </button>

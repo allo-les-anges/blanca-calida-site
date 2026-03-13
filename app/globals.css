@@ -106,3 +106,9 @@ main {
   margin-top: 0 !important; 
   padding-top: 0 !important; 
 }
+
+/* Forcer le blanc pour les liens du menu mobile en mode sombre */
+.dark .mobile-menu-link {
+  color: #ffffff !important;
+  opacity: 1 !important;
+}
