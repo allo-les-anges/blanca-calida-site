@@ -9,7 +9,7 @@ import {
   ChevronRight, Info, Upload, X, UserPlus, Mail, Lock, Copy,
   CheckCircle2, Clock, Phone, Globe, Hash,
   LayoutDashboard, Database, Eye, EyeOff, ArrowRight, Settings,
-  AlertCircle, Paperclip, HardDrive, Key, Menu,Construction, Briefcase
+  AlertCircle, Paperclip, HardDrive, Key, Menu, Construction, Briefcase
 } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
 import jsPDF from 'jspdf';
@@ -235,44 +235,44 @@ export default function AdminDashboard() {
   // --- GESTION DU STAFF ---
 
   const handleAddStaff = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setUpdating(true);
+    e.preventDefault();
+    setUpdating(true);
 
-  try {
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email: newStaff.email,
-      password: 'TemporaryPassword123!',
-    });
+    try {
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: newStaff.email,
+        password: 'TemporaryPassword123!',
+      });
 
-    if (authError) throw authError;
-    if (!authData.user) throw new Error(t('adminStaff.userCreationFailed'));
+      if (authError) throw authError;
+      if (!authData.user) throw new Error(t('adminStaff.userCreationFailed'));
 
-    const userId = authData.user.id;
-    const autoPin = Math.floor(100000 + Math.random() * 900000).toString();
+      const userId = authData.user.id;
+      const autoPin = Math.floor(100000 + Math.random() * 900000).toString();
 
-    const { error: profileError } = await supabase.from('profiles').insert([{
-      id: userId,
-      nom: newStaff.nom,
-      prenom: newStaff.prenom,
-      email: newStaff.email,
-      role: newStaff.role, 
-      company_name: agencyProfile.company_name,
-      pin_code: autoPin,
-      pack: "Standard"
-    }]);
+      const { error: profileError } = await supabase.from('profiles').insert([{
+        id: userId,
+        nom: newStaff.nom,
+        prenom: newStaff.prenom,
+        email: newStaff.email,
+        role: newStaff.role, 
+        company_name: agencyProfile.company_name,
+        pin_code: autoPin,
+        pack: "Standard"
+      }]);
 
-    if (profileError) throw profileError;
+      if (profileError) throw profileError;
 
-    alert(t('adminStaff.addSuccess', { pin: autoPin }));
-    setShowStaffModal(false);
-    setNewStaff({ nom: "", prenom: "", email: "", role: "agent" });
-    loadData();
-  } catch (err: any) {
-    alert(t('adminStaff.addError', { message: err.message }));
-  } finally {
-    setUpdating(false);
-  }
-};
+      alert(t('adminStaff.addSuccess', { pin: autoPin }));
+      setShowStaffModal(false);
+      setNewStaff({ nom: "", prenom: "", email: "", role: "agent" });
+      loadData();
+    } catch (err: any) {
+      alert(t('adminStaff.addError', { message: err.message }));
+    } finally {
+      setUpdating(false);
+    }
+  };
 
   const handleDeleteStaff = async (staffId: string, staffEmail: string) => {
     if (staffEmail === agencyProfile.email) {
@@ -304,35 +304,33 @@ export default function AdminDashboard() {
   };
 
   const copyToClipboard = async (text: string, id: string) => {
-  console.log('Tentative de copie :', text);
-  if (!text) {
-    console.warn('Code PIN vide');
-    return;
-  }
-  try {
-    await navigator.clipboard.writeText(text);
-    setCopySuccess(id);
-    setTimeout(() => setCopySuccess(null), 2000);
-  } catch (err) {
-    console.error('Erreur API Clipboard :', err);
-    // Fallback pour navigateurs anciens / contexte non sécurisé
+    if (!text) {
+      console.warn('Tentative de copie d\'un code PIN vide');
+      return;
+    }
     try {
-      const textarea = document.createElement('textarea');
-      textarea.value = text;
-      textarea.style.position = 'fixed';
-      textarea.style.opacity = '0';
-      document.body.appendChild(textarea);
-      textarea.select();
-      document.execCommand('copy');
-      document.body.removeChild(textarea);
+      await navigator.clipboard.writeText(text);
       setCopySuccess(id);
       setTimeout(() => setCopySuccess(null), 2000);
-    } catch (fallbackErr) {
-      console.error('Fallback échoué :', fallbackErr);
-      alert('Impossible de copier le code. Veuillez le sélectionner manuellement.');
+    } catch (err) {
+      console.error('Échec de la copie avec API Clipboard :', err);
+      try {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        setCopySuccess(id);
+        setTimeout(() => setCopySuccess(null), 2000);
+      } catch (fallbackErr) {
+        console.error('Fallback copy failed:', fallbackErr);
+        alert('Impossible de copier le code. Veuillez le sélectionner manuellement.');
+      }
     }
-  }
-};
+  };
 
   // --- GESTION DES CONSTATS ET PDF ---
 
@@ -347,134 +345,134 @@ export default function AdminDashboard() {
 
   // --- STATISTIQUES (pour la vue vide) ---
   const stats = useMemo(() => {
-  const total = projets.length;
-  const termines = projets.filter(p => p.etape_actuelle?.includes("12")).length;
-  const enCours = total - termines;
-  const cashbackTotal = projets.reduce((acc, curr) => acc + (curr.montant_cashback || 0), 0);
-  return { total, termines, enCours, cashbackTotal };
+    const total = projets.length;
+    const termines = projets.filter(p => p.etape_actuelle?.includes("12")).length;
+    const enCours = total - termines;
+    const cashbackTotal = projets.reduce((acc, curr) => acc + (curr.montant_cashback || 0), 0);
+    return { total, termines, enCours, cashbackTotal };
   }, [projets]);
 
   const generateConstatsPDF = async (date: string, dailyConstats: any[], action: 'save' | 'preview') => {
-  if (isGeneratingPDF) return;
-  setIsGeneratingPDF(true);
+    if (isGeneratingPDF) return;
+    setIsGeneratingPDF(true);
 
-  try {
-    const doc = new jsPDF();
-    const pageWidth = doc.internal.pageSize.getWidth();
+    try {
+      const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.getWidth();
 
-    // En-tête
-    doc.setFillColor(245, 245, 245);
-    doc.rect(0, 0, pageWidth, 45, 'F');
+      // En-tête
+      doc.setFillColor(245, 245, 245);
+      doc.rect(0, 0, pageWidth, 45, 'F');
 
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(18);
-    doc.setTextColor(15, 23, 42);
-    doc.text(agencyProfile.company_name || "AMARU-HOMES", 14, 20);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(18);
+      doc.setTextColor(15, 23, 42);
+      doc.text(agencyProfile.company_name || "AMARU-HOMES", 14, 20);
 
-    doc.setFontSize(9);
-    doc.setTextColor(100, 100, 100);
-    doc.text(t('projectTracker.department'), 14, 26);
+      doc.setFontSize(9);
+      doc.setTextColor(100, 100, 100);
+      doc.text(t('projectTracker.department'), 14, 26);
 
-    doc.setDrawColor(16, 185, 129);
-    doc.setLineWidth(1);
-    doc.line(14, 32, 60, 32);
+      doc.setDrawColor(16, 185, 129);
+      doc.setLineWidth(1);
+      doc.line(14, 32, 60, 32);
 
-    // Infos dossier
-    doc.setFontSize(10);
-    doc.setTextColor(15, 23, 42);
-    doc.text(t('adminDashboard.reportRef', { ref: date.replace(/ /g, '') }), 140, 20);
+      // Infos dossier
+      doc.setFontSize(10);
+      doc.setTextColor(15, 23, 42);
+      doc.text(t('adminDashboard.reportRef', { ref: date.replace(/ /g, '') }), 140, 20);
 
-    doc.setFont("helvetica", "normal");
-    doc.text(t('adminDashboard.visitDate', { date }), 140, 26);
-    doc.text(t('adminDashboard.phase', { phase: selectedProjet?.etape_actuelle || "N/A" }), 140, 32);
+      doc.setFont("helvetica", "normal");
+      doc.text(t('adminDashboard.visitDate', { date }), 140, 26);
+      doc.text(t('adminDashboard.phase', { phase: selectedProjet?.etape_actuelle || "N/A" }), 140, 32);
 
-    // Destinataire
-    doc.setFont("helvetica", "bold");
-    doc.text(t('adminDashboard.recipient'), 14, 55);
+      // Destinataire
+      doc.setFont("helvetica", "bold");
+      doc.text(t('adminDashboard.recipient'), 14, 55);
 
-    doc.setFont("helvetica", "normal");
-    doc.text(`${selectedProjet?.client_prenom} ${selectedProjet?.client_nom}`, 14, 60);
-    doc.text(t('adminDashboard.project', { name: selectedProjet?.nom_villa }), 14, 65);
+      doc.setFont("helvetica", "normal");
+      doc.text(`${selectedProjet?.client_prenom} ${selectedProjet?.client_nom}`, 14, 60);
+      doc.text(t('adminDashboard.project', { name: selectedProjet?.nom_villa }), 14, 65);
 
-    // Expert
-    const expertNom =
-      agencyProfile?.prenom && agencyProfile?.nom
-        ? `${agencyProfile.prenom} ${agencyProfile.nom}`
-        : "Gaëtan Mukeba";
+      // Expert
+      const expertNom =
+        agencyProfile?.prenom && agencyProfile?.nom
+          ? `${agencyProfile.prenom} ${agencyProfile.nom}`
+          : "Gaëtan Mukeba";
 
-    doc.setFont("helvetica", "bold");
-    doc.text(t('adminDashboard.expert'), 110, 55);
+      doc.setFont("helvetica", "bold");
+      doc.text(t('adminDashboard.expert'), 110, 55);
 
-    doc.setFont("helvetica", "normal");
-    doc.text(expertNom, 110, 60);
+      doc.setFont("helvetica", "normal");
+      doc.text(expertNom, 110, 60);
 
-    const bodyData = dailyConstats.map((c, i) => {
-      const rawNote = c.note_expert || t('adminDashboard.defaultObservation');
-      const cleanNote = rawNote
-        .normalize("NFKD")
-        .replace(/[^\x00-\x7F]/g, " ")
-        .replace(/\s+/g, " ")
-        .trim();
-      const analyse = t('adminDashboard.statusConforme') + '\n\n' + cleanNote;
-      return [
-        t('adminDashboard.photoRef', { num: i + 1, lat: c.latitude || 'N/A', lng: c.longitude || 'N/A' }),
-        analyse
-      ];
-    });
+      const bodyData = dailyConstats.map((c, i) => {
+        const rawNote = c.note_expert || t('adminDashboard.defaultObservation');
+        const cleanNote = rawNote
+          .normalize("NFKD")
+          .replace(/[^\x00-\x7F]/g, " ")
+          .replace(/\s+/g, " ")
+          .trim();
+        const analyse = t('adminDashboard.statusConforme') + '\n\n' + cleanNote;
+        return [
+          t('adminDashboard.photoRef', { num: i + 1, lat: c.latitude || 'N/A', lng: c.longitude || 'N/A' }),
+          analyse
+        ];
+      });
 
-    autoTable(doc, {
-      startY: 75,
-      head: [[t('adminDashboard.photoHeader'), t('adminDashboard.analysisHeader')]],
-      body: bodyData,
-      theme: 'striped',
-      headStyles: { fillColor: [15, 23, 42], fontSize: 9 },
-      columnStyles: { 0: { cellWidth: 45 }, 1: { cellWidth: 120 } },
-      styles: { fontSize: 8, cellPadding: 4, overflow: 'linebreak', valign: 'top' },
-      margin: { left: 14, right: 14 }
-    });
+      autoTable(doc, {
+        startY: 75,
+        head: [[t('adminDashboard.photoHeader'), t('adminDashboard.analysisHeader')]],
+        body: bodyData,
+        theme: 'striped',
+        headStyles: { fillColor: [15, 23, 42], fontSize: 9 },
+        columnStyles: { 0: { cellWidth: 45 }, 1: { cellWidth: 120 } },
+        styles: { fontSize: 8, cellPadding: 4, overflow: 'linebreak', valign: 'top' },
+        margin: { left: 14, right: 14 }
+      });
 
-    doc.addPage();
-    doc.setFont("helvetica", "bold");
-    doc.text(t('adminDashboard.photoAnnex'), 14, 20);
+      doc.addPage();
+      doc.setFont("helvetica", "bold");
+      doc.text(t('adminDashboard.photoAnnex'), 14, 20);
 
-    let yPos = 30;
-    for (let i = 0; i < dailyConstats.length; i++) {
-      const c = dailyConstats[i];
-      if (yPos > 220) { doc.addPage(); yPos = 20; }
-      try {
-        doc.addImage(c.url_image, 'JPEG', 14, yPos, 120, 75);
-      } catch (e) {
-        doc.text(t('adminDashboard.imageNotAvailable'), 14, yPos + 20);
+      let yPos = 30;
+      for (let i = 0; i < dailyConstats.length; i++) {
+        const c = dailyConstats[i];
+        if (yPos > 220) { doc.addPage(); yPos = 20; }
+        try {
+          doc.addImage(c.url_image, 'JPEG', 14, yPos, 120, 75);
+        } catch (e) {
+          doc.text(t('adminDashboard.imageNotAvailable'), 14, yPos + 20);
+        }
+        doc.setFontSize(8);
+        const text = t('adminDashboard.imageCaption', { num: i + 1, date: new Date(c.created_at).toLocaleString() });
+        const lines = doc.splitTextToSize(text, 160);
+        doc.text(lines, 14, yPos + 82);
+        yPos += 95;
       }
+
+      const finalY = doc.internal.pageSize.getHeight() - 40;
+      doc.setDrawColor(200, 200, 200);
+      doc.line(14, finalY, pageWidth - 14, finalY);
       doc.setFontSize(8);
-      const text = t('adminDashboard.imageCaption', { num: i + 1, date: new Date(c.created_at).toLocaleString() });
-      const lines = doc.splitTextToSize(text, 160);
-      doc.text(lines, 14, yPos + 82);
-      yPos += 95;
-    }
+      doc.setFont("helvetica", "italic");
+      doc.text(t('adminDashboard.certificationTitle'), 14, finalY + 10);
+      const certifText = t('adminDashboard.certificationText', { expert: expertNom });
+      const certifLines = doc.splitTextToSize(certifText, 180);
+      doc.text(certifLines, 14, finalY + 15);
 
-    const finalY = doc.internal.pageSize.getHeight() - 40;
-    doc.setDrawColor(200, 200, 200);
-    doc.line(14, finalY, pageWidth - 14, finalY);
-    doc.setFontSize(8);
-    doc.setFont("helvetica", "italic");
-    doc.text(t('adminDashboard.certificationTitle'), 14, finalY + 10);
-    const certifText = t('adminDashboard.certificationText', { expert: expertNom });
-    const certifLines = doc.splitTextToSize(certifText, 180);
-    doc.text(certifLines, 14, finalY + 15);
-
-    if (action === 'save') {
-      doc.save(`Rapport_Technique_${date}.pdf`);
-    } else {
-      window.open(doc.output('bloburl'), '_blank');
+      if (action === 'save') {
+        doc.save(`Rapport_Technique_${date}.pdf`);
+      } else {
+        window.open(doc.output('bloburl'), '_blank');
+      }
+    } catch (e) {
+      console.error(e);
+      alert(t('adminDashboard.pdfError'));
+    } finally {
+      setIsGeneratingPDF(false);
     }
-  } catch (e) {
-    console.error(e);
-    alert(t('adminDashboard.pdfError'));
-  } finally {
-    setIsGeneratingPDF(false);
-  }
-};
+  };
 
   if (loading) return (
     <div className="h-screen bg-[#020617] flex flex-col items-center justify-center">
@@ -559,22 +557,20 @@ export default function AdminDashboard() {
             projets
               .filter(p => `${p.client_prenom} ${p.client_nom} ${p.nom_villa}`.toLowerCase().includes(searchTerm.toLowerCase()))
               .map((p) => (
-        <button 
-              onClick={() => {
-                const pin = editFields.pin_code;
-                if (pin) {
-                  copyToClipboard(pin, 'pin');
-                } else {
-                  console.warn('PIN non disponible pour ce projet', editFields);
-                  alert('Le code PIN n\'est pas disponible pour ce projet.');
-                }
-              }}
-              className="mt-6 text-[9px] font-black text-emerald-500 uppercase tracking-widest flex items-center gap-2 hover:bg-emerald-500/10 px-4 py-2 rounded-xl transition-all"
-              aria-label={copySuccess === 'pin' ? t('adminDashboard.pin.copied') : t('adminDashboard.pin.copy')}
-            >
-              {copySuccess === 'pin' ? <CheckCircle2 size={12} /> : <Copy size={12} />} 
-              {copySuccess === 'pin' ? t('adminDashboard.pin.copied') : t('adminDashboard.pin.copy')}
-            </button>
+                <button 
+                  key={p.id} 
+                  onClick={() => { setSelectedProjet(p); setIsSidebarOpen(false); }} 
+                  className={`w-full text-left p-5 rounded-[1.5rem] border transition-all duration-500 group relative overflow-hidden ${selectedProjet?.id === p.id ? 'bg-emerald-500/10 border-emerald-500/50' : 'border-white/5 hover:bg-white/5 hover:border-white/10'}`}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="font-black text-[11px] text-white uppercase tracking-tighter leading-none">{p.client_prenom} {p.client_nom}</p>
+                    {selectedProjet?.id === p.id && <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-glow"></div>}
+                  </div>
+                  <p className="text-[9px] uppercase font-black text-emerald-500 flex items-center gap-2 tracking-widest opacity-80 group-hover:opacity-100 transition-opacity">
+                    <MapPin size={10} className="shrink-0" /> {p.nom_villa}
+                  </p>
+                  <ChevronRight size={14} className={`absolute right-4 top-1/2 -translate-y-1/2 text-emerald-500/20 transition-all duration-500 ${selectedProjet?.id === p.id ? 'translate-x-0 opacity-100' : 'translate-x-4 opacity-0'}`} />
+                </button>
               ))
           ) : (
             staffList
@@ -817,33 +813,33 @@ export default function AdminDashboard() {
                       {/* Sidebar de droite : Cashback & PIN */}
                       <div className="lg:col-span-4 space-y-6 lg:space-y-8">
                           {/* Carte Cashback */}
-                        <div className="relative bg-emerald-500 p-8 lg:p-10 rounded-[2rem] lg:rounded-[3rem] text-black overflow-hidden group hover:scale-[1.02] transition-transform duration-500">
-                            <Euro size={100} className="absolute -right-8 -bottom-8 opacity-10 rotate-12 group-hover:rotate-0 transition-transform duration-1000 hidden sm:block" />
-                            <div className="relative z-10 space-y-4">
-                                <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-60">{t('adminDashboard.cashback.reward')}</p>
-                                
-                                <div className="flex justify-between items-end">
-                                    <span className="text-4xl sm:text-5xl font-black leading-none">
-                                        {editFields.montant_cashback?.toLocaleString() || 0} €
-                                    </span>
-                                </div>
+                          <div className="relative bg-emerald-500 p-8 lg:p-10 rounded-[2rem] lg:rounded-[3rem] text-black overflow-hidden group hover:scale-[1.02] transition-transform duration-500">
+                              <Euro size={100} className="absolute -right-8 -bottom-8 opacity-10 rotate-12 group-hover:rotate-0 transition-transform duration-1000 hidden sm:block" />
+                              <div className="relative z-10 space-y-4">
+                                  <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-60">{t('adminDashboard.cashback.reward')}</p>
+                                  
+                                  <div className="flex justify-between items-end">
+                                      <span className="text-4xl sm:text-5xl font-black leading-none">
+                                          {editFields.montant_cashback?.toLocaleString() || 0} €
+                                      </span>
+                                  </div>
 
-                                {/* Slider */}
-                                <input 
-                                    type="range" 
-                                    min="0" 
-                                    max="100000" 
-                                    step="1000" 
-                                    value={editFields.montant_cashback || 0} 
-                                    onChange={(e) => setEditFields({...editFields, montant_cashback: parseInt(e.target.value)})} 
-                                    className="w-full h-2 bg-black/20 rounded-lg appearance-none accent-white cursor-pointer" 
-                                />
+                                  {/* Slider */}
+                                  <input 
+                                      type="range" 
+                                      min="0" 
+                                      max="100000" 
+                                      step="1000" 
+                                      value={editFields.montant_cashback || 0} 
+                                      onChange={(e) => setEditFields({...editFields, montant_cashback: parseInt(e.target.value)})} 
+                                      className="w-full h-2 bg-black/20 rounded-lg appearance-none accent-white cursor-pointer" 
+                                  />
 
-                                <p className="text-[9px] font-bold uppercase mt-4 bg-black/10 inline-block px-3 py-1 rounded-full italic tracking-widest">
-                                    {t('adminDashboard.cashback.paidAfterClosure')}
-                                </p>
-                            </div>
-                        </div>
+                                  <p className="text-[9px] font-bold uppercase mt-4 bg-black/10 inline-block px-3 py-1 rounded-full italic tracking-widest">
+                                      {t('adminDashboard.cashback.paidAfterClosure')}
+                                  </p>
+                              </div>
+                          </div>
 
                           {/* Carte PIN Client */}
                           <div className="bg-white/5 p-8 lg:p-10 rounded-[2rem] lg:rounded-[3rem] border border-white/5 flex flex-col items-center text-center relative group overflow-hidden">
@@ -851,14 +847,21 @@ export default function AdminDashboard() {
                             <ShieldCheck size={40} className="text-emerald-500 mb-6 group-hover:scale-110 transition-transform duration-500" />
                             <p className="text-[10px] font-black uppercase text-slate-500 tracking-[0.3em]">{t('adminDashboard.pin.code')}</p>
                             <p className="text-3xl sm:text-4xl font-black text-white tracking-[0.4em] mt-4 ml-4 leading-none italic select-all break-all">
-                              {editFields.pin_code}
+                              {editFields.pin_code || '------'}
                             </p>
                             
-                            {/* Bouton avec feedback */}
+                            {/* Bouton avec feedback et gestion du cas PIN absent */}
                             <button 
-                              onClick={() => copyToClipboard(editFields.pin_code, 'pin')}
-                              className="mt-6 text-[9px] font-black text-emerald-500 uppercase tracking-widest flex items-center gap-2 hover:bg-emerald-500/10 px-4 py-2 rounded-xl transition-all"
+                              onClick={() => {
+                                if (editFields.pin_code) {
+                                  copyToClipboard(editFields.pin_code, 'pin');
+                                } else {
+                                  alert('Aucun code PIN défini pour ce projet. Veuillez en générer un via la modification du dossier.');
+                                }
+                              }}
+                              className="mt-6 text-[9px] font-black text-emerald-500 uppercase tracking-widest flex items-center gap-2 hover:bg-emerald-500/10 px-4 py-2 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                               aria-label={copySuccess === 'pin' ? t('adminDashboard.pin.copied') : t('adminDashboard.pin.copy')}
+                              disabled={!editFields.pin_code}
                             >
                               {copySuccess === 'pin' ? <CheckCircle2 size={12} /> : <Copy size={12} />} 
                               {copySuccess === 'pin' ? t('adminDashboard.pin.copied') : t('adminDashboard.pin.copy')}
@@ -983,70 +986,70 @@ export default function AdminDashboard() {
               )}
 
               {/* CONTENU ONGLET 3 : COFFRE-FORT DOCUMENTS */}
-            {projectTab === 'docs' && (
-              <section className="bg-white/5 p-6 lg:p-10 rounded-[2rem] lg:rounded-[3rem] border border-white/5 animate-in fade-in slide-in-from-right-4 duration-700">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 mb-10 lg:mb-16">
-                  <div className="space-y-2">
-                    <h3 className="text-xs font-black uppercase text-white tracking-[0.3em] flex items-center gap-4">
-                      <div className="p-2 bg-blue-500/10 rounded-lg text-blue-500"><Database size={16} /></div>
-                      {t('adminDashboard.docs.title')}
-                    </h3>
-                    <p className="text-[10px] font-bold text-slate-500 uppercase ml-12 tracking-widest">{t('adminDashboard.docs.subtitle')}</p>
-                  </div>
-                  <label className="group cursor-pointer relative flex items-center justify-center gap-3 px-6 lg:px-10 py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-[1.5rem] font-black text-[10px] uppercase tracking-[0.2em] transition-all duration-500 shadow-lg shadow-emerald-600/30 overflow-hidden active:scale-95">
-                    {uploadingDoc ? <Loader2 className="animate-spin" size={16} /> : <Upload size={16} className="group-hover:scale-110 transition-transform" />}
-                    {uploadingDoc ? t('adminDashboard.docs.processing') : t('adminDashboard.docs.upload')}
-                    <input type="file" className="hidden" onChange={handleFileUpload} disabled={uploadingDoc} />
-                  </label>
-                </div> {/* Fermeture de la div flex-row */}
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {projectDocs.length > 0 ? (
-                    projectDocs.map((doc) => (
-                      <div key={doc.id} className="group relative p-6 bg-black/40 border border-white/5 rounded-[2rem] lg:rounded-[2.5rem] flex flex-col gap-6 hover:border-emerald-500/30 hover:bg-white/[0.02] transition-all duration-500 hover:-translate-y-2 shadow-2xl">
-                        <div className="flex items-center justify-between">
-                          <div className="p-4 bg-white/5 rounded-2xl text-slate-400 group-hover:text-emerald-500 group-hover:bg-emerald-500/10 transition-all duration-500">
-                            <FileText size={24} />
-                          </div>
-                          <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-500 translate-x-4 group-hover:translate-x-0 transition-transform">
-                            <a href={doc.url_fichier} target="_blank" rel="noreferrer" className="p-3 bg-white/5 text-white hover:bg-emerald-500 hover:text-black rounded-xl transition-all">
-                              <ExternalLink size={16} />
-                            </a>
-                            <button 
-                              onClick={() => deleteDocument(doc.id, doc.url_fichier)} 
-                              className="p-3 bg-white/5 text-white hover:bg-rose-500 rounded-xl transition-all"
-                            >
-                              <Trash2 size={16} />
-                            </button>
-                          </div>
-                        </div>
-                        <div className="space-y-2">
-                          <p className="text-[11px] font-black text-white uppercase tracking-tight truncate pr-4" title={doc.nom_fichier}>
-                            {doc.nom_fichier}
-                          </p>
-                          <div className="flex items-center gap-3">
-                            <span className="text-[8px] font-black text-slate-500 uppercase bg-white/5 px-2 py-0.5 rounded tracking-widest">
-                              {doc.type || 'PDF'}
-                            </span>
-                            <span className="text-[8px] font-bold text-slate-600">
-                              {new Date(doc.created_at).toLocaleDateString('fr-FR')}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="absolute top-0 right-0 p-8">
-                          <HardDrive size={40} className="text-white/5 rotate-12 group-hover:rotate-0 group-hover:text-emerald-500/10 transition-all duration-700" />
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="col-span-full py-16 lg:py-24 text-center border-2 border-dashed border-white/5 rounded-[2rem] lg:rounded-[3rem] flex flex-col items-center justify-center space-y-4 opacity-30">
-                      <FileText size={48} className="text-slate-600" />
-                      <p className="text-[10px] text-slate-500 uppercase font-black tracking-[0.5em]">{t('adminDashboard.docs.noDocuments')}</p>
+              {projectTab === 'docs' && (
+                <section className="bg-white/5 p-6 lg:p-10 rounded-[2rem] lg:rounded-[3rem] border border-white/5 animate-in fade-in slide-in-from-right-4 duration-700">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 mb-10 lg:mb-16">
+                    <div className="space-y-2">
+                      <h3 className="text-xs font-black uppercase text-white tracking-[0.3em] flex items-center gap-4">
+                        <div className="p-2 bg-blue-500/10 rounded-lg text-blue-500"><Database size={16} /></div>
+                        {t('adminDashboard.docs.title')}
+                      </h3>
+                      <p className="text-[10px] font-bold text-slate-500 uppercase ml-12 tracking-widest">{t('adminDashboard.docs.subtitle')}</p>
                     </div>
-                  )}
-                </div>
-              </section>
-            )}
+                    <label className="group cursor-pointer relative flex items-center justify-center gap-3 px-6 lg:px-10 py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-[1.5rem] font-black text-[10px] uppercase tracking-[0.2em] transition-all duration-500 shadow-lg shadow-emerald-600/30 overflow-hidden active:scale-95">
+                      {uploadingDoc ? <Loader2 className="animate-spin" size={16} /> : <Upload size={16} className="group-hover:scale-110 transition-transform" />}
+                      {uploadingDoc ? t('adminDashboard.docs.processing') : t('adminDashboard.docs.upload')}
+                      <input type="file" className="hidden" onChange={handleFileUpload} disabled={uploadingDoc} />
+                    </label>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {projectDocs.length > 0 ? (
+                      projectDocs.map((doc) => (
+                        <div key={doc.id} className="group relative p-6 bg-black/40 border border-white/5 rounded-[2rem] lg:rounded-[2.5rem] flex flex-col gap-6 hover:border-emerald-500/30 hover:bg-white/[0.02] transition-all duration-500 hover:-translate-y-2 shadow-2xl">
+                          <div className="flex items-center justify-between">
+                            <div className="p-4 bg-white/5 rounded-2xl text-slate-400 group-hover:text-emerald-500 group-hover:bg-emerald-500/10 transition-all duration-500">
+                              <FileText size={24} />
+                            </div>
+                            <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-500 translate-x-4 group-hover:translate-x-0 transition-transform">
+                              <a href={doc.url_fichier} target="_blank" rel="noreferrer" className="p-3 bg-white/5 text-white hover:bg-emerald-500 hover:text-black rounded-xl transition-all">
+                                <ExternalLink size={16} />
+                              </a>
+                              <button 
+                                onClick={() => deleteDocument(doc.id, doc.url_fichier)} 
+                                className="p-3 bg-white/5 text-white hover:bg-rose-500 rounded-xl transition-all"
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            <p className="text-[11px] font-black text-white uppercase tracking-tight truncate pr-4" title={doc.nom_fichier}>
+                              {doc.nom_fichier}
+                            </p>
+                            <div className="flex items-center gap-3">
+                              <span className="text-[8px] font-black text-slate-500 uppercase bg-white/5 px-2 py-0.5 rounded tracking-widest">
+                                {doc.type || 'PDF'}
+                              </span>
+                              <span className="text-[8px] font-bold text-slate-600">
+                                {new Date(doc.created_at).toLocaleDateString('fr-FR')}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="absolute top-0 right-0 p-8">
+                            <HardDrive size={40} className="text-white/5 rotate-12 group-hover:rotate-0 group-hover:text-emerald-500/10 transition-all duration-700" />
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="col-span-full py-16 lg:py-24 text-center border-2 border-dashed border-white/5 rounded-[2rem] lg:rounded-[3rem] flex flex-col items-center justify-center space-y-4 opacity-30">
+                        <FileText size={48} className="text-slate-600" />
+                        <p className="text-[10px] text-slate-500 uppercase font-black tracking-[0.5em]">{t('adminDashboard.docs.noDocuments')}</p>
+                      </div>
+                    )}
+                  </div>
+                </section>
+              )}
 
             </div>
           ) : (
