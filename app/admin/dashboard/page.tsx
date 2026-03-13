@@ -304,18 +304,18 @@ export default function AdminDashboard() {
   };
 
   const copyToClipboard = async (text: string, id: string) => {
+  console.log('Tentative de copie :', text);
   if (!text) {
-    console.warn('Tentative de copie d\'un code PIN vide');
+    console.warn('Code PIN vide');
     return;
   }
   try {
-    // Méthode moderne (async)
     await navigator.clipboard.writeText(text);
     setCopySuccess(id);
     setTimeout(() => setCopySuccess(null), 2000);
   } catch (err) {
-    console.error('Échec de la copie avec API Clipboard :', err);
-    // Fallback pour les navigateurs plus anciens / contextes non sécurisés
+    console.error('Erreur API Clipboard :', err);
+    // Fallback pour navigateurs anciens / contexte non sécurisé
     try {
       const textarea = document.createElement('textarea');
       textarea.value = text;
@@ -328,7 +328,7 @@ export default function AdminDashboard() {
       setCopySuccess(id);
       setTimeout(() => setCopySuccess(null), 2000);
     } catch (fallbackErr) {
-      console.error('Fallback copy failed:', fallbackErr);
+      console.error('Fallback échoué :', fallbackErr);
       alert('Impossible de copier le code. Veuillez le sélectionner manuellement.');
     }
   }
