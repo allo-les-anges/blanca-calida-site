@@ -48,6 +48,11 @@ export default function AdminDashboard() {
   // --- ÉTAT POUR LA SIDEBAR RESPONSIVE ---
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+  // --- NOUVEAUX ÉTATS POUR LE FILTRAGE XML/SUPABASE ---
+  const [minCommission, setMinCommission] = useState(0);
+  const [excludedPromoters, setExcludedPromoters] = useState<string[]>([]);
+  const [availablePromoters, setAvailablePromoters] = useState<string[]>([]);
+
   // --- DONNÉES ---
   const [projets, setProjets] = useState<any[]>([]);
   const [staffList, setStaffList] = useState<any[]>([]);
@@ -122,6 +127,18 @@ export default function AdminDashboard() {
         .order('created_at', { ascending: false });
       
       if (!errorStaff) setStaffList(staff || []);
+
+      // 4. Charger les Promoteurs uniques pour le filtre d'exclusion
+      const { data: villas } = await supabase
+        .from('villas')
+        .select('development_name')
+        .not('development_name', 'is', null);
+      
+      if (villas) {
+        // Crée une liste sans doublons
+        const uniquePromoters = Array.from(new Set(villas.map(v => v.development_name)));
+        setAvailablePromoters(uniquePromoters as string[]);
+      }
 
     } catch (error) {
       console.error("Erreur de chargement:", error);
@@ -523,20 +540,33 @@ export default function AdminDashboard() {
           </div>
 
           {/* Sélecteur de Tab Principal */}
-          <div className="flex bg-black/40 p-1.5 rounded-2xl border border-white/5 relative">
+          <div className="flex flex-col gap-2 bg-black/40 p-1.5 rounded-2xl border border-white/5 relative">
+            <div className="flex gap-1 relative">
+              <button 
+                onClick={() => setActiveTab('clients')} 
+                className={`relative z-10 flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-500 flex items-center justify-center gap-2 ${activeTab === 'clients' ? 'text-black' : 'text-slate-500 hover:text-white'}`}
+              >
+                <LayoutDashboard size={14} /> {t('adminDashboard.projects')}
+              </button>
+              <button 
+                onClick={() => setActiveTab('staff')} 
+                className={`relative z-10 flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-500 flex items-center justify-center gap-2 ${activeTab === 'staff' ? 'text-black' : 'text-slate-500 hover:text-white'}`}
+              >
+                <UserPlus size={14} /> {t('adminDashboard.team')}
+              </button>
+              {/* Indicateur coulissant pour les deux premiers onglets */}
+              {(activeTab === 'clients' || activeTab === 'staff') && (
+                <div className={`absolute top-0 bottom-0 left-0 w-[calc(50%)] bg-emerald-500 rounded-xl transition-all duration-500 ease-out ${activeTab === 'staff' ? 'translate-x-full' : 'translate-x-0'}`}></div>
+              )}
+            </div>
+
+            {/* Nouveau bouton pour les filtres XML */}
             <button 
-              onClick={() => setActiveTab('clients')} 
-              className={`relative z-10 flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-500 flex items-center justify-center gap-2 ${activeTab === 'clients' ? 'text-black' : 'text-slate-500 hover:text-white'}`}
+              onClick={() => setActiveTab('settings')} 
+              className={`w-full py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-500 flex items-center justify-center gap-2 ${activeTab === 'settings' ? 'bg-[#D4AF37] text-black' : 'border border-white/5 text-slate-500 hover:text-white hover:bg-white/5'}`}
             >
-              <LayoutDashboard size={14} /> {t('adminDashboard.projects')}
+              <Settings size={14} /> Filtres Ventes (XML)
             </button>
-            <button 
-              onClick={() => setActiveTab('staff')} 
-              className={`relative z-10 flex-1 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-500 flex items-center justify-center gap-2 ${activeTab === 'staff' ? 'text-black' : 'text-slate-500 hover:text-white'}`}
-            >
-              <UserPlus size={14} /> {t('adminDashboard.team')}
-            </button>
-            <div className={`absolute top-1.5 bottom-1.5 left-1.5 w-[calc(50%-6px)] bg-emerald-500 rounded-xl transition-all duration-500 ease-out ${activeTab === 'staff' ? 'translate-x-[100%]' : 'translate-x-0'}`}></div>
           </div>
 
           {/* Recherche */}
@@ -553,7 +583,61 @@ export default function AdminDashboard() {
 
         {/* Liste défilante des éléments */}
         <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-3 custom-scrollbar">
-          {activeTab === 'clients' ? (
+          
+          {/* CAS 1 : RÉGLAGES FILTRES XML */}
+          {activeTab === 'settings' ? (
+            <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
+              {/* Filtre Commission */}
+              <div className="p-5 rounded-2xl bg-white/5 border border-white/5 space-y-4">
+                <div className="flex items-center gap-2 text-[#D4AF37]">
+                  <Percent size={14} />
+                  <h3 className="text-[10px] font-black uppercase tracking-widest text-[#D4AF37]">Commission Minimale</h3>
+                </div>
+                <input 
+                  type="range" min="0" max="10" step="0.5" 
+                  value={minCommission} 
+                  onChange={(e) => setMinCommission(parseFloat(e.target.value))}
+                  className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-[#D4AF37]"
+                />
+                <div className="flex justify-between text-[11px] font-black text-white italic">
+                  <span>0%</span>
+                  <span className="text-[#D4AF37] bg-[#D4AF37]/10 px-2 py-0.5 rounded-md">{minCommission}%</span>
+                  <span>10%</span>
+                </div>
+              </div>
+
+              {/* Filtre Promoteurs */}
+              <div className="p-5 rounded-2xl bg-white/5 border border-white/5 space-y-4">
+                <div className="flex items-center gap-2 text-rose-500">
+                  <Ban size={14} />
+                  <h3 className="text-[10px] font-black uppercase tracking-widest text-rose-500">Exclure Promoteurs</h3>
+                </div>
+                <div className="flex flex-col gap-2 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                  {availablePromoters.map(name => (
+                    <label key={name} className="flex items-center justify-between p-3 rounded-xl bg-black/20 border border-white/5 cursor-pointer hover:bg-white/5 transition-all">
+                      <span className="text-[10px] font-bold text-slate-300 uppercase truncate pr-4">{name}</span>
+                      <input 
+                        type="checkbox" 
+                        checked={excludedPromoters.includes(name)}
+                        onChange={() => {
+                            setExcludedPromoters(prev => 
+                                prev.includes(name) ? prev.filter(p => p !== name) : [...prev, name]
+                            );
+                        }}
+                        className="w-4 h-4 rounded border-white/10 bg-white/5 text-emerald-500 focus:ring-0 accent-emerald-500"
+                      />
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <p className="text-[9px] text-slate-500 italic px-2 leading-relaxed">
+                * Ces paramètres filtrent en temps réel les biens importés via le flux XML sur la page publique.
+              </p>
+            </div>
+          ) 
+          
+          /* CAS 2 : LISTE DES PROJETS */
+          : activeTab === 'clients' ? (
             projets
               .filter(p => `${p.client_prenom} ${p.client_nom} ${p.nom_villa}`.toLowerCase().includes(searchTerm.toLowerCase()))
               .map((p) => (

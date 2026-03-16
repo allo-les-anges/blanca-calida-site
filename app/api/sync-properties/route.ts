@@ -32,14 +32,16 @@ export async function GET() {
         const loc = p.location || {};
         const dists = p.distances || {}; 
         
-        // Images
+        // Gestion des images (extraction de l'URL si objet ou string)
         let imagesArray: string[] = [];
         if (p.images && p.images.image) {
           const rawImages = Array.isArray(p.images.image) ? p.images.image : [p.images.image];
-          imagesArray = rawImages.map((img: any) => img.url).filter((u: any) => typeof u === 'string');
+          imagesArray = rawImages
+            .map((img: any) => (typeof img === 'string' ? img : img.url))
+            .filter((u: any) => typeof u === 'string');
         }
 
-        // Objet de base (champs non linguistiques)
+        // Objet de base mappé sur vos colonnes SQL exactes
         const base: any = {
           id_externe: String(p.id),
           ref: String(p.ref || p.id),
@@ -52,7 +54,7 @@ export async function GET() {
           type: String(p.type || "Villa"),
           beds: String(p.beds || "0"),
           baths: String(p.baths || "0"),
-          pool: (p.pool === "1" || (p.features?.feature && JSON.stringify(p.features.feature).includes("pool"))) ? "Oui" : "Non",
+          pool: (p.pool === "1" || JSON.stringify(p.features).includes("pool")) ? "Oui" : "Non",
           price: parseFloat(p.price) || 0,
           prix: parseFloat(p.price) || 0,
           currency: String(p.currency || "EUR"),
@@ -65,10 +67,10 @@ export async function GET() {
           images: imagesArray,
           updated_at: new Date().toISOString(),
           
-          // Nouvelles données extraites du XML pour le filtrage admin
-          development_name: p.development_name ? String(p.development_name) : null,
-          commission_quantity: p.commission?.quantity ? parseFloat(p.commission.quantity) : 0,
-          commission_type: p.commission?.type ? String(p.commission.type) : 'percentage'
+          // MAPPING CORRIGÉ SELON VOTRE SQL :
+          promoteur_name: p.development_name ? String(p.development_name) : null,
+          commission_percentage: p.commission?.quantity ? parseFloat(p.commission.quantity) : 0,
+          is_excluded: false // Valeur par défaut
         };
 
         // Titres et descriptions multilingues
@@ -76,37 +78,32 @@ export async function GET() {
         const descObj = p.desc || {};
 
         for (const lang of languages) {
-          // Titre : priorité à development_name, sinon titre dans la langue, sinon fallback français
-          let titre = p.development_name;
-          if (!titre && titleObj[lang]) {
-            titre = titleObj[lang];
-          }
-          if (!titre) {
-            titre = titleObj.fr || titleObj.en || "Villa Moderne";
-          }
+          let titre = p.development_name || titleObj[lang] || titleObj.fr || titleObj.en || "Villa Moderne";
           base[`titre_${lang}`] = String(titre).trim();
 
-          // Description
-          let description = descObj[lang];
-          if (!description) {
-            description = descObj.fr || descObj.en || "";
-          }
+          let description = descObj[lang] || descObj.fr || descObj.en || "";
           base[`description_${lang}`] = String(description).trim();
         }
 
         return base;
       });
 
+      // Upsert vers Supabase
       const { error, data } = await supabase
         .from('villas')
         .upsert(updates, { onConflict: 'id_externe' })
         .select('id_externe');
 
-      if (!error) totalSynced += data?.length || 0;
+      if (error) {
+        console.error(`Erreur d'insertion pour ${source.url}:`, error.message);
+      } else {
+        totalSynced += data?.length || 0;
+      }
     }
 
     return NextResponse.json({ success: true, totalSynced });
   } catch (error: any) {
+    console.error("Erreur de synchronisation:", error.message);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
