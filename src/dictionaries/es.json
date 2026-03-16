@@ -347,7 +347,12 @@
     "tabs": {
       "clientBudget": "Cliente y Presupuesto",
       "constructionStatus": "Estado de la Obra",
-      "documents": "Caja Fuerte de Documentos"
+      "documents": "Caja Fuerte de Documentos",
+    "filters": {
+        "tabLabel": "Filtros de Ventas (XML)",
+        "minCommission": "Comisión Mínima",
+        "excludePromoters": "Excluir Promotores",
+        "description": "* Estos parámetros filtran en tiempo real las propiedades importadas a través del feed XML en la página pública."
     },
     "clientInfo": {
       "title": "Datos del propietario",

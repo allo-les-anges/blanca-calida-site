@@ -347,7 +347,12 @@
     "tabs": {
       "clientBudget": "Client & Budget",
       "constructionStatus": "État du Chantier",
-      "documents": "Coffre-fort (Docs)"
+      "documents": "Coffre-fort (Docs)",
+    "filters": {
+        "tabLabel": "Filtres Ventes (XML)",
+        "minCommission": "Commission Minimale",
+        "excludePromoters": "Exclure Promoteurs",
+        "description": "* Ces paramètres filtrent en temps réel les biens importés via le flux XML sur la page publique."
     },
     "clientInfo": {
       "title": "Coordonnées du propriétaire",

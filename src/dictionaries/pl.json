@@ -347,7 +347,12 @@
     "tabs": {
       "clientBudget": "Klient i Budżet",
       "constructionStatus": "Status Budowy",
-      "documents": "Skarbiec Dokumentów"
+      "documents": "Skarbiec Dokumentów",
+    "filters": {
+        "tabLabel": "Filtry Sprzedaży (XML)",
+        "minCommission": "Minimalna Prowizja",
+        "excludePromoters": "Wyklucz Deweloperów",
+        "description": "* Parametry te filtrują w czasie rzeczywistym nieruchomości importowane za pośrednictwem kanału XML na stronie publicznej."
     },
     "clientInfo": {
       "title": "Dane właściciela",

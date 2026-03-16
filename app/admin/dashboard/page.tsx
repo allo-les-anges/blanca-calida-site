@@ -70,7 +70,7 @@ export default function AdminDashboard() {
   // --- ÉTATS POUR LES CONSTATS ---
   const [selectedConstatsDate, setSelectedConstatsDate] = useState<string | null>(null);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
-  
+
 
   const [newProject, setNewProject] = useState({ 
     client_nom: "", 

@@ -347,7 +347,12 @@
     "tabs": {
       "clientBudget": "العميل والميزانية",
       "constructionStatus": "حالة البناء",
-      "documents": "خزنة المستندات"
+      "documents": "خزنة المستندات",
+    "filters": {
+        "tabLabel": "مرشحات المبيعات (XML)",
+        "minCommission": "الحد الأدنى للعمولة",
+        "excludePromoters": "استبعاد المطورين",
+        "description": "* تعمل هذه المعلمات على تصفية العقارات المستوردة عبر خلاصة XML في الوقت الفعلي على الصفحة العامة."
     },
     "clientInfo": {
       "title": "تفاصيل المالك",

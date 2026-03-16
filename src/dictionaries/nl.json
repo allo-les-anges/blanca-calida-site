@@ -347,7 +347,12 @@
     "tabs": {
       "clientBudget": "Cliënt & Budget",
       "constructionStatus": "Bouwstatus",
-      "documents": "Documentenkluis"
+      "documents": "Documentenkluis",
+    "filters": {
+        "tabLabel": "Verkoopfilters (XML)",
+        "minCommission": "Minimale Commissie",
+        "excludePromoters": "Promotoren Uitsluiten",
+        "description": "* Deze parameters filteren in realtime de eigendommen die via de XML-feed op de openbare pagina worden geïmporteerd."
     },
     "clientInfo": {
       "title": "Eigenaargegevens",

@@ -347,7 +347,12 @@
     "tabs": {
       "clientBudget": "Client & Budget",
       "constructionStatus": "Construction Status",
-      "documents": "Documents Vault"
+      "documents": "Documents Vault",
+    "filters": {
+        "tabLabel": "Sales Filters (XML)",
+        "minCommission": "Minimum Commission",
+        "excludePromoters": "Exclude Promoters",
+        "description": "* These parameters filter in real time the properties imported via the XML feed on the public page."
     },
     "clientInfo": {
       "title": "Owner details",
