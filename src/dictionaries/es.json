@@ -327,7 +327,7 @@
     "storageError": "Error de almacenamiento: {message}",
     "databaseError": "Error de base de datos: {message}"
   },
-  "adminDashboard": {
+   "adminDashboard": {
     "adminControl": "Control de Administración",
     "search": "BUSCAR...",
     "searchPlaceholder": "BUSCAR...",
@@ -347,13 +347,13 @@
     "tabs": {
       "clientBudget": "Cliente y Presupuesto",
       "constructionStatus": "Estado de la Obra",
-      "documents": "Caja fuerte (Docs)",
-      "filters": {
-        "tabLabel": "Filtros de Ventas (XML)",
-        "minCommission": "Comisión Mínima",
-        "excludePromoters": "Excluir Promotores",
-        "description": "* Estos parámetros filtran en tiempo real las propiedades importadas a través del feed XML en la página pública."
-      }
+      "documents": "Caja fuerte (Docs)"
+    },
+    "filters": {
+      "tabLabel": "Filtros de Ventas (XML)",
+      "minCommission": "Comisión Mínima",
+      "excludePromoters": "Excluir Promotores",
+      "description": "* Estos parámetros filtran en tiempo real las propiedades importadas a través del feed XML en la página pública."
     },
     "clientInfo": {
       "title": "Datos del propietario",
@@ -377,7 +377,8 @@
       "code": "Código PIN de conexión",
       "copy": "Copiar código",
       "copied": "¡Copiado!",
-      "encryption": "Cifrado AES-256 Activo"
+      "encryption": "Cifrado AES-256 Activo",
+      "notDefined": "El código PIN no está definido para este proyecto."
     },
     "progress": {
       "title": "Progreso en Tiempo Real",
@@ -406,48 +407,6 @@
       "processing": "Procesando...",
       "noDocuments": "Ningún documento archivado"
     },
-    "staff": {
-      "add": "Añadir colaborador",
-      "firstName": "Nombre",
-      "lastName": "Apellido",
-      "email": "Email profesional",
-      "role": "Asignación de rol y privilegios",
-      "agent": "Agente (Acceso limitado)",
-      "admin": "Administrador de agencia",
-      "superAdmin": "Super Administrador",
-      "security": "Seguridad Automática",
-      "pinInfo": "Se generará un código PIN único de 6 dígitos. El colaborador podrá conectarse inmediatamente después de la validación.",
-      "confirm": "Confirmar invitación",
-      "copyPin": "Copiar PIN",
-      "delete": "Eliminar este colaborador",
-      "securityCode": "Código de seguridad",
-      "cannotDeleteSelf": "No puede eliminar su propia cuenta."
-    },
-    "inspectionReport": "Informe de Inspección",
-    "observation": "Observación técnica #{num}",
-    "location": "Ubicación: {lat}, {lng}",
-    "certification": "Certifico que la información y las fotografías presentadas a continuación fueron recogidas in situ por el departamento técnico de Amaru-Homes. Las coordenadas GPS garantizan la autenticidad de la inspección.",
-    "generateReport": "Generar Informe",
-    "reportRef": "Informe de Inspección #RC-{ref}",
-    "visitDate": "Fecha de visita: {date}",
-    "phase": "Fase: {phase}",
-    "recipient": "DESTINATARIO:",
-    "project": "Proyecto: {name}",
-    "expert": "EXPERTO REFERENTE:",
-    "defaultObservation": "No se detectó ninguna anomalía durante la inspección visual.",
-    "statusConforme": "ESTADO: CONFORME",
-    "photoRef": "Toma #{num}\n\nGPS: {lat}\n{lng}",
-    "photoHeader": "REFERENCIA FOTO",
-    "analysisHeader": "ANÁLISIS TÉCNICO Y OBSERVACIONES",
-    "photoAnnex": "ANEXO FOTOGRÁFICO Y GEOLOCALIZACIÓN",
-    "imageNotAvailable": "(Imagen no disponible)",
-    "imageCaption": "Ilustración #{num} - Capturada el {date}",
-    "certificationTitle": "CERTIFICACIÓN:",
-    "certificationText": "Yo, el abajo firmante, {expert}, certifico que la información, los datos GPS y las fotografías contenidas en este informe reflejan fielmente el estado real de avance de la obra en la fecha indicada.",
-    "pdfError": "Error al generar el PDF",
-    "initializing": "Inicializando Terminal de Administración",
-    "version": "Dashboard Terminal v2.4.0"
-  },
   "adminStaff": {
     "userCreationFailed": "Error al crear el usuario",
     "addSuccess": "✅ ¡Colaborador añadido! PIN generado: {pin}",

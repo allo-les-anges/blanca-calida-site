@@ -347,13 +347,13 @@
     "tabs": {
       "clientBudget": "Client & Budget",
       "constructionStatus": "État du Chantier",
-      "documents": "Coffre-fort (Docs)",
-      "filters": {
-        "tabLabel": "Filtres Ventes (XML)",
-        "minCommission": "Commission Minimale",
-        "excludePromoters": "Exclure Promoteurs",
-        "description": "* Ces paramètres filtrent en temps réel les biens importés via le flux XML sur la page publique."
-      }
+      "documents": "Coffre-fort (Docs)"
+    },
+    "filters": {
+      "tabLabel": "Filtres Ventes (XML)",
+      "minCommission": "Commission Minimale",
+      "excludePromoters": "Exclure Promoteurs",
+      "description": "* Ces paramètres filtrent en temps réel les biens importés via le flux XML sur la page publique."
     },
     "clientInfo": {
       "title": "Coordonnées du propriétaire",
@@ -377,7 +377,8 @@
       "code": "Code PIN de connexion",
       "copy": "Copier le code",
       "copied": "Copié !",
-      "encryption": "Chiffrement AES-256 Actif"
+      "encryption": "Chiffrement AES-256 Actif",
+      "notDefined": "Le code PIN n'est pas défini pour ce projet."
     },
     "progress": {
       "title": "Progression Temps Réel",
@@ -446,7 +447,15 @@
     "certificationText": "Je soussigné, {expert}, certifie que les informations, relevés GPS et photographies contenus dans ce rapport reflètent fidèlement l'état d'avancement réel du chantier à la date mentionnée.",
     "pdfError": "Erreur lors de la génération du PDF",
     "initializing": "Initialisation du Terminal Admin",
-    "version": "Dashboard Terminal v2.4.0"
+    "version": "Dashboard Terminal v2.4.0",
+    "emptyState": {
+      "line1": "Prêt pour le prochain",
+      "line2": "chef-d'œuvre ?",
+      "subtitle": "Sélectionnez un dossier client dans la barre latérale ou créez une nouvelle fiche projet pour débuter le suivi."
+    },
+    "newProject": "Nouveau Dossier",
+    "manageStaff": "Gestion Staff",
+    "delivered": "Livrés"
   },
   "adminStaff": {
     "userCreationFailed": "Échec de la création de l'utilisateur",

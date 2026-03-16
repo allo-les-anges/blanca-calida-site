@@ -347,13 +347,13 @@
     "tabs": {
       "clientBudget": "Client & Budget",
       "constructionStatus": "Construction Status",
-      "documents": "Safe (Docs)",
-      "filters": {
-        "tabLabel": "Sales Filters (XML)",
-        "minCommission": "Minimum Commission",
-        "excludePromoters": "Exclude Promoters",
-        "description": "* These parameters filter in real time the properties imported via the XML feed on the public page."
-      }
+      "documents": "Safe (Docs)"
+    },
+    "filters": {
+      "tabLabel": "Sales Filters (XML)",
+      "minCommission": "Minimum Commission",
+      "excludePromoters": "Exclude Promoters",
+      "description": "* These parameters filter in real time the properties imported via the XML feed on the public page."
     },
     "clientInfo": {
       "title": "Owner details",
@@ -377,7 +377,8 @@
       "code": "Login PIN code",
       "copy": "Copy code",
       "copied": "Copied!",
-      "encryption": "AES-256 Encryption Active"
+      "encryption": "AES-256 Encryption Active",
+      "notDefined": "The PIN code is not defined for this project."
     },
     "progress": {
       "title": "Real-Time Progress",
@@ -446,7 +447,15 @@
     "certificationText": "I, the undersigned, {expert}, certify that the information, GPS data, and photographs contained in this report accurately reflect the actual progress of the work on site on the stated date.",
     "pdfError": "Error generating PDF",
     "initializing": "Initializing Admin Terminal",
-    "version": "Dashboard Terminal v2.4.0"
+    "version": "Dashboard Terminal v2.4.0",
+    "emptyState": {
+      "line1": "Ready for the next",
+      "line2": "masterpiece?",
+      "subtitle": "Select a client file from the sidebar or create a new project to start tracking."
+    },
+    "newProject": "New Project",
+    "manageStaff": "Manage Staff",
+    "delivered": "Delivered"
   },
   "adminStaff": {
     "userCreationFailed": "User creation failed",

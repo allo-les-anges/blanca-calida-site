@@ -347,13 +347,13 @@
     "tabs": {
       "clientBudget": "Cliënt & Budget",
       "constructionStatus": "Bouwstatus",
-      "documents": "Kluis (Docs)",
-      "filters": {
-        "tabLabel": "Verkoopfilters (XML)",
-        "minCommission": "Minimale Commissie",
-        "excludePromoters": "Promotoren Uitsluiten",
-        "description": "* Deze parameters filteren in realtime de eigendommen die via de XML-feed op de openbare pagina worden geïmporteerd."
-      }
+      "documents": "Kluis (Docs)"
+    },
+    "filters": {
+      "tabLabel": "Verkoopfilters (XML)",
+      "minCommission": "Minimale Commissie",
+      "excludePromoters": "Promotoren Uitsluiten",
+      "description": "* Deze parameters filteren in realtime de eigendommen die via de XML-feed op de openbare pagina worden geïmporteerd."
     },
     "clientInfo": {
       "title": "Gegevens eigenaar",
@@ -377,7 +377,8 @@
       "code": "PIN-code voor verbinding",
       "copy": "Code kopiëren",
       "copied": "Gekopieerd!",
-      "encryption": "AES-256 Versleuteling Actief"
+      "encryption": "AES-256 Versleuteling Actief",
+      "notDefined": "De pincode is niet gedefinieerd voor dit project."
     },
     "progress": {
       "title": "Realtime Progressie",
@@ -446,7 +447,15 @@
     "certificationText": "Ik, ondergetekende, {expert}, verklaar dat de informatie, GPS-gegevens en foto's in dit rapport de werkelijke stand van de werkzaamheden ter plaatse op de genoemde datum getrouw weergeven.",
     "pdfError": "Fout bij genereren PDF",
     "initializing": "Beheerterminal initialiseren",
-    "version": "Dashboard Terminal v2.4.0"
+    "version": "Dashboard Terminal v2.4.0",
+    "emptyState": {
+      "line1": "Klaar voor de volgende",
+      "line2": "meesterwerk?",
+      "subtitle": "Selecteer een klantdossier in de zijbalk of maak een nieuw project aan om te beginnen met volgen."
+    },
+    "newProject": "Nieuw Project",
+    "manageStaff": "Personeel Beheren",
+    "delivered": "Opgeleverd"
   },
   "adminStaff": {
     "userCreationFailed": "Gebruikersaanmaken mislukt",
