@@ -9,7 +9,8 @@ import {
   ChevronRight, Info, Upload, X, UserPlus, Mail, Lock, Copy,
   CheckCircle2, Clock, Phone, Globe, Hash,
   LayoutDashboard, Database, Eye, EyeOff, ArrowRight, Settings,
-  AlertCircle, Paperclip, HardDrive, Key, Menu, Construction, Briefcase
+  AlertCircle, Paperclip, HardDrive, Key, Menu, Construction, Briefcase,
+  Percent
 } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
 import jsPDF from 'jspdf';
