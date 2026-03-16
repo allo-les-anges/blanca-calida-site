@@ -39,6 +39,7 @@ export default function AdminDashboard() {
   
   // --- ÉTATS DE L'INTERFACE ---
   const [activeTab, setActiveTab] = useState<'clients' | 'staff' | 'settings'>('clients');
+  const [projectTab, setProjectTab] = useState<'infos' | 'suivi' | 'docs'>('infos');
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const [uploadingDoc, setUploadingDoc] = useState(false);
