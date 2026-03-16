@@ -10,7 +10,7 @@ import {
   CheckCircle2, Clock, Phone, Globe, Hash,
   LayoutDashboard, Database, Eye, EyeOff, ArrowRight, Settings,
   AlertCircle, Paperclip, HardDrive, Key, Menu, Construction, Briefcase,
-  Percent
+  Percent, Ban
 } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
 import jsPDF from 'jspdf';
