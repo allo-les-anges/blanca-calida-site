@@ -2952,6 +2952,21 @@ export default function Hero() {
 }
 </file>
 
+<file path="src/components/ThemeProvider.tsx">
+"use client";
+
+import * as React from "react";
+import { ThemeProvider as NextThemesProvider } from "next-themes";
+
+export function ThemeProvider({ children, ...props }: any) {
+  return (
+    <NextThemesProvider {...props}>
+      {children}
+    </NextThemesProvider>
+  );
+}
+</file>
+
 <file path="tailwind.config.js">
 /** @type {import('tailwindcss').Config} */
 export default {
@@ -3578,21 +3593,6 @@ export default function RootLayout({
         </ThemeProvider>
       </body>
     </html>
-  );
-}
-</file>
-
-<file path="src/components/ThemeProvider.tsx">
-"use client";
-
-import * as React from "react";
-import { ThemeProvider as NextThemesProvider } from "next-themes";
-
-export function ThemeProvider({ children, ...props }: any) {
-  return (
-    <NextThemesProvider {...props}>
-      {children}
-    </NextThemesProvider>
   );
 }
 </file>
@@ -4442,243 +4442,6 @@ export default function CashbackInfo() {
 }
 </file>
 
-<file path="app/contact/page.tsx">
-"use client";
-
-import React, { useEffect, useState } from "react";
-import { motion } from "framer-motion";
-import { 
-  Globe, Target, MapPin, Languages, Compass, Sun, Moon 
-} from "lucide-react";
-import { useTheme } from "next-themes";
-import { useTranslation } from "@/contexts/I18nContext";
-
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-
-// Tableau statique des photos (chemins fixes)
-const teamMembers = [
-  { id: 1, photo: "/Deborah.jpeg" },
-  { id: 2, photo: "/Gillian.jpeg" },
-  { id: 3, photo: "/Joanna.jpeg" },
-  { id: 4, photo: "/Abdou.jpeg" },
-  { id: 5, photo: "/Gaëtan.jpeg" },
-];
-
-export default function ContactPage() {
-  const { resolvedTheme } = useTheme();
-  const { t } = useTranslation();
-  const [mounted, setMounted] = useState(false);
-  
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    region: "",
-    message: ""
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) return null;
-
-  const isDark = resolvedTheme === "dark";
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setStatus("idle");
-
-    try {
-      const response = await fetch("/api/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-
-      if (response.ok) {
-        setStatus("success");
-        setFormData({ name: "", email: "", region: "", message: "" });
-      } else {
-        setStatus("error");
-      }
-    } catch (error) {
-      console.error("Erreur soumission:", error);
-      setStatus("error");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const inputStyle = {
-    color: isDark ? '#ffffff' : '#0f172a',
-    backgroundColor: isDark ? 'rgba(0, 0, 0, 0.6)' : '#ffffff',
-  };
-
-  const inputClasses = `
-    w-full px-8 py-5 rounded-2xl outline-none transition-all 
-    text-[10px] font-black tracking-widest 
-    border-2 border-slate-200 dark:border-white/20 
-    placeholder:text-slate-400 dark:placeholder:text-white/40
-    focus:border-[#D4AF37] dark:focus:border-[#D4AF37]
-  `;
-
-  return (
-    <div className="min-h-screen transition-colors duration-500 bg-white dark:bg-[#0A0A0A] text-slate-900 dark:text-white">
-      
-      <Navbar />
-
-      <main>
-        {/* SECTION HÉRO */}
-        <section className="relative h-[65vh] w-full flex items-center justify-center transition-colors duration-1000 bg-slate-900 dark:bg-[#020617]">
-          <div className="absolute inset-0 z-0 opacity-50 bg-slate-900 dark:bg-black" />
-          <div className="relative z-10 text-center px-6 max-w-5xl pt-20">
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
-              <span className="text-[#D4AF37] text-[12px] font-black uppercase tracking-[0.6em] mb-6 block">
-                {t('contact.heroBadge')}
-              </span>
-              <h1 className="text-4xl md:text-7xl font-serif italic text-white mb-8">
-                {t('contact.heroTitle')}
-              </h1>
-              <p className="text-white/70 text-base md:text-lg font-light max-w-3xl mx-auto leading-relaxed italic">
-                {t('contact.heroQuote')}
-              </p>
-            </motion.div>
-          </div>
-        </section>
-
-        {/* SECTION ÉQUIPE */}
-        <section className="max-w-[1400px] mx-auto px-6 py-24 grid grid-cols-1 xl:grid-cols-12 gap-20">
-          <div className="xl:col-span-7 space-y-12">
-            {teamMembers.map((member, idx) => (
-              <motion.div 
-                key={member.id}
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: idx * 0.1 }}
-                className="p-8 md:p-12 rounded-[2.5rem] border transition-all duration-700 bg-white dark:bg-white/5 border-slate-100 dark:border-white/10 shadow-xl"
-              >
-                <div className="flex flex-col md:flex-row gap-10">
-                  <div className="relative w-full md:w-48 h-60 shrink-0 overflow-hidden rounded-[2rem] bg-slate-100 dark:bg-white/5">
-                    <img 
-                      src={member.photo} 
-                      className={`w-full h-full object-cover ${isDark ? "brightness-75 grayscale-[0.3]" : ""}`}
-                      alt={t(`contact.team.${idx}.name`)}
-                    />
-                  </div>
-                  <div className="flex-1 space-y-5">
-                    <h3 className="text-3xl font-serif italic text-[#D4AF37]">
-                      {t(`contact.team.${idx}.name`)}
-                    </h3>
-                    <p className="text-base leading-relaxed font-light text-slate-600 dark:text-slate-300">
-                      {t(`contact.team.${idx}.background`)}
-                    </p>
-                    <div className="flex flex-wrap gap-2 pt-4">
-                      {[0, 1, 2].map((skillIdx) => (
-                        <span 
-                          key={skillIdx} 
-                          className="text-[9px] font-black uppercase tracking-widest px-3 py-1 bg-[#D4AF37]/10 text-[#D4AF37] rounded-md border border-[#D4AF37]/20"
-                        >
-                          {t(`contact.team.${idx}.skills.${skillIdx}`)}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-
-          {/* COLONNE FORMULAIRE */}
-          <div className="xl:col-span-5">
-            <div className="sticky top-32 p-12 rounded-[3.5rem] transition-all duration-700 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 shadow-2xl">
-              
-              <h3 
-                className="text-3xl md:text-4xl font-serif italic mb-2"
-                style={{ color: isDark ? '#FFFFFF' : '#0f172a' }}
-              >
-                {t('contact.formTitle')}
-              </h3>
-              
-              <p className="text-[#D4AF37] text-[10px] font-black uppercase tracking-[0.2em] mb-10">
-                {t('contact.formSubtitle')}
-              </p>
-              
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <input 
-                  required
-                  type="text" 
-                  placeholder={t('contact.namePlaceholder')}
-                  style={inputStyle}
-                  className={inputClasses}
-                  value={formData.name}
-                  onChange={(e) => setFormData({...formData, name: e.target.value})}
-                />
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <input 
-                    required
-                    type="email" 
-                    placeholder={t('contact.emailPlaceholder')}
-                    style={inputStyle}
-                    className={inputClasses}
-                    value={formData.email}
-                    onChange={(e) => setFormData({...formData, email: e.target.value})}
-                  />
-                  <input 
-                    type="text" 
-                    placeholder={t('contact.regionPlaceholder')}
-                    style={inputStyle}
-                    className={inputClasses}
-                    value={formData.region}
-                    onChange={(e) => setFormData({...formData, region: e.target.value})}
-                  />
-                </div>
-                
-                <textarea 
-                  required
-                  rows={4} 
-                  placeholder={t('contact.messagePlaceholder')}
-                  style={inputStyle}
-                  className={`${inputClasses} resize-none`}
-                  value={formData.message}
-                  onChange={(e) => setFormData({...formData, message: e.target.value})}
-                />
-                
-                <button 
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full bg-[#D4AF37] text-black py-6 rounded-2xl font-black uppercase text-[10px] tracking-[0.4em] hover:bg-white transition-all shadow-xl disabled:opacity-50"
-                >
-                  {isSubmitting ? t('contact.submitting') : t('contact.submit')}
-                </button>
-
-                {status === "success" && (
-                  <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-green-600 dark:text-green-400 text-center font-bold text-[10px] tracking-widest uppercase mt-4">
-                    {t('contact.success')}
-                  </motion.p>
-                )}
-                {status === "error" && (
-                  <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-red-500 text-center font-bold text-[10px] tracking-widest uppercase mt-4">
-                    {t('contact.error')}
-                  </motion.p>
-                )}
-              </form>
-            </div>
-          </div>
-        </section>
-      </main>
-
-      <Footer />
-    </div>
-  );
-}
-</file>
-
 <file path="app/page.tsx">
 "use client";
 
@@ -5204,6 +4967,377 @@ export default function Navbar() {
 }
 </file>
 
+<file path="app/contact/page.tsx">
+"use client";
+
+import React, { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { 
+  Globe, Target, MapPin, Languages, Compass, Sun, Moon 
+} from "lucide-react";
+import { useTheme } from "next-themes";
+import { useTranslation } from "@/contexts/I18nContext";
+
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+
+// Tableau statique des photos
+const teamMembers = [
+  { id: 1, photo: "/Deborah.jpeg" },
+  { id: 2, photo: "/Gillian.jpeg" },
+  { id: 3, photo: "/Joanna.jpeg" }, // Joanna (Index 2)
+  { id: 4, photo: "/Abdou.jpeg" },
+  { id: 5, photo: "/Gaëtan.jpeg" },
+];
+
+export default function ContactPage() {
+  const { resolvedTheme } = useTheme();
+  const { t } = useTranslation();
+  const [mounted, setMounted] = useState(false);
+  
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    region: "",
+    message: ""
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
+
+  const isDark = resolvedTheme === "dark";
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setStatus("idle");
+
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        setStatus("success");
+        setFormData({ name: "", email: "", region: "", message: "" });
+      } else {
+        setStatus("error");
+      }
+    } catch (error) {
+      console.error("Erreur soumission:", error);
+      setStatus("error");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const inputStyle = {
+    color: isDark ? '#ffffff' : '#0f172a',
+    backgroundColor: isDark ? 'rgba(0, 0, 0, 0.6)' : '#ffffff',
+  };
+
+  const inputClasses = `
+    w-full px-8 py-5 rounded-2xl outline-none transition-all 
+    text-[10px] font-black tracking-widest 
+    border-2 border-slate-200 dark:border-white/20 
+    placeholder:text-slate-400 dark:placeholder:text-white/40
+    focus:border-[#D4AF37] dark:focus:border-[#D4AF37]
+  `;
+
+  return (
+    <div className="min-h-screen transition-colors duration-500 bg-white dark:bg-[#0A0A0A] text-slate-900 dark:text-white">
+      
+      <Navbar />
+
+      <main>
+        {/* SECTION HÉRO */}
+        <section className="relative h-[65vh] w-full flex items-center justify-center transition-colors duration-1000 bg-slate-900 dark:bg-[#020617]">
+          <div className="absolute inset-0 z-0 opacity-50 bg-slate-900 dark:bg-black" />
+          <div className="relative z-10 text-center px-6 max-w-5xl pt-20">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
+              <span className="text-[#D4AF37] text-[12px] font-black uppercase tracking-[0.6em] mb-6 block">
+                {t('contact.heroBadge')}
+              </span>
+              <h1 className="text-4xl md:text-7xl font-serif italic text-white mb-8">
+                {t('contact.heroTitle')}
+              </h1>
+              <p className="text-white/70 text-base md:text-lg font-light max-w-3xl mx-auto leading-relaxed italic">
+                {t('contact.heroQuote')}
+              </p>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* SECTION ÉQUIPE */}
+        <section className="max-w-[1400px] mx-auto px-6 py-24 grid grid-cols-1 xl:grid-cols-12 gap-20">
+          <div className="xl:col-span-7 space-y-12">
+            {teamMembers.map((member, idx) => (
+              <motion.div 
+                key={member.id}
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: idx * 0.1 }}
+                className="p-8 md:p-12 rounded-[2.5rem] border transition-all duration-700 bg-white dark:bg-white/5 border-slate-100 dark:border-white/10 shadow-xl"
+              >
+                <div className="flex flex-col md:flex-row gap-10">
+                  <div className="relative w-full md:w-48 h-60 shrink-0 overflow-hidden rounded-[2rem] bg-slate-100 dark:bg-white/5">
+                    <img 
+                      src={member.photo} 
+                      className={`w-full h-full object-cover ${isDark ? "brightness-75 grayscale-[0.3]" : ""}`}
+                      alt={t(`contact.team.${idx}.name`)}
+                    />
+                  </div>
+                  <div className="flex-1 space-y-5">
+                    <h3 className="text-3xl font-serif italic text-[#D4AF37]">
+                      {t(`contact.team.${idx}.name`)}
+                    </h3>
+                    <p className="text-base leading-relaxed font-light text-slate-600 dark:text-slate-300">
+                      {t(`contact.team.${idx}.background`)}
+                    </p>
+                    <div className="flex flex-wrap gap-2 pt-4">
+                      {/* MODIFICATION ICI : 
+                          On utilise maintenant les traductions dynamiques pour Joanna (index 2)
+                          au lieu de textes statiques en français.
+                      */}
+                      {idx === 2 ? (
+                        <>
+                          <span className="text-[9px] font-black uppercase tracking-widest px-3 py-1 bg-[#D4AF37]/10 text-[#D4AF37] rounded-md border border-[#D4AF37]/20">
+                            {t('contact.team.2.skills.0')}
+                          </span>
+                          <span className="text-[9px] font-black uppercase tracking-widest px-3 py-1 bg-[#D4AF37]/10 text-[#D4AF37] rounded-md border border-[#D4AF37]/20">
+                            {t('contact.team.2.skills.1')}
+                          </span>
+                          <span className="text-[9px] font-black uppercase tracking-widest px-3 py-1 bg-[#D4AF37]/10 text-[#D4AF37] rounded-md border border-[#D4AF37]/20">
+                            {t('contact.team.2.skills.2')}
+                          </span>
+                        </>
+                      ) : (
+                        [0, 1, 2].map((skillIdx) => (
+                          <span 
+                            key={skillIdx} 
+                            className="text-[9px] font-black uppercase tracking-widest px-3 py-1 bg-[#D4AF37]/10 text-[#D4AF37] rounded-md border border-[#D4AF37]/20"
+                          >
+                            {t(`contact.team.${idx}.skills.${skillIdx}`)}
+                          </span>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* COLONNE FORMULAIRE */}
+          <div className="xl:col-span-5">
+            <div className="sticky top-32 p-12 rounded-[3.5rem] transition-all duration-700 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 shadow-2xl">
+              <h3 
+                className="text-3xl md:text-4xl font-serif italic mb-2"
+                style={{ color: isDark ? '#FFFFFF' : '#0f172a' }}
+              >
+                {t('contact.formTitle')}
+              </h3>
+              
+              <p className="text-[#D4AF37] text-[10px] font-black uppercase tracking-[0.2em] mb-10">
+                {t('contact.formSubtitle')}
+              </p>
+              
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <input 
+                  required
+                  type="text" 
+                  placeholder={t('contact.namePlaceholder')}
+                  style={inputStyle}
+                  className={inputClasses}
+                  value={formData.name}
+                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                />
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <input 
+                    required
+                    type="email" 
+                    placeholder={t('contact.emailPlaceholder')}
+                    style={inputStyle}
+                    className={inputClasses}
+                    value={formData.email}
+                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                  />
+                  <input 
+                    type="text" 
+                    placeholder={t('contact.regionPlaceholder')}
+                    style={inputStyle}
+                    className={inputClasses}
+                    value={formData.region}
+                    onChange={(e) => setFormData({...formData, region: e.target.value})}
+                  />
+                </div>
+                
+                <textarea 
+                  required
+                  rows={4} 
+                  placeholder={t('contact.messagePlaceholder')}
+                  style={inputStyle}
+                  className={`${inputClasses} resize-none`}
+                  value={formData.message}
+                  onChange={(e) => setFormData({...formData, message: e.target.value})}
+                />
+                
+                <button 
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full bg-[#D4AF37] text-black py-6 rounded-2xl font-black uppercase text-[10px] tracking-[0.4em] hover:bg-white transition-all shadow-xl disabled:opacity-50"
+                >
+                  {isSubmitting ? t('contact.submitting') : t('contact.submit')}
+                </button>
+
+                {status === "success" && (
+                  <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-green-600 dark:text-green-400 text-center font-bold text-[10px] tracking-widest uppercase mt-4">
+                    {t('contact.success')}
+                  </motion.p>
+                )}
+                {status === "error" && (
+                  <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-red-500 text-center font-bold text-[10px] tracking-widest uppercase mt-4">
+                    {t('contact.error')}
+                  </motion.p>
+                )}
+              </form>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <Footer />
+    </div>
+  );
+}
+</file>
+
+<file path="app/globals.css">
+@import "tailwindcss";
+
+/* 1. RESET STRUCTUREL */
+html, body {
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100%;
+}
+
+@layer base {
+  :root {
+    --background: #ffffff;
+    --foreground: #0f172a;
+  }
+
+  /* Force les variables au niveau le plus haut */
+  html.dark {
+    --background: #020617 !important;
+    --foreground: #ffffff !important; /* Blanc pur ici aussi */
+  }
+
+  body {
+    background-color: var(--background) !important;
+    color: var(--foreground) !important;
+    @apply transition-colors duration-300 antialiased min-h-screen;
+  }
+
+  /* 2. LE SÉLECTEUR "ÉCLAT PUR" (VIGNETTES ET TEXTES) */
+  /* On force le BLANC PUR (#FFFFFF) et l'OPACITÉ TOTALE */
+  html.dark .text-slate-900, 
+  html.dark .text-slate-800, 
+  html.dark .text-slate-700, 
+  html.dark .text-slate-600,
+  html.dark .text-slate-500,
+  html.dark .text-slate-400,
+  html.dark .text-gray-900,
+  html.dark .text-gray-600,
+  html.dark .text-gray-500,
+  html.dark .text-gray-400,
+  html.dark h1, html.dark h2, html.dark h3, html.dark h4, 
+  html.dark p, html.dark span:not(.bg-[#D4AF37] span), 
+  html.dark li, html.dark a {
+    color: #ffffff !important; /* Blanc pur absolu */
+    opacity: 1 !important;      /* Supprime l'effet gris/bleu transparent */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* 3. LES VIGNETTES ET LE FOOTER */
+  /* On s'assure que les fonds ne sont plus blancs */
+  html.dark .bg-white:not(button):not(.recherche-privee-btn),
+  html.dark section,
+  html.dark footer,
+  html.dark main,
+  html.dark .property-card,
+  html.dark .bg-slate-50,
+  html.dark .bg-gray-50,
+  html.dark .bg-slate-100 {
+    background-color: #020617 !important;
+    border-color: rgba(255, 255, 255, 0.2) !important; /* Bordures plus visibles */
+  }
+
+  /* 4. ÉLÉMENTS DE VIGNETTE (Icones techniques) */
+  /* On force les petits labels (ex: "3 lits") à être très blancs */
+  html.dark .text-slate-800, 
+  html.dark .text-slate-100,
+  html.dark .font-medium {
+    color: #ffffff !important;
+  }
+
+  /* 5. EXCEPTIONS (Boutons blancs et éléments dorés) */
+  html.dark button.bg-white span,
+  html.dark .bg-white button span,
+  html.dark .recherche-privee-btn span {
+    color: #020617 !important;
+    font-weight: 700 !important; /* Plus de gras pour la lisibilité sur bouton */
+  }
+
+  html.dark .text-[#D4AF37], html.dark .text-gold {
+    color: #D4AF37 !important;
+  }
+}
+
+/* 6. SCROLLBAR & PIN */
+html.dark input[type="password"] {
+  background-color: #1e293b !important;
+  color: #D4AF37 !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+::-webkit-scrollbar { 
+  width: 6px; 
+}
+
+::-webkit-scrollbar-track { 
+  background: transparent; 
+}
+
+::-webkit-scrollbar-thumb { 
+  background: #D4AF37; 
+  border-radius: 10px; 
+}
+
+/* 7. FIX LAYOUT */
+main { 
+  margin-top: 0 !important; 
+  padding-top: 0 !important; 
+}
+
+/* Forcer le blanc pour les liens du menu mobile en mode sombre */
+.dark .mobile-menu-link {
+  color: #ffffff !important;
+  opacity: 1 !important;
+}
+</file>
+
 <file path="src/components/RegionGrid.tsx">
 "use client";
 
@@ -5590,13 +5724,13 @@ export default function RegionGrid({ properties, onRegionClick }: RegionGridProp
         "market": "International"
       },
       {
-        "name": "Joanna Pawelek",
-        "role": "Eastern Europe & Alicante Specialist",
-        "worldRegion": "Europe de l'Est & anglophone",
-        "background": "Experte certifiée (ANAI - API) du marché d'Alicante. Elle agit comme un pont stratégique pour les investisseurs d'Europe de l'Est et du monde anglophone grâce à sa maîtrise du polonais, de l'anglais et de l'espagnol.",
-        "skills": ["Certifiée ANAI-API", "Marché Polonais", "Alicante"],
-        "market": "Alicante / Costa Blanca"
-      },
+      "name": "Joanna Pawelek",
+      "role": "Eastern Europe & International Strategist",
+      "worldRegion": "Europe de l'Est & anglophone",
+      "background": "Experte du marché d'Alicante. Elle agit comme un pont stratégique pour les investisseurs d'Europe de l'Est et du monde anglophone grâce à sa maîtrise parfaite du polonais, de l'anglais et de l'espagnol.",
+      "skills": ["Expertise Multilingue", "Marché International", "Alicante"],
+      "market": "Alicante / Costa Blanca"
+    },
       {
         "name": "Abdellah Touati",
         "role": "MENA & Americas Expert",
@@ -6007,123 +6141,6 @@ export default function RegionGrid({ properties, onRegionClick }: RegionGridProp
 }
 </file>
 
-<file path="app/globals.css">
-@import "tailwindcss";
-
-/* 1. RESET STRUCTUREL */
-html, body {
-  margin: 0 !important;
-  padding: 0 !important;
-  width: 100%;
-}
-
-@layer base {
-  :root {
-    --background: #ffffff;
-    --foreground: #0f172a;
-  }
-
-  /* Force les variables au niveau le plus haut */
-  html.dark {
-    --background: #020617 !important;
-    --foreground: #ffffff !important; /* Blanc pur ici aussi */
-  }
-
-  body {
-    background-color: var(--background) !important;
-    color: var(--foreground) !important;
-    @apply transition-colors duration-300 antialiased min-h-screen;
-  }
-
-  /* 2. LE SÉLECTEUR "ÉCLAT PUR" (VIGNETTES ET TEXTES) */
-  /* On force le BLANC PUR (#FFFFFF) et l'OPACITÉ TOTALE */
-  html.dark .text-slate-900, 
-  html.dark .text-slate-800, 
-  html.dark .text-slate-700, 
-  html.dark .text-slate-600,
-  html.dark .text-slate-500,
-  html.dark .text-slate-400,
-  html.dark .text-gray-900,
-  html.dark .text-gray-600,
-  html.dark .text-gray-500,
-  html.dark .text-gray-400,
-  html.dark h1, html.dark h2, html.dark h3, html.dark h4, 
-  html.dark p, html.dark span:not(.bg-[#D4AF37] span), 
-  html.dark li, html.dark a {
-    color: #ffffff !important; /* Blanc pur absolu */
-    opacity: 1 !important;      /* Supprime l'effet gris/bleu transparent */
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
-
-  /* 3. LES VIGNETTES ET LE FOOTER */
-  /* On s'assure que les fonds ne sont plus blancs */
-  html.dark .bg-white:not(button):not(.recherche-privee-btn),
-  html.dark section,
-  html.dark footer,
-  html.dark main,
-  html.dark .property-card,
-  html.dark .bg-slate-50,
-  html.dark .bg-gray-50,
-  html.dark .bg-slate-100 {
-    background-color: #020617 !important;
-    border-color: rgba(255, 255, 255, 0.2) !important; /* Bordures plus visibles */
-  }
-
-  /* 4. ÉLÉMENTS DE VIGNETTE (Icones techniques) */
-  /* On force les petits labels (ex: "3 lits") à être très blancs */
-  html.dark .text-slate-800, 
-  html.dark .text-slate-100,
-  html.dark .font-medium {
-    color: #ffffff !important;
-  }
-
-  /* 5. EXCEPTIONS (Boutons blancs et éléments dorés) */
-  html.dark button.bg-white span,
-  html.dark .bg-white button span,
-  html.dark .recherche-privee-btn span {
-    color: #020617 !important;
-    font-weight: 700 !important; /* Plus de gras pour la lisibilité sur bouton */
-  }
-
-  html.dark .text-[#D4AF37], html.dark .text-gold {
-    color: #D4AF37 !important;
-  }
-}
-
-/* 6. SCROLLBAR & PIN */
-html.dark input[type="password"] {
-  background-color: #1e293b !important;
-  color: #D4AF37 !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-}
-
-::-webkit-scrollbar { 
-  width: 6px; 
-}
-
-::-webkit-scrollbar-track { 
-  background: transparent; 
-}
-
-::-webkit-scrollbar-thumb { 
-  background: #D4AF37; 
-  border-radius: 10px; 
-}
-
-/* 7. FIX LAYOUT */
-main { 
-  margin-top: 0 !important; 
-  padding-top: 0 !important; 
-}
-
-/* Forcer le blanc pour les liens du menu mobile en mode sombre */
-.dark .mobile-menu-link {
-  color: #ffffff !important;
-  opacity: 1 !important;
-}
-</file>
-
 <file path="src/dictionaries/ar.json">
 {
   "common": {
@@ -6333,13 +6350,13 @@ main {
         "market": "دولي"
       },
       {
-        "name": "Joanna Pawelek",
-        "role": "أخصائية أوروبا الشرقية وأليكانتي",
-        "worldRegion": "أوروبا الشرقية والناطقة بالإنجليزية",
-        "background": "خبيرة معتمدة (ANAI - API) في سوق أليكانتي. تعمل كجسر استراتيجي للمستثمرين من أوروبا الشرقية والعالم الناطق بالإنجليزية بفضل إتقانها للبولندية والإنجليزية والإسبانية.",
-        "skills": ["معتمدة ANAI-API", "السوق البولندي", "أليكانتي"],
-        "market": "أليكانتي / كوستا بلانكا"
-      },
+      "name": "Joanna Pawelek",
+      "role": "Eastern Europe & International Strategist",
+      "worldRegion": "أوروبا الشرقية والدول الناطقة بالإنجليزية",
+      "background": "خبيرة في سوق أليكانتي. تعمل كجسر استراتيجي للمستثمرين من أوروبا الشرقية والعالم الناطق بالإنجليزية بفضل إتقانها للغات البولندية والإنجليزية والإسبانية.",
+      "skills": ["خبرة متعددة اللغات", "السوق الدولية", "أليكانتي"],
+      "market": "أليكانتي / كوستا بلانكا"
+    },
       {
         "name": "Abdellah Touati",
         "role": "خبير الشرق الأوسط والأمريكتين",
@@ -6959,13 +6976,13 @@ main {
         "market": "Internacional"
       },
       {
-        "name": "Joanna Pawelek",
-        "role": "Eastern Europe & Alicante Specialist",
-        "worldRegion": "Europa del Este & anglófono",
-        "background": "Experta certificada (ANAI - API) del mercado de Alicante. Actúa como puente estratégico para inversores de Europa del Este y el mundo anglófono gracias a su dominio del polaco, inglés y español.",
-        "skills": ["Certificada ANAI-API", "Mercado Polaco", "Alicante"],
-        "market": "Alicante / Costa Blanca"
-      },
+      "name": "Joanna Pawelek",
+      "role": "Eastern Europe & International Strategist",
+      "worldRegion": "Europa del Este y Anglófonos",
+      "background": "Experta en el mercado de Alicante. Actúa como un puente estratégico para inversores de Europa del Este y del mundo angloparlante gracias a su dominio del polaco, inglés y español.",
+      "skills": ["Experiencia Multilingüe", "Mercado Internacional", "Alicante"],
+      "market": "Alicante / Costa Blanca"
+    },
       {
         "name": "Abdellah Touati",
         "role": "MENA & Americas Expert",
@@ -7585,13 +7602,13 @@ main {
         "market": "Internationaal"
       },
       {
-        "name": "Joanna Pawelek",
-        "role": "Eastern Europe & Alicante Specialist",
-        "worldRegion": "Oost-Europa & Engelstalig",
-        "background": "Gecertificeerd expert (ANAI - API) van de Alicante-markt. Zij fungeert als strategische brug voor investeerders uit Oost-Europa en de Engelstalige wereld dankzij haar beheersing van Pools, Engels en Spaans.",
-        "skills": ["ANAI-API Gecertificeerd", "Poolse Markt", "Alicante"],
-        "market": "Alicante / Costa Blanca"
-      },
+      "name": "Joanna Pawelek",
+      "role": "Eastern Europe & International Strategist",
+      "worldRegion": "Oost-Europa & Engelstalige wereld",
+      "background": "Expert in de markt van Alicante. Zij fungeert als een strategische brug voor investeerders uit Oost-Europa en de Engelstalige wereld dankzij haar beheersing van het Pools, Engels en Spaans.",
+      "skills": ["Meertalige Expertise", "Internationale Markt", "Alicante"],
+      "market": "Alicante / Costa Blanca"
+    },
       {
         "name": "Abdellah Touati",
         "role": "MENA & Americas Expert",
@@ -8211,13 +8228,13 @@ main {
         "market": "Międzynarodowy"
       },
       {
-        "name": "Joanna Pawelek",
-        "role": "Eastern Europe & Alicante Specialist",
-        "worldRegion": "Europa Wschodnia i anglojęzyczna",
-        "background": "Certyfikowana ekspertka (ANAI - API) rynku Alicante. Działa jako strategiczny pomost dla inwestorów z Europy Wschodniej i świata anglojęzycznego dzięki znajomości polskiego, angielskiego i hiszpańskiego.",
-        "skills": ["Certyfikat ANAI-API", "Rynek Polski", "Alicante"],
-        "market": "Alicante / Costa Blanca"
-      },
+      "name": "Joanna Pawelek",
+      "role": "Eastern Europe & International Strategist",
+      "worldRegion": "Europa Wschodnia i kraje anglojęzyczne",
+      "background": "Ekspertka rynku w Alicante. Pełni rolę strategicznego pomostu dla inwestorów z Europy Wschodniej oraz świata anglojęzycznego dzięki biegłej znajomości języka polskiego, angielskiego i hiszpańskiego.",
+      "skills": ["Ekspertyza wielojęzyczna", "Rynek międzynarodowy", "Alicante"],
+      "market": "Alicante / Costa Blanca"
+    },
       {
         "name": "Abdellah Touati",
         "role": "MENA & Americas Expert",
@@ -8837,13 +8854,13 @@ main {
         "market": "International"
       },
       {
-        "name": "Joanna Pawelek",
-        "role": "Eastern Europe & Alicante Specialist",
-        "worldRegion": "Eastern Europe & English-speaking",
-        "background": "Certified expert (ANAI - API) of the Alicante market. She acts as a strategic bridge for investors from Eastern Europe and the English-speaking world thanks to her mastery of Polish, English and Spanish.",
-        "skills": ["ANAI-API Certified", "Polish Market", "Alicante"],
-        "market": "Alicante / Costa Blanca"
-      },
+      "name": "Joanna Pawelek",
+      "role": "Eastern Europe & International Strategist",
+      "worldRegion": "Eastern Europe & Anglosphere",
+      "background": "Alicante market expert. She serves as a strategic bridge for investors from Eastern Europe and the English-speaking world, leveraging her fluency in Polish, English, and Spanish.",
+      "skills": ["Multilingual Expertise", "International Market", "Alicante"],
+      "market": "Alicante / Costa Blanca"
+    },
       {
         "name": "Abdellah Touati",
         "role": "MENA & Americas Expert",

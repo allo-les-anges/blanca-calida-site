@@ -63,7 +63,12 @@ export async function GET() {
           surface_plot: String(surf.plot || "0"),
           surface_useful: String(surf.useful || "0"),
           images: imagesArray,
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
+          
+          // Nouvelles données extraites du XML pour le filtrage admin
+          development_name: p.development_name ? String(p.development_name) : null,
+          commission_quantity: p.commission?.quantity ? parseFloat(p.commission.quantity) : 0,
+          commission_type: p.commission?.type ? String(p.commission.type) : 'percentage'
         };
 
         // Titres et descriptions multilingues
