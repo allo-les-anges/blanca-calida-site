@@ -11,11 +11,11 @@ import { useTranslation } from "@/contexts/I18nContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
-// Tableau statique des photos (chemins fixes)
+// Tableau statique des photos
 const teamMembers = [
   { id: 1, photo: "/Deborah.jpeg" },
   { id: 2, photo: "/Gillian.jpeg" },
-  { id: 3, photo: "/Joanna.jpeg" }, // Joanna
+  { id: 3, photo: "/Joanna.jpeg" }, // Joanna (Index 2)
   { id: 4, photo: "/Abdou.jpeg" },
   { id: 5, photo: "/Gaëtan.jpeg" },
 ];
@@ -133,19 +133,20 @@ export default function ContactPage() {
                       {t(`contact.team.${idx}.background`)}
                     </p>
                     <div className="flex flex-wrap gap-2 pt-4">
-                      {/* Logique de filtrage/modification pour Joanna (index 2 dans teamMembers) 
-                        On remplace les tags génériques par des tags plus stratégiques basés sur ses retours.
+                      {/* MODIFICATION ICI : 
+                          On utilise maintenant les traductions dynamiques pour Joanna (index 2)
+                          au lieu de textes statiques en français.
                       */}
                       {idx === 2 ? (
                         <>
                           <span className="text-[9px] font-black uppercase tracking-widest px-3 py-1 bg-[#D4AF37]/10 text-[#D4AF37] rounded-md border border-[#D4AF37]/20">
-                            Expertise Multilingue
+                            {t('contact.team.2.skills.0')}
                           </span>
                           <span className="text-[9px] font-black uppercase tracking-widest px-3 py-1 bg-[#D4AF37]/10 text-[#D4AF37] rounded-md border border-[#D4AF37]/20">
-                            Marché International
+                            {t('contact.team.2.skills.1')}
                           </span>
                           <span className="text-[9px] font-black uppercase tracking-widest px-3 py-1 bg-[#D4AF37]/10 text-[#D4AF37] rounded-md border border-[#D4AF37]/20">
-                            Alicante
+                            {t('contact.team.2.skills.2')}
                           </span>
                         </>
                       ) : (
@@ -168,7 +169,6 @@ export default function ContactPage() {
           {/* COLONNE FORMULAIRE */}
           <div className="xl:col-span-5">
             <div className="sticky top-32 p-12 rounded-[3.5rem] transition-all duration-700 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 shadow-2xl">
-              
               <h3 
                 className="text-3xl md:text-4xl font-serif italic mb-2"
                 style={{ color: isDark ? '#FFFFFF' : '#0f172a' }}
