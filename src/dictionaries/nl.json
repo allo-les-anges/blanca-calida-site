@@ -206,13 +206,13 @@
         "market": "Internationaal"
       },
       {
-        "name": "Joanna Pawelek",
-        "role": "Eastern Europe & Alicante Specialist",
-        "worldRegion": "Oost-Europa & Engelstalig",
-        "background": "Gecertificeerd expert (ANAI - API) van de Alicante-markt. Zij fungeert als strategische brug voor investeerders uit Oost-Europa en de Engelstalige wereld dankzij haar beheersing van Pools, Engels en Spaans.",
-        "skills": ["ANAI-API Gecertificeerd", "Poolse Markt", "Alicante"],
-        "market": "Alicante / Costa Blanca"
-      },
+      "name": "Joanna Pawelek",
+      "role": "Eastern Europe & International Strategist",
+      "worldRegion": "Oost-Europa & Engelstalige wereld",
+      "background": "Expert in de markt van Alicante. Zij fungeert als een strategische brug voor investeerders uit Oost-Europa en de Engelstalige wereld dankzij haar beheersing van het Pools, Engels en Spaans.",
+      "skills": ["Meertalige Expertise", "Internationale Markt", "Alicante"],
+      "market": "Alicante / Costa Blanca"
+    },
       {
         "name": "Abdellah Touati",
         "role": "MENA & Americas Expert",

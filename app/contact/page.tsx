@@ -15,7 +15,7 @@ import Footer from "@/components/Footer";
 const teamMembers = [
   { id: 1, photo: "/Deborah.jpeg" },
   { id: 2, photo: "/Gillian.jpeg" },
-  { id: 3, photo: "/Joanna.jpeg" },
+  { id: 3, photo: "/Joanna.jpeg" }, // Joanna
   { id: 4, photo: "/Abdou.jpeg" },
   { id: 5, photo: "/Gaëtan.jpeg" },
 ];
@@ -133,14 +133,31 @@ export default function ContactPage() {
                       {t(`contact.team.${idx}.background`)}
                     </p>
                     <div className="flex flex-wrap gap-2 pt-4">
-                      {[0, 1, 2].map((skillIdx) => (
-                        <span 
-                          key={skillIdx} 
-                          className="text-[9px] font-black uppercase tracking-widest px-3 py-1 bg-[#D4AF37]/10 text-[#D4AF37] rounded-md border border-[#D4AF37]/20"
-                        >
-                          {t(`contact.team.${idx}.skills.${skillIdx}`)}
-                        </span>
-                      ))}
+                      {/* Logique de filtrage/modification pour Joanna (index 2 dans teamMembers) 
+                        On remplace les tags génériques par des tags plus stratégiques basés sur ses retours.
+                      */}
+                      {idx === 2 ? (
+                        <>
+                          <span className="text-[9px] font-black uppercase tracking-widest px-3 py-1 bg-[#D4AF37]/10 text-[#D4AF37] rounded-md border border-[#D4AF37]/20">
+                            Expertise Multilingue
+                          </span>
+                          <span className="text-[9px] font-black uppercase tracking-widest px-3 py-1 bg-[#D4AF37]/10 text-[#D4AF37] rounded-md border border-[#D4AF37]/20">
+                            Marché International
+                          </span>
+                          <span className="text-[9px] font-black uppercase tracking-widest px-3 py-1 bg-[#D4AF37]/10 text-[#D4AF37] rounded-md border border-[#D4AF37]/20">
+                            Alicante
+                          </span>
+                        </>
+                      ) : (
+                        [0, 1, 2].map((skillIdx) => (
+                          <span 
+                            key={skillIdx} 
+                            className="text-[9px] font-black uppercase tracking-widest px-3 py-1 bg-[#D4AF37]/10 text-[#D4AF37] rounded-md border border-[#D4AF37]/20"
+                          >
+                            {t(`contact.team.${idx}.skills.${skillIdx}`)}
+                          </span>
+                        ))
+                      )}
                     </div>
                   </div>
                 </div>

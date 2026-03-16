@@ -206,13 +206,13 @@
         "market": "International"
       },
       {
-        "name": "Joanna Pawelek",
-        "role": "Eastern Europe & Alicante Specialist",
-        "worldRegion": "Eastern Europe & English-speaking",
-        "background": "Certified expert (ANAI - API) of the Alicante market. She acts as a strategic bridge for investors from Eastern Europe and the English-speaking world thanks to her mastery of Polish, English and Spanish.",
-        "skills": ["ANAI-API Certified", "Polish Market", "Alicante"],
-        "market": "Alicante / Costa Blanca"
-      },
+      "name": "Joanna Pawelek",
+      "role": "Eastern Europe & International Strategist",
+      "worldRegion": "Eastern Europe & Anglosphere",
+      "background": "Alicante market expert. She serves as a strategic bridge for investors from Eastern Europe and the English-speaking world, leveraging her fluency in Polish, English, and Spanish.",
+      "skills": ["Multilingual Expertise", "International Market", "Alicante"],
+      "market": "Alicante / Costa Blanca"
+    },
       {
         "name": "Abdellah Touati",
         "role": "MENA & Americas Expert",
