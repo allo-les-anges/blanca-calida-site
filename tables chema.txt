@@ -1,0 +1,209 @@
+create table public.agency_settings (
+  id uuid not null default gen_random_uuid (),
+  created_at timestamp with time zone not null default timezone ('utc'::text, now()),
+  agency_name text not null,
+  subdomain text not null,
+  package_level text null default 'bronze'::text,
+  logo_url text null,
+  font_family text null default 'Inter, sans-serif'::text,
+  primary_color text null default '#10b981'::text,
+  hero_type text null default 'image'::text,
+  hero_url text null,
+  hero_title text null,
+  modules_active jsonb null default '{"contact_page": true, "project_tracker": false}'::jsonb,
+  footer_config jsonb null default '{"email": "contact@agency.com", "phone": "+34 000 00 00 00", "address": "Calle Mayor, Alicante", "socials": {"linkedin": "", "instagram": ""}}'::jsonb,
+  filter_config jsonb null default '{"minCommission": 0, "excludedPromoters": []}'::jsonb,
+  constraint agency_settings_pkey primary key (id),
+  constraint agency_settings_subdomain_key unique (subdomain),
+  constraint agency_settings_hero_type_check check (
+    (
+      hero_type = any (array['image'::text, 'video'::text])
+    )
+  ),
+  constraint agency_settings_package_level_check check (
+    (
+      package_level = any (
+        array['bronze'::text, 'silver'::text, 'gold'::text]
+      )
+    )
+  )
+) TABLESPACE pg_default;
+
+create table public.chantier_updates (
+  id uuid not null default gen_random_uuid (),
+  project_id uuid null,
+  image_url text not null,
+  description text null,
+  created_at timestamp with time zone null default now(),
+  agency_id uuid null,
+  constraint chantier_updates_pkey primary key (id),
+  constraint chantier_updates_agency_id_fkey foreign KEY (agency_id) references agency_settings (id) on delete CASCADE
+) TABLESPACE pg_default;
+
+create table public.constats - photos (
+  url_image text null,
+  note_expert text null,
+  created_at date null,
+  id_projet uuid null,
+  id uuid not null default gen_random_uuid (),
+  agency_id uuid null,
+  constraint constats - photos_pkey primary key (id),
+  constraint constats - photos_agency_id_fkey foreign KEY (agency_id) references agency_settings (id) on delete CASCADE,
+  constraint constats - photos_id_projet_fkey foreign KEY (id_projet) references suivi_chantier (id) on delete CASCADE
+) TABLESPACE pg_default;
+
+create trigger on_constat_added
+after INSERT on "constats-photos" for EACH row
+execute FUNCTION notify_new_constat ();
+
+create trigger send_to_make
+after INSERT on "constats-photos" for EACH row
+execute FUNCTION supabase_functions.http_request (
+  'https://hook.eu2.make.com/8fzzf8ccoc42b99wuqxfs4o7rbn7vn6w',
+  'POST',
+  '{"Content-type":"application/json"}',
+  '{}',
+  '5000'
+);
+
+create table public.documents_projets (
+  id uuid not null default gen_random_uuid (),
+  projet_id uuid null,
+  nom_fichier text null,
+  url_fichier text null,
+  storage_path text null,
+  created_at timestamp with time zone null default now(),
+  type text null,
+  agency_id uuid null,
+  constraint documents_projets_pkey primary key (id),
+  constraint documents_projets_agency_id_fkey foreign KEY (agency_id) references agency_settings (id) on delete CASCADE,
+  constraint documents_projets_projet_id_fkey foreign KEY (projet_id) references suivi_chantier (id) on delete CASCADE
+) TABLESPACE pg_default;
+
+create table public.profiles (
+  id uuid not null,
+  email text null,
+  role text null,
+  company_name text null,
+  created_at timestamp with time zone null default now(),
+  logo_url text null,
+  pack text null default 'Standard'::text,
+  prenom text null,
+  nom text null,
+  pin_code text null,
+  agency_id uuid null,
+  constraint profiles_pkey primary key (id),
+  constraint profiles_agency_id_fkey foreign KEY (agency_id) references agency_settings (id) on delete CASCADE,
+  constraint profiles_id_fkey foreign KEY (id) references auth.users (id) on delete CASCADE,
+  constraint profiles_role_check check (
+    (
+      role = any (
+        array[
+          'admin'::text,
+          'super_admin'::text,
+          'agent'::text,
+          'prestataire'::text,
+          'agent de suivi'::text
+        ]
+      )
+    )
+  )
+) TABLESPACE pg_default;
+
+create table public.staff_prestataires (
+  id uuid not null default gen_random_uuid (),
+  created_at timestamp with time zone null default now(),
+  nom text not null,
+  prenom text not null,
+  pin_code text not null,
+  role text null default 'Prestataire'::text,
+  email text null,
+  company_name text null,
+  agency_id uuid null,
+  constraint staff_prestataires_pkey primary key (id),
+  constraint staff_prestataires_pin_code_key unique (pin_code),
+  constraint staff_prestataires_agency_id_fkey foreign KEY (agency_id) references agency_settings (id) on delete CASCADE
+) TABLESPACE pg_default;
+
+create table public.suivi_chantier (
+  id uuid not null default gen_random_uuid (),
+  created_at timestamp with time zone null default now(),
+  client_nom text null,
+  client_prenom text null,
+  email_client text null,
+  telephone text null,
+  date_naissance date null,
+  rue text null,
+  code_postal text null,
+  ville text null,
+  pays text null default 'Belgique'::text,
+  nom_villa text null,
+  constructeur_info text null,
+  montant_cashback numeric null,
+  commentaires_etape text null,
+  etape_actuelle text null default 'Signature contrat'::text,
+  commentaire_etape_chantier text null,
+  lien_photo text null,
+  date_livraison_prevue date null,
+  pin_code text null,
+  document_url text null,
+  updated_at timestamp with time zone null default now(),
+  company_name text null,
+  infos_complementaires text null,
+  agency_id uuid null,
+  constraint suivi_chantier_pkey primary key (id),
+  constraint suivi_chantier_agency_id_fkey foreign KEY (agency_id) references agency_settings (id) on delete CASCADE
+) TABLESPACE pg_default;
+
+create table public.villas (
+  id uuid not null default extensions.uuid_generate_v4 (),
+  id_externe text null,
+  titre text null,
+  prix numeric null,
+  region text null,
+  ville text null,
+  images jsonb null,
+  details text null,
+  updated_at timestamp with time zone null default timezone ('utc'::text, now()),
+  price numeric null,
+  town text null,
+  beds text null,
+  ref text null,
+  type text null,
+  development_name text null,
+  description text null,
+  baths text null,
+  surface_built text null,
+  surface_plot text null,
+  latitude double precision null,
+  longitude double precision null,
+  adresse text null,
+  surface_useful text null default '0'::text,
+  pool text null default 'Non'::text,
+  distance_beach text null,
+  distance_town text null,
+  province text null,
+  currency text null default 'EUR'::text,
+  distance_golf text null,
+  titre_fr text null,
+  titre_en text null,
+  titre_es text null,
+  titre_nl text null,
+  titre_pl text null,
+  titre_ar text null,
+  description_fr text null,
+  description_en text null,
+  description_es text null,
+  description_nl text null,
+  description_pl text null,
+  description_ar text null,
+  agency_id uuid null,
+  commission_percentage numeric null,
+  promoteur_name text null,
+  is_excluded boolean null default false,
+  constraint villas_pkey primary key (id),
+  constraint villas_id_externe_key unique (id_externe),
+  constraint villas_agency_id_fkey foreign KEY (agency_id) references agency_settings (id) on delete CASCADE
+) TABLESPACE pg_default;
+
+create index IF not exists idx_villas_id_externe on public.villas using btree (id_externe) TABLESPACE pg_default;

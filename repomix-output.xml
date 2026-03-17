@@ -1455,6 +1455,1279 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
 </file>
 
+<file path="src/components/CashbackForm.tsx">
+"use client";
+
+import React, { useEffect } from 'react';
+
+export default function CashbackForm() {
+  
+  useEffect(() => {
+    // Logique de capture de l'ID Propriété depuis l'URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const propId = urlParams.get('Property_ID');
+    const designationField = document.getElementById('Designation') as HTMLInputElement;
+    
+    if (propId && designationField) {
+      designationField.value = propId;
+    }
+  }, []);
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    // Simulation de la validation Zoho avant soumission
+    const mndFileds = ['Company', 'Last Name', 'Email'];
+    const fldLangVal = ['Prénom', 'Nom', 'E-mail'];
+    const form = e.currentTarget;
+
+    for (let i = 0; i < mndFileds.length; i++) {
+      const field = form.elements.namedItem(mndFileds[i]) as HTMLInputElement;
+      if (field && field.value.trim().length === 0) {
+        alert(`${fldLangVal[i]} ne peut pas être vide.`);
+        field.focus();
+        e.preventDefault();
+        return false;
+      }
+    }
+    
+    // Désactiver le bouton pour éviter les doubles soumissions
+    const submitBtn = document.getElementById('formsubmit') as HTMLButtonElement;
+    if (submitBtn) submitBtn.disabled = true;
+  };
+
+  return (
+    <div 
+      id='crmWebToEntityForm' 
+      className='zcwf_lblLeft crmWebToEntityForm' 
+      style={{
+        backgroundColor: 'white', 
+        color: '#1e293b', 
+        maxWidth: '600px', 
+        margin: '0 auto', 
+        fontFamily: 'sans-serif',
+        padding: '20px',
+        borderRadius: '24px'
+      }}
+    >
+      <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+      <meta httpEquiv='content-type' content='text/html;charset=UTF-8' />
+      
+      <style>{`
+        .zcwf_title { 
+            font-family: serif; 
+            font-size: 28px; 
+            color: #0f172a; 
+            margin-bottom: 30px; 
+            text-align: center; 
+        }
+        .zcwf_row { margin-bottom: 20px; clear: both; }
+        .zcwf_col_lab { 
+            font-size: 11px; 
+            text-transform: uppercase; 
+            letter-spacing: 0.1em; 
+            font-weight: 700; 
+            color: #64748b; 
+            margin-bottom: 8px; 
+            display: block;
+        }
+        .zcwf_col_fld input[type=text] {
+            width: 100% !important;
+            border: 1px solid #e2e8f0 !important;
+            background-color: #f8fafc !important;
+            padding: 14px !important;
+            border-radius: 12px !important;
+            font-size: 15px !important;
+            transition: all 0.2s ease;
+            outline: none;
+        }
+        .zcwf_col_fld input[type=text]:focus {
+            border-color: #94a3b8 !important;
+            background-color: #ffffff !important;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        }
+        .formsubmit.zcwf_button {
+            background: #0f172a !important;
+            color: white !important;
+            border: none !important;
+            border-radius: 14px !important;
+            padding: 16px 40px !important;
+            font-weight: bold !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.2em !important;
+            font-size: 11px !important;
+            cursor: pointer !important;
+            width: 100%;
+            margin-top: 10px;
+            transition: transform 0.2s ease, background 0.2s ease !important;
+        }
+        .formsubmit.zcwf_button:hover {
+            background: #1e293b !important;
+            transform: translateY(-2px);
+        }
+        .wfrm_fld_dpNn { display: none !important; }
+        @media (max-width: 600px) {
+            #crmWebToEntityForm { padding: 10px; }
+        }
+      `}</style>
+
+      <form 
+        id='webform926137000000620001' 
+        action='https://crm.zoho.eu/crm/WebToLeadForm' 
+        name='WebToLeads926137000000620001' 
+        method='POST' 
+        onSubmit={handleSubmit}
+        acceptCharset='UTF-8'
+      >
+        {/* Champs cachés Zoho */}
+        <input type='text' style={{display:'none'}} name='xnQsjsdp' value='89dec12b0f4964ef48eb1146afdf728288b1067dc6b63cb582637ae5b06a02fb' readOnly />
+        <input type='hidden' name='zc_gad' id='zc_gad' value='' />
+        <input type='text' style={{display:'none'}} name='xmIwtLD' value='a31c3c626df8e3bd4a030929931d95f293b65e415d7072f7b6a8cb68d029701b7626c355eb89a4275cd16caebd9c7c40' readOnly />
+        <input type='text' style={{display:'none'}} name='actionType' value='TGVhZHM=' readOnly />
+        <input type='text' style={{display:'none'}} name='returnURL' value='https://blanca-calida-site.vercel.app/merci' readOnly />
+
+        <div className='zcwf_title'>Activer mon Cashback</div>
+
+        <div className='zcwf_row'>
+          <div className='zcwf_col_lab'><label htmlFor='Company'>Prénom <span style={{color:'#ef4444'}}>*</span></label></div>
+          <div className='zcwf_col_fld'><input type='text' id='Company' name='Company' maxLength={200} placeholder='Jean' /></div>
+        </div>
+
+        <div className='zcwf_row'>
+          <div className='zcwf_col_lab'><label htmlFor='Last_Name'>Nom <span style={{color:'#ef4444'}}>*</span></label></div>
+          <div className='zcwf_col_fld'><input type='text' id='Last_Name' name='Last Name' maxLength={80} placeholder='Dupont' /></div>
+        </div>
+
+        <div className='zcwf_row'>
+          <div className='zcwf_col_lab'><label htmlFor='Email'>E-mail <span style={{color:'#ef4444'}}>*</span></label></div>
+          <div className='zcwf_col_fld'><input type='text' id='Email' name='Email' maxLength={100} placeholder='jean@exemple.com' /></div>
+        </div>
+
+        <div className='zcwf_row'>
+          <div className='zcwf_col_lab'><label htmlFor='Mobile'>Portable</label></div>
+          <div className='zcwf_col_fld'><input type='text' id='Mobile' name='Mobile' maxLength={30} placeholder='+33 6 ...' /></div>
+        </div>
+
+        {/* Champ caché pour l'ID Propriété */}
+        <div className='zcwf_row wfrm_fld_dpNn'>
+          <div className='zcwf_col_fld'><input type='text' id='Designation' name='Designation' defaultValue='General_Interest' /></div>
+        </div>
+
+        <div className='zcwf_row'>
+          <div className='zcwf_col_fld'>
+            <input type='submit' id='formsubmit' className='formsubmit zcwf_button' value='Demander mon avantage' />
+          </div>
+        </div>
+      </form>
+    </div>
+  );
+}
+</file>
+
+<file path="src/components/Expertise.tsx">
+import { Award, ShieldCheck, Map } from 'lucide-react';
+
+export default function Expertise() {
+  const items = [
+    { icon: <Award size={30}/>, title: "Expertise Luxe", desc: "Sélection rigoureuse des biens les plus exclusifs." },
+    { icon: <ShieldCheck size={30}/>, title: "Accompagnement", desc: "Conseils juridiques et fiscaux personnalisés." },
+    { icon: <Map size={30}/>, title: "Localisation", desc: "Le meilleur de Javea, Moraira et Altea." },
+  ];
+
+  return (
+    <section className="py-20 bg-gray-50">
+      <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-16">
+        {items.map((item, i) => (
+          <div key={i} className="text-center group">
+            <div className="mb-6 inline-block text-brand-secondary group-hover:scale-110 transition-transform">
+              {item.icon}
+            </div>
+            <h3 className="font-serif text-xl mb-4 text-brand-primary uppercase tracking-wider">{item.title}</h3>
+            <p className="text-gray-500 text-sm font-light leading-relaxed">{item.desc}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+</file>
+
+<file path="src/components/LanguageSelector.tsx">
+"use client";
+
+import React, { useState } from 'react';
+import { ChevronDown, Globe } from 'lucide-react';
+
+// Liste des langues supportées
+const languages = [
+  { code: 'fr', label: 'FR' },
+  { code: 'en', label: 'EN' },
+  { code: 'nl', label: 'NL' },
+  { code: 'es', label: 'ES' },
+  { code: 'ar', label: 'AR' },
+  { code: 'pl', label: 'PL' }
+];
+
+export default function LanguageSelector() {
+  const [isOpen, setIsOpen] = useState(false);
+  const [currentLang, setCurrentLang] = useState('fr');
+
+  return (
+    <div className="relative inline-block text-left">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center gap-2 px-3 py-2 text-sm font-medium transition-colors rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+      >
+        <Globe className="w-4 h-4 text-[#D4AF37]" />
+        <span>{currentLang.toUpperCase()}</span>
+        <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+
+      {isOpen && (
+        <>
+          {/* Overlay pour fermer le menu en cliquant ailleurs */}
+          <div 
+            className="fixed inset-0 z-10" 
+            onClick={() => setIsOpen(false)}
+          ></div>
+
+          <div className="absolute right-0 z-20 w-24 mt-2 origin-top-right bg-white border rounded-md shadow-lg dark:bg-[#0f172a] dark:border-slate-700 ring-1 ring-black ring-opacity-5 focus:outline-none">
+            <div className="py-1">
+              {languages.map((lang) => (
+                <button
+                  key={lang.code}
+                  onClick={() => {
+                    setCurrentLang(lang.code);
+                    setIsOpen(false);
+                    // Ici, vous pourrez ajouter la logique pour changer les textes
+                  }}
+                  className={`block w-full px-4 py-2 text-sm text-left hover:bg-slate-100 dark:hover:bg-slate-800 ${
+                    currentLang === lang.code ? 'text-[#D4AF37] font-bold' : 'text-slate-700 dark:text-slate-300'
+                  }`}
+                >
+                  {lang.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+</file>
+
+<file path="src/components/Logo.tsx">
+const DataHomeLogo = ({ className }: { className?: string }) => (
+  <svg 
+    viewBox="0 0 150 35" 
+    fill="none" 
+    xmlns="http://www.w3.org/2000/svg" 
+    className={className}
+  >
+    {/* Icône Triangle (Toit/Data) */}
+    <path d="M15 12L20 5L25 12H15Z" fill="currentColor" />
+    {/* Texte "data home" stylisé */}
+    <text 
+      x="10" 
+      y="28" 
+      fontFamily="sans-serif" 
+      fontSize="22" 
+      fontWeight="300" 
+      fill="currentColor" 
+      letterSpacing="-0.02em"
+    >
+      data home
+    </text>
+  </svg>
+);
+</file>
+
+<file path="src/components/Testimonials.tsx">
+const reviews = [
+  { name: "Isabelle Dupont", text: "Excellente expérience avec Blanca Calida ! Ils connaissent parfaitement le marché et savent conseiller en fonction des besoins spécifiques.", stars: 5 },
+  { name: "Sarah Williams", text: "Professional team, they helped us navigate every detail of the buying process. Highly recommended!", stars: 5 },
+  { name: "Michael Ford", text: "Sehr guter Service, von der Besichtigung bis zur Kaufabwicklung. Alles war perfekt organisiert.", stars: 5 },
+];
+
+export default function Testimonials() {
+  return (
+    <section className="bg-[#fcfaf7] py-24 px-4">
+      <div className="max-w-7xl mx-auto">
+        <h2 className="text-center font-serif text-4xl md:text-5xl text-slate-800 mb-4 italic">La confiance est une valeur fondamentale</h2>
+        <p className="text-center text-slate-500 mb-16 max-w-2xl mx-auto">La satisfaction de nos clients est notre plus belle réussite.</p>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {reviews.map((r, i) => (
+            <div key={i} className="bg-white p-10 shadow-sm border border-slate-100 flex flex-col items-center text-center">
+              <div className="flex text-yellow-400 mb-6 text-sm">{"★".repeat(r.stars)}</div>
+              <p className="text-slate-600 italic leading-relaxed mb-8 flex-grow">"{r.text}"</p>
+              <p className="font-serif text-lg text-slate-900 border-t border-slate-100 pt-6 w-full">{r.name}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+</file>
+
+<file path="src/components/ThemeProvider.tsx">
+"use client";
+
+import * as React from "react";
+import { ThemeProvider as NextThemesProvider } from "next-themes";
+
+export function ThemeProvider({ children, ...props }: any) {
+  return (
+    <NextThemesProvider {...props}>
+      {children}
+    </NextThemesProvider>
+  );
+}
+</file>
+
+<file path="src/components/ThemeToggle.tsx">
+"use client";
+
+import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
+import { Sun, Moon } from "lucide-react";
+
+export default function ThemeToggle() {
+  const [mounted, setMounted] = useState(false);
+  const { theme, setTheme } = useTheme();
+
+  // Évite les erreurs d'hydratation au rendu
+  useEffect(() => setMounted(true), []);
+
+  if (!mounted) return <div className="p-3 w-10 h-10" />;
+
+  return (
+    <button
+      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+      className="p-3 bg-slate-100 dark:bg-white/10 rounded-full text-[#D4AF37] border border-slate-200 dark:border-white/10 hover:bg-[#D4AF37] hover:text-white transition-all shadow-sm"
+      aria-label="Toggle Theme"
+    >
+      {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
+    </button>
+  );
+}
+</file>
+
+<file path="src/SuiviClient.js">
+import React from 'react';
+
+const SuiviChantier = ({ clientName, etapeActuelle }) => {
+  const totalEtapes = 12;
+  
+  // Liste des noms d'étapes (vous pourrez les personnaliser)
+  const nomsEtapes = [
+    "Terrassement", "Fondations", "Murs", "Toiture", 
+    "Menuiseries", "Plomberie", "Électricité", "Plâtrerie",
+    "Carrelage", "Peinture", "Finitions", "Remise des clés"
+  ];
+
+  return (
+    <div className="p-6 max-w-md mx-auto bg-white rounded-xl shadow-md space-y-4 border border-gray-200">
+      <div className="text-center">
+        <h2 className="text-xl font-bold text-gray-800">{clientName}</h2>
+        <p className="text-sm text-gray-500">Avancement de votre projet</p>
+      </div>
+
+      {/* Barre de progression visuelle */}
+      <div className="flex gap-1 h-3 w-full bg-gray-100 rounded-full overflow-hidden">
+        {[...Array(totalEtapes)].map((_, i) => (
+          <div 
+            key={i}
+            className={`flex-1 ${i < etapeActuelle ? 'bg-green-500' : 'bg-gray-300'}`}
+          />
+        ))}
+      </div>
+
+      {/* Détail de l'étape actuelle */}
+      <div className="bg-green-50 border-l-4 border-green-500 p-4">
+        <p className="text-sm font-medium text-green-800">
+          Étape actuelle : {nomsEtapes[etapeActuelle - 1]} ({etapeActuelle}/{totalEtapes})
+        </p>
+      </div>
+    </div>
+  );
+};
+
+export default SuiviChantier;
+</file>
+
+<file path="src/types/property.ts">
+import { NextResponse, type NextRequest } from 'next/server'
+
+export async function proxy(request: NextRequest) {
+  return NextResponse.next()
+}
+
+export const config = {
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
+}
+</file>
+
+<file path="tailwind.config.js">
+/** @type {import('tailwindcss').Config} */
+export default {
+  darkMode: 'class',
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+    "./app/**/*.{js,ts,jsx,tsx}",
+    "./components/**/*.{js,ts,jsx,tsx}",
+  ],
+  theme: {
+    extend: {
+      colors: {
+        primary: '#0A0A0A',
+        secondary: '#1A1A1A',
+        accent: '#FFE7C2',
+        neutral: '#E9E3DA',
+        'soft-text': '#1A1A1A',
+        'gold-light': '#F5E8D0',
+        'navy-dark': '#0A0A0A',
+      },
+      fontFamily: {
+        'serif': ['"Playfair Display"', 'Georgia', 'serif'],
+        'sans': ['"Inter"', '-apple-system', 'sans-serif'],
+      },
+    },
+  },
+  plugins: [],
+}
+</file>
+
+<file path="tsconfig.json">
+{
+  "compilerOptions": {
+    "target": "ES2017",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "react-jsx",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts",
+    "**/*.mts"
+  ],
+  "exclude": ["node_modules"]
+}
+</file>
+
+<file path=".repomix/bundles.json">
+{
+  "bundles": {
+    "blueprint-saas-575": {
+      "name": "blueprint-saas",
+      "created": "2026-03-12T11:24:41.540Z",
+      "lastUsed": "2026-03-12T11:24:41.540Z",
+      "tags": [],
+      "files": []
+    }
+  }
+}
+</file>
+
+<file path="app/api/contact/route.ts">
+import { NextResponse } from "next/server";
+
+export async function POST(req: Request) {
+  try {
+    const body = await req.json();
+    const { name, email, region, message } = body;
+
+    // 1. ENVOI VERS ZOHO CRM (Web-to-Lead ou API)
+    // Remplacer l'URL par votre Web-to-Lead hook ou votre endpoint d'automatisation
+    const zohoResponse = await fetch("https://crm.zoho.eu/crm/WebToLeadForm", {
+      method: "POST",
+      body: new URLSearchParams({
+        'xnpe_force': '1',
+        'Last Name': name,
+        'Email': email,
+        'Description': `Région: ${region} | Message: ${message}`,
+        // Ajoutez ici vos identifiants Zoho (FormId, etc.)
+      })
+    });
+
+    // 2. NOTIFICATION GILLIAN 
+    // Option simple : Envoi d'un email via un service comme Resend ou SendGrid
+    // Ou via un webhook Slack/Teams si Gillian l'utilise
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    return NextResponse.json({ success: false }, { status: 500 });
+  }
+}
+</file>
+
+<file path="app/contact-cashback/page.tsx">
+"use client";
+
+import React, { useEffect } from "react";
+import Link from "next/link";
+import { ArrowLeft, ShieldCheck } from "lucide-react";
+import { useTranslation } from "@/contexts/I18nContext";
+
+export default function ContactCashback() {
+  const { t } = useTranslation();
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const propertyId = params.get("Property_ID");
+    const idField = document.getElementById("Designation") as HTMLInputElement;
+    if (idField && propertyId) {
+      idField.value = propertyId;
+    }
+  }, []);
+
+  return (
+    <div className="min-h-screen bg-slate-50 pt-32 pb-20 px-6">
+      <div className="max-w-2xl mx-auto">
+        <Link href="/" className="inline-flex items-center gap-2 text-slate-400 hover:text-slate-900 mb-8 uppercase text-[10px] tracking-widest font-bold transition-colors">
+          <ArrowLeft size={14} /> {t('contactCashback.back')}
+        </Link>
+
+        <div className="bg-white rounded-[2.5rem] p-8 md:p-12 shadow-xl border border-slate-100">
+          <div className="mb-10 text-center">
+            <div className="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <ShieldCheck size={32} />
+            </div>
+            <h1 className="text-3xl font-serif text-slate-900 mb-2">{t('contactCashback.title')}</h1>
+            <p className="text-slate-500 text-sm">{t('contactCashback.description')}</p>
+          </div>
+
+          {/* FORMULAIRE ZOHO */}
+          <div id="crmWebToEntityForm" className="zcwf_lblLeft crmWebToEntityForm">
+            <form id="webform926137000000620001" action="https://crm.zoho.eu/crm/WebToLeadForm" name="WebToLeads926137000000620001" method="POST" acceptCharset="UTF-8" className="space-y-4">
+              <input type="text" style={{ display: 'none' }} name="xnQsjsdp" value="89dec12b0f4964ef48eb1146afdf728288b1067dc6b63cb582637ae5b06a02fb" />
+              <input type="hidden" name="zc_gad" id="zc_gad" value="" />
+              <input type="text" style={{ display: 'none' }} name="xmIwtLD" value="a31c3c626df8e3bd4a030929931d95f293b65e415d7072f7b6a8cb68d029701b7626c355eb89a4275cd16caebd9c7c40" />
+              <input type="text" style={{ display: 'none' }} name="actionType" value="TGVhZHM=" />
+              <input type="text" style={{ display: 'none' }} name="returnURL" value="https://blanca-calida-site.vercel.app/merci" />
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">{t('contactCashback.firstName')}</label>
+                  <input type="text" name="Company" required className="w-full px-5 py-3 rounded-xl border border-slate-100 bg-slate-50 outline-none focus:border-emerald-500 transition-colors" />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">{t('contactCashback.lastName')}</label>
+                  <input type="text" name="Last Name" required className="w-full px-5 py-3 rounded-xl border border-slate-100 bg-slate-50 outline-none focus:border-emerald-500 transition-colors" />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">{t('contactCashback.email')}</label>
+                <input type="email" name="Email" required className="w-full px-5 py-3 rounded-xl border border-slate-100 bg-slate-50 outline-none focus:border-emerald-500 transition-colors" />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">{t('contactCashback.phone')}</label>
+                <input type="text" name="Mobile" className="w-full px-5 py-3 rounded-xl border border-slate-100 bg-slate-50 outline-none focus:border-emerald-500 transition-colors" />
+              </div>
+
+              <input type="hidden" id="Designation" name="Designation" value="General_Interest" />
+
+              <button type="submit" className="w-full bg-slate-900 text-white py-5 rounded-2xl font-bold uppercase text-[11px] tracking-[0.2em] hover:bg-emerald-600 transition-all mt-6 shadow-lg shadow-slate-900/10">
+                {t('contactCashback.submit')}
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+</file>
+
+<file path="app/globals.css">
+@import "tailwindcss";
+
+/* 1. RESET STRUCTUREL */
+html, body {
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100%;
+}
+
+@layer base {
+  :root {
+    --background: #ffffff;
+    --foreground: #0f172a;
+  }
+
+  /* Force les variables au niveau le plus haut */
+  html.dark {
+    --background: #020617 !important;
+    --foreground: #ffffff !important; /* Blanc pur ici aussi */
+  }
+
+  body {
+    background-color: var(--background) !important;
+    color: var(--foreground) !important;
+    @apply transition-colors duration-300 antialiased min-h-screen;
+  }
+
+  /* 2. LE SÉLECTEUR "ÉCLAT PUR" (VIGNETTES ET TEXTES) */
+  /* On force le BLANC PUR (#FFFFFF) et l'OPACITÉ TOTALE */
+  html.dark .text-slate-900, 
+  html.dark .text-slate-800, 
+  html.dark .text-slate-700, 
+  html.dark .text-slate-600,
+  html.dark .text-slate-500,
+  html.dark .text-slate-400,
+  html.dark .text-gray-900,
+  html.dark .text-gray-600,
+  html.dark .text-gray-500,
+  html.dark .text-gray-400,
+  html.dark h1, html.dark h2, html.dark h3, html.dark h4, 
+  html.dark p, html.dark span:not(.bg-[#D4AF37] span), 
+  html.dark li, html.dark a {
+    color: #ffffff !important; /* Blanc pur absolu */
+    opacity: 1 !important;      /* Supprime l'effet gris/bleu transparent */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* 3. LES VIGNETTES ET LE FOOTER */
+  /* On s'assure que les fonds ne sont plus blancs */
+  html.dark .bg-white:not(button):not(.recherche-privee-btn),
+  html.dark section,
+  html.dark footer,
+  html.dark main,
+  html.dark .property-card,
+  html.dark .bg-slate-50,
+  html.dark .bg-gray-50,
+  html.dark .bg-slate-100 {
+    background-color: #020617 !important;
+    border-color: rgba(255, 255, 255, 0.2) !important; /* Bordures plus visibles */
+  }
+
+  /* 4. ÉLÉMENTS DE VIGNETTE (Icones techniques) */
+  /* On force les petits labels (ex: "3 lits") à être très blancs */
+  html.dark .text-slate-800, 
+  html.dark .text-slate-100,
+  html.dark .font-medium {
+    color: #ffffff !important;
+  }
+
+  /* 5. EXCEPTIONS (Boutons blancs et éléments dorés) */
+  html.dark button.bg-white span,
+  html.dark .bg-white button span,
+  html.dark .recherche-privee-btn span {
+    color: #020617 !important;
+    font-weight: 700 !important; /* Plus de gras pour la lisibilité sur bouton */
+  }
+
+  html.dark .text-[#D4AF37], html.dark .text-gold {
+    color: #D4AF37 !important;
+  }
+}
+
+/* 6. SCROLLBAR & PIN */
+html.dark input[type="password"] {
+  background-color: #1e293b !important;
+  color: #D4AF37 !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+::-webkit-scrollbar { 
+  width: 6px; 
+}
+
+::-webkit-scrollbar-track { 
+  background: transparent; 
+}
+
+::-webkit-scrollbar-thumb { 
+  background: #D4AF37; 
+  border-radius: 10px; 
+}
+
+/* 7. FIX LAYOUT */
+main { 
+  margin-top: 0 !important; 
+  padding-top: 0 !important; 
+}
+
+/* Forcer le blanc pour les liens du menu mobile en mode sombre */
+.dark .mobile-menu-link {
+  color: #ffffff !important;
+  opacity: 1 !important;
+}
+</file>
+
+<file path="app/login/page.tsx">
+"use client";
+
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Loader2, ShieldCheck, RefreshCw, Delete, Key } from "lucide-react";
+import { supabase } from "../../lib/supabase";
+import { useTranslation } from "@/contexts/I18nContext";
+
+export default function LoginPage() {
+  const router = useRouter();
+  const { t } = useTranslation();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [pin, setPin] = useState<string>("");
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [showPin, setShowPin] = useState(true);
+
+  useEffect(() => {
+    const tempPin = localStorage.getItem("temp_client_pin");
+    if (tempPin) {
+      setPin(tempPin);
+      console.log("PIN client détecté depuis la Home.");
+    }
+  }, []);
+
+  const handleRedirection = async (userId: string, userEmail?: string) => {
+    try {
+      if (userEmail?.toLowerCase().trim() === 'gaetan@amaru-homes.com') {
+        router.replace('/super-admin');
+        return;
+      }
+
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('role, company_name, email')
+        .or(`id.eq.${userId},email.eq.${userEmail}`)
+        .single();
+
+      if (error || !profile) {
+        setErrorMsg(t('login.profileMissing'));
+        setLoading(false);
+        return;
+      }
+
+      localStorage.setItem("staff_session", JSON.stringify({
+        email: profile.email,
+        role: profile.role,
+        company_name: profile.company_name || "Amaru-Homes"
+      }));
+
+      if (profile.role === 'super_admin') {
+        router.replace('/super-admin');
+      } else if (profile.role === 'admin' || profile.role === 'staff') {
+        router.replace('/admin/dashboard');
+      } else {
+        setErrorMsg(t('login.roleNotAuthorized'));
+        setLoading(false);
+      }
+    } catch (err) {
+      setErrorMsg(t('login.systemError'));
+      setLoading(false);
+    }
+  };
+
+  const handleLogin = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    setLoading(true);
+    setErrorMsg(null);
+
+    if (showPin) {
+      try {
+        if (pin === "240226") {
+          const { data, error } = await supabase.auth.signInWithPassword({
+            email: "iris@amaru-homes.com",
+            password: "TonMotDePasseSecret",
+          });
+          if (data?.user) {
+            await handleRedirection(data.user.id, data.user.email);
+            return;
+          }
+        }
+
+        const { data: chantier, error: chantierError } = await supabase
+          .from('suivi_chantier')
+          .select('*')
+          .eq('pin_code', pin)
+          .single();
+
+        if (chantier) {
+          localStorage.setItem("client_access_pin", pin);
+          localStorage.setItem("active_project_id", chantier.id);
+          localStorage.removeItem("temp_client_pin");
+          router.push("/project-tracker");
+          return;
+        }
+
+        setErrorMsg(t('errors.pinIncorrect'));
+      } catch (err) {
+        setErrorMsg(t('login.validationError'));
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: email.trim(),
+      password: password,
+    });
+
+    if (error) {
+      setErrorMsg(error.message === "Invalid login credentials" ? t('login.invalidCredentials') : error.message);
+      setLoading(false);
+    } else if (data?.user) {
+      await handleRedirection(data.user.id, data.user.email);
+    }
+  };
+
+  const handlePinInput = (num: string) => {
+    if (pin.length < 6) {
+      setPin(prev => prev + num);
+    }
+  };
+
+  const clearPin = () => setPin("");
+
+  const clearSession = async () => {
+    await supabase.auth.signOut();
+    localStorage.clear();
+    sessionStorage.clear();
+    window.location.reload();
+  };
+
+  return (
+    <div className="min-h-screen bg-[#050505] flex items-center justify-center p-6 text-left">
+      <div className="w-full max-w-md bg-[#0a0a0a] border border-slate-800/60 p-8 rounded-[2.5rem] shadow-2xl">
+        
+        <div className="flex flex-col items-center mb-8">
+          <div className="h-14 w-14 bg-red-600 rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-red-900/20">
+            <ShieldCheck size={28} className="text-white" />
+          </div>
+          <h1 className="text-xl font-bold text-white">{t('login.title')}</h1>
+          <p className="text-slate-500 text-[9px] uppercase tracking-[0.3em] font-black mt-1">{t('login.subtitle')}</p>
+        </div>
+
+        <div className="flex bg-black p-1 rounded-xl mb-8 border border-slate-900">
+          <button 
+            onClick={() => { setShowPin(true); setErrorMsg(null); }}
+            className={`flex-1 py-2 rounded-lg text-[10px] font-black transition-all ${showPin ? 'bg-slate-800 text-white' : 'text-slate-500'}`}
+          >
+            {t('login.pinTab')}
+          </button>
+          <button 
+            onClick={() => { setShowPin(false); setErrorMsg(null); }}
+            className={`flex-1 py-2 rounded-lg text-[10px] font-black transition-all ${!showPin ? 'bg-slate-800 text-white' : 'text-slate-500'}`}
+          >
+            {t('login.credentialsTab')}
+          </button>
+        </div>
+
+        {showPin ? (
+          <div className="space-y-6">
+            <div className="flex justify-center gap-3">
+              {[...Array(6)].map((_, i) => (
+                <div 
+                  key={i} 
+                  className={`h-3 w-3 rounded-full border ${pin.length > i ? 'bg-red-600 border-red-600' : 'border-slate-700'}`}
+                />
+              ))}
+            </div>
+            
+            <div className="grid grid-cols-3 gap-3">
+              {["1", "2", "3", "4", "5", "6", "7", "8", "9"].map((num) => (
+                <button
+                  key={num}
+                  onClick={() => handlePinInput(num)}
+                  className="h-16 rounded-2xl bg-black border border-slate-900 text-white text-xl font-bold hover:bg-slate-900 transition-colors"
+                >
+                  {num}
+                </button>
+              ))}
+              <button onClick={clearPin} className="h-16 rounded-2xl bg-black border border-slate-900 text-red-500 flex items-center justify-center">
+                <Delete size={20} />
+              </button>
+              <button onClick={() => handlePinInput("0")} className="h-16 rounded-2xl bg-black border border-slate-900 text-white text-xl font-bold">0</button>
+              <button 
+                onClick={() => handleLogin()} 
+                className="h-16 rounded-2xl bg-red-600 text-white flex items-center justify-center shadow-lg shadow-red-900/20"
+                disabled={loading}
+              >
+                {loading ? <Loader2 className="animate-spin" /> : <Key size={20} />}
+              </button>
+            </div>
+            {errorMsg && <p className="text-red-500 text-[10px] font-bold text-center uppercase mt-4 tracking-widest">{errorMsg}</p>}
+          </div>
+        ) : (
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div className="space-y-1">
+              <label className="text-[9px] uppercase tracking-widest font-black text-slate-500 ml-2">{t('login.emailLabel')}</label>
+              <input 
+                type="email" 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full bg-black border border-slate-800 rounded-xl p-4 text-white outline-none focus:border-red-600 transition-all text-sm"
+                placeholder="admin@amaru-homes.com"
+                required 
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-[9px] uppercase tracking-widest font-black text-slate-500 ml-2">{t('login.passwordLabel')}</label>
+              <input 
+                type="password" 
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full bg-black border border-slate-800 rounded-xl p-4 text-white outline-none focus:border-red-600 transition-all text-sm"
+                placeholder="••••••••"
+                required 
+              />
+            </div>
+
+            {errorMsg && (
+              <div className="p-3 bg-red-950/20 border border-red-900/30 rounded-lg">
+                <p className="text-red-500 text-[10px] font-bold text-center uppercase tracking-tighter">{errorMsg}</p>
+              </div>
+            )}
+
+            <button 
+              type="submit" 
+              disabled={loading} 
+              className="w-full bg-red-700 hover:bg-red-600 py-4 mt-4 rounded-xl font-black text-[10px] tracking-[0.2em] text-white flex justify-center items-center transition-all shadow-lg"
+            >
+              {loading ? <Loader2 className="animate-spin" size={18} /> : t('login.validate')}
+            </button>
+          </form>
+        )}
+
+        <div className="mt-8 pt-6 border-t border-slate-900 flex flex-col gap-4">
+          <button 
+            onClick={clearSession}
+            className="text-[9px] text-slate-600 hover:text-white transition-colors flex items-center justify-center gap-2 uppercase font-black tracking-widest"
+          >
+            <RefreshCw size={12} /> {t('login.reset')}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+</file>
+
+<file path="app/project-tracker/page.tsx">
+"use client";
+
+import React, { useEffect, useState, useMemo } from "react";
+import { createClient } from "@supabase/supabase-js";
+import { 
+  HardHat, Loader2, LogOut, X, ChevronRight, CheckCircle2,
+  Printer, Eye, Save, FileText, Download, ShieldCheck, MapPin
+} from "lucide-react";
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import { useTranslation } from "@/contexts/I18nContext";
+
+const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL || "", process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "");
+
+export default function ProjectTracker() {
+  const { t } = useTranslation();
+  const [projet, setProjet] = useState<any>(null);
+  const [photos, setPhotos] = useState<any[]>([]);
+  const [documents, setDocuments] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedDay, setSelectedDay] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const NOM_AGENCE = t('projectTracker.agencyName');
+  const BUREAU_ETUDE = t('projectTracker.department');
+  const EXPERT_NOM = t('projectTracker.expertName');
+
+  useEffect(() => {
+    const fetchInitialData = async () => {
+      try {
+        const savedPin = localStorage.getItem("client_access_pin");
+        if (!savedPin) { window.location.href = "/"; return; }
+
+        const { data: projectData } = await supabase.from("suivi_chantier").select("*").eq("pin_code", savedPin).maybeSingle();
+        
+        if (projectData) {
+          setProjet(projectData);
+          const { data: docs } = await supabase.from("documents_projets").select("*").eq("projet_id", projectData.id);
+          setDocuments(docs || []);
+          const { data: ph } = await supabase.from("constats-photos").select("*").eq("id_projet", projectData.id).order("created_at", { ascending: false });
+          setPhotos(ph || []);
+        }
+      } catch (error) { console.error(error); } finally { setLoading(false); }
+    };
+    fetchInitialData();
+  }, []);
+
+  const groupedPhotos = useMemo(() => {
+    return photos.reduce((acc: any, photo: any) => {
+      const date = new Date(photo.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+      if (!acc[date]) acc[date] = [];
+      acc[date].push(photo);
+      return acc;
+    }, {});
+  }, [photos]);
+
+  const handlePDFAction = async (date: string, dailyPhotos: any[], action: 'save' | 'print' | 'preview') => {
+    if (isProcessing) return;
+    setIsProcessing(true);
+    try {
+      const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.getWidth();
+
+      // En-tête professionnel
+      doc.setFillColor(245, 245, 245);
+      doc.rect(0, 0, pageWidth, 45, 'F');
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(18);
+      doc.setTextColor(15, 23, 42);
+      doc.text(NOM_AGENCE, 14, 20);
+      doc.setFontSize(9);
+      doc.setTextColor(100, 100, 100);
+      doc.text(BUREAU_ETUDE, 14, 26);
+      doc.setDrawColor(16, 185, 129);
+      doc.setLineWidth(1);
+      doc.line(14, 32, 60, 32);
+
+      // Infos dossier
+      doc.setFontSize(10);
+      doc.setTextColor(15, 23, 42);
+      doc.text(t('projectTracker.reportRef', { ref: date.replace(/ /g, '') }), 140, 20);
+      doc.setFont("helvetica", "normal");
+      doc.text(t('projectTracker.visitDate', { date }), 140, 26);
+      doc.text(t('projectTracker.phase', { phase: projet?.etape_actuelle || "N/A" }), 140, 32);
+
+      // Destinataire
+      doc.setFont("helvetica", "bold");
+      doc.text(t('projectTracker.recipient'), 14, 55);
+      doc.setFont("helvetica", "normal");
+      doc.text(`${projet?.client_prenom} ${projet?.client_nom}`, 14, 60);
+      doc.text(t('projectTracker.project', { name: projet?.nom_villa }), 14, 65);
+
+      // Expert référent
+      doc.setFont("helvetica", "bold");
+      doc.text(t('projectTracker.expert'), 110, 55);
+      doc.setFont("helvetica", "normal");
+      doc.text(EXPERT_NOM, 110, 60);
+
+      // Préparation des données du tableau
+      const bodyData = dailyPhotos.map((p, i) => {
+        const rawNote = p.note_expert || t('projectTracker.defaultObservation');
+        const cleanNote = rawNote
+          .normalize("NFKD")
+          .replace(/[^\x00-\x7F]/g, " ")
+          .replace(/\s+/g, " ")
+          .trim();
+        const analyse = t('projectTracker.statusConforme') + '\n\n' + cleanNote;
+        return [
+          t('projectTracker.photoRef', { num: i+1, lat: p.latitude || 'N/A', lng: p.longitude || 'N/A' }),
+          analyse
+        ];
+      });
+
+      // Tableau
+      autoTable(doc, {
+        startY: 75,
+        head: [[t('projectTracker.photoHeader'), t('projectTracker.analysisHeader')]],
+        body: bodyData,
+        theme: 'striped',
+        headStyles: { fillColor: [15, 23, 42], fontSize: 9 },
+        columnStyles: {
+          0: { cellWidth: 45 },
+          1: { cellWidth: 120 }
+        },
+        styles: {
+          fontSize: 8,
+          cellPadding: 4,
+          overflow: 'linebreak',
+          valign: 'top'
+        },
+        margin: { left: 14, right: 14 }
+      });
+
+      // Annexe photo
+      doc.addPage();
+      doc.setFont("helvetica", "bold");
+      doc.text(t('projectTracker.photoAnnex'), 14, 20);
+
+      let yPos = 30;
+      for (let i = 0; i < dailyPhotos.length; i++) {
+        const p = dailyPhotos[i];
+        if (yPos > 220) { doc.addPage(); yPos = 20; }
+        try {
+          doc.addImage(p.url_image, 'JPEG', 14, yPos, 120, 75);
+        } catch (e) {
+          doc.text(t('projectTracker.imageNotAvailable'), 14, yPos + 20);
+        }
+        doc.setFontSize(8);
+        const text = t('projectTracker.imageCaption', { num: i+1, date: new Date(p.created_at).toLocaleString() });
+        const lines = doc.splitTextToSize(text, 160);
+        doc.text(lines, 14, yPos + 82);
+        yPos += 95;
+      }
+
+      // Certification finale
+      const finalY = doc.internal.pageSize.getHeight() - 40;
+      doc.setDrawColor(200, 200, 200);
+      doc.line(14, finalY, pageWidth - 14, finalY);
+      doc.setFontSize(8);
+      doc.setFont("helvetica", "italic");
+      doc.text(t('projectTracker.certificationTitle'), 14, finalY + 10);
+      doc.text(t('projectTracker.certificationText', { expert: EXPERT_NOM }), 14, finalY + 15);
+      doc.text(t('projectTracker.certificationText2'), 14, finalY + 19);
+
+      if (action === 'save') doc.save(`Rapport_Technique_${date}.pdf`);
+      else window.open(doc.output('bloburl'), '_blank');
+    } catch (e) {
+      alert(t('projectTracker.pdfError'));
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  if (loading) return <div className="h-screen flex items-center justify-center bg-[#020617]"><Loader2 className="animate-spin text-emerald-500" size={40} /></div>;
+
+  return (
+    <div className="min-h-screen bg-[#020617] text-slate-200 p-6 md:p-12">
+      <div className="max-w-6xl mx-auto space-y-12">
+        
+        {/* HEADER */}
+        <header className="flex justify-between items-center bg-[#0F172A] p-8 rounded-[2rem] border border-white/5 shadow-xl">
+          <div className="flex items-center gap-5">
+            <div className="bg-emerald-500 p-4 rounded-2xl shadow-lg shadow-emerald-500/20"><HardHat className="text-black" /></div>
+            <div>
+              <h2 className="text-2xl font-black text-white">{NOM_AGENCE}</h2>
+              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">
+                {t('projectTracker.phaseLabel')} <span className="text-emerald-500">{projet?.etape_actuelle}</span>
+              </p>
+            </div>
+          </div>
+          <button onClick={() => {localStorage.clear(); window.location.href="/";}} className="text-slate-500 hover:text-red-500 font-bold text-xs uppercase tracking-widest transition-colors flex items-center gap-2">
+            <LogOut size={16}/> {t('projectTracker.quit')}
+          </button>
+        </header>
+
+        {/* DOCUMENTS SECTION */}
+        <section className="bg-[#0F172A]/50 p-8 rounded-[2rem] border border-white/5">
+          <h3 className="text-xs font-black uppercase tracking-[0.3em] text-emerald-500 mb-6 flex items-center gap-2">
+            <FileText size={16}/> {t('projectTracker.documents')}
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {documents.map((doc) => (
+              <a key={doc.id} href={doc.url_fichier} target="_blank" className="flex items-center justify-between p-5 bg-white/5 border border-white/5 rounded-2xl hover:bg-emerald-500/10 hover:border-emerald-500/30 transition-all group">
+                <span className="text-xs font-bold truncate pr-4">{doc.nom_fichier}</span>
+                <Download size={18} className="text-slate-500 group-hover:text-emerald-500" />
+              </a>
+            ))}
+          </div>
+        </section>
+
+        {/* LISTE DES RAPPORTS */}
+        <section>
+          <h3 className="text-xs font-black uppercase tracking-[0.3em] text-emerald-500 mb-6 flex items-center gap-2">
+            <ShieldCheck size={16}/> {t('projectTracker.technicalReports')}
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {Object.keys(groupedPhotos).map((date) => (
+              <div key={date} onClick={() => setSelectedDay(date)} className="group bg-[#0F172A] rounded-[3rem] border border-white/5 overflow-hidden cursor-pointer hover:border-emerald-500/30 transition-all shadow-2xl">
+                <div className="h-56 relative">
+                  <img src={groupedPhotos[date][0].url_image} className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A] to-transparent" />
+                  <div className="absolute bottom-6 left-8">
+                    <p className="text-white font-black text-2xl tracking-tighter">{date}</p>
+                    <p className="text-[10px] text-emerald-500 font-bold uppercase mt-1">{t('projectTracker.reportValidated')}</p>
+                  </div>
+                </div>
+                <div className="p-6 flex justify-between items-center bg-white/[0.02]">
+                  <div className="flex flex-col">
+                    <span className="text-[9px] font-black text-slate-500 uppercase">{t('projectTracker.expertise')}</span>
+                    <span className="text-xs text-slate-300 font-bold">{EXPERT_NOM}</span>
+                  </div>
+                  <ChevronRight className="text-emerald-500" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      </div>
+
+      {/* MODALE PRÉVISUALISATION */}
+      {selectedDay && (
+        <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex items-center justify-center p-4">
+          <div className="bg-[#0F172A] w-full max-w-5xl rounded-[3rem] border border-white/10 flex flex-col max-h-[92vh] overflow-hidden shadow-2xl">
+            <div className="p-10 border-b border-white/5 flex justify-between items-center bg-white/[0.01]">
+              <div>
+                <span className="text-[10px] text-emerald-500 font-black uppercase tracking-widest">{t('projectTracker.inspectionReport')}</span>
+                <h3 className="text-3xl font-black text-white">{selectedDay}</h3>
+                <p className="text-xs text-slate-500 mt-1 uppercase font-bold italic">{t('projectTracker.phase', { phase: projet?.etape_actuelle })}</p>
+              </div>
+              <div className="flex gap-4">
+                <button onClick={() => handlePDFAction(selectedDay, groupedPhotos[selectedDay], 'preview')} className="flex items-center gap-2 px-6 py-3 bg-emerald-500 text-black rounded-xl hover:bg-emerald-400 transition-all text-xs font-black uppercase shadow-lg shadow-emerald-500/20">
+                  <Printer size={16}/> {t('projectTracker.generateReport')}
+                </button>
+                <button onClick={() => setSelectedDay(null)} className="p-3 bg-white/5 text-slate-400 rounded-xl hover:text-white transition-all"><X size={24}/></button>
+              </div>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto p-10 space-y-12 custom-scrollbar">
+              <div className="bg-emerald-500/5 p-6 rounded-2xl border border-emerald-500/20 flex gap-4 items-center">
+                 <ShieldCheck className="text-emerald-500" size={24}/>
+                 <p className="text-xs text-slate-300 leading-relaxed italic">
+                   {t('projectTracker.certification')}
+                 </p>
+              </div>
+
+              {groupedPhotos[selectedDay].map((p: any, i: number) => (
+                <div key={i} className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                  <div className="rounded-3xl overflow-hidden border border-white/5 shadow-2xl">
+                    <img src={p.url_image} className="w-full aspect-video object-cover" />
+                  </div>
+                  <div className="space-y-4 py-2">
+                    <div className="flex items-center gap-2 text-[10px] font-black uppercase text-slate-500 tracking-tighter">
+                       <MapPin size={14} className="text-emerald-500"/> {t('projectTracker.location', { lat: p.latitude, lng: p.longitude })}
+                    </div>
+                    <h4 className="text-sm font-black text-white uppercase">{t('projectTracker.observation', { num: i+1 })}</h4>
+                    <p className="text-slate-400 text-sm leading-relaxed border-l-2 border-emerald-500 pl-4 italic">
+                      "{p.note_expert || t('projectTracker.defaultObservation')}"
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+      
+      <style jsx global>{`
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #10b981; border-radius: 10px; }
+      `}</style>
+    </div>
+  );
+}
+</file>
+
 <file path="repomix-output1.xml">
 This file is a merged representation of the entire codebase, combined into a single document by Repomix.
 
@@ -12076,1162 +13349,6 @@ export default function AdminDashboard() {
 </files>
 </file>
 
-<file path="src/components/CashbackForm.tsx">
-"use client";
-
-import React, { useEffect } from 'react';
-
-export default function CashbackForm() {
-  
-  useEffect(() => {
-    // Logique de capture de l'ID Propriété depuis l'URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const propId = urlParams.get('Property_ID');
-    const designationField = document.getElementById('Designation') as HTMLInputElement;
-    
-    if (propId && designationField) {
-      designationField.value = propId;
-    }
-  }, []);
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    // Simulation de la validation Zoho avant soumission
-    const mndFileds = ['Company', 'Last Name', 'Email'];
-    const fldLangVal = ['Prénom', 'Nom', 'E-mail'];
-    const form = e.currentTarget;
-
-    for (let i = 0; i < mndFileds.length; i++) {
-      const field = form.elements.namedItem(mndFileds[i]) as HTMLInputElement;
-      if (field && field.value.trim().length === 0) {
-        alert(`${fldLangVal[i]} ne peut pas être vide.`);
-        field.focus();
-        e.preventDefault();
-        return false;
-      }
-    }
-    
-    // Désactiver le bouton pour éviter les doubles soumissions
-    const submitBtn = document.getElementById('formsubmit') as HTMLButtonElement;
-    if (submitBtn) submitBtn.disabled = true;
-  };
-
-  return (
-    <div 
-      id='crmWebToEntityForm' 
-      className='zcwf_lblLeft crmWebToEntityForm' 
-      style={{
-        backgroundColor: 'white', 
-        color: '#1e293b', 
-        maxWidth: '600px', 
-        margin: '0 auto', 
-        fontFamily: 'sans-serif',
-        padding: '20px',
-        borderRadius: '24px'
-      }}
-    >
-      <meta name='viewport' content='width=device-width, initial-scale=1.0' />
-      <meta httpEquiv='content-type' content='text/html;charset=UTF-8' />
-      
-      <style>{`
-        .zcwf_title { 
-            font-family: serif; 
-            font-size: 28px; 
-            color: #0f172a; 
-            margin-bottom: 30px; 
-            text-align: center; 
-        }
-        .zcwf_row { margin-bottom: 20px; clear: both; }
-        .zcwf_col_lab { 
-            font-size: 11px; 
-            text-transform: uppercase; 
-            letter-spacing: 0.1em; 
-            font-weight: 700; 
-            color: #64748b; 
-            margin-bottom: 8px; 
-            display: block;
-        }
-        .zcwf_col_fld input[type=text] {
-            width: 100% !important;
-            border: 1px solid #e2e8f0 !important;
-            background-color: #f8fafc !important;
-            padding: 14px !important;
-            border-radius: 12px !important;
-            font-size: 15px !important;
-            transition: all 0.2s ease;
-            outline: none;
-        }
-        .zcwf_col_fld input[type=text]:focus {
-            border-color: #94a3b8 !important;
-            background-color: #ffffff !important;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
-        }
-        .formsubmit.zcwf_button {
-            background: #0f172a !important;
-            color: white !important;
-            border: none !important;
-            border-radius: 14px !important;
-            padding: 16px 40px !important;
-            font-weight: bold !important;
-            text-transform: uppercase !important;
-            letter-spacing: 0.2em !important;
-            font-size: 11px !important;
-            cursor: pointer !important;
-            width: 100%;
-            margin-top: 10px;
-            transition: transform 0.2s ease, background 0.2s ease !important;
-        }
-        .formsubmit.zcwf_button:hover {
-            background: #1e293b !important;
-            transform: translateY(-2px);
-        }
-        .wfrm_fld_dpNn { display: none !important; }
-        @media (max-width: 600px) {
-            #crmWebToEntityForm { padding: 10px; }
-        }
-      `}</style>
-
-      <form 
-        id='webform926137000000620001' 
-        action='https://crm.zoho.eu/crm/WebToLeadForm' 
-        name='WebToLeads926137000000620001' 
-        method='POST' 
-        onSubmit={handleSubmit}
-        acceptCharset='UTF-8'
-      >
-        {/* Champs cachés Zoho */}
-        <input type='text' style={{display:'none'}} name='xnQsjsdp' value='89dec12b0f4964ef48eb1146afdf728288b1067dc6b63cb582637ae5b06a02fb' readOnly />
-        <input type='hidden' name='zc_gad' id='zc_gad' value='' />
-        <input type='text' style={{display:'none'}} name='xmIwtLD' value='a31c3c626df8e3bd4a030929931d95f293b65e415d7072f7b6a8cb68d029701b7626c355eb89a4275cd16caebd9c7c40' readOnly />
-        <input type='text' style={{display:'none'}} name='actionType' value='TGVhZHM=' readOnly />
-        <input type='text' style={{display:'none'}} name='returnURL' value='https://blanca-calida-site.vercel.app/merci' readOnly />
-
-        <div className='zcwf_title'>Activer mon Cashback</div>
-
-        <div className='zcwf_row'>
-          <div className='zcwf_col_lab'><label htmlFor='Company'>Prénom <span style={{color:'#ef4444'}}>*</span></label></div>
-          <div className='zcwf_col_fld'><input type='text' id='Company' name='Company' maxLength={200} placeholder='Jean' /></div>
-        </div>
-
-        <div className='zcwf_row'>
-          <div className='zcwf_col_lab'><label htmlFor='Last_Name'>Nom <span style={{color:'#ef4444'}}>*</span></label></div>
-          <div className='zcwf_col_fld'><input type='text' id='Last_Name' name='Last Name' maxLength={80} placeholder='Dupont' /></div>
-        </div>
-
-        <div className='zcwf_row'>
-          <div className='zcwf_col_lab'><label htmlFor='Email'>E-mail <span style={{color:'#ef4444'}}>*</span></label></div>
-          <div className='zcwf_col_fld'><input type='text' id='Email' name='Email' maxLength={100} placeholder='jean@exemple.com' /></div>
-        </div>
-
-        <div className='zcwf_row'>
-          <div className='zcwf_col_lab'><label htmlFor='Mobile'>Portable</label></div>
-          <div className='zcwf_col_fld'><input type='text' id='Mobile' name='Mobile' maxLength={30} placeholder='+33 6 ...' /></div>
-        </div>
-
-        {/* Champ caché pour l'ID Propriété */}
-        <div className='zcwf_row wfrm_fld_dpNn'>
-          <div className='zcwf_col_fld'><input type='text' id='Designation' name='Designation' defaultValue='General_Interest' /></div>
-        </div>
-
-        <div className='zcwf_row'>
-          <div className='zcwf_col_fld'>
-            <input type='submit' id='formsubmit' className='formsubmit zcwf_button' value='Demander mon avantage' />
-          </div>
-        </div>
-      </form>
-    </div>
-  );
-}
-</file>
-
-<file path="src/components/Expertise.tsx">
-import { Award, ShieldCheck, Map } from 'lucide-react';
-
-export default function Expertise() {
-  const items = [
-    { icon: <Award size={30}/>, title: "Expertise Luxe", desc: "Sélection rigoureuse des biens les plus exclusifs." },
-    { icon: <ShieldCheck size={30}/>, title: "Accompagnement", desc: "Conseils juridiques et fiscaux personnalisés." },
-    { icon: <Map size={30}/>, title: "Localisation", desc: "Le meilleur de Javea, Moraira et Altea." },
-  ];
-
-  return (
-    <section className="py-20 bg-gray-50">
-      <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-16">
-        {items.map((item, i) => (
-          <div key={i} className="text-center group">
-            <div className="mb-6 inline-block text-brand-secondary group-hover:scale-110 transition-transform">
-              {item.icon}
-            </div>
-            <h3 className="font-serif text-xl mb-4 text-brand-primary uppercase tracking-wider">{item.title}</h3>
-            <p className="text-gray-500 text-sm font-light leading-relaxed">{item.desc}</p>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
-</file>
-
-<file path="src/components/LanguageSelector.tsx">
-"use client";
-
-import React, { useState } from 'react';
-import { ChevronDown, Globe } from 'lucide-react';
-
-// Liste des langues supportées
-const languages = [
-  { code: 'fr', label: 'FR' },
-  { code: 'en', label: 'EN' },
-  { code: 'nl', label: 'NL' },
-  { code: 'es', label: 'ES' },
-  { code: 'ar', label: 'AR' },
-  { code: 'pl', label: 'PL' }
-];
-
-export default function LanguageSelector() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [currentLang, setCurrentLang] = useState('fr');
-
-  return (
-    <div className="relative inline-block text-left">
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-2 text-sm font-medium transition-colors rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
-      >
-        <Globe className="w-4 h-4 text-[#D4AF37]" />
-        <span>{currentLang.toUpperCase()}</span>
-        <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-      </button>
-
-      {isOpen && (
-        <>
-          {/* Overlay pour fermer le menu en cliquant ailleurs */}
-          <div 
-            className="fixed inset-0 z-10" 
-            onClick={() => setIsOpen(false)}
-          ></div>
-
-          <div className="absolute right-0 z-20 w-24 mt-2 origin-top-right bg-white border rounded-md shadow-lg dark:bg-[#0f172a] dark:border-slate-700 ring-1 ring-black ring-opacity-5 focus:outline-none">
-            <div className="py-1">
-              {languages.map((lang) => (
-                <button
-                  key={lang.code}
-                  onClick={() => {
-                    setCurrentLang(lang.code);
-                    setIsOpen(false);
-                    // Ici, vous pourrez ajouter la logique pour changer les textes
-                  }}
-                  className={`block w-full px-4 py-2 text-sm text-left hover:bg-slate-100 dark:hover:bg-slate-800 ${
-                    currentLang === lang.code ? 'text-[#D4AF37] font-bold' : 'text-slate-700 dark:text-slate-300'
-                  }`}
-                >
-                  {lang.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        </>
-      )}
-    </div>
-  );
-}
-</file>
-
-<file path="src/components/Logo.tsx">
-const DataHomeLogo = ({ className }: { className?: string }) => (
-  <svg 
-    viewBox="0 0 150 35" 
-    fill="none" 
-    xmlns="http://www.w3.org/2000/svg" 
-    className={className}
-  >
-    {/* Icône Triangle (Toit/Data) */}
-    <path d="M15 12L20 5L25 12H15Z" fill="currentColor" />
-    {/* Texte "data home" stylisé */}
-    <text 
-      x="10" 
-      y="28" 
-      fontFamily="sans-serif" 
-      fontSize="22" 
-      fontWeight="300" 
-      fill="currentColor" 
-      letterSpacing="-0.02em"
-    >
-      data home
-    </text>
-  </svg>
-);
-</file>
-
-<file path="src/components/Testimonials.tsx">
-const reviews = [
-  { name: "Isabelle Dupont", text: "Excellente expérience avec Blanca Calida ! Ils connaissent parfaitement le marché et savent conseiller en fonction des besoins spécifiques.", stars: 5 },
-  { name: "Sarah Williams", text: "Professional team, they helped us navigate every detail of the buying process. Highly recommended!", stars: 5 },
-  { name: "Michael Ford", text: "Sehr guter Service, von der Besichtigung bis zur Kaufabwicklung. Alles war perfekt organisiert.", stars: 5 },
-];
-
-export default function Testimonials() {
-  return (
-    <section className="bg-[#fcfaf7] py-24 px-4">
-      <div className="max-w-7xl mx-auto">
-        <h2 className="text-center font-serif text-4xl md:text-5xl text-slate-800 mb-4 italic">La confiance est une valeur fondamentale</h2>
-        <p className="text-center text-slate-500 mb-16 max-w-2xl mx-auto">La satisfaction de nos clients est notre plus belle réussite.</p>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {reviews.map((r, i) => (
-            <div key={i} className="bg-white p-10 shadow-sm border border-slate-100 flex flex-col items-center text-center">
-              <div className="flex text-yellow-400 mb-6 text-sm">{"★".repeat(r.stars)}</div>
-              <p className="text-slate-600 italic leading-relaxed mb-8 flex-grow">"{r.text}"</p>
-              <p className="font-serif text-lg text-slate-900 border-t border-slate-100 pt-6 w-full">{r.name}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-</file>
-
-<file path="src/components/ThemeProvider.tsx">
-"use client";
-
-import * as React from "react";
-import { ThemeProvider as NextThemesProvider } from "next-themes";
-
-export function ThemeProvider({ children, ...props }: any) {
-  return (
-    <NextThemesProvider {...props}>
-      {children}
-    </NextThemesProvider>
-  );
-}
-</file>
-
-<file path="src/components/ThemeToggle.tsx">
-"use client";
-
-import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
-import { Sun, Moon } from "lucide-react";
-
-export default function ThemeToggle() {
-  const [mounted, setMounted] = useState(false);
-  const { theme, setTheme } = useTheme();
-
-  // Évite les erreurs d'hydratation au rendu
-  useEffect(() => setMounted(true), []);
-
-  if (!mounted) return <div className="p-3 w-10 h-10" />;
-
-  return (
-    <button
-      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-      className="p-3 bg-slate-100 dark:bg-white/10 rounded-full text-[#D4AF37] border border-slate-200 dark:border-white/10 hover:bg-[#D4AF37] hover:text-white transition-all shadow-sm"
-      aria-label="Toggle Theme"
-    >
-      {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
-    </button>
-  );
-}
-</file>
-
-<file path="src/SuiviClient.js">
-import React from 'react';
-
-const SuiviChantier = ({ clientName, etapeActuelle }) => {
-  const totalEtapes = 12;
-  
-  // Liste des noms d'étapes (vous pourrez les personnaliser)
-  const nomsEtapes = [
-    "Terrassement", "Fondations", "Murs", "Toiture", 
-    "Menuiseries", "Plomberie", "Électricité", "Plâtrerie",
-    "Carrelage", "Peinture", "Finitions", "Remise des clés"
-  ];
-
-  return (
-    <div className="p-6 max-w-md mx-auto bg-white rounded-xl shadow-md space-y-4 border border-gray-200">
-      <div className="text-center">
-        <h2 className="text-xl font-bold text-gray-800">{clientName}</h2>
-        <p className="text-sm text-gray-500">Avancement de votre projet</p>
-      </div>
-
-      {/* Barre de progression visuelle */}
-      <div className="flex gap-1 h-3 w-full bg-gray-100 rounded-full overflow-hidden">
-        {[...Array(totalEtapes)].map((_, i) => (
-          <div 
-            key={i}
-            className={`flex-1 ${i < etapeActuelle ? 'bg-green-500' : 'bg-gray-300'}`}
-          />
-        ))}
-      </div>
-
-      {/* Détail de l'étape actuelle */}
-      <div className="bg-green-50 border-l-4 border-green-500 p-4">
-        <p className="text-sm font-medium text-green-800">
-          Étape actuelle : {nomsEtapes[etapeActuelle - 1]} ({etapeActuelle}/{totalEtapes})
-        </p>
-      </div>
-    </div>
-  );
-};
-
-export default SuiviChantier;
-</file>
-
-<file path="src/types/property.ts">
-import { NextResponse, type NextRequest } from 'next/server'
-
-export async function proxy(request: NextRequest) {
-  return NextResponse.next()
-}
-
-export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
-}
-</file>
-
-<file path="tailwind.config.js">
-/** @type {import('tailwindcss').Config} */
-export default {
-  darkMode: 'class',
-  content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
-    "./app/**/*.{js,ts,jsx,tsx}",
-    "./components/**/*.{js,ts,jsx,tsx}",
-  ],
-  theme: {
-    extend: {
-      colors: {
-        primary: '#0A0A0A',
-        secondary: '#1A1A1A',
-        accent: '#FFE7C2',
-        neutral: '#E9E3DA',
-        'soft-text': '#1A1A1A',
-        'gold-light': '#F5E8D0',
-        'navy-dark': '#0A0A0A',
-      },
-      fontFamily: {
-        'serif': ['"Playfair Display"', 'Georgia', 'serif'],
-        'sans': ['"Inter"', '-apple-system', 'sans-serif'],
-      },
-    },
-  },
-  plugins: [],
-}
-</file>
-
-<file path="tsconfig.json">
-{
-  "compilerOptions": {
-    "target": "ES2017",
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "noEmit": true,
-    "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "jsx": "react-jsx",
-    "incremental": true,
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ],
-    "paths": {
-      "@/*": ["./src/*"]
-    }
-  },
-  "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    ".next/types/**/*.ts",
-    ".next/dev/types/**/*.ts",
-    "**/*.mts"
-  ],
-  "exclude": ["node_modules"]
-}
-</file>
-
-<file path=".repomix/bundles.json">
-{
-  "bundles": {
-    "blueprint-saas-575": {
-      "name": "blueprint-saas",
-      "created": "2026-03-12T11:24:41.540Z",
-      "lastUsed": "2026-03-12T11:24:41.540Z",
-      "tags": [],
-      "files": []
-    }
-  }
-}
-</file>
-
-<file path="app/api/contact/route.ts">
-import { NextResponse } from "next/server";
-
-export async function POST(req: Request) {
-  try {
-    const body = await req.json();
-    const { name, email, region, message } = body;
-
-    // 1. ENVOI VERS ZOHO CRM (Web-to-Lead ou API)
-    // Remplacer l'URL par votre Web-to-Lead hook ou votre endpoint d'automatisation
-    const zohoResponse = await fetch("https://crm.zoho.eu/crm/WebToLeadForm", {
-      method: "POST",
-      body: new URLSearchParams({
-        'xnpe_force': '1',
-        'Last Name': name,
-        'Email': email,
-        'Description': `Région: ${region} | Message: ${message}`,
-        // Ajoutez ici vos identifiants Zoho (FormId, etc.)
-      })
-    });
-
-    // 2. NOTIFICATION GILLIAN 
-    // Option simple : Envoi d'un email via un service comme Resend ou SendGrid
-    // Ou via un webhook Slack/Teams si Gillian l'utilise
-
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    return NextResponse.json({ success: false }, { status: 500 });
-  }
-}
-</file>
-
-<file path="app/contact-cashback/page.tsx">
-"use client";
-
-import React, { useEffect } from "react";
-import Link from "next/link";
-import { ArrowLeft, ShieldCheck } from "lucide-react";
-import { useTranslation } from "@/contexts/I18nContext";
-
-export default function ContactCashback() {
-  const { t } = useTranslation();
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const propertyId = params.get("Property_ID");
-    const idField = document.getElementById("Designation") as HTMLInputElement;
-    if (idField && propertyId) {
-      idField.value = propertyId;
-    }
-  }, []);
-
-  return (
-    <div className="min-h-screen bg-slate-50 pt-32 pb-20 px-6">
-      <div className="max-w-2xl mx-auto">
-        <Link href="/" className="inline-flex items-center gap-2 text-slate-400 hover:text-slate-900 mb-8 uppercase text-[10px] tracking-widest font-bold transition-colors">
-          <ArrowLeft size={14} /> {t('contactCashback.back')}
-        </Link>
-
-        <div className="bg-white rounded-[2.5rem] p-8 md:p-12 shadow-xl border border-slate-100">
-          <div className="mb-10 text-center">
-            <div className="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <ShieldCheck size={32} />
-            </div>
-            <h1 className="text-3xl font-serif text-slate-900 mb-2">{t('contactCashback.title')}</h1>
-            <p className="text-slate-500 text-sm">{t('contactCashback.description')}</p>
-          </div>
-
-          {/* FORMULAIRE ZOHO */}
-          <div id="crmWebToEntityForm" className="zcwf_lblLeft crmWebToEntityForm">
-            <form id="webform926137000000620001" action="https://crm.zoho.eu/crm/WebToLeadForm" name="WebToLeads926137000000620001" method="POST" acceptCharset="UTF-8" className="space-y-4">
-              <input type="text" style={{ display: 'none' }} name="xnQsjsdp" value="89dec12b0f4964ef48eb1146afdf728288b1067dc6b63cb582637ae5b06a02fb" />
-              <input type="hidden" name="zc_gad" id="zc_gad" value="" />
-              <input type="text" style={{ display: 'none' }} name="xmIwtLD" value="a31c3c626df8e3bd4a030929931d95f293b65e415d7072f7b6a8cb68d029701b7626c355eb89a4275cd16caebd9c7c40" />
-              <input type="text" style={{ display: 'none' }} name="actionType" value="TGVhZHM=" />
-              <input type="text" style={{ display: 'none' }} name="returnURL" value="https://blanca-calida-site.vercel.app/merci" />
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">{t('contactCashback.firstName')}</label>
-                  <input type="text" name="Company" required className="w-full px-5 py-3 rounded-xl border border-slate-100 bg-slate-50 outline-none focus:border-emerald-500 transition-colors" />
-                </div>
-                <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">{t('contactCashback.lastName')}</label>
-                  <input type="text" name="Last Name" required className="w-full px-5 py-3 rounded-xl border border-slate-100 bg-slate-50 outline-none focus:border-emerald-500 transition-colors" />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">{t('contactCashback.email')}</label>
-                <input type="email" name="Email" required className="w-full px-5 py-3 rounded-xl border border-slate-100 bg-slate-50 outline-none focus:border-emerald-500 transition-colors" />
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2">{t('contactCashback.phone')}</label>
-                <input type="text" name="Mobile" className="w-full px-5 py-3 rounded-xl border border-slate-100 bg-slate-50 outline-none focus:border-emerald-500 transition-colors" />
-              </div>
-
-              <input type="hidden" id="Designation" name="Designation" value="General_Interest" />
-
-              <button type="submit" className="w-full bg-slate-900 text-white py-5 rounded-2xl font-bold uppercase text-[11px] tracking-[0.2em] hover:bg-emerald-600 transition-all mt-6 shadow-lg shadow-slate-900/10">
-                {t('contactCashback.submit')}
-              </button>
-            </form>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-</file>
-
-<file path="app/login/page.tsx">
-"use client";
-
-import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { Loader2, ShieldCheck, RefreshCw, Delete, Key } from "lucide-react";
-import { supabase } from "../../lib/supabase";
-import { useTranslation } from "@/contexts/I18nContext";
-
-export default function LoginPage() {
-  const router = useRouter();
-  const { t } = useTranslation();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [pin, setPin] = useState<string>("");
-  const [loading, setLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [showPin, setShowPin] = useState(true);
-
-  useEffect(() => {
-    const tempPin = localStorage.getItem("temp_client_pin");
-    if (tempPin) {
-      setPin(tempPin);
-      console.log("PIN client détecté depuis la Home.");
-    }
-  }, []);
-
-  const handleRedirection = async (userId: string, userEmail?: string) => {
-    try {
-      if (userEmail?.toLowerCase().trim() === 'gaetan@amaru-homes.com') {
-        router.replace('/super-admin');
-        return;
-      }
-
-      const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('role, company_name, email')
-        .or(`id.eq.${userId},email.eq.${userEmail}`)
-        .single();
-
-      if (error || !profile) {
-        setErrorMsg(t('login.profileMissing'));
-        setLoading(false);
-        return;
-      }
-
-      localStorage.setItem("staff_session", JSON.stringify({
-        email: profile.email,
-        role: profile.role,
-        company_name: profile.company_name || "Amaru-Homes"
-      }));
-
-      if (profile.role === 'super_admin') {
-        router.replace('/super-admin');
-      } else if (profile.role === 'admin' || profile.role === 'staff') {
-        router.replace('/admin/dashboard');
-      } else {
-        setErrorMsg(t('login.roleNotAuthorized'));
-        setLoading(false);
-      }
-    } catch (err) {
-      setErrorMsg(t('login.systemError'));
-      setLoading(false);
-    }
-  };
-
-  const handleLogin = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    setLoading(true);
-    setErrorMsg(null);
-
-    if (showPin) {
-      try {
-        if (pin === "240226") {
-          const { data, error } = await supabase.auth.signInWithPassword({
-            email: "iris@amaru-homes.com",
-            password: "TonMotDePasseSecret",
-          });
-          if (data?.user) {
-            await handleRedirection(data.user.id, data.user.email);
-            return;
-          }
-        }
-
-        const { data: chantier, error: chantierError } = await supabase
-          .from('suivi_chantier')
-          .select('*')
-          .eq('pin_code', pin)
-          .single();
-
-        if (chantier) {
-          localStorage.setItem("client_access_pin", pin);
-          localStorage.setItem("active_project_id", chantier.id);
-          localStorage.removeItem("temp_client_pin");
-          router.push("/project-tracker");
-          return;
-        }
-
-        setErrorMsg(t('errors.pinIncorrect'));
-      } catch (err) {
-        setErrorMsg(t('login.validationError'));
-      } finally {
-        setLoading(false);
-      }
-      return;
-    }
-
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: email.trim(),
-      password: password,
-    });
-
-    if (error) {
-      setErrorMsg(error.message === "Invalid login credentials" ? t('login.invalidCredentials') : error.message);
-      setLoading(false);
-    } else if (data?.user) {
-      await handleRedirection(data.user.id, data.user.email);
-    }
-  };
-
-  const handlePinInput = (num: string) => {
-    if (pin.length < 6) {
-      setPin(prev => prev + num);
-    }
-  };
-
-  const clearPin = () => setPin("");
-
-  const clearSession = async () => {
-    await supabase.auth.signOut();
-    localStorage.clear();
-    sessionStorage.clear();
-    window.location.reload();
-  };
-
-  return (
-    <div className="min-h-screen bg-[#050505] flex items-center justify-center p-6 text-left">
-      <div className="w-full max-w-md bg-[#0a0a0a] border border-slate-800/60 p-8 rounded-[2.5rem] shadow-2xl">
-        
-        <div className="flex flex-col items-center mb-8">
-          <div className="h-14 w-14 bg-red-600 rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-red-900/20">
-            <ShieldCheck size={28} className="text-white" />
-          </div>
-          <h1 className="text-xl font-bold text-white">{t('login.title')}</h1>
-          <p className="text-slate-500 text-[9px] uppercase tracking-[0.3em] font-black mt-1">{t('login.subtitle')}</p>
-        </div>
-
-        <div className="flex bg-black p-1 rounded-xl mb-8 border border-slate-900">
-          <button 
-            onClick={() => { setShowPin(true); setErrorMsg(null); }}
-            className={`flex-1 py-2 rounded-lg text-[10px] font-black transition-all ${showPin ? 'bg-slate-800 text-white' : 'text-slate-500'}`}
-          >
-            {t('login.pinTab')}
-          </button>
-          <button 
-            onClick={() => { setShowPin(false); setErrorMsg(null); }}
-            className={`flex-1 py-2 rounded-lg text-[10px] font-black transition-all ${!showPin ? 'bg-slate-800 text-white' : 'text-slate-500'}`}
-          >
-            {t('login.credentialsTab')}
-          </button>
-        </div>
-
-        {showPin ? (
-          <div className="space-y-6">
-            <div className="flex justify-center gap-3">
-              {[...Array(6)].map((_, i) => (
-                <div 
-                  key={i} 
-                  className={`h-3 w-3 rounded-full border ${pin.length > i ? 'bg-red-600 border-red-600' : 'border-slate-700'}`}
-                />
-              ))}
-            </div>
-            
-            <div className="grid grid-cols-3 gap-3">
-              {["1", "2", "3", "4", "5", "6", "7", "8", "9"].map((num) => (
-                <button
-                  key={num}
-                  onClick={() => handlePinInput(num)}
-                  className="h-16 rounded-2xl bg-black border border-slate-900 text-white text-xl font-bold hover:bg-slate-900 transition-colors"
-                >
-                  {num}
-                </button>
-              ))}
-              <button onClick={clearPin} className="h-16 rounded-2xl bg-black border border-slate-900 text-red-500 flex items-center justify-center">
-                <Delete size={20} />
-              </button>
-              <button onClick={() => handlePinInput("0")} className="h-16 rounded-2xl bg-black border border-slate-900 text-white text-xl font-bold">0</button>
-              <button 
-                onClick={() => handleLogin()} 
-                className="h-16 rounded-2xl bg-red-600 text-white flex items-center justify-center shadow-lg shadow-red-900/20"
-                disabled={loading}
-              >
-                {loading ? <Loader2 className="animate-spin" /> : <Key size={20} />}
-              </button>
-            </div>
-            {errorMsg && <p className="text-red-500 text-[10px] font-bold text-center uppercase mt-4 tracking-widest">{errorMsg}</p>}
-          </div>
-        ) : (
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div className="space-y-1">
-              <label className="text-[9px] uppercase tracking-widest font-black text-slate-500 ml-2">{t('login.emailLabel')}</label>
-              <input 
-                type="email" 
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-black border border-slate-800 rounded-xl p-4 text-white outline-none focus:border-red-600 transition-all text-sm"
-                placeholder="admin@amaru-homes.com"
-                required 
-              />
-            </div>
-
-            <div className="space-y-1">
-              <label className="text-[9px] uppercase tracking-widest font-black text-slate-500 ml-2">{t('login.passwordLabel')}</label>
-              <input 
-                type="password" 
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-black border border-slate-800 rounded-xl p-4 text-white outline-none focus:border-red-600 transition-all text-sm"
-                placeholder="••••••••"
-                required 
-              />
-            </div>
-
-            {errorMsg && (
-              <div className="p-3 bg-red-950/20 border border-red-900/30 rounded-lg">
-                <p className="text-red-500 text-[10px] font-bold text-center uppercase tracking-tighter">{errorMsg}</p>
-              </div>
-            )}
-
-            <button 
-              type="submit" 
-              disabled={loading} 
-              className="w-full bg-red-700 hover:bg-red-600 py-4 mt-4 rounded-xl font-black text-[10px] tracking-[0.2em] text-white flex justify-center items-center transition-all shadow-lg"
-            >
-              {loading ? <Loader2 className="animate-spin" size={18} /> : t('login.validate')}
-            </button>
-          </form>
-        )}
-
-        <div className="mt-8 pt-6 border-t border-slate-900 flex flex-col gap-4">
-          <button 
-            onClick={clearSession}
-            className="text-[9px] text-slate-600 hover:text-white transition-colors flex items-center justify-center gap-2 uppercase font-black tracking-widest"
-          >
-            <RefreshCw size={12} /> {t('login.reset')}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-</file>
-
-<file path="app/project-tracker/page.tsx">
-"use client";
-
-import React, { useEffect, useState, useMemo } from "react";
-import { createClient } from "@supabase/supabase-js";
-import { 
-  HardHat, Loader2, LogOut, X, ChevronRight, CheckCircle2,
-  Printer, Eye, Save, FileText, Download, ShieldCheck, MapPin
-} from "lucide-react";
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
-import { useTranslation } from "@/contexts/I18nContext";
-
-const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL || "", process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "");
-
-export default function ProjectTracker() {
-  const { t } = useTranslation();
-  const [projet, setProjet] = useState<any>(null);
-  const [photos, setPhotos] = useState<any[]>([]);
-  const [documents, setDocuments] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedDay, setSelectedDay] = useState<string | null>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
-
-  const NOM_AGENCE = t('projectTracker.agencyName');
-  const BUREAU_ETUDE = t('projectTracker.department');
-  const EXPERT_NOM = t('projectTracker.expertName');
-
-  useEffect(() => {
-    const fetchInitialData = async () => {
-      try {
-        const savedPin = localStorage.getItem("client_access_pin");
-        if (!savedPin) { window.location.href = "/"; return; }
-
-        const { data: projectData } = await supabase.from("suivi_chantier").select("*").eq("pin_code", savedPin).maybeSingle();
-        
-        if (projectData) {
-          setProjet(projectData);
-          const { data: docs } = await supabase.from("documents_projets").select("*").eq("projet_id", projectData.id);
-          setDocuments(docs || []);
-          const { data: ph } = await supabase.from("constats-photos").select("*").eq("id_projet", projectData.id).order("created_at", { ascending: false });
-          setPhotos(ph || []);
-        }
-      } catch (error) { console.error(error); } finally { setLoading(false); }
-    };
-    fetchInitialData();
-  }, []);
-
-  const groupedPhotos = useMemo(() => {
-    return photos.reduce((acc: any, photo: any) => {
-      const date = new Date(photo.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
-      if (!acc[date]) acc[date] = [];
-      acc[date].push(photo);
-      return acc;
-    }, {});
-  }, [photos]);
-
-  const handlePDFAction = async (date: string, dailyPhotos: any[], action: 'save' | 'print' | 'preview') => {
-    if (isProcessing) return;
-    setIsProcessing(true);
-    try {
-      const doc = new jsPDF();
-      const pageWidth = doc.internal.pageSize.getWidth();
-
-      // En-tête professionnel
-      doc.setFillColor(245, 245, 245);
-      doc.rect(0, 0, pageWidth, 45, 'F');
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(18);
-      doc.setTextColor(15, 23, 42);
-      doc.text(NOM_AGENCE, 14, 20);
-      doc.setFontSize(9);
-      doc.setTextColor(100, 100, 100);
-      doc.text(BUREAU_ETUDE, 14, 26);
-      doc.setDrawColor(16, 185, 129);
-      doc.setLineWidth(1);
-      doc.line(14, 32, 60, 32);
-
-      // Infos dossier
-      doc.setFontSize(10);
-      doc.setTextColor(15, 23, 42);
-      doc.text(t('projectTracker.reportRef', { ref: date.replace(/ /g, '') }), 140, 20);
-      doc.setFont("helvetica", "normal");
-      doc.text(t('projectTracker.visitDate', { date }), 140, 26);
-      doc.text(t('projectTracker.phase', { phase: projet?.etape_actuelle || "N/A" }), 140, 32);
-
-      // Destinataire
-      doc.setFont("helvetica", "bold");
-      doc.text(t('projectTracker.recipient'), 14, 55);
-      doc.setFont("helvetica", "normal");
-      doc.text(`${projet?.client_prenom} ${projet?.client_nom}`, 14, 60);
-      doc.text(t('projectTracker.project', { name: projet?.nom_villa }), 14, 65);
-
-      // Expert référent
-      doc.setFont("helvetica", "bold");
-      doc.text(t('projectTracker.expert'), 110, 55);
-      doc.setFont("helvetica", "normal");
-      doc.text(EXPERT_NOM, 110, 60);
-
-      // Préparation des données du tableau
-      const bodyData = dailyPhotos.map((p, i) => {
-        const rawNote = p.note_expert || t('projectTracker.defaultObservation');
-        const cleanNote = rawNote
-          .normalize("NFKD")
-          .replace(/[^\x00-\x7F]/g, " ")
-          .replace(/\s+/g, " ")
-          .trim();
-        const analyse = t('projectTracker.statusConforme') + '\n\n' + cleanNote;
-        return [
-          t('projectTracker.photoRef', { num: i+1, lat: p.latitude || 'N/A', lng: p.longitude || 'N/A' }),
-          analyse
-        ];
-      });
-
-      // Tableau
-      autoTable(doc, {
-        startY: 75,
-        head: [[t('projectTracker.photoHeader'), t('projectTracker.analysisHeader')]],
-        body: bodyData,
-        theme: 'striped',
-        headStyles: { fillColor: [15, 23, 42], fontSize: 9 },
-        columnStyles: {
-          0: { cellWidth: 45 },
-          1: { cellWidth: 120 }
-        },
-        styles: {
-          fontSize: 8,
-          cellPadding: 4,
-          overflow: 'linebreak',
-          valign: 'top'
-        },
-        margin: { left: 14, right: 14 }
-      });
-
-      // Annexe photo
-      doc.addPage();
-      doc.setFont("helvetica", "bold");
-      doc.text(t('projectTracker.photoAnnex'), 14, 20);
-
-      let yPos = 30;
-      for (let i = 0; i < dailyPhotos.length; i++) {
-        const p = dailyPhotos[i];
-        if (yPos > 220) { doc.addPage(); yPos = 20; }
-        try {
-          doc.addImage(p.url_image, 'JPEG', 14, yPos, 120, 75);
-        } catch (e) {
-          doc.text(t('projectTracker.imageNotAvailable'), 14, yPos + 20);
-        }
-        doc.setFontSize(8);
-        const text = t('projectTracker.imageCaption', { num: i+1, date: new Date(p.created_at).toLocaleString() });
-        const lines = doc.splitTextToSize(text, 160);
-        doc.text(lines, 14, yPos + 82);
-        yPos += 95;
-      }
-
-      // Certification finale
-      const finalY = doc.internal.pageSize.getHeight() - 40;
-      doc.setDrawColor(200, 200, 200);
-      doc.line(14, finalY, pageWidth - 14, finalY);
-      doc.setFontSize(8);
-      doc.setFont("helvetica", "italic");
-      doc.text(t('projectTracker.certificationTitle'), 14, finalY + 10);
-      doc.text(t('projectTracker.certificationText', { expert: EXPERT_NOM }), 14, finalY + 15);
-      doc.text(t('projectTracker.certificationText2'), 14, finalY + 19);
-
-      if (action === 'save') doc.save(`Rapport_Technique_${date}.pdf`);
-      else window.open(doc.output('bloburl'), '_blank');
-    } catch (e) {
-      alert(t('projectTracker.pdfError'));
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  if (loading) return <div className="h-screen flex items-center justify-center bg-[#020617]"><Loader2 className="animate-spin text-emerald-500" size={40} /></div>;
-
-  return (
-    <div className="min-h-screen bg-[#020617] text-slate-200 p-6 md:p-12">
-      <div className="max-w-6xl mx-auto space-y-12">
-        
-        {/* HEADER */}
-        <header className="flex justify-between items-center bg-[#0F172A] p-8 rounded-[2rem] border border-white/5 shadow-xl">
-          <div className="flex items-center gap-5">
-            <div className="bg-emerald-500 p-4 rounded-2xl shadow-lg shadow-emerald-500/20"><HardHat className="text-black" /></div>
-            <div>
-              <h2 className="text-2xl font-black text-white">{NOM_AGENCE}</h2>
-              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">
-                {t('projectTracker.phaseLabel')} <span className="text-emerald-500">{projet?.etape_actuelle}</span>
-              </p>
-            </div>
-          </div>
-          <button onClick={() => {localStorage.clear(); window.location.href="/";}} className="text-slate-500 hover:text-red-500 font-bold text-xs uppercase tracking-widest transition-colors flex items-center gap-2">
-            <LogOut size={16}/> {t('projectTracker.quit')}
-          </button>
-        </header>
-
-        {/* DOCUMENTS SECTION */}
-        <section className="bg-[#0F172A]/50 p-8 rounded-[2rem] border border-white/5">
-          <h3 className="text-xs font-black uppercase tracking-[0.3em] text-emerald-500 mb-6 flex items-center gap-2">
-            <FileText size={16}/> {t('projectTracker.documents')}
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {documents.map((doc) => (
-              <a key={doc.id} href={doc.url_fichier} target="_blank" className="flex items-center justify-between p-5 bg-white/5 border border-white/5 rounded-2xl hover:bg-emerald-500/10 hover:border-emerald-500/30 transition-all group">
-                <span className="text-xs font-bold truncate pr-4">{doc.nom_fichier}</span>
-                <Download size={18} className="text-slate-500 group-hover:text-emerald-500" />
-              </a>
-            ))}
-          </div>
-        </section>
-
-        {/* LISTE DES RAPPORTS */}
-        <section>
-          <h3 className="text-xs font-black uppercase tracking-[0.3em] text-emerald-500 mb-6 flex items-center gap-2">
-            <ShieldCheck size={16}/> {t('projectTracker.technicalReports')}
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {Object.keys(groupedPhotos).map((date) => (
-              <div key={date} onClick={() => setSelectedDay(date)} className="group bg-[#0F172A] rounded-[3rem] border border-white/5 overflow-hidden cursor-pointer hover:border-emerald-500/30 transition-all shadow-2xl">
-                <div className="h-56 relative">
-                  <img src={groupedPhotos[date][0].url_image} className="w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A] to-transparent" />
-                  <div className="absolute bottom-6 left-8">
-                    <p className="text-white font-black text-2xl tracking-tighter">{date}</p>
-                    <p className="text-[10px] text-emerald-500 font-bold uppercase mt-1">{t('projectTracker.reportValidated')}</p>
-                  </div>
-                </div>
-                <div className="p-6 flex justify-between items-center bg-white/[0.02]">
-                  <div className="flex flex-col">
-                    <span className="text-[9px] font-black text-slate-500 uppercase">{t('projectTracker.expertise')}</span>
-                    <span className="text-xs text-slate-300 font-bold">{EXPERT_NOM}</span>
-                  </div>
-                  <ChevronRight className="text-emerald-500" />
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-      </div>
-
-      {/* MODALE PRÉVISUALISATION */}
-      {selectedDay && (
-        <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex items-center justify-center p-4">
-          <div className="bg-[#0F172A] w-full max-w-5xl rounded-[3rem] border border-white/10 flex flex-col max-h-[92vh] overflow-hidden shadow-2xl">
-            <div className="p-10 border-b border-white/5 flex justify-between items-center bg-white/[0.01]">
-              <div>
-                <span className="text-[10px] text-emerald-500 font-black uppercase tracking-widest">{t('projectTracker.inspectionReport')}</span>
-                <h3 className="text-3xl font-black text-white">{selectedDay}</h3>
-                <p className="text-xs text-slate-500 mt-1 uppercase font-bold italic">{t('projectTracker.phase', { phase: projet?.etape_actuelle })}</p>
-              </div>
-              <div className="flex gap-4">
-                <button onClick={() => handlePDFAction(selectedDay, groupedPhotos[selectedDay], 'preview')} className="flex items-center gap-2 px-6 py-3 bg-emerald-500 text-black rounded-xl hover:bg-emerald-400 transition-all text-xs font-black uppercase shadow-lg shadow-emerald-500/20">
-                  <Printer size={16}/> {t('projectTracker.generateReport')}
-                </button>
-                <button onClick={() => setSelectedDay(null)} className="p-3 bg-white/5 text-slate-400 rounded-xl hover:text-white transition-all"><X size={24}/></button>
-              </div>
-            </div>
-            
-            <div className="flex-1 overflow-y-auto p-10 space-y-12 custom-scrollbar">
-              <div className="bg-emerald-500/5 p-6 rounded-2xl border border-emerald-500/20 flex gap-4 items-center">
-                 <ShieldCheck className="text-emerald-500" size={24}/>
-                 <p className="text-xs text-slate-300 leading-relaxed italic">
-                   {t('projectTracker.certification')}
-                 </p>
-              </div>
-
-              {groupedPhotos[selectedDay].map((p: any, i: number) => (
-                <div key={i} className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-                  <div className="rounded-3xl overflow-hidden border border-white/5 shadow-2xl">
-                    <img src={p.url_image} className="w-full aspect-video object-cover" />
-                  </div>
-                  <div className="space-y-4 py-2">
-                    <div className="flex items-center gap-2 text-[10px] font-black uppercase text-slate-500 tracking-tighter">
-                       <MapPin size={14} className="text-emerald-500"/> {t('projectTracker.location', { lat: p.latitude, lng: p.longitude })}
-                    </div>
-                    <h4 className="text-sm font-black text-white uppercase">{t('projectTracker.observation', { num: i+1 })}</h4>
-                    <p className="text-slate-400 text-sm leading-relaxed border-l-2 border-emerald-500 pl-4 italic">
-                      "{p.note_expert || t('projectTracker.defaultObservation')}"
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-      
-      <style jsx global>{`
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #10b981; border-radius: 10px; }
-      `}</style>
-    </div>
-  );
-}
-</file>
-
 <file path="src/components/Footer.tsx">
 "use client";
 
@@ -13842,123 +13959,6 @@ export async function GET(request: Request) {
     console.error("Erreur API Properties:", error);
     return NextResponse.json([], { status: 500 });
   }
-}
-</file>
-
-<file path="app/globals.css">
-@import "tailwindcss";
-
-/* 1. RESET STRUCTUREL */
-html, body {
-  margin: 0 !important;
-  padding: 0 !important;
-  width: 100%;
-}
-
-@layer base {
-  :root {
-    --background: #ffffff;
-    --foreground: #0f172a;
-  }
-
-  /* Force les variables au niveau le plus haut */
-  html.dark {
-    --background: #020617 !important;
-    --foreground: #ffffff !important; /* Blanc pur ici aussi */
-  }
-
-  body {
-    background-color: var(--background) !important;
-    color: var(--foreground) !important;
-    @apply transition-colors duration-300 antialiased min-h-screen;
-  }
-
-  /* 2. LE SÉLECTEUR "ÉCLAT PUR" (VIGNETTES ET TEXTES) */
-  /* On force le BLANC PUR (#FFFFFF) et l'OPACITÉ TOTALE */
-  html.dark .text-slate-900, 
-  html.dark .text-slate-800, 
-  html.dark .text-slate-700, 
-  html.dark .text-slate-600,
-  html.dark .text-slate-500,
-  html.dark .text-slate-400,
-  html.dark .text-gray-900,
-  html.dark .text-gray-600,
-  html.dark .text-gray-500,
-  html.dark .text-gray-400,
-  html.dark h1, html.dark h2, html.dark h3, html.dark h4, 
-  html.dark p, html.dark span:not(.bg-[#D4AF37] span), 
-  html.dark li, html.dark a {
-    color: #ffffff !important; /* Blanc pur absolu */
-    opacity: 1 !important;      /* Supprime l'effet gris/bleu transparent */
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
-
-  /* 3. LES VIGNETTES ET LE FOOTER */
-  /* On s'assure que les fonds ne sont plus blancs */
-  html.dark .bg-white:not(button):not(.recherche-privee-btn),
-  html.dark section,
-  html.dark footer,
-  html.dark main,
-  html.dark .property-card,
-  html.dark .bg-slate-50,
-  html.dark .bg-gray-50,
-  html.dark .bg-slate-100 {
-    background-color: #020617 !important;
-    border-color: rgba(255, 255, 255, 0.2) !important; /* Bordures plus visibles */
-  }
-
-  /* 4. ÉLÉMENTS DE VIGNETTE (Icones techniques) */
-  /* On force les petits labels (ex: "3 lits") à être très blancs */
-  html.dark .text-slate-800, 
-  html.dark .text-slate-100,
-  html.dark .font-medium {
-    color: #ffffff !important;
-  }
-
-  /* 5. EXCEPTIONS (Boutons blancs et éléments dorés) */
-  html.dark button.bg-white span,
-  html.dark .bg-white button span,
-  html.dark .recherche-privee-btn span {
-    color: #020617 !important;
-    font-weight: 700 !important; /* Plus de gras pour la lisibilité sur bouton */
-  }
-
-  html.dark .text-[#D4AF37], html.dark .text-gold {
-    color: #D4AF37 !important;
-  }
-}
-
-/* 6. SCROLLBAR & PIN */
-html.dark input[type="password"] {
-  background-color: #1e293b !important;
-  color: #D4AF37 !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-}
-
-::-webkit-scrollbar { 
-  width: 6px; 
-}
-
-::-webkit-scrollbar-track { 
-  background: transparent; 
-}
-
-::-webkit-scrollbar-thumb { 
-  background: #D4AF37; 
-  border-radius: 10px; 
-}
-
-/* 7. FIX LAYOUT */
-main { 
-  margin-top: 0 !important; 
-  padding-top: 0 !important; 
-}
-
-/* Forcer le blanc pour les liens du menu mobile en mode sombre */
-.dark .mobile-menu-link {
-  color: #ffffff !important;
-  opacity: 1 !important;
 }
 </file>
 
@@ -17439,597 +17439,6 @@ export default function RegionGrid({ properties, onRegionClick }: RegionGridProp
 }
 </file>
 
-<file path="src/dictionaries/es.json">
-{
-  "common": {
-    "backToHome": "Volver al inicio",
-    "backToSelection": "Volver a la selección",
-    "loading": "Cargando...",
-    "save": "Guardar",
-    "print": "Imprimir",
-    "search": "Buscar",
-    "reset": "Reiniciar",
-    "close": "Cerrar",
-    "confirm": "Confirmar",
-    "cancel": "Cancelar",
-    "error": "Error",
-    "success": "Éxito",
-    "yes": "Sí",
-    "no": "No",
-    "optional": "Opcional"
-  },
-  "nav": {
-    "home": "Inicio",
-    "contact": "Contacto",
-    "clientAccess": "Acceso Cliente",
-    "search": "Buscar",
-    "budget": "Presupuesto Máx.",
-    "results": "Mostrar resultados",
-    "private": "Acceso Privado",
-    "pinPlaceholder": "PIN",
-    "validate": "Validar",
-    "subtitle": "Encuentre su villa ideal",
-    "cashbackInfo": "Información Cashback"
-  },
-  "footer": {
-    "excellence": "Excelencia Inmobiliaria",
-    "description": "El arte de la inmobiliaria de excepción. Forjamos puentes entre sus ambiciones y las propiedades más prestigiosas de la costa.",
-    "collections": "Colecciones",
-    "villasSignature": "Villas Signature",
-    "domainsPrestige": "Dominios de Prestigio",
-    "newDevelopments": "Nuevos Desarrollos",
-    "privateClientAccess": "Acceso Privado Cliente",
-    "proSpace": "Espacio Pro",
-    "siteTracking": "Seguimiento de Obra",
-    "supervisor": "Supervisor",
-    "partnerPortal": "Portal de Socios",
-    "socialHeadquarters": "Sede Social",
-    "address": "Calle Pablo Picass 1",
-    "city": "Orihuela Costa, España",
-    "email": "contact@data-home.io",
-    "phone": "+34 627 76 82 33",
-    "privacy": "Privacidad",
-    "legal": "Aviso Legal",
-    "eliteEdition": "Elite Edition v2.0"
-  },
-  "home": {
-    "heroTitleLine1": "Villas de Lujo &",
-    "heroTitleLine2": "Propiedades de Excepción",
-    "heroSubtitle": "COSTA BLANCA | COSTA DEL SOL",
-    "findVilla": "Encuentre su villa",
-    "ownerSection": {
-      "title": "Siga su proyecto",
-      "subtitle": "en tiempo real.",
-      "description": "Acceda a su cockpit de construcción privado para seguir cada etapa.",
-      "pinPlaceholder": "CÓDIGO PIN",
-      "accessButton": "Acceder a la obra"
-    },
-    "collection": {
-      "title": "Portafolio Privado",
-      "propertiesSelected": "Propiedades Seleccionadas",
-      "noMatch": "Sin coincidencias",
-      "noMatchDescription": "No encontramos ninguna propiedad que coincida con sus criterios.",
-      "tryWider": "Intente ampliar sus filtros.",
-      "reset": "Reiniciar"
-    },
-    "regionGrid": {
-      "ourDestinations": "Nuestros Destinos",
-      "exceptionalPlaces": "Lugares de Excepción",
-      "description": "Una selección rigurosa de los enclaves más prestigiosos del litoral.",
-      "properties": "Propiedades",
-      "discover": "Descubrir"
-    },
-    "searchModal": {
-      "search": "Buscar",
-      "sub": "Encuentre su villa ideal",
-      "budget": "Presupuesto Máx.",
-      "results": "Mostrar resultados"
-    },
-    "clientLogin": {
-      "private": "Acceso Privado",
-      "pinPlaceholder": "PIN",
-      "validate": "Validar"
-    },
-    "loading": {
-      "updating": "Actualizando...",
-      "amaruExcellence": "data home..."
-    }
-  },
-  "propertyCard": {
-    "ref": "REF: {ref}",
-    "exclusivity": "EXCLUSIVIDAD",
-    "beds": "hab.",
-    "baths": "baños",
-    "pool": "Piscina",
-    "noPool": "Sin piscina",
-    "land": "terreno",
-    "garage": "Garaje",
-    "surface": "m²",
-    "plot": "m² parcela",
-    "fallbackTitle": "Villa de Prestigio"
-  },
-  "propertyDetail": {
-    "back": "Volver a la selección",
-    "backToProgram": "Volver al programa {name}",
-    "ref": "Ref: {ref}",
-    "bedrooms": "Dormitorios",
-    "bathrooms": "Baños",
-    "built": "m² construidos",
-    "plot": "m² parcela",
-    "pool": "Piscina",
-    "poolPrivate": "Privada",
-    "poolNo": "No",
-    "parking": "Aparcamiento",
-    "artOfLiving": "El Arte de Vivir",
-    "technicalPlans": "Planos Técnicos",
-    "detailedLayout": "Distribución detallada",
-    "price": "Precio de venta",
-    "brochure": "Folleto PDF",
-    "whatsapp": "Contacto WhatsApp",
-    "whatsappDirect": "WhatsApp Directo",
-    "bookVisit": "Reservar Visita",
-    "advisor": "Asesor",
-    "activateCashback": "Activar mi Cashback",
-    "privilege": "Privilegio Amaru",
-    "location": "Ubicación Privilegiada",
-    "distanceSea": "Mar a {distance}km",
-    "golf": "Golf a {distance}km",
-    "propertyNotFound": "Propiedad no encontrada",
-    "backToCatalogue": "Volver al catálogo",
-    "loading": "Cargando propiedad...",
-    "rooms": "Habitaciones",
-    "baths": "Baños",
-    "surface": "m² construidos",
-    "from": "Desde",
-    "configurations": "Configuraciones disponibles",
-    "selected": "Modelo seleccionado",
-    "whatsapp_msg": "Hola, me gustaría más información sobre"
-  },
-  "cashback": {
-    "title": "El Programa de Ventajas Negociadas",
-    "description": "En Amaru, cada transacción es única. El \"Cashback\" no es una escala fija, sino una condición prenegociada con nuestros socios para maximizar el valor de su inversión desde el principio.",
-    "flexibility": "Flexibilidad Total",
-    "flexibilityText": "Una ventaja a medida adaptada a su proyecto",
-    "example": "Ejemplo de dotación",
-    "exampleAmount": "2 500 €*",
-    "orEquipment": "o equivalente en mobiliario / servicios",
-    "points": [
-      "Condición negociada previamente con la agencia o promotor socio.",
-      "Libre elección entre pago en efectivo, paquete de mobiliario o cobertura de gastos."
-    ],
-    "options": {
-      "cash": {
-        "title": "En Efectivo",
-        "desc": "Una inyección de liquidez directa para optimizar su plan de financiación o gastos accesorios."
-      },
-      "furniture": {
-        "title": "Mobiliario & Diseño",
-        "desc": "Una dotación dedicada al amueblamiento de prestigio para mudarse a una villa lista para vivir."
-      },
-      "services": {
-        "title": "Servicios & Honorarios",
-        "desc": "Cobertura de sus gastos de abogado o asesoría para una transacción sin problemas."
-      }
-    },
-    "activation": "Condiciones de activación",
-    "activationText": "Este sistema de Cashback es fruto de acuerdos específicos entre Amaru Properties y sus socios inmobiliarios. Cada importe o servicio se valida al reservar su propiedad.",
-    "activationDetail": "Según sus necesidades, esta ventaja puede convertirse en suministro de mobiliario de diseñador o pago de honorarios legales, ofreciendo una gran flexibilidad fiscal y operativa.",
-    "backHome": "Volver al inicio"
-  },
-  "contact": {
-    "heroBadge": "🌍 Nuestra Ventaja Humana",
-    "heroTitle": "Experiencia Sin Fronteras",
-    "heroQuote": "\"Nuestra fuerza reside en nuestra capacidad para conectar los mercados locales con las oportunidades globales.\"",
-    "formTitle": "Contáctenos",
-    "formSubtitle": "La Excelencia Amaru a su servicio",
-    "namePlaceholder": "NOMBRE COMPLETO",
-    "emailPlaceholder": "EMAIL",
-    "regionPlaceholder": "PAÍS / REGIÓN",
-    "messagePlaceholder": "DETALLES DE SU PROYECTO...",
-    "submit": "Contactar al Experto Dedicado",
-    "submitting": "ENVIANDO...",
-    "success": "¡Mensaje enviado! Gillian se pondrá en contacto con usted.",
-    "error": "Error. Por favor, inténtelo de nuevo.",
-    "team": [
-      {
-        "name": "Deborah",
-        "role": "Excelencia Operativa y Experiencia del Cliente",
-        "worldRegion": "Operaciones Globales",
-        "background": "Garante de la fluidez de los procesos y la satisfacción del cliente. Asegura el seguimiento operativo diario para garantizar que cada proyecto reciba una atención personalizada y un rigor de ejecución máximo.",
-        "skills": ["Procesos", "Experiencia del Cliente", "Rigor"],
-        "market": "Sede Amaru"
-      },
-      {
-        "name": "Gillian",
-        "role": "Experto en Benelux, DACH y Reino Unido",
-        "worldRegion": "Europa del Norte y Reino Unido",
-        "background": "Especialista en mercados de alto poder adquisitivo, especialmente Bélgica, Países Bajos, Alemania y Reino Unido. Asegura el vínculo estratégico entre los inversores del norte de Europa y las oportunidades internacionales.",
-        "skills": ["Inversión", "Región DACH", "Estrategia"],
-        "market": "Internacional"
-      },
-      {
-        "name": "Joanna Pawelek",
-        "role": "Europa del Este y Estratega Internacional",
-        "worldRegion": "Europa del Este y angloparlante",
-        "background": "Experta en el mercado de Alicante. Actúa como puente estratégico para inversores de Europa del Este y el mundo angloparlante gracias a su perfecto dominio del polaco, inglés y español.",
-        "skills": ["Experiencia multilingüe", "Mercado internacional", "Alicante"],
-        "market": "Alicante / Costa Blanca"
-      },
-      {
-        "name": "Abdellah Touati",
-        "role": "Experto en MENA y Américas",
-        "worldRegion": "Oriente Medio y Américas",
-        "background": "Con una trayectoria técnica en ingeniería civil y experiencia en el mercado de Dubái, lidera la expansión hacia mercados emergentes y América del Norte, conectando a los promotores con redes globales de inversores.",
-        "skills": ["Ingeniería Civil", "Mercado de Dubái", "Redes Globales"],
-        "market": "MENA / EE. UU. / Canadá"
-      },
-      {
-        "name": "Gaëtan",
-        "role": "Francofonía y Estrategia Global",
-        "worldRegion": "Mundo Francófono",
-        "background": "Arquitecto de la estrategia comercial, asegura la coherencia de las alianzas con actores institucionales (notarios, abogados, promotores) y la expansión en el mercado francófono global, incluyendo Europa y Canadá.",
-        "skills": ["Alianzas B2B", "Estrategia", "Expansión"],
-        "market": "Francofonía Global"
-      }
-    ]
-  },
-  "login": {
-    "title": "Amaru Engine",
-    "subtitle": "Autenticación Segura",
-    "pinTab": "CÓDIGO PIN",
-    "credentialsTab": "CREDENCIALES",
-    "pinPlaceholder": "••••••",
-    "connect": "Conectar",
-    "emailLabel": "Usuario",
-    "passwordLabel": "Contraseña",
-    "validate": "VALIDAR ACCESO",
-    "reset": "Reiniciar terminal",
-    "invalidPin": "Código PIN inválido",
-    "invalidCredentials": "Credenciales inválidas",
-    "validationError": "Error de validación",
-    "profileMissing": "Perfil no encontrado en la base de datos.",
-    "roleNotAuthorized": "Rol no autorizado.",
-    "systemError": "Error del sistema."
-  },
-  "projectTracker": {
-    "agencyName": "AMARU-HOMES",
-    "department": "Departamento de Control Técnico y Calidad",
-    "phase": "Fase Actual: {phase}",
-    "phaseLabel": "Fase Actual:",
-    "quit": "Salir",
-    "documents": "Anexos Administrativos",
-    "technicalReports": "Expediente de Seguimiento Técnico",
-    "reportValidated": "Informe de Inspección Validado",
-    "expertise": "Experticia",
-    "inspectionReport": "Informe de Inspección",
-    "generateReport": "Generar Informe",
-    "certification": "Certifico que la información y las fotografías presentadas a continuación fueron recogidas in situ por el departamento técnico de Amaru-Homes. Las coordenadas GPS garantizan la autenticidad de la inspección.",
-    "observation": "Observación técnica #{number}",
-    "location": "Ubicación: {lat}, {lng}",
-    "expertName": "Gaëtan Mukeba",
-    "reportRef": "Informe de Inspección #RC-{ref}",
-    "visitDate": "Fecha de visita: {date}",
-    "recipient": "DESTINATARIO:",
-    "project": "Proyecto: {name}",
-    "expert": "EXPERTO REFERENTE:",
-    "defaultObservation": "No se detectó ninguna anomalía durante la inspección visual.",
-    "statusConforme": "ESTADO: CONFORME",
-    "photoRef": "Toma #{num}\n\nGPS: {lat}\n{lng}",
-    "photoHeader": "REFERENCIA FOTO",
-    "analysisHeader": "ANÁLISIS TÉCNICO Y OBSERVACIONES",
-    "photoAnnex": "ANEXO FOTOGRÁFICO Y GEOLOCALIZACIÓN",
-    "imageNotAvailable": "(Imagen no disponible)",
-    "imageCaption": "Ilustración #{num} - Capturada el {date}",
-    "certificationTitle": "CERTIFICACIÓN:",
-    "certificationText": "Yo, el abajo firmante, {expert}, certifico que la información, los datos GPS y las fotografías contenidas en este informe reflejan fielmente el estado real de avance de la obra en la fecha indicada.",
-    "pdfError": "Error al generar el PDF"
-  },
-  "adminChantier": {
-    "backHome": "Volver al Inicio",
-    "title": "Luxury Staff",
-    "subtitle": "Terreno y Reportes",
-    "pinPlaceholder": "••••••",
-    "connect": "Conectar",
-    "agent": "Agente",
-    "whichSite": "¿Qué obra visita?",
-    "searchPlaceholder": "Ej: Villa Bianca...",
-    "changeVilla": "Cambiar de villa",
-    "constructionPhase": "Fase de construcción",
-    "newReport": "Nuevo Informe",
-    "observationsPlaceholder": "Observaciones sobre el terreno...",
-    "locate": "Localizar",
-    "gpsOk": "GPS OK",
-    "photo": "Foto",
-    "publish": "Publicar informe ({count})",
-    "stepUpdated": "Etapa actualizada",
-    "uploading": "Subiendo...",
-    "photoAdded": "¡Foto añadida!",
-    "publishing": "Publicando...",
-    "reportSent": "¡Informe enviado!",
-    "phases": [
-      "0. Firma y Reserva",
-      "1. Terreno / Movimiento de tierras",
-      "2. Cimientos",
-      "3. Muros / Elevación",
-      "4. Cubierta / Estructura de madera",
-      "5. Carpintería",
-      "6. Electricidad / Fontanería",
-      "7. Aislamiento",
-      "8. Yesería",
-      "9. Suelos y Alicatados",
-      "10. Pintura / Acabados",
-      "11. Exteriores / Jardín",
-      "12. Entrega de llaves"
-    ],
-    "pinCheckError": "Error al verificar el PIN.",
-    "noAccess": "Esta cuenta no tiene permisos de acceso a la interfaz de obra.",
-    "invalidPin": "PIN inválido.",
-    "projectNotFound": "Obra no encontrada.",
-    "defaultPhotoComment": "Foto de seguimiento",
-    "storageError": "Error de almacenamiento: {message}",
-    "databaseError": "Error de base de datos: {message}"
-  },
-   "adminDashboard": {
-    "adminControl": "Control de Administración",
-    "search": "BUSCAR...",
-    "searchPlaceholder": "BUSCAR...",
-    "projects": "Expedientes",
-    "team": "Equipo",
-    "publicSite": "Sitio Público",
-    "logout": "Cerrar sesión",
-    "activeConstructionFile": "Expediente de construcción activo",
-    "ref": "REF: {ref}",
-    "owner": "Propietario: {name}",
-    "print": "Imprimir",
-    "save": "Guardar expediente",
-    "saveSuccess": "✅ ¡Expediente actualizado con éxito!",
-    "uploadError": "Error de importación: {message}",
-    "confirmDeleteDocument": "¿Está seguro de que desea eliminar permanentemente este documento?",
-    "saveFile": "Guardar expediente",
-    "tabs": {
-      "clientBudget": "Cliente y Presupuesto",
-      "constructionStatus": "Estado de la Obra",
-      "documents": "Caja fuerte (Docs)"
-    },
-    "filters": {
-      "tabLabel": "Filtros de Ventas (XML)",
-      "minCommission": "Comisión Mínima",
-      "excludePromoters": "Excluir Promotores",
-      "description": "* Estos parámetros filtran en tiempo real las propiedades importadas a través del feed XML en la página pública."
-    },
-    "clientInfo": {
-      "title": "Datos del propietario",
-      "firstName": "Nombre",
-      "lastName": "Apellido",
-      "email": "Email",
-      "phone": "Teléfono"
-    },
-    "address": {
-      "title": "Ubicación del inmueble",
-      "street": "Calle / Dirección",
-      "city": "Ciudad",
-      "postal": "Código Postal",
-      "country": "País"
-    },
-    "cashback": {
-      "reward": "Recompensa Cashback",
-      "paidAfterClosure": "Importe pagado después del cierre"
-    },
-    "pin": {
-      "code": "Código PIN de conexión",
-      "copy": "Copiar código",
-      "copied": "¡Copiado!",
-      "encryption": "Cifrado AES-256 Activo",
-      "notDefined": "El código PIN no está definido para este proyecto."
-    },
-    "progress": {
-      "title": "Progreso en Tiempo Real",
-      "global": "Avance Global",
-      "phase": "Etapa actual seleccionada",
-      "weeklyComments": "Comentarios semanales",
-      "visibleByClient": "Visible para el cliente",
-      "placeholder": "Detalle aquí los trabajos realizados esta semana (ej: Colocación de la losa de hormigón terminada...)"
-    },
-    "constats": {
-      "title": "Inspecciones técnicas ({count})",
-      "photos": "{count} foto(s)"
-    },
-    "delivery": {
-      "estimated": "Entrega estimada",
-      "realTimeUpdate": "La fecha de entrega se actualiza en tiempo real en el espacio del cliente."
-    },
-    "builder": {
-      "partner": "Constructor socio",
-      "placeholder": "Ej: Porcelanosa / Grupo Isan"
-    },
-    "docs": {
-      "title": "Documentos en la Nube",
-      "subtitle": "Zona de almacenamiento seguro para el cliente",
-      "upload": "Subir archivo",
-      "processing": "Procesando...",
-      "noDocuments": "Ningún documento archivado"
-    },
-  "adminStaff": {
-    "userCreationFailed": "Error al crear el usuario",
-    "addSuccess": "✅ ¡Colaborador añadido! PIN generado: {pin}",
-    "addError": "Error al añadir: {message}",
-    "cannotDeleteSelf": "No puede eliminar su propia cuenta.",
-    "confirmDelete": "¿Está seguro de que desea eliminar permanentemente este colaborador?",
-    "deleteSuccess": "Colaborador eliminado.",
-    "deleteError": "Error al eliminar: {message}",
-    "copyPin": "Copiar PIN",
-    "delete": "Eliminar este colaborador",
-    "securityCode": "Código de seguridad",
-    "superAdmin": "Super Administrador",
-    "admin": "Administrador de agencia",
-    "agent": "Agente (Acceso limitado)",
-    "add": "Añadir colaborador",
-    "enrollment": "Inscripción en el equipo {company}",
-    "firstName": "Nombre",
-    "lastName": "Apellido",
-    "email": "Email profesional",
-    "role": "Asignación de rol y privilegios",
-    "security": "Seguridad Automática",
-    "pinInfo": "Se generará un código PIN único de 6 dígitos. El colaborador podrá conectarse inmediatamente después de la validación.",
-    "confirm": "Confirmar invitación"
-  },
-  "adminProject": {
-    "initialize": "Inicializar Proyecto",
-    "subtitle": "Registro de una nueva obra Amaru",
-    "error": "Error: {message}",
-    "firstName": "Nombre",
-    "firstNamePlaceholder": "John",
-    "lastName": "Apellido",
-    "lastNamePlaceholder": "Doe",
-    "villaName": "Nombre de la Villa",
-    "villaPlaceholder": "VILLA AMARU LUXE",
-    "clientEmail": "Email del cliente",
-    "emailPlaceholder": "cliente@ejemplo.com",
-    "phone": "Teléfono",
-    "phonePlaceholder": "+34 600 00 00 00",
-    "address": "Calle / Dirección",
-    "addressPlaceholder": "123 Avenida de la Playa",
-    "city": "Ciudad",
-    "cityPlaceholder": "Marbella",
-    "postalCode": "Código postal",
-    "country": "País",
-    "generate": "Generar expediente completo"
-  },
-  "superAdmin": {
-    "initializing": "Inicializando terminal...",
-    "accessDenied": "Acceso Denegado",
-    "noPrivileges": "Su cuenta no tiene privilegios de Super-Administrador.",
-    "logout": "Cerrar sesión",
-    "title": "Super Control",
-    "subtitle": "Sistema Centralizado",
-    "publicSite": "Sitio Público",
-    "deploy": "Desplegar una cuenta",
-    "firstName": "Nombre",
-    "lastName": "Apellido",
-    "agency": "Agencia / Socio",
-    "packLevel": "Nivel del Paquete",
-    "core": "CORE (2 Expertos)",
-    "ascent": "ASCENT (10 Expertos)",
-    "horizon": "HORIZON (Ilimitado)",
-    "emailPlaceholder": "Email de conexión",
-    "passwordPlaceholder": "Contraseña",
-    "activate": "ACTIVAR LICENCIA",
-    "activeUsers": "Usuarios Activos",
-    "database": "Base de Datos en Vivo",
-    "search": "Buscar...",
-    "id": "ID: {id}",
-    "pin": "PIN: {pin}",
-    "deleteConfirm": "¿Revocar definitivamente el acceso de \"{company}\"?"
-  },
-  "contactCashback": {
-    "back": "Volver al inicio",
-    "title": "Activación Cashback",
-    "description": "Complete su información para vincular esta ventaja a su perfil de cliente.",
-    "firstName": "Nombre *",
-    "lastName": "Apellido *",
-    "email": "Correo electrónico *",
-    "phone": "Teléfono",
-    "submit": "Activar mi Cashback"
-  },
-  "merci": {
-    "title": "Solicitud Recibida",
-    "message": "Su solicitud de Cashback ha sido transmitida. Nos pondremos en contacto con usted en un plazo de 24 horas para presentarle los detalles de su ventaja.",
-    "backHome": "Volver al inicio",
-    "brand": "Luxury Estates — Inmobiliaria Redefinida"
-  },
-  "development": {
-    "back": "Volver a la selección",
-    "exclusiveDevelopment": "Desarrollo Exclusivo",
-    "availability": "Disponibilidad",
-    "units": "Unidades",
-    "artOfLiving": "El Arte de Vivir",
-    "distanceSea": "Distancia al Mar",
-    "airport": "Aeropuerto",
-    "unitsAvailable": "Unidades disponibles y Planos",
-    "selectUnit": "Seleccione un lote para ver los detalles y planos de planta",
-    "available": "Disponible",
-    "seeDetails": "Ver planos y detalles"
-  },
-  "bien": {
-    "backToProgram": "Volver al programa {name}",
-    "ref": "Ref: {ref}",
-    "bedrooms": "Dormitorios",
-    "baths": "Baños",
-    "built": "m² construidos",
-    "pool": "Piscina",
-    "artOfLiving": "El Arte de Vivir",
-    "technicalPlans": "Planos Técnicos",
-    "detailedLayout": "Distribución detallada",
-    "price": "Precio de venta",
-    "brochure": "Folleto PDF",
-    "whatsapp": "Contacto WhatsApp",
-    "whatsappMobile": "Chatear en WhatsApp",
-    "bookVisit": "Reservar Visita",
-    "advisor": "Asesor",
-    "distanceSea": "Mar a {distance}km",
-    "golf": "Golf a {distance}km"
-  },
-  "advancedSearch": {
-    "propertyRef": "Referencia de Propiedad",
-    "refPlaceholder": "Ej: REF-1234",
-    "region": "Región",
-    "allSpain": "España (Todas)",
-    "costaBlanca": "Costa Blanca",
-    "costaCalida": "Costa Cálida",
-    "costaDelSol": "Costa del Sol",
-    "costaAlmeria": "Costa Almería",
-    "type": "Tipo",
-    "anyType": "Indiferente",
-    "villa": "Villa",
-    "apartment": "Apartamento",
-    "penthouse": "Ático",
-    "bungalow": "Bungalow",
-    "townhouse": "Casa adosada",
-    "min": "Mín",
-    "max": "Máx",
-    "bedrooms": "Dormitorios",
-    "collection": "Colección Amaru • Selección Exclusiva",
-    "reset": "Reiniciar"
-  },
-  "scrollingBanner": {
-    "portfolioExclusif": "Portafolio Exclusivo",
-    "conciergeriePrivee": "Conserjería Privada",
-    "ventesOffMarket": "Ventas Off-Market",
-    "expertiseArchitecturale": "Experticia Arquitectónica",
-    "investissements": "Inversiones",
-    "gestionPrestige": "Gestión de Prestigio"
-  },
-  "testimonials": {
-    "title": "La confianza es un valor fundamental",
-    "subtitle": "La satisfacción de nuestros clientes es nuestro mayor éxito.",
-    "reviews": [
-      {
-        "name": "Isabelle Dupont",
-        "text": "¡Excelente experiencia con Blanca Calida! Conocen perfectamente el mercado y saben asesorar según las necesidades específicas."
-      },
-      {
-        "name": "Sarah Williams",
-        "text": "Professional team, they helped us navigate every detail of the buying process. Highly recommended!"
-      },
-      {
-        "name": "Michael Ford",
-        "text": "Sehr guter Service, von der Besichtigung bis zur Kaufabwicklung. Alles war perfekt organisiert."
-      }
-    ]
-  },
-  "languageSelector": {
-    "label": "Idioma"
-  },
-  "themeToggle": {
-    "ariaLabel": "Cambiar tema"
-  },
-  "errors": {
-    "pinIncorrect": "Código PIN incorrecto.",
-    "incorrectPin": "PIN incorrecto."
-  }
-}
-</file>
-
 <file path="src/dictionaries/nl.json">
 {
   "common": {
@@ -19949,6 +19358,647 @@ export default function RegionGrid({ properties, onRegionClick }: RegionGridProp
   "errors": {
     "pinIncorrect": "Incorrect PIN code.",
     "incorrectPin": "Incorrect PIN."
+  }
+}
+</file>
+
+<file path="src/dictionaries/es.json">
+{
+  "common": {
+    "backToHome": "Volver al inicio",
+    "backToSelection": "Volver a la selección",
+    "loading": "Cargando...",
+    "save": "Guardar",
+    "print": "Imprimir",
+    "search": "Buscar",
+    "reset": "Reiniciar",
+    "close": "Cerrar",
+    "confirm": "Confirmar",
+    "cancel": "Cancelar",
+    "error": "Error",
+    "success": "Éxito",
+    "yes": "Sí",
+    "no": "No",
+    "optional": "Opcional"
+  },
+  "nav": {
+    "home": "Inicio",
+    "contact": "Contacto",
+    "clientAccess": "Acceso Cliente",
+    "search": "Buscar",
+    "budget": "Presupuesto Máx.",
+    "results": "Mostrar resultados",
+    "private": "Acceso Privado",
+    "pinPlaceholder": "PIN",
+    "validate": "Validar",
+    "subtitle": "Encuentre su villa ideal",
+    "cashbackInfo": "Información Cashback"
+  },
+  "footer": {
+    "excellence": "Excelencia Inmobiliaria",
+    "description": "El arte de la inmobiliaria de excepción. Forjamos puentes entre sus ambiciones y las propiedades más prestigiosas de la costa.",
+    "collections": "Colecciones",
+    "villasSignature": "Villas Signature",
+    "domainsPrestige": "Dominios de Prestigio",
+    "newDevelopments": "Nuevos Desarrollos",
+    "privateClientAccess": "Acceso Privado Cliente",
+    "proSpace": "Espacio Pro",
+    "siteTracking": "Seguimiento de Obra",
+    "supervisor": "Supervisor",
+    "partnerPortal": "Portal de Socios",
+    "socialHeadquarters": "Sede Social",
+    "address": "Calle Pablo Picass 1",
+    "city": "Orihuela Costa, España",
+    "email": "contact@data-home.io",
+    "phone": "+34 627 76 82 33",
+    "privacy": "Privacidad",
+    "legal": "Aviso Legal",
+    "eliteEdition": "Elite Edition v2.0"
+  },
+  "home": {
+    "heroTitleLine1": "Villas de Lujo &",
+    "heroTitleLine2": "Propiedades de Excepción",
+    "heroSubtitle": "COSTA BLANCA | COSTA DEL SOL",
+    "findVilla": "Encuentre su villa",
+    "ownerSection": {
+      "title": "Siga su proyecto",
+      "subtitle": "en tiempo real.",
+      "description": "Acceda a su cockpit de construcción privado para seguir cada etapa.",
+      "pinPlaceholder": "CÓDIGO PIN",
+      "accessButton": "Acceder a la obra"
+    },
+    "collection": {
+      "title": "Portafolio Privado",
+      "propertiesSelected": "Propiedades Seleccionadas",
+      "noMatch": "Sin coincidencias",
+      "noMatchDescription": "No encontramos ninguna propiedad que coincida con sus criterios.",
+      "tryWider": "Intente ampliar sus filtros.",
+      "reset": "Reiniciar"
+    },
+    "regionGrid": {
+      "ourDestinations": "Nuestros Destinos",
+      "exceptionalPlaces": "Lugares de Excepción",
+      "description": "Una selección rigurosa de los enclaves más prestigiosos del litoral.",
+      "properties": "Propiedades",
+      "discover": "Descubrir"
+    },
+    "searchModal": {
+      "search": "Buscar",
+      "sub": "Encuentre su villa ideal",
+      "budget": "Presupuesto Máx.",
+      "results": "Mostrar resultados"
+    },
+    "clientLogin": {
+      "private": "Acceso Privado",
+      "pinPlaceholder": "PIN",
+      "validate": "Validar"
+    },
+    "loading": {
+      "updating": "Actualizando...",
+      "amaruExcellence": "data home..."
+    }
+  },
+  "propertyCard": {
+    "ref": "REF: {ref}",
+    "exclusivity": "EXCLUSIVIDAD",
+    "beds": "hab.",
+    "baths": "baños",
+    "pool": "Piscina",
+    "noPool": "Sin piscina",
+    "land": "terreno",
+    "garage": "Garaje",
+    "surface": "m²",
+    "plot": "m² parcela",
+    "fallbackTitle": "Villa de Prestigio"
+  },
+  "propertyDetail": {
+    "back": "Volver a la selección",
+    "backToProgram": "Volver al programa {name}",
+    "ref": "Ref: {ref}",
+    "bedrooms": "Dormitorios",
+    "bathrooms": "Baños",
+    "built": "m² construidos",
+    "plot": "m² parcela",
+    "pool": "Piscina",
+    "poolPrivate": "Privada",
+    "poolNo": "No",
+    "parking": "Aparcamiento",
+    "artOfLiving": "El Arte de Vivir",
+    "technicalPlans": "Planos Técnicos",
+    "detailedLayout": "Distribución detallada",
+    "price": "Precio de venta",
+    "brochure": "Folleto PDF",
+    "whatsapp": "Contacto WhatsApp",
+    "whatsappDirect": "WhatsApp Directo",
+    "bookVisit": "Reservar Visita",
+    "advisor": "Asesor",
+    "activateCashback": "Activar mi Cashback",
+    "privilege": "Privilegio Amaru",
+    "location": "Ubicación Privilegiada",
+    "distanceSea": "Mar a {distance}km",
+    "golf": "Golf a {distance}km",
+    "propertyNotFound": "Propiedad no encontrada",
+    "backToCatalogue": "Volver al catálogo",
+    "loading": "Cargando propiedad...",
+    "rooms": "Habitaciones",
+    "baths": "Baños",
+    "surface": "m² construidos",
+    "from": "Desde",
+    "configurations": "Configuraciones disponibles",
+    "selected": "Modelo seleccionado",
+    "whatsapp_msg": "Hola, me gustaría más información sobre"
+  },
+  "cashback": {
+    "title": "El Programa de Ventajas Negociadas",
+    "description": "En Amaru, cada transacción es única. El \"Cashback\" no es una escala fija, sino una condición prenegociada con nuestros socios para maximizar el valor de su inversión desde el principio.",
+    "flexibility": "Flexibilidad Total",
+    "flexibilityText": "Una ventaja a medida adaptada a su proyecto",
+    "example": "Ejemplo de dotación",
+    "exampleAmount": "2 500 €*",
+    "orEquipment": "o equivalente en mobiliario / servicios",
+    "points": [
+      "Condición negociada previamente con la agencia o promotor socio.",
+      "Libre elección entre pago en efectivo, paquete de mobiliario o cobertura de gastos."
+    ],
+    "options": {
+      "cash": {
+        "title": "En Efectivo",
+        "desc": "Una inyección de liquidez directa para optimizar su plan de financiación o gastos accesorios."
+      },
+      "furniture": {
+        "title": "Mobiliario & Diseño",
+        "desc": "Una dotación dedicada al amueblamiento de prestigio para mudarse a una villa lista para vivir."
+      },
+      "services": {
+        "title": "Servicios & Honorarios",
+        "desc": "Cobertura de sus gastos de abogado o asesoría para una transacción sin problemas."
+      }
+    },
+    "activation": "Condiciones de activación",
+    "activationText": "Este sistema de Cashback es fruto de acuerdos específicos entre Amaru Properties y sus socios inmobiliarios. Cada importe o servicio se valida al reservar su propiedad.",
+    "activationDetail": "Según sus necesidades, esta ventaja puede convertirse en suministro de mobiliario de diseñador o pago de honorarios legales, ofreciendo una gran flexibilidad fiscal y operativa.",
+    "backHome": "Volver al inicio"
+  },
+  "contact": {
+    "heroBadge": "🌍 Nuestra Ventaja Humana",
+    "heroTitle": "Experiencia Sin Fronteras",
+    "heroQuote": "\"Nuestra fuerza reside en nuestra capacidad para conectar los mercados locales con las oportunidades globales.\"",
+    "formTitle": "Contáctenos",
+    "formSubtitle": "La Excelencia Amaru a su servicio",
+    "namePlaceholder": "NOMBRE COMPLETO",
+    "emailPlaceholder": "EMAIL",
+    "regionPlaceholder": "PAÍS / REGIÓN",
+    "messagePlaceholder": "DETALLES DE SU PROYECTO...",
+    "submit": "Contactar al Experto Dedicado",
+    "submitting": "ENVIANDO...",
+    "success": "¡Mensaje enviado! Gillian se pondrá en contacto con usted.",
+    "error": "Error. Por favor, inténtelo de nuevo.",
+    "team": [
+      {
+        "name": "Deborah",
+        "role": "Excelencia Operativa y Experiencia del Cliente",
+        "worldRegion": "Operaciones Globales",
+        "background": "Garante de la fluidez de los procesos y la satisfacción del cliente. Asegura el seguimiento operativo diario para garantizar que cada proyecto reciba una atención personalizada y un rigor de ejecución máximo.",
+        "skills": ["Procesos", "Experiencia del Cliente", "Rigor"],
+        "market": "Sede Amaru"
+      },
+      {
+        "name": "Gillian",
+        "role": "Experto en Benelux, DACH y Reino Unido",
+        "worldRegion": "Europa del Norte y Reino Unido",
+        "background": "Especialista en mercados de alto poder adquisitivo, especialmente Bélgica, Países Bajos, Alemania y Reino Unido. Asegura el vínculo estratégico entre los inversores del norte de Europa y las oportunidades internacionales.",
+        "skills": ["Inversión", "Región DACH", "Estrategia"],
+        "market": "Internacional"
+      },
+      {
+        "name": "Joanna Pawelek",
+        "role": "Europa del Este y Estratega Internacional",
+        "worldRegion": "Europa del Este y angloparlante",
+        "background": "Experta en el mercado de Alicante. Actúa como puente estratégico para inversores de Europa del Este y el mundo angloparlante gracias a su perfecto dominio del polaco, inglés y español.",
+        "skills": ["Experiencia multilingüe", "Mercado internacional", "Alicante"],
+        "market": "Alicante / Costa Blanca"
+      },
+      {
+        "name": "Abdellah Touati",
+        "role": "Experto en MENA y Américas",
+        "worldRegion": "Oriente Medio y Américas",
+        "background": "Con una trayectoria técnica en ingeniería civil y experiencia en el mercado de Dubái, lidera la expansión hacia mercados emergentes y América del Norte, conectando a los promotores con redes globales de inversores.",
+        "skills": ["Ingeniería Civil", "Mercado de Dubái", "Redes Globales"],
+        "market": "MENA / EE. UU. / Canadá"
+      },
+      {
+        "name": "Gaëtan",
+        "role": "Francofonía y Estrategia Global",
+        "worldRegion": "Mundo Francófono",
+        "background": "Arquitecto de la estrategia comercial, asegura la coherencia de las alianzas con actores institucionales (notarios, abogados, promotores) y la expansión en el mercado francófono global, incluyendo Europa y Canadá.",
+        "skills": ["Alianzas B2B", "Estrategia", "Expansión"],
+        "market": "Francofonía Global"
+      }
+    ]
+  },
+  "login": {
+    "title": "Amaru Engine",
+    "subtitle": "Autenticación Segura",
+    "pinTab": "CÓDIGO PIN",
+    "credentialsTab": "CREDENCIALES",
+    "pinPlaceholder": "••••••",
+    "connect": "Conectar",
+    "emailLabel": "Usuario",
+    "passwordLabel": "Contraseña",
+    "validate": "VALIDAR ACCESO",
+    "reset": "Reiniciar terminal",
+    "invalidPin": "Código PIN inválido",
+    "invalidCredentials": "Credenciales inválidas",
+    "validationError": "Error de validación",
+    "profileMissing": "Perfil no encontrado en la base de datos.",
+    "roleNotAuthorized": "Rol no autorizado.",
+    "systemError": "Error del sistema."
+  },
+  "projectTracker": {
+    "agencyName": "AMARU-HOMES",
+    "department": "Departamento de Control Técnico y Calidad",
+    "phase": "Fase Actual: {phase}",
+    "phaseLabel": "Fase Actual:",
+    "quit": "Salir",
+    "documents": "Anexos Administrativos",
+    "technicalReports": "Expediente de Seguimiento Técnico",
+    "reportValidated": "Informe de Inspección Validado",
+    "expertise": "Experticia",
+    "inspectionReport": "Informe de Inspección",
+    "generateReport": "Generar Informe",
+    "certification": "Certifico que la información y las fotografías presentadas a continuación fueron recogidas in situ por el departamento técnico de Amaru-Homes. Las coordenadas GPS garantizan la autenticidad de la inspección.",
+    "observation": "Observación técnica #{number}",
+    "location": "Ubicación: {lat}, {lng}",
+    "expertName": "Gaëtan Mukeba",
+    "reportRef": "Informe de Inspección #RC-{ref}",
+    "visitDate": "Fecha de visita: {date}",
+    "recipient": "DESTINATARIO:",
+    "project": "Proyecto: {name}",
+    "expert": "EXPERTO REFERENTE:",
+    "defaultObservation": "No se detectó ninguna anomalía durante la inspección visual.",
+    "statusConforme": "ESTADO: CONFORME",
+    "photoRef": "Toma #{num}\n\nGPS: {lat}\n{lng}",
+    "photoHeader": "REFERENCIA FOTO",
+    "analysisHeader": "ANÁLISIS TÉCNICO Y OBSERVACIONES",
+    "photoAnnex": "ANEXO FOTOGRÁFICO Y GEOLOCALIZACIÓN",
+    "imageNotAvailable": "(Imagen no disponible)",
+    "imageCaption": "Ilustración #{num} - Capturada el {date}",
+    "certificationTitle": "CERTIFICACIÓN:",
+    "certificationText": "Yo, el abajo firmante, {expert}, certifico que la información, los datos GPS y las fotografías contenidas en este informe reflejan fielmente el estado real de avance de la obra en la fecha indicada.",
+    "pdfError": "Error al generar el PDF"
+  },
+  "adminChantier": {
+    "backHome": "Volver al Inicio",
+    "title": "Luxury Staff",
+    "subtitle": "Terreno y Reportes",
+    "pinPlaceholder": "••••••",
+    "connect": "Conectar",
+    "agent": "Agente",
+    "whichSite": "¿Qué obra visita?",
+    "searchPlaceholder": "Ej: Villa Bianca...",
+    "changeVilla": "Cambiar de villa",
+    "constructionPhase": "Fase de construcción",
+    "newReport": "Nuevo Informe",
+    "observationsPlaceholder": "Observaciones sobre el terreno...",
+    "locate": "Localizar",
+    "gpsOk": "GPS OK",
+    "photo": "Foto",
+    "publish": "Publicar informe ({count})",
+    "stepUpdated": "Etapa actualizada",
+    "uploading": "Subiendo...",
+    "photoAdded": "¡Foto añadida!",
+    "publishing": "Publicando...",
+    "reportSent": "¡Informe enviado!",
+    "phases": [
+      "0. Firma y Reserva",
+      "1. Terreno / Movimiento de tierras",
+      "2. Cimientos",
+      "3. Muros / Elevación",
+      "4. Cubierta / Estructura de madera",
+      "5. Carpintería",
+      "6. Electricidad / Fontanería",
+      "7. Aislamiento",
+      "8. Yesería",
+      "9. Suelos y Alicatados",
+      "10. Pintura / Acabados",
+      "11. Exteriores / Jardín",
+      "12. Entrega de llaves"
+    ],
+    "pinCheckError": "Error al verificar el PIN.",
+    "noAccess": "Esta cuenta no tiene permisos de acceso a la interfaz de obra.",
+    "invalidPin": "PIN inválido.",
+    "projectNotFound": "Obra no encontrada.",
+    "defaultPhotoComment": "Foto de seguimiento",
+    "storageError": "Error de almacenamiento: {message}",
+    "databaseError": "Error de base de datos: {message}"
+  },
+  "adminDashboard": {
+    "adminControl": "Control de Administración",
+    "search": "BUSCAR...",
+    "searchPlaceholder": "BUSCAR...",
+    "projects": "Expedientes",
+    "team": "Equipo",
+    "publicSite": "Sitio Público",
+    "logout": "Cerrar sesión",
+    "activeConstructionFile": "Expediente de construcción activo",
+    "ref": "REF: {ref}",
+    "owner": "Propietario: {name}",
+    "print": "Imprimir",
+    "save": "Guardar expediente",
+    "saveSuccess": "✅ ¡Expediente actualizado con éxito!",
+    "uploadError": "Error de importación: {message}",
+    "confirmDeleteDocument": "¿Está seguro de que desea eliminar permanentemente este documento?",
+    "saveFile": "Guardar expediente",
+    "tabs": {
+      "clientBudget": "Cliente y Presupuesto",
+      "constructionStatus": "Estado de la Obra",
+      "documents": "Caja fuerte (Docs)"
+    },
+    "filters": {
+      "tabLabel": "Filtros de Ventas (XML)",
+      "minCommission": "Comisión Mínima",
+      "excludePromoters": "Excluir Promotores",
+      "description": "* Estos parámetros filtran en tiempo real las propiedades importadas a través del feed XML en la página pública."
+    },
+    "clientInfo": {
+      "title": "Datos del propietario",
+      "firstName": "Nombre",
+      "lastName": "Apellido",
+      "email": "Email",
+      "phone": "Teléfono"
+    },
+    "address": {
+      "title": "Ubicación del inmueble",
+      "street": "Calle / Dirección",
+      "city": "Ciudad",
+      "postal": "Código Postal",
+      "country": "País"
+    },
+    "cashback": {
+      "reward": "Recompensa Cashback",
+      "paidAfterClosure": "Importe pagado después del cierre"
+    },
+    "pin": {
+      "code": "Código PIN de conexión",
+      "copy": "Copiar código",
+      "copied": "¡Copiado!",
+      "encryption": "Cifrado AES-256 Activo",
+      "notDefined": "El código PIN no está definido para este proyecto."
+    },
+    "progress": {
+      "title": "Progreso en Tiempo Real",
+      "global": "Avance Global",
+      "phase": "Etapa actual seleccionada",
+      "weeklyComments": "Comentarios semanales",
+      "visibleByClient": "Visible para el cliente",
+      "placeholder": "Detalle aquí los trabajos realizados esta semana (ej: Colocación de la losa de hormigón terminada...)"
+    },
+    "constats": {
+      "title": "Inspecciones técnicas ({count})",
+      "photos": "{count} foto(s)"
+    },
+    "delivery": {
+      "estimated": "Entrega estimada",
+      "realTimeUpdate": "La fecha de entrega se actualiza en tiempo real en el espacio del cliente."
+    },
+    "builder": {
+      "partner": "Constructor socio",
+      "placeholder": "Ej: Porcelanosa / Grupo Isan"
+    },
+    "docs": {
+      "title": "Documentos en la Nube",
+      "subtitle": "Zona de almacenamiento seguro para el cliente",
+      "upload": "Subir archivo",
+      "processing": "Procesando...",
+      "noDocuments": "Ningún documento archivado"
+    },
+    "staff": {
+      "add": "Añadir colaborador",
+      "firstName": "Nombre",
+      "lastName": "Apellido",
+      "email": "Email profesional",
+      "role": "Asignación de rol y privilegios",
+      "agent": "Agente (Acceso limitado)",
+      "admin": "Administrador de agencia",
+      "superAdmin": "Super Administrador",
+      "security": "Seguridad Automática",
+      "pinInfo": "Se generará un código PIN único de 6 dígitos. El colaborador podrá conectarse inmediatamente después de la validación.",
+      "confirm": "Confirmar invitación",
+      "copyPin": "Copiar PIN",
+      "delete": "Eliminar este colaborador",
+      "securityCode": "Código de seguridad",
+      "cannotDeleteSelf": "No puede eliminar su propia cuenta."
+    },
+    "inspectionReport": "Informe de Inspección",
+    "observation": "Observación técnica #{num}",
+    "location": "Ubicación: {lat}, {lng}",
+    "certification": "Certifico que la información y las fotografías presentadas a continuación fueron recogidas in situ por el departamento técnico de Amaru-Homes. Las coordenadas GPS garantizan la autenticidad de la inspección.",
+    "generateReport": "Generar Informe",
+    "reportRef": "Informe de Inspección #RC-{ref}",
+    "visitDate": "Fecha de visita: {date}",
+    "phase": "Fase: {phase}",
+    "recipient": "DESTINATARIO:",
+    "project": "Proyecto: {name}",
+    "expert": "EXPERTO REFERENTE:",
+    "defaultObservation": "No se detectó ninguna anomalía durante la inspección visual.",
+    "statusConforme": "ESTADO: CONFORME",
+    "photoRef": "Toma #{num}\n\nGPS: {lat}\n{lng}",
+    "photoHeader": "REFERENCIA FOTO",
+    "analysisHeader": "ANÁLISIS TÉCNICO Y OBSERVACIONES",
+    "photoAnnex": "ANEXO FOTOGRÁFICO Y GEOLOCALIZACIÓN",
+    "imageNotAvailable": "(Imagen no disponible)",
+    "imageCaption": "Ilustración #{num} - Capturada el {date}",
+    "certificationTitle": "CERTIFICACIÓN:",
+    "certificationText": "Yo, el abajo firmante, {expert}, certifico que la información, los datos GPS y las fotografías contenidas en este informe reflejan fielmente el estado real de avance de la obra en la fecha indicada.",
+    "pdfError": "Error al generar el PDF",
+    "initializing": "Inicializando Terminal de Administración",
+    "version": "Dashboard Terminal v2.4.0",
+    "emptyState": {
+      "line1": "Listo para el próximo",
+      "line2": "¿obra maestra?",
+      "subtitle": "Seleccione un expediente de cliente en la barra lateral o cree un nuevo proyecto para iniciar el seguimiento."
+    },
+    "newProject": "Nuevo Proyecto",
+    "manageStaff": "Gestionar Personal",
+    "delivered": "Entregados"
+  },
+  "adminStaff": {
+    "userCreationFailed": "Error al crear el usuario",
+    "addSuccess": "✅ ¡Colaborador añadido! PIN generado: {pin}",
+    "addError": "Error al añadir: {message}",
+    "cannotDeleteSelf": "No puede eliminar su propia cuenta.",
+    "confirmDelete": "¿Está seguro de que desea eliminar permanentemente este colaborador?",
+    "deleteSuccess": "Colaborador eliminado.",
+    "deleteError": "Error al eliminar: {message}",
+    "copyPin": "Copiar PIN",
+    "delete": "Eliminar este colaborador",
+    "securityCode": "Código de seguridad",
+    "superAdmin": "Super Administrador",
+    "admin": "Administrador de agencia",
+    "agent": "Agente (Acceso limitado)",
+    "add": "Añadir colaborador",
+    "enrollment": "Inscripción en el equipo {company}",
+    "firstName": "Nombre",
+    "lastName": "Apellido",
+    "email": "Email profesional",
+    "role": "Asignación de rol y privilegios",
+    "security": "Seguridad Automática",
+    "pinInfo": "Se generará un código PIN único de 6 dígitos. El colaborador podrá conectarse inmediatamente después de la validación.",
+    "confirm": "Confirmar invitación"
+  },
+  "adminProject": {
+    "initialize": "Inicializar Proyecto",
+    "subtitle": "Registro de una nueva obra Amaru",
+    "error": "Error: {message}",
+    "firstName": "Nombre",
+    "firstNamePlaceholder": "John",
+    "lastName": "Apellido",
+    "lastNamePlaceholder": "Doe",
+    "villaName": "Nombre de la Villa",
+    "villaPlaceholder": "VILLA AMARU LUXE",
+    "clientEmail": "Email del cliente",
+    "emailPlaceholder": "cliente@ejemplo.com",
+    "phone": "Teléfono",
+    "phonePlaceholder": "+34 600 00 00 00",
+    "address": "Calle / Dirección",
+    "addressPlaceholder": "123 Avenida de la Playa",
+    "city": "Ciudad",
+    "cityPlaceholder": "Marbella",
+    "postalCode": "Código postal",
+    "country": "País",
+    "generate": "Generar expediente completo"
+  },
+  "superAdmin": {
+    "initializing": "Inicializando terminal...",
+    "accessDenied": "Acceso Denegado",
+    "noPrivileges": "Su cuenta no tiene privilegios de Super-Administrador.",
+    "logout": "Cerrar sesión",
+    "title": "Super Control",
+    "subtitle": "Sistema Centralizado",
+    "publicSite": "Sitio Público",
+    "deploy": "Desplegar una cuenta",
+    "firstName": "Nombre",
+    "lastName": "Apellido",
+    "agency": "Agencia / Socio",
+    "packLevel": "Nivel del Paquete",
+    "core": "CORE (2 Expertos)",
+    "ascent": "ASCENT (10 Expertos)",
+    "horizon": "HORIZON (Ilimitado)",
+    "emailPlaceholder": "Email de conexión",
+    "passwordPlaceholder": "Contraseña",
+    "activate": "ACTIVAR LICENCIA",
+    "activeUsers": "Usuarios Activos",
+    "database": "Base de Datos en Vivo",
+    "search": "Buscar...",
+    "id": "ID: {id}",
+    "pin": "PIN: {pin}",
+    "deleteConfirm": "¿Revocar definitivamente el acceso de \"{company}\"?"
+  },
+  "contactCashback": {
+    "back": "Volver al inicio",
+    "title": "Activación Cashback",
+    "description": "Complete su información para vincular esta ventaja a su perfil de cliente.",
+    "firstName": "Nombre *",
+    "lastName": "Apellido *",
+    "email": "Correo electrónico *",
+    "phone": "Teléfono",
+    "submit": "Activar mi Cashback"
+  },
+  "merci": {
+    "title": "Solicitud Recibida",
+    "message": "Su solicitud de Cashback ha sido transmitida. Nos pondremos en contacto con usted en un plazo de 24 horas para presentarle los detalles de su ventaja.",
+    "backHome": "Volver al inicio",
+    "brand": "Luxury Estates — Inmobiliaria Redefinida"
+  },
+  "development": {
+    "back": "Volver a la selección",
+    "exclusiveDevelopment": "Desarrollo Exclusivo",
+    "availability": "Disponibilidad",
+    "units": "Unidades",
+    "artOfLiving": "El Arte de Vivir",
+    "distanceSea": "Distancia al Mar",
+    "airport": "Aeropuerto",
+    "unitsAvailable": "Unidades disponibles y Planos",
+    "selectUnit": "Seleccione un lote para ver los detalles y planos de planta",
+    "available": "Disponible",
+    "seeDetails": "Ver planos y detalles"
+  },
+  "bien": {
+    "backToProgram": "Volver al programa {name}",
+    "ref": "Ref: {ref}",
+    "bedrooms": "Dormitorios",
+    "baths": "Baños",
+    "built": "m² construidos",
+    "pool": "Piscina",
+    "artOfLiving": "El Arte de Vivir",
+    "technicalPlans": "Planos Técnicos",
+    "detailedLayout": "Distribución detallada",
+    "price": "Precio de venta",
+    "brochure": "Folleto PDF",
+    "whatsapp": "Contacto WhatsApp",
+    "whatsappMobile": "Chatear en WhatsApp",
+    "bookVisit": "Reservar Visita",
+    "advisor": "Asesor",
+    "distanceSea": "Mar a {distance}km",
+    "golf": "Golf a {distance}km"
+  },
+  "advancedSearch": {
+    "propertyRef": "Referencia de Propiedad",
+    "refPlaceholder": "Ej: REF-1234",
+    "region": "Región",
+    "allSpain": "España (Todas)",
+    "costaBlanca": "Costa Blanca",
+    "costaCalida": "Costa Cálida",
+    "costaDelSol": "Costa del Sol",
+    "costaAlmeria": "Costa Almería",
+    "type": "Tipo",
+    "anyType": "Indiferente",
+    "villa": "Villa",
+    "apartment": "Apartamento",
+    "penthouse": "Ático",
+    "bungalow": "Bungalow",
+    "townhouse": "Casa adosada",
+    "min": "Mín",
+    "max": "Máx",
+    "bedrooms": "Dormitorios",
+    "collection": "Colección Amaru • Selección Exclusiva",
+    "reset": "Reiniciar"
+  },
+  "scrollingBanner": {
+    "portfolioExclusif": "Portafolio Exclusivo",
+    "conciergeriePrivee": "Conserjería Privada",
+    "ventesOffMarket": "Ventas Off-Market",
+    "expertiseArchitecturale": "Experticia Arquitectónica",
+    "investissements": "Inversiones",
+    "gestionPrestige": "Gestión de Prestigio"
+  },
+  "testimonials": {
+    "title": "La confianza es un valor fundamental",
+    "subtitle": "La satisfacción de nuestros clientes es nuestro mayor éxito.",
+    "reviews": [
+      {
+        "name": "Isabelle Dupont",
+        "text": "¡Excelente experiencia con Blanca Calida! Conocen perfectamente el mercado y saben asesorar según las necesidades específicas."
+      },
+      {
+        "name": "Sarah Williams",
+        "text": "Professional team, they helped us navigate every detail of the buying process. Highly recommended!"
+      },
+      {
+        "name": "Michael Ford",
+        "text": "Sehr guter Service, von der Besichtigung bis zur Kaufabwicklung. Alles war perfekt organisiert."
+      }
+    ]
+  },
+  "languageSelector": {
+    "label": "Idioma"
+  },
+  "themeToggle": {
+    "ariaLabel": "Cambiar tema"
+  },
+  "errors": {
+    "pinIncorrect": "Código PIN incorrecto.",
+    "incorrectPin": "PIN incorrecto."
   }
 }
 </file>
