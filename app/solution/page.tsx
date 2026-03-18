@@ -5,14 +5,15 @@ import Image from 'next/image';
 import { 
   Globe, ShieldCheck, TrendingUp, Cpu, Layers,
   MapPin, Camera, ChevronDown, Home, ArrowRight,
-  Settings, Palette, Languages, Workflow
+  Settings, Palette, Languages, Workflow,
+  Check, X, Zap, Star, Crown
 } from 'lucide-react';
 
 // --- DICTIONNAIRE DE TRADUCTION COMPLET ---
 const translations = {
   fr: {
     dir: 'ltr', label: "Français",
-    nav: ["Vision", "Fonctionnement", "Master Template", "Commencer"],
+    nav: ["Vision", "Fonctionnement", "Master Template", "Tarifs", "Commencer"],
     hero: { tag: "OS Immobilier Global v1.2", title1: "L'Immobilier", title2: "Sans Frontières.", desc: "L'infrastructure logicielle qui unifie le marché mondial. Connectez vos clients locaux aux opportunités internationales en un clic." },
     gap: { title1: "Combler la", title2: "Fracture Immobilière.", desc1: "Aujourd'hui, lorsqu'un client vend un bien localement pour s'expatrier, le flux de données s'arrête. L'agence perd le contrôle et le client perd sa confiance.", desc2: "data-home.io agit comme une couche d'interopérabilité. Nous sécurisons les commissions cross-border en gardant le client dans votre écosystème." },
     how: {
@@ -33,20 +34,67 @@ const translations = {
         { icon: Workflow, t: "Gestion des Étapes", d: "Configurez vos propres jalons de chantier et flux de travail personnalisés." },
         { icon: Settings, t: "Contrôle Data", d: "Administrez vos accès API et la synchronisation des données depuis votre console." }
       ]
+    },
+    pricing: {
+      tag: "Offre Exclusive : 20 Premiers Partenaires",
+      title: "Tarifs",
+      subtitle: "Fondateurs.",
+      desc: "Tarifs préférentiels garantis à vie pour nos 20 premiers partenaires fondateurs.",
+      cta: "Choisir ce pack",
+      popular: "Populaire",
+      perMonth: "/mois",
+      packs: [
+        { name: "Bronze", desc: "Idéal pour les indépendants.", features: ["5 Projets max", "2 Staff", "Suivi chantier", "Cashback", "1 Go Stockage"] },
+        { name: "Silver", desc: "Pour les agences en croissance.", features: ["25 Projets max", "5 Staff", "Filtres XML", "Custom Branding", "5 Go Stockage", "PDF Illimités"] },
+        { name: "Gold", desc: "Solution réseaux & holdings.", features: ["Projets illimités", "Multi-agences", "API & Webhooks", "White-label", "25 Go Stockage", "Support 24/7"] }
+      ]
     }
   },
   en: { 
     dir: 'ltr', label: "English", 
-    nav: ["Vision", "How It Works", "Master Template", "Get Started"], 
+    nav: ["Vision", "How It Works", "Master Template", "Pricing", "Get Started"], 
     hero: { tag: "Global Real Estate OS v1.2", title1: "Scaling Real Estate", title2: "Beyond Borders.", desc: "The software infrastructure that unifies the global real estate market." }, 
-    gap: { title1: "Solving the", title2: "Global Real Estate Gap.", desc1: "When a client sells locally to relocate, data flow stops.", desc2: "We secure cross-border commissions by keeping the client in your ecosystem." }, 
-    how: { title: "How It Works:", subtitle: "The Global Flow", steps: [{ icon: MapPin, t: "1. Local Need", d: "Your client wants to invest abroad. You gain access to a certified international database." }, { icon: Layers, t: "2. Activation", d: "Instantly access a unified and verified portfolio of global properties." }, { icon: Camera, t: "3. Real-Time Tracking", d: "On-site pros upload progress reports and photos directly to your platform." }, { icon: ShieldCheck, t: "4. Total Trust", d: "Clients access their dedicated dashboard to follow investments in real-time." }] }, 
-    saas: { title: "Configurable", subtitle: "Master Template", desc: "Take full control of your interface. Our SaaS environment allows you to configure every aspect of your international platform.", features: [{ icon: Palette, t: "Full Branding", d: "Customize logos, colors, and fonts for a 100% white-label experience." }, { icon: Languages, t: "Auto Multi-language", d: "Activate and manage translations for your global clients instantly." }, { icon: Workflow, t: "Milestone Management", d: "Configure your own construction milestones and custom workflows." }, { icon: Settings, t: "Data Control", d: "Manage API access and data synchronization from your console." }] } 
+    gap: { title1: "Solving the", title2: "Real Estate Gap.", desc1: "When a client sells locally, data flow stops.", desc2: "We secure cross-border commissions by keeping the client in your ecosystem." }, 
+    how: { title: "How It Works:", subtitle: "The Global Flow", steps: [{ icon: MapPin, t: "1. Local Need", d: "Your client wants to invest abroad. Access a certified international database." }, { icon: Layers, t: "2. Activation", d: "Instantly access a unified and verified portfolio of properties." }, { icon: Camera, t: "3. Tracking", d: "On-site pros upload progress reports and photos." }, { icon: ShieldCheck, t: "4. Trust", d: "Clients follow investments in real-time." }] }, 
+    saas: { title: "Configurable", subtitle: "Master Template", desc: "Take full control. Configure every aspect of your international platform.", features: [{ icon: Palette, t: "Full Branding", d: "Customize logos, colors, and fonts." }, { icon: Languages, t: "Auto Translate", d: "Manage translations for global clients." }, { icon: Workflow, t: "Workflow", d: "Configure your own construction milestones." }, { icon: Settings, t: "Data", d: "Manage API access and data sync." }] },
+    pricing: { tag: "Exclusive Offer: First 20 Partners", title: "Founder", subtitle: "Pricing.", desc: "Preferential rates guaranteed for life for our first 20 partners.", cta: "Choose Plan", popular: "Popular", perMonth: "/mo", packs: [ { name: "Bronze", desc: "Ideal for freelancers.", features: ["5 Projects max", "2 Staff", "Construction tracking", "Cashback", "1 GB Storage"] }, { name: "Silver", desc: "For growing agencies.", features: ["25 Projects max", "5 Staff", "XML Filters", "Custom Branding", "5 GB Storage", "Unlimited PDF"] }, { name: "Gold", desc: "Network solution.", features: ["Unlimited projects", "Multi-agency", "API & Webhooks", "White-label", "25 GB Storage", "24/7 Support"] } ] }
   },
-  nl: { dir: 'ltr', label: "Nederlands", nav: ["Visie", "Werking", "Master Template", "Starten"], hero: { tag: "Global OS v1.2", title1: "Vastgoed Schalen", title2: "Zonder Grenzen.", desc: "Software-infrastructuur die de wereldwijde markt verenigt." }, gap: { title1: "Het dichten van de", title2: "Vastgoedkloof.", desc1: "Wanneer een klant lokaal verkoopt, stopt de donnéesstroom.", desc2: "data-home.io fungeert als une interoperabiliteitslaag." }, how: { title: "Hoe het werkt:", subtitle: "De Global Flow", steps: [{ icon: MapPin, t: "1. Lokale Nood", d: "Uw klant wil internationaal investeren." }, { icon: Layers, t: "2. Activatie", d: "Directe toegang tot een wereldwijd portfolio." }, { icon: Camera, t: "3. Opvolging", d: "Bouwprofessionals uploaden fotoreportages." }, { icon: ShieldCheck, t: "4. Vertrouwen", d: "Klant volgt investering in real-time." }] }, saas: { title: "Configureerbaar", subtitle: "Master Template", desc: "Neem de volledige controle over uw interface. Configureer elk aspect van uw platform.", features: [{ icon: Palette, t: "Full Branding", d: "Personaliseer logo's en couleurs." }, { icon: Languages, t: "Meertaligheid", d: "Beheer vertalingen direct." }, { icon: Workflow, t: "Mijlpalen", d: "Configureer uw eigen workflows." }, { icon: Settings, t: "Data Beheer", d: "Beheer API-toegang." }] } },
-  pl: { dir: 'ltr', label: "Polski", nav: ["Wizja", "Jak to działa", "Master Template", "Zacznij"], hero: { tag: "Global OS v1.2", title1: "Skalowanie", title2: "Bez Granic.", desc: "Infrastruktura oprogramowania jednocząca rynek." }, gap: { title1: "Rozwiązanie", title2: "Globalnej Luki.", desc1: "Kiedy klient sprzedaje lokalnie, przepływ danych ustaje.", desc2: "Zabezpieczamy prowizje zagraniczne." }, how: { title: "Jak to działa:", subtitle: "Globalny Przepływ", steps: [{ icon: MapPin, t: "1. Potrzeba", d: "Klient chce inwestować za granicą." }, { icon: Layers, t: "2. Aktywacja", d: "Dostęp do zweryfikowanych ofert." }, { icon: Camera, t: "3. Śledzenie", d: "Raporty foto prosto do Twojej platformy." }, { icon: ShieldCheck, t: "4. Zaufanie", d: "Klient śledzi postępy w czasie rzeczywistym." }] }, saas: { title: "Konfigurowalny", subtitle: "Master Template", desc: "Przejmij pełną kontrolę nad interfejsem. Konfiguruj każdy aspekt swojej platformy.", features: [{ icon: Palette, t: "Full Branding", d: "Dostosuj logo i kolory." }, { icon: Languages, t: "Multi-języczność", d: "Zarządzaj tłumaczeniami natychmiast." }, { icon: Workflow, t: "Zarządzanie Etapami", d: "Konfiguruj własne kroki budowy." }, { icon: Settings, t: "Kontrola Danych", d: "Zarządzaj dostępem API." }] } },
-  es: { dir: 'ltr', label: "Español", nav: ["Visión", "Funcionamiento", "Master Template", "Empezar"], hero: { tag: "OS Global v1.2", title1: "Inmobiliario", title2: "Sin Fronteras.", desc: "La infraestructura que une el marché inmobiliario mundial." }, gap: { title1: "Cerrando la", title2: "Brecha Inmobiliaria.", desc1: "Cuando un client vende localmente, el flujo de données se rompe.", desc2: "Aseguramos comisiones internacionales." }, how: { title: "Cómo funciona:", subtitle: "Flujo Global", steps: [{ icon: MapPin, t: "1. Necesidad", d: "Su cliente quiere invertir fuera." }, { icon: Layers, t: "2. Activación", d: "Catálogo verificado de propiedades globales." }, { icon: Camera, t: "3. Seguimiento", d: "Fotos del progreso en tiempo real." }, { icon: ShieldCheck, t: "4. Confianza", d: "El cliente sigue su inversión desde su dashboard." }] }, saas: { title: "Master Template", subtitle: "Configurable", desc: "Tome el control total de su interfaz. Configure cada aspect de su plateforme internationale.", features: [{ icon: Palette, t: "Branding Total", d: "Personalice logos, couleurs y fuentes." }, { icon: Languages, t: "Multi-idioma", d: "Active traducciones al instante." }, { icon: Workflow, t: "Gestión de Hitos", d: "Configure sus propios pasos de obra." }, { icon: Settings, t: "Control de Datos", d: "Administre accesos y sincronización." }] } },
-  ar: { dir: 'rtl', label: "العربية", nav: ["الرؤية", "كيف يعمل", "القالب الرئيسي", "ابدأ"], hero: { tag: "نظام العقارات v1.2", title1: "العقارات", title2: "بلا حدود.", desc: "البنية التحتية البرمجية التي توحد سوق العقارات العالمي." }, gap: { title1: "حل", title2: "الفجوة العقارية.", desc1: "عندما يبيع العميل محلياً، يتوقف تدفق البيانات.", desc2: "تؤمن data-home عمولاتك." }, how: { title: "كيف يعمل:", subtitle: "التدفق العالمي", steps: [{ icon: MapPin, t: "1. الحاجة", d: "عميلك يريد الاستثمار دولياً." }, { icon: Layers, t: "2. التفعيل", d: "وصول فوري لمحفظة عقارات عالمية موثقة." }, { icon: Camera, t: "3. المتابعة", d: "تقارير الصور مباشرة إلى منصتك." }, { icon: ShieldCheck, t: "4. الثقة", d: "يتابع العميل استثماره في الوقت الفعلي." }] }, saas: { title: "القالب الرئيسي", subtitle: "القابل للتهيئة", desc: "تحكم بالكامل في واواجهتك. تتيح لك بيئتنا تهيئة كل جانب de جوانب منصتك الدولية.", features: [{ icon: Palette, t: "هوية تجارية كاملة", d: "تخصيص الشعار والألوان والخطوط." }, { icon: Languages, t: "تعدد اللغات", d: "تفعيل وإدارة الترجمات فوراً." }, { icon: Workflow, t: "إدارة المراحل", d: "تهيئة مراحل البناء الخاصة بك." }, { icon: Settings, t: "التحكم في البيانات", d: "إدارة الوصول والمزامنة." }] } }
+  nl: { 
+    dir: 'ltr', label: "Nederlands", 
+    nav: ["Visie", "Werking", "Master Template", "Tarieven", "Starten"], 
+    hero: { tag: "Global OS v1.2", title1: "Vastgoed Schalen", title2: "Zonder Grenzen.", desc: "Software-infrastructuur die de wereldwijde markt verenigt." }, 
+    gap: { title1: "Het dichten van de", title2: "Vastgoedkloof.", desc1: "Wanneer een klant lokaal verkoopt, stopt de stroom.", desc2: "data-home.io fungeert als een interoperabiliteitslaag." }, 
+    how: { title: "Hoe het werkt:", subtitle: "De Global Flow", steps: [{ icon: MapPin, t: "1. Lokale Nood", d: "Uw klant wil internationaal investeren." }, { icon: Layers, t: "2. Activatie", d: "Directe toegang tot een wereldwijd portfolio." }, { icon: Camera, t: "3. Opvolging", d: "Bouwprofessionals uploaden fotoreportages." }, { icon: ShieldCheck, t: "4. Vertrouwen", d: "Klant volgt investering in real-time." }] }, 
+    saas: { title: "Configureerbaar", subtitle: "Master Template", desc: "Neem de volledige controle over uw interface.", features: [{ icon: Palette, t: "Branding", d: "Personaliseer logo's en kleuren." }, { icon: Languages, t: "Vertalingen", d: "Beheer vertalingen direct." }, { icon: Workflow, t: "Workflows", d: "Configureer uw eigen mijlpalen." }, { icon: Settings, t: "Data", d: "Beheer API-toegang." }] },
+    pricing: { tag: "Exclusief Aanbod: Eerste 20 Partners", title: "Oprichters", subtitle: "Tarieven.", desc: "Levenslang gegarandeerde voorkeurstarieven voor de eerste 20 partners.", cta: "Kies dit pakket", popular: "Populair", perMonth: "/mnd", packs: [ { name: "Brons", desc: "Ideaal voor zzp'ers.", features: ["5 Projecten max", "2 Medewerkers", "Bouw opvolging", "Cashback", "1 GB Opslag"] }, { name: "Zilver", desc: "Voor groeiende bureaus.", features: ["25 Projecten max", "5 Medewerkers", "XML-filters", "Custom Branding", "5 GB Opslag", "Onbeperkt PDF"] }, { name: "Goud", desc: "Netwerkoplossing.", features: ["Onbeperkt projecten", "Multi-agency", "API & Webhooks", "White-label", "25 GB Opslag", "24/7 Support"] } ] }
+  },
+  pl: { 
+    dir: 'ltr', label: "Polski", 
+    nav: ["Wizja", "Jak to działa", "Master Template", "Cennik", "Zacznij"], 
+    hero: { tag: "Global OS v1.2", title1: "Skalowanie", title2: "Bez Granic.", desc: "Infrastruktura oprogramowania jednocząca rynek." }, 
+    gap: { title1: "Rozwiązanie", title2: "Globalnej Luki.", desc1: "Kiedy klient sprzedaje lokalnie, dane przestają płynąć.", desc2: "Zabezpieczamy prowizje zagraniczne." }, 
+    how: { title: "Jak to działa:", subtitle: "Globalny Przepływ", steps: [{ icon: MapPin, t: "1. Potrzeba", d: "Klient chce inwestować za granicą." }, { icon: Layers, t: "2. Aktywacja", d: "Dostęp do zweryfikowanych ofert." }, { icon: Camera, t: "3. Śledzenie", d: "Raporty foto prosto do platformy." }, { icon: ShieldCheck, t: "4. Zaufanie", d: "Klient śledzi postępy w czasie rzeczywistym." }] }, 
+    saas: { title: "Konfigurowalny", subtitle: "Master Template", desc: "Przejmij pełną kontrolę nad interfejsem.", features: [{ icon: Palette, t: "Branding", d: "Dostosuj logo i kolory." }, { icon: Languages, t: "Tłumaczenia", d: "Zarządzaj językami natychmiast." }, { icon: Workflow, t: "Etapy", d: "Konfiguruj własne kroki budowy." }, { icon: Settings, t: "Dane", d: "Zarządzaj dostępem API." }] },
+    pricing: { tag: "Oferta Specjalna: Pierwszych 20 Partnerów", title: "Ceny", subtitle: "Założycielskie.", desc: "Preferencyjne stawki gwarantowane dożywotnio dla pierwszych 20 partnerów.", cta: "Wybierz pakiet", popular: "Popularne", perMonth: "/mies.", packs: [ { name: "Brąz", desc: "Dla freelancerów.", features: ["5 Projektów max", "2 Pracowników", "Śledzenie budowy", "Cashback", "1 GB Miejsca"] }, { name: "Srebro", desc: "Dla rozwijających się agencji.", features: ["25 Projektów max", "5 Pracowników", "Filtry XML", "Custom Branding", "5 GB Miejsca", "PDF bez limitu"] }, { name: "Złoto", desc: "Rozwiązanie sieciowe.", features: ["Projekty bez limitu", "Multi-agencja", "API & Webhooks", "White-label", "25 GB Miejsca", "Support 24/7"] } ] }
+  },
+  es: { 
+    dir: 'ltr', label: "Español", 
+    nav: ["Visión", "Funcionamiento", "Master Template", "Precios", "Empezar"], 
+    hero: { tag: "OS Global v1.2", title1: "Inmobiliario", title2: "Sin Fronteras.", desc: "La infraestructura que une el marché inmobiliario mundial." }, 
+    gap: { title1: "Cerrando la", title2: "Brecha Inmobiliaria.", desc1: "Cuando un client vende localmente, el flujo se rompe.", desc2: "Aseguramos comisiones internacionales." }, 
+    how: { title: "Cómo funciona:", subtitle: "Flujo Global", steps: [{ icon: MapPin, t: "1. Necesidad", d: "Su cliente quiere invertir fuera." }, { icon: Layers, t: "2. Activación", d: "Catálogo verificado de propiedades." }, { icon: Camera, t: "3. Seguimiento", d: "Fotos del progreso en tiempo real." }, { icon: ShieldCheck, t: "4. Confianza", d: "El cliente sigue su inversión." }] }, 
+    saas: { title: "Master Template", subtitle: "Configurable", desc: "Tome el control total de su interfaz.", features: [{ icon: Palette, t: "Branding", d: "Personalice logos y colores." }, { icon: Languages, t: "Multi-idioma", d: "Active traducciones al instante." }, { icon: Workflow, t: "Hitos", d: "Configure sus propios pasos de obra." }, { icon: Settings, t: "Datos", d: "Administre accesos y sincronización." }] },
+    pricing: { tag: "Oferta Exclusiva: Primeros 20 Socios", title: "Precios", subtitle: "Fundadores.", desc: "Tarifas preferenciales garantizadas de por vida para nuestros primeros 20 socios.", cta: "Elegir plan", popular: "Popular", perMonth: "/mes", packs: [ { name: "Bronce", desc: "Ideal para autónomos.", features: ["5 Proyectos max", "2 Usuarios", "Seguimiento obra", "Cashback", "1 GB Almacén"] }, { name: "Plata", desc: "Agencias en crecimiento.", features: ["25 Proyectos max", "5 Usuarios", "Filtros XML", "Branding Custom", "5 GB Almacén", "PDF Ilimitados"] }, { name: "Oro", desc: "Solución para redes.", features: ["Proyectos ilimitados", "Multi-agencia", "API & Webhooks", "Marca Blanca", "25 GB Almacén", "Soporte 24/7"] } ] }
+  },
+  ar: { 
+    dir: 'rtl', label: "العربية", 
+    nav: ["الرؤية", "كيف يعمل", "القالب الرئيسي", "الأسعار", "ابدأ"], 
+    hero: { tag: "نظام العقارات v1.2", title1: "العقارات", title2: "بلا حدود.", desc: "البنية التحتية البرمجية التي توحد سوق العقارات العالمي." }, 
+    gap: { title1: "حل", title2: "الفجوة العقارية.", desc1: "عندما يبيع العميل محلياً، يتوقف تدفق البيانات.", desc2: "تؤمن data-home عمولاتك." }, 
+    how: { title: "كيف يعمل:", subtitle: "التدفق العالمي", steps: [{ icon: MapPin, t: "1. الحاجة", d: "عميلك يريد الاستثمار دولياً." }, { icon: Layers, t: "2. التفعيل", d: "وصول فوري لمحفظة عقارات عالمية موثقة." }, { icon: Camera, t: "3. المتابعة", d: "تقارير الصور مباشرة إلى منصتك." }, { icon: ShieldCheck, t: "4. الثقة", d: "يتابع العميل استثماره في الوقت الفعلي." }] }, 
+    saas: { title: "القالب الرئيسي", subtitle: "القابل للتهيئة", desc: "تحكم بالكامل في واواجهتك.", features: [{ icon: Palette, t: "هوية كاملة", d: "تخصيص الشعار والألوان." }, { icon: Languages, t: "تعدد اللغات", d: "إدارة الترجمات فوراً." }, { icon: Workflow, t: "المراحل", d: "تهيئة مراحل البناء الخاصة بك." }, { icon: Settings, t: "البيانات", d: "إدارة الوصول والمزامنة." }] },
+    pricing: { tag: "عرض حصري: أول 20 شريك", title: "أسعار", subtitle: "المؤسسين.", desc: "أسعار تفضيلية مضمونة مدى الحياة لأول 20 شريك مؤسس.", cta: "اختر الباقة", popular: "الأكثر رواجاً", perMonth: "/شهر", packs: [ { name: "برونزي", desc: "مثالي للمستقلين.", features: ["5 مشاريع كحد أقصى", "مستخدمين اثنين", "متابعة البناء", "كاش باك", "1 جيجا تخزين"] }, { name: "فضي", desc: "للوكالات المتنامية.", features: ["25 مشروع كحد أقصى", "5 مستخدمين", "فلاتر XML", "هوية مخصصة", "5 جيجا تخزين", "تقارير غير محدودة"] }, { name: "ذهبي", desc: "حلول الشبكات.", features: ["مشاريع غير محدودة", "وكالات متعددة", "API و Webhooks", "العلامة البيضاء", "25 جيجا تخزين", "دعم 24/7"] } ] }
+  }
 };
 
 export default function DataHomeSolution() {
@@ -65,38 +113,77 @@ export default function DataHomeSolution() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const PricingSection = () => {
+    const icons = [<Zap size={20} />, <Star size={20} />, <Crown size={20} />];
+    const betaPrices = ["29", "79", "199"];
+    const publicPrices = ["149", "299", "599"];
+
+    return (
+      <section id="pricing" className="py-24 px-6 bg-[#020617] relative z-10">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <div className="inline-block px-4 py-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 text-[10px] font-black uppercase tracking-[0.2em] mb-4">
+              {t.pricing.tag}
+            </div>
+            <h2 className="text-3xl md:text-6xl font-black uppercase tracking-tighter">
+              {t.pricing.title} <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-white italic font-light">{t.pricing.subtitle}</span>
+            </h2>
+            <p className="mt-4 text-slate-400 italic text-sm">{t.pricing.desc}</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {t.pricing.packs.map((pack, i) => (
+              <div key={i} className={`p-8 rounded-[2.5rem] border transition-all duration-500 ${i === 1 ? 'bg-emerald-500/5 border-emerald-500/40 scale-105 shadow-2xl' : 'bg-white/5 border-white/10'}`}>
+                <div className="flex items-center justify-between mb-6">
+                  <div className="p-3 bg-white/5 rounded-2xl text-emerald-400">{icons[i]}</div>
+                  {i === 1 && <span className="text-[8px] font-black bg-emerald-500 px-3 py-1 rounded-full uppercase text-white">{t.pricing.popular}</span>}
+                </div>
+                <h3 className="text-xl font-black uppercase mb-2">{pack.name}</h3>
+                <div className="flex items-baseline gap-2 mb-6">
+                  <span className="text-4xl font-black">{betaPrices[i]}€</span>
+                  <span className="text-slate-500 line-through text-sm">{publicPrices[i]}€</span>
+                  <span className="text-[10px] text-slate-500 uppercase">{t.pricing.perMonth}</span>
+                </div>
+                <div className="space-y-4 mb-8">
+                  {pack.features.map((f, idx) => (
+                    <div key={idx} className="flex items-center gap-3 text-[11px] text-slate-400">
+                      <Check size={14} className="text-emerald-500" /> {f}
+                    </div>
+                  ))}
+                </div>
+                <button className={`w-full py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${i === 1 ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20 hover:bg-emerald-400' : 'bg-white/10 hover:bg-white/20'}`}>
+                  {t.pricing.cta}
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  };
+
   return (
     <div className="bg-[#020617] text-white min-h-screen font-sans selection:bg-emerald-500/30 overflow-x-hidden relative" dir={t.dir}>
       
-      {/* --- BACKGROUND LAYER --- */}
       <div className="fixed inset-0 z-0 opacity-[0.05] pointer-events-none">
         <Image src="/1.jpg" alt="Background" fill className="object-cover" priority />
       </div>
 
-      {/* --- NAV CORRIGÉE (Logo responsive + Espace bouton) --- */}
       <nav className="border-b border-white/5 px-4 md:px-6 py-3 md:py-4 flex justify-between items-center backdrop-blur-xl sticky top-0 z-50 bg-[#020617]/90">
         <div className="flex items-center shrink-0">
-          {/* Logo : Taille normale sur mobile (h-10), Agrandie sur desktop (h-[60px]) */}
           <div className="relative h-10 w-28 md:h-[60px] md:w-60 transition-all duration-300">
-             <Image 
-                src="/logo_1.png" 
-                alt="Logo data-home" 
-                fill 
-                className="object-contain object-left" 
-                priority 
-             />
+             <Image src="/logo_1.png" alt="Logo data-home" fill className="object-contain object-left" priority />
           </div>
         </div>
         
-        {/* Liens cachés sur mobile */}
         <div className="hidden lg:flex gap-8 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
           <a href="#vision" className="hover:text-white transition-colors">{t.nav[0]}</a>
           <a href="#how" className="hover:text-white transition-colors">{t.nav[1]}</a>
           <a href="#saas" className="hover:text-white transition-colors">{t.nav[2]}</a>
+          <a href="#pricing" className="hover:text-white transition-colors">{t.nav[3]}</a>
         </div>
 
         <div className="flex items-center gap-2 md:gap-4 shrink-0">
-          {/* Sélecteur de langue */}
           <div className="relative" ref={dropdownRef}>
             <button onClick={() => setIsLangOpen(!isLangOpen)} className="p-2 hover:bg-white/5 rounded-full flex items-center gap-1 group">
               <Globe size={18} className="text-slate-400 group-hover:text-emerald-400 transition-colors" />
@@ -113,14 +200,12 @@ export default function DataHomeSolution() {
             )}
           </div>
 
-          {/* Bouton Commencer : Texte réduit sur mobile pour gagner de la place */}
           <button className="bg-[#10B981] hover:bg-[#059669] text-white px-3 md:px-6 py-2 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-emerald-500/10 whitespace-nowrap">
-            {t.nav[3]}
+            {t.nav[4]}
           </button>
         </div>
       </nav>
 
-      {/* --- HERO SECTION --- */}
       <section id="vision" className="relative pt-20 md:pt-32 pb-16 md:pb-24 px-6 text-center z-10 min-h-[85vh] flex items-center justify-center overflow-hidden">
         <video autoPlay loop muted playsInline className="absolute inset-0 z-0 w-full h-full object-cover pointer-events-none">
           <source src="/hero_datahome.mp4" type="video/mp4" />
@@ -142,7 +227,6 @@ export default function DataHomeSolution() {
         </div>
       </section>
 
-      {/* --- SECTION FRACTURE --- */}
       <section className="py-20 md:py-24 px-6 border-y border-white/5 bg-slate-950/50 z-10 relative">
         <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 md:gap-24 items-center">
           <div className="order-2 md:order-1 space-y-8">
@@ -164,7 +248,6 @@ export default function DataHomeSolution() {
         </div>
       </section>
 
-      {/* --- HOW IT WORKS --- */}
       <section id="how" className="py-20 md:py-24 px-6 z-10 relative">
         <div className="max-w-6xl mx-auto text-center">
           <h2 className="text-3xl md:text-6xl font-black uppercase tracking-tighter mb-16 md:mb-20">
@@ -194,7 +277,6 @@ export default function DataHomeSolution() {
         </div>
       </section>
 
-      {/* --- SAAS MASTER TEMPLATE --- */}
       <section id="saas" className="py-24 md:py-32 px-6 bg-slate-950 border-y border-white/5 relative z-10 overflow-hidden">
         <div className="max-w-6xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-16 items-start">
@@ -230,7 +312,8 @@ export default function DataHomeSolution() {
         </div>
       </section>
 
-      {/* --- FOOTER --- */}
+      <PricingSection />
+
       <footer className="py-20 border-t border-white/5 text-center opacity-40 z-10 relative bg-[#020617]">
         <div className="flex justify-center mb-6 h-6 relative w-24 mx-auto grayscale hover:grayscale-0 transition-all">
            <Image src="/logo_1.png" alt="Logo Footer" fill className="object-contain" />
