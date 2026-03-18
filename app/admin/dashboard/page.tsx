@@ -1097,7 +1097,12 @@ export default function AdminDashboard() {
                               <FileText size={24} />
                             </div>
                             <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-500 translate-x-4 group-hover:translate-x-0 transition-transform">
-                              <a href={doc.url_fichier} target="_blank" rel="noreferrer" className="p-3 bg-white/5 text-white hover:bg-emerald-500 hover:text-black rounded-xl transition-all">
+                              <a 
+                                href={doc.url_fichier} 
+                                target="_blank" 
+                                rel="noreferrer" 
+                                className="p-3 bg-white/5 text-white hover:bg-emerald-500 hover:text-black rounded-xl transition-all inline-flex items-center justify-center"
+                              >
                                 <ExternalLink size={16} />
                               </a>
                               <button 
