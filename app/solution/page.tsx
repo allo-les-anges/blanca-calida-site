@@ -79,7 +79,7 @@ export default function DataHomeSolution() {
           {/* Conteneur agrandi de 40px à 60px de haut */}
           <div className="relative h-[60px] w-48 md:w-60">
              <Image 
-                src="/logo.jpeg" 
+                src="/logo_1.png" 
                 alt="Logo data-home" 
                 fill 
                 className="object-contain object-left mix-blend-multiply" 
