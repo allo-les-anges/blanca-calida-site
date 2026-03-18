@@ -77,7 +77,7 @@ export default function DataHomeSolution() {
       <nav className="border-b border-white/5 px-6 py-4 flex justify-between items-center backdrop-blur-xl sticky top-0 z-50 bg-[#020617]/90">
         <div className="flex items-center gap-2">
           <div className="relative h-10 w-32 md:w-40">
-             <Image src="/logo_1.jpeg" alt="Logo Data-Home" fill className="object-contain object-left" priority />
+             <Image src="/logo.jpeg" alt="Logo Data-Home" fill className="object-contain object-left" priority />
           </div>
         </div>
         
