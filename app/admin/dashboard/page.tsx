@@ -1097,14 +1097,12 @@ export default function AdminDashboard() {
                               <FileText size={24} />
                             </div>
                             <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-500 translate-x-4 group-hover:translate-x-0 transition-transform">
-                              <a 
-                                href={doc.url_fichier} 
-                                target="_blank" 
-                                rel="noreferrer" 
-                                className="w-10 h-10 flex items-center justify-center bg-white/5 text-white hover:bg-emerald-500 hover:text-black rounded-xl transition-all"
-                              >
-                                <ExternalLink size={16} />
-                              </a>
+                              <button
+                                  onClick={() => window.open(doc.url_fichier, '_blank')}
+                                  className="w-10 h-10 flex items-center justify-center bg-white/5 text-white hover:bg-emerald-500 hover:text-black rounded-xl transition-all"
+                                >
+                                  <ExternalLink size={16} />
+                                </button>
                               <button 
                                 onClick={() => deleteDocument(doc.id, doc.url_fichier)} 
                                 className="p-3 bg-white/5 text-white hover:bg-rose-500 rounded-xl transition-all"
