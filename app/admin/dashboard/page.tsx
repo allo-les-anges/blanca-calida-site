@@ -1096,8 +1096,7 @@ export default function AdminDashboard() {
                             <div className="p-4 bg-white/5 rounded-2xl text-slate-400 group-hover:text-emerald-500 group-hover:bg-emerald-500/10 transition-all duration-500">
                               <FileText size={24} />
                             </div>
-                            <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-500 translate-x-4 group-hover:translate-x-0 transition-transform">
-                              <a 
+                              <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-500 translate-x-4 group-hover:translate-x-0 transition-transform relative z-10">                              <a 
                                 href={doc.url_fichier} 
                                 target="_blank" 
                                 rel="noreferrer" 
