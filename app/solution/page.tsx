@@ -45,7 +45,7 @@ const translations = {
   },
   nl: { dir: 'ltr', label: "Nederlands", nav: ["Visie", "Werking", "Master Template", "Starten"], hero: { tag: "Global OS v1.2", title1: "Vastgoed Schalen", title2: "Zonder Grenzen.", desc: "Software-infrastructuur die de wereldwijde markt verenigt." }, gap: { title1: "Het dichten van de", title2: "Vastgoedkloof.", desc1: "Wanneer een klant lokaal verkoopt, stopt de gegevensstroom.", desc2: "Data-Home.io fungeert als een interoperabiliteitslaag." }, how: { title: "Hoe het werkt:", subtitle: "De Global Flow", steps: [{ icon: MapPin, t: "1. Lokale Nood", d: "Uw klant wil internationaal investeren." }, { icon: Layers, t: "2. Activatie", d: "Directe toegang tot een wereldwijd portfolio." }, { icon: Camera, t: "3. Opvolging", d: "Bouwprofessionals uploaden fotoreportages." }, { icon: ShieldCheck, t: "4. Vertrouwen", d: "Klant volgt investering in real-time." }] }, saas: { title: "Configureerbaar", subtitle: "Master Template", desc: "Neem de volledige controle over uw interface. Configureer elk aspect van uw platform.", features: [{ icon: Palette, t: "Full Branding", d: "Personaliseer logo's en kleuren." }, { icon: Languages, t: "Meertaligheid", d: "Beheer vertalingen direct." }, { icon: Workflow, t: "Mijlpalen", d: "Configureer uw eigen workflows." }, { icon: Settings, t: "Data Beheer", d: "Beheer API-toegang." }] } },
   pl: { dir: 'ltr', label: "Polski", nav: ["Wizja", "Jak to działa", "Master Template", "Zacznij"], hero: { tag: "Global OS v1.2", title1: "Skalowanie", title2: "Bez Granic.", desc: "Infrastruktura oprogramowania jednocząca rynek." }, gap: { title1: "Rozwiązanie", title2: "Globalnej Luki.", desc1: "Kiedy klient sprzedaje lokalnie, przepływ danych ustaje.", desc2: "Zabezpieczamy prowizje zagraniczne." }, how: { title: "Jak to działa:", subtitle: "Globalny Przepływ", steps: [{ icon: MapPin, t: "1. Potrzeba", d: "Klient chce inwestować za granicą." }, { icon: Layers, t: "2. Aktywacja", d: "Dostęp do zweryfikowanych ofert." }, { icon: Camera, t: "3. Śledzenie", d: "Raporty foto prosto do Twojej platformy." }, { icon: ShieldCheck, t: "4. Zaufanie", d: "Klient śledzi postępy w czasie rzeczywistym." }] }, saas: { title: "Konfigurowalny", subtitle: "Master Template", desc: "Przejmij pełną kontrolę nad interfejsem. Konfiguruj każdy aspekt swojej platformy.", features: [{ icon: Palette, t: "Full Branding", d: "Dostosuj logo i kolory." }, { icon: Languages, t: "Multi-języczność", d: "Zarządzaj tłumaczeniami natychmiast." }, { icon: Workflow, t: "Zarządzanie Etapami", d: "Konfiguruj własne kroki budowy." }, { icon: Settings, t: "Kontrola Danych", d: "Zarządzaj dostępem API." }] } },
-  es: { dir: 'ltr', label: "Español", nav: ["Visión", "Funcionamiento", "Master Template", "Empezar"], hero: { tag: "OS Global v1.2", title1: "Inmobiliario", title2: "Sin Fronteras.", desc: "La infraestructura que une el mercado inmobiliario mundial." }, gap: { title1: "Cerrando la", title2: "Brecha Inmobiliaria.", desc1: "Cuando un client vende localmente, el flujo de datos se rompe.", desc2: "Aseguramos comisiones internacionales." }, how: { title: "Cómo funciona:", subtitle: "Flujo Global", steps: [{ icon: MapPin, t: "1. Necesidad", d: "Su cliente quiere invertir fuera." }, { icon: Layers, t: "2. Activación", d: "Catálogo verificado de propiedades globales." }, { icon: Camera, t: "3. Seguimiento", d: "Fotos del progreso en tiempo real." }, { icon: ShieldCheck, t: "4. Confianza", d: "El cliente sigue su inversión desde su dashboard." }] }, saas: { title: "Master Template", subtitle: "Configurable", desc: "Tome el control total de su interfaz. Configure cada aspecto de su plataforma internacional.", features: [{ icon: Palette, t: "Branding Total", d: "Personalice logos, colores y fuentes." }, { icon: Languages, t: "Multi-idioma", d: "Active traducciones al instante." }, { icon: Workflow, t: "Gestión de Hitos", d: "Configure sus propios pasos de obra." }, { icon: Settings, t: "Control de Datos", d: "Administre accesos y sincronización." }] } },
+  es: { dir: 'ltr', label: "Español", nav: ["Visión", "Funcionamiento", "Master Template", "Empezar"], hero: { tag: "OS Global v1.2", title1: "Inmobiliario", title2: "Sin Fronteras.", desc: "La infraestructura que une el mercado inmobiliario mundial." }, gap: { title1: "Cerrando la", title2: "Brecha Inmobiliaria.", desc1: "Cuando un client vende localmente, el flujo de datos se rompe.", desc2: "Aseguramos comisiones internacionales." }, how: { title: "Cómo funciona:", subtitle: "Flujo Global", steps: [{ icon: MapPin, t: "1. Necesidad", d: "Su cliente quiere invertir fuera." }, { icon: Layers, t: "2. Activación", d: "Catálogo verificado de propiedades globales." }, { icon: Camera, t: "3. Seguimiento", d: "Fotos del progreso en tiempo real." }, { icon: ShieldCheck, t: "4. Confianza", d: "El cliente sigue su inversión desde su dashboard." }] }, saas: { title: "Master Template", subtitle: "Configurable", desc: "Tome el control total de su interfaz. Configure cada aspecto de su plateforme internationale.", features: [{ icon: Palette, t: "Branding Total", d: "Personalice logos, colores y fuentes." }, { icon: Languages, t: "Multi-idioma", d: "Active traducciones al instante." }, { icon: Workflow, t: "Gestión de Hitos", d: "Configure sus propios pasos de obra." }, { icon: Settings, t: "Control de Datos", d: "Administre accesos y sincronización." }] } },
   ar: { dir: 'rtl', label: "العربية", nav: ["الرؤية", "كيف يعمل", "القالب الرئيسي", "ابدأ"], hero: { tag: "نظام العقارات v1.2", title1: "العقارات", title2: "بلا حدود.", desc: "البنية التحتية البرمجية التي توحد سوق العقارات العالمي." }, gap: { title1: "حل", title2: "الفجوة العقارية.", desc1: "عندما يبيع العميل محلياً، يتوقف تدفق البيانات.", desc2: "تؤمن Data-Home عمولاتك." }, how: { title: "كيف يعمل:", subtitle: "التدفق العالمي", steps: [{ icon: MapPin, t: "1. الحاجة", d: "عميلك يريد الاستثمار دولياً." }, { icon: Layers, t: "2. التفعيل", d: "وصول فوري لمحفظة عقارات عالمية موثقة." }, { icon: Camera, t: "3. المتابعة", d: "تقارير الصور مباشرة إلى منصتك." }, { icon: ShieldCheck, t: "4. الثقة", d: "يتابع العميل استثماره في الوقت الفعلي." }] }, saas: { title: "القالب الرئيسي", subtitle: "القابل للتهيئة", desc: "تحكم بالكامل في واواجهتك. تتيح لك بيئتنا تهيئة كل جانب من جوانب منصتك الدولية.", features: [{ icon: Palette, t: "هوية تجارية كاملة", d: "تخصيص الشعار والألوان والخطوط." }, { icon: Languages, t: "تعدد اللغات", d: "تفعيل وإدارة الترجمات فوراً." }, { icon: Workflow, t: "إدارة المراحل", d: "تهيئة مراحل البناء الخاصة بك." }, { icon: Settings, t: "التحكم في البيانات", d: "إدارة الوصول والمزامنة." }] } }
 };
 
@@ -76,7 +76,7 @@ export default function DataHomeSolution() {
       {/* --- NAV --- */}
       <nav className="border-b border-white/5 px-6 py-4 flex justify-between items-center backdrop-blur-xl sticky top-0 z-50 bg-[#020617]/90">
         <div className="flex items-center gap-2">
-          <div className="relative h-10 w-40">
+          <div className="relative h-10 w-32 md:w-40">
              <Image src="/logo.jpeg" alt="Logo Data-Home" fill className="object-contain object-left" priority />
           </div>
         </div>
@@ -103,34 +103,41 @@ export default function DataHomeSolution() {
               </div>
             )}
           </div>
-          <button className="bg-[#10B981] hover:bg-[#059669] text-white px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-emerald-500/10">
+          <button className="bg-[#10B981] hover:bg-[#059669] text-white px-4 md:px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-emerald-500/10">
             {t.nav[3]}
           </button>
         </div>
       </nav>
 
-      {/* --- HERO --- */}
-      <section id="vision" className="relative pt-32 pb-24 px-6 text-center z-10">
+      {/* --- HERO SECTION CORRIGÉE --- */}
+      <section id="vision" className="relative pt-20 md:pt-32 pb-16 md:pb-24 px-6 text-center z-10">
         <div className="max-w-5xl mx-auto">
-          <div className="inline-block px-3 py-1 rounded-full border border-emerald-500/30 bg-emerald-500/5 text-[#10B981] text-[10px] font-black uppercase mb-8 tracking-widest">
+          <div className="inline-block px-3 py-1 rounded-full border border-emerald-500/30 bg-emerald-500/5 text-[#10B981] text-[10px] font-black uppercase mb-6 md:mb-8 tracking-widest">
             {t.hero.tag}
           </div>
-          <h1 className="text-6xl md:text-8xl font-black tracking-tighter leading-[0.85] mb-8 uppercase">
-            {t.hero.title1} <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-b from-white to-emerald-400 italic font-light">{t.hero.title2}</span>
+          
+          {/* Correction Responsive du Titre */}
+          <h1 className="text-[12vw] md:text-[85px] font-black tracking-tighter leading-[0.9] md:leading-[0.85] mb-8 uppercase break-words overflow-hidden">
+            <span className="block">{t.hero.title1}</span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-b from-white to-emerald-400 italic font-light block">
+              {t.hero.title2}
+            </span>
           </h1>
-          <p className="max-w-2xl mx-auto text-slate-400 text-lg md:text-xl font-light italic leading-relaxed">{t.hero.desc}</p>
+          
+          <p className="max-w-2xl mx-auto text-slate-400 text-base md:text-xl font-light italic leading-relaxed px-4">
+            {t.hero.desc}
+          </p>
         </div>
       </section>
 
-      {/* --- SECTION FRACTURE (Image 2.jpg) --- */}
-      <section className="py-24 px-6 border-y border-white/5 bg-slate-950/50 z-10 relative">
-        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-16 items-center">
+      {/* --- SECTION FRACTURE (16/9) --- */}
+      <section className="py-20 md:py-24 px-6 border-y border-white/5 bg-slate-950/50 z-10 relative">
+        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 md:gap-24 items-center">
           <div className="order-2 md:order-1 space-y-8">
-            <h2 className="text-4xl md:text-5xl font-black tracking-tighter uppercase leading-none">
+            <h2 className="text-3xl md:text-5xl font-black tracking-tighter uppercase leading-none">
               {t.gap.title1} <br /> <span className="text-[#10B981] font-light italic">{t.gap.title2}</span>
             </h2>
-            <div className="space-y-6 text-slate-400 font-light leading-relaxed text-lg text-justify">
+            <div className="space-y-6 text-slate-400 font-light leading-relaxed text-base md:text-lg text-justify">
               <p>{t.gap.desc1}</p>
               <div className="flex gap-4 items-start p-6 bg-emerald-500/5 border border-emerald-500/20 rounded-2xl italic">
                 <TrendingUp className="text-[#10B981] shrink-0" />
@@ -145,10 +152,10 @@ export default function DataHomeSolution() {
         </div>
       </section>
 
-      {/* --- HOW IT WORKS (Images 3.1.jpg à 3.4.jpg) --- */}
-      <section id="how" className="py-24 px-6 z-10 relative">
+      {/* --- HOW IT WORKS (16/9) --- */}
+      <section id="how" className="py-20 md:py-24 px-6 z-10 relative">
         <div className="max-w-6xl mx-auto text-center">
-          <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter mb-20">
+          <h2 className="text-3xl md:text-6xl font-black uppercase tracking-tighter mb-16 md:mb-20">
             {t.how.title} <span className="text-[#10B981] font-light italic">{t.how.subtitle}</span>
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-left">
@@ -176,16 +183,16 @@ export default function DataHomeSolution() {
         </div>
       </section>
 
-      {/* --- SAAS MASTER TEMPLATE (Image 4.jpg) --- */}
-      <section id="saas" className="py-32 px-6 bg-slate-950 border-y border-white/5 relative z-10 overflow-hidden">
+      {/* --- SAAS MASTER TEMPLATE (16/9) --- */}
+      <section id="saas" className="py-24 md:py-32 px-6 bg-slate-950 border-y border-white/5 relative z-10 overflow-hidden">
         <div className="max-w-6xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-16 items-start">
             <div className="space-y-12">
               <div className="space-y-6">
-                <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter leading-none">
+                <h2 className="text-3xl md:text-6xl font-black uppercase tracking-tighter leading-none">
                   {t.saas.title} <br /> <span className="text-[#10B981] font-light italic">{t.saas.subtitle}</span>
                 </h2>
-                <p className="text-slate-400 font-light text-lg leading-relaxed italic border-l-2 border-[#10B981] pl-6">
+                <p className="text-slate-400 font-light text-base md:text-lg leading-relaxed italic border-l-2 border-[#10B981] pl-6">
                   {t.saas.desc}
                 </p>
               </div>
@@ -217,11 +224,13 @@ export default function DataHomeSolution() {
       </section>
 
       {/* --- FOOTER --- */}
-      <footer className="py-20 border-t border-white/5 text-center opacity-40 z-10 relative">
+      <footer className="py-20 border-t border-white/5 text-center opacity-40 z-10 relative bg-[#020617]">
         <div className="flex justify-center mb-6 grayscale hover:grayscale-0 transition-all duration-500 h-6 relative w-24 mx-auto">
            <Image src="/logo.jpeg" alt="Logo Footer" fill className="object-contain" />
         </div>
-        <p className="text-[8px] uppercase tracking-[0.2em]">© 2026 Data-Home.io / Global Infrastructure / Mons, Belgium</p>
+        <p className="text-[8px] uppercase tracking-[0.2em] px-6">
+          © 2026 Data-Home.io / Global Infrastructure / Mons, Belgium
+        </p>
       </footer>
     </div>
   );
