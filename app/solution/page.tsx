@@ -486,6 +486,7 @@ export default function DataHomeSolution() {
   const [isLangOpen, setIsLangOpen] = useState(false);
   const [isYearly, setIsYearly] = useState(false);
   const [activeTab, setActiveTab] = useState(0);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const t = translations[lang];
 
@@ -503,49 +504,49 @@ export default function DataHomeSolution() {
     const [pinCopied, setPinCopied] = useState(false);
 
     return (
-      <div className="w-full bg-[#0f172a] rounded-[2.5rem] border border-white/10 shadow-2xl overflow-hidden flex flex-col h-[600px] relative">
-        <div className="h-16 border-b border-white/5 bg-slate-900/50 flex items-center justify-between px-6 shrink-0">
-          <div className="flex gap-4">
+      <div className="w-full bg-[#0f172a] rounded-[2.5rem] border border-white/10 shadow-2xl overflow-hidden flex flex-col h-[400px] sm:h-[500px] md:h-[600px] relative">
+        <div className="h-12 sm:h-14 md:h-16 border-b border-white/5 bg-slate-900/50 flex items-center justify-between px-3 sm:px-4 md:px-6 shrink-0">
+          <div className="flex gap-2 sm:gap-3 md:gap-4 overflow-x-auto pb-1 scrollbar-hide">
             {t.saas.mockup.tabs.map((tab, i) => (
               <button
                 key={i}
                 onClick={() => setActiveTab(i)}
-                className={`text-[10px] font-black uppercase tracking-widest transition-all pb-1 border-b-2 ${activeTab === i ? 'border-emerald-500 text-white' : 'border-transparent text-slate-500'}`}
+                className={`text-[8px] sm:text-[9px] md:text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all pb-1 border-b-2 ${activeTab === i ? 'border-emerald-500 text-white' : 'border-transparent text-slate-500'}`}
               >
                 {tab}
               </button>
             ))}
           </div>
-          <div className="flex items-center gap-3">
-            <div className="text-[8px] font-black uppercase text-slate-500 tracking-tighter">System_v1.2</div>
-            <div className="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center"><Users size={12} className="text-emerald-500" /></div>
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="text-[7px] sm:text-[8px] font-black uppercase text-slate-500 tracking-tighter hidden sm:block">System_v1.2</div>
+            <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-emerald-500/20 flex items-center justify-center"><Users size={10} className="sm:size-12 text-emerald-500" /></div>
           </div>
         </div>
 
         <div className="flex-1 overflow-y-auto bg-[#020617]/40 custom-scrollbar">
           {activeTab === 0 ? (
-            /* --- CONSOLE AGENCE --- */
-            <div className="flex h-full">
-              {/* Sidebar projets */}
-              <div className="w-2/5 border-r border-white/5 p-4 space-y-4 bg-black/20">
+            /* --- CONSOLE AGENCE (responsive) --- */
+            <div className="flex flex-col sm:flex-row h-full">
+              {/* Sidebar projets - sur mobile, pleine largeur */}
+              <div className="w-full sm:w-2/5 border-r border-white/5 p-2 sm:p-3 md:p-4 space-y-2 sm:space-y-3 md:space-y-4 bg-black/20">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-600" size={14} />
+                  <Search className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 text-slate-600" size={12} />
                   <input
                     type="text"
                     placeholder={t.saas.mockup.search_placeholder}
-                    className="w-full pl-9 pr-3 py-3 bg-white/5 rounded-xl text-[10px] font-black border border-white/5 outline-none focus:border-emerald-500/50 placeholder:text-slate-700"
+                    className="w-full pl-7 sm:pl-9 pr-2 sm:pr-3 py-2 sm:py-3 bg-white/5 rounded-xl text-[8px] sm:text-[10px] font-black border border-white/5 outline-none focus:border-emerald-500/50 placeholder:text-slate-700"
                   />
                 </div>
-                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{t.saas.mockup.projects}</p>
-                <div className="space-y-2">
+                <p className="text-[8px] sm:text-[10px] font-black text-slate-500 uppercase tracking-widest">{t.saas.mockup.projects}</p>
+                <div className="space-y-1 sm:space-y-2">
                   {t.saas.mockup.project_list.map((proj, idx) => (
                     <button
                       key={idx}
-                      className={`w-full text-left p-4 rounded-xl border transition-all ${idx === 0 ? 'bg-emerald-500/10 border-emerald-500/50' : 'border-white/5 hover:bg-white/5'}`}
+                      className={`w-full text-left p-2 sm:p-3 md:p-4 rounded-lg sm:rounded-xl border transition-all ${idx === 0 ? 'bg-emerald-500/10 border-emerald-500/50' : 'border-white/5 hover:bg-white/5'}`}
                     >
-                      <p className="font-black text-[11px] text-white uppercase tracking-tighter">{proj.owner}</p>
-                      <p className="text-[9px] font-black text-emerald-500 flex items-center gap-1 tracking-widest">
-                        <MapPin size={10} /> {proj.name}
+                      <p className="font-black text-[9px] sm:text-[10px] md:text-[11px] text-white uppercase tracking-tighter">{proj.owner}</p>
+                      <p className="text-[7px] sm:text-[8px] md:text-[9px] font-black text-emerald-500 flex items-center gap-1 tracking-widest">
+                        <MapPin size={8} className="sm:size-10" /> {proj.name}
                       </p>
                     </button>
                   ))}
@@ -553,118 +554,118 @@ export default function DataHomeSolution() {
               </div>
 
               {/* Contenu principal du projet sélectionné */}
-              <div className="w-3/5 p-5 overflow-y-auto space-y-5">
-                <div className="flex justify-between items-start border-b border-white/5 pb-4">
+              <div className="w-full sm:w-3/5 p-2 sm:p-3 md:p-5 overflow-y-auto space-y-3 sm:space-y-4 md:space-y-5">
+                <div className="flex justify-between items-start border-b border-white/5 pb-2 sm:pb-3 md:pb-4">
                   <div>
-                    <h3 className="text-xl font-black text-white uppercase tracking-tighter">{t.saas.mockup.selected_project}</h3>
-                    <p className="text-[10px] text-slate-400 font-bold flex items-center gap-2 mt-1">
-                      <UserPlus size={12} /> {t.saas.mockup.project_owner}
+                    <h3 className="text-base sm:text-lg md:text-xl font-black text-white uppercase tracking-tighter">{t.saas.mockup.selected_project}</h3>
+                    <p className="text-[8px] sm:text-[9px] md:text-[10px] text-slate-400 font-bold flex items-center gap-1 mt-1">
+                      <UserPlus size={10} className="sm:size-12" /> {t.saas.mockup.project_owner}
                     </p>
                   </div>
                   <div className="text-right">
-                    <span className="text-xs font-black text-emerald-500 uppercase tracking-widest">{t.saas.mockup.current_phase}</span>
+                    <span className="text-[9px] sm:text-[10px] md:text-xs font-black text-emerald-500 uppercase tracking-widest">{t.saas.mockup.current_phase}</span>
                   </div>
                 </div>
 
-                <div className="flex gap-6 border-b border-white/5 text-[9px] font-black uppercase tracking-widest">
+                <div className="flex gap-2 sm:gap-3 md:gap-6 border-b border-white/5 text-[8px] sm:text-[9px] font-black uppercase tracking-widest overflow-x-auto pb-1">
                   {t.saas.mockup.tabs_infos.map((tab, i) => (
-                    <button key={i} className={`pb-2 ${i === 0 ? 'text-emerald-500 border-b-2 border-emerald-500' : 'text-slate-500'}`}>{tab}</button>
+                    <button key={i} className={`pb-1 sm:pb-2 whitespace-nowrap ${i === 0 ? 'text-emerald-500 border-b-2 border-emerald-500' : 'text-slate-500'}`}>{tab}</button>
                   ))}
                 </div>
 
-                <div className="space-y-5 pt-2">
-                  <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-3 sm:space-y-4 md:space-y-5 pt-1 sm:pt-2">
+                  <div className="grid grid-cols-2 gap-2 sm:gap-3 md:gap-4">
                     <div>
-                      <label className="text-[8px] font-black text-slate-500 uppercase tracking-widest">{t.saas.mockup.client_info}</label>
-                      <p className="text-sm font-bold text-white">Martin V.</p>
+                      <label className="text-[6px] sm:text-[7px] md:text-[8px] font-black text-slate-500 uppercase tracking-widest">{t.saas.mockup.client_info}</label>
+                      <p className="text-xs sm:text-sm font-bold text-white">Martin V.</p>
                     </div>
                     <div>
-                      <label className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Email</label>
-                      <p className="text-[10px] text-slate-300">{t.saas.mockup.email}</p>
+                      <label className="text-[6px] sm:text-[7px] md:text-[8px] font-black text-slate-500 uppercase tracking-widest">Email</label>
+                      <p className="text-[8px] sm:text-[9px] md:text-[10px] text-slate-300">{t.saas.mockup.email}</p>
                     </div>
                     <div>
-                      <label className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Tél.</label>
-                      <p className="text-[10px] text-slate-300">{t.saas.mockup.phone}</p>
+                      <label className="text-[6px] sm:text-[7px] md:text-[8px] font-black text-slate-500 uppercase tracking-widest">Tél.</label>
+                      <p className="text-[8px] sm:text-[9px] md:text-[10px] text-slate-300">{t.saas.mockup.phone}</p>
                     </div>
                   </div>
 
-                  <div className="bg-emerald-500/10 p-4 rounded-2xl border border-emerald-500/20 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <Euro size={18} className="text-emerald-500" />
-                      <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest">{t.saas.mockup.cashback}</span>
+                  <div className="bg-emerald-500/10 p-2 sm:p-3 md:p-4 rounded-xl sm:rounded-2xl border border-emerald-500/20 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Euro size={14} className="sm:size-18 text-emerald-500" />
+                      <span className="text-[7px] sm:text-[8px] md:text-[9px] font-black text-slate-300 uppercase tracking-widest">{t.saas.mockup.cashback}</span>
                     </div>
-                    <span className="text-lg font-black text-emerald-400">3 500 €</span>
+                    <span className="text-sm sm:text-base md:text-lg font-black text-emerald-400">3 500 €</span>
                   </div>
 
-                  <div className="bg-white/5 p-4 rounded-2xl border border-white/5 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <Lock size={14} className="text-slate-500" />
-                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{t.saas.mockup.pin}</span>
+                  <div className="bg-white/5 p-2 sm:p-3 md:p-4 rounded-xl sm:rounded-2xl border border-white/5 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Lock size={12} className="text-slate-500" />
+                      <span className="text-[7px] sm:text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest">{t.saas.mockup.pin}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-black text-white tracking-[0.3em]">240226</span>
+                      <span className="text-xs sm:text-sm font-black text-white tracking-[0.3em]">240226</span>
                       <button
                         onClick={() => { setPinCopied(true); setTimeout(() => setPinCopied(false), 1500); }}
-                        className="p-1.5 bg-white/5 rounded-lg text-slate-400 hover:text-emerald-500"
+                        className="p-1 bg-white/5 rounded-lg text-slate-400 hover:text-emerald-500"
                       >
-                        {pinCopied ? <Check size={12} /> : <Copy size={12} />}
+                        {pinCopied ? <Check size={10} /> : <Copy size={10} />}
                       </button>
                     </div>
                   </div>
-                  <p className="text-[8px] text-slate-600 font-bold uppercase flex items-center gap-2">
-                    <ShieldCheck size={10} /> {t.saas.mockup.encryption}
+                  <p className="text-[6px] sm:text-[7px] md:text-[8px] text-slate-600 font-bold uppercase flex items-center gap-2">
+                    <ShieldCheck size={8} /> {t.saas.mockup.encryption}
                   </p>
                 </div>
               </div>
             </div>
           ) : (
-            /* --- VUE CLIENT (Tracker) --- */
-            <div className="p-6 space-y-6">
-              <div className="flex justify-between items-center bg-white/5 p-4 rounded-2xl border border-white/5">
-                <div className="flex items-center gap-3">
-                  <div className="bg-emerald-500 p-2 rounded-xl"><HardHat size={16} className="text-black" /></div>
+            /* --- VUE CLIENT (Tracker) responsive --- */
+            <div className="p-2 sm:p-3 md:p-6 space-y-3 sm:space-y-4 md:space-y-6">
+              <div className="flex justify-between items-center bg-white/5 p-2 sm:p-3 md:p-4 rounded-xl sm:rounded-2xl border border-white/5">
+                <div className="flex items-center gap-2">
+                  <div className="bg-emerald-500 p-1 sm:p-2 rounded-lg sm:rounded-xl"><HardHat size={14} className="sm:size-16 text-black" /></div>
                   <div>
-                    <h2 className="text-sm font-black text-white">{t.saas.mockup.agency_name}</h2>
-                    <p className="text-[8px] text-emerald-400 font-black uppercase tracking-widest">{t.saas.mockup.current_phase}</p>
+                    <h2 className="text-xs sm:text-sm font-black text-white">{t.saas.mockup.agency_name}</h2>
+                    <p className="text-[7px] sm:text-[8px] text-emerald-400 font-black uppercase tracking-widest">{t.saas.mockup.current_phase}</p>
                   </div>
                 </div>
-                <button className="text-slate-500 hover:text-rose-500 text-[9px] font-black uppercase tracking-widest flex items-center gap-1">
-                  <LogOut size={12} /> {t.saas.mockup.quit}
+                <button className="text-slate-500 hover:text-rose-500 text-[7px] sm:text-[8px] md:text-[9px] font-black uppercase tracking-widest flex items-center gap-1">
+                  <LogOut size={10} className="sm:size-12" /> {t.saas.mockup.quit}
                 </button>
               </div>
 
               <div>
-                <h3 className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-3 flex items-center gap-2">
-                  <FileText size={14} /> {t.saas.mockup.documents}
+                <h3 className="text-[8px] sm:text-[9px] md:text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-2 flex items-center gap-2">
+                  <FileText size={12} className="sm:size-14" /> {t.saas.mockup.documents}
                 </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                   {t.saas.mockup.doc_filenames.map((name, i) => (
-                    <div key={i} className="flex items-center justify-between p-3 bg-white/5 border border-white/5 rounded-xl hover:bg-emerald-500/10 transition-all">
-                      <span className="text-[8px] font-bold truncate pr-2">{name}</span>
-                      <Download size={12} className="text-slate-500" />
+                    <div key={i} className="flex items-center justify-between p-2 bg-white/5 border border-white/5 rounded-lg hover:bg-emerald-500/10 transition-all">
+                      <span className="text-[7px] sm:text-[8px] font-bold truncate pr-2">{name}</span>
+                      <Download size={10} className="text-slate-500" />
                     </div>
                   ))}
                 </div>
               </div>
 
               <div>
-                <h3 className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-3 flex items-center gap-2">
-                  <ShieldCheck size={14} /> {t.saas.mockup.tech_reports}
+                <h3 className="text-[8px] sm:text-[9px] md:text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-2 flex items-center gap-2">
+                  <ShieldCheck size={12} className="sm:size-14" /> {t.saas.mockup.tech_reports}
                 </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 md:gap-4">
                   {[0, 1].map((idx) => (
-                    <div key={idx} className="group bg-white/5 rounded-3xl border border-white/5 overflow-hidden cursor-pointer hover:border-emerald-500/30 transition-all">
-                      <div className="h-32 relative bg-slate-800">
-                        <div className="absolute inset-0 flex items-center justify-center text-slate-700"><ImageIcon size={24} /></div>
+                    <div key={idx} className="group bg-white/5 rounded-xl sm:rounded-2xl md:rounded-3xl border border-white/5 overflow-hidden cursor-pointer hover:border-emerald-500/30 transition-all">
+                      <div className="h-20 sm:h-24 md:h-32 relative bg-slate-800">
+                        <div className="absolute inset-0 flex items-center justify-center text-slate-700"><ImageIcon size={18} className="sm:size-24" /></div>
                       </div>
-                      <div className="p-4 flex justify-between items-center">
+                      <div className="p-2 sm:p-3 md:p-4 flex justify-between items-center">
                         <div>
-                          <p className="text-xs font-black text-white">{t.saas.mockup.report_date}</p>
-                          <p className="text-[8px] text-emerald-500 font-bold uppercase tracking-widest">{t.saas.mockup.report_validated}</p>
+                          <p className="text-[9px] sm:text-[10px] md:text-xs font-black text-white">{t.saas.mockup.report_date}</p>
+                          <p className="text-[6px] sm:text-[7px] md:text-[8px] text-emerald-500 font-bold uppercase tracking-widest">{t.saas.mockup.report_validated}</p>
                         </div>
                         <div className="text-right">
-                          <span className="text-[8px] font-black text-slate-500 uppercase">{t.saas.mockup.expertise}</span>
-                          <p className="text-[9px] text-slate-300 font-bold">{t.saas.mockup.expert}</p>
+                          <span className="text-[6px] sm:text-[7px] md:text-[8px] font-black text-slate-500 uppercase">{t.saas.mockup.expertise}</span>
+                          <p className="text-[7px] sm:text-[8px] md:text-[9px] text-slate-300 font-bold">{t.saas.mockup.expert}</p>
                         </div>
                       </div>
                     </div>
@@ -684,41 +685,41 @@ export default function DataHomeSolution() {
     const getPrice = (base: number) => isYearly ? Math.floor(base * 0.8) : base;
 
     return (
-      <section id="pricing" className="py-24 px-6 bg-[#020617] relative z-10">
+      <section id="pricing" className="py-12 sm:py-16 md:py-24 px-4 sm:px-6 bg-[#020617] relative z-10">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
-            <div className="inline-block px-4 py-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 text-[10px] font-black uppercase mb-6 tracking-[0.2em]">{t.pricing.tag}</div>
-            <h2 className="text-3xl md:text-6xl font-black uppercase tracking-tighter">
-              {t.pricing.title} <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-white italic font-light">{t.pricing.subtitle}</span>
+          <div className="text-center mb-8 sm:mb-12 md:mb-16">
+            <div className="inline-block px-3 sm:px-4 py-1 sm:py-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 text-[8px] sm:text-[10px] font-black uppercase mb-4 sm:mb-6 tracking-[0.2em]">{t.pricing.tag}</div>
+            <h2 className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-black uppercase tracking-tighter">
+              {t.pricing.title} <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-white italic font-light block sm:inline">{t.pricing.subtitle}</span>
             </h2>
           </div>
 
-          <div className="flex justify-center items-center gap-6 mb-16">
-            <span className={`text-[11px] font-black uppercase tracking-widest transition-colors ${!isYearly ? 'text-white' : 'text-slate-600'}`}>{t.pricing.billing.monthly}</span>
-            <button onClick={() => setIsYearly(!isYearly)} className="w-16 h-8 bg-white/5 border border-white/10 rounded-full p-1.5 hover:bg-white/10 transition-all"><div className={`w-5 h-5 bg-emerald-500 rounded-full transition-transform duration-300 ${isYearly ? 'translate-x-8' : 'translate-x-0 shadow-[0_0_10px_rgba(16,185,129,0.5)]'}`} /></button>
-            <div className="flex items-center gap-3">
-              <span className={`text-[11px] font-black uppercase tracking-widest transition-colors ${isYearly ? 'text-white' : 'text-slate-600'}`}>{t.pricing.billing.yearly}</span>
-              <span className="bg-emerald-500/20 text-emerald-400 text-[9px] font-black px-2 py-1 rounded-md uppercase animate-pulse">{t.pricing.billing.save}</span>
+          <div className="flex flex-wrap justify-center items-center gap-4 sm:gap-6 mb-10 sm:mb-12 md:mb-16">
+            <span className={`text-[10px] sm:text-[11px] font-black uppercase tracking-widest transition-colors ${!isYearly ? 'text-white' : 'text-slate-600'}`}>{t.pricing.billing.monthly}</span>
+            <button onClick={() => setIsYearly(!isYearly)} className="w-14 h-7 sm:w-16 sm:h-8 bg-white/5 border border-white/10 rounded-full p-1 hover:bg-white/10 transition-all"><div className={`w-5 h-5 bg-emerald-500 rounded-full transition-transform duration-300 ${isYearly ? 'translate-x-8' : 'translate-x-0 shadow-[0_0_10px_rgba(16,185,129,0.5)]'}`} /></button>
+            <div className="flex items-center gap-2">
+              <span className={`text-[10px] sm:text-[11px] font-black uppercase tracking-widest transition-colors ${isYearly ? 'text-white' : 'text-slate-600'}`}>{t.pricing.billing.yearly}</span>
+              <span className="bg-emerald-500/20 text-emerald-400 text-[7px] sm:text-[9px] font-black px-1 sm:px-2 py-0.5 sm:py-1 rounded-md uppercase animate-pulse">{t.pricing.billing.save}</span>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
             {t.pricing.packs.map((pack, i) => (
-              <div key={i} className={`p-10 rounded-[3rem] border transition-all duration-500 ${i === 1 ? 'bg-emerald-500/5 border-emerald-500/40 scale-105 shadow-2xl relative' : 'bg-white/5 border-white/10 hover:border-white/20'}`}>
-                {i === 1 && <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-emerald-500 text-slate-950 text-[10px] font-black px-6 py-2 rounded-full uppercase tracking-widest">{t.pricing.popular}</div>}
-                <div className="mb-8 p-5 bg-white/5 w-fit rounded-[2rem] text-emerald-400 border border-white/5">{icons[i]}</div>
-                <h3 className="text-3xl font-black uppercase mb-3 tracking-tighter">{pack.name}</h3>
-                <p className="text-slate-500 text-[11px] italic mb-8 uppercase tracking-widest">{pack.desc}</p>
-                <div className="flex items-baseline gap-2 mb-10 border-b border-white/5 pb-10">
-                  <span className="text-5xl font-black text-white">{getPrice(monthlyBeta[i])}€</span>
-                  <span className="text-[10px] text-slate-500 uppercase font-black">{t.pricing.perMonth}</span>
+              <div key={i} className={`p-4 sm:p-6 md:p-8 lg:p-10 rounded-[2rem] sm:rounded-[2.5rem] md:rounded-[3rem] border transition-all duration-500 ${i === 1 ? 'bg-emerald-500/5 border-emerald-500/40 scale-105 shadow-2xl relative' : 'bg-white/5 border-white/10 hover:border-white/20'}`}>
+                {i === 1 && <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-emerald-500 text-slate-950 text-[8px] sm:text-[10px] font-black px-3 sm:px-6 py-1 sm:py-2 rounded-full uppercase tracking-widest">{t.pricing.popular}</div>}
+                <div className="mb-4 sm:mb-6 md:mb-8 p-3 sm:p-4 md:p-5 bg-white/5 w-fit rounded-[1.5rem] sm:rounded-[2rem] text-emerald-400 border border-white/5">{icons[i]}</div>
+                <h3 className="text-xl sm:text-2xl md:text-3xl font-black uppercase mb-2 tracking-tighter">{pack.name}</h3>
+                <p className="text-slate-500 text-[9px] sm:text-[10px] md:text-[11px] italic mb-4 sm:mb-6 md:mb-8 uppercase tracking-widest">{pack.desc}</p>
+                <div className="flex items-baseline gap-2 mb-4 sm:mb-6 md:mb-8 border-b border-white/5 pb-4 sm:pb-6 md:pb-8">
+                  <span className="text-3xl sm:text-4xl md:text-5xl font-black text-white">{getPrice(monthlyBeta[i])}€</span>
+                  <span className="text-[8px] sm:text-[9px] md:text-[10px] text-slate-500 uppercase font-black">{t.pricing.perMonth}</span>
                 </div>
-                <div className="space-y-5 mb-12">
+                <div className="space-y-2 sm:space-y-3 md:space-y-4 mb-6 sm:mb-8 md:mb-10">
                   {pack.features.map((f, idx) => (
-                    <div key={idx} className="flex items-center gap-4 text-[13px] text-slate-400 font-medium tracking-tight"><Check size={18} className="text-emerald-500 shrink-0" /> {f}</div>
+                    <div key={idx} className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm text-slate-400 font-medium tracking-tight"><Check size={16} className="sm:size-18 text-emerald-500 shrink-0" /> {f}</div>
                   ))}
                 </div>
-                <button className={`w-full py-6 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] transition-all ${i === 1 ? 'bg-emerald-500 text-slate-950 shadow-xl shadow-emerald-500/30 hover:bg-emerald-400 hover:scale-[1.02]' : 'bg-white/10 text-white hover:bg-white/20'}`}>{t.pricing.cta}</button>
+                <button className={`w-full py-3 sm:py-4 md:py-5 lg:py-6 rounded-xl sm:rounded-2xl text-[10px] sm:text-[11px] font-black uppercase tracking-[0.2em] transition-all ${i === 1 ? 'bg-emerald-500 text-slate-950 shadow-xl shadow-emerald-500/30 hover:bg-emerald-400 hover:scale-[1.02]' : 'bg-white/10 text-white hover:bg-white/20'}`}>{t.pricing.cta}</button>
               </div>
             ))}
           </div>
@@ -734,68 +735,94 @@ export default function DataHomeSolution() {
         <Image src="/1.jpg" alt="Background" fill className="object-cover" priority />
       </div>
 
-      <nav className="border-b border-white/5 px-6 py-5 flex justify-between items-center backdrop-blur-2xl sticky top-0 z-50 bg-[#020617]/90">
-        <div className="relative h-12 w-32 md:w-64"><Image src="/logo_1.png" alt="Logo" fill className="object-contain object-left" /></div>
+      <nav className="border-b border-white/5 px-4 sm:px-6 py-4 sm:py-5 flex justify-between items-center backdrop-blur-2xl sticky top-0 z-50 bg-[#020617]/90">
+        <div className="relative h-10 w-24 sm:h-12 sm:w-32 md:w-64">
+          <Image src="/logo_1.png" alt="Logo" fill className="object-contain object-left" />
+        </div>
 
-        <div className="hidden lg:flex gap-10 text-[11px] font-black uppercase tracking-[0.2em] text-slate-500">
+        {/* Menu desktop */}
+        <div className="hidden lg:flex gap-8 xl:gap-10 text-[10px] sm:text-[11px] font-black uppercase tracking-[0.2em] text-slate-500">
           {t.nav.slice(0, 4).map((item, i) => <a key={i} href={`#${['vision','how','saas','pricing'][i]}`} className="hover:text-emerald-400 transition-colors">{item}</a>)}
         </div>
 
-        <div className="flex items-center gap-5">
+        <div className="flex items-center gap-2 sm:gap-5">
           <div className="relative" ref={dropdownRef}>
-            <button onClick={() => setIsLangOpen(!isLangOpen)} className="p-2.5 hover:bg-white/5 rounded-full flex items-center gap-2 group transition-all">
-              <Globe size={20} className="text-slate-400 group-hover:text-emerald-400 transition-colors" /><ChevronDown size={14} className={`text-slate-600 transition-transform ${isLangOpen ? 'rotate-180' : ''}`} />
+            <button onClick={() => setIsLangOpen(!isLangOpen)} className="p-2 hover:bg-white/5 rounded-full flex items-center gap-1 group transition-all">
+              <Globe size={16} className="sm:size-20 text-slate-400 group-hover:text-emerald-400 transition-colors" />
+              <ChevronDown size={12} className={`text-slate-600 transition-transform ${isLangOpen ? 'rotate-180' : ''}`} />
             </button>
             {isLangOpen && (
-              <div className="absolute right-0 mt-4 w-48 bg-[#0f172a] border border-white/10 rounded-[1.5rem] overflow-hidden shadow-3xl z-50 p-2">
+              <div className="absolute right-0 mt-4 w-36 sm:w-48 bg-[#0f172a] border border-white/10 rounded-[1.5rem] overflow-hidden shadow-3xl z-50 p-2">
                 {(Object.keys(translations) as Array<keyof typeof translations>).map((l) => (
-                  <button key={l} onClick={() => { setLang(l); setIsLangOpen(false); }} className={`w-full text-left px-5 py-4 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${lang === l ? 'text-emerald-400 bg-white/5' : 'text-slate-400 hover:bg-emerald-500 hover:text-slate-950'}`}>
+                  <button key={l} onClick={() => { setLang(l); setIsLangOpen(false); }} className={`w-full text-left px-3 sm:px-5 py-2 sm:py-4 text-[9px] sm:text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${lang === l ? 'text-emerald-400 bg-white/5' : 'text-slate-400 hover:bg-emerald-500 hover:text-slate-950'}`}>
                     {translations[l].label}
                   </button>
                 ))}
               </div>
             )}
           </div>
-          <button className="bg-emerald-500 text-slate-950 px-8 py-3 rounded-full text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-emerald-500/20 hover:bg-emerald-400 transition-all">{t.nav[4]}</button>
+          <button className="bg-emerald-500 text-slate-950 px-4 sm:px-6 md:px-8 py-2 sm:py-3 rounded-full text-[8px] sm:text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-emerald-500/20 hover:bg-emerald-400 transition-all whitespace-nowrap">{t.nav[4]}</button>
+          
+          {/* Bouton menu mobile */}
+          <button className="lg:hidden p-2 text-slate-400 hover:text-white" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+            <Menu size={24} />
+          </button>
         </div>
+
+        {/* Menu mobile déroulant */}
+        {mobileMenuOpen && (
+          <div className="absolute top-full left-0 right-0 bg-[#0f172a] border-t border-white/5 p-4 flex flex-col gap-4 lg:hidden z-50">
+            {t.nav.slice(0, 4).map((item, i) => (
+              <a key={i} href={`#${['vision','how','saas','pricing'][i]}`} className="text-sm font-black uppercase tracking-widest text-slate-400 hover:text-emerald-400 py-2" onClick={() => setMobileMenuOpen(false)}>
+                {item}
+              </a>
+            ))}
+          </div>
+        )}
       </nav>
 
-      <section id="vision" className="relative h-[90vh] flex items-center justify-center overflow-hidden z-10">
-        <video autoPlay loop muted playsInline className="absolute inset-0 w-full h-full object-cover opacity-40 mix-blend-lighten"><source src="/hero_datahome.mp4" type="video/mp4" /></video>
+      <section id="vision" className="relative h-[70vh] sm:h-[80vh] md:h-[90vh] flex items-center justify-center overflow-hidden z-10">
+        <video autoPlay loop muted playsInline className="absolute inset-0 w-full h-full object-cover opacity-40 mix-blend-lighten">
+          <source src="/hero_datahome.mp4" type="video/mp4" />
+        </video>
         <div className="absolute inset-0 bg-gradient-to-b from-[#020617]/20 via-[#020617]/40 to-[#020617]"></div>
-        <div className="relative z-10 text-center px-6 max-w-5xl">
-          <div className="inline-block px-5 py-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 text-[11px] font-black uppercase mb-10 tracking-[0.3em]">{t.hero.tag}</div>
-          <h1 className="text-[13vw] md:text-[95px] font-black tracking-tighter leading-[0.85] mb-10 uppercase">
+        <div className="relative z-10 text-center px-4 max-w-5xl">
+          <div className="inline-block px-3 sm:px-5 py-1 sm:py-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 text-[9px] sm:text-[11px] font-black uppercase mb-6 sm:mb-10 tracking-[0.2em] sm:tracking-[0.3em]">{t.hero.tag}</div>
+          <h1 className="text-[12vw] sm:text-[11vw] md:text-[95px] font-black tracking-tighter leading-[0.85] mb-6 sm:mb-10 uppercase">
             {t.hero.title1} <span className="text-transparent bg-clip-text bg-gradient-to-b from-white to-emerald-400 italic font-light block">{t.hero.title2}</span>
           </h1>
-          <p className="max-w-2xl mx-auto text-slate-300 text-xl md:text-2xl font-light italic leading-relaxed tracking-tight">{t.hero.desc}</p>
+          <p className="max-w-2xl mx-auto text-sm sm:text-base md:text-xl lg:text-2xl text-slate-300 font-light italic leading-relaxed tracking-tight">{t.hero.desc}</p>
         </div>
       </section>
 
-      <section className="py-28 px-6 bg-slate-950/60 z-10 relative border-y border-white/5">
-        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-24 items-center">
-          <div className="space-y-10">
-            <h2 className="text-5xl md:text-6xl font-black tracking-tighter uppercase leading-[0.9]">{t.gap.title1} <br /><span className="text-emerald-500 font-light italic">{t.gap.title2}</span></h2>
-            <div className="space-y-8 text-slate-400 font-light text-xl leading-relaxed italic">
+      <section className="py-16 sm:py-20 md:py-28 px-4 sm:px-6 bg-slate-950/60 z-10 relative border-y border-white/5">
+        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 md:gap-24 items-center">
+          <div className="space-y-6 sm:space-y-8 md:space-y-10">
+            <h2 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tighter uppercase leading-[0.9]">{t.gap.title1} <br /><span className="text-emerald-500 font-light italic">{t.gap.title2}</span></h2>
+            <div className="space-y-4 sm:space-y-6 md:space-y-8 text-slate-400 font-light text-base sm:text-lg md:text-xl leading-relaxed italic">
               <p>{t.gap.desc1}</p>
-              <div className="p-8 bg-emerald-500/5 border border-emerald-500/20 rounded-[2.5rem] flex gap-6"><Percent size={28} className="text-emerald-500 shrink-0" /><p className="text-base text-slate-300 not-italic tracking-tight leading-relaxed">{t.gap.desc2}</p></div>
+              <div className="p-4 sm:p-6 md:p-8 bg-emerald-500/5 border border-emerald-500/20 rounded-[2rem] sm:rounded-[2.5rem] flex gap-4 sm:gap-6"><Percent size={24} className="sm:size-28 text-emerald-500 shrink-0" /><p className="text-sm sm:text-base text-slate-300 not-italic tracking-tight leading-relaxed">{t.gap.desc2}</p></div>
             </div>
           </div>
-          <div className="relative aspect-square md:aspect-video rounded-[3rem] overflow-hidden border border-emerald-500/20 shadow-3xl group"><Image src="/2.jpg" alt="Gap" fill className="object-cover group-hover:scale-105 transition-transform duration-1000" /></div>
+          <div className="relative aspect-square md:aspect-video rounded-[2rem] sm:rounded-[2.5rem] md:rounded-[3rem] overflow-hidden border border-emerald-500/20 shadow-3xl group">
+            <Image src="/2.jpg" alt="Gap" fill className="object-cover group-hover:scale-105 transition-transform duration-1000" />
+          </div>
         </div>
       </section>
 
-      <section id="how" className="py-32 px-6 z-10 relative">
+      <section id="how" className="py-16 sm:py-20 md:py-32 px-4 sm:px-6 z-10 relative">
         <div className="max-w-6xl mx-auto text-center">
-          <h2 className="text-4xl md:text-7xl font-black uppercase tracking-tighter mb-24 leading-none">{t.how.title} <br /><span className="text-emerald-500 font-light italic">{t.how.subtitle}</span></h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          <h2 className="text-4xl sm:text-5xl md:text-7xl font-black uppercase tracking-tighter mb-12 sm:mb-16 md:mb-24 leading-none">{t.how.title} <br /><span className="text-emerald-500 font-light italic">{t.how.subtitle}</span></h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
             {t.how.steps.map((step, i) => (
-              <div key={i} className="bg-white/5 rounded-[2.5rem] border border-white/5 overflow-hidden text-left group hover:border-emerald-500/30 transition-all duration-500">
-                <div className="relative aspect-video overflow-hidden border-b border-white/5"><Image src={`/3.${i+1}.jpg`} alt={step.t} fill className="object-cover group-hover:scale-110 transition-transform duration-700" /></div>
-                <div className="p-8 space-y-5">
-                  <div className="w-12 h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-emerald-500"><step.icon size={24} /></div>
-                  <h3 className="font-black text-[11px] uppercase tracking-[0.2em] text-white leading-tight">{step.t}</h3>
-                  <p className="text-slate-500 text-[11px] leading-relaxed font-medium">{step.d}</p>
+              <div key={i} className="bg-white/5 rounded-[2rem] sm:rounded-[2.5rem] border border-white/5 overflow-hidden text-left group hover:border-emerald-500/30 transition-all duration-500">
+                <div className="relative aspect-video overflow-hidden border-b border-white/5">
+                  <Image src={`/3.${i+1}.jpg`} alt={step.t} fill className="object-cover group-hover:scale-110 transition-transform duration-700" />
+                </div>
+                <div className="p-4 sm:p-6 md:p-8 space-y-3 sm:space-y-4 md:space-y-5">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-emerald-500/10 rounded-xl sm:rounded-2xl flex items-center justify-center text-emerald-500"><step.icon size={18} className="sm:size-24" /></div>
+                  <h3 className="font-black text-[9px] sm:text-[10px] md:text-[11px] uppercase tracking-[0.2em] text-white leading-tight">{step.t}</h3>
+                  <p className="text-slate-500 text-[9px] sm:text-[10px] md:text-[11px] leading-relaxed font-medium">{step.d}</p>
                 </div>
               </div>
             ))}
@@ -803,32 +830,32 @@ export default function DataHomeSolution() {
         </div>
       </section>
 
-      <section id="saas" className="py-32 md:py-40 px-6 bg-slate-950 border-y border-white/5 relative z-10">
+      <section id="saas" className="py-16 sm:py-20 md:py-32 lg:py-40 px-4 sm:px-6 bg-slate-950 border-y border-white/5 relative z-10">
         <div className="max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-24 items-start">
-            <div className="space-y-16">
-              <div className="space-y-8">
-                <h2 className="text-4xl md:text-7xl font-black uppercase tracking-tighter leading-[0.85]">{t.saas.title} <br /><span className="text-emerald-500 font-light italic">{t.saas.subtitle}</span></h2>
-                <p className="text-slate-400 font-light text-xl leading-relaxed italic border-l-4 border-emerald-500 pl-8">{t.saas.desc}</p>
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-24 items-start">
+            <div className="space-y-8 sm:space-y-12 md:space-y-16">
+              <div className="space-y-4 sm:space-y-6 md:space-y-8">
+                <h2 className="text-4xl sm:text-5xl md:text-7xl font-black uppercase tracking-tighter leading-[0.85]">{t.saas.title} <br /><span className="text-emerald-500 font-light italic">{t.saas.subtitle}</span></h2>
+                <p className="text-slate-400 font-light text-base sm:text-lg md:text-xl leading-relaxed italic border-l-4 border-emerald-500 pl-4 sm:pl-6 md:pl-8">{t.saas.desc}</p>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 {t.saas.features.map((f, i) => (
-                  <div key={i} className="p-8 bg-white/5 border border-white/5 rounded-[2rem] hover:border-emerald-500/20 transition-all duration-500">
-                    <f.icon className="text-emerald-500 mb-6" size={28} />
-                    <h4 className="font-black text-[11px] uppercase tracking-[0.2em] mb-3 text-white">{f.t}</h4>
-                    <p className="text-slate-500 text-[11px] leading-relaxed font-medium">{f.d}</p>
+                  <div key={i} className="p-4 sm:p-6 md:p-8 bg-white/5 border border-white/5 rounded-[1.5rem] sm:rounded-[2rem] hover:border-emerald-500/20 transition-all duration-500">
+                    <f.icon className="text-emerald-500 mb-4 sm:mb-6" size={24} />
+                    <h4 className="font-black text-[9px] sm:text-[10px] md:text-[11px] uppercase tracking-[0.2em] mb-2 text-white">{f.t}</h4>
+                    <p className="text-slate-500 text-[9px] sm:text-[10px] md:text-[11px] leading-relaxed font-medium">{f.d}</p>
                   </div>
                 ))}
               </div>
-              <button className="flex items-center gap-4 text-emerald-500 font-black uppercase text-[11px] tracking-[0.3em] group">
-                {t.saas.admin_cta} <ArrowRight size={18} className="group-hover:translate-x-2 transition-transform" />
+              <button className="flex items-center gap-3 sm:gap-4 text-emerald-500 font-black uppercase text-[10px] sm:text-[11px] tracking-[0.3em] group">
+                {t.saas.admin_cta} <ArrowRight size={16} className="sm:size-18 group-hover:translate-x-2 transition-transform" />
               </button>
             </div>
 
             <div className="relative group lg:sticky lg:top-40">
-              <div className="absolute -inset-10 bg-emerald-500/10 rounded-[5rem] blur-[100px] opacity-20 group-hover:opacity-40 transition-opacity duration-1000"></div>
+              <div className="absolute -inset-6 sm:-inset-8 md:-inset-10 bg-emerald-500/10 rounded-[3rem] sm:rounded-[4rem] md:rounded-[5rem] blur-[80px] sm:blur-[100px] opacity-20 group-hover:opacity-40 transition-opacity duration-1000"></div>
               <DashboardMockup />
-              <p className="text-[10px] text-slate-600 italic mt-8 text-center uppercase tracking-[0.25em] font-black opacity-60">
+              <p className="text-[8px] sm:text-[9px] md:text-[10px] text-slate-600 italic mt-4 sm:mt-6 md:mt-8 text-center uppercase tracking-[0.2em] sm:tracking-[0.25em] font-black opacity-60">
                 Explore Dashboard Ecosystem • Tripartite Visualization
               </p>
             </div>
@@ -838,11 +865,13 @@ export default function DataHomeSolution() {
 
       <PricingSection />
 
-      <footer className="py-24 border-t border-white/5 text-center opacity-40 z-10 relative bg-[#020617]">
-        <div className="flex justify-center mb-10 h-10 relative w-48 mx-auto grayscale hover:grayscale-0 transition-all duration-700 cursor-pointer">
-          <Image src="/logo_1.png" alt="Logo" fill className="object-contain" />
+      <footer className="py-16 sm:py-20 md:py-24 border-t border-white/5 text-center opacity-40 z-10 relative bg-[#020617]">
+        <div className="flex justify-center mb-6 sm:mb-8 md:mb-10">
+          <div className="relative h-8 w-32 sm:h-10 sm:w-48 grayscale hover:grayscale-0 transition-all duration-700 cursor-pointer">
+            <Image src="/logo_1.png" alt="Logo" fill className="object-contain" />
+          </div>
         </div>
-        <p className="text-[9px] font-black uppercase tracking-[0.4em] text-slate-500">© 2026 data-home.io / Global SaaS Infrastructure / Mons, Belgium</p>
+        <p className="text-[7px] sm:text-[8px] md:text-[9px] font-black uppercase tracking-[0.3em] sm:tracking-[0.4em] text-slate-500">© 2026 data-home.io / Global SaaS Infrastructure / Mons, Belgium</p>
       </footer>
     </div>
   );
