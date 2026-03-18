@@ -1,17 +1,18 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import { 
   Globe, ShieldCheck, Zap, Database, 
   CheckCircle2, TrendingUp, Cpu, Layers,
-  MapPin, Camera, CloudSync, LayoutGrid, ArrowRight
+  MapPin, Camera, CloudSync, LayoutGrid, ArrowRight, ChevronDown
 } from 'lucide-react';
 
 // --- DICTIONNAIRE DE TRADUCTION COMPLET ---
 const translations = {
   fr: {
     dir: 'ltr',
+    label: "Français",
     nav: ["Vision", "Fonctionnement", "Environnement SaaS", "Commencer"],
     hero: { tag: "OS Immobilier Global v1.2", title1: "L'Immobilier", title2: "Sans Frontières.", desc: "L'infrastructure logicielle qui unifie le marché mondial. Connectez vos clients locaux aux opportunités internationales en un clic." },
     gap: { title1: "Combler la", title2: "Fracture Immobilière.", desc1: "Aujourd'hui, lorsqu'un client vend un bien localement pour s'expatrier, le flux de données s'arrête. L'agence perd le contrôle et le client perd sa confiance.", desc2: "Data-Home.io agit comme une couche d'interopérabilité. Nous sécurisons les commissions cross-border en gardant le client dans votre écosystème." },
@@ -37,6 +38,7 @@ const translations = {
   },
   en: {
     dir: 'ltr',
+    label: "English",
     nav: ["Vision", "How It Works", "SaaS Environment", "Get Started"],
     hero: { tag: "Global Real Estate OS v1.2", title1: "Scaling Real Estate", title2: "Beyond Borders.", desc: "The software infrastructure that unifies the global real estate market. Connect your local clients to international opportunities in one click." },
     gap: { title1: "Solving the", title2: "Global Real Estate Gap.", desc1: "Today, when a client sells an asset in their local market to relocate, the data flow stops. The original agency loses control, and the client loses trust.", desc2: "Data-Home.io acts as a global interoperability layer. We secure cross-border commissions by keeping the client in your ecosystem." },
@@ -49,112 +51,42 @@ const translations = {
         { icon: ShieldCheck, t: "4. Global Trust", d: "Your client receives access to a secure dashboard. They follow their investment in real-time, maintaining trust in your agency." }
       ]
     },
-    saas: {
-      title: "The SaaS", subtitle: "Environment",
-      desc: "Data-Home.io is a complete software ecosystem designed for data-driven, cross-border real estate.",
-      features: [
-        { icon: CloudSync, t: "Data Synchronization", d: "Real-time sync between your local CRM and global databases via API." },
-        { icon: LayoutGrid, t: "White-Label CMS", d: "Manage branding, languages, and construction milestones from a single dashboard." },
-        { icon: ShieldCheck, t: "Secure Data Vault", d: "GDPR & international standard compliance for storing client documents." },
-        { icon: Cpu, t: "Edge Computing", d: "Vercel & Turbopack Core for sub-second page loads worldwide." }
-      ]
-    }
+    saas: { title: "The SaaS", subtitle: "Environment", desc: "Software ecosystem for data-driven real estate.", features: [{ icon: CloudSync, t: "Data Sync", d: "Real-time sync via API." }, { icon: LayoutGrid, t: "CMS", d: "White-label management." }, { icon: ShieldCheck, t: "Vault", d: "International security." }, { icon: Cpu, t: "Edge", d: "Ultra-fast loading." }] }
   },
-  nl: {
-    dir: 'ltr',
-    nav: ["Visie", "Hoe het werkt", "SaaS Omgeving", "Aan de slag"],
-    hero: { tag: "Global Real Estate OS v1.2", title1: "Vastgoed Schalen", title2: "Zonder Grenzen.", desc: "De software-infrastructuur die de wereldwijde vastgoedmarkt verenigt." },
-    gap: { title1: "Het dichten van de", title2: "Vastgoedkloof.", desc1: "Wanneer een klant lokaal verkoopt om naar het buitenland te verhuizen, stopt de gegevensstroom.", desc2: "Data-Home.io fungeert als een wereldwijde interoperabiliteitslaag." },
-    how: {
-      title: "Hoe het werkt:", subtitle: "De Global Flow",
-      steps: [
-        { icon: MapPin, t: "1. Lokale Behoefte", d: "Uw klant wil internationaal investeren. U heeft aanvankelijk geen toegang tot een gecertificeerde database." },
-        { icon: Layers, t: "2. Activatie", d: "U activeert Data-Home.io en krijgt direct toegang tot een wereldwijd geverifieerd portfolio." },
-        { icon: Camera, t: "3. Real-time Opvolging", d: "Bouwprofessionals uploaden fotoreportages rechtstreeks naar uw white-label platform." },
-        { icon: ShieldCheck, t: "4. Wereldwijd Vertrouwen", d: "Uw klant volgt zijn investering in real-time via een beveiligd dashboard." }
-      ]
-    },
-    saas: { title: "De SaaS", subtitle: "Omgeving", desc: "Een compleet software-ecosysteem voor grensoverschrijdend vastgoed.", features: [ { icon: CloudSync, t: "Data Sync", d: "Real-time synchronisatie via API." }, { icon: LayoutGrid, t: "White-Label CMS", d: "Beheer branding en mijlpalen." }, { icon: ShieldCheck, t: "Beveiligde Vault", d: "GDPR-conformiteit." }, { icon: Cpu, t: "Edge Computing", d: "Ultrasnelle wereldwijde laadtijden." } ] }
-  },
-  pl: {
-    dir: 'ltr',
-    nav: ["Wizja", "Jak to działa", "Środowisko SaaS", "Zacznij"],
-    hero: { tag: "Global Real Estate OS v1.2", title1: "Skalowanie", title2: "Bez Granic.", desc: "Infrastruktura oprogramowania jednocząca globalny rynek nieruchomości." },
-    gap: { title1: "Rozwiązanie", title2: "Globalnej Luki.", desc1: "Kiedy klient sprzedaje lokalnie, by zainwestować za granicą, przepływ danych ustaje.", desc2: "Data-Home.io zapewnia płynność operacji cross-border." },
-    how: {
-      title: "Jak to działa:", subtitle: "Globalny Przepływ",
-      steps: [
-        { icon: MapPin, t: "1. Lokalna Potrzeba", d: "Klient chce inwestować za granicą. Brak Ci certyfikowanej bazy danych." },
-        { icon: Layers, t: "2. Aktywacja Szablonu", d: "Otrzymujesz natychmiastowy dostęp do zweryfikowanych ofert międzynarodowych." },
-        { icon: Camera, t: "3. Śledzenie Budowy", d: "Profesjonaliści przesyłają raporty foto bezpośrednio do Twojego systemu." },
-        { icon: ShieldCheck, t: "4. Zaufanie", d: "Klient śledzi postępy w czasie rzeczywistym, ufając Twojej agencji." }
-      ]
-    },
-    saas: { title: "Środowisko", subtitle: "SaaS", desc: "Ekosystem zaprojektowany dla nowoczesnych biur nieruchomości.", features: [ { icon: CloudSync, t: "Sync Danych", d: "Synchronizacja w czasie rzeczywistym." }, { icon: LayoutGrid, t: "White-Label CMS", d: "Zarządzanie marką i etapami budowy." }, { icon: ShieldCheck, t: "Bezpieczeństwo", d: "Zgodność z RODO." }, { icon: Cpu, t: "Edge Computing", d: "Szybkość działania na całym świecie." } ] }
-  },
-  es: {
-    dir: 'ltr',
-    nav: ["Visión", "Cómo funciona", "Entorno SaaS", "Empezar"],
-    hero: { tag: "OS Inmobiliario Global v1.2", title1: "Escalando el", title2: "Sector Inmobiliario.", desc: "La infraestructura que une el mercado inmobiliario mundial." },
-    gap: { title1: "Cerrando la", title2: "Brecha Inmobiliaria.", desc1: "Cuando un cliente vende localmente para mudarse al extranjero, el flujo de datos se rompe.", desc2: "Data-Home.io asegura las comisiones internacionales." },
-    how: {
-      title: "Cómo funciona:", subtitle: "Flujo Global",
-      steps: [
-        { icon: MapPin, t: "1. Necesidad Local", d: "Su cliente quiere invertir fuera. Usted no tiene base de datos internacional." },
-        { icon: Layers, t: "2. Activación", d: "Acceda al instante a un catálogo verificado de propiedades globales." },
-        { icon: Camera, t: "3. Seguimiento Real", d: "Los profesionales suben fotos del progreso directamente a su plataforma." },
-        { icon: ShieldCheck, t: "4. Confianza", d: "El cliente sigue su inversión en tiempo real desde su dashboard." }
-      ]
-    },
-    saas: { title: "Entorno", subtitle: "SaaS", desc: "Ecosistema de software diseñado para el mercado inmobiliario global.", features: [ { icon: CloudSync, t: "Sync de Datos", d: "Sincronización en tiempo real." }, { icon: LayoutGrid, t: "CMS Marca Blanca", d: "Gestione su marca y proyectos." }, { icon: ShieldCheck, t: "Bóveda de Datos", d: "Cumplimiento de estándares internacionales." }, { icon: Cpu, t: "Edge Computing", d: "Velocidad máxima en todo el mundo." } ] }
-  },
-  ar: {
-    dir: 'rtl',
-    nav: ["الرؤية", "كيف يعمل", "بيئة SaaS", "ابدأ الآن"],
-    hero: { tag: "نظام تشغيل العقارات العالمي v1.2", title1: "توسيع العقارات", title2: "بلا حدود.", desc: "البنية التحتية البرمجية التي توحد سوق العقارات العالمي." },
-    gap: { title1: "حل", title2: "الفجوة العقارية.", desc1: "عندما يبيع العميل محلياً للاستثمار في الخارج، يتوقف تدفق البيانات.", desc2: "تؤمن Data-Home.io العمولات عبر الحدود." },
-    how: {
-      title: "كيف يعمل:", subtitle: "التدفق العالمي",
-      steps: [
-        { icon: MapPin, t: "1. الحاجة المحلية", d: "يريد عميلك الاستثمار دولياً. ليس لديك قاعدة بيانات معتمدة." },
-        { icon: Layers, t: "2. التفعيل", d: "احصل على وصول فوري إلى محفظة عقارات عالمية موثقة." },
-        { icon: Camera, t: "3. متابعة البناء", d: "يقوم المحترفون برفع تقارير الصور مباشرة إلى منصتك." },
-        { icon: ShieldCheck, t: "4. الثقة", d: "يتابع العميل استثماره في الوقت الفعلي عبر لوحة التحكم." }
-      ]
-    },
-    saas: { title: "بيئة", subtitle: "SaaS", desc: "نظام برمجيات متكامل للعقارات العالمية.", features: [ { icon: CloudSync, t: "مزامنة البيانات", d: "مزامنة فورية عبر API." }, { icon: LayoutGrid, t: "نظام الإدارة", d: "إدارة العلامة التجارية والمشاريع." }, { icon: ShieldCheck, t: "أمن البيانات", d: "التوافق مع المعايير الدولية." }, { icon: Cpu, t: "Edge Computing", d: "سرعة تحميل عالمية فائقة." } ] }
-  }
+  nl: { dir: 'ltr', label: "Nederlands", nav: ["Visie", "Hoe het werkt", "SaaS Omgeving", "Starten"], hero: { tag: "Global OS v1.2", title1: "Vastgoed Schalen", title2: "Zonder Grenzen.", desc: "Software-infrastructuur die de wereldwijde markt verenigt." }, gap: { title1: "Het dichten van", title2: "de Vastgoedkloof.", desc1: "Wanneer een klant lokaal verkoopt, stopt de gegevensstroom.", desc2: "Data-Home.io fungeert als een interoperabiliteitslaag." }, how: { title: "Hoe het werkt:", subtitle: "De Global Flow", steps: [{ icon: MapPin, t: "1. Lokale Nood", d: "Uw klant wil internationaal investeren." }, { icon: Layers, t: "2. Activatie", d: "Toegang tot een geverifieerd wereldwijd portfolio." }, { icon: Camera, t: "3. Real-time", d: "Bouwprofessionals uploaden fotoreportages." }, { icon: ShieldCheck, t: "4. Vertrouwen", d: "Volg de investering in real-time." }] }, saas: { title: "SaaS", subtitle: "Omgeving", desc: "Software-ecosysteem voor vastgoed.", features: [{ icon: CloudSync, t: "Data Sync", d: "API-synchronisatie." }, { icon: LayoutGrid, t: "CMS", d: "White-label beheer." }, { icon: ShieldCheck, t: "Vault", d: "Beveiliging." }, { icon: Cpu, t: "Edge", d: "Snelheid." }] } },
+  pl: { dir: 'ltr', label: "Polski", nav: ["Wizja", "Jak to działa", "Środowisko SaaS", "Zacznij"], hero: { tag: "Global OS v1.2", title1: "Skalowanie", title2: "Bez Granic.", desc: "Infrastruktura oprogramowania jednocząca rynek." }, gap: { title1: "Rozwiązanie", title2: "Globalnej Luki.", desc1: "Kiedy klient sprzedaje lokalnie, przepływ danych ustaje.", desc2: "Zabezpieczamy prowizje zagraniczne." }, how: { title: "Jak to działa:", subtitle: "Globalny Przepływ", steps: [{ icon: MapPin, t: "1. Potrzeba", d: "Klient chce inwestować za granicą." }, { icon: Layers, t: "2. Aktywacja", d: "Dostęp do ofert międzynarodowych." }, { icon: Camera, t: "3. Śledzenie", d: "Raporty foto prosto do systemu." }, { icon: ShieldCheck, t: "4. Zaufanie", d: "Śledzenie postępów w czasie rzeczywistym." }] }, saas: { title: "Środowisko", subtitle: "SaaS", desc: "Ekosystem zaprojektowany dla biur nieruchomości.", features: [{ icon: CloudSync, t: "Sync", d: "Synchronizacja danych." }, { icon: LayoutGrid, t: "CMS", d: "Zarządzanie marką." }, { icon: ShieldCheck, t: "Bezpieczeństwo", d: "Zgodność." }, { icon: Cpu, t: "Edge", d: "Szybkość." }] } },
+  es: { dir: 'ltr', label: "Español", nav: ["Visión", "Cómo funciona", "Entorno SaaS", "Empezar"], hero: { tag: "OS Global v1.2", title1: "Escalando el", title2: "Sector Inmobiliario.", desc: "La infraestructura que une el mercado inmobiliario mundial." }, gap: { title1: "Cerrando la", title2: "Brecha Inmobiliaria.", desc1: "Cuando un cliente vende localmente, el flujo se rompe.", desc2: "Aseguramos comisiones internacionales." }, how: { title: "Cómo funciona:", subtitle: "Flujo Global", steps: [{ icon: MapPin, t: "1. Necesidad", d: "Su cliente quiere invertir fuera." }, { icon: Layers, t: "2. Activación", d: "Catálogo verificado de propiedades globales." }, { icon: Camera, t: "3. Seguimiento", d: "Fotos del progreso en tiempo real." }, { icon: ShieldCheck, t: "4. Confianza", d: "Siga su inversión desde su dashboard." }] }, saas: { title: "Entorno", subtitle: "SaaS", desc: "Ecosistema diseñado para el mercado global.", features: [{ icon: CloudSync, t: "Sync", d: "Sincronización real." }, { icon: LayoutGrid, t: "CMS", d: "Marca blanca." }, { icon: ShieldCheck, t: "Bóveda", d: "Seguridad." }, { icon: Cpu, t: "Edge", d: "Velocidad." }] } },
+  ar: { dir: 'rtl', label: "العربية", nav: ["الرؤية", "كيف يعمل", "بيئة SaaS", "ابدأ"], hero: { tag: "نظام العقارات v1.2", title1: "توسيع العقارات", title2: "بلا حدود.", desc: "البنية التحتية البرمجية التي توحد السوق العالمي." }, gap: { title1: "حل", title2: "الفجوة العقارية.", desc1: "عندما يبيع العميل محلياً، يتوقف تدفق البيانات.", desc2: "تؤمن Data-Home العمولات." }, how: { title: "كيف يعمل:", subtitle: "التدفق العالمي", steps: [{ icon: MapPin, t: "1. الحاجة", d: "يريد عميلك الاستثمار دولياً." }, { icon: Layers, t: "2. التفعيل", d: "وصول فوري لمحفظة عقارات عالمية." }, { icon: Camera, t: "3. متابعة", d: "تقارير الصور مباشرة إلى منصتك." }, { icon: ShieldCheck, t: "4. الثقة", d: "يتابع العميل استثماره في الوقت الفعلي." }] }, saas: { title: "بيئة", subtitle: "SaaS", desc: "نظام برمجيات متكامل للعقارات.", features: [{ icon: CloudSync, t: "مزامنة", d: "مزامنة فورية." }, { icon: LayoutGrid, t: "الإدارة", d: "إدارة العلامة التجارية." }, { icon: ShieldCheck, t: "الأمن", d: "التوافق الدولي." }, { icon: Cpu, t: "Edge", d: "سرعة عالمية." }] } }
 };
 
 export default function DataHomeSolution() {
-  const [lang, setLang] = useState<'fr' | 'en' | 'nl' | 'pl' | 'es' | 'ar'>('fr');
+  const [lang, setLang] = useState<keyof typeof translations>('fr');
+  const [isLangOpen, setIsLangOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const t = translations[lang];
+
+  // Fermer le menu si clic à l'extérieur
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsLangOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
     <div className="bg-[#020617] text-white min-h-screen font-sans selection:bg-emerald-500/30 transition-all duration-500" dir={t.dir}>
       
-      {/* --- BARRE DE LANGUES --- */}
-      <div className="bg-[#10B981] text-white py-1.5 px-6 flex justify-center gap-6 text-[10px] font-black uppercase tracking-[0.2em] sticky top-0 z-[60]">
-        {Object.keys(translations).map((l) => (
-          <button 
-            key={l} 
-            onClick={() => setLang(l as any)}
-            className={`transition-all hover:scale-110 ${lang === l ? 'opacity-100 border-b-2 border-white' : 'opacity-50'}`}
-          >
-            {l}
-          </button>
-        ))}
-      </div>
-
       {/* --- NAVIGATION --- */}
-      <nav className="border-b border-white/5 px-6 py-4 flex justify-between items-center backdrop-blur-md sticky top-[34px] z-50 bg-[#020617]/80">
-        <div className="flex items-center gap-3">
-          <div className="relative w-10 h-10 overflow-hidden rounded-xl border border-white/10 shadow-2xl shadow-emerald-500/10">
-            <Image src="/logo.jpeg" alt="Data-Home Logo" fill className="object-cover" priority />
+      <nav className="border-b border-white/5 px-6 py-4 flex justify-between items-center backdrop-blur-md sticky top-0 z-50 bg-[#020617]/80">
+        
+        {/* LOGO SEUL */}
+        <div className="flex items-center">
+          <div className="relative w-12 h-12 overflow-hidden rounded-xl border border-white/10 shadow-2xl shadow-emerald-500/10">
+            <Image src="/logo.jpeg" alt="Logo" fill className="object-cover" priority />
           </div>
-          <span className="text-xl font-black tracking-tighter uppercase font-mono italic">
-            Data-Home<span className="text-[#10B981]">.io</span>
-          </span>
         </div>
         
         <div className="hidden md:flex gap-8 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
@@ -163,15 +95,46 @@ export default function DataHomeSolution() {
           <a href="#saas" className="hover:text-[#10B981] transition-colors">{t.nav[2]}</a>
         </div>
 
-        <button className="bg-[#10B981] hover:bg-[#059669] text-white px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all">
-          {t.nav[3]}
-        </button>
+        <div className="flex items-center gap-4">
+          {/* BOUTON GLOBE (SÉLECTEUR DE LANGUE) */}
+          <div className="relative" ref={dropdownRef}>
+            <button 
+              onClick={() => setIsLangOpen(!isLangOpen)}
+              className="p-2 hover:bg-white/5 rounded-full transition-all flex items-center gap-1 group"
+            >
+              <Globe size={20} className="text-slate-400 group-hover:text-[#10B981] transition-colors" />
+              <ChevronDown size={12} className={`text-slate-500 transition-transform ${isLangOpen ? 'rotate-180' : ''}`} />
+            </button>
+
+            {/* MENU DÉROULANT */}
+            {isLangOpen && (
+              <div className="absolute right-0 mt-3 w-40 bg-[#0f172a] border border-white/10 rounded-2xl overflow-hidden shadow-2xl animate-in fade-in slide-in-from-top-2">
+                {Object.keys(translations).map((l) => (
+                  <button
+                    key={l}
+                    onClick={() => {
+                      setLang(l as any);
+                      setIsLangOpen(false);
+                    }}
+                    className={`w-full text-left px-5 py-3 text-[11px] font-bold uppercase tracking-widest hover:bg-[#10B981] hover:text-white transition-colors ${lang === l ? 'text-[#10B981] bg-white/5' : 'text-slate-400'}`}
+                  >
+                    {translations[l as keyof typeof translations].label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <button className="bg-[#10B981] hover:bg-[#059669] text-white px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all">
+            {t.nav[3]}
+          </button>
+        </div>
       </nav>
 
       {/* --- HERO --- */}
-      <section id="vision" className="relative pt-24 pb-16 px-6 overflow-hidden">
+      <section id="vision" className="relative pt-24 pb-16 px-6 overflow-hidden text-center">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] bg-emerald-600/10 blur-[120px] rounded-full -z-10" />
-        <div className="max-w-5xl mx-auto text-center">
+        <div className="max-w-5xl mx-auto">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-emerald-500/30 bg-emerald-500/5 text-[#10B981] text-[10px] font-black uppercase mb-8 tracking-widest">
             {t.hero.tag}
           </div>
@@ -189,9 +152,9 @@ export default function DataHomeSolution() {
       <section className="py-24 px-6 bg-emerald-950/10 border-y border-white/5">
         <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-16 items-center">
           <div className="space-y-8">
-            <h2 className="text-3xl md:text-5xl font-black tracking-tighter uppercase leading-none text-justify md:text-left">
+            <h2 className="text-3xl md:text-5xl font-black tracking-tighter uppercase leading-none">
               {t.gap.title1} <br />
-              <span className="text-[#10B981] font-light italic tracking-normal">{t.gap.title2}</span>
+              <span className="text-[#10B981] font-light italic">{t.gap.title2}</span>
             </h2>
             <div className="space-y-6 text-slate-400 font-light leading-relaxed text-lg text-justify">
               <p>{t.gap.desc1}</p>
@@ -203,40 +166,29 @@ export default function DataHomeSolution() {
           </div>
           <div className="relative aspect-video rounded-3xl overflow-hidden border border-emerald-500/30 bg-slate-900 flex items-center justify-center">
              <Cpu className="w-16 h-16 text-[#10B981]/20 animate-pulse" />
-             <div className="absolute inset-0 bg-gradient-to-tr from-[#10B981]/10 to-transparent pointer-events-none" />
           </div>
         </div>
       </section>
 
-      {/* --- HOW IT WORKS (STORYTELLING) --- */}
-      <section id="how" className="py-24 px-6 relative">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-20">
-            <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter mb-4">
-              {t.how.title} <span className="text-[#10B981] font-light italic">{t.how.subtitle}</span>
-            </h2>
-          </div>
-          
-          <div className="grid md:grid-cols-4 gap-8 relative">
-            <div className="hidden md:block absolute top-32 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent z-0" />
-            
+      {/* --- HOW IT WORKS --- */}
+      <section id="how" className="py-24 px-6">
+        <div className="max-w-6xl mx-auto text-center">
+          <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter mb-20">
+            {t.how.title} <span className="text-[#10B981] font-light italic">{t.how.subtitle}</span>
+          </h2>
+          <div className="grid md:grid-cols-4 gap-8">
             {t.how.steps.map((step, i) => {
               const Icon = step.icon;
               return (
-                <div key={i} className="relative space-y-6 bg-white/2 p-6 rounded-3xl border border-white/5 hover:border-emerald-500/30 transition-all group z-10">
-                  <div className="w-14 h-14 rounded-2xl bg-[#10B981]/10 border border-[#10B981]/20 flex items-center justify-center text-[#10B981]">
+                <div key={i} className="bg-white/2 p-6 rounded-3xl border border-white/5 hover:border-emerald-500/30 transition-all text-left group">
+                  <div className="w-14 h-14 rounded-2xl bg-[#10B981]/10 border border-[#10B981]/20 flex items-center justify-center text-[#10B981] mb-6">
                     <Icon size={24} />
                   </div>
-                  <div className="aspect-[16/10] bg-slate-800 rounded-2xl overflow-hidden border border-white/5 relative shadow-inner">
-                    <div className="absolute inset-0 flex items-center justify-center text-[10px] uppercase tracking-widest text-slate-600">
-                      Step_{i+1}_Visual
-                    </div>
-                    {/* <Image src={`/how_step_${i+1}.jpg`} alt={step.t} fill className="object-cover opacity-80" /> */}
+                  <div className="aspect-[16/10] bg-slate-800 rounded-2xl overflow-hidden border border-white/5 relative mb-6">
+                    <div className="absolute inset-0 flex items-center justify-center text-[10px] uppercase tracking-widest text-slate-600">Visual_Step_{i+1}</div>
                   </div>
-                  <div>
-                    <h3 className="font-black text-[11px] uppercase tracking-widest text-white mb-2">{step.t}</h3>
-                    <p className="text-slate-500 text-[11px] italic leading-relaxed">{step.d}</p>
-                  </div>
+                  <h3 className="font-black text-[11px] uppercase tracking-widest text-white mb-2">{step.t}</h3>
+                  <p className="text-slate-500 text-[11px] italic leading-relaxed">{step.d}</p>
                 </div>
               );
             })}
@@ -245,47 +197,40 @@ export default function DataHomeSolution() {
       </section>
 
       {/* --- SAAS ENVIRONMENT --- */}
-      <section id="saas" className="py-24 px-6 bg-slate-950 border-y border-white/5 relative">
+      <section id="saas" className="py-24 px-6 bg-slate-950 border-y border-white/5 relative overflow-hidden">
         <div className="absolute inset-0 opacity-5 bg-[radial-gradient(#10B981_1px,transparent_1px)] [background-size:20px_20px]"></div>
-        <div className="max-w-6xl mx-auto relative z-10">
-          <div className="flex flex-col md:flex-row gap-16 items-center">
-            <div className="flex-1 grid grid-cols-2 gap-4">
-              {t.saas.features.map((f, i) => {
-                const Icon = f.icon;
-                return (
-                  <div key={i} className="p-8 bg-white/5 border border-white/5 rounded-3xl hover:border-emerald-500/20 transition-all">
-                    <Icon className="text-[#10B981] mb-4" size={24} />
-                    <h4 className="font-black text-[10px] uppercase tracking-widest mb-2">{f.t}</h4>
-                    <p className="text-slate-500 text-[10px] leading-relaxed">{f.d}</p>
-                  </div>
-                );
-              })}
-            </div>
-            
-            <div className="flex-1 space-y-8">
-              <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter leading-none">
-                {t.saas.title} <br /> <span className="text-[#10B981] font-light italic">{t.saas.subtitle}</span>
-              </h2>
-              <p className="text-slate-400 font-light text-lg leading-relaxed italic border-l-2 border-[#10B981] pl-6 text-justify">
-                {t.saas.desc}
-              </p>
-              <button className="flex items-center gap-2 text-[#10B981] font-black uppercase text-[10px] tracking-widest group">
-                Download Technical Spec <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
-              </button>
-            </div>
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row gap-16 items-center relative z-10">
+          <div className="flex-1 grid grid-cols-2 gap-4">
+            {t.saas.features.map((f, i) => {
+              const Icon = f.icon;
+              return (
+                <div key={i} className="p-8 bg-white/5 border border-white/5 rounded-3xl hover:border-emerald-500/20 transition-all">
+                  <Icon className="text-[#10B981] mb-4" size={24} />
+                  <h4 className="font-black text-[10px] uppercase tracking-widest mb-2">{f.t}</h4>
+                  <p className="text-slate-500 text-[10px] leading-relaxed">{f.d}</p>
+                </div>
+              );
+            })}
+          </div>
+          <div className="flex-1 space-y-8">
+            <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter">
+              {t.saas.title} <br /> <span className="text-[#10B981] font-light italic">{t.saas.subtitle}</span>
+            </h2>
+            <p className="text-slate-400 font-light text-lg leading-relaxed italic border-l-2 border-[#10B981] pl-6 text-justify">
+              {t.saas.desc}
+            </p>
           </div>
         </div>
       </section>
 
       {/* --- FOOTER --- */}
       <footer className="py-20 px-6 text-center border-t border-white/5 opacity-40">
-        <div className="flex items-center justify-center gap-2 mb-4 grayscale">
-          <div className="relative w-5 h-5 rounded overflow-hidden">
+        <div className="flex items-center justify-center mb-4 grayscale">
+          <div className="relative w-8 h-8 rounded-lg overflow-hidden">
             <Image src="/logo.jpeg" alt="Logo" fill className="object-cover" />
           </div>
-          <span className="text-[10px] font-black uppercase tracking-[0.5em] font-mono">Data-Home.io / Global Engine</span>
         </div>
-        <p className="text-[8px] uppercase tracking-[0.2em]">© 2026 World Class Real Estate Infrastructure</p>
+        <p className="text-[8px] uppercase tracking-[0.2em]">© 2026 Data-Home.io / Infrastructure Engine</p>
       </footer>
 
     </div>
