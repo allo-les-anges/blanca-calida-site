@@ -73,28 +73,30 @@ export default function DataHomeSolution() {
         <Image src="/1.jpg" alt="Background" fill className="object-cover" priority />
       </div>
 
-      {/* --- NAV (Logo AGRANDI x1.5 et CORRIGÉ pour logo_1.png) --- */}
-      <nav className="border-b border-white/5 px-6 py-4 flex justify-between items-center backdrop-blur-xl sticky top-0 z-50 bg-[#020617]/90">
-        <div className="flex items-center gap-2">
-          {/* Conteneur parent agrandi : hauteur 60px */}
-          <div className="relative h-[60px] w-48 md:w-60">
+      {/* --- NAV CORRIGÉE (Logo responsive + Espace bouton) --- */}
+      <nav className="border-b border-white/5 px-4 md:px-6 py-3 md:py-4 flex justify-between items-center backdrop-blur-xl sticky top-0 z-50 bg-[#020617]/90">
+        <div className="flex items-center shrink-0">
+          {/* Logo : Taille normale sur mobile (h-10), Agrandie sur desktop (h-[60px]) */}
+          <div className="relative h-10 w-28 md:h-[60px] md:w-60 transition-all duration-300">
              <Image 
-                src="/logo_1.png" // --- CORRECTION DU CHEMIN ICI ---
+                src="/logo_1.png" 
                 alt="Logo data-home" 
                 fill 
-                className="object-contain object-left" // --- RETRAIT mix-blend car PNG transparent ---
+                className="object-contain object-left" 
                 priority 
              />
           </div>
         </div>
         
-        <div className="hidden md:flex gap-8 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
+        {/* Liens cachés sur mobile */}
+        <div className="hidden lg:flex gap-8 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
           <a href="#vision" className="hover:text-white transition-colors">{t.nav[0]}</a>
           <a href="#how" className="hover:text-white transition-colors">{t.nav[1]}</a>
           <a href="#saas" className="hover:text-white transition-colors">{t.nav[2]}</a>
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 md:gap-4 shrink-0">
+          {/* Sélecteur de langue */}
           <div className="relative" ref={dropdownRef}>
             <button onClick={() => setIsLangOpen(!isLangOpen)} className="p-2 hover:bg-white/5 rounded-full flex items-center gap-1 group">
               <Globe size={18} className="text-slate-400 group-hover:text-emerald-400 transition-colors" />
@@ -110,48 +112,37 @@ export default function DataHomeSolution() {
               </div>
             )}
           </div>
-          <button className="bg-[#10B981] hover:bg-[#059669] text-white px-4 md:px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-emerald-500/10">
+
+          {/* Bouton Commencer : Texte réduit sur mobile pour gagner de la place */}
+          <button className="bg-[#10B981] hover:bg-[#059669] text-white px-3 md:px-6 py-2 rounded-full text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-emerald-500/10 whitespace-nowrap">
             {t.nav[3]}
           </button>
         </div>
       </nav>
 
-      {/* --- HERO SECTION (Vidéo Nettoyée) --- */}
+      {/* --- HERO SECTION --- */}
       <section id="vision" className="relative pt-20 md:pt-32 pb-16 md:pb-24 px-6 text-center z-10 min-h-[85vh] flex items-center justify-center overflow-hidden">
-        
-        {/* Vidéo HD */}
-        <video 
-          autoPlay 
-          loop 
-          muted 
-          playsInline 
-          className="absolute inset-0 z-0 w-full h-full object-cover pointer-events-none"
-        >
+        <video autoPlay loop muted playsInline className="absolute inset-0 z-0 w-full h-full object-cover pointer-events-none">
           <source src="/hero_datahome.mp4" type="video/mp4" />
         </video>
-
-        {/* Overlay sombre */}
         <div className="absolute inset-0 z-1 bg-slate-950/50"></div>
-
         <div className="max-w-5xl mx-auto relative z-10">
           <div className="inline-block px-3 py-1 rounded-full border border-emerald-500/30 bg-emerald-500/5 text-[#10B981] text-[10px] font-black uppercase mb-6 md:mb-8 tracking-widest">
             {t.hero.tag}
           </div>
-          
           <h1 className="text-[12vw] md:text-[85px] font-black tracking-tighter leading-[0.9] md:leading-[0.85] mb-8 uppercase break-words overflow-hidden">
             <span className="block">{t.hero.title1}</span>
             <span className="text-transparent bg-clip-text bg-gradient-to-b from-white to-emerald-400 italic font-light block">
               {t.hero.title2}
             </span>
           </h1>
-          
           <p className="max-w-2xl mx-auto text-slate-200 text-base md:text-xl font-light italic leading-relaxed px-4 drop-shadow-lg">
             {t.hero.desc}
           </p>
         </div>
       </section>
 
-      {/* --- SECTION FRACTURE (16/9) --- */}
+      {/* --- SECTION FRACTURE --- */}
       <section className="py-20 md:py-24 px-6 border-y border-white/5 bg-slate-950/50 z-10 relative">
         <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 md:gap-24 items-center">
           <div className="order-2 md:order-1 space-y-8">
@@ -173,7 +164,7 @@ export default function DataHomeSolution() {
         </div>
       </section>
 
-      {/* --- HOW IT WORKS (16/9) --- */}
+      {/* --- HOW IT WORKS --- */}
       <section id="how" className="py-20 md:py-24 px-6 z-10 relative">
         <div className="max-w-6xl mx-auto text-center">
           <h2 className="text-3xl md:text-6xl font-black uppercase tracking-tighter mb-16 md:mb-20">
@@ -186,14 +177,13 @@ export default function DataHomeSolution() {
                 <div key={i} className="bg-white/5 rounded-3xl border border-white/5 overflow-hidden flex flex-col group hover:border-emerald-500/30 transition-all duration-300">
                   <div className="relative w-full aspect-[16/9]">
                     <Image src={`/3.${i+1}.jpg`} alt={step.t} fill className="object-cover group-hover:scale-110 transition-transform duration-500" />
-                    <div className="absolute inset-0 bg-slate-950/20 group-hover:bg-transparent transition-colors"></div>
                   </div>
                   <div className="p-6 space-y-4">
                     <div className="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center text-[#10B981]">
                        <Icon size={20} />
                     </div>
                     <div>
-                      <h3 className="font-black text-[10px] uppercase tracking-widest text-white group-hover:text-emerald-400 transition-colors">{step.t}</h3>
+                      <h3 className="font-black text-[10px] uppercase tracking-widest text-white">{step.t}</h3>
                       <p className="text-slate-500 text-[10px] italic leading-relaxed mt-2">{step.d}</p>
                     </div>
                   </div>
@@ -204,7 +194,7 @@ export default function DataHomeSolution() {
         </div>
       </section>
 
-      {/* --- SAAS MASTER TEMPLATE (16/9) --- */}
+      {/* --- SAAS MASTER TEMPLATE --- */}
       <section id="saas" className="py-24 md:py-32 px-6 bg-slate-950 border-y border-white/5 relative z-10 overflow-hidden">
         <div className="max-w-6xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-16 items-start">
@@ -217,22 +207,18 @@ export default function DataHomeSolution() {
                   {t.saas.desc}
                 </p>
               </div>
-
-              <div className="relative w-full aspect-[16/9] rounded-2xl overflow-hidden border border-emerald-500/20 shadow-2xl shadow-emerald-500/5 group">
+              <div className="relative w-full aspect-[16/9] rounded-2xl overflow-hidden border border-emerald-500/20 group">
                 <Image src="/4.jpg" alt="Console Admin" fill className="object-cover group-hover:scale-105 transition-transform duration-1000" />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#020617] via-transparent to-transparent opacity-50"></div>
               </div>
-              
               <button className="flex items-center gap-2 text-[#10B981] font-black uppercase text-[10px] tracking-widest group">
                 Découvrir la console d'administration <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
               </button>
             </div>
-
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                {t.saas.features.map((f, i) => {
                  const Icon = f.icon;
                  return (
-                   <div key={i} className="p-8 bg-white/5 border border-white/5 rounded-3xl hover:bg-white/[0.07] hover:border-emerald-500/20 transition-all flex flex-col items-start">
+                   <div key={i} className="p-8 bg-white/5 border border-white/5 rounded-3xl hover:border-emerald-500/20 transition-all flex flex-col items-start">
                       <Icon className="text-[#10B981] mb-4" size={24} />
                       <h4 className="font-black text-[10px] uppercase tracking-widest mb-2 text-white">{f.t}</h4>
                       <p className="text-slate-500 text-[10px] leading-relaxed">{f.d}</p>
@@ -246,8 +232,7 @@ export default function DataHomeSolution() {
 
       {/* --- FOOTER --- */}
       <footer className="py-20 border-t border-white/5 text-center opacity-40 z-10 relative bg-[#020617]">
-        <div className="flex justify-center mb-6 grayscale hover:grayscale-0 transition-all duration-500 h-6 relative w-24 mx-auto">
-           {/* J'ai également mis à jour le chemin dans le footer par sécurité */}
+        <div className="flex justify-center mb-6 h-6 relative w-24 mx-auto grayscale hover:grayscale-0 transition-all">
            <Image src="/logo_1.png" alt="Logo Footer" fill className="object-contain" />
         </div>
         <p className="text-[8px] uppercase tracking-[0.2em] px-6">
