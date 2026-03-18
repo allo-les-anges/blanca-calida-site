@@ -44,8 +44,8 @@ const translations = {
     saas: { title: "Configurable", subtitle: "Master Template", desc: "Take full control of your interface. Our SaaS environment allows you to configure every aspect of your international platform.", features: [{ icon: Palette, t: "Full Branding", d: "Customize logos, colors, and fonts for a 100% white-label experience." }, { icon: Languages, t: "Auto Multi-language", d: "Activate and manage translations for your global clients instantly." }, { icon: Workflow, t: "Milestone Management", d: "Configure your own construction milestones and custom workflows." }, { icon: Settings, t: "Data Control", d: "Manage API access and data synchronization from your console." }] } 
   },
   nl: { dir: 'ltr', label: "Nederlands", nav: ["Visie", "Werking", "Master Template", "Starten"], hero: { tag: "Global OS v1.2", title1: "Vastgoed Schalen", title2: "Zonder Grenzen.", desc: "Software-infrastructuur die de wereldwijde markt verenigt." }, gap: { title1: "Het dichten van de", title2: "Vastgoedkloof.", desc1: "Wanneer een klant lokaal verkoopt, stopt de gegevensstroom.", desc2: "Data-Home.io fungeert als een interoperabiliteitslaag." }, how: { title: "Hoe het werkt:", subtitle: "De Global Flow", steps: [{ icon: MapPin, t: "1. Lokale Nood", d: "Uw klant wil internationaal investeren." }, { icon: Layers, t: "2. Activatie", d: "Directe toegang tot een wereldwijd portfolio." }, { icon: Camera, t: "3. Opvolging", d: "Bouwprofessionals uploaden fotoreportages." }, { icon: ShieldCheck, t: "4. Vertrouwen", d: "Klant volgt investering in real-time." }] }, saas: { title: "Configureerbaar", subtitle: "Master Template", desc: "Neem de volledige controle over uw interface. Configureer elk aspect van uw platform.", features: [{ icon: Palette, t: "Full Branding", d: "Personaliseer logo's en kleuren." }, { icon: Languages, t: "Meertaligheid", d: "Beheer vertalingen direct." }, { icon: Workflow, t: "Mijlpalen", d: "Configureer uw eigen workflows." }, { icon: Settings, t: "Data Beheer", d: "Beheer API-toegang." }] } },
-  pl: { dir: 'ltr', label: "Polski", nav: ["Wizja", "Jak to działa", "Master Template", "Zacznij"], hero: { tag: "Global OS v1.2", title1: "Skalowanie", title2: "Bez Granic.", desc: "Infrastruktura oprogramowania jednocząca rynek." }, gap: { title1: "Rozwiązanie", title2: "Globalnej Luki.", desc1: "Kiedy klient sprzedaje lokalnie, przepływ danych ustaje.", desc2: "Zabezpieczamy prowizje zagraniczne." }, how: { title: "Jak to działa:", subtitle: "Globalny Przepływ", steps: [{ icon: MapPin, t: "1. Potrzeba", d: "Klient chce inwestować za granicą." }, { icon: Layers, t: "2. Aktywacja", d: "Dostęp do zweryfikowanych ofert." }, { icon: Camera, t: "3. Śledzenie", d: "Raporty foto prosto do Twojej platformy." }, { icon: ShieldCheck, t: "4. Zaufanie", d: "Klient śledzi postępy w czasie rzeczywistym." }] }, saas: { title: "Konfigurowalny", subtitle: "Master Template", desc: "Przejmij pełną kontrolę nad interfejsem. Konfiguruj każdy aspekt swojej platformy.", features: [{ icon: Palette, t: "Full Branding", d: "Dostosuj logo i kolory." }, { icon: Languages, t: "Multi-języczność", d: "Zarządzaj tłumaczeniami natychmiast." }, { icon: Workflow, t: "Zarządzanie Etapami", d: "Konfiguruj własne kroki budowy." }, { icon: Settings, t: "Kontrola Danych", d: "Zarządzaj dostępem API." }] } },
-  es: { dir: 'ltr', label: "Español", nav: ["Visión", "Funcionamiento", "Master Template", "Empezar"], hero: { tag: "OS Global v1.2", title1: "Inmobiliario", title2: "Sin Fronteras.", desc: "La infraestructura que une el mercado inmobiliario mundial." }, gap: { title1: "Cerrando la", title2: "Brecha Inmobiliaria.", desc1: "Cuando un client vende localmente, el flujo de datos se rompe.", desc2: "Aseguramos comisiones internacionales." }, how: { title: "Cómo funciona:", subtitle: "Flujo Global", steps: [{ icon: MapPin, t: "1. Necesidad", d: "Su cliente quiere invertir fuera." }, { icon: Layers, t: "2. Activación", d: "Catálogo verificado de propiedades globales." }, { icon: Camera, t: "3. Seguimiento", d: "Fotos del progreso en tiempo real." }, { icon: ShieldCheck, t: "4. Confianza", d: "El cliente sigue su inversión desde su dashboard." }] }, saas: { title: "Master Template", subtitle: "Configurable", desc: "Tome el control total de su interfaz. Configure cada aspecto de su plateforme internationale.", features: [{ icon: Palette, t: "Branding Total", d: "Personalice logos, colores y fuentes." }, { icon: Languages, t: "Multi-idioma", d: "Active traducciones al instante." }, { icon: Workflow, t: "Gestión de Hitos", d: "Configure sus propios pasos de obra." }, { icon: Settings, t: "Control de Datos", d: "Administre accesos y sincronización." }] } },
+  pl: { dir: 'ltr', label: "Polski", nav: ["Wizja", "Jak to działa", "Master Template", "Zacznij"], hero: { tag: "Global OS v1.2", title1: "Skalowanie", title2: "Bez Granic.", desc: "Infrastruktura oprogramowania jednocząca rynek." }, gap: { title1: "Rozwiązanie", title2: "Globalnej Luki.", desc1: "Kiedy klient sprzedaje lokalnie, przepływ danych ustaje.", desc2: "Zabezpieczamy prowizje zagraniczne." }, how: { title: "Jak to działa:", subtitle: "Globalny Przepływ", steps: [{ icon: MapPin, t: "1. Potrzeba", d: "Klient chce inwestować za granicą." }, { icon: Layers, t: "2. Aktywacja", d: "Dostęp do zweryfikowanych ofert." }, { icon: Camera, t: "3. Śledzenie", d: "Raporty foto prosto do Twojej platformy." }, { icon: ShieldCheck, t: "4. Zaufanie", d: "Klient śledzi postępy w czasie irrealsistym." }] }, saas: { title: "Konfigurowalny", subtitle: "Master Template", desc: "Przejmij pełną kontrolę nad interfejsem. Konfiguruj każdy aspekt swojej platformy.", features: [{ icon: Palette, t: "Full Branding", d: "Dostosuj logo i kolory." }, { icon: Languages, t: "Multi-języczność", d: "Zarządzaj tłumaczeniami natychmiast." }, { icon: Workflow, t: "Zarządzanie Etapami", d: "Konfiguruj własne kroki budowy." }, { icon: Settings, t: "Kontrola Danych", d: "Zarządzaj dostępem API." }] } },
+  es: { dir: 'ltr', label: "Español", nav: ["Visión", "Funcionamiento", "Master Template", "Empezar"], hero: { tag: "OS Global v1.2", title1: "Inmobiliario", title2: "Sin Fronteras.", desc: "La infraestructura que une el marché inmobiliario mundial." }, gap: { title1: "Cerrando la", title2: "Brecha Inmobiliaria.", desc1: "Cuando un client vende localmente, el flujo de données se rompe.", desc2: "Aseguramos comisiones internacionales." }, how: { title: "Cómo funciona:", subtitle: "Flujo Global", steps: [{ icon: MapPin, t: "1. Necesidad", d: "Su cliente quiere invertir fuera." }, { icon: Layers, t: "2. Activación", d: "Catálogo verificado de propiedades globales." }, { icon: Camera, t: "3. Seguimiento", d: "Fotos del progreso en tiempo real." }, { icon: ShieldCheck, t: "4. Confianza", d: "El cliente sigue su inversión desde su dashboard." }] }, saas: { title: "Master Template", subtitle: "Configurable", desc: "Tome el control total de su interfaz. Configure cada aspecto de su plateforme internationale.", features: [{ icon: Palette, t: "Branding Total", d: "Personalice logos, colores y fuentes." }, { icon: Languages, t: "Multi-idioma", d: "Active traducciones al instante." }, { icon: Workflow, t: "Gestión de Hitos", d: "Configure sus propios pasos de obra." }, { icon: Settings, t: "Control de Datos", d: "Administre accesos y sincronización." }] } },
   ar: { dir: 'rtl', label: "العربية", nav: ["الرؤية", "كيف يعمل", "القالب الرئيسي", "ابدأ"], hero: { tag: "نظام العقارات v1.2", title1: "العقارات", title2: "بلا حدود.", desc: "البنية التحتية البرمجية التي توحد سوق العقارات العالمي." }, gap: { title1: "حل", title2: "الفجوة العقارية.", desc1: "عندما يبيع العميل محلياً، يتوقف تدفق البيانات.", desc2: "تؤمن Data-Home عمولاتك." }, how: { title: "كيف يعمل:", subtitle: "التدفق العالمي", steps: [{ icon: MapPin, t: "1. الحاجة", d: "عميلك يريد الاستثمار دولياً." }, { icon: Layers, t: "2. التفعيل", d: "وصول فوري لمحفظة عقارات عالمية موثقة." }, { icon: Camera, t: "3. المتابعة", d: "تقارير الصور مباشرة إلى منصتك." }, { icon: ShieldCheck, t: "4. الثقة", d: "يتابع العميل استثماره في الوقت الفعلي." }] }, saas: { title: "القالب الرئيسي", subtitle: "القابل للتهيئة", desc: "تحكم بالكامل في واواجهتك. تتيح لك بيئتنا تهيئة كل جانب من جوانب منصتك الدولية.", features: [{ icon: Palette, t: "هوية تجارية كاملة", d: "تخصيص الشعار والألوان والخطوط." }, { icon: Languages, t: "تعدد اللغات", d: "تفعيل وإدارة الترجمات فوراً." }, { icon: Workflow, t: "إدارة المراحل", d: "تهيئة مراحل البناء الخاصة بك." }, { icon: Settings, t: "التحكم في البيانات", d: "إدارة الوصول والمزامنة." }] } }
 };
 
@@ -66,9 +66,9 @@ export default function DataHomeSolution() {
   }, []);
 
   return (
-    <div className="bg-[#020617] text-white min-h-screen font-sans selection:bg-emerald-500/30 overflow-x-hidden" dir={t.dir}>
+    <div className="bg-[#020617] text-white min-h-screen font-sans selection:bg-emerald-500/30 overflow-x-hidden relative" dir={t.dir}>
       
-      {/* --- BACKGROUND LAYER --- */}
+      {/* --- BACKGROUND LAYER (Stays fixed) --- */}
       <div className="fixed inset-0 z-0 opacity-[0.05] pointer-events-none">
         <Image src="/1.jpg" alt="Background" fill className="object-cover" priority />
       </div>
@@ -109,22 +109,39 @@ export default function DataHomeSolution() {
         </div>
       </nav>
 
-      {/* --- HERO SECTION CORRIGÉE --- */}
-      <section id="vision" className="relative pt-20 md:pt-32 pb-16 md:pb-24 px-6 text-center z-10">
-        <div className="max-w-5xl mx-auto">
+      {/* --- SECTION 1 : HERO WITH VIDEO BACKGROUND --- */}
+      <section id="vision" className="relative pt-20 md:pt-32 pb-16 md:pb-24 px-6 text-center z-10 min-h-[80vh] flex items-center justify-center overflow-hidden">
+        
+        {/* --- BALISE VIDÉO INTÉGRÉE --- */}
+        <video 
+          autoPlay 
+          loop 
+          muted 
+          playsInline 
+          className="absolute inset-0 z-0 w-full h-full object-cover pointer-events-none"
+        >
+          <source src="/hero_datahome.mp4" type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+
+        {/* --- OVERLAY SOMBRE (Crucial pour la lisibilité du texte) --- */}
+        <div className="absolute inset-0 z-1 bg-slate-950/60 backdrop-blur-[2px]"></div>
+
+        {/* --- CONTENU DE LA HERO (z-10 pour être au-dessus de l'overlay) --- */}
+        <div className="max-w-5xl mx-auto relative z-10">
           <div className="inline-block px-3 py-1 rounded-full border border-emerald-500/30 bg-emerald-500/5 text-[#10B981] text-[10px] font-black uppercase mb-6 md:mb-8 tracking-widest">
             {t.hero.tag}
           </div>
           
-          {/* Correction Responsive du Titre */}
-          <h1 className="text-[12vw] md:text-[85px] font-black tracking-tighter leading-[0.9] md:leading-[0.85] mb-8 uppercase break-words overflow-hidden">
+          {/* Titre Responsive */}
+          <h1 className="text-[12vw] md:text-[85px] font-black tracking-tighter leading-[0.9] md:leading-[0.85] mb-8 uppercase break-words overflow-hidden text-white">
             <span className="block">{t.hero.title1}</span>
             <span className="text-transparent bg-clip-text bg-gradient-to-b from-white to-emerald-400 italic font-light block">
               {t.hero.title2}
             </span>
           </h1>
           
-          <p className="max-w-2xl mx-auto text-slate-400 text-base md:text-xl font-light italic leading-relaxed px-4">
+          <p className="max-w-2xl mx-auto text-slate-200 text-base md:text-xl font-light italic leading-relaxed px-4">
             {t.hero.desc}
           </p>
         </div>
