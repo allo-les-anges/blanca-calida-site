@@ -1101,15 +1101,15 @@ export default function AdminDashboard() {
                                 href={doc.url_fichier} 
                                 target="_blank" 
                                 rel="noreferrer" 
-                                className="inline-flex items-center justify-center w-10 h-10 bg-white/5 text-white hover:bg-emerald-500 hover:text-black rounded-xl transition-all text-sm font-bold"
+                                className="inline-flex items-center justify-center w-10 h-10 bg-white/5 text-white hover:bg-emerald-500 hover:text-black rounded-xl transition-all"
                               >
-                                ↗
+                                <ExternalLink size={16} className="pointer-events-none" />
                               </a>
                               <button 
                                 onClick={() => deleteDocument(doc.id, doc.url_fichier)} 
-                                className="p-3 bg-white/5 text-white hover:bg-rose-500 rounded-xl transition-all"
+                                className="inline-flex items-center justify-center w-10 h-10 bg-white/5 text-white hover:bg-rose-500 rounded-xl transition-all"
                               >
-                                <Trash2 size={16} />
+                                <Trash2 size={16} className="pointer-events-none" />
                               </button>
                             </div>
                           </div>
