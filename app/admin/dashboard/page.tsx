@@ -1101,7 +1101,7 @@ export default function AdminDashboard() {
                                 href={doc.url_fichier} 
                                 target="_blank" 
                                 rel="noreferrer" 
-                                className="p-3 bg-white/5 text-white hover:bg-emerald-500 hover:text-black rounded-xl transition-all inline-flex items-center justify-center"
+                                className="w-10 h-10 flex items-center justify-center bg-white/5 text-white hover:bg-emerald-500 hover:text-black rounded-xl transition-all"
                               >
                                 <ExternalLink size={16} />
                               </a>
