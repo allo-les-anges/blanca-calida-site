@@ -92,7 +92,7 @@ export default function DataHomeSolution() {
           <div className="relative h-12 w-40 flex items-center justify-start"> 
             {!imgError ? (
               <Image 
-                src="/logo.jpeg" 
+                src="/logo.jpg" 
                 alt="Logo" 
                 fill
                 className="object-contain object-left" 
