@@ -112,28 +112,32 @@ export default function DataHomeSolution() {
       {/* --- SECTION 1 : HERO WITH VIDEO BACKGROUND --- */}
       <section id="vision" className="relative pt-20 md:pt-32 pb-16 md:pb-24 px-6 text-center z-10 min-h-[80vh] flex items-center justify-center overflow-hidden">
         
-        {/* --- BALISE VIDÉO INTÉGRÉE --- */}
+        {/* --- BALISE VIDÉO OPTIMISÉE --- */}
         <video 
           autoPlay 
           loop 
           muted 
           playsInline 
+          // Ajout de image-rendering pour plus de piqué
+          style={{ imageRendering: 'crisp-edges' }}
           className="absolute inset-0 z-0 w-full h-full object-cover pointer-events-none"
         >
           <source src="/hero_datahome.mp4" type="video/mp4" />
           Your browser does not support the video tag.
         </video>
 
-        {/* --- OVERLAY SOMBRE (Crucial pour la lisibilité du texte) --- */}
-        <div className="absolute inset-0 z-1 bg-slate-950/60 backdrop-blur-[2px]"></div>
+        {/* --- OVERLAY SOMBRE SANS FLOU --- 
+            J'ai retiré backdrop-blur et ajusté l'opacité (0.5 au lieu de 0.6) 
+            pour laisser passer plus de détails de la vidéo.
+        */}
+        <div className="absolute inset-0 z-1 bg-slate-950/50"></div>
 
-        {/* --- CONTENU DE LA HERO (z-10 pour être au-dessus de l'overlay) --- */}
+        {/* --- CONTENU --- */}
         <div className="max-w-5xl mx-auto relative z-10">
           <div className="inline-block px-3 py-1 rounded-full border border-emerald-500/30 bg-emerald-500/5 text-[#10B981] text-[10px] font-black uppercase mb-6 md:mb-8 tracking-widest">
             {t.hero.tag}
           </div>
           
-          {/* Titre Responsive */}
           <h1 className="text-[12vw] md:text-[85px] font-black tracking-tighter leading-[0.9] md:leading-[0.85] mb-8 uppercase break-words overflow-hidden text-white">
             <span className="block">{t.hero.title1}</span>
             <span className="text-transparent bg-clip-text bg-gradient-to-b from-white to-emerald-400 italic font-light block">
@@ -141,7 +145,7 @@ export default function DataHomeSolution() {
             </span>
           </h1>
           
-          <p className="max-w-2xl mx-auto text-slate-200 text-base md:text-xl font-light italic leading-relaxed px-4">
+          <p className="max-w-2xl mx-auto text-white/90 text-base md:text-xl font-light italic leading-relaxed px-4 drop-shadow-md">
             {t.hero.desc}
           </p>
         </div>
