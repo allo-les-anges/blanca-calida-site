@@ -11,12 +11,13 @@ html, body {
   :root {
     --background: #ffffff;
     --foreground: #0f172a;
+    --accent-gold: #D4AF37; /* Variable centrale pour éviter les erreurs de build */
   }
 
   /* Force les variables au niveau le plus haut */
   html.dark {
     --background: #020617 !important;
-    --foreground: #ffffff !important; /* Blanc pur ici aussi */
+    --foreground: #ffffff !important; 
   }
 
   body {
@@ -26,7 +27,7 @@ html, body {
   }
 
   /* 2. LE SÉLECTEUR "ÉCLAT PUR" (VIGNETTES ET TEXTES) */
-  /* On force le BLANC PUR (#FFFFFF) et l'OPACITÉ TOTALE */
+  /* On force le blanc sur tous les textes standards */
   html.dark .text-slate-900, 
   html.dark .text-slate-800, 
   html.dark .text-slate-700, 
@@ -37,17 +38,30 @@ html, body {
   html.dark .text-gray-600,
   html.dark .text-gray-500,
   html.dark .text-gray-400,
-  html.dark h1, html.dark h2, html.dark h3, html.dark h4, 
-  html.dark p, html.dark span:not(.bg-[#D4AF37] span), 
-  html.dark li, html.dark a {
-    color: #ffffff !important; /* Blanc pur absolu */
-    opacity: 1 !important;      /* Supprime l'effet gris/bleu transparent */
+  html.dark h1, 
+  html.dark h2, 
+  html.dark h3, 
+  html.dark h4, 
+  html.dark p, 
+  html.dark li, 
+  html.dark a,
+  html.dark span {
+    color: #ffffff !important;
+    opacity: 1 !important;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
-  /* 3. LES VIGNETTES ET LE FOOTER */
-  /* On s'assure que les fonds ne sont plus blancs */
+  /* 3. RÉTABLISSEMENT DU DORÉ (PRIORITÉ) */
+  /* On utilise un sélecteur d'attribut "contient" pour éviter le caractère # qui fait planter le build */
+  html.dark [class*="D4AF37"],
+  html.dark .text-gold,
+  html.dark .gold-text,
+  html.dark span[class*="text-gold"] {
+    color: var(--accent-gold) !important;
+  }
+
+  /* 4. LES VIGNETTES ET LE FOOTER */
   html.dark .bg-white:not(button):not(.recherche-privee-btn),
   html.dark section,
   html.dark footer,
@@ -57,34 +71,22 @@ html, body {
   html.dark .bg-gray-50,
   html.dark .bg-slate-100 {
     background-color: #020617 !important;
-    border-color: rgba(255, 255, 255, 0.2) !important; /* Bordures plus visibles */
+    border-color: rgba(255, 255, 255, 0.2) !important; 
   }
 
-  /* 4. ÉLÉMENTS DE VIGNETTE (Icones techniques) */
-  /* On force les petits labels (ex: "3 lits") à être très blancs */
-  html.dark .text-slate-800, 
-  html.dark .text-slate-100,
-  html.dark .font-medium {
-    color: #ffffff !important;
-  }
-
-  /* 5. EXCEPTIONS (Boutons blancs et éléments dorés) */
+  /* 5. EXCEPTIONS BOUTONS */
   html.dark button.bg-white span,
   html.dark .bg-white button span,
   html.dark .recherche-privee-btn span {
     color: #020617 !important;
-    font-weight: 700 !important; /* Plus de gras pour la lisibilité sur bouton */
-  }
-
-  html.dark .text-[#D4AF37], html.dark .text-gold {
-    color: #D4AF37 !important;
+    font-weight: 700 !important; 
   }
 }
 
 /* 6. SCROLLBAR & PIN */
 html.dark input[type="password"] {
   background-color: #1e293b !important;
-  color: #D4AF37 !important;
+  color: var(--accent-gold) !important;
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
 
@@ -97,7 +99,7 @@ html.dark input[type="password"] {
 }
 
 ::-webkit-scrollbar-thumb { 
-  background: #D4AF37; 
+  background: var(--accent-gold); 
   border-radius: 10px; 
 }
 
@@ -107,8 +109,26 @@ main {
   padding-top: 0 !important; 
 }
 
-/* Forcer le blanc pour les liens du menu mobile en mode sombre */
 .dark .mobile-menu-link {
   color: #ffffff !important;
   opacity: 1 !important;
+}
+
+/* --- CONFIGURATION VERSION LIGHT (750€) --- */
+
+[data-package="light"] {
+  scrollbar-width: none !important; 
+}
+
+[data-package="light"]::-webkit-scrollbar {
+  display: none !important; 
+}
+
+[data-package="light"] * {
+  transition: none !important;
+  animation-duration: 0.1s !important;
+}
+
+[data-package="light"] .theme-toggle-component {
+  display: none !important;
 }

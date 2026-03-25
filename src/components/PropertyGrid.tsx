@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation"; // Importé pour détecter le mode
 import PropertyCard from "./PropertyCard";
 import { Loader2, SearchX } from "lucide-react";
 import { useTheme } from "next-themes";
@@ -14,9 +15,15 @@ interface PropertyGridProps {
 export default function PropertyGrid({ activeFilters, properties }: PropertyGridProps) {
   const { resolvedTheme } = useTheme();
   const { t } = useTranslation();
+  const searchParamsOrigin = useSearchParams(); // On récupère les paramètres de l'URL
+  
   const [filtered, setFiltered] = useState<any[]>([]);
   const [isAnimating, setIsAnimating] = useState(false);
   const [mounted, setMounted] = useState(false);
+
+  // --- DÉTECTION DU MODE LIGHT ---
+  const isLight = searchParamsOrigin.get('pack') === 'light' || 
+                 (typeof document !== 'undefined' && document.documentElement.getAttribute('data-package') === 'light');
 
   useEffect(() => {
     setMounted(true);
@@ -103,7 +110,10 @@ export default function PropertyGrid({ activeFilters, properties }: PropertyGrid
                 className="group animate-in fade-in slide-in-from-bottom-10 duration-1000 fill-mode-forwards rounded-none overflow-hidden"
                 style={{ animationDelay: `${index * 150}ms` }}
               >
-                <PropertyCard property={p} />
+                {/* IMPORTANT : On passe la prop isLight au composant PropertyCard 
+                   pour qu'il sache quel URL générer 
+                */}
+                <PropertyCard property={p} isLight={isLight} />
               </div>
             ))}
           </div>

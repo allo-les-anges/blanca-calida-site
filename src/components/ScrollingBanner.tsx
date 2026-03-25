@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import { useSearchParams } from "next/navigation"; // Importé pour la détection
 import { useTheme } from "next-themes";
 import { useTranslation } from "@/contexts/I18nContext";
 
@@ -17,13 +18,19 @@ const BANNER_KEYS = [
 export default function ScrollingBanner() {
   const { resolvedTheme } = useTheme();
   const { t } = useTranslation();
+  const searchParams = useSearchParams();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  if (!mounted) return null;
+  // --- LOGIQUE D'EXCLUSION ---
+  const isLight = searchParams.get('pack') === 'light' || 
+                 (typeof document !== 'undefined' && document.documentElement.getAttribute('data-package') === 'light');
+
+  // Si on est en mode light ou non monté, on ne rend rien
+  if (!mounted || isLight) return null;
 
   const isDark = resolvedTheme === "dark";
   const duplicatedTexts = [...BANNER_KEYS, ...BANNER_KEYS, ...BANNER_KEYS, ...BANNER_KEYS];

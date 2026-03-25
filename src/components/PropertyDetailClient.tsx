@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import ContactForm from "@/components/ContactForm"; // ← IMPORT DU NOUVEAU COMPOSANT
 import { 
   Bed, Bath, Maximize, MapPin, MessageCircle, ArrowLeft, 
   Loader2, Image as ImageIcon, Home, Map as MapIcon, 
@@ -12,29 +13,29 @@ import Link from "next/link";
 import { useTranslation } from "@/contexts/I18nContext";
 
 export default function PropertyDetailClient({ id }: { id: string }) {
-  const { t, locale } = useTranslation(); // ← ajout de locale
+  const { t, locale } = useTranslation();
   const [property, setProperty] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [activeImage, setActiveImage] = useState(0);
   const [mounted, setMounted] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  // Fonction utilitaire pour remplacer les variables
-  const translate = (key: string, params?: Record<string, string>) => {
-    let text = t(key);
-    if (params) {
-      Object.entries(params).forEach(([k, v]) => {
-        text = text.replace(new RegExp(`\\{${k}\\}`, 'g'), v);
-      });
-    }
-    return text;
+  // --- LOGIQUE DE DÉTECTION DU PACK (HANNIBAL VS GOLD) ---
+  // Force le mode light si "?pack=light" est dans l'URL, sinon regarde le HTML
+const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+const isLight = searchParams?.get('pack') === 'light' || (typeof document !== 'undefined' && document.documentElement.getAttribute('data-package') === 'light');
+
+  // Simulation de l'objet agence (à dynamiser plus tard via ton fetch agence)
+  const currentAgency = {
+    id: "AGENCE_HANNIBAL_001", 
+    package_level: isLight ? "light" : "gold",
+    name: "Data Home"
   };
 
   useEffect(() => {
     setMounted(true);
     async function fetchData() {
       try {
-        // Utilisation de la langue courante dans l'URL
         const res = await fetch(`/api/properties?lang=${locale}`);
         const data = await res.json();
         const propertiesArray = Array.isArray(data) ? data : (data.properties || []);
@@ -49,7 +50,7 @@ export default function PropertyDetailClient({ id }: { id: string }) {
       }
     }
     fetchData();
-  }, [id, locale]); // ← recharger quand la langue change
+  }, [id, locale]);
 
   const handleScroll = () => {
     if (scrollContainerRef.current) {
@@ -89,7 +90,6 @@ export default function PropertyDetailClient({ id }: { id: string }) {
 
   const images = property.images || [];
   const numericPrice = Number(property.price || property.prix || 0);
-  
   const mapQuery = encodeURIComponent(`${property.town || ""}, ${property.region || ""}, Espagne`);
   const fallbackMapUrl = `https://maps.google.com/maps?q=${mapQuery}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
 
@@ -193,12 +193,7 @@ export default function PropertyDetailClient({ id }: { id: string }) {
               
               <div className="relative w-full h-[400px] rounded-[2.5rem] overflow-hidden shadow-xl border border-slate-200 dark:border-white/10 map-container">
                 <iframe 
-                  width="100%" 
-                  height="100%" 
-                  frameBorder="0" 
-                  scrolling="no" 
-                  marginHeight={0} 
-                  marginWidth={0} 
+                  width="100%" height="100%" frameBorder="0" scrolling="no" 
                   src={fallbackMapUrl}
                   className="grayscale-[0.5] dark:grayscale-[1]"
                 />
@@ -207,38 +202,54 @@ export default function PropertyDetailClient({ id }: { id: string }) {
           </div>
         </div>
 
-        {/* SIDEBAR */}
+        {/* SIDEBAR DYNAMIQUE */}
         <div className="lg:col-span-1">
           <div className="sticky top-40 space-y-6">
-            <Link 
-              href={`/contact-cashback?Property_ID=${property.id_externe || property.id}`}
-              className="group relative block w-full overflow-hidden rounded-[2.5rem] bg-slate-900 p-[1px] shadow-2xl transition-transform hover:scale-[1.02]"
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-[#D4AF37] to-transparent opacity-30" />
-              <div className="relative bg-slate-900 rounded-[2.5rem] p-8 flex items-center gap-5">
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/30">
-                  <ShieldCheck size={28} />
+            
+            {/* 1. ON MASQUE LE CASHBACK POUR LE PACK LIGHT (HANNIBAL) */}
+            {!isLight && (
+              <Link 
+                href={`/contact-cashback?Property_ID=${property.id_externe || property.id}`}
+                className="group relative block w-full overflow-hidden rounded-[2.5rem] bg-slate-900 p-[1px] shadow-2xl transition-transform hover:scale-[1.02]"
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-[#D4AF37] to-transparent opacity-30" />
+                <div className="relative bg-slate-900 rounded-[2.5rem] p-8 flex items-center gap-5">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/30">
+                    <ShieldCheck size={28} />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-[#D4AF37] mb-1">{t('propertyDetail.privilege')}</span>
+                    <span className="text-xl font-serif italic text-white leading-tight">{t('propertyDetail.activateCashback')}</span>
+                  </div>
                 </div>
-                <div className="flex flex-col">
-                  <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-[#D4AF37] mb-1">{t('propertyDetail.privilege')}</span>
-                  <span className="text-xl font-serif italic text-white leading-tight">{t('propertyDetail.activateCashback')}</span>
-                </div>
-              </div>
-            </Link>
+              </Link>
+            )}
 
-            <div className="bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 p-10 rounded-[3rem] shadow-2xl">
-              <p className="text-[10px] uppercase text-slate-400 dark:text-[#FFE7C2]/60 mb-2 font-bold tracking-widest">{t('propertyDetail.price')}</p>
-              <p className="smart-title text-5xl font-serif leading-none mb-10">
-                {numericPrice.toLocaleString("fr-FR")} €
-              </p>
+            {/* 2. LE FORMULAIRE DE CONTACT (S'ADAPTE SI LIGHT OU GOLD) */}
+            <div className={isLight ? "" : "bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-[3rem] shadow-2xl overflow-hidden"}>
               
-              <button className="w-full bg-[#D4AF37] text-black py-6 rounded-2xl font-bold uppercase text-[11px] tracking-widest hover:brightness-110 transition-all mb-4">
-                {t('propertyDetail.bookVisit')}
-              </button>
-              
-              <a href={`https://wa.me/34627768233?text=Info ref: ${property.ref}`} target="_blank" className="w-full border border-slate-200 dark:border-white/10 flex items-center justify-center gap-3 py-6 rounded-2xl font-bold uppercase text-[11px] smart-title hover:bg-slate-50 dark:hover:bg-white/5 transition-all">
-                <MessageCircle size={20} className="text-green-500" /> {t('propertyDetail.whatsappDirect')}
-              </a>
+              {/* Affichage du prix uniquement au-dessus du formulaire pour le mode Gold */}
+              {!isLight && (
+                <div className="p-10 pb-0">
+                  <p className="text-[10px] uppercase text-slate-400 dark:text-[#FFE7C2]/60 mb-2 font-bold tracking-widest">{t('propertyDetail.price')}</p>
+                  <p className="smart-title text-5xl font-serif leading-none mb-6">
+                    {numericPrice.toLocaleString("fr-FR")} €
+                  </p>
+                </div>
+              )}
+
+              {/* Insertion du composant de formulaire intelligent */}
+              <ContactForm 
+                agency={currentAgency} 
+                propertyRef={property.id_externe || property.id} 
+              />
+
+              {/* Petit lien WhatsApp discret en dessous */}
+              <div className="px-8 pb-8">
+                <a href={`https://wa.me/34627768233?text=Info ref: ${property.ref}`} target="_blank" className="w-full border border-slate-200 dark:border-white/10 flex items-center justify-center gap-3 py-4 rounded-2xl font-bold uppercase text-[10px] smart-title hover:bg-slate-50 dark:hover:bg-white/5 transition-all">
+                  <MessageCircle size={18} className="text-green-500" /> {t('propertyDetail.whatsappDirect')}
+                </a>
+              </div>
             </div>
           </div>
         </div>
