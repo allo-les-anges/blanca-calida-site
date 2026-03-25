@@ -14,8 +14,6 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children, agency }: { children: React.ReactNode; agency?: { package_level?: string } }) {
-  
-  // On vérifie si c'est le pack light
   const isLight = agency?.package_level === 'light';
 
   return (
@@ -23,7 +21,6 @@ export default function RootLayout({ children, agency }: { children: React.React
       lang="fr" 
       className={`${inter.variable} ${playfair.variable} ${montserrat.variable}`} 
       suppressHydrationWarning
-      // On injecte l'attribut pour que le CSS et le Hero puissent le lire
       data-package={isLight ? 'light' : 'gold'}
     >
       <body className={`antialiased ${isLight ? 'bg-white text-slate-900' : 'bg-black text-white'}`}>
