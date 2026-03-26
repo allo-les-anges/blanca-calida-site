@@ -78,12 +78,11 @@ export default function RegionGrid({ properties, onRegionClick }: RegionGridProp
 
   if (!mounted) return null;
 
-  // Détermine si on affiche le mode sombre visuellement (uniquement si pas en pack light)
   const isDarkVisual = resolvedTheme === "dark" && !isLight;
 
   return (
     <section 
-      className="max-w-[1600px] mx-auto px-6 py-12 transition-colors duration-500"
+      className="max-w-[1600px] mx-auto px-6 py-20 transition-colors duration-500"
       style={{ backgroundColor: isDarkVisual ? '#0A0A0A' : '#FFFFFF' }}
     >
       
