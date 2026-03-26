@@ -4,6 +4,7 @@ import React, { useMemo, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useTheme } from "next-themes";
 import { useTranslation } from "@/contexts/I18nContext";
+import { useSearchParams } from "next/navigation";
 
 interface Property {
   id: string;
@@ -49,7 +50,10 @@ const REGIONS_DISPLAY = [
 export default function RegionGrid({ properties, onRegionClick }: RegionGridProps) {
   const { resolvedTheme } = useTheme();
   const { t } = useTranslation();
+  const searchParams = useSearchParams();
   const [mounted, setMounted] = useState(false);
+
+  const isLight = searchParams.get('pack') === 'light';
 
   useEffect(() => {
     setMounted(true);
@@ -63,13 +67,10 @@ export default function RegionGrid({ properties, onRegionClick }: RegionGridProp
     properties.forEach(p => {
       const rawCity = (p.town || p.ville || "").toLowerCase().trim();
       const regionFound = CITY_TO_REGION_MAP[rawCity];
-      if (regionFound) {
-        counts[regionFound]++;
-      } else {
+      if (regionFound) counts[regionFound]++;
+      else {
         const rawRegion = p.region?.trim();
-        if (rawRegion && counts[rawRegion] !== undefined) {
-          counts[rawRegion]++;
-        }
+        if (rawRegion && counts[rawRegion] !== undefined) counts[rawRegion]++;
       }
     });
     return counts;
@@ -77,25 +78,21 @@ export default function RegionGrid({ properties, onRegionClick }: RegionGridProp
 
   if (!mounted) return null;
 
-  const isDark = resolvedTheme === "dark";
+  const isDarkVisual = resolvedTheme === "dark" && !isLight;
 
   return (
-    <section className="max-w-[1600px] mx-auto px-6 py-6 bg-white dark:bg-[#0A0A0A] transition-colors duration-500">
+    <section className={`max-w-[1600px] mx-auto px-6 py-6 transition-colors duration-500 ${isLight ? 'bg-white' : 'bg-white dark:bg-[#0A0A0A]'}`}>
       
       {/* HEADER */}
       <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-8">
         <div className="max-w-2xl">
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
+          <motion.div initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
             <span className="text-[#D4AF37] text-[10px] font-black uppercase tracking-[0.4em] mb-3 block">
               {t('home.regionGrid.ourDestinations')}
             </span>
             <h2 
               className="text-4xl md:text-6xl font-serif italic leading-tight"
-              style={{ color: isDark ? '#FFFFFF' : '#0f172a' }}
+              style={{ color: isDarkVisual ? '#FFFFFF' : '#0f172a' }}
             >
               {t('home.regionGrid.exceptionalPlaces')}
             </h2>
@@ -106,11 +103,11 @@ export default function RegionGrid({ properties, onRegionClick }: RegionGridProp
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
-          className="max-w-xs border-l border-slate-200 dark:border-white/10 pl-6 pb-1"
+          className={`max-w-xs border-l ${isDarkVisual ? 'border-white/10' : 'border-slate-200'} pl-6 pb-1`}
         >
           <p 
             className="text-xs font-light leading-relaxed italic"
-            style={{ color: isDark ? '#CBD5E1' : '#64748b' }}
+            style={{ color: isDarkVisual ? '#CBD5E1' : '#64748b' }}
           >
             {t('home.regionGrid.description')}
           </p>
@@ -121,7 +118,6 @@ export default function RegionGrid({ properties, onRegionClick }: RegionGridProp
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 auto-rows-[300px] md:auto-rows-[400px]">
         {REGIONS_DISPLAY.map((region, index) => {
           const count = regionCounts[region.name] || 0;
-          
           return (
             <motion.div
               key={region.name}
@@ -141,17 +137,14 @@ export default function RegionGrid({ properties, onRegionClick }: RegionGridProp
                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-80" />
               </div>
 
-              {/* CONTENU TEXTE */}
               <div className="absolute inset-0 p-8 flex flex-col justify-end items-start text-white">
                 <motion.div className="space-y-2 w-full">
                   <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-[#D4AF37]">
                     {count} {t('home.regionGrid.properties')}
                   </p>
-                  
                   <h3 className="text-2xl md:text-4xl font-serif italic leading-none text-white">
                     {region.name}
                   </h3>
-                  
                   <div className="relative pt-4">
                     <div className="absolute top-0 left-0 w-8 h-[1px] bg-white/40 group-hover:w-full transition-all duration-700" />
                     <div className="flex items-center justify-between pt-3 opacity-0 group-hover:opacity-100 transition-all duration-500">
@@ -162,8 +155,6 @@ export default function RegionGrid({ properties, onRegionClick }: RegionGridProp
                   </div>
                 </motion.div>
               </div>
-
-              {/* Bordure intérieure carrée */}
               <div className="absolute inset-0 border border-white/5 pointer-events-none" />
             </motion.div>
           );
