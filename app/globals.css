@@ -152,3 +152,7 @@ html[data-package="light"] button.bg-[#D4AF37],
 html[data-package="light"] button.bg-[#D4AF37] span {
   color: #000000 !important;
 }
+
+html[data-package="light"] .bg-black\/60 {
+  background-color: rgba(0, 0, 0, 0.8) !important;
+}
