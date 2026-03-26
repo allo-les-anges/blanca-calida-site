@@ -20,24 +20,34 @@ export default function RootLayout({
   children: React.ReactNode; 
   agency?: { package_level?: string } 
 }) {
+  // Vérification de sécurité : on s'assure que isLight est bien un booléen
   const isLight = agency?.package_level === 'light';
 
   return (
     <html 
       lang="fr" 
-      className={`${inter.variable} ${playfair.variable} ${montserrat.variable}`} 
+      /* FORCE la suppression de la classe 'dark' si on est en mode light.
+         C'est crucial car Tailwind se base sur la présence de cette classe.
+      */
+      className={`${inter.variable} ${playfair.variable} ${montserrat.variable} ${isLight ? '!light' : ''}`}
       suppressHydrationWarning
       data-package={isLight ? 'light' : 'gold'}
     >
-      {/* Ici, on s'assure que si c'est light, TOUT le site ignore le mode sombre.
-          On utilise forcedTheme pour écraser la détection automatique du navigateur.
-      */}
-      <body className={`antialiased transition-colors duration-300 ${isLight ? 'bg-white text-slate-900' : 'bg-black text-white'}`}>
+      <body 
+        className={`antialiased transition-colors duration-300`}
+        style={{ 
+            backgroundColor: isLight ? '#FFFFFF' : '#000000',
+            color: isLight ? '#0f172a' : '#FFFFFF' 
+        }}
+      >
         <ThemeProvider 
           attribute="class" 
+          /* forcedTheme est l'arme absolue : il ignore les préférences du navigateur 
+             et force next-themes à injecter uniquement la classe 'light'.
+          */
+          forcedTheme={isLight ? "light" : undefined}
           defaultTheme={isLight ? "light" : "dark"} 
-          forcedTheme={isLight ? "light" : undefined} // FORCE le thème clair si pack light
-          enableSystem={!isLight} // Désactive la détection système en mode light
+          enableSystem={!isLight}
         >
           <I18nProvider>
             {children}
