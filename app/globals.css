@@ -108,3 +108,30 @@ html[data-package="light"] * {
 html[data-package="light"] .theme-toggle-component {
   display: none !important;
 }
+
+/* --- FIX FINAL POUR VIGNETTES ET FOOTER --- */
+
+html[data-package="light"] .property-card, 
+html[data-package="light"] [class*="bg-slate-900"],
+html[data-package="light"] [class*="bg-gray-900"],
+html[data-package="light"] footer {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #e2e8f0 !important;
+}
+
+/* Force les textes dans les vignettes et le footer */
+html[data-package="light"] .property-card h3,
+html[data-package="light"] .property-card p,
+html[data-package="light"] footer h2,
+html[data-package="light"] footer h3,
+html[data-package="light"] footer p,
+html[data-package="light"] footer a {
+  color: #0f172a !important;
+}
+
+/* Ajuste les icônes ou petits textes secondaires */
+html[data-package="light"] .text-slate-400,
+html[data-package="light"] .text-gray-400 {
+  color: #64748b !important;
+}

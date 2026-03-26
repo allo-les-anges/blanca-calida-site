@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { useTheme } from "next-themes";
 import { useTranslation } from "@/contexts/I18nContext";
 
-// Ajout de isLight dans l'interface des Props
 export default function PropertyCard({ property, isLight = false }: { property: any, isLight?: boolean }) {
   const { resolvedTheme } = useTheme();
   const { t } = useTranslation();
@@ -27,8 +26,12 @@ export default function PropertyCard({ property, isLight = false }: { property: 
     return text;
   };
 
-  // Construction de l'URL avec propagation du mode Light
   const detailUrl = `/property/${property.id_externe || property.id}${isLight ? '?pack=light' : ''}`;
+
+  if (!mounted) return null;
+
+  // On détermine si on doit vraiment afficher le style "sombre"
+  const showDark = resolvedTheme === 'dark' && !isLight;
 
   return (
     <Link 
@@ -36,7 +39,13 @@ export default function PropertyCard({ property, isLight = false }: { property: 
       className="group flex flex-col w-full transition-all duration-500"
     >
       {/* IMAGE & BADGES */}
-      <div className="relative h-[380px] overflow-hidden rounded-none border border-slate-200 dark:border-white/5 bg-slate-100 dark:bg-slate-900">
+      <div 
+        className="relative h-[380px] overflow-hidden rounded-none border transition-colors duration-500"
+        style={{ 
+          backgroundColor: showDark ? '#0f172a' : '#f1f5f9',
+          borderColor: showDark ? 'rgba(255,255,255,0.05)' : '#e2e8f0'
+        }}
+      >
         <img 
           src={property.images?.[0] || "/placeholder-house.jpg"} 
           alt={property.titre}
@@ -46,8 +55,7 @@ export default function PropertyCard({ property, isLight = false }: { property: 
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-80" />
 
         <div className="absolute bottom-6 left-6 flex flex-wrap gap-2 max-w-[70%]">
-          {/* En mode Light, on met le badge en noir pour plus de sobriété */}
-          <span className={`${isLight ? 'bg-black text-white' : 'bg-[#D4AF37] text-black'} text-[9px] font-black px-4 py-2 rounded-none uppercase tracking-widest shadow-lg transition-colors`}>
+          <span className={`${isLight ? 'bg-black text-white' : 'bg-[#D4AF37] text-black'} text-[9px] font-black px-4 py-2 rounded-none uppercase tracking-widest shadow-lg`}>
             {translate('propertyCard.ref', { ref: property.ref || property.id_externe })}
           </span>
           <span className="bg-white/10 backdrop-blur-md text-white border border-white/20 text-[8px] font-bold px-4 py-2 rounded-none uppercase tracking-[0.2em]">
@@ -56,7 +64,7 @@ export default function PropertyCard({ property, isLight = false }: { property: 
         </div>
 
         <div className="absolute bottom-6 right-6 flex flex-col gap-2">
-          <button className="bg-white/10 backdrop-blur-md p-3 rounded-none border border-white/20 text-white hover:bg-[#D4AF37] hover:text-black transition-all duration-300">
+          <button className="bg-white/10 backdrop-blur-md p-3 rounded-none border border-white/20 text-white hover:bg-[#D4AF37] hover:text-black transition-all">
             <Heart size={18} strokeWidth={1.5} />
           </button>
           <div className={`${isLight ? 'bg-black text-white' : 'bg-[#D4AF37] text-black'} p-3 rounded-none shadow-xl transform group-hover:translate-x-1 transition-all`}>
@@ -69,71 +77,57 @@ export default function PropertyCard({ property, isLight = false }: { property: 
       <div className="py-8 px-2">
         <div className="flex justify-between items-start gap-4 mb-3">
           <h3 
-            className="font-serif text-2xl text-slate-900 dark:text-white italic leading-tight flex-grow line-clamp-1"
-            style={{ color: (mounted && resolvedTheme === 'dark') ? '#ffffff' : undefined }}
+            className="font-serif text-2xl italic leading-tight flex-grow line-clamp-1 transition-colors"
+            style={{ color: showDark ? '#ffffff' : '#0f172a' }}
           >
             {property.titre || property.type || t('propertyCard.fallbackTitle')}
           </h3>
           
-          <span className={`text-xl font-bold ${isLight ? 'text-black dark:text-white' : 'text-[#D4AF37]'} whitespace-nowrap pt-1 transition-colors`}>
+          <span className={`text-xl font-bold ${isLight ? 'text-black' : 'text-[#D4AF37]'} whitespace-nowrap pt-1`}>
             {priceFormatted} €
           </span>
         </div>
 
-        <div className="flex items-center gap-2 text-slate-600 dark:text-slate-200 text-[10px] tracking-[0.3em] uppercase font-bold">
-          <span className={isLight ? 'text-black dark:text-white' : 'text-[#D4AF37]'}>●</span>
+        <div 
+          className="flex items-center gap-2 text-[10px] tracking-[0.3em] uppercase font-bold transition-colors"
+          style={{ color: showDark ? '#e2e8f0' : '#475569' }}
+        >
+          <span className={isLight ? 'text-black' : 'text-[#D4AF37]'}>●</span>
           {property.town} <span className="opacity-30">|</span> {property.region || 'Costa Blanca'}
         </div>
       </div>
 
       {/* ICONES TECHNIQUES */}
-      <div className="grid grid-cols-3 gap-y-6 pt-6 border-t border-slate-100 dark:border-white/10">
-        
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-none bg-slate-100 dark:bg-white/5 flex items-center justify-center border border-slate-200/50 dark:border-white/10">
-            <Maximize size={14} className={isLight ? 'text-black dark:text-white' : 'text-[#D4AF37]'} />
+      <div 
+        className="grid grid-cols-3 gap-y-6 pt-6 border-t transition-colors"
+        style={{ borderColor: showDark ? 'rgba(255,255,255,0.1)' : '#f1f5f9' }}
+      >
+        {[
+          { icon: Maximize, value: `${property.surface_built || '0'} m²` },
+          { icon: Bed, value: `${property.beds || '0'} ${t('propertyCard.beds')}` },
+          { icon: Bath, value: `${property.baths || '0'} ${t('propertyCard.baths')}` },
+          { icon: Waves, value: property.pool === "Oui" ? t('propertyCard.pool') : t('propertyCard.noPool') },
+          { icon: Map, value: `${property.surface_plot || '0'} m² ${t('propertyCard.land')}` },
+          { icon: Car, value: t('propertyCard.garage') }
+        ].map((item, idx) => (
+          <div key={idx} className="flex items-center gap-3">
+            <div 
+              className="w-8 h-8 flex items-center justify-center border transition-colors"
+              style={{ 
+                backgroundColor: showDark ? 'rgba(255,255,255,0.05)' : '#f8fafc',
+                borderColor: showDark ? 'rgba(255,255,255,0.1)' : '#e2e8f0'
+              }}
+            >
+              <item.icon size={14} className={isLight ? 'text-black' : 'text-[#D4AF37]'} />
+            </div>
+            <span 
+              className="text-[11px] font-medium transition-colors"
+              style={{ color: showDark ? '#f1f5f9' : '#1e293b' }}
+            >
+              {item.value}
+            </span>
           </div>
-          <span className="text-[11px] font-medium text-slate-800 dark:text-slate-100">{property.surface_built || '0'} m²</span>
-        </div>
-        
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-none bg-slate-100 dark:bg-white/5 flex items-center justify-center border border-slate-200/50 dark:border-white/10">
-            <Bed size={14} className={isLight ? 'text-black dark:text-white' : 'text-[#D4AF37]'} />
-          </div>
-          <span className="text-[11px] font-medium text-slate-800 dark:text-slate-100">{property.beds || '0'} {t('propertyCard.beds')}</span>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-none bg-slate-100 dark:bg-white/5 flex items-center justify-center border border-slate-200/50 dark:border-white/10">
-            <Bath size={14} className={isLight ? 'text-black dark:text-white' : 'text-[#D4AF37]'} />
-          </div>
-          <span className="text-[11px] font-medium text-slate-800 dark:text-slate-100">{property.baths || '0'} {t('propertyCard.baths')}</span>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-none bg-slate-100 dark:bg-white/5 flex items-center justify-center border border-slate-200/50 dark:border-white/10">
-            <Waves size={14} className={isLight ? 'text-black dark:text-white' : 'text-[#D4AF37]'} />
-          </div>
-          <span className="text-[11px] font-medium text-slate-800 dark:text-slate-100 uppercase">
-            {property.pool === "Oui" ? t('propertyCard.pool') : t('propertyCard.noPool')}
-          </span>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-none bg-slate-100 dark:bg-white/5 flex items-center justify-center border border-slate-200/50 dark:border-white/10">
-            <Map size={14} className={isLight ? 'text-black dark:text-white' : 'text-[#D4AF37]'} />
-          </div>
-          <span className="text-[11px] font-medium text-slate-800 dark:text-slate-100 truncate">
-            {property.surface_plot || '0'} m² {t('propertyCard.land')}
-          </span>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-none bg-slate-100 dark:bg-white/5 flex items-center justify-center border border-slate-200/50 dark:border-white/10">
-            <Car size={14} className={isLight ? 'text-black dark:text-white' : 'text-[#D4AF37]'} />
-          </div>
-          <span className="text-[11px] font-medium text-slate-800 dark:text-slate-100">{t('propertyCard.garage')}</span>
-        </div>
+        ))}
       </div>
     </Link>
   );
