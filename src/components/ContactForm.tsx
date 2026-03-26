@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { Send, CheckCircle } from "lucide-react";
+import { Send, CheckCircle, Loader2 } from "lucide-react";
+import { useTranslation } from "@/contexts/I18nContext";
 
 interface ContactFormProps {
   agency: {
@@ -9,76 +10,122 @@ interface ContactFormProps {
     package_level: string;
     name: string;
   };
-  propertyRef?: string; // Optionnel : l'ID de la villa si on est sur une fiche produit
+  propertyRef?: string;
+  isLight?: boolean; // Prop optionnelle pour forcer le mode
 }
 
-export default function ContactForm({ agency, propertyRef }: ContactFormProps) {
+export default function ContactForm({ agency, propertyRef, isLight: forcedLight }: ContactFormProps) {
+  const { t } = useTranslation();
   const [status, setStatus] = useState<"idle" | "sending" | "success">("idle");
-  const isLight = agency.package_level === "light";
+  
+  // On est en mode light si le package est 'light' OU si la prop isLight est vraie
+  const isLight = agency.package_level === "light" || forcedLight === true;
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setStatus("sending");
 
-    // Simulation de l'envoi vers ton Zoho / API
-    // Plus tard, on remplacera par ton URL de Webform Zoho
-    setTimeout(() => setStatus("success"), 1500);
+    // Logique de simulation d'envoi
+    setTimeout(() => {
+      setStatus("success");
+    }, 1500);
   };
 
   if (status === "success") {
     return (
-      <div className="p-8 text-center bg-green-50 rounded-2xl border border-green-100">
-        <CheckCircle className="mx-auto text-green-500 mb-4" size={40} />
-        <h3 className="text-xl font-serif italic text-green-900">Message envoyé</h3>
-        <p className="text-sm text-green-700 mt-2">Nous reviendrons vers vous rapidement.</p>
+      <div className={`p-10 text-center rounded-[2.5rem] border animate-in fade-in zoom-in duration-500 ${
+        isLight ? "bg-slate-50 border-slate-200" : "bg-white/5 border-white/10"
+      }`}>
+        <div className="w-16 h-16 bg-[#D4AF37]/20 rounded-full flex items-center justify-center mx-auto mb-6">
+          <CheckCircle className="text-[#D4AF37]" size={32} />
+        </div>
+        <h3 className={`text-2xl font-serif italic mb-2 ${isLight ? "text-slate-900" : "text-white"}`}>
+          {t('propertyDetail.messageSent') || "Message envoyé"}
+        </h3>
+        <p className={`text-[10px] uppercase tracking-[0.2em] ${isLight ? "text-slate-500" : "text-slate-400"}`}>
+          {t('propertyDetail.weWillContactYou') || "Nous reviendrons vers vous rapidement."}
+        </p>
       </div>
     );
   }
 
+  // Styles dynamiques
+  const containerStyle = isLight 
+    ? "bg-white border-slate-100 shadow-[0_20px_50px_rgba(0,0,0,0.05)]" 
+    : "bg-[#0A0A0A]/40 border-white/5 backdrop-blur-xl";
+
+  const titleStyle = isLight ? "text-slate-900" : "text-white";
+  
+  const inputBaseStyle = `w-full p-4 text-[10px] tracking-widest uppercase outline-none border transition-all duration-300 rounded-xl`;
+  const inputThemeStyle = isLight 
+    ? "bg-slate-50 border-slate-200 text-slate-900 focus:border-black placeholder:text-slate-400" 
+    : "bg-white/5 border-white/10 text-white focus:border-[#D4AF37] placeholder:text-white/20";
+
   return (
-    <div className={`p-8 rounded-[2.5rem] border ${isLight ? "bg-white border-slate-100 shadow-sm" : "bg-white/5 border-white/10 backdrop-blur-md"}`}>
-      <h3 className={`text-2xl font-serif italic mb-6 ${isLight ? "text-slate-900" : "text-white"}`}>
-        {isLight ? "Demander des informations" : "Contacter un Expert Prestige"}
-      </h3>
+    <div className={`p-8 md:p-10 rounded-[2.5rem] border ${containerStyle}`}>
+      <div className="mb-8">
+        <h3 className={`text-2xl md:text-3xl font-serif italic mb-2 ${titleStyle}`}>
+          {isLight ? "Demander des informations" : "Contacter un Expert"}
+        </h3>
+        <p className={`text-[9px] font-bold uppercase tracking-[0.3em] ${isLight ? 'text-slate-400' : 'text-[#D4AF37]/60'}`}>
+          Réf: {propertyRef || 'Général'} — {agency.name}
+        </p>
+      </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* --- CHAMPS VISIBLES --- */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-4">
           <input 
-            type="text" name="name" required placeholder="Votre nom"
-            className={`w-full p-4 rounded-xl outline-none border transition-all ${isLight ? "bg-slate-50 border-slate-200 focus:border-black" : "bg-black/20 border-white/10 text-white focus:border-[#D4AF37]"}`}
+            type="text" 
+            name="name" 
+            required 
+            placeholder="NOM COMPLET"
+            className={`${inputBaseStyle} ${inputThemeStyle}`}
           />
           <input 
-            type="email" name="email" required placeholder="Votre email"
-            className={`w-full p-4 rounded-xl outline-none border transition-all ${isLight ? "bg-slate-50 border-slate-200 focus:border-black" : "bg-black/20 border-white/10 text-white focus:border-[#D4AF37]"}`}
+            type="email" 
+            name="email" 
+            required 
+            placeholder="VOTRE EMAIL"
+            className={`${inputBaseStyle} ${inputThemeStyle}`}
           />
+          <textarea 
+            name="message" 
+            rows={4} 
+            placeholder="VOTRE MESSAGE..."
+            className={`${inputBaseStyle} ${inputThemeStyle} resize-none`}
+          ></textarea>
         </div>
 
-        <textarea 
-          name="message" rows={4} placeholder="Comment pouvons-nous vous aider ?"
-          className={`w-full p-4 rounded-xl outline-none border transition-all ${isLight ? "bg-slate-50 border-slate-200 focus:border-black" : "bg-black/20 border-white/10 text-white focus:border-[#D4AF37]"}`}
-        ></textarea>
-
-        {/* --- CHAMPS INVISIBLES (LE PONT ZOHO) --- */}
-        {/* Ces champs permettent à ton CRM de trier les leads automatiquement */}
-        <input type="hidden" name="zc_gad" value="" /> {/* Pour le tracking Zoho */}
+        {/* Hidden Fields pour CRM */}
         <input type="hidden" name="agency_id" value={agency.id} />
-        <input type="hidden" name="source_package" value={agency.package_level} />
-        {propertyRef && <input type="hidden" name="property_id" value={propertyRef} />}
+        <input type="hidden" name="source" value={isLight ? "Pack_Light" : "Pack_Gold"} />
 
         <button 
           type="submit" 
           disabled={status === "sending"}
-          className={`w-full py-5 rounded-2xl font-bold uppercase text-[10px] tracking-widest flex items-center justify-center gap-3 transition-all ${
+          className={`w-full py-5 rounded-2xl font-black uppercase text-[10px] tracking-[0.4em] flex items-center justify-center gap-4 transition-all duration-500 shadow-lg ${
             isLight 
-            ? "bg-black text-white hover:bg-slate-800" 
+            ? "bg-black text-white hover:bg-[#D4AF37] hover:shadow-[#D4AF37]/20" 
             : "bg-[#D4AF37] text-black hover:bg-white"
-          }`}
+          } ${status === "sending" ? "opacity-70 cursor-not-allowed" : ""}`}
         >
-          {status === "sending" ? "Envoi en cours..." : "Envoyer la demande"}
-          <Send size={14} />
+          {status === "sending" ? (
+            <>
+              <Loader2 size={16} className="animate-spin" />
+              ENVOI EN COURS
+            </>
+          ) : (
+            <>
+              ENVOYER LA DEMANDE
+              <Send size={14} className="group-hover:translate-x-1 transition-transform" />
+            </>
+          )}
         </button>
       </form>
+      
+      <p className={`text-center mt-6 text-[8px] uppercase tracking-widest ${isLight ? 'text-slate-400' : 'text-white/20'}`}>
+        Vos données sont protégées par le secret professionnel
+      </p>
     </div>
   );
 }
