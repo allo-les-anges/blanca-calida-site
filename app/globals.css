@@ -15,8 +15,7 @@
 }
 
 /* 2. Correction des sélecteurs de section */
-/* Au lieu de forcer !important partout, utilise des classes Tailwind normales 
-   ou restreint le sélecteur au mode dark réel */
+/* On restreint le mode sombre uniquement quand on n'est PAS en pack light */
 html.dark:not([data-package="light"]) section,
 html.dark:not([data-package="light"]) main,
 html.dark:not([data-package="light"]) footer {
@@ -34,31 +33,30 @@ html[data-package="light"] section {
 
 html[data-package="light"] .text-white,
 html[data-package="light"] h2,
+html[data-package="light"] h3,
 html[data-package="light"] p {
- 
   color: #0f172a !important;
 }
 
-  /* 4. LES VIGNETTES ET LE FOOTER */
-  html.dark .bg-white:not(button):not(.recherche-privee-btn),
-  html.dark section,
-  html.dark footer,
-  html.dark main,
-  html.dark .property-card,
-  html.dark .bg-slate-50,
-  html.dark .bg-gray-50,
-  html.dark .bg-slate-100 {
-    background-color: #020617 !important;
-    border-color: rgba(255, 255, 255, 0.2) !important; 
-  }
+/* 4. LES VIGNETTES ET LE FOOTER (Uniquement si PAS en pack light) */
+html.dark:not([data-package="light"]) .bg-white:not(button):not(.recherche-privee-btn),
+html.dark:not([data-package="light"]) section,
+html.dark:not([data-package="light"]) footer,
+html.dark:not([data-package="light"]) main,
+html.dark:not([data-package="light"]) .property-card,
+html.dark:not([data-package="light"]) .bg-slate-50,
+html.dark:not([data-package="light"]) .bg-gray-50,
+html.dark:not([data-package="light"]) .bg-slate-100 {
+  background-color: #020617 !important;
+  border-color: rgba(255, 255, 255, 0.2) !important; 
+}
 
-  /* 5. EXCEPTIONS BOUTONS */
-  html.dark button.bg-white span,
-  html.dark .bg-white button span,
-  html.dark .recherche-privee-btn span {
-    color: #020617 !important;
-    font-weight: 700 !important; 
-  }
+/* 5. EXCEPTIONS BOUTONS */
+html.dark button.bg-white span,
+html.dark .bg-white button span,
+html.dark .recherche-privee-btn span {
+  color: #020617 !important;
+  font-weight: 700 !important; 
 }
 
 /* 6. SCROLLBAR & PIN */
@@ -92,21 +90,21 @@ main {
   opacity: 1 !important;
 }
 
-/* --- CONFIGURATION VERSION LIGHT (750€) --- */
+/* --- CONFIGURATION VERSION LIGHT --- */
 
-[data-package="light"] {
+html[data-package="light"] {
   scrollbar-width: none !important; 
 }
 
-[data-package="light"]::-webkit-scrollbar {
+html[data-package="light"]::-webkit-scrollbar {
   display: none !important; 
 }
 
-[data-package="light"] * {
+html[data-package="light"] * {
   transition: none !important;
   animation-duration: 0.1s !important;
 }
 
-[data-package="light"] .theme-toggle-component {
+html[data-package="light"] .theme-toggle-component {
   display: none !important;
 }
