@@ -12,7 +12,7 @@ import Link from "next/link";
 import { useTranslation } from "@/contexts/I18nContext";
 import { useSearchParams } from "next/navigation";
 
-// Interface ajoutée pour corriger l'erreur de compilation
+// 1. Interface pour typer les props (Indispensable pour corriger l'erreur de build)
 interface PropertyDetailClientProps {
   id: string;
 }
@@ -69,7 +69,7 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
       .replace(/color="[^"]*"/gi, '')
       .replace(/<font[^>]*>/gi, '')
       .replace(/<\/font>/gi, '')
-      .replace(/&nbsp;/g, ' ');
+      .replace(/ /g, ' ');
   };
 
   if (!mounted) return null;
@@ -106,7 +106,6 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
         </Link>
       </div>
 
-      {/* Galerie Photos */}
       <section className="max-w-7xl mx-auto px-6 mb-16">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:h-[550px]">
           <div className="md:col-span-3 relative rounded-[2.5rem] md:rounded-[3rem] overflow-hidden shadow-2xl bg-slate-100 dark:bg-[#111] h-[400px] md:h-full">
@@ -133,7 +132,6 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
         </div>
       </section>
 
-      {/* Infos principales */}
       <section className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-3 gap-16 pb-24">
         <div className="lg:col-span-2">
           <h1 className={`text-4xl md:text-7xl font-serif mb-8 leading-[1.1] ${isLight ? 'text-slate-900' : 'text-white'}`}>
@@ -169,7 +167,6 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
               dangerouslySetInnerHTML={{ __html: cleanDescription(property.description || "") }} 
             />
             
-            {/* Carte */}
             <div className="space-y-8">
               <div className="flex items-center gap-4">
                 <div className="h-12 w-12 rounded-2xl bg-[#D4AF37]/10 flex items-center justify-center text-[#D4AF37]"><Navigation size={24} /></div>
@@ -185,7 +182,6 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
           </div>
         </div>
 
-        {/* Sidebar contact */}
         <div className="lg:col-span-1">
           <div className="sticky top-40 space-y-6">
             {!isLight && (

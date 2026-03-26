@@ -1,13 +1,16 @@
 import PropertyDetailClient from "@/components/PropertyDetailClient";
 
+// On définit précisément les types pour Next.js 15
 interface PageProps {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
 export default async function Page({ params }: PageProps) {
-  // 1. On attend la résolution des paramètres (Obligatoire Next 15)
+  // Extraction sécurisée de l'ID
   const { id } = await params;
   
-  // 2. On passe l'id au composant Client
+  if (!id) return null;
+
   return <PropertyDetailClient id={id} />;
 }
