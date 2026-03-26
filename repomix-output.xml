@@ -893,6 +893,154 @@ export default function PropertyDetailPage() {
 }
 </file>
 
+<file path="app/cashback-info/page.tsx">
+"use client";
+
+import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
+import Navbar from "@/components/Navbar";
+import { 
+  ShieldCheck, 
+  ArrowLeft, 
+  Sofa, 
+  Banknote, 
+  CheckCircle2, 
+  Home, 
+  Gavel,
+  Scale
+} from 'lucide-react';
+import { useTheme } from "next-themes";
+import { useTranslation } from "@/contexts/I18nContext";
+
+export default function CashbackInfo() {
+  const { resolvedTheme } = useTheme();
+  const { t } = useTranslation();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
+
+  const isDark = resolvedTheme === "dark";
+
+  const themeStyles = {
+    title: { color: isDark ? '#FFFFFF' : '#0f172a' },
+    text: { color: isDark ? '#CBD5E1' : '#64748b' },
+    heading: { color: isDark ? '#D4AF37' : '#0f172a' },
+    iconColor: isDark ? '#FFFFFF' : '#0f172a'
+  };
+
+  return (
+    <div className="min-h-screen bg-white dark:bg-[#0A0A0A] transition-colors duration-500">
+      <Navbar />
+      <div className="pt-32 pb-20 px-6">
+        <div className="max-w-4xl mx-auto">
+          {/* Fil d'ariane */}
+          <Link 
+            href="/" 
+            className="inline-flex items-center gap-2 text-slate-400 hover:text-[#D4AF37] transition-colors mb-12 uppercase text-[10px] tracking-[0.3em] font-bold"
+          >
+            <ArrowLeft size={14} /> {t('cashback.back')}
+          </Link>
+
+          <div className="mb-16">
+            <h1 
+              className="text-5xl md:text-7xl font-serif mb-8 leading-tight"
+              style={themeStyles.title}
+            >
+              {t('cashback.title')} <br />
+              <span className="italic text-[#D4AF37]">{t('cashback.subtitle')}</span>
+            </h1>
+            <p 
+              className="text-xl max-w-2xl leading-relaxed"
+              style={themeStyles.text}
+            >
+              {t('cashback.description')}
+            </p>
+          </div>
+
+          {/* SECTION EXEMPLE CONCRET */}
+          <div className="relative overflow-hidden bg-[#0F172A] rounded-[3rem] p-8 md:p-16 mb-20 shadow-2xl border border-white/5">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-[#D4AF37] opacity-10 blur-[100px] -mr-32 -mt-32" />
+            
+            <div className="relative z-10">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6">
+                <div className="max-w-md">
+                  <h2 className="text-[10px] uppercase tracking-[0.4em] font-bold text-[#D4AF37] mb-3">{t('cashback.flexibility')}</h2>
+                  <p className="text-3xl font-serif italic text-white leading-tight">{t('cashback.flexibilityText')}</p>
+                </div>
+                <div className="bg-white/5 backdrop-blur-md px-6 py-8 rounded-[2rem] border border-[#D4AF37]/30 min-w-[240px]">
+                  <span className="text-[9px] uppercase tracking-[0.2em] font-bold text-[#D4AF37] block mb-4 text-center">{t('cashback.example')}</span>
+                  <div className="flex flex-col items-center gap-2">
+                      <span className="text-2xl md:text-3xl font-light text-white tabular-nums whitespace-nowrap">
+                           {t('cashback.exampleAmount')}<span className="text-[#D4AF37] ml-1">*</span>
+                      </span>
+                      <span className="text-[10px] text-slate-400 uppercase tracking-tighter">{t('cashback.orEquipment')}</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 border-t border-white/10 pt-10">
+                {[0, 1].map((idx) => (
+                  <div key={idx} className="flex items-start gap-4">
+                    <div className="bg-[#D4AF37]/10 p-2 rounded-full">
+                      <CheckCircle2 className="text-[#D4AF37]" size={20} />
+                    </div>
+                    <p className="text-sm text-slate-300 leading-relaxed">{t(`cashback.points.${idx}`)}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* GRILLE D'AVANTAGES */}
+          <div className="grid md:grid-cols-3 gap-16 mb-24">
+            {['cash', 'furniture', 'services'].map((key, idx) => (
+              <div key={idx} className="group space-y-6">
+                <div className="w-14 h-14 bg-slate-50 dark:bg-white/5 rounded-2xl flex items-center justify-center group-hover:bg-[#D4AF37] transition-all duration-500 shadow-sm">
+                  {key === 'cash' && <Banknote size={28} strokeWidth={1.5} color={themeStyles.iconColor} className="group-hover:stroke-white transition-colors" />}
+                  {key === 'furniture' && <Sofa size={28} strokeWidth={1.5} color={themeStyles.iconColor} className="group-hover:stroke-white transition-colors" />}
+                  {key === 'services' && <Scale size={28} strokeWidth={1.5} color={themeStyles.iconColor} className="group-hover:stroke-white transition-colors" />}
+                </div>
+                <h3 className="font-bold uppercase text-[11px] tracking-[0.2em]" style={themeStyles.title}>{t(`cashback.options.${key}.title`)}</h3>
+                <p className="text-sm leading-relaxed" style={themeStyles.text}>{t(`cashback.options.${key}.desc`)}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Section FAQ / Info */}
+          <div className="border-t border-slate-100 dark:border-white/10 pt-20">
+              <div className="max-w-2xl">
+                <h2 className="text-4xl font-serif italic mb-10 text-left" style={themeStyles.title}>{t('cashback.activation')}</h2>
+                <div className="space-y-8 text-lg leading-relaxed">
+                  <p style={themeStyles.text}>
+                    {t('cashback.activationText')}
+                  </p>
+                  <p style={themeStyles.text}>
+                    {t('cashback.activationDetail')}
+                  </p>
+                </div>
+
+                <div className="mt-16">
+                  <Link 
+                      href="/" 
+                      className="group inline-flex items-center gap-4 bg-slate-900 dark:bg-white text-white dark:text-black px-12 py-6 rounded-2xl font-bold uppercase text-[11px] tracking-[0.3em] hover:bg-[#D4AF37] transition-all duration-500 shadow-2xl"
+                  >
+                      <Home size={18} className="group-hover:scale-110 transition-transform" />
+                      {t('cashback.backHome')}
+                  </Link>
+                </div>
+              </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+</file>
+
 <file path="app/contact-cashback/page.tsx">
 "use client";
 
@@ -1832,17 +1980,6 @@ export default function ProjectTracker() {
 }
 </file>
 
-<file path="app/property/[id]/page.tsx">
-import PropertyDetailClient from "../../../src/components/PropertyDetailClient";
-
-// Next.js 15 : params est une Promise
-export default async function Page({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  
-  return <PropertyDetailClient id={id} />;
-}
-</file>
-
 <file path="app/super-admin/page.tsx">
 "use client";
 
@@ -2462,247 +2599,6 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
 </file>
 
-<file path="src/components/AdvancedSearch.tsx">
-"use client";
-import React, { useState, useEffect, useMemo } from "react";
-import { RotateCcw, Search, Map, Home, Hash, Bed, X } from "lucide-react";
-
-interface AdvancedSearchProps {
-  onSearch: (filters: any) => void;
-  properties: any[];
-  activeFilters: any;
-  onClose?: () => void;
-}
-
-export default function AdvancedSearch({
-  onSearch,
-  properties = [],
-  activeFilters,
-  onClose,
-}: AdvancedSearchProps) {
-  const [localFilters, setLocalFilters] = useState(activeFilters);
-
-  useEffect(() => {
-    setLocalFilters(activeFilters);
-  }, [activeFilters]);
-
-  // --- LOGIQUE DE DONNÉES ---
-  const regions = ["Costa Blanca", "Costa Calida", "Costa del Sol", "Costa Almeria"];
-  
-  const types = useMemo(() => {
-    const translation: { [key: string]: string } = {
-      villa: "Villa", apartment: "Appartement", penthouse: "Penthouse", bungalow: "Bungalow", townhouse: "Maison de ville"
-    };
-    return [...new Set(properties.map((p) => p.type))]
-      .filter((t) => t && t.toLowerCase() !== "property")
-      .map((t) => ({ id: t.toLowerCase(), label: translation[t.toLowerCase()] || t }));
-  }, [properties]);
-
-  // --- ACTIONS ---
-  const handleSearchClick = () => {
-    const cleanedFilters = {
-      ...localFilters,
-      reference: localFilters.reference?.trim().toLowerCase() || "",
-      region: localFilters.region || "",
-      type: localFilters.type || "",
-      beds: localFilters.beds || "",
-      minPrice: localFilters.minPrice || "100000",
-      maxPrice: localFilters.maxPrice || "75000000"
-    };
-    onSearch(cleanedFilters);
-    if (onClose) onClose();
-  };
-
-  const reset = () => {
-    const empty = { 
-      region: "", town: "", type: "", beds: "", 
-      minPrice: "100000", maxPrice: "75000000", reference: "" 
-    };
-    setLocalFilters(empty);
-    onSearch(empty);
-  };
-
-  return (
-    <div className="max-w-7xl mx-auto px-4 relative z-[100]">
-      <style jsx>{`
-        .custom-slider {
-          -webkit-appearance: none;
-          width: 100%;
-          height: 4px;
-          background: #334155;
-          border-radius: 5px;
-          outline: none;
-        }
-        .custom-slider::-webkit-slider-thumb {
-          -webkit-appearance: none;
-          appearance: none;
-          width: 20px;
-          height: 20px;
-          background: #D4AF37;
-          border-radius: 50%;
-          cursor: pointer;
-          border: 2px solid white;
-          box-shadow: 0 0 10px rgba(212, 175, 55, 0.4);
-        }
-      `}</style>
-
-      {/* Bouton Fermer */}
-      {onClose && (
-        <button 
-          onClick={onClose}
-          className="absolute -top-6 -right-2 md:right-4 w-12 h-12 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-full flex items-center justify-center shadow-2xl hover:bg-[#D4AF37] hover:text-white transition-all z-[110] border border-slate-200 dark:border-slate-700"
-        >
-          <X size={24} />
-        </button>
-      )}
-
-      {/* Container Principal */}
-      <div className="bg-white dark:bg-[#0f172a] rounded-[2.5rem] shadow-[0_30px_100px_rgba(0,0,0,0.4)] border border-slate-100 dark:border-slate-800 p-3 relative">
-        
-        <div className="w-12 h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full mx-auto mt-2 mb-4 lg:hidden" />
-
-        {/* LIGNE 1 : RÉFÉRENCE */}
-        <div className="border-b border-slate-50 dark:border-slate-800/50">
-          <div className="p-6 lg:p-8">
-            <label className="flex items-center gap-2 text-[9px] uppercase font-black tracking-[0.2em] text-[#D4AF37] mb-2">
-              <Hash size={12} /> Référence Propriété
-            </label>
-            <input 
-              type="text"
-              placeholder="Ex: REF-1234"
-              value={localFilters.reference || ""}
-              onChange={(e) => setLocalFilters({ ...localFilters, reference: e.target.value })}
-              className="w-full bg-transparent text-lg font-serif italic outline-none text-slate-900 dark:text-white placeholder:text-slate-300 dark:placeholder:text-slate-600"
-            />
-          </div>
-        </div>
-
-        {/* LIGNE 2 : CRITÈRES */}
-        <div className="flex flex-col lg:flex-row items-stretch">
-          <div className="flex-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-0">
-            
-            {/* RÉGION */}
-            <div className="p-6 border-b md:border-b-0 md:border-r border-slate-50 dark:border-slate-800/50">
-              <label className="flex items-center gap-2 text-[9px] uppercase font-black tracking-[0.2em] text-slate-400 mb-2">
-                <Map size={12} /> Région
-              </label>
-              <select 
-                value={localFilters.region || ""}
-                onChange={(e) => setLocalFilters({ ...localFilters, region: e.target.value })}
-                className="w-full bg-transparent text-[13px] font-bold outline-none cursor-pointer appearance-none uppercase text-slate-900 dark:text-white"
-              >
-                <option value="" className="dark:bg-[#0f172a]">Espagne (Toutes)</option>
-                {regions.map(r => <option key={r} value={r} className="dark:bg-[#0f172a]">{r}</option>)}
-              </select>
-            </div>
-
-            {/* TYPE */}
-            <div className="p-6 border-b md:border-b-0 md:border-r border-slate-50 dark:border-slate-800/50">
-              <label className="flex items-center gap-2 text-[9px] uppercase font-black tracking-[0.2em] text-slate-400 mb-2">
-                <Home size={12} /> Type
-              </label>
-              <select 
-                value={localFilters.type || ""}
-                onChange={(e) => setLocalFilters({ ...localFilters, type: e.target.value })}
-                className="w-full bg-transparent text-[13px] font-bold outline-none cursor-pointer appearance-none uppercase text-slate-900 dark:text-white"
-              >
-                <option value="" className="dark:bg-[#0f172a]">Indifférent</option>
-                {types.map(t => <option key={t.id} value={t.id} className="dark:bg-[#0f172a]">{t.label}</option>)}
-              </select>
-            </div>
-
-            {/* PRIX MIN */}
-            <div className="p-6 border-b md:border-b-0 md:border-r border-slate-50 dark:border-slate-800/50">
-              <div className="flex justify-between items-center mb-3">
-                <label className="text-[9px] uppercase font-black tracking-[0.2em] text-slate-400">Min</label>
-                <span className="text-[11px] font-bold text-slate-900 dark:text-[#D4AF37]">
-                  {parseInt(localFilters.minPrice || "100000").toLocaleString()} €
-                </span>
-              </div>
-              <input 
-                type="range"
-                min="100000"
-                max="2000000"
-                step="50000"
-                value={localFilters.minPrice || "100000"}
-                onChange={(e) => setLocalFilters({ ...localFilters, minPrice: e.target.value })}
-                className="custom-slider"
-              />
-            </div>
-
-            {/* PRIX MAX */}
-            <div className="p-6 border-b md:border-b-0 md:border-r border-slate-50 dark:border-slate-800/50">
-              <div className="flex justify-between items-center mb-3">
-                <label className="text-[9px] uppercase font-black tracking-[0.2em] text-slate-400">Max</label>
-                <span className="text-[11px] font-bold text-slate-900 dark:text-[#D4AF37]">
-                  {parseInt(localFilters.maxPrice || "5000000").toLocaleString()} €
-                </span>
-              </div>
-              <input 
-                type="range"
-                min="200000"
-                max="5000000"
-                step="50000"
-                value={localFilters.maxPrice || "5000000"}
-                onChange={(e) => setLocalFilters({ ...localFilters, maxPrice: e.target.value })}
-                className="custom-slider"
-              />
-            </div>
-
-            {/* CHAMBRES */}
-            <div className="p-6">
-              <label className="flex items-center gap-2 text-[9px] uppercase font-black tracking-[0.2em] text-slate-400 mb-3">
-                <Bed size={12} /> Chambres
-              </label>
-              <div className="flex gap-1">
-                {[2, 3, 4, 5].map((n) => (
-                  <button
-                    key={n}
-                    type="button"
-                    onClick={() => setLocalFilters({ ...localFilters, beds: n.toString() })}
-                    className={`flex-1 h-8 rounded-lg text-[10px] font-black transition-all ${
-                      localFilters.beds === n.toString() 
-                      ? "bg-[#D4AF37] text-white" 
-                      : "bg-slate-50 dark:bg-slate-800 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700"
-                    }`}
-                  >
-                    {n}+
-                  </button>
-                ))}
-              </div>
-            </div>
-
-          </div>
-
-          {/* BOUTON RECHERCHE */}
-          <div className="p-4 flex items-center justify-center lg:bg-slate-50/30 dark:lg:bg-slate-800/30 rounded-r-[2.5rem]">
-            <button 
-              onClick={handleSearchClick}
-              className="w-full lg:w-20 h-16 lg:h-20 bg-slate-950 dark:bg-[#D4AF37] text-white dark:text-slate-900 rounded-3xl flex items-center justify-center hover:scale-105 transition-all duration-300 shadow-xl"
-            >
-              <Search size={24} strokeWidth={2.5} />
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* FOOTER */}
-      <div className="mt-6 flex justify-between items-center px-8">
-        <p className="text-[10px] text-slate-400 dark:text-slate-500 font-medium italic">
-          Collection Amaru • Sélection Exclusive
-        </p>
-        <button 
-          onClick={reset}
-          className="flex items-center gap-2 text-[10px] uppercase font-bold text-slate-400 hover:text-red-500 tracking-[0.2em] transition-colors"
-        >
-          <RotateCcw size={12} /> Réinitialiser
-        </button>
-      </div>
-    </div>
-  );
-}
-</file>
-
 <file path="src/components/CashbackForm.tsx">
 "use client";
 
@@ -3297,6 +3193,80 @@ export const config = {
       "tags": [],
       "files": []
     }
+  }
+}
+</file>
+
+<file path="app/api/properties/route.ts">
+import { createClient } from '@supabase/supabase-js';
+import { NextResponse } from 'next/server';
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
+
+export const dynamic = 'force-dynamic';
+
+export async function GET(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    
+    // 1. Paramètres de langue
+    const lang = searchParams.get('lang') || 'fr';
+    const supportedLangs = ['fr', 'en', 'es', 'nl', 'pl', 'ar'];
+    const selectedLang = supportedLangs.includes(lang) ? lang : 'fr';
+
+    // 2. Nouveaux paramètres de filtrage admin
+    const minCommission = searchParams.get('minCommission');
+    const excludedDevelopments = searchParams.get('excluded'); // Format attendu: "Promotion A,Promotion B"
+
+    // Initialisation de la requête Supabase
+    let query = supabase
+      .from('villas')
+      .select('*')
+      .eq('is_excluded', false); // On exclut d'office les biens marqués "is_excluded" manuellement
+
+    // 3. Application du filtre de commission minimale
+    if (minCommission) {
+      const minCommValue = parseFloat(minCommission);
+      if (!isNaN(minCommValue)) {
+        query = query.gte('commission_quantity', minCommValue);
+      }
+    }
+
+    // 4. Application du filtre d'exclusion par nom de promotion/promoteur
+    if (excludedDevelopments) {
+      const excludedList = excludedDevelopments.split(',').map(s => s.trim());
+      if (excludedList.length > 0) {
+        query = query.not('development_name', 'in', `(${excludedList.join(',')})`);
+      }
+    }
+
+    const { data: properties, error } = await query.order('price', { ascending: true });
+
+    if (error) {
+      console.error("Erreur Supabase:", error.message);
+      return NextResponse.json({ error: "Erreur base de données" }, { status: 500 });
+    }
+
+    // 5. Transformation pour renvoyer les champs dans la bonne langue
+    const formatted = properties.map((p: any) => ({
+      ...p,
+      titre: p[`titre_${selectedLang}`] || p.titre_fr,
+      description: p[`description_${selectedLang}`] || p.description_fr,
+      
+      // Nettoyage des champs linguistiques bruts pour alléger le JSON
+      titre_fr: undefined, titre_en: undefined, titre_es: undefined, 
+      titre_nl: undefined, titre_pl: undefined, titre_ar: undefined,
+      description_fr: undefined, description_en: undefined, description_es: undefined, 
+      description_nl: undefined, description_pl: undefined, description_ar: undefined,
+    }));
+
+    return NextResponse.json(formatted);
+  } catch (error) {
+    console.error("Erreur API Properties:", error);
+    return NextResponse.json([], { status: 500 });
   }
 }
 </file>
@@ -36508,396 +36478,256 @@ export default function AdminDashboard() {
 </files>
 </file>
 
-<file path="src/components/ContactForm.tsx">
+<file path="src/components/AdvancedSearch.tsx">
 "use client";
+import React, { useState, useEffect, useMemo } from "react";
+import { RotateCcw, Search, Map, Home, Hash, Bed, X } from "lucide-react";
 
-import React, { useState } from "react";
-import { Send, CheckCircle } from "lucide-react";
-
-interface ContactFormProps {
-  agency: {
-    id: string;
-    package_level: string;
-    name: string;
-  };
-  propertyRef?: string; // Optionnel : l'ID de la villa si on est sur une fiche produit
+interface AdvancedSearchProps {
+  onSearch: (filters: any) => void;
+  properties: any[];
+  activeFilters: any;
+  onClose?: () => void;
+  isLight?: boolean; // AJOUTÉ : Pour corriger l'erreur de build TypeScript
 }
 
-export default function ContactForm({ agency, propertyRef }: ContactFormProps) {
-  const [status, setStatus] = useState<"idle" | "sending" | "success">("idle");
-  const isLight = agency.package_level === "light";
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setStatus("sending");
-
-    // Simulation de l'envoi vers ton Zoho / API
-    // Plus tard, on remplacera par ton URL de Webform Zoho
-    setTimeout(() => setStatus("success"), 1500);
-  };
-
-  if (status === "success") {
-    return (
-      <div className="p-8 text-center bg-green-50 rounded-2xl border border-green-100">
-        <CheckCircle className="mx-auto text-green-500 mb-4" size={40} />
-        <h3 className="text-xl font-serif italic text-green-900">Message envoyé</h3>
-        <p className="text-sm text-green-700 mt-2">Nous reviendrons vers vous rapidement.</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className={`p-8 rounded-[2.5rem] border ${isLight ? "bg-white border-slate-100 shadow-sm" : "bg-white/5 border-white/10 backdrop-blur-md"}`}>
-      <h3 className={`text-2xl font-serif italic mb-6 ${isLight ? "text-slate-900" : "text-white"}`}>
-        {isLight ? "Demander des informations" : "Contacter un Expert Prestige"}
-      </h3>
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {/* --- CHAMPS VISIBLES --- */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <input 
-            type="text" name="name" required placeholder="Votre nom"
-            className={`w-full p-4 rounded-xl outline-none border transition-all ${isLight ? "bg-slate-50 border-slate-200 focus:border-black" : "bg-black/20 border-white/10 text-white focus:border-[#D4AF37]"}`}
-          />
-          <input 
-            type="email" name="email" required placeholder="Votre email"
-            className={`w-full p-4 rounded-xl outline-none border transition-all ${isLight ? "bg-slate-50 border-slate-200 focus:border-black" : "bg-black/20 border-white/10 text-white focus:border-[#D4AF37]"}`}
-          />
-        </div>
-
-        <textarea 
-          name="message" rows={4} placeholder="Comment pouvons-nous vous aider ?"
-          className={`w-full p-4 rounded-xl outline-none border transition-all ${isLight ? "bg-slate-50 border-slate-200 focus:border-black" : "bg-black/20 border-white/10 text-white focus:border-[#D4AF37]"}`}
-        ></textarea>
-
-        {/* --- CHAMPS INVISIBLES (LE PONT ZOHO) --- */}
-        {/* Ces champs permettent à ton CRM de trier les leads automatiquement */}
-        <input type="hidden" name="zc_gad" value="" /> {/* Pour le tracking Zoho */}
-        <input type="hidden" name="agency_id" value={agency.id} />
-        <input type="hidden" name="source_package" value={agency.package_level} />
-        {propertyRef && <input type="hidden" name="property_id" value={propertyRef} />}
-
-        <button 
-          type="submit" 
-          disabled={status === "sending"}
-          className={`w-full py-5 rounded-2xl font-bold uppercase text-[10px] tracking-widest flex items-center justify-center gap-3 transition-all ${
-            isLight 
-            ? "bg-black text-white hover:bg-slate-800" 
-            : "bg-[#D4AF37] text-black hover:bg-white"
-          }`}
-        >
-          {status === "sending" ? "Envoi en cours..." : "Envoyer la demande"}
-          <Send size={14} />
-        </button>
-      </form>
-    </div>
-  );
-}
-</file>
-
-<file path="src/components/Footer.tsx">
-"use client";
-
-import React from "react";
-import { Instagram, Linkedin, Facebook, MapPin, Mail, Phone } from "lucide-react";
-import { useSearchParams } from "next/navigation";
-import { useTranslation } from "@/contexts/I18nContext";
-import Link from "next/link";
-
-// --- DÉFINITION DU COMPOSANT LOGO SVG ---
-const DataHomeLogo = ({ className }: { className?: string }) => (
-  <svg 
-    viewBox="0 0 150 35" 
-    fill="none" 
-    xmlns="http://www.w3.org/2000/svg" 
-    className={className}
-  >
-    <path d="M15 12L20 5L25 12H15Z" fill="currentColor" />
-    <text 
-      x="10" 
-      y="28" 
-      fontFamily="sans-serif" 
-      fontSize="22" 
-      fontWeight="300" 
-      fill="currentColor" 
-      letterSpacing="-0.02em"
-    >
-      data home
-    </text>
-  </svg>
-);
-
-export default function Footer() {
-  const { t } = useTranslation();
-  const searchParams = useSearchParams();
-
-  // --- DETECTION DU MODE LIGHT ---
-  const isLight = searchParams.get('pack') === 'light' || 
-                 (typeof document !== 'undefined' && document.documentElement.getAttribute('data-package') === 'light');
-
-  // Utilitaire pour propager le mode light sur les liens du footer
-  const getUrl = (path: string) => isLight ? `${path}${path.includes('?') ? '&' : '?'}pack=light` : path;
-
-  return (
-    <footer className="bg-[#020617] text-white pt-32 pb-12 px-6 lg:px-10 border-t border-white/5">
-      <div className="max-w-7xl mx-auto">
-        <div className={`grid grid-cols-1 md:grid-cols-2 ${isLight ? 'lg:grid-cols-3' : 'lg:grid-cols-4'} gap-16 lg:gap-12 mb-24`}>
-          
-          {/* LOGO & BRAND DESCRIPTION */}
-          <div className="col-span-1 space-y-8">
-            <div className="space-y-2">
-               <DataHomeLogo className="h-10 md:h-12 w-auto text-white transition-colors hover:text-[#D4AF37]" />
-               <span className="text-[#D4AF37] font-sans font-light text-[10px] tracking-[0.3em] uppercase block mt-2 ml-1">
-                 {isLight ? "Signature Real Estate" : t('footer.excellence')}
-               </span>
-            </div>
-            <p className="text-slate-500 font-light leading-relaxed text-sm max-w-xs italic">
-              {t('footer.description')}
-            </p>
-            <div className="flex gap-6 mt-10">
-              <Instagram size={20} className="text-[#D4AF37] hover:text-white cursor-pointer transition-all duration-300" />
-              <Linkedin size={20} className="text-[#D4AF37] hover:text-white cursor-pointer transition-all duration-300" />
-              <Facebook size={20} className="text-[#D4AF37] hover:text-white cursor-pointer transition-all duration-300" />
-            </div>
-          </div>
-
-          {/* NAVIGATION COLLECTIONS */}
-          <div>
-            <h4 className="text-[10px] uppercase tracking-[0.5em] font-bold mb-10 text-[#D4AF37]">
-              {t('footer.collections')}
-            </h4>
-            <ul className="space-y-5 text-[13px] text-slate-400 font-light">
-              <li><Link href={getUrl("/")} className="hover:text-[#D4AF37] transition-colors duration-300">{t('footer.villasSignature')}</Link></li>
-              <li><Link href={getUrl("/")} className="hover:text-[#D4AF37] transition-colors duration-300">{t('footer.domainsPrestige')}</Link></li>
-              <li><Link href={getUrl("/")} className="hover:text-[#D4AF37] transition-colors duration-300">{t('footer.newDevelopments')}</Link></li>
-              
-              {/* On cache l'accès privé en mode Light */}
-              {!isLight && (
-                <li>
-                  <Link href="/login" className="text-white hover:text-[#D4AF37] transition-colors duration-300 italic flex items-center gap-2">
-                    <span className="w-1 h-1 bg-[#D4AF37] rounded-full"></span>
-                    {t('footer.privateClientAccess')}
-                  </Link>
-                </li>
-              )}
-            </ul>
-          </div>
-
-          {/* ESPACE PROFESSIONNEL (MASQUÉ EN MODE LIGHT) */}
-          {!isLight && (
-            <div>
-              <h4 className="text-[10px] uppercase tracking-[0.5em] font-bold mb-10 text-slate-500">
-                {t('footer.proSpace')}
-              </h4>
-              <ul className="space-y-5 text-[13px] text-slate-400 font-light">
-                <li>
-                  <Link href="/admin-chantier" className="hover:text-white transition-all flex items-center gap-3 group">
-                    <span className="w-2 h-[1px] bg-[#D4AF37] group-hover:w-4 transition-all"></span>
-                    {t('footer.siteTracking')}
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/login" className="hover:text-white transition-all flex items-center gap-3 group">
-                    <span className="w-2 h-[1px] bg-slate-700 group-hover:bg-[#D4AF37] group-hover:w-4 transition-all"></span>
-                    {t('footer.supervisor')}
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/login" className="hover:text-white transition-all flex items-center gap-3 group">
-                    <span className="w-2 h-[1px] bg-slate-700 group-hover:bg-[#D4AF37] group-hover:w-4 transition-all"></span>
-                    {t('footer.partnerPortal')}
-                  </Link>
-                </li>
-              </ul>
-            </div>
-          )}
-
-          {/* CONTACT & HQ */}
-          <div>
-            <h4 className="text-[10px] uppercase tracking-[0.5em] font-bold mb-10 text-slate-500">
-              {t('footer.socialHeadquarters')}
-            </h4>
-            <div className="space-y-6 text-[13px] text-slate-400 font-light">
-              <div className="flex items-start gap-4">
-                <MapPin size={18} className="text-[#D4AF37] mt-1 flex-shrink-0 opacity-80" />
-                <p className="leading-relaxed">{t('footer.address')}<br /><span className="text-white font-medium">{t('footer.city')}</span></p>
-              </div>
-              <div className="flex items-center gap-4">
-                <Mail size={18} className="text-[#D4AF37] flex-shrink-0 opacity-80" />
-                <p className="hover:text-white transition-colors cursor-pointer">{t('footer.email')}</p>
-              </div>
-              <div className="flex items-center gap-4">
-                <Phone size={18} className="text-[#D4AF37] flex-shrink-0 opacity-80" />
-                <p className="text-white font-medium">{t('footer.phone')}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* BOTTOM BAR */}
-        <div className="border-t border-white/5 pt-12 flex flex-col md:flex-row justify-between items-center gap-8">
-          <div className="flex flex-col md:flex-row items-center gap-10">
-              <p className="text-[9px] uppercase tracking-[0.3em] text-slate-600">
-                © 2026 {isLight ? "Hannibal Villas" : "Data Home Estates"}
-              </p>
-              <div className="flex gap-8 text-[9px] uppercase tracking-[0.3em] text-slate-500 font-bold">
-                <Link href={getUrl("#")} className="hover:text-[#D4AF37] transition-all">{t('footer.privacy')}</Link>
-                <Link href={getUrl("#")} className="hover:text-[#D4AF37] transition-all">{t('footer.legal')}</Link>
-              </div>
-          </div>
-          
-          <div className="flex items-center gap-3">
-            <span className={`w-2 h-2 ${isLight ? 'bg-white' : 'bg-[#D4AF37]'} rounded-full animate-pulse`}></span>
-            <p className="text-[9px] font-black uppercase tracking-[0.4em] text-slate-800">
-              {isLight ? "Limited Edition" : t('footer.eliteEdition')}
-            </p>
-          </div>
-        </div>
-      </div>
-    </footer>
-  );
-}
-</file>
-
-<file path="src/components/PropertyCard.tsx">
-"use client";
-
-import React, { useState, useEffect } from 'react';
-import { Bed, Bath, Waves, Car, Maximize, Map, ChevronRight, Heart } from 'lucide-react';
-import Link from 'next/link';
-import { useTheme } from "next-themes";
-import { useTranslation } from "@/contexts/I18nContext";
-
-// Ajout de isLight dans l'interface des Props
-export default function PropertyCard({ property, isLight = false }: { property: any, isLight?: boolean }) {
-  const { resolvedTheme } = useTheme();
-  const { t } = useTranslation();
-  const [mounted, setMounted] = useState(false);
-  const priceFormatted = new Intl.NumberFormat('de-DE').format(property.price || property.prix || 0);
+export default function AdvancedSearch({
+  onSearch,
+  properties = [],
+  activeFilters,
+  onClose,
+  isLight = false, // AJOUTÉ : Récupération de la prop
+}: AdvancedSearchProps) {
+  const [localFilters, setLocalFilters] = useState(activeFilters);
 
   useEffect(() => {
-    setMounted(true);
-  }, []);
+    setLocalFilters(activeFilters);
+  }, [activeFilters]);
 
-  const translate = (key: string, params?: Record<string, string>) => {
-    let text = t(key);
-    if (params) {
-      Object.entries(params).forEach(([k, v]) => {
-        text = text.replace(new RegExp(`\\{${k}\\}`, 'g'), v);
-      });
-    }
-    return text;
+  // --- LOGIQUE DE DONNÉES ---
+  const regions = ["Costa Blanca", "Costa Calida", "Costa del Sol", "Costa Almeria"];
+  
+  const types = useMemo(() => {
+    const translation: { [key: string]: string } = {
+      villa: "Villa", apartment: "Appartement", penthouse: "Penthouse", bungalow: "Bungalow", townhouse: "Maison de ville"
+    };
+    const safeProps = Array.isArray(properties) ? properties : [];
+    return [...new Set(safeProps.map((p) => p.type))]
+      .filter((t) => t && t.toLowerCase() !== "property")
+      .map((t) => ({ id: t.toLowerCase(), label: translation[t.toLowerCase()] || t }));
+  }, [properties]);
+
+  // --- ACTIONS ---
+  const handleSearchClick = () => {
+    const cleanedFilters = {
+      ...localFilters,
+      reference: localFilters.reference?.trim().toLowerCase() || "",
+      region: localFilters.region || "",
+      type: localFilters.type || "",
+      beds: localFilters.beds || "",
+      minPrice: localFilters.minPrice || "100000",
+      maxPrice: localFilters.maxPrice || "75000000"
+    };
+    onSearch(cleanedFilters);
+    if (onClose) onClose();
   };
 
-  // Construction de l'URL avec propagation du mode Light
-  const detailUrl = `/property/${property.id_externe || property.id}${isLight ? '?pack=light' : ''}`;
+  const reset = () => {
+    const empty = { 
+      region: "", town: "", type: "", beds: "", 
+      minPrice: "100000", maxPrice: "75000000", reference: "" 
+    };
+    setLocalFilters(empty);
+    onSearch(empty);
+  };
+
+  // --- STYLES DYNAMIQUES ---
+  const cardBg = isLight ? "bg-white" : "bg-white dark:bg-[#0f172a]";
+  const textColor = isLight ? "text-slate-900" : "text-slate-900 dark:text-white";
+  const borderColor = isLight ? "border-slate-100" : "border-slate-100 dark:border-slate-800";
+  const sliderTrack = isLight ? "bg-slate-200" : "bg-slate-200 dark:bg-slate-700";
 
   return (
-    <Link 
-      href={detailUrl} 
-      className="group flex flex-col w-full transition-all duration-500"
-    >
-      {/* IMAGE & BADGES */}
-      <div className="relative h-[380px] overflow-hidden rounded-none border border-slate-200 dark:border-white/5 bg-slate-100 dark:bg-slate-900">
-        <img 
-          src={property.images?.[0] || "/placeholder-house.jpg"} 
-          alt={property.titre}
-          className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 rounded-none"
-        />
-        
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-80" />
+    <div className="max-w-7xl mx-auto px-4 relative z-[100]">
+      <style jsx>{`
+        .custom-slider {
+          -webkit-appearance: none;
+          width: 100%;
+          height: 4px;
+          background: ${isLight ? '#e2e8f0' : '#334155'};
+          border-radius: 5px;
+          outline: none;
+        }
+        .custom-slider::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          appearance: none;
+          width: 20px;
+          height: 20px;
+          background: #D4AF37;
+          border-radius: 50%;
+          cursor: pointer;
+          border: 2px solid white;
+          box-shadow: 0 0 10px rgba(212, 175, 55, 0.4);
+        }
+      `}</style>
 
-        <div className="absolute bottom-6 left-6 flex flex-wrap gap-2 max-w-[70%]">
-          {/* En mode Light, on met le badge en noir pour plus de sobriété */}
-          <span className={`${isLight ? 'bg-black text-white' : 'bg-[#D4AF37] text-black'} text-[9px] font-black px-4 py-2 rounded-none uppercase tracking-widest shadow-lg transition-colors`}>
-            {translate('propertyCard.ref', { ref: property.ref || property.id_externe })}
-          </span>
-          <span className="bg-white/10 backdrop-blur-md text-white border border-white/20 text-[8px] font-bold px-4 py-2 rounded-none uppercase tracking-[0.2em]">
-            {property.type ? property.type : t('propertyCard.exclusivity')}
-          </span>
+      {/* Bouton Fermer */}
+      {onClose && (
+        <button 
+          onClick={onClose}
+          className={`absolute -top-6 -right-2 md:right-4 w-12 h-12 rounded-full flex items-center justify-center shadow-2xl hover:bg-[#D4AF37] hover:text-white transition-all z-[110] border ${
+            isLight ? "bg-white text-slate-900 border-slate-200" : "bg-white dark:bg-slate-800 text-slate-900 dark:text-white border-slate-200 dark:border-slate-700"
+          }`}
+        >
+          <X size={24} />
+        </button>
+      )}
+
+      {/* Container Principal */}
+      <div className={`${cardBg} rounded-[2.5rem] shadow-[0_30px_100px_rgba(0,0,0,0.2)] border ${borderColor} p-3 relative`}>
+        
+        <div className={`w-12 h-1.5 rounded-full mx-auto mt-2 mb-4 lg:hidden ${isLight ? 'bg-slate-100' : 'bg-slate-100 dark:bg-slate-800'}`} />
+
+        {/* LIGNE 1 : RÉFÉRENCE */}
+        <div className={`border-b ${isLight ? 'border-slate-50' : 'border-slate-50 dark:border-slate-800/50'}`}>
+          <div className="p-6 lg:p-8">
+            <label className="flex items-center gap-2 text-[9px] uppercase font-black tracking-[0.2em] text-[#D4AF37] mb-2">
+              <Hash size={12} /> Référence Propriété
+            </label>
+            <input 
+              type="text"
+              placeholder="Ex: REF-1234"
+              value={localFilters.reference || ""}
+              onChange={(e) => setLocalFilters({ ...localFilters, reference: e.target.value })}
+              className={`w-full bg-transparent text-lg font-serif italic outline-none ${textColor} placeholder:text-slate-300`}
+            />
+          </div>
         </div>
 
-        <div className="absolute bottom-6 right-6 flex flex-col gap-2">
-          <button className="bg-white/10 backdrop-blur-md p-3 rounded-none border border-white/20 text-white hover:bg-[#D4AF37] hover:text-black transition-all duration-300">
-            <Heart size={18} strokeWidth={1.5} />
-          </button>
-          <div className={`${isLight ? 'bg-black text-white' : 'bg-[#D4AF37] text-black'} p-3 rounded-none shadow-xl transform group-hover:translate-x-1 transition-all`}>
-            <ChevronRight size={20} strokeWidth={2.5} />
+        {/* LIGNE 2 : CRITÈRES */}
+        <div className="flex flex-col lg:flex-row items-stretch">
+          <div className="flex-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-0">
+            
+            {/* RÉGION */}
+            <div className={`p-6 border-b md:border-b-0 md:border-r ${isLight ? 'border-slate-50' : 'border-slate-50 dark:border-slate-800/50'}`}>
+              <label className="flex items-center gap-2 text-[9px] uppercase font-black tracking-[0.2em] text-slate-400 mb-2">
+                <Map size={12} /> Région
+              </label>
+              <select 
+                value={localFilters.region || ""}
+                onChange={(e) => setLocalFilters({ ...localFilters, region: e.target.value })}
+                className={`w-full bg-transparent text-[13px] font-bold outline-none cursor-pointer appearance-none uppercase ${textColor}`}
+              >
+                <option value="" className={isLight ? "" : "dark:bg-[#0f172a]"}>Espagne (Toutes)</option>
+                {regions.map(r => <option key={r} value={r} className={isLight ? "" : "dark:bg-[#0f172a]"}>{r}</option>)}
+              </select>
+            </div>
+
+            {/* TYPE */}
+            <div className={`p-6 border-b md:border-b-0 md:border-r ${isLight ? 'border-slate-50' : 'border-slate-50 dark:border-slate-800/50'}`}>
+              <label className="flex items-center gap-2 text-[9px] uppercase font-black tracking-[0.2em] text-slate-400 mb-2">
+                <Home size={12} /> Type
+              </label>
+              <select 
+                value={localFilters.type || ""}
+                onChange={(e) => setLocalFilters({ ...localFilters, type: e.target.value })}
+                className={`w-full bg-transparent text-[13px] font-bold outline-none cursor-pointer appearance-none uppercase ${textColor}`}
+              >
+                <option value="" className={isLight ? "" : "dark:bg-[#0f172a]"}>Indifférent</option>
+                {types.map(t => <option key={t.id} value={t.id} className={isLight ? "" : "dark:bg-[#0f172a]"}>{t.label}</option>)}
+              </select>
+            </div>
+
+            {/* PRIX MIN */}
+            <div className={`p-6 border-b md:border-b-0 md:border-r ${isLight ? 'border-slate-50' : 'border-slate-50 dark:border-slate-800/50'}`}>
+              <div className="flex justify-between items-center mb-3">
+                <label className="text-[9px] uppercase font-black tracking-[0.2em] text-slate-400">Min</label>
+                <span className={`text-[11px] font-bold ${isLight ? 'text-slate-900' : 'text-slate-900 dark:text-[#D4AF37]'}`}>
+                  {parseInt(localFilters.minPrice || "100000").toLocaleString()} €
+                </span>
+              </div>
+              <input 
+                type="range"
+                min="100000"
+                max="2000000"
+                step="50000"
+                value={localFilters.minPrice || "100000"}
+                onChange={(e) => setLocalFilters({ ...localFilters, minPrice: e.target.value })}
+                className="custom-slider"
+              />
+            </div>
+
+            {/* PRIX MAX */}
+            <div className={`p-6 border-b md:border-b-0 md:border-r ${isLight ? 'border-slate-50' : 'border-slate-50 dark:border-slate-800/50'}`}>
+              <div className="flex justify-between items-center mb-3">
+                <label className="text-[9px] uppercase font-black tracking-[0.2em] text-slate-400">Max</label>
+                <span className={`text-[11px] font-bold ${isLight ? 'text-slate-900' : 'text-slate-900 dark:text-[#D4AF37]'}`}>
+                  {parseInt(localFilters.maxPrice || "5000000").toLocaleString()} €
+                </span>
+              </div>
+              <input 
+                type="range"
+                min="200000"
+                max="5000000"
+                step="50000"
+                value={localFilters.maxPrice || "5000000"}
+                onChange={(e) => setLocalFilters({ ...localFilters, maxPrice: e.target.value })}
+                className="custom-slider"
+              />
+            </div>
+
+            {/* CHAMBRES */}
+            <div className="p-6">
+              <label className="flex items-center gap-2 text-[9px] uppercase font-black tracking-[0.2em] text-slate-400 mb-3">
+                <Bed size={12} /> Chambres
+              </label>
+              <div className="flex gap-1">
+                {[2, 3, 4, 5].map((n) => (
+                  <button
+                    key={n}
+                    type="button"
+                    onClick={() => setLocalFilters({ ...localFilters, beds: n.toString() })}
+                    className={`flex-1 h-8 rounded-lg text-[10px] font-black transition-all ${
+                      localFilters.beds === n.toString() 
+                      ? "bg-[#D4AF37] text-white" 
+                      : `${isLight ? 'bg-slate-50 hover:bg-slate-100' : 'bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700'} text-slate-400`
+                    }`}
+                  >
+                    {n}+
+                  </button>
+                ))}
+              </div>
+            </div>
+
+          </div>
+
+          {/* BOUTON RECHERCHE */}
+          <div className={`p-4 flex items-center justify-center rounded-r-[2.5rem] ${isLight ? 'bg-slate-50/50' : 'lg:bg-slate-50/30 dark:lg:bg-slate-800/30'}`}>
+            <button 
+              onClick={handleSearchClick}
+              className={`w-full lg:w-20 h-16 lg:h-20 rounded-3xl flex items-center justify-center hover:scale-105 transition-all duration-300 shadow-xl ${
+                isLight ? "bg-black text-white" : "bg-slate-950 dark:bg-[#D4AF37] text-white dark:text-slate-900"
+              }`}
+            >
+              <Search size={24} strokeWidth={2.5} />
+            </button>
           </div>
         </div>
       </div>
 
-      {/* INFOS TITRE & PRIX */}
-      <div className="py-8 px-2">
-        <div className="flex justify-between items-start gap-4 mb-3">
-          <h3 
-            className="font-serif text-2xl text-slate-900 dark:text-white italic leading-tight flex-grow line-clamp-1"
-            style={{ color: (mounted && resolvedTheme === 'dark') ? '#ffffff' : undefined }}
-          >
-            {property.titre || property.type || t('propertyCard.fallbackTitle')}
-          </h3>
-          
-          <span className={`text-xl font-bold ${isLight ? 'text-black dark:text-white' : 'text-[#D4AF37]'} whitespace-nowrap pt-1 transition-colors`}>
-            {priceFormatted} €
-          </span>
-        </div>
-
-        <div className="flex items-center gap-2 text-slate-600 dark:text-slate-200 text-[10px] tracking-[0.3em] uppercase font-bold">
-          <span className={isLight ? 'text-black dark:text-white' : 'text-[#D4AF37]'}>●</span>
-          {property.town} <span className="opacity-30">|</span> {property.region || 'Costa Blanca'}
-        </div>
+      {/* FOOTER */}
+      <div className="mt-6 flex justify-between items-center px-8">
+        <p className={`text-[10px] font-medium italic ${isLight ? 'text-slate-400' : 'text-slate-400 dark:text-slate-500'}`}>
+          Collection Amaru • Sélection Exclusive
+        </p>
+        <button 
+          onClick={reset}
+          className="flex items-center gap-2 text-[10px] uppercase font-bold text-slate-400 hover:text-red-500 tracking-[0.2em] transition-colors"
+        >
+          <RotateCcw size={12} /> Réinitialiser
+        </button>
       </div>
-
-      {/* ICONES TECHNIQUES */}
-      <div className="grid grid-cols-3 gap-y-6 pt-6 border-t border-slate-100 dark:border-white/10">
-        
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-none bg-slate-100 dark:bg-white/5 flex items-center justify-center border border-slate-200/50 dark:border-white/10">
-            <Maximize size={14} className={isLight ? 'text-black dark:text-white' : 'text-[#D4AF37]'} />
-          </div>
-          <span className="text-[11px] font-medium text-slate-800 dark:text-slate-100">{property.surface_built || '0'} m²</span>
-        </div>
-        
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-none bg-slate-100 dark:bg-white/5 flex items-center justify-center border border-slate-200/50 dark:border-white/10">
-            <Bed size={14} className={isLight ? 'text-black dark:text-white' : 'text-[#D4AF37]'} />
-          </div>
-          <span className="text-[11px] font-medium text-slate-800 dark:text-slate-100">{property.beds || '0'} {t('propertyCard.beds')}</span>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-none bg-slate-100 dark:bg-white/5 flex items-center justify-center border border-slate-200/50 dark:border-white/10">
-            <Bath size={14} className={isLight ? 'text-black dark:text-white' : 'text-[#D4AF37]'} />
-          </div>
-          <span className="text-[11px] font-medium text-slate-800 dark:text-slate-100">{property.baths || '0'} {t('propertyCard.baths')}</span>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-none bg-slate-100 dark:bg-white/5 flex items-center justify-center border border-slate-200/50 dark:border-white/10">
-            <Waves size={14} className={isLight ? 'text-black dark:text-white' : 'text-[#D4AF37]'} />
-          </div>
-          <span className="text-[11px] font-medium text-slate-800 dark:text-slate-100 uppercase">
-            {property.pool === "Oui" ? t('propertyCard.pool') : t('propertyCard.noPool')}
-          </span>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-none bg-slate-100 dark:bg-white/5 flex items-center justify-center border border-slate-200/50 dark:border-white/10">
-            <Map size={14} className={isLight ? 'text-black dark:text-white' : 'text-[#D4AF37]'} />
-          </div>
-          <span className="text-[11px] font-medium text-slate-800 dark:text-slate-100 truncate">
-            {property.surface_plot || '0'} m² {t('propertyCard.land')}
-          </span>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-none bg-slate-100 dark:bg-white/5 flex items-center justify-center border border-slate-200/50 dark:border-white/10">
-            <Car size={14} className={isLight ? 'text-black dark:text-white' : 'text-[#D4AF37]'} />
-          </div>
-          <span className="text-[11px] font-medium text-slate-800 dark:text-slate-100">{t('propertyCard.garage')}</span>
-        </div>
-      </div>
-    </Link>
+    </div>
   );
 }
 </file>
@@ -37245,225 +37075,115 @@ export default {
 }
 </file>
 
-<file path="app/api/properties/route.ts">
-import { createClient } from '@supabase/supabase-js';
+<file path="app/api/sync-properties/route.ts">
 import { NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
+import xml2js from 'xml2js';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-export const dynamic = 'force-dynamic';
+const SOURCES = [
+  { defaultRegion: "Costa Blanca", url: "https://medianewbuild.com/file/hh-media-bucket/agents/6d5cb68a-3636-4095-b0ce-7dc9ec2df2d2/feed_blanca_calida.xml" },
+  { defaultRegion: "Costa del Sol", url: "https://medianewbuild.com/file/hh-media-bucket/agents/6d5cb68a-3636-4095-b0ce-7dc9ec2df2d2/feed_sol.xml" }
+];
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
-    const { searchParams } = new URL(request.url);
-    
-    // 1. Paramètres de langue
-    const lang = searchParams.get('lang') || 'fr';
-    const supportedLangs = ['fr', 'en', 'es', 'nl', 'pl', 'ar'];
-    const selectedLang = supportedLangs.includes(lang) ? lang : 'fr';
+    let totalSynced = 0;
+    const languages = ['fr', 'en', 'es', 'nl', 'pl', 'ar'];
 
-    // 2. Nouveaux paramètres de filtrage admin
-    const minCommission = searchParams.get('minCommission');
-    const excludedDevelopments = searchParams.get('excluded'); // Format attendu: "Promotion A,Promotion B"
-
-    // Initialisation de la requête Supabase
-    let query = supabase
-      .from('villas')
-      .select('*')
-      .eq('is_excluded', false); // On exclut d'office les biens marqués "is_excluded" manuellement
-
-    // 3. Application du filtre de commission minimale
-    if (minCommission) {
-      const minCommValue = parseFloat(minCommission);
-      if (!isNaN(minCommValue)) {
-        query = query.gte('commission_quantity', minCommValue);
-      }
-    }
-
-    // 4. Application du filtre d'exclusion par nom de promotion/promoteur
-    if (excludedDevelopments) {
-      const excludedList = excludedDevelopments.split(',').map(s => s.trim());
-      if (excludedList.length > 0) {
-        query = query.not('development_name', 'in', `(${excludedList.join(',')})`);
-      }
-    }
-
-    const { data: properties, error } = await query.order('price', { ascending: true });
-
-    if (error) {
-      console.error("Erreur Supabase:", error.message);
-      return NextResponse.json({ error: "Erreur base de données" }, { status: 500 });
-    }
-
-    // 5. Transformation pour renvoyer les champs dans la bonne langue
-    const formatted = properties.map((p: any) => ({
-      ...p,
-      titre: p[`titre_${selectedLang}`] || p.titre_fr,
-      description: p[`description_${selectedLang}`] || p.description_fr,
+    for (const source of SOURCES) {
+      const response = await fetch(source.url, { cache: 'no-store' });
+      const xmlText = await response.text();
       
-      // Nettoyage des champs linguistiques bruts pour alléger le JSON
-      titre_fr: undefined, titre_en: undefined, titre_es: undefined, 
-      titre_nl: undefined, titre_pl: undefined, titre_ar: undefined,
-      description_fr: undefined, description_en: undefined, description_es: undefined, 
-      description_nl: undefined, description_pl: undefined, description_ar: undefined,
-    }));
+      const parser = new xml2js.Parser({ explicitArray: false, mergeAttrs: true, trim: true });
+      const result = await parser.parseStringPromise(xmlText);
+      const rootKey = Object.keys(result)[0];
+      let properties = result[rootKey].property || [];
+      if (!Array.isArray(properties)) properties = [properties];
 
-    return NextResponse.json(formatted);
-  } catch (error) {
-    console.error("Erreur API Properties:", error);
-    return NextResponse.json([], { status: 500 });
+      const updates = properties.map((p: any) => {
+        const surf = p.surface_area || {};
+        const loc = p.location || {};
+        const dists = p.distances || {}; 
+        
+        // Gestion des images (extraction de l'URL si objet ou string)
+        let imagesArray: string[] = [];
+        if (p.images && p.images.image) {
+          const rawImages = Array.isArray(p.images.image) ? p.images.image : [p.images.image];
+          imagesArray = rawImages
+            .map((img: any) => (typeof img === 'string' ? img : img.url))
+            .filter((u: any) => typeof u === 'string');
+        }
+
+        // Objet de base mappé sur vos colonnes SQL exactes
+        const base: any = {
+          id_externe: String(p.id),
+          ref: String(p.ref || p.id),
+          town: String(p.town || loc.town || "Espagne"),
+          ville: String(p.town || loc.town || "Espagne"),
+          province: String(p.province || ""),
+          region: source.defaultRegion,
+          latitude: loc.latitude ? parseFloat(loc.latitude) : null,
+          longitude: loc.longitude ? parseFloat(loc.longitude) : null,
+          type: String(p.type || "Villa"),
+          beds: String(p.beds || "0"),
+          baths: String(p.baths || "0"),
+          pool: (p.pool === "1" || JSON.stringify(p.features).includes("pool")) ? "Oui" : "Non",
+          price: parseFloat(p.price) || 0,
+          prix: parseFloat(p.price) || 0,
+          currency: String(p.currency || "EUR"),
+          distance_beach: dists.beach ? String(dists.beach) : null,
+          distance_golf: dists.golf ? String(dists.golf) : null,
+          distance_town: dists.town_distance || dists.town || null,
+          surface_built: String(surf.built || "0"),
+          surface_plot: String(surf.plot || "0"),
+          surface_useful: String(surf.useful || "0"),
+          images: imagesArray,
+          updated_at: new Date().toISOString(),
+          
+          // MAPPING CORRIGÉ SELON VOTRE SQL :
+          promoteur_name: p.development_name ? String(p.development_name) : null,
+          commission_percentage: p.commission?.quantity ? parseFloat(p.commission.quantity) : 0,
+          is_excluded: false // Valeur par défaut
+        };
+
+        // Titres et descriptions multilingues
+        const titleObj = p.title || {};
+        const descObj = p.desc || {};
+
+        for (const lang of languages) {
+          let titre = p.development_name || titleObj[lang] || titleObj.fr || titleObj.en || "Villa Moderne";
+          base[`titre_${lang}`] = String(titre).trim();
+
+          let description = descObj[lang] || descObj.fr || descObj.en || "";
+          base[`description_${lang}`] = String(description).trim();
+        }
+
+        return base;
+      });
+
+      // Upsert vers Supabase
+      const { error, data } = await supabase
+        .from('villas')
+        .upsert(updates, { onConflict: 'id_externe' })
+        .select('id_externe');
+
+      if (error) {
+        console.error(`Erreur d'insertion pour ${source.url}:`, error.message);
+      } else {
+        totalSynced += data?.length || 0;
+      }
+    }
+
+    return NextResponse.json({ success: true, totalSynced });
+  } catch (error: any) {
+    console.error("Erreur de synchronisation:", error.message);
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
-}
-</file>
-
-<file path="app/cashback-info/page.tsx">
-"use client";
-
-import React, { useEffect, useState } from 'react';
-import Link from 'next/link';
-import Navbar from "@/components/Navbar";
-import { 
-  ShieldCheck, 
-  ArrowLeft, 
-  Sofa, 
-  Banknote, 
-  CheckCircle2, 
-  Home, 
-  Gavel,
-  Scale
-} from 'lucide-react';
-import { useTheme } from "next-themes";
-import { useTranslation } from "@/contexts/I18nContext";
-
-export default function CashbackInfo() {
-  const { resolvedTheme } = useTheme();
-  const { t } = useTranslation();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) return null;
-
-  const isDark = resolvedTheme === "dark";
-
-  const themeStyles = {
-    title: { color: isDark ? '#FFFFFF' : '#0f172a' },
-    text: { color: isDark ? '#CBD5E1' : '#64748b' },
-    heading: { color: isDark ? '#D4AF37' : '#0f172a' },
-    iconColor: isDark ? '#FFFFFF' : '#0f172a'
-  };
-
-  return (
-    <div className="min-h-screen bg-white dark:bg-[#0A0A0A] transition-colors duration-500">
-      <Navbar />
-      <div className="pt-32 pb-20 px-6">
-        <div className="max-w-4xl mx-auto">
-          {/* Fil d'ariane */}
-          <Link 
-            href="/" 
-            className="inline-flex items-center gap-2 text-slate-400 hover:text-[#D4AF37] transition-colors mb-12 uppercase text-[10px] tracking-[0.3em] font-bold"
-          >
-            <ArrowLeft size={14} /> {t('cashback.back')}
-          </Link>
-
-          <div className="mb-16">
-            <h1 
-              className="text-5xl md:text-7xl font-serif mb-8 leading-tight"
-              style={themeStyles.title}
-            >
-              {t('cashback.title')} <br />
-              <span className="italic text-[#D4AF37]">{t('cashback.subtitle')}</span>
-            </h1>
-            <p 
-              className="text-xl max-w-2xl leading-relaxed"
-              style={themeStyles.text}
-            >
-              {t('cashback.description')}
-            </p>
-          </div>
-
-          {/* SECTION EXEMPLE CONCRET */}
-          <div className="relative overflow-hidden bg-[#0F172A] rounded-[3rem] p-8 md:p-16 mb-20 shadow-2xl border border-white/5">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-[#D4AF37] opacity-10 blur-[100px] -mr-32 -mt-32" />
-            
-            <div className="relative z-10">
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6">
-                <div className="max-w-md">
-                  <h2 className="text-[10px] uppercase tracking-[0.4em] font-bold text-[#D4AF37] mb-3">{t('cashback.flexibility')}</h2>
-                  <p className="text-3xl font-serif italic text-white leading-tight">{t('cashback.flexibilityText')}</p>
-                </div>
-                <div className="bg-white/5 backdrop-blur-md px-6 py-8 rounded-[2rem] border border-[#D4AF37]/30 min-w-[240px]">
-                  <span className="text-[9px] uppercase tracking-[0.2em] font-bold text-[#D4AF37] block mb-4 text-center">{t('cashback.example')}</span>
-                  <div className="flex flex-col items-center gap-2">
-                      <span className="text-2xl md:text-3xl font-light text-white tabular-nums whitespace-nowrap">
-                           {t('cashback.exampleAmount')}<span className="text-[#D4AF37] ml-1">*</span>
-                      </span>
-                      <span className="text-[10px] text-slate-400 uppercase tracking-tighter">{t('cashback.orEquipment')}</span>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 border-t border-white/10 pt-10">
-                {[0, 1].map((idx) => (
-                  <div key={idx} className="flex items-start gap-4">
-                    <div className="bg-[#D4AF37]/10 p-2 rounded-full">
-                      <CheckCircle2 className="text-[#D4AF37]" size={20} />
-                    </div>
-                    <p className="text-sm text-slate-300 leading-relaxed">{t(`cashback.points.${idx}`)}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* GRILLE D'AVANTAGES */}
-          <div className="grid md:grid-cols-3 gap-16 mb-24">
-            {['cash', 'furniture', 'services'].map((key, idx) => (
-              <div key={idx} className="group space-y-6">
-                <div className="w-14 h-14 bg-slate-50 dark:bg-white/5 rounded-2xl flex items-center justify-center group-hover:bg-[#D4AF37] transition-all duration-500 shadow-sm">
-                  {key === 'cash' && <Banknote size={28} strokeWidth={1.5} color={themeStyles.iconColor} className="group-hover:stroke-white transition-colors" />}
-                  {key === 'furniture' && <Sofa size={28} strokeWidth={1.5} color={themeStyles.iconColor} className="group-hover:stroke-white transition-colors" />}
-                  {key === 'services' && <Scale size={28} strokeWidth={1.5} color={themeStyles.iconColor} className="group-hover:stroke-white transition-colors" />}
-                </div>
-                <h3 className="font-bold uppercase text-[11px] tracking-[0.2em]" style={themeStyles.title}>{t(`cashback.options.${key}.title`)}</h3>
-                <p className="text-sm leading-relaxed" style={themeStyles.text}>{t(`cashback.options.${key}.desc`)}</p>
-              </div>
-            ))}
-          </div>
-
-          {/* Section FAQ / Info */}
-          <div className="border-t border-slate-100 dark:border-white/10 pt-20">
-              <div className="max-w-2xl">
-                <h2 className="text-4xl font-serif italic mb-10 text-left" style={themeStyles.title}>{t('cashback.activation')}</h2>
-                <div className="space-y-8 text-lg leading-relaxed">
-                  <p style={themeStyles.text}>
-                    {t('cashback.activationText')}
-                  </p>
-                  <p style={themeStyles.text}>
-                    {t('cashback.activationDetail')}
-                  </p>
-                </div>
-
-                <div className="mt-16">
-                  <Link 
-                      href="/" 
-                      className="group inline-flex items-center gap-4 bg-slate-900 dark:bg-white text-white dark:text-black px-12 py-6 rounded-2xl font-bold uppercase text-[11px] tracking-[0.3em] hover:bg-[#D4AF37] transition-all duration-500 shadow-2xl"
-                  >
-                      <Home size={18} className="group-hover:scale-110 transition-transform" />
-                      {t('cashback.backHome')}
-                  </Link>
-                </div>
-              </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
 }
 </file>
 
@@ -37721,230 +37441,242 @@ export default function ContactPage() {
 }
 </file>
 
-<file path="src/components/PropertyGrid.tsx">
-"use client";
+<file path="app/property/[id]/page.tsx">
+import PropertyDetailClient from "@/components/PropertyDetailClient";
 
-import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
-import PropertyCard from "./PropertyCard";
-import { Loader2, SearchX } from "lucide-react";
-import { useTheme } from "next-themes";
-import { useTranslation } from "@/contexts/I18nContext";
-
-interface PropertyGridProps {
-  activeFilters: any;
-  properties: any[];
+// On définit précisément les types pour Next.js 15
+interface PageProps {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
-export default function PropertyGrid({ activeFilters, properties }: PropertyGridProps) {
-  const { resolvedTheme } = useTheme();
-  const { t } = useTranslation();
-  const searchParamsOrigin = useSearchParams();
+export default async function Page({ params }: PageProps) {
+  // Extraction sécurisée de l'ID
+  const { id } = await params;
   
-  const [filtered, setFiltered] = useState<any[]>([]);
-  const [isAnimating, setIsAnimating] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  if (!id) return null;
 
-  const isLight = searchParamsOrigin.get('pack') === 'light';
+  return <PropertyDetailClient id={id} />;
+}
+</file>
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+<file path="src/components/Footer.tsx">
+"use client";
 
-  useEffect(() => {
-    if (!properties) return;
-    setIsAnimating(true);
-    
-    const result = properties.filter((p) => {
-      const matchType = !activeFilters.type || p.type?.toLowerCase().includes(activeFilters.type.toLowerCase());
-      const matchTown = !activeFilters.town || p.town?.toLowerCase().includes(activeFilters.town.toLowerCase());
-      const matchRegion = !activeFilters.region || p.region?.toLowerCase().includes(activeFilters.region.toLowerCase());
-      const matchBeds = !activeFilters.beds || Number(p.beds) >= Number(activeFilters.beds);
-      const price = Number(p.price || p.prix || 0);
-      const matchMin = !activeFilters.minPrice || price >= Number(activeFilters.minPrice);
-      const matchMax = !activeFilters.maxPrice || price <= Number(activeFilters.maxPrice);
-      const matchRef = !activeFilters.reference || p.ref?.toLowerCase().includes(activeFilters.reference.toLowerCase());
-      return matchType && matchTown && matchRegion && matchMin && matchMax && matchBeds && matchRef;
-    });
+import React from "react";
+import Link from "next/link";
+import { Mail, Phone, Instagram, Facebook, MapPin } from "lucide-react";
+import { useTranslation } from "@/contexts/I18nContext";
 
-    const timer = setTimeout(() => {
-      setFiltered(result);
-      setIsAnimating(false);
-    }, 400);
+// 1. Définition de l'interface pour TypeScript
+interface FooterProps {
+  isLight?: boolean;
+}
 
-    return () => clearTimeout(timer);
-  }, [activeFilters, properties]);
+export default function Footer({ isLight = false }: FooterProps) {
+  const { t } = useTranslation();
 
-  if (!mounted) return null;
-
-  const isDarkVisual = resolvedTheme === "dark" && !isLight;
+  // 2. Adaptation des couleurs
+  const bgColor = isLight ? "bg-slate-50 border-t border-slate-200" : "bg-[#020617] border-t border-white/5";
+  const textColor = isLight ? "text-slate-900" : "text-white";
+  const mutedText = isLight ? "text-slate-500" : "text-slate-400";
+  const iconColor = "text-[#D4AF37]";
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 md:px-0 transition-colors duration-500">
-      
-      {isAnimating && filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-40 space-y-4">
-          <Loader2 className="animate-spin text-[#D4AF37]" size={40} />
-          <p className="text-[#D4AF37] text-[10px] font-bold uppercase tracking-[0.4em] animate-pulse">
-            {t('home.loading.updating')}
+    <footer className={`${bgColor} py-20 transition-colors duration-500`}>
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 md:gap-8">
+          
+          {/* LOGO & DESCRIPTION */}
+          <div className="col-span-1 md:col-span-1 space-y-6">
+            <h3 className={`text-2xl font-serif italic ${textColor}`}>
+              Amaru <span className="text-[#D4AF37] not-italic font-sans font-bold text-sm tracking-widest ml-2 uppercase">Excellence</span>
+            </h3>
+            <p className={`${mutedText} text-xs leading-relaxed uppercase tracking-widest`}>
+              {t('footer.description')}
+            </p>
+          </div>
+
+          {/* QUICK LINKS */}
+          <div className="space-y-6">
+            <h4 className={`text-[10px] font-bold uppercase tracking-[0.3em] ${textColor}`}>Menu</h4>
+            <ul className={`space-y-4 text-[10px] uppercase tracking-widest ${mutedText}`}>
+              <li><Link href="/" className="hover:text-[#D4AF37] transition-colors">Accueil</Link></li>
+              <li><Link href="/properties" className="hover:text-[#D4AF37] transition-colors">Propriétés</Link></li>
+              <li><Link href="/about" className="hover:text-[#D4AF37] transition-colors">À Propos</Link></li>
+              <li><Link href="/contact" className="hover:text-[#D4AF37] transition-colors">Contact</Link></li>
+            </ul>
+          </div>
+
+          {/* CONTACT */}
+          <div className="space-y-6">
+            <h4 className={`text-[10px] font-bold uppercase tracking-[0.3em] ${textColor}`}>Contact</h4>
+            <ul className={`space-y-4 text-[10px] uppercase tracking-widest ${mutedText}`}>
+              <li className="flex items-center gap-3">
+                <Mail size={14} className={iconColor} /> info@amaru-excellence.com
+              </li>
+              <li className="flex items-center gap-3">
+                <Phone size={14} className={iconColor} /> +34 000 000 000
+              </li>
+              <li className="flex items-center gap-3 italic">
+                <MapPin size={14} className={iconColor} /> Costa Blanca, España
+              </li>
+            </ul>
+          </div>
+
+          {/* SOCIAL */}
+          <div className="space-y-6">
+            <h4 className={`text-[10px] font-bold uppercase tracking-[0.3em] ${textColor}`}>Suivez-nous</h4>
+            <div className="flex gap-6">
+              <a href="#" className={`${mutedText} hover:text-[#D4AF37] transition-colors`}><Instagram size={20} /></a>
+              <a href="#" className={`${mutedText} hover:text-[#D4AF37] transition-colors`}><Facebook size={20} /></a>
+            </div>
+          </div>
+
+        </div>
+
+        <div className={`mt-20 pt-8 border-t ${isLight ? 'border-slate-200' : 'border-white/5'} text-center`}>
+          <p className={`${mutedText} text-[9px] uppercase tracking-[0.5em]`}>
+            © {new Date().getFullYear()} Amaru Excellence — All Rights Reserved
           </p>
         </div>
-      ) : filtered.length === 0 && !isAnimating ? (
-        <div className="flex flex-col items-center justify-center py-24 md:py-40 px-6 space-y-6">
-          <div className="w-16 h-16 md:w-20 md:h-20 rounded-none bg-[#D4AF37]/10 flex items-center justify-center border border-[#D4AF37]/20">
-            <SearchX size={32} className="text-[#D4AF37] opacity-60" />
-          </div>
-          <div className="text-center space-y-3">
-            <p className="text-[#D4AF37] text-[10px] font-bold uppercase tracking-[0.4em]">
-              {t('home.collection.noMatch')}
-            </p>
-            <p 
-              className="font-serif italic text-xl md:text-2xl leading-relaxed"
-              style={{ color: isDarkVisual ? '#FFFFFF' : '#0F172A' }}
-            >
-              {t('home.collection.noMatchDescription')}
-            </p>
-            <p className="text-slate-500 text-sm font-light italic">
-              {t('home.collection.tryWider')}
-            </p>
-          </div>
-          <button 
-            onClick={() => window.location.reload()}
-            className="mt-4 text-[10px] uppercase font-bold tracking-widest border-b border-[#D4AF37] pb-1 hover:text-[#D4AF37] transition-all"
-            style={{ color: isDarkVisual ? '#FFFFFF' : '#0F172A' }}
-          >
-            {t('home.collection.reset')}
-          </button>
-        </div>
-      ) : (
-        <div className={`transition-all duration-700 ease-in-out ${isAnimating ? 'opacity-30 blur-sm scale-[0.99]' : 'opacity-100 blur-0 scale-100'}`}>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12 md:gap-x-10 md:gap-y-20">
-            {filtered.map((p, index) => (
-              <div 
-                key={p.id || index}
-                className="group animate-in fade-in slide-in-from-bottom-10 duration-1000 fill-mode-forwards rounded-none overflow-hidden"
-                style={{ animationDelay: `${index * 150}ms` }}
-              >
-                <PropertyCard property={p} isLight={isLight} />
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
+      </div>
+    </footer>
   );
 }
 </file>
 
-<file path="app/api/sync-properties/route.ts">
-import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-import xml2js from 'xml2js';
+<file path="src/components/ContactForm.tsx">
+"use client";
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+import React, { useState } from "react";
+import { Send, CheckCircle, Loader2 } from "lucide-react";
+import { useTranslation } from "@/contexts/I18nContext";
 
-const SOURCES = [
-  { defaultRegion: "Costa Blanca", url: "https://medianewbuild.com/file/hh-media-bucket/agents/6d5cb68a-3636-4095-b0ce-7dc9ec2df2d2/feed_blanca_calida.xml" },
-  { defaultRegion: "Costa del Sol", url: "https://medianewbuild.com/file/hh-media-bucket/agents/6d5cb68a-3636-4095-b0ce-7dc9ec2df2d2/feed_sol.xml" }
-];
+interface ContactFormProps {
+  agency: {
+    id: string;
+    package_level: string;
+    name: string;
+  };
+  propertyRef?: string;
+  isLight?: boolean; // Prop optionnelle pour forcer le mode
+}
 
-export async function GET() {
-  try {
-    let totalSynced = 0;
-    const languages = ['fr', 'en', 'es', 'nl', 'pl', 'ar'];
+export default function ContactForm({ agency, propertyRef, isLight: forcedLight }: ContactFormProps) {
+  const { t } = useTranslation();
+  const [status, setStatus] = useState<"idle" | "sending" | "success">("idle");
+  
+  // On est en mode light si le package est 'light' OU si la prop isLight est vraie
+  const isLight = agency.package_level === "light" || forcedLight === true;
 
-    for (const source of SOURCES) {
-      const response = await fetch(source.url, { cache: 'no-store' });
-      const xmlText = await response.text();
-      
-      const parser = new xml2js.Parser({ explicitArray: false, mergeAttrs: true, trim: true });
-      const result = await parser.parseStringPromise(xmlText);
-      const rootKey = Object.keys(result)[0];
-      let properties = result[rootKey].property || [];
-      if (!Array.isArray(properties)) properties = [properties];
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setStatus("sending");
 
-      const updates = properties.map((p: any) => {
-        const surf = p.surface_area || {};
-        const loc = p.location || {};
-        const dists = p.distances || {}; 
-        
-        // Gestion des images (extraction de l'URL si objet ou string)
-        let imagesArray: string[] = [];
-        if (p.images && p.images.image) {
-          const rawImages = Array.isArray(p.images.image) ? p.images.image : [p.images.image];
-          imagesArray = rawImages
-            .map((img: any) => (typeof img === 'string' ? img : img.url))
-            .filter((u: any) => typeof u === 'string');
-        }
+    // Logique de simulation d'envoi
+    setTimeout(() => {
+      setStatus("success");
+    }, 1500);
+  };
 
-        // Objet de base mappé sur vos colonnes SQL exactes
-        const base: any = {
-          id_externe: String(p.id),
-          ref: String(p.ref || p.id),
-          town: String(p.town || loc.town || "Espagne"),
-          ville: String(p.town || loc.town || "Espagne"),
-          province: String(p.province || ""),
-          region: source.defaultRegion,
-          latitude: loc.latitude ? parseFloat(loc.latitude) : null,
-          longitude: loc.longitude ? parseFloat(loc.longitude) : null,
-          type: String(p.type || "Villa"),
-          beds: String(p.beds || "0"),
-          baths: String(p.baths || "0"),
-          pool: (p.pool === "1" || JSON.stringify(p.features).includes("pool")) ? "Oui" : "Non",
-          price: parseFloat(p.price) || 0,
-          prix: parseFloat(p.price) || 0,
-          currency: String(p.currency || "EUR"),
-          distance_beach: dists.beach ? String(dists.beach) : null,
-          distance_golf: dists.golf ? String(dists.golf) : null,
-          distance_town: dists.town_distance || dists.town || null,
-          surface_built: String(surf.built || "0"),
-          surface_plot: String(surf.plot || "0"),
-          surface_useful: String(surf.useful || "0"),
-          images: imagesArray,
-          updated_at: new Date().toISOString(),
-          
-          // MAPPING CORRIGÉ SELON VOTRE SQL :
-          promoteur_name: p.development_name ? String(p.development_name) : null,
-          commission_percentage: p.commission?.quantity ? parseFloat(p.commission.quantity) : 0,
-          is_excluded: false // Valeur par défaut
-        };
-
-        // Titres et descriptions multilingues
-        const titleObj = p.title || {};
-        const descObj = p.desc || {};
-
-        for (const lang of languages) {
-          let titre = p.development_name || titleObj[lang] || titleObj.fr || titleObj.en || "Villa Moderne";
-          base[`titre_${lang}`] = String(titre).trim();
-
-          let description = descObj[lang] || descObj.fr || descObj.en || "";
-          base[`description_${lang}`] = String(description).trim();
-        }
-
-        return base;
-      });
-
-      // Upsert vers Supabase
-      const { error, data } = await supabase
-        .from('villas')
-        .upsert(updates, { onConflict: 'id_externe' })
-        .select('id_externe');
-
-      if (error) {
-        console.error(`Erreur d'insertion pour ${source.url}:`, error.message);
-      } else {
-        totalSynced += data?.length || 0;
-      }
-    }
-
-    return NextResponse.json({ success: true, totalSynced });
-  } catch (error: any) {
-    console.error("Erreur de synchronisation:", error.message);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  if (status === "success") {
+    return (
+      <div className={`p-10 text-center rounded-[2.5rem] border animate-in fade-in zoom-in duration-500 ${
+        isLight ? "bg-slate-50 border-slate-200" : "bg-white/5 border-white/10"
+      }`}>
+        <div className="w-16 h-16 bg-[#D4AF37]/20 rounded-full flex items-center justify-center mx-auto mb-6">
+          <CheckCircle className="text-[#D4AF37]" size={32} />
+        </div>
+        <h3 className={`text-2xl font-serif italic mb-2 ${isLight ? "text-slate-900" : "text-white"}`}>
+          {t('propertyDetail.messageSent') || "Message envoyé"}
+        </h3>
+        <p className={`text-[10px] uppercase tracking-[0.2em] ${isLight ? "text-slate-500" : "text-slate-400"}`}>
+          {t('propertyDetail.weWillContactYou') || "Nous reviendrons vers vous rapidement."}
+        </p>
+      </div>
+    );
   }
+
+  // Styles dynamiques
+  const containerStyle = isLight 
+    ? "bg-white border-slate-100 shadow-[0_20px_50px_rgba(0,0,0,0.05)]" 
+    : "bg-[#0A0A0A]/40 border-white/5 backdrop-blur-xl";
+
+  const titleStyle = isLight ? "text-slate-900" : "text-white";
+  
+  const inputBaseStyle = `w-full p-4 text-[10px] tracking-widest uppercase outline-none border transition-all duration-300 rounded-xl`;
+  const inputThemeStyle = isLight 
+    ? "bg-slate-50 border-slate-200 text-slate-900 focus:border-black placeholder:text-slate-400" 
+    : "bg-white/5 border-white/10 text-white focus:border-[#D4AF37] placeholder:text-white/20";
+
+  return (
+    <div className={`p-8 md:p-10 rounded-[2.5rem] border ${containerStyle}`}>
+      <div className="mb-8">
+        <h3 className={`text-2xl md:text-3xl font-serif italic mb-2 ${titleStyle}`}>
+          {isLight ? "Demander des informations" : "Contacter un Expert"}
+        </h3>
+        <p className={`text-[9px] font-bold uppercase tracking-[0.3em] ${isLight ? 'text-slate-400' : 'text-[#D4AF37]/60'}`}>
+          Réf: {propertyRef || 'Général'} — {agency.name}
+        </p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="space-y-4">
+          <input 
+            type="text" 
+            name="name" 
+            required 
+            placeholder="NOM COMPLET"
+            className={`${inputBaseStyle} ${inputThemeStyle}`}
+          />
+          <input 
+            type="email" 
+            name="email" 
+            required 
+            placeholder="VOTRE EMAIL"
+            className={`${inputBaseStyle} ${inputThemeStyle}`}
+          />
+          <textarea 
+            name="message" 
+            rows={4} 
+            placeholder="VOTRE MESSAGE..."
+            className={`${inputBaseStyle} ${inputThemeStyle} resize-none`}
+          ></textarea>
+        </div>
+
+        {/* Hidden Fields pour CRM */}
+        <input type="hidden" name="agency_id" value={agency.id} />
+        <input type="hidden" name="source" value={isLight ? "Pack_Light" : "Pack_Gold"} />
+
+        <button 
+  type="submit" 
+  disabled={status === "sending"}
+  className={`w-full py-5 rounded-2xl font-black uppercase text-[10px] tracking-[0.4em] flex items-center justify-center gap-4 transition-all duration-500 shadow-lg ${
+    isLight 
+    ? "bg-black text-white hover:bg-[#D4AF37] hover:text-black hover:shadow-[#D4AF37]/20" 
+    : "bg-[#D4AF37] text-black hover:bg-white hover:text-black"
+  } ${status === "sending" ? "opacity-70 cursor-not-allowed" : "active:scale-[0.98]"}`}
+>
+  {status === "sending" ? (
+    <>
+      <Loader2 size={16} className="animate-spin text-inherit" />
+      <span className="text-inherit">ENVOI EN COURS</span>
+    </>
+  ) : (
+    <>
+      <span className="text-inherit">ENVOYER LA DEMANDE</span>
+      <Send size={14} className="transition-transform group-hover:translate-x-1 text-inherit" />
+    </>
+  )}
+</button>
+      </form>
+      
+      <p className={`text-center mt-6 text-[8px] uppercase tracking-widest ${isLight ? 'text-slate-400' : 'text-white/20'}`}>
+        Vos données sont protégées par le secret professionnel
+      </p>
+    </div>
+  );
 }
 </file>
 
@@ -38013,6 +37745,134 @@ export default function Hero() {
     <Suspense fallback={<div className="h-screen w-full bg-black" />}>
       <HeroContent />
     </Suspense>
+  );
+}
+</file>
+
+<file path="src/components/PropertyGrid.tsx">
+"use client";
+
+import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import PropertyCard from "./PropertyCard";
+import { Loader2, SearchX } from "lucide-react";
+import { useTheme } from "next-themes";
+import { useTranslation } from "@/contexts/I18nContext";
+
+interface PropertyGridProps {
+  activeFilters: any;
+  properties: any[];
+  isLight?: boolean; // Ajout de la prop pour TypeScript
+}
+
+export default function PropertyGrid({ 
+  activeFilters, 
+  properties, 
+  isLight: isLightProp // On récupère la prop passée par le parent
+}: PropertyGridProps) {
+  const { resolvedTheme } = useTheme();
+  const { t } = useTranslation();
+  const searchParamsOrigin = useSearchParams();
+  
+  const [filtered, setFiltered] = useState<any[]>([]);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  // Détection combinée : prop du parent OU paramètre d'URL
+  const isLight = isLightProp || searchParamsOrigin.get('pack') === 'light';
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    // Sécurité : si properties n'est pas un tableau, on ne fait rien pour éviter le crash .filter
+    if (!properties || !Array.isArray(properties)) {
+      setFiltered([]);
+      return;
+    }
+
+    setIsAnimating(true);
+    
+    const result = properties.filter((p) => {
+      if (!p) return false;
+      const matchType = !activeFilters.type || p.type?.toLowerCase().includes(activeFilters.type.toLowerCase());
+      const matchTown = !activeFilters.town || p.town?.toLowerCase().includes(activeFilters.town.toLowerCase());
+      const matchRegion = !activeFilters.region || p.region?.toLowerCase().includes(activeFilters.region.toLowerCase());
+      const matchBeds = !activeFilters.beds || Number(p.beds) >= Number(activeFilters.beds);
+      const price = Number(p.price || p.prix || 0);
+      const matchMin = !activeFilters.minPrice || price >= Number(activeFilters.minPrice);
+      const matchMax = !activeFilters.maxPrice || price <= Number(activeFilters.maxPrice);
+      const matchRef = !activeFilters.reference || p.ref?.toLowerCase().includes(activeFilters.reference.toLowerCase());
+      return matchType && matchTown && matchRegion && matchMin && matchMax && matchBeds && matchRef;
+    });
+
+    const timer = setTimeout(() => {
+      setFiltered(result);
+      setIsAnimating(false);
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [activeFilters, properties]);
+
+  if (!mounted) return null;
+
+  // Logique visuelle pour le texte (Blanc si Dark pur, Noir si Light ou pack=light)
+  const isDarkVisual = resolvedTheme === "dark" && !isLight;
+
+  return (
+    <div className="w-full max-w-7xl mx-auto px-4 md:px-0 transition-colors duration-500">
+      
+      {isAnimating && filtered.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-40 space-y-4">
+          <Loader2 className="animate-spin text-[#D4AF37]" size={40} />
+          <p className="text-[#D4AF37] text-[10px] font-bold uppercase tracking-[0.4em] animate-pulse">
+            {t('home.loading.updating')}
+          </p>
+        </div>
+      ) : filtered.length === 0 && !isAnimating ? (
+        <div className="flex flex-col items-center justify-center py-24 md:py-40 px-6 space-y-6">
+          <div className="w-16 h-16 md:w-20 md:h-20 rounded-none bg-[#D4AF37]/10 flex items-center justify-center border border-[#D4AF37]/20">
+            <SearchX size={32} className="text-[#D4AF37] opacity-60" />
+          </div>
+          <div className="text-center space-y-3">
+            <p className="text-[#D4AF37] text-[10px] font-bold uppercase tracking-[0.4em]">
+              {t('home.collection.noMatch')}
+            </p>
+            <p 
+              className="font-serif italic text-xl md:text-2xl leading-relaxed"
+              style={{ color: isDarkVisual ? '#FFFFFF' : '#0F172A' }}
+            >
+              {t('home.collection.noMatchDescription')}
+            </p>
+            <p className="text-slate-500 text-sm font-light italic">
+              {t('home.collection.tryWider')}
+            </p>
+          </div>
+          <button 
+            onClick={() => window.location.reload()}
+            className="mt-4 text-[10px] uppercase font-bold tracking-widest border-b border-[#D4AF37] pb-1 hover:text-[#D4AF37] transition-all"
+            style={{ color: isDarkVisual ? '#FFFFFF' : '#0F172A' }}
+          >
+            {t('home.collection.reset')}
+          </button>
+        </div>
+      ) : (
+        <div className={`transition-all duration-700 ease-in-out ${isAnimating ? 'opacity-30 blur-sm scale-[0.99]' : 'opacity-100 blur-0 scale-100'}`}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12 md:gap-x-10 md:gap-y-20">
+            {filtered.map((p, index) => (
+              <div 
+                key={p.id || index}
+                className="group animate-in fade-in slide-in-from-bottom-10 duration-1000 fill-mode-forwards rounded-none overflow-hidden"
+                style={{ animationDelay: `${index * 150}ms` }}
+              >
+                <PropertyCard property={p} isLight={isLight} />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 </file>
@@ -38189,6 +38049,146 @@ export default function RegionGrid({ properties, onRegionClick }: RegionGridProp
 }
 </file>
 
+<file path="src/components/PropertyCard.tsx">
+"use client";
+
+import React, { useState, useEffect } from 'react';
+import { Bed, Bath, Waves, Car, Maximize, Map, ChevronRight, Heart } from 'lucide-react';
+import Link from 'next/link';
+import { useTheme } from "next-themes";
+import { useTranslation } from "@/contexts/I18nContext";
+
+export default function PropertyCard({ property, isLight = false }: { property: any, isLight?: boolean }) {
+  const { resolvedTheme } = useTheme();
+  const { t } = useTranslation();
+  const [mounted, setMounted] = useState(false);
+  const priceFormatted = new Intl.NumberFormat('de-DE').format(property.price || property.prix || 0);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const translate = (key: string, params?: Record<string, string>) => {
+    let text = t(key);
+    if (params) {
+      Object.entries(params).forEach(([k, v]) => {
+        text = text.replace(new RegExp(`\\{${k}\\}`, 'g'), v);
+      });
+    }
+    return text;
+  };
+
+  const detailUrl = `/property/${property.id_externe || property.id}${isLight ? '?pack=light' : ''}`;
+
+  if (!mounted) return null;
+
+  const showDark = resolvedTheme === 'dark' && !isLight;
+
+  return (
+    <Link 
+      href={detailUrl} 
+      className="group flex flex-col w-full transition-all duration-500"
+    >
+      {/* IMAGE & BADGES */}
+      <div 
+        className="relative h-[380px] overflow-hidden rounded-none border transition-colors duration-500"
+        style={{ 
+          backgroundColor: showDark ? '#0f172a' : '#f1f5f9',
+          borderColor: showDark ? 'rgba(255,255,255,0.05)' : '#e2e8f0'
+        }}
+      >
+        <img 
+          src={property.images?.[0] || "/placeholder-house.jpg"} 
+          alt={property.titre}
+          className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 rounded-none"
+        />
+        
+        {/* Overlay dégradé plus prononcé pour la lisibilité */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-90" />
+
+        {/* BADGES GAUCHE */}
+        <div className="absolute bottom-6 left-6 flex flex-wrap gap-2 max-w-[70%] z-10">
+          <span className={`${isLight ? 'bg-black text-white' : 'bg-[#D4AF37] text-black'} text-[9px] font-black px-4 py-2 rounded-none uppercase tracking-widest shadow-xl border ${isLight ? 'border-white/10' : 'border-black/5'}`}>
+            {translate('propertyCard.ref', { ref: property.ref || property.id_externe })}
+          </span>
+          
+          <span className="bg-black/60 backdrop-blur-md text-white border border-white/30 text-[8px] font-bold px-4 py-2 rounded-none uppercase tracking-[0.2em]">
+            {property.type ? property.type : t('propertyCard.exclusivity')}
+          </span>
+        </div>
+
+        {/* BOUTONS DROITE */}
+        <div className="absolute bottom-6 right-6 flex flex-col gap-2 z-10">
+          <button className="bg-black/40 backdrop-blur-md p-3 rounded-none border border-white/20 text-white hover:bg-[#D4AF37] hover:text-black transition-all">
+            <Heart size={18} strokeWidth={1.5} />
+          </button>
+          <div className={`${isLight ? 'bg-black text-white' : 'bg-[#D4AF37] text-black'} p-3 rounded-none shadow-xl transform group-hover:translate-x-1 transition-all border ${isLight ? 'border-white/10' : 'border-black/5'}`}>
+            <ChevronRight size={20} strokeWidth={2.5} />
+          </div>
+        </div>
+      </div>
+
+      {/* INFOS TITRE & PRIX */}
+      <div className="py-8 px-2">
+        <div className="flex justify-between items-start gap-4 mb-3">
+          <h3 
+            className="font-serif text-2xl italic leading-tight flex-grow line-clamp-1 transition-colors"
+            style={{ color: showDark ? '#ffffff' : '#0f172a' }}
+          >
+            {property.titre || property.type || t('propertyCard.fallbackTitle')}
+          </h3>
+          
+          <span className={`text-xl font-bold ${isLight ? 'text-black' : 'text-[#D4AF37]'} whitespace-nowrap pt-1`}>
+            {priceFormatted} €
+          </span>
+        </div>
+
+        <div 
+          className="flex items-center gap-2 text-[10px] tracking-[0.3em] uppercase font-bold transition-colors"
+          style={{ color: showDark ? '#e2e8f0' : '#475569' }}
+        >
+          <span className={isLight ? 'text-black' : 'text-[#D4AF37]'}>●</span>
+          {property.town} <span className="opacity-30">|</span> {property.region || 'Costa Blanca'}
+        </div>
+      </div>
+
+      {/* ICONES TECHNIQUES */}
+      <div 
+        className="grid grid-cols-3 gap-y-6 pt-6 border-t transition-colors"
+        style={{ borderColor: showDark ? 'rgba(255,255,255,0.1)' : '#f1f5f9' }}
+      >
+        {[
+          { icon: Maximize, value: `${property.surface_built || '0'} m²` },
+          { icon: Bed, value: `${property.beds || '0'} ${t('propertyCard.beds')}` },
+          { icon: Bath, value: `${property.baths || '0'} ${t('propertyCard.baths')}` },
+          { icon: Waves, value: property.pool === "Oui" ? t('propertyCard.pool') : t('propertyCard.noPool') },
+          { icon: Map, value: `${property.surface_plot || '0'} m² ${t('propertyCard.land')}` },
+          { icon: Car, value: t('propertyCard.garage') }
+        ].map((item, idx) => (
+          <div key={idx} className="flex items-center gap-3">
+            <div 
+              className="w-8 h-8 flex items-center justify-center border transition-colors"
+              style={{ 
+                backgroundColor: showDark ? 'rgba(255,255,255,0.05)' : '#f8fafc',
+                borderColor: showDark ? 'rgba(255,255,255,0.1)' : '#e2e8f0'
+              }}
+            >
+              <item.icon size={14} className={isLight ? 'text-black' : 'text-[#D4AF37]'} />
+            </div>
+            <span 
+              className="text-[11px] font-medium transition-colors"
+              style={{ color: showDark ? '#f1f5f9' : '#1e293b' }}
+            >
+              {item.value}
+            </span>
+          </div>
+        ))}
+      </div>
+    </Link>
+  );
+}
+</file>
+
 <file path="app/globals.css">
 @import "tailwindcss";
 
@@ -38300,6 +38300,33 @@ html[data-package="light"] * {
 html[data-package="light"] .theme-toggle-component {
   display: none !important;
 }
+
+/* --- FIX FINAL POUR VIGNETTES ET FOOTER --- */
+
+html[data-package="light"] .property-card, 
+html[data-package="light"] [class*="bg-slate-900"],
+html[data-package="light"] [class*="bg-gray-900"],
+html[data-package="light"] footer {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #e2e8f0 !important;
+}
+
+/* Force les textes dans les vignettes et le footer */
+html[data-package="light"] .property-card h3,
+html[data-package="light"] .property-card p,
+html[data-package="light"] footer h2,
+html[data-package="light"] footer h3,
+html[data-package="light"] footer p,
+html[data-package="light"] footer a {
+  color: #0f172a !important;
+}
+
+/* Ajuste les icônes ou petits textes secondaires */
+html[data-package="light"] .text-slate-400,
+html[data-package="light"] .text-gray-400 {
+  color: #64748b !important;
+}
 </file>
 
 <file path="app/page.tsx">
@@ -38333,10 +38360,10 @@ function HomeContent() {
   const [allProperties, setAllProperties] = useState<Property[]>([]);
   const [visibleCount, setVisibleCount] = useState(12);
   const [loading, setLoading] = useState(true);
-  const [clientPin, setClientPin] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   // --- LOGIQUE DE DÉTECTION DU PACK ---
+  // On vérifie l'URL et l'attribut HTML injecté par le serveur
   const isLight = searchParamsOrigin.get('pack') === 'light' || 
                   (typeof document !== 'undefined' && document.documentElement.getAttribute('data-package') === 'light');
 
@@ -38351,11 +38378,20 @@ function HomeContent() {
   useEffect(() => {
     async function loadData() {
       try {
+        setLoading(true);
         const res = await fetch("/api/properties");
         const data = await res.json();
-        setAllProperties(data);
+        
+        // CORRECTION : On s'assure que data est bien un tableau pour éviter "filter is not a function"
+        if (data && Array.isArray(data)) {
+          setAllProperties(data);
+        } else {
+          console.error("Format de données invalide reçu de l'API");
+          setAllProperties([]);
+        }
       } catch (err) {
         console.error("Erreur API:", err);
+        setAllProperties([]);
       } finally {
         setLoading(false);
       }
@@ -38368,14 +38404,18 @@ function HomeContent() {
     minPrice: "", maxPrice: "", reference: "", development: "", availableOnly: false,
   });
 
+  // CORRECTION : Sécurisation du filter
   const filteredProperties = useMemo(() => {
-    return allProperties.filter((p) => {
+    const baseProps = Array.isArray(allProperties) ? allProperties : [];
+    
+    return baseProps.filter((p) => {
+      if (!p) return false;
       const matchDev = !filters.development || p.development_name?.toLowerCase().trim() === filters.development.toLowerCase().trim();
       const matchTown = !filters.town || p.town === filters.town;
       const matchRegion = !filters.region || p.region === filters.region;
       const matchType = !filters.type || p.type?.toLowerCase().includes(filters.type.toLowerCase());
       const matchBeds = !filters.beds || Number(p.beds) >= Number(filters.beds);
-      const price = Number(p.price);
+      const price = Number(p.price || 0);
       const matchMin = !filters.minPrice || price >= Number(filters.minPrice);
       const matchMax = !filters.maxPrice || price <= Number(filters.maxPrice);
       const matchRef = !filters.reference || p.ref?.toLowerCase().includes(filters.reference.toLowerCase());
@@ -38403,17 +38443,16 @@ function HomeContent() {
 
   if (!mounted) return null;
 
-  // Couleurs dynamiques selon le mode Light ou Dark
+  // Couleurs dynamiques
   const bgColor = isLight ? 'bg-white' : 'bg-[#020617]';
-  const sectionBg = isLight ? 'bg-slate-50' : 'bg-[#0F172A]/40';
   const textColor = isLight ? 'text-slate-900' : 'text-white';
   const mutedText = isLight ? 'text-slate-500' : 'text-slate-400';
 
   if (loading) {
     return (
-      <div className="h-screen bg-[#020617] flex flex-col items-center justify-center">
+      <div className={`h-screen flex flex-col items-center justify-center ${isLight ? 'bg-white' : 'bg-[#020617]'}`}>
         <Loader2 className="animate-spin text-[#D4AF37] mb-8" size={48} />
-        <span className="text-[10px] font-bold uppercase tracking-[0.5em] text-[#D4AF37] animate-pulse">
+        <span className={`text-[10px] font-bold uppercase tracking-[0.5em] animate-pulse ${isLight ? 'text-black' : 'text-[#D4AF37]'}`}>
           {t('home.loading.amaruExcellence')}
         </span>
       </div>
@@ -38421,19 +38460,17 @@ function HomeContent() {
   }
 
   return (
-    <main className={`min-h-screen selection:bg-[#D4AF37]/30 font-sans overflow-x-hidden transition-colors duration-500 ${isLight ? 'bg-white' : 'bg-[#020617]'}`}>
+    <main className={`min-h-screen selection:bg-[#D4AF37]/30 font-sans overflow-x-hidden transition-colors duration-500 ${bgColor}`}>
       <Navbar />
       
       {/* SECTION HERO */}
-      <div className={`relative h-[80vh] flex flex-col items-center justify-center transition-colors duration-500 ${isLight ? 'bg-white' : 'bg-[#020617]'}`}>
+      <div className={`relative h-[80vh] flex flex-col items-center justify-center transition-colors duration-500 ${bgColor}`}>
         <Hero />
-        
-        {/* BOUTON RECHERCHE */}
         <div className="absolute bottom-[12%] z-40">
            {!isSearchOpen && (
              <button 
                 onClick={() => setIsSearchOpen(true)}
-                className="group flex items-center gap-5 transition-all duration-700 ease-in-out"
+                className="group flex items-center gap-5 transition-all duration-700"
              >
                 <div className={`w-10 h-10 border border-[#D4AF37]/30 ${isLight ? 'bg-black text-white' : 'bg-transparent text-[#D4AF37]'} rounded-full flex items-center justify-center group-hover:bg-[#D4AF37] group-hover:text-white transition-all duration-500`}>
                   <Search size={16} strokeWidth={1.5} />
@@ -38456,23 +38493,20 @@ function HomeContent() {
 
       {/* SECTION ESPACE PROPRIÉTAIRE (Masquée en mode Light) */}
       {!isLight && (
-        <section className={`max-w-[1600px] mx-auto px-4 sm:px-6 py-8 sm:py-12 ${bgColor}`}>
-          <div className={`${sectionBg} p-6 sm:p-8 md:p-12 lg:p-20 border border-slate-200 dark:border-white/5 relative overflow-hidden`}>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 items-center relative z-10">
-              <div className="space-y-4 sm:space-y-6 text-center lg:text-left">
+        <section className={`max-w-[1600px] mx-auto px-4 py-12 ${bgColor}`}>
+          <div className="bg-[#0F172A]/40 p-12 border border-white/5 relative overflow-hidden">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+              <div className="space-y-6">
                 <span className="text-[#D4AF37] text-[10px] font-bold uppercase tracking-[0.4em]">{t('home.ownerSection.badge')}</span>
-                <h2 className={`text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif leading-tight italic ${textColor}`}>
-                  {t('home.ownerSection.title')} <br className="hidden sm:block" />
-                  <span className="text-[#D4AF37] not-italic font-sans font-extrabold tracking-tighter text-xl sm:text-2xl md:text-3xl lg:text-5xl uppercase block sm:inline">{t('home.ownerSection.subtitle')}</span>
+                <h2 className="text-4xl md:text-6xl font-serif italic text-white leading-tight">
+                  {t('home.ownerSection.title')} <br />
+                  <span className="text-[#D4AF37] not-italic font-sans font-extrabold text-3xl md:text-5xl uppercase">{t('home.ownerSection.subtitle')}</span>
                 </h2>
-                <p className={`text-sm sm:text-base font-light leading-relaxed max-w-md mx-auto lg:mx-0 border-l border-slate-200 dark:border-white/10 pl-4 sm:pl-6 italic opacity-90 ${mutedText}`}>
-                  {t('home.ownerSection.description')}
-                </p>
               </div>
-              <div className={`p-6 sm:p-8 md:p-10 border border-slate-200 dark:border-[#D4AF37]/20 shadow-xl max-w-md mx-auto w-full lg:mx-0 ${isLight ? 'bg-white' : 'bg-[#020617]'}`}>
-                <form className="space-y-6 sm:space-y-8">
-                  <input type="password" placeholder={t('home.ownerSection.pinPlaceholder')} className={`w-full bg-transparent border-b border-slate-200 dark:border-white/10 py-3 sm:py-4 text-center text-xl sm:text-2xl font-black tracking-[0.6em] outline-none focus:border-[#D4AF37] transition-all ${textColor}`} />
-                  <button type="submit" className="w-full bg-[#D4AF37] text-black py-4 sm:py-5 font-bold text-[10px] uppercase tracking-[0.3em] hover:bg-black hover:text-white transition-all flex items-center justify-center gap-4">
+              <div className="p-10 border border-[#D4AF37]/20 bg-[#020617] shadow-xl">
+                <form className="space-y-8">
+                  <input type="password" placeholder={t('home.ownerSection.pinPlaceholder')} className="w-full bg-transparent border-b border-white/10 py-4 text-center text-2xl font-black tracking-[0.6em] outline-none focus:border-[#D4AF37] text-white" />
+                  <button type="submit" className="w-full bg-[#D4AF37] text-black py-5 font-bold text-[10px] uppercase tracking-[0.3em] hover:bg-white transition-all flex items-center justify-center gap-4">
                     {t('home.ownerSection.accessButton')} <ArrowRight size={18} />
                   </button>
                 </form>
@@ -38495,7 +38529,8 @@ function HomeContent() {
                <span className="w-4 h-px bg-[#D4AF37]/40"></span>
             </p>
           </header>
-          <PropertyGrid activeFilters={filters} properties={propertiesToShow} />
+          {/* On passe isLight au Grid pour les vignettes */}
+          <PropertyGrid activeFilters={filters} properties={propertiesToShow} isLight={isLight} />
         </div>
       </section>
 
@@ -38505,9 +38540,9 @@ function HomeContent() {
           <div className="bg-black text-white p-12 md:p-20 text-center space-y-8">
             <Mail className="mx-auto text-[#D4AF37]" size={40} />
             <h2 className="text-3xl md:text-5xl font-serif italic">Recevez notre sélection Off-Market</h2>
-            <p className="text-slate-400 max-w-xl mx-auto text-sm uppercase tracking-widest leading-relaxed">Inscrivez-vous pour accéder aux propriétés avant leur publication officielle.</p>
+            <p className="text-slate-400 max-w-xl mx-auto text-sm uppercase tracking-widest">Inscrivez-vous pour accéder aux propriétés avant leur publication officielle.</p>
             <div className="flex flex-col md:flex-row gap-4 max-w-md mx-auto pt-4">
-              <input type="email" placeholder="VOTRE EMAIL" className="bg-transparent border border-white/20 px-6 py-4 outline-none focus:border-[#D4AF37] transition-all flex-1 text-[10px] tracking-widest text-white" />
+              <input type="email" placeholder="VOTRE EMAIL" className="bg-transparent border border-white/20 px-6 py-4 outline-none focus:border-[#D4AF37] flex-1 text-[10px] tracking-widest text-white" />
               <button className="bg-[#D4AF37] text-black px-8 py-4 font-bold text-[10px] tracking-widest uppercase hover:bg-white transition-all">S'inscrire</button>
             </div>
           </div>
@@ -38516,21 +38551,20 @@ function HomeContent() {
 
       {/* MODAL DE RECHERCHE */}
       <div className={`fixed inset-0 z-[100] flex items-center justify-center p-4 transition-all duration-500 ${isSearchOpen ? 'visible opacity-100' : 'invisible opacity-0'}`}>
-        <div className="absolute inset-0 bg-slate-900/60 dark:bg-black/95 backdrop-blur-md" onClick={() => setIsSearchOpen(false)} />
-        <div className={`relative w-full max-w-5xl rounded-none overflow-hidden shadow-2xl transition-transform duration-500 ${isSearchOpen ? 'scale-100 translate-y-0' : 'scale-95 translate-y-10'} ${isLight ? 'bg-white' : 'bg-[#0A0A0A]'}`}>
-          <button onClick={() => setIsSearchOpen(false)} className="absolute top-5 right-5 w-10 h-10 bg-black text-[#D4AF37] rounded-none flex items-center justify-center hover:bg-[#D4AF37] hover:text-black transition-all z-50"><X size={20} /></button>
+        <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-md" onClick={() => setIsSearchOpen(false)} />
+        <div className={`relative w-full max-w-5xl overflow-hidden shadow-2xl transition-all duration-500 ${isSearchOpen ? 'scale-100' : 'scale-95'} ${isLight ? 'bg-white' : 'bg-[#0A0A0A]'}`}>
+          <button onClick={() => setIsSearchOpen(false)} className="absolute top-5 right-5 w-10 h-10 bg-black text-[#D4AF37] flex items-center justify-center hover:bg-[#D4AF37] hover:text-black z-50 transition-all"><X size={20} /></button>
           <div className="p-8 md:p-12 max-h-[85vh] overflow-y-auto">
-            <AdvancedSearch properties={allProperties} onSearch={handleSearch} activeFilters={filters} />
+            <AdvancedSearch properties={allProperties} onSearch={handleSearch} activeFilters={filters} isLight={isLight} />
           </div>
         </div>
       </div>
 
-      <Footer />
+      <Footer isLight={isLight} />
     </main>
   );
 }
 
-// EXPORT AVEC SUSPENSE POUR VERCEL
 export default function Home() {
   return (
     <Suspense fallback={<div className="h-screen bg-[#020617] flex items-center justify-center"><Loader2 className="animate-spin text-[#D4AF37]" size={48} /></div>}>
@@ -38549,14 +38583,18 @@ import Footer from "@/components/Footer";
 import ContactForm from "@/components/ContactForm";
 import { 
   Bed, Bath, Maximize, MapPin, MessageCircle, ArrowLeft, 
-  Loader2, Image as ImageIcon, Home, Map as MapIcon, 
-  Waves, Car, ShieldCheck, Navigation
+  Loader2, Image as ImageIcon, Home, Waves, Car, ShieldCheck, Navigation
 } from "lucide-react";
 import Link from "next/link";
 import { useTranslation } from "@/contexts/I18nContext";
 import { useSearchParams } from "next/navigation";
 
-export default function PropertyDetailClient({ id }: { id: string }) {
+// 1. Interface pour typer les props (Indispensable pour corriger l'erreur de build)
+interface PropertyDetailClientProps {
+  id: string;
+}
+
+export default function PropertyDetailClient({ id }: PropertyDetailClientProps) {
   const { t, locale } = useTranslation();
   const searchParams = useSearchParams();
   const [property, setProperty] = useState<any>(null);
@@ -38584,8 +38622,11 @@ export default function PropertyDetailClient({ id }: { id: string }) {
           String(p.id_externe) === String(id) || String(p.id) === String(id)
         );
         if (current) setProperty(current);
-      } catch (err) { console.error("Erreur Fetch:", err); } 
-      finally { setLoading(false); }
+      } catch (err) { 
+        console.error("Erreur Fetch:", err); 
+      } finally { 
+        setLoading(false); 
+      }
     }
     fetchData();
   }, [id, locale]);
@@ -38600,21 +38641,26 @@ export default function PropertyDetailClient({ id }: { id: string }) {
 
   const cleanDescription = (html: string) => {
     if (!html) return "";
-    return html.replace(/style="[^"]*"/gi, '').replace(/color="[^"]*"/gi, '').replace(/<font[^>]*>/gi, '').replace(/<\/font>/gi, '').replace(/ /g, ' ');
+    return html
+      .replace(/style="[^"]*"/gi, '')
+      .replace(/color="[^"]*"/gi, '')
+      .replace(/<font[^>]*>/gi, '')
+      .replace(/<\/font>/gi, '')
+      .replace(/ /g, ' ');
   };
 
   if (!mounted) return null;
 
   if (loading) return (
-    <div className={`h-screen flex flex-col items-center justify-center ${isLight ? 'bg-white' : 'bg-white dark:bg-[#0A0A0A]'} text-[#D4AF37]`}>
+    <div className={`h-screen flex flex-col items-center justify-center ${isLight ? 'bg-white' : 'bg-[#0A0A0A]'} text-[#D4AF37]`}>
       <Loader2 className="animate-spin mb-4" size={40} />
       <span className="font-serif italic text-xl">{t('propertyDetail.loading')}</span>
     </div>
   );
 
   if (!property) return (
-    <div className={`h-screen flex flex-col items-center justify-center ${isLight ? 'bg-white' : 'bg-white dark:bg-[#0A0A0A]'} p-6 text-center`}>
-      <h1 className={`text-2xl mb-4 font-serif ${isLight ? 'text-slate-900' : 'dark:text-white'}`}>{t('propertyDetail.propertyNotFound')}</h1>
+    <div className={`h-screen flex flex-col items-center justify-center ${isLight ? 'bg-white' : 'bg-[#0A0A0A]'} p-6 text-center`}>
+      <h1 className={`text-2xl mb-4 font-serif ${isLight ? 'text-slate-900' : 'text-white'}`}>{t('propertyDetail.propertyNotFound')}</h1>
       <Link href="/" className="px-8 py-3 bg-[#D4AF37] text-black rounded-full font-bold uppercase text-[10px] tracking-widest">
         {t('propertyDetail.backToCatalogue')}
       </Link>
@@ -38627,18 +38673,16 @@ export default function PropertyDetailClient({ id }: { id: string }) {
   const fallbackMapUrl = `https://maps.google.com/maps?q=${mapQuery}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
 
   return (
-    <main className={`min-h-screen transition-colors duration-500 ${isLight ? 'bg-white' : 'bg-white dark:bg-[#0A0A0A]'}`}>
+    <main className={`min-h-screen transition-colors duration-500 ${isLight ? 'bg-white' : 'bg-[#0A0A0A]'}`}>
       <Navbar />
       <div className="h-24 md:h-32" />
 
-      {/* NAVIGATION */}
       <div className="max-w-7xl mx-auto px-6 mb-8">
         <Link href="/" className="group inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.3em] text-[#D4AF37] font-bold">
           <ArrowLeft size={14} /> {t('propertyDetail.back')}
         </Link>
       </div>
 
-      {/* GALERIE */}
       <section className="max-w-7xl mx-auto px-6 mb-16">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:h-[550px]">
           <div className="md:col-span-3 relative rounded-[2.5rem] md:rounded-[3rem] overflow-hidden shadow-2xl bg-slate-100 dark:bg-[#111] h-[400px] md:h-full">
@@ -38665,10 +38709,9 @@ export default function PropertyDetailClient({ id }: { id: string }) {
         </div>
       </section>
 
-      {/* CONTENU */}
       <section className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-3 gap-16 pb-24">
         <div className="lg:col-span-2">
-          <h1 className={`text-4xl md:text-7xl font-serif mb-8 leading-[1.1] ${isLight ? 'text-slate-900' : 'text-slate-900 dark:text-white'}`}>
+          <h1 className={`text-4xl md:text-7xl font-serif mb-8 leading-[1.1] ${isLight ? 'text-slate-900' : 'text-white'}`}>
             {property.titre || t('propertyDetail.fallbackTitle')}
           </h1>
           
@@ -38686,18 +38729,18 @@ export default function PropertyDetailClient({ id }: { id: string }) {
               { icon: Waves, key: 'pool', val: (property.pool === "Oui" ? t('propertyDetail.poolPrivate') : t('propertyDetail.poolNo')) },
               { icon: Car, key: 'parking', val: t('propertyDetail.parking') }
             ].map((item, i) => (
-              <div key={i} className={`${isLight ? 'bg-slate-100' : 'bg-slate-50 dark:bg-white/5'} p-6 rounded-3xl text-center border ${isLight ? 'border-slate-200' : 'border-white/10'}`}>
+              <div key={i} className={`${isLight ? 'bg-slate-50' : 'bg-white/5'} p-6 rounded-3xl text-center border ${isLight ? 'border-slate-100' : 'border-white/10'}`}>
                 <item.icon className="mx-auto mb-2 text-[#D4AF37]" size={22} />
-                <p className={`text-2xl font-serif ${isLight ? 'text-slate-900' : 'text-slate-900 dark:text-white'}`}>{item.val || "0"}</p>
+                <p className={`text-2xl font-serif ${isLight ? 'text-slate-900' : 'text-white'}`}>{item.val || "0"}</p>
                 <p className="text-[8px] uppercase text-slate-400 font-bold tracking-widest">{t(`propertyDetail.${item.key}`)}</p>
               </div>
             ))}
           </div>
 
-          <div className={`max-w-none mb-20 pt-10 border-t ${isLight ? 'border-slate-200' : 'border-white/10'}`}>
-            <h2 className={`text-3xl font-serif italic mb-8 ${isLight ? 'text-slate-900' : 'dark:text-white'}`}>{t('propertyDetail.artOfLiving')}</h2>
+          <div className={`max-w-none mb-20 pt-10 border-t ${isLight ? 'border-slate-100' : 'border-white/10'}`}>
+            <h2 className={`text-3xl font-serif italic mb-8 ${isLight ? 'text-slate-900' : 'text-white'}`}>{t('propertyDetail.artOfLiving')}</h2>
             <div 
-              className={`text-lg leading-relaxed opacity-90 mb-16 ${isLight ? 'text-slate-700' : 'dark:text-slate-300'}`}
+              className={`text-lg leading-relaxed opacity-90 mb-16 ${isLight ? 'text-slate-700' : 'text-slate-300'}`}
               dangerouslySetInnerHTML={{ __html: cleanDescription(property.description || "") }} 
             />
             
@@ -38705,12 +38748,12 @@ export default function PropertyDetailClient({ id }: { id: string }) {
               <div className="flex items-center gap-4">
                 <div className="h-12 w-12 rounded-2xl bg-[#D4AF37]/10 flex items-center justify-center text-[#D4AF37]"><Navigation size={24} /></div>
                 <div>
-                  <h3 className={`text-2xl font-serif italic ${isLight ? 'text-slate-900' : 'dark:text-white'}`}>{t('propertyDetail.location')}</h3>
+                  <h3 className={`text-2xl font-serif italic ${isLight ? 'text-slate-900' : 'text-white'}`}>{t('propertyDetail.location')}</h3>
                   <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold">{property.town}, Costa Blanca</p>
                 </div>
               </div>
               <div className="relative w-full h-[400px] rounded-[2.5rem] overflow-hidden shadow-xl border border-slate-200 dark:border-white/10">
-                <iframe width="100%" height="100%" frameBorder="0" scrolling="no" src={fallbackMapUrl} className={isLight ? "" : "grayscale-[0.5] dark:grayscale-[1]"} />
+                <iframe width="100%" height="100%" frameBorder="0" scrolling="no" src={fallbackMapUrl} className={isLight ? "" : "grayscale-[1] invert"} />
               </div>
             </div>
           </div>
@@ -38731,18 +38774,16 @@ export default function PropertyDetailClient({ id }: { id: string }) {
               </Link>
             )}
 
-            <div className={isLight ? "" : "bg-white dark:bg-[#111] border border-slate-200 dark:border-white/10 rounded-[3rem] shadow-2xl overflow-hidden"}>
-              {!isLight && (
+            <div className={isLight ? "bg-slate-50 border border-slate-200 rounded-[3rem] p-4" : "bg-[#111] border border-white/10 rounded-[3rem] shadow-2xl overflow-hidden"}>
                 <div className="p-10 pb-0">
                   <p className="text-[10px] uppercase text-slate-400 mb-2 font-bold tracking-widest">{t('propertyDetail.price')}</p>
-                  <p className={`text-5xl font-serif leading-none mb-6 ${isLight ? 'text-slate-900' : 'dark:text-white'}`}>
+                  <p className={`text-5xl font-serif leading-none mb-6 ${isLight ? 'text-slate-900' : 'text-white'}`}>
                     {numericPrice.toLocaleString("fr-FR")} €
                   </p>
                 </div>
-              )}
-              <ContactForm agency={currentAgency} propertyRef={property.id_externe || property.id} />
+              <ContactForm agency={currentAgency} propertyRef={property.id_externe || property.id} isLight={isLight} />
               <div className="px-8 pb-8">
-                <a href={`https://wa.me/34627768233?text=Info ref: ${property.ref}`} target="_blank" className={`w-full border ${isLight ? 'border-slate-200' : 'border-white/10'} flex items-center justify-center gap-3 py-4 rounded-2xl font-bold uppercase text-[10px] hover:bg-slate-50 transition-all ${isLight ? 'text-slate-900' : 'dark:text-white'}`}>
+                <a href={`https://wa.me/34627768233?text=Info ref: ${property.ref}`} target="_blank" className={`w-full border ${isLight ? 'border-slate-200 bg-white' : 'border-white/10'} flex items-center justify-center gap-3 py-4 rounded-2xl font-bold uppercase text-[10px] hover:bg-slate-50 transition-all ${isLight ? 'text-slate-900' : 'text-white'}`}>
                   <MessageCircle size={18} className="text-green-500" /> {t('propertyDetail.whatsappDirect')}
                 </a>
               </div>
@@ -38750,7 +38791,7 @@ export default function PropertyDetailClient({ id }: { id: string }) {
           </div>
         </div>
       </section>
-      <Footer />
+      <Footer isLight={isLight} />
     </main>
   );
 }

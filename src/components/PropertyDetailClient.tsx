@@ -12,7 +12,6 @@ import Link from "next/link";
 import { useTranslation } from "@/contexts/I18nContext";
 import { useSearchParams } from "next/navigation";
 
-// 1. Interface pour typer les props (Indispensable pour corriger l'erreur de build)
 interface PropertyDetailClientProps {
   id: string;
 }
@@ -69,7 +68,7 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
       .replace(/color="[^"]*"/gi, '')
       .replace(/<font[^>]*>/gi, '')
       .replace(/<\/font>/gi, '')
-      .replace(/ /g, ' ');
+      .replace(/&nbsp;/g, ' ');
   };
 
   if (!mounted) return null;

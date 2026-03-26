@@ -105,19 +105,16 @@ export default function ContactForm({ agency, propertyRef, isLight: forcedLight 
   disabled={status === "sending"}
   className={`w-full py-5 rounded-2xl font-black uppercase text-[10px] tracking-[0.4em] flex items-center justify-center gap-4 transition-all duration-500 shadow-lg ${
     isLight 
-    ? "bg-black text-white hover:bg-[#D4AF37] hover:text-black hover:shadow-[#D4AF37]/20" 
-    : "bg-[#D4AF37] text-black hover:bg-white hover:text-black"
-  } ${status === "sending" ? "opacity-70 cursor-not-allowed" : "active:scale-[0.98]"}`}
+      ? "bg-black text-white hover:bg-[#D4AF37] hover:text-black" 
+      : "bg-[#D4AF37] text-black hover:bg-white hover:text-black"
+  }`}
 >
   {status === "sending" ? (
-    <>
-      <Loader2 size={16} className="animate-spin text-inherit" />
-      <span className="text-inherit">ENVOI EN COURS</span>
-    </>
+    <Loader2 className="animate-spin" size={16} />
   ) : (
     <>
-      <span className="text-inherit">ENVOYER LA DEMANDE</span>
-      <Send size={14} className="transition-transform group-hover:translate-x-1 text-inherit" />
+      <span>ENVOYER LA DEMANDE</span>
+      <Send size={14} />
     </>
   )}
 </button>

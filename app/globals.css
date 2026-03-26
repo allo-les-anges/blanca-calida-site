@@ -15,7 +15,6 @@
 }
 
 /* 2. Correction des sélecteurs de section */
-/* On restreint le mode sombre uniquement quand on n'est PAS en pack light */
 html.dark:not([data-package="light"]) section,
 html.dark:not([data-package="light"]) main,
 html.dark:not([data-package="light"]) footer {
@@ -134,4 +133,22 @@ html[data-package="light"] footer a {
 html[data-package="light"] .text-slate-400,
 html[data-package="light"] .text-gray-400 {
   color: #64748b !important;
+}
+
+/* --- NOUVEAU : Amélioration du contraste des badges en mode Light --- */
+html[data-package="light"] .bg-black\/60 {
+  background-color: rgba(0, 0, 0, 0.8) !important;
+}
+
+/* --- NOUVEAU : Garantit la lisibilité des boutons en mode Light --- */
+html[data-package="light"] button {
+  color: #000000 !important;
+}
+html[data-package="light"] button.bg-black,
+html[data-package="light"] button.bg-black span {
+  color: #ffffff !important;
+}
+html[data-package="light"] button.bg-[#D4AF37],
+html[data-package="light"] button.bg-[#D4AF37] span {
+  color: #000000 !important;
 }
