@@ -30,7 +30,6 @@ export default function PropertyCard({ property, isLight = false }: { property: 
 
   if (!mounted) return null;
 
-  // On détermine si on doit vraiment afficher le style "sombre"
   const showDark = resolvedTheme === 'dark' && !isLight;
 
   return (
@@ -45,29 +44,34 @@ export default function PropertyCard({ property, isLight = false }: { property: 
           backgroundColor: showDark ? '#0f172a' : '#f1f5f9',
           borderColor: showDark ? 'rgba(255,255,255,0.05)' : '#e2e8f0'
         }}
-      >
+       Packable>
         <img 
           src={property.images?.[0] || "/placeholder-house.jpg"} 
           alt={property.titre}
           className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 rounded-none"
         />
         
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-80" />
+        {/* Overlay dégradé plus prononcé pour la lisibilité */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-90" />
 
-        <div className="absolute bottom-6 left-6 flex flex-wrap gap-2 max-w-[70%]">
-          <span className={`${isLight ? 'bg-black text-white' : 'bg-[#D4AF37] text-black'} text-[9px] font-black px-4 py-2 rounded-none uppercase tracking-widest shadow-lg`}>
+        {/* BADGES GAUCHE */}
+        <div className="absolute bottom-6 left-6 flex flex-wrap gap-2 max-w-[70%] z-10">
+          <span className={`${isLight ? 'bg-black text-white' : 'bg-[#D4AF37] text-black'} text-[9px] font-black px-4 py-2 rounded-none uppercase tracking-widest shadow-xl border ${isLight ? 'border-white/10' : 'border-black/5'}`}>
             {translate('propertyCard.ref', { ref: property.ref || property.id_externe })}
           </span>
-          <span className="bg-white/10 backdrop-blur-md text-white border border-white/20 text-[8px] font-bold px-4 py-2 rounded-none uppercase tracking-[0.2em]">
+          
+          {/* Correction de la lisibilité ici : bg-black/60 au lieu de white/10 */}
+          <span className="bg-black/60 backdrop-blur-md text-white border border-white/30 text-[8px] font-bold px-4 py-2 rounded-none uppercase tracking-[0.2em]">
             {property.type ? property.type : t('propertyCard.exclusivity')}
           </span>
         </div>
 
-        <div className="absolute bottom-6 right-6 flex flex-col gap-2">
-          <button className="bg-white/10 backdrop-blur-md p-3 rounded-none border border-white/20 text-white hover:bg-[#D4AF37] hover:text-black transition-all">
+        {/* BOUTONS DROITE */}
+        <div className="absolute bottom-6 right-6 flex flex-col gap-2 z-10">
+          <button className="bg-black/40 backdrop-blur-md p-3 rounded-none border border-white/20 text-white hover:bg-[#D4AF37] hover:text-black transition-all">
             <Heart size={18} strokeWidth={1.5} />
           </button>
-          <div className={`${isLight ? 'bg-black text-white' : 'bg-[#D4AF37] text-black'} p-3 rounded-none shadow-xl transform group-hover:translate-x-1 transition-all`}>
+          <div className={`${isLight ? 'bg-black text-white' : 'bg-[#D4AF37] text-black'} p-3 rounded-none shadow-xl transform group-hover:translate-x-1 transition-all border ${isLight ? 'border-white/10' : 'border-black/5'}`}>
             <ChevronRight size={20} strokeWidth={2.5} />
           </div>
         </div>

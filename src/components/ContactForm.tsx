@@ -101,26 +101,26 @@ export default function ContactForm({ agency, propertyRef, isLight: forcedLight 
         <input type="hidden" name="source" value={isLight ? "Pack_Light" : "Pack_Gold"} />
 
         <button 
-          type="submit" 
-          disabled={status === "sending"}
-          className={`w-full py-5 rounded-2xl font-black uppercase text-[10px] tracking-[0.4em] flex items-center justify-center gap-4 transition-all duration-500 shadow-lg ${
-            isLight 
-            ? "bg-black text-white hover:bg-[#D4AF37] hover:shadow-[#D4AF37]/20" 
-            : "bg-[#D4AF37] text-black hover:bg-white"
-          } ${status === "sending" ? "opacity-70 cursor-not-allowed" : ""}`}
-        >
-          {status === "sending" ? (
-            <>
-              <Loader2 size={16} className="animate-spin" />
-              ENVOI EN COURS
-            </>
-          ) : (
-            <>
-              ENVOYER LA DEMANDE
-              <Send size={14} className="group-hover:translate-x-1 transition-transform" />
-            </>
-          )}
-        </button>
+  type="submit" 
+  disabled={status === "sending"}
+  className={`w-full py-5 rounded-2xl font-black uppercase text-[10px] tracking-[0.4em] flex items-center justify-center gap-4 transition-all duration-500 shadow-lg ${
+    isLight 
+    ? "bg-black text-white hover:bg-[#D4AF37] hover:text-black hover:shadow-[#D4AF37]/20" 
+    : "bg-[#D4AF37] text-black hover:bg-white hover:text-black"
+  } ${status === "sending" ? "opacity-70 cursor-not-allowed" : "active:scale-[0.98]"}`}
+>
+  {status === "sending" ? (
+    <>
+      <Loader2 size={16} className="animate-spin text-inherit" />
+      <span className="text-inherit">ENVOI EN COURS</span>
+    </>
+  ) : (
+    <>
+      <span className="text-inherit">ENVOYER LA DEMANDE</span>
+      <Send size={14} className="transition-transform group-hover:translate-x-1 text-inherit" />
+    </>
+  )}
+</button>
       </form>
       
       <p className={`text-center mt-6 text-[8px] uppercase tracking-widest ${isLight ? 'text-slate-400' : 'text-white/20'}`}>
