@@ -1,65 +1,43 @@
 @import "tailwindcss";
 
-/* 1. RESET STRUCTUREL */
-html, body {
-  margin: 0 !important;
-  padding: 0 !important;
-  width: 100%;
-}
-
+/* 1. Reset des forçages agressifs */
 @layer base {
   :root {
     --background: #ffffff;
     --foreground: #0f172a;
-    --accent-gold: #D4AF37; /* Variable centrale pour éviter les erreurs de build */
   }
 
-  /* Force les variables au niveau le plus haut */
-  html.dark {
-    --background: #020617 !important;
-    --foreground: #ffffff !important; 
+  /* On ne force le dark QUE si on n'est pas en pack light */
+  html.dark:not([data-package="light"]) {
+    --background: #020617;
+    --foreground: #ffffff;
   }
+}
 
-  body {
-    background-color: var(--background) !important;
-    color: var(--foreground) !important;
-    @apply transition-colors duration-300 antialiased min-h-screen;
-  }
+/* 2. Correction des sélecteurs de section */
+/* Au lieu de forcer !important partout, utilise des classes Tailwind normales 
+   ou restreint le sélecteur au mode dark réel */
+html.dark:not([data-package="light"]) section,
+html.dark:not([data-package="light"]) main,
+html.dark:not([data-package="light"]) footer {
+    background-color: #020617;
+    color: #ffffff;
+}
 
-  /* 2. LE SÉLECTEUR "ÉCLAT PUR" (VIGNETTES ET TEXTES) */
-  /* On force le blanc sur tous les textes standards */
-  html.dark .text-slate-900, 
-  html.dark .text-slate-800, 
-  html.dark .text-slate-700, 
-  html.dark .text-slate-600,
-  html.dark .text-slate-500,
-  html.dark .text-slate-400,
-  html.dark .text-gray-900,
-  html.dark .text-gray-600,
-  html.dark .text-gray-500,
-  html.dark .text-gray-400,
-  html.dark h1, 
-  html.dark h2, 
-  html.dark h3, 
-  html.dark h4, 
-  html.dark p, 
-  html.dark li, 
-  html.dark a,
-  html.dark span {
-    color: #ffffff !important;
-    opacity: 1 !important;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
+/* 3. FORCE LE BLANC SI PACK LIGHT (Sécurité ultime) */
+html[data-package="light"], 
+html[data-package="light"] body,
+html[data-package="light"] section {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+}
 
-  /* 3. RÉTABLISSEMENT DU DORÉ (PRIORITÉ) */
-  /* On utilise un sélecteur d'attribut "contient" pour éviter le caractère # qui fait planter le build */
-  html.dark [class*="D4AF37"],
-  html.dark .text-gold,
-  html.dark .gold-text,
-  html.dark span[class*="text-gold"] {
-    color: var(--accent-gold) !important;
-  }
+html[data-package="light"] .text-white,
+html[data-package="light"] h2,
+html[data-package="light"] p {
+ 
+  color: #0f172a !important;
+}
 
   /* 4. LES VIGNETTES ET LE FOOTER */
   html.dark .bg-white:not(button):not(.recherche-privee-btn),
