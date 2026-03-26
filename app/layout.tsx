@@ -3,6 +3,7 @@ import { Inter, Playfair_Display, Montserrat } from "next/font/google";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { I18nProvider } from "@/contexts/I18nContext";
 import "./globals.css";  
+import { headers } from "next/headers"; // Ajout crucial
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans", display: 'swap' });
 const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-serif", display: 'swap' });
@@ -13,38 +14,37 @@ export const metadata: Metadata = {
   description: "Découvrez notre sélection exclusive de villas et appartements de luxe.",
 };
 
-export default function RootLayout({ 
-  children, 
-  agency 
+export default async function RootLayout({ 
+  children 
 }: { 
-  children: React.ReactNode; 
-  agency?: { package_level?: string } 
+  children: React.ReactNode;
 }) {
-  // Vérification de sécurité : on s'assure que isLight est bien un booléen
-  const isLight = agency?.package_level === 'light';
+  // TECHNIQUE DE DÉTECTION ROBUSTE :
+  // On regarde l'URL via les headers pour savoir si on est en pack light
+  const headerList = await headers();
+  const fullUrl = headerList.get("x-url") || ""; 
+  const referer = headerList.get("referer") || "";
+  
+  // On vérifie si "pack=light" est présent dans l'URL ou le referer
+  const isLight = fullUrl.includes('pack=light') || referer.includes('pack=light');
 
   return (
     <html 
       lang="fr" 
-      /* FORCE la suppression de la classe 'dark' si on est en mode light.
-         C'est crucial car Tailwind se base sur la présence de cette classe.
-      */
-      className={`${inter.variable} ${playfair.variable} ${montserrat.variable} ${isLight ? '!light' : ''}`}
+      /* On force le retrait de la classe dark au niveau SSR */
+      className={`${inter.variable} ${playfair.variable} ${montserrat.variable} ${isLight ? 'light' : 'dark'}`} 
       suppressHydrationWarning
       data-package={isLight ? 'light' : 'gold'}
     >
       <body 
-        className={`antialiased transition-colors duration-300`}
+        className="antialiased"
         style={{ 
-            backgroundColor: isLight ? '#FFFFFF' : '#000000',
+            backgroundColor: isLight ? '#FFFFFF' : '#020617',
             color: isLight ? '#0f172a' : '#FFFFFF' 
         }}
       >
         <ThemeProvider 
           attribute="class" 
-          /* forcedTheme est l'arme absolue : il ignore les préférences du navigateur 
-             et force next-themes à injecter uniquement la classe 'light'.
-          */
           forcedTheme={isLight ? "light" : undefined}
           defaultTheme={isLight ? "light" : "dark"} 
           enableSystem={!isLight}
