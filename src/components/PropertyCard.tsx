@@ -44,7 +44,7 @@ export default function PropertyCard({ property, isLight = false }: { property: 
           backgroundColor: showDark ? '#0f172a' : '#f1f5f9',
           borderColor: showDark ? 'rgba(255,255,255,0.05)' : '#e2e8f0'
         }}
-       Packable>
+      >
         <img 
           src={property.images?.[0] || "/placeholder-house.jpg"} 
           alt={property.titre}
@@ -60,7 +60,6 @@ export default function PropertyCard({ property, isLight = false }: { property: 
             {translate('propertyCard.ref', { ref: property.ref || property.id_externe })}
           </span>
           
-          {/* Correction de la lisibilité ici : bg-black/60 au lieu de white/10 */}
           <span className="bg-black/60 backdrop-blur-md text-white border border-white/30 text-[8px] font-bold px-4 py-2 rounded-none uppercase tracking-[0.2em]">
             {property.type ? property.type : t('propertyCard.exclusivity')}
           </span>
