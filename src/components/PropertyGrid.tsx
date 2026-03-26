@@ -10,9 +10,14 @@ import { useTranslation } from "@/contexts/I18nContext";
 interface PropertyGridProps {
   activeFilters: any;
   properties: any[];
+  isLight?: boolean; // Ajout de la prop pour TypeScript
 }
 
-export default function PropertyGrid({ activeFilters, properties }: PropertyGridProps) {
+export default function PropertyGrid({ 
+  activeFilters, 
+  properties, 
+  isLight: isLightProp // On récupère la prop passée par le parent
+}: PropertyGridProps) {
   const { resolvedTheme } = useTheme();
   const { t } = useTranslation();
   const searchParamsOrigin = useSearchParams();
@@ -21,17 +26,24 @@ export default function PropertyGrid({ activeFilters, properties }: PropertyGrid
   const [isAnimating, setIsAnimating] = useState(false);
   const [mounted, setMounted] = useState(false);
 
-  const isLight = searchParamsOrigin.get('pack') === 'light';
+  // Détection combinée : prop du parent OU paramètre d'URL
+  const isLight = isLightProp || searchParamsOrigin.get('pack') === 'light';
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
   useEffect(() => {
-    if (!properties) return;
+    // Sécurité : si properties n'est pas un tableau, on ne fait rien pour éviter le crash .filter
+    if (!properties || !Array.isArray(properties)) {
+      setFiltered([]);
+      return;
+    }
+
     setIsAnimating(true);
     
     const result = properties.filter((p) => {
+      if (!p) return false;
       const matchType = !activeFilters.type || p.type?.toLowerCase().includes(activeFilters.type.toLowerCase());
       const matchTown = !activeFilters.town || p.town?.toLowerCase().includes(activeFilters.town.toLowerCase());
       const matchRegion = !activeFilters.region || p.region?.toLowerCase().includes(activeFilters.region.toLowerCase());
@@ -53,6 +65,7 @@ export default function PropertyGrid({ activeFilters, properties }: PropertyGrid
 
   if (!mounted) return null;
 
+  // Logique visuelle pour le texte (Blanc si Dark pur, Noir si Light ou pack=light)
   const isDarkVisual = resolvedTheme === "dark" && !isLight;
 
   return (
