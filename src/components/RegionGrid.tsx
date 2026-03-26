@@ -78,10 +78,14 @@ export default function RegionGrid({ properties, onRegionClick }: RegionGridProp
 
   if (!mounted) return null;
 
+  // Détermine si on affiche le mode sombre visuellement (uniquement si pas en pack light)
   const isDarkVisual = resolvedTheme === "dark" && !isLight;
 
   return (
-    <section className={`max-w-[1600px] mx-auto px-6 py-6 transition-colors duration-500 ${isLight ? 'bg-white' : 'bg-white dark:bg-[#0A0A0A]'}`}>
+    <section 
+      className="max-w-[1600px] mx-auto px-6 py-12 transition-colors duration-500"
+      style={{ backgroundColor: isDarkVisual ? '#0A0A0A' : '#FFFFFF' }}
+    >
       
       {/* HEADER */}
       <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-8">
@@ -103,7 +107,8 @@ export default function RegionGrid({ properties, onRegionClick }: RegionGridProp
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
-          className={`max-w-xs border-l ${isDarkVisual ? 'border-white/10' : 'border-slate-200'} pl-6 pb-1`}
+          className="max-w-xs border-l pl-6 pb-1"
+          style={{ borderColor: isDarkVisual ? 'rgba(255,255,255,0.1)' : '#e2e8f0' }}
         >
           <p 
             className="text-xs font-light leading-relaxed italic"

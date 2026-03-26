@@ -13,7 +13,13 @@ export const metadata: Metadata = {
   description: "Découvrez notre sélection exclusive de villas et appartements de luxe.",
 };
 
-export default function RootLayout({ children, agency }: { children: React.ReactNode; agency?: { package_level?: string } }) {
+export default function RootLayout({ 
+  children, 
+  agency 
+}: { 
+  children: React.ReactNode; 
+  agency?: { package_level?: string } 
+}) {
   const isLight = agency?.package_level === 'light';
 
   return (
@@ -23,12 +29,15 @@ export default function RootLayout({ children, agency }: { children: React.React
       suppressHydrationWarning
       data-package={isLight ? 'light' : 'gold'}
     >
-      <body className={`antialiased ${isLight ? 'bg-white text-slate-900' : 'bg-black text-white'}`}>
+      {/* Ici, on s'assure que si c'est light, TOUT le site ignore le mode sombre.
+          On utilise forcedTheme pour écraser la détection automatique du navigateur.
+      */}
+      <body className={`antialiased transition-colors duration-300 ${isLight ? 'bg-white text-slate-900' : 'bg-black text-white'}`}>
         <ThemeProvider 
           attribute="class" 
           defaultTheme={isLight ? "light" : "dark"} 
-          forcedTheme={isLight ? "light" : undefined}
-          enableSystem={false}
+          forcedTheme={isLight ? "light" : undefined} // FORCE le thème clair si pack light
+          enableSystem={!isLight} // Désactive la détection système en mode light
         >
           <I18nProvider>
             {children}
