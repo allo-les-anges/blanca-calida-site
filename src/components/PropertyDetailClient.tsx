@@ -1,223 +1,224 @@
 "use client";
 
-import { useState, useEffect, useMemo, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { 
-  Search, Loader2, ArrowRight, X, Mail
-} from "lucide-react";
-import { useTranslation } from "@/contexts/I18nContext";
-
+import { useEffect, useState, useRef } from "react";
 import Navbar from "@/components/Navbar";
-import Hero from "@/components/Hero";
-import AdvancedSearch from "@/components/AdvancedSearch";
-import ScrollingBanner from "@/components/ScrollingBanner";
-import RegionGrid from "@/components/RegionGrid";
-import PropertyGrid from "@/components/PropertyGrid";
 import Footer from "@/components/Footer";
+import ContactForm from "@/components/ContactForm";
+import { 
+  Bed, Bath, Maximize, MapPin, MessageCircle, ArrowLeft, 
+  Loader2, Image as ImageIcon, Home, Waves, Car, ShieldCheck, Navigation
+} from "lucide-react";
+import Link from "next/link";
+import { useTranslation } from "@/contexts/I18nContext";
+import { useSearchParams } from "next/navigation";
 
-type Property = any;
+// Interface ajoutée pour corriger l'erreur de compilation
+interface PropertyDetailClientProps {
+  id: string;
+}
 
-function HomeContent() {
-  const router = useRouter();
-  const searchParamsOrigin = useSearchParams();
-  const { t } = useTranslation();
-  
-  const [mounted, setMounted] = useState(false);
-  const [allProperties, setAllProperties] = useState<Property[]>([]);
-  const [visibleCount, setVisibleCount] = useState(12);
+export default function PropertyDetailClient({ id }: PropertyDetailClientProps) {
+  const { t, locale } = useTranslation();
+  const searchParams = useSearchParams();
+  const [property, setProperty] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [activeImage, setActiveImage] = useState(0);
+  const [mounted, setMounted] = useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  const isLight = searchParamsOrigin.get('pack') === 'light' || 
-                  (typeof document !== 'undefined' && document.documentElement.getAttribute('data-package') === 'light');
+  const isLight = searchParams.get('pack') === 'light';
+
+  const currentAgency = {
+    id: "AGENCE_HANNIBAL_001", 
+    package_level: isLight ? "light" : "gold",
+    name: "Data Home"
+  };
 
   useEffect(() => {
     setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    document.body.style.overflow = isSearchOpen ? "hidden" : "unset";
-  }, [isSearchOpen]);
-
-  useEffect(() => {
-    async function loadData() {
+    async function fetchData() {
       try {
-        setLoading(true);
-        const res = await fetch("/api/properties");
+        const res = await fetch(`/api/properties?lang=${locale}`);
         const data = await res.json();
-        if (data && Array.isArray(data)) {
-          setAllProperties(data);
-        } else {
-          setAllProperties([]);
-        }
-      } catch (err) {
-        setAllProperties([]);
-      } finally {
-        setLoading(false);
+        const propertiesArray = Array.isArray(data) ? data : (data.properties || []);
+        const current = propertiesArray.find((p: any) => 
+          String(p.id_externe) === String(id) || String(p.id) === String(id)
+        );
+        if (current) setProperty(current);
+      } catch (err) { 
+        console.error("Erreur Fetch:", err); 
+      } finally { 
+        setLoading(false); 
       }
     }
-    loadData();
-  }, []);
+    fetchData();
+  }, [id, locale]);
 
-  const [filters, setFilters] = useState({
-    type: "", town: "", region: "", beds: "",
-    minPrice: "", maxPrice: "", reference: "", development: "", availableOnly: false,
-  });
-
-  const filteredProperties = useMemo(() => {
-    const baseProps = Array.isArray(allProperties) ? allProperties : [];
-    return baseProps.filter((p) => {
-      if (!p) return false;
-      const matchDev = !filters.development || p.development_name?.toLowerCase().trim() === filters.development.toLowerCase().trim();
-      const matchTown = !filters.town || p.town === filters.town;
-      const matchRegion = !filters.region || p.region === filters.region;
-      const matchType = !filters.type || p.type?.toLowerCase().includes(filters.type.toLowerCase());
-      const matchBeds = !filters.beds || Number(p.beds) >= Number(filters.beds);
-      const price = Number(p.price || 0);
-      const matchMin = !filters.minPrice || price >= Number(filters.minPrice);
-      const matchMax = !filters.maxPrice || price <= Number(filters.maxPrice);
-      const matchRef = !filters.reference || p.ref?.toLowerCase().includes(filters.reference.toLowerCase());
-      return matchDev && matchTown && matchRegion && matchType && matchBeds && matchMin && matchMax && matchRef;
-    });
-  }, [allProperties, filters]);
-
-  const hasActiveFilters = Object.values(filters).some((v) => v !== "" && v !== false);
-  const propertiesToShow = hasActiveFilters ? filteredProperties : filteredProperties.slice(0, visibleCount);
-
-  const handleSearch = (newFilters: any) => {
-    setFilters({ ...filters, ...newFilters, region: "" });
-    setVisibleCount(12);
-    setIsSearchOpen(false);
-    const section = document.getElementById("collection");
-    if (section) setTimeout(() => section.scrollIntoView({ behavior: "smooth" }), 100);
+  const handleScroll = () => {
+    if (scrollContainerRef.current) {
+      const { scrollLeft, clientWidth } = scrollContainerRef.current;
+      const newIndex = Math.round(scrollLeft / clientWidth);
+      if (newIndex !== activeImage) setActiveImage(newIndex);
+    }
   };
 
-  const handleRegionClick = (regionName: string) => {
-    setFilters({ type: "", town: "", region: regionName, beds: "", minPrice: "", maxPrice: "", reference: "", development: "", availableOnly: false });
-    setVisibleCount(12);
-    const section = document.getElementById("collection");
-    if (section) setTimeout(() => section.scrollIntoView({ behavior: "smooth" }), 100);
+  const cleanDescription = (html: string) => {
+    if (!html) return "";
+    return html
+      .replace(/style="[^"]*"/gi, '')
+      .replace(/color="[^"]*"/gi, '')
+      .replace(/<font[^>]*>/gi, '')
+      .replace(/<\/font>/gi, '')
+      .replace(/&nbsp;/g, ' ');
   };
 
   if (!mounted) return null;
 
-  const bgColor = isLight ? 'bg-white' : 'bg-[#020617]';
-  const textColor = isLight ? 'text-slate-900' : 'text-white';
+  if (loading) return (
+    <div className={`h-screen flex flex-col items-center justify-center ${isLight ? 'bg-white' : 'bg-[#0A0A0A]'} text-[#D4AF37]`}>
+      <Loader2 className="animate-spin mb-4" size={40} />
+      <span className="font-serif italic text-xl">{t('propertyDetail.loading')}</span>
+    </div>
+  );
 
-  if (loading) {
-    return (
-      <div className={`h-screen flex flex-col items-center justify-center ${bgColor}`}>
-        <Loader2 className="animate-spin text-[#D4AF37] mb-8" size={48} />
-        <span className={`text-[10px] font-bold uppercase tracking-[0.5em] animate-pulse ${isLight ? 'text-black' : 'text-[#D4AF37]'}`}>
-          {t('home.loading.amaruExcellence')}
-        </span>
-      </div>
-    );
-  }
+  if (!property) return (
+    <div className={`h-screen flex flex-col items-center justify-center ${isLight ? 'bg-white' : 'bg-[#0A0A0A]'} p-6 text-center`}>
+      <h1 className={`text-2xl mb-4 font-serif ${isLight ? 'text-slate-900' : 'text-white'}`}>{t('propertyDetail.propertyNotFound')}</h1>
+      <Link href="/" className="px-8 py-3 bg-[#D4AF37] text-black rounded-full font-bold uppercase text-[10px] tracking-widest">
+        {t('propertyDetail.backToCatalogue')}
+      </Link>
+    </div>
+  );
+
+  const images = property.images || [];
+  const numericPrice = Number(property.price || property.prix || 0);
+  const mapQuery = encodeURIComponent(`${property.town || ""}, ${property.region || ""}, Espagne`);
+  const fallbackMapUrl = `https://maps.google.com/maps?q=${mapQuery}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
 
   return (
-    <main className={`min-h-screen selection:bg-[#D4AF37]/30 font-sans overflow-x-hidden transition-colors duration-500 ${bgColor}`}>
+    <main className={`min-h-screen transition-colors duration-500 ${isLight ? 'bg-white' : 'bg-[#0A0A0A]'}`}>
       <Navbar />
-      
-      <div className={`relative h-[80vh] flex flex-col items-center justify-center transition-colors duration-500 ${bgColor}`}>
-        <Hero />
-        <div className="absolute bottom-[12%] z-40">
-           {!isSearchOpen && (
-             <button 
-                onClick={() => setIsSearchOpen(true)}
-                className="group flex items-center gap-5 transition-all duration-700"
-             >
-                <div className={`w-10 h-10 border ${isLight ? 'border-black/10 bg-black text-white' : 'border-[#D4AF37]/30 bg-transparent text-[#D4AF37]'} rounded-full flex items-center justify-center group-hover:bg-[#D4AF37] group-hover:text-white transition-all duration-500 shadow-sm`}>
-                  <Search size={16} strokeWidth={1.5} />
+      <div className="h-24 md:h-32" />
+
+      <div className="max-w-7xl mx-auto px-6 mb-8">
+        <Link href="/" className="group inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.3em] text-[#D4AF37] font-bold">
+          <ArrowLeft size={14} /> {t('propertyDetail.back')}
+        </Link>
+      </div>
+
+      {/* Galerie Photos */}
+      <section className="max-w-7xl mx-auto px-6 mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:h-[550px]">
+          <div className="md:col-span-3 relative rounded-[2.5rem] md:rounded-[3rem] overflow-hidden shadow-2xl bg-slate-100 dark:bg-[#111] h-[400px] md:h-full">
+            <div ref={scrollContainerRef} onScroll={handleScroll} className="flex md:block h-full overflow-x-auto md:overflow-x-hidden snap-x snap-mandatory scrollbar-hide">
+              {images.map((img: string, idx: number) => (
+                <div key={idx} className="min-w-full h-full snap-center md:absolute md:inset-0 md:transition-opacity md:duration-700" style={{ opacity: activeImage === idx ? 1 : 0, zIndex: activeImage === idx ? 10 : 0 }}>
+                  <img src={img} className="w-full h-full object-cover" alt="" />
                 </div>
-                <span className={`text-[11px] md:text-[13px] font-light uppercase tracking-[0.6em] transition-colors duration-500 ${textColor}`}>
-                  {t('home.findVilla')}
-                </span>
-             </button>
-           )}
-        </div>
-        <div className={`absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t ${isLight ? 'from-white' : 'from-[#020617]'} to-transparent pointer-events-none transition-colors duration-500`} />
-      </div>
-
-      <ScrollingBanner />
-
-      <section className={`py-12 transition-colors duration-500 ${bgColor}`}>
-          <RegionGrid properties={allProperties} onRegionClick={handleRegionClick} />
-      </section>
-
-      {!isLight && (
-        <section className={`max-w-[1600px] mx-auto px-4 py-12 ${bgColor}`}>
-          <div className="bg-[#0F172A]/40 p-12 border border-white/5 relative overflow-hidden">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-              <div className="space-y-6">
-                <span className="text-[#D4AF37] text-[10px] font-bold uppercase tracking-[0.4em]">{t('home.ownerSection.badge')}</span>
-                <h2 className="text-4xl md:text-6xl font-serif italic text-white leading-tight">
-                  {t('home.ownerSection.title')} <br />
-                  <span className="text-[#D4AF37] not-italic font-sans font-extrabold text-3xl md:text-5xl uppercase">{t('home.ownerSection.subtitle')}</span>
-                </h2>
-              </div>
-              <div className="p-10 border border-[#D4AF37]/20 bg-[#020617] shadow-xl">
-                <form className="space-y-8">
-                  <input type="password" placeholder={t('home.ownerSection.pinPlaceholder')} className="w-full bg-transparent border-b border-white/10 py-4 text-center text-2xl font-black tracking-[0.6em] outline-none focus:border-[#D4AF37] text-white" />
-                  <button type="submit" className="w-full bg-[#D4AF37] text-black py-5 font-bold text-[10px] uppercase tracking-[0.3em] hover:bg-white transition-all flex items-center justify-center gap-4">
-                    {t('home.ownerSection.accessButton')} <ArrowRight size={18} />
-                  </button>
-                </form>
-              </div>
+              ))}
+            </div>
+            <div className="absolute bottom-6 left-6 bg-black/60 backdrop-blur-md text-white px-4 py-2 rounded-full text-[10px] uppercase tracking-widest flex items-center gap-2 z-20">
+              <ImageIcon size={14} /> {activeImage + 1} / {images.length}
             </div>
           </div>
-        </section>
-      )}
-
-      <section id="collection" className={`py-12 relative transition-colors duration-500 ${bgColor}`}>
-        <div className="max-w-7xl mx-auto px-6">
-          <header className="mb-12 text-center space-y-4">
-            <h3 className={`text-4xl md:text-6xl font-serif italic leading-none ${textColor}`}>
-              {filters.region ? filters.region : t('home.collection.title')}
-            </h3>
-            <p className="text-[#D4AF37] text-[10px] font-bold uppercase tracking-[0.4em] flex items-center justify-center gap-4">
-               <span className="w-4 h-px bg-[#D4AF37]/40"></span>
-               {filteredProperties.length} {t('home.collection.propertiesSelected')}
-               <span className="w-4 h-px bg-[#D4AF37]/40"></span>
-            </p>
-          </header>
-          <PropertyGrid activeFilters={filters} properties={propertiesToShow} isLight={isLight} />
+          <div className="hidden md:flex flex-col gap-4 overflow-y-auto pr-2 custom-scrollbar">
+            {images.map((img: string, idx: number) => (
+              <button key={idx} onClick={() => { setActiveImage(idx); scrollContainerRef.current?.scrollTo({ left: idx * (scrollContainerRef.current?.clientWidth || 0), behavior: 'smooth' }); }} 
+                className={`relative h-24 min-h-[96px] rounded-2xl overflow-hidden border-2 transition-all ${activeImage === idx ? 'border-[#D4AF37] scale-95' : 'border-transparent opacity-60'}`}
+              >
+                <img src={img} className="w-full h-full object-cover" alt="" />
+              </button>
+            ))}
+          </div>
         </div>
       </section>
 
-      {isLight && (
-        <section className="max-w-7xl mx-auto px-6 py-24">
-          <div className="bg-slate-50 border border-slate-100 p-12 md:p-20 text-center space-y-8 rounded-[2rem]">
-            <Mail className="mx-auto text-[#D4AF37]" size={40} />
-            <h2 className="text-3xl md:text-5xl font-serif italic text-slate-900">Recevez notre sélection Off-Market</h2>
-            <p className="text-slate-500 max-w-xl mx-auto text-[10px] uppercase tracking-[0.3em]">Inscrivez-vous pour accéder aux propriétés avant leur publication officielle.</p>
-            <div className="flex flex-col md:flex-row gap-4 max-w-md mx-auto pt-4">
-              <input type="email" placeholder="VOTRE EMAIL" className="bg-white border border-slate-200 px-6 py-4 outline-none focus:border-[#D4AF37] flex-1 text-[10px] tracking-widest text-slate-900" />
-              <button className="bg-black text-white px-8 py-4 font-bold text-[10px] tracking-widest uppercase hover:bg-[#D4AF37] transition-all">S'inscrire</button>
+      {/* Infos principales */}
+      <section className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-3 gap-16 pb-24">
+        <div className="lg:col-span-2">
+          <h1 className={`text-4xl md:text-7xl font-serif mb-8 leading-[1.1] ${isLight ? 'text-slate-900' : 'text-white'}`}>
+            {property.titre || t('propertyDetail.fallbackTitle')}
+          </h1>
+          
+          <div className="flex items-center gap-3 text-slate-500 mb-8 text-[11px] uppercase tracking-[0.2em] font-bold">
+            <MapPin size={18} className="text-[#D4AF37]" />
+            {property.town || property.ville} • {property.region}
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-16">
+            {[
+              { icon: Bed, key: 'bedrooms', val: property.beds },
+              { icon: Bath, key: 'bathrooms', val: property.baths },
+              { icon: Maximize, key: 'built', val: property.surface_built },
+              { icon: Home, key: 'plot', val: property.surface_plot },
+              { icon: Waves, key: 'pool', val: (property.pool === "Oui" ? t('propertyDetail.poolPrivate') : t('propertyDetail.poolNo')) },
+              { icon: Car, key: 'parking', val: t('propertyDetail.parking') }
+            ].map((item, i) => (
+              <div key={i} className={`${isLight ? 'bg-slate-50' : 'bg-white/5'} p-6 rounded-3xl text-center border ${isLight ? 'border-slate-100' : 'border-white/10'}`}>
+                <item.icon className="mx-auto mb-2 text-[#D4AF37]" size={22} />
+                <p className={`text-2xl font-serif ${isLight ? 'text-slate-900' : 'text-white'}`}>{item.val || "0"}</p>
+                <p className="text-[8px] uppercase text-slate-400 font-bold tracking-widest">{t(`propertyDetail.${item.key}`)}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className={`max-w-none mb-20 pt-10 border-t ${isLight ? 'border-slate-100' : 'border-white/10'}`}>
+            <h2 className={`text-3xl font-serif italic mb-8 ${isLight ? 'text-slate-900' : 'text-white'}`}>{t('propertyDetail.artOfLiving')}</h2>
+            <div 
+              className={`text-lg leading-relaxed opacity-90 mb-16 ${isLight ? 'text-slate-700' : 'text-slate-300'}`}
+              dangerouslySetInnerHTML={{ __html: cleanDescription(property.description || "") }} 
+            />
+            
+            {/* Carte */}
+            <div className="space-y-8">
+              <div className="flex items-center gap-4">
+                <div className="h-12 w-12 rounded-2xl bg-[#D4AF37]/10 flex items-center justify-center text-[#D4AF37]"><Navigation size={24} /></div>
+                <div>
+                  <h3 className={`text-2xl font-serif italic ${isLight ? 'text-slate-900' : 'text-white'}`}>{t('propertyDetail.location')}</h3>
+                  <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold">{property.town}, Costa Blanca</p>
+                </div>
+              </div>
+              <div className="relative w-full h-[400px] rounded-[2.5rem] overflow-hidden shadow-xl border border-slate-200 dark:border-white/10">
+                <iframe width="100%" height="100%" frameBorder="0" scrolling="no" src={fallbackMapUrl} className={isLight ? "" : "grayscale-[1] invert"} />
+              </div>
             </div>
           </div>
-        </section>
-      )}
+        </div>
 
-      <div className={`fixed inset-0 z-[100] flex items-center justify-center p-4 transition-all duration-500 ${isSearchOpen ? 'visible opacity-100' : 'invisible opacity-0'}`}>
-        <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-md" onClick={() => setIsSearchOpen(false)} />
-        <div className={`relative w-full max-w-5xl overflow-hidden shadow-2xl transition-all duration-500 ${isSearchOpen ? 'scale-100' : 'scale-95'} ${isLight ? 'bg-white rounded-[2.5rem]' : 'bg-[#0A0A0A]'}`}>
-          <button onClick={() => setIsSearchOpen(false)} className="absolute top-5 right-5 w-10 h-10 bg-black text-[#D4AF37] flex items-center justify-center hover:bg-[#D4AF37] hover:text-black z-50 transition-all rounded-full"><X size={20} /></button>
-          <div className="p-8 md:p-12 max-h-[85vh] overflow-y-auto">
-            <AdvancedSearch properties={allProperties} onSearch={handleSearch} activeFilters={filters} isLight={isLight} />
+        {/* Sidebar contact */}
+        <div className="lg:col-span-1">
+          <div className="sticky top-40 space-y-6">
+            {!isLight && (
+              <Link href={`/contact-cashback?Property_ID=${property.id_externe || property.id}`} className="group relative block w-full overflow-hidden rounded-[2.5rem] bg-slate-900 p-[1px] shadow-2xl transition-transform hover:scale-[1.02]">
+                <div className="absolute inset-0 bg-gradient-to-br from-[#D4AF37] to-transparent opacity-30" />
+                <div className="relative bg-slate-900 rounded-[2.5rem] p-8 flex items-center gap-5">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/30"><ShieldCheck size={28} /></div>
+                  <div className="flex flex-col">
+                    <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-[#D4AF37] mb-1">{t('propertyDetail.privilege')}</span>
+                    <span className="text-xl font-serif italic text-white leading-tight">{t('propertyDetail.activateCashback')}</span>
+                  </div>
+                </div>
+              </Link>
+            )}
+
+            <div className={isLight ? "bg-slate-50 border border-slate-200 rounded-[3rem] p-4" : "bg-[#111] border border-white/10 rounded-[3rem] shadow-2xl overflow-hidden"}>
+                <div className="p-10 pb-0">
+                  <p className="text-[10px] uppercase text-slate-400 mb-2 font-bold tracking-widest">{t('propertyDetail.price')}</p>
+                  <p className={`text-5xl font-serif leading-none mb-6 ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                    {numericPrice.toLocaleString("fr-FR")} €
+                  </p>
+                </div>
+              <ContactForm agency={currentAgency} propertyRef={property.id_externe || property.id} isLight={isLight} />
+              <div className="px-8 pb-8">
+                <a href={`https://wa.me/34627768233?text=Info ref: ${property.ref}`} target="_blank" className={`w-full border ${isLight ? 'border-slate-200 bg-white' : 'border-white/10'} flex items-center justify-center gap-3 py-4 rounded-2xl font-bold uppercase text-[10px] hover:bg-slate-50 transition-all ${isLight ? 'text-slate-900' : 'text-white'}`}>
+                  <MessageCircle size={18} className="text-green-500" /> {t('propertyDetail.whatsappDirect')}
+                </a>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-
+      </section>
       <Footer isLight={isLight} />
     </main>
-  );
-}
-
-export default function Home() {
-  return (
-    <Suspense fallback={<div className="h-screen bg-[#020617] flex items-center justify-center"><Loader2 className="animate-spin text-[#D4AF37]" size={48} /></div>}>
-      <HomeContent />
-    </Suspense>
   );
 }
