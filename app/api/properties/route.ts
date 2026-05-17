@@ -43,7 +43,7 @@ export async function GET(request: Request) {
       }
     }
 
-    const { data: properties, error } = await query.order('price', { ascending: true });
+    const { data: properties, error } = await query.order('price', { ascending: true }).limit(24);
 
     if (error) {
       console.error("Erreur Supabase:", error.message);
