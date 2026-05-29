@@ -446,6 +446,30 @@ export default function AdminDashboard() {
         const text = cleanPdfText(value);
         return text.length > maxLength ? `${text.slice(0, maxLength).trim()}...` : text;
       };
+      const forceWrapText = (value: string, maxWidth: number) => {
+        const words = cleanPdfText(value).split(/\s+/).filter(Boolean);
+        const lines: string[] = [];
+        let current = "";
+
+        for (const word of words) {
+          const pieces = doc.getTextWidth(word) > maxWidth
+            ? word.match(new RegExp(`.{1,${Math.max(4, Math.floor(maxWidth / 2))}}`, "g")) || [word]
+            : [word];
+
+          for (const piece of pieces) {
+            const candidate = current ? `${current} ${piece}` : piece;
+            if (doc.getTextWidth(candidate) <= maxWidth) {
+              current = candidate;
+            } else {
+              if (current) lines.push(current);
+              current = piece;
+            }
+          }
+        }
+
+        if (current) lines.push(current);
+        return lines;
+      };
 
       const addFooter = () => {
         doc.setDrawColor(...brandGold);
@@ -546,7 +570,7 @@ export default function AdminDashboard() {
           new Date(c.created_at).toLocaleString(),
           gpsText(c),
           c.captured_by || expertNom,
-          doc.splitTextToSize(analysisText, analysisColumnWidth).join("\n"),
+          forceWrapText(analysisText, analysisColumnWidth - 5).slice(0, 7).join("\n"),
         ];
       });
 
@@ -617,7 +641,7 @@ export default function AdminDashboard() {
         doc.text("Observation", margin + 6, yPos + 36);
         doc.setFont("helvetica", "normal");
         doc.setFontSize(8);
-        const noteLines = doc.splitTextToSize(limitPdfText(c.note_expert || t('adminDashboard.defaultObservation'), 360), 72);
+        const noteLines = forceWrapText(limitPdfText(c.note_expert || t('adminDashboard.defaultObservation'), 300), 66);
         doc.text(noteLines.slice(0, 7), margin + 6, yPos + 42);
         yPos += 88;
       }
