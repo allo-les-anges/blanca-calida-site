@@ -65,6 +65,7 @@ export default function Navbar() {
 
   const navLinks = [
     { name: t('nav.home'), href: "/", show: true },
+    { name: t('nav.regionGuide'), href: "/guides", show: true },
     { name: t('nav.cashbackInfo'), href: "/cashback-info", show: !isLight }, 
     { name: t('nav.contact'), href: "/contact", show: true },
   ].filter(link => link.show).map(link => ({
