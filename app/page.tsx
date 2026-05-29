@@ -18,6 +18,7 @@ import Footer from "@/components/Footer";
 import IntroGate from "@/components/IntroGate";
 
 type Property = any;
+const DEFAULT_MIN_PRICE = "500000";
 
 function HomeContent() {
   const router = useRouter();
@@ -70,7 +71,7 @@ function HomeContent() {
 
   const [filters, setFilters] = useState({
     type: "", town: "", region: "", beds: "",
-    minPrice: "", maxPrice: "", reference: "", development: "", availableOnly: false,
+    minPrice: DEFAULT_MIN_PRICE, maxPrice: "", reference: "", development: "", availableOnly: false,
   });
 
   // CORRECTION : Sécurisation du filter
@@ -92,7 +93,10 @@ function HomeContent() {
     });
   }, [allProperties, filters]);
 
-  const hasActiveFilters = Object.values(filters).some((v) => v !== "" && v !== false);
+  const hasActiveFilters = Object.entries(filters).some(([key, value]) => {
+    if (key === "minPrice") return value !== DEFAULT_MIN_PRICE;
+    return value !== "" && value !== false;
+  });
   const propertiesToShow = hasActiveFilters ? filteredProperties : filteredProperties.slice(0, visibleCount);
 
   const handleSearch = (newFilters: any) => {
@@ -104,7 +108,7 @@ function HomeContent() {
   };
 
   const handleRegionClick = (regionName: string) => {
-    setFilters({ type: "", town: "", region: regionName, beds: "", minPrice: "", maxPrice: "", reference: "", development: "", availableOnly: false });
+    setFilters({ type: "", town: "", region: regionName, beds: "", minPrice: DEFAULT_MIN_PRICE, maxPrice: "", reference: "", development: "", availableOnly: false });
     setVisibleCount(12);
     const section = document.getElementById("collection");
     if (section) setTimeout(() => section.scrollIntoView({ behavior: "smooth" }), 100);

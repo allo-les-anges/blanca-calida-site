@@ -2,6 +2,8 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { RotateCcw, Search, Map, Home, Hash, Bed, X } from "lucide-react";
 
+const DEFAULT_MIN_PRICE = "500000";
+
 interface AdvancedSearchProps {
   onSearch: (filters: any) => void;
   properties: any[];
@@ -44,7 +46,7 @@ export default function AdvancedSearch({
       region: localFilters.region || "",
       type: localFilters.type || "",
       beds: localFilters.beds || "",
-      minPrice: localFilters.minPrice || "100000",
+      minPrice: localFilters.minPrice || DEFAULT_MIN_PRICE,
       maxPrice: localFilters.maxPrice || "75000000"
     };
     onSearch(cleanedFilters);
@@ -54,7 +56,7 @@ export default function AdvancedSearch({
   const reset = () => {
     const empty = { 
       region: "", town: "", type: "", beds: "", 
-      minPrice: "100000", maxPrice: "75000000", reference: "" 
+      minPrice: DEFAULT_MIN_PRICE, maxPrice: "75000000", reference: "" 
     };
     setLocalFilters(empty);
     onSearch(empty);
@@ -162,7 +164,7 @@ export default function AdvancedSearch({
               <div className="flex justify-between items-center mb-3">
                 <label className="text-[9px] uppercase font-black tracking-[0.2em] text-slate-400">Min</label>
                 <span className={`text-[11px] font-bold ${isLight ? 'text-slate-900' : 'text-slate-900 dark:text-[#D4AF37]'}`}>
-                  {parseInt(localFilters.minPrice || "100000").toLocaleString()} €
+                  {parseInt(localFilters.minPrice || DEFAULT_MIN_PRICE).toLocaleString()} €
                 </span>
               </div>
               <input 
@@ -170,7 +172,7 @@ export default function AdvancedSearch({
                 min="100000"
                 max="2000000"
                 step="50000"
-                value={localFilters.minPrice || "100000"}
+                value={localFilters.minPrice || DEFAULT_MIN_PRICE}
                 onChange={(e) => setLocalFilters({ ...localFilters, minPrice: e.target.value })}
                 className="custom-slider"
               />
