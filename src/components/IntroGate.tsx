@@ -27,6 +27,8 @@ export default function IntroGate() {
   useEffect(() => {
     if (!isReady || isGone) return;
 
+    const autoOpenTimer = window.setTimeout(openIntro, 3000);
+
     const handleWheel = (event: WheelEvent) => {
       if (Math.abs(event.deltaY) < 8) return;
       event.preventDefault();
@@ -62,6 +64,7 @@ export default function IntroGate() {
     window.addEventListener("touchmove", handleTouchMove, { passive: false });
 
     return () => {
+      window.clearTimeout(autoOpenTimer);
       document.body.style.overflow = previousOverflow;
       window.removeEventListener("wheel", handleWheel);
       window.removeEventListener("keydown", handleKeyDown);
