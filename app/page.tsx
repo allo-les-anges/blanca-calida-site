@@ -79,6 +79,7 @@ function HomeContent() {
   
   const [mounted, setMounted] = useState(false);
   const [allProperties, setAllProperties] = useState<Property[]>([]);
+  const [regionCounts, setRegionCounts] = useState<Record<string, number>>({});
   const [visibleCount, setVisibleCount] = useState(12);
   const [loading, setLoading] = useState(true);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -100,8 +101,12 @@ function HomeContent() {
     async function loadData() {
       try {
         setLoading(true);
-        const res = await fetch(`/api/properties?minPrice=${DEFAULT_MIN_PRICE}&limit=96`);
-        const data = await res.json();
+        const [propertiesRes, regionCountsRes] = await Promise.all([
+          fetch(`/api/properties?minPrice=${DEFAULT_MIN_PRICE}&limit=96`),
+          fetch('/api/properties?regionCounts=true'),
+        ]);
+        const data = await propertiesRes.json();
+        const countsData = await regionCountsRes.json();
         
         // CORRECTION : On s'assure que data est bien un tableau pour éviter "filter is not a function"
         if (data && Array.isArray(data)) {
@@ -109,6 +114,9 @@ function HomeContent() {
         } else {
           console.error("Format de données invalide reçu de l'API");
           setAllProperties([]);
+        }
+        if (countsData && !Array.isArray(countsData)) {
+          setRegionCounts(countsData);
         }
       } catch (err) {
         console.error("Erreur API:", err);
@@ -213,7 +221,7 @@ function HomeContent() {
 
       {/* GRILLE DES RÉGIONS */}
       <section className={`py-12 transition-colors duration-500 ${bgColor}`}>
-          <RegionGrid properties={allProperties} onRegionClick={handleRegionClick} />
+          <RegionGrid properties={allProperties} regionCounts={regionCounts} onRegionClick={handleRegionClick} />
       </section>
 
       {/* SECTION ESPACE PROPRIÉTAIRE (Masquée en mode Light) */}

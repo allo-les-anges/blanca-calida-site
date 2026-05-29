@@ -16,6 +16,7 @@ interface Property {
 
 interface RegionGridProps {
   properties: Property[];
+  regionCounts?: Record<string, number>;
   onRegionClick: (regionName: string) => void;
 }
 
@@ -70,7 +71,7 @@ const REGIONS_DISPLAY = [
   { name: "Costa Almeria", image: "/images/regions/4.jpg", size: "md:col-span-1 md:row-span-1" }
 ];
 
-export default function RegionGrid({ properties, onRegionClick }: RegionGridProps) {
+export default function RegionGrid({ properties, regionCounts: serverRegionCounts, onRegionClick }: RegionGridProps) {
   const { resolvedTheme } = useTheme();
   const { t } = useTranslation();
   const searchParams = useSearchParams();
@@ -83,6 +84,8 @@ export default function RegionGrid({ properties, onRegionClick }: RegionGridProp
   }, []);
 
   const regionCounts = useMemo(() => {
+    if (serverRegionCounts) return serverRegionCounts;
+
     const counts: Record<string, number> = {
       "Costa Blanca": 0, "Costa del Sol": 0, "Costa Calida": 0, "Costa Almeria": 0
     };
@@ -92,7 +95,7 @@ export default function RegionGrid({ properties, onRegionClick }: RegionGridProp
       if (regionFound && counts[regionFound] !== undefined) counts[regionFound]++;
     });
     return counts;
-  }, [properties]);
+  }, [properties, serverRegionCounts]);
 
   if (!mounted) return null;
 
