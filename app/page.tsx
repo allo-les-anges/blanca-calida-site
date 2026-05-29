@@ -20,6 +20,14 @@ import IntroGate from "@/components/IntroGate";
 type Property = any;
 const DEFAULT_MIN_PRICE = "500000";
 
+function parsePropertyPrice(value: unknown) {
+  if (typeof value === "number") return Number.isFinite(value) ? value : 0;
+  if (typeof value !== "string") return 0;
+
+  const digitsOnly = value.replace(/[^\d]/g, "");
+  return digitsOnly ? Number(digitsOnly) : 0;
+}
+
 function HomeContent() {
   const router = useRouter();
   const searchParamsOrigin = useSearchParams();
@@ -85,7 +93,7 @@ function HomeContent() {
       const matchRegion = !filters.region || p.region === filters.region;
       const matchType = !filters.type || p.type?.toLowerCase().includes(filters.type.toLowerCase());
       const matchBeds = !filters.beds || Number(p.beds) >= Number(filters.beds);
-      const price = Number(p.price || 0);
+      const price = parsePropertyPrice(p.price);
       const matchMin = !filters.minPrice || price >= Number(filters.minPrice);
       const matchMax = !filters.maxPrice || price <= Number(filters.maxPrice);
       const matchRef = !filters.reference || p.ref?.toLowerCase().includes(filters.reference.toLowerCase());
