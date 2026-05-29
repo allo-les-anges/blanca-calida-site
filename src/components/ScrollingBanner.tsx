@@ -36,11 +36,11 @@ export default function ScrollingBanner() {
   const duplicatedTexts = [...BANNER_KEYS, ...BANNER_KEYS, ...BANNER_KEYS, ...BANNER_KEYS];
 
   const styles = {
-    containerBg: isDark ? '#0F172A' : '#F8FAFC', 
-    borderColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(15,23,42,0.05)',
-    fullTextColor: isDark ? '#FFFFFF' : '#0F172A',
-    outlineStroke: isDark ? '#334155' : '#CBD5E1', 
-    separatorColor: '#D4AF37'
+    containerBg: isDark ? '#171716' : '#F2EFEA', 
+    borderColor: isDark ? 'color-mix(in srgb, #FAFAFA 3%, transparent)' : 'color-mix(in srgb, #171716 5%, transparent)',
+    fullTextColor: isDark ? '#FAFAFA' : '#171716',
+    outlineStroke: isDark ? '#D8C9B6' : '#D8C9B6', 
+    separatorColor: '#D8C9B6'
   };
 
   return (

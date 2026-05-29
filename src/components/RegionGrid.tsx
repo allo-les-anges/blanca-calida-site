@@ -101,19 +101,19 @@ export default function RegionGrid({ properties, onRegionClick }: RegionGridProp
   return (
     <section 
       className="max-w-[1600px] mx-auto px-6 py-20 transition-colors duration-500"
-      style={{ backgroundColor: isDarkVisual ? '#0A0A0A' : '#FFFFFF' }}
+      style={{ backgroundColor: isDarkVisual ? '#010101' : '#FAFAFA' }}
     >
       
       {/* HEADER */}
       <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-8">
         <div className="max-w-2xl">
           <motion.div initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
-            <span className="text-[#D4AF37] text-[10px] font-black uppercase tracking-[0.4em] mb-3 block">
+            <span className="text-[#D8C9B6] text-[10px] font-black uppercase tracking-[0.4em] mb-3 block">
               {t('home.regionGrid.ourDestinations')}
             </span>
             <h2 
               className="text-4xl md:text-6xl font-serif italic leading-tight"
-              style={{ color: isDarkVisual ? '#FFFFFF' : '#0f172a' }}
+              style={{ color: isDarkVisual ? '#FAFAFA' : '#171716' }}
             >
               {t('home.regionGrid.exceptionalPlaces')}
             </h2>
@@ -125,11 +125,11 @@ export default function RegionGrid({ properties, onRegionClick }: RegionGridProp
           whileInView={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
           className="max-w-xs border-l pl-6 pb-1"
-          style={{ borderColor: isDarkVisual ? 'rgba(255,255,255,0.1)' : '#e2e8f0' }}
+          style={{ borderColor: isDarkVisual ? 'color-mix(in srgb, #FAFAFA 10%, transparent)' : '#D8C9B6' }}
         >
           <p 
             className="text-xs font-light leading-relaxed italic"
-            style={{ color: isDarkVisual ? '#CBD5E1' : '#64748b' }}
+            style={{ color: isDarkVisual ? '#D8C9B6' : '#171716' }}
           >
             {t('home.regionGrid.description')}
           </p>
@@ -161,7 +161,7 @@ export default function RegionGrid({ properties, onRegionClick }: RegionGridProp
 
               <div className="absolute inset-0 p-8 flex flex-col justify-end items-start text-white">
                 <motion.div className="space-y-2 w-full">
-                  <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-[#D4AF37]">
+                  <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-[#D8C9B6]">
                     {count} {t('home.regionGrid.properties')}
                   </p>
                   <h3 className="text-2xl md:text-4xl font-serif italic leading-none text-white">

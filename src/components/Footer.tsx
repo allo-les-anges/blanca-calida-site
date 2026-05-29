@@ -14,10 +14,10 @@ export default function Footer({ isLight = false }: FooterProps) {
   const { t } = useTranslation();
 
   // 2. Adaptation des couleurs
-  const bgColor = isLight ? "bg-slate-50 border-t border-slate-200" : "bg-[#020617] border-t border-white/5";
+  const bgColor = isLight ? "bg-slate-50 border-t border-slate-200" : "bg-[#010101] border-t border-white/5";
   const textColor = isLight ? "text-slate-900" : "text-white";
   const mutedText = isLight ? "text-slate-500" : "text-slate-400";
-  const iconColor = "text-[#D4AF37]";
+  const iconColor = "text-[#D8C9B6]";
 
   return (
     <footer className={`${bgColor} py-20 transition-colors duration-500`}>
@@ -27,7 +27,7 @@ export default function Footer({ isLight = false }: FooterProps) {
           {/* LOGO & DESCRIPTION */}
           <div className="col-span-1 md:col-span-1 space-y-6">
             <h3 className={`text-2xl font-serif italic ${textColor}`}>
-              Amaru <span className="text-[#D4AF37] not-italic font-sans font-bold text-sm tracking-widest ml-2 uppercase">Excellence</span>
+              Amaru <span className="text-[#D8C9B6] not-italic font-sans font-bold text-sm tracking-widest ml-2 uppercase">Excellence</span>
             </h3>
             <p className={`${mutedText} text-xs leading-relaxed uppercase tracking-widest`}>
               {t('footer.description')}
@@ -38,10 +38,10 @@ export default function Footer({ isLight = false }: FooterProps) {
           <div className="space-y-6">
             <h4 className={`text-[10px] font-bold uppercase tracking-[0.3em] ${textColor}`}>Menu</h4>
             <ul className={`space-y-4 text-[10px] uppercase tracking-widest ${mutedText}`}>
-              <li><Link href="/" className="hover:text-[#D4AF37] transition-colors">Accueil</Link></li>
-              <li><Link href="/properties" className="hover:text-[#D4AF37] transition-colors">Propriétés</Link></li>
-              <li><Link href="/about" className="hover:text-[#D4AF37] transition-colors">À Propos</Link></li>
-              <li><Link href="/contact" className="hover:text-[#D4AF37] transition-colors">Contact</Link></li>
+              <li><Link href="/" className="hover:text-[#D8C9B6] transition-colors">Accueil</Link></li>
+              <li><Link href="/properties" className="hover:text-[#D8C9B6] transition-colors">Propriétés</Link></li>
+              <li><Link href="/about" className="hover:text-[#D8C9B6] transition-colors">À Propos</Link></li>
+              <li><Link href="/contact" className="hover:text-[#D8C9B6] transition-colors">Contact</Link></li>
             </ul>
           </div>
 
@@ -65,8 +65,8 @@ export default function Footer({ isLight = false }: FooterProps) {
           <div className="space-y-6">
             <h4 className={`text-[10px] font-bold uppercase tracking-[0.3em] ${textColor}`}>Suivez-nous</h4>
             <div className="flex gap-6">
-              <a href="#" className={`${mutedText} hover:text-[#D4AF37] transition-colors`}><Instagram size={20} /></a>
-              <a href="#" className={`${mutedText} hover:text-[#D4AF37] transition-colors`}><Facebook size={20} /></a>
+              <a href="#" className={`${mutedText} hover:text-[#D8C9B6] transition-colors`}><Instagram size={20} /></a>
+              <a href="#" className={`${mutedText} hover:text-[#D8C9B6] transition-colors`}><Facebook size={20} /></a>
             </div>
           </div>
 

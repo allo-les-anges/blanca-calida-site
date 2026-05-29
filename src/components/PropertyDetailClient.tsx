@@ -74,16 +74,16 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
   if (!mounted) return null;
 
   if (loading) return (
-    <div className={`h-screen flex flex-col items-center justify-center ${isLight ? 'bg-white' : 'bg-[#0A0A0A]'} text-[#D4AF37]`}>
+    <div className={`h-screen flex flex-col items-center justify-center ${isLight ? 'bg-white' : 'bg-[#010101]'} text-[#D8C9B6]`}>
       <Loader2 className="animate-spin mb-4" size={40} />
       <span className="font-serif italic text-xl">{t('propertyDetail.loading')}</span>
     </div>
   );
 
   if (!property) return (
-    <div className={`h-screen flex flex-col items-center justify-center ${isLight ? 'bg-white' : 'bg-[#0A0A0A]'} p-6 text-center`}>
+    <div className={`h-screen flex flex-col items-center justify-center ${isLight ? 'bg-white' : 'bg-[#010101]'} p-6 text-center`}>
       <h1 className={`text-2xl mb-4 font-serif ${isLight ? 'text-slate-900' : 'text-white'}`}>{t('propertyDetail.propertyNotFound')}</h1>
-      <Link href="/" className="px-8 py-3 bg-[#D4AF37] text-black rounded-full font-bold uppercase text-[10px] tracking-widest">
+      <Link href="/" className="px-8 py-3 bg-[#D8C9B6] text-black rounded-full font-bold uppercase text-[10px] tracking-widest">
         {t('propertyDetail.backToCatalogue')}
       </Link>
     </div>
@@ -95,19 +95,19 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
   const fallbackMapUrl = `https://maps.google.com/maps?q=${mapQuery}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
 
   return (
-    <main className={`min-h-screen transition-colors duration-500 ${isLight ? 'bg-white' : 'bg-[#0A0A0A]'}`}>
+    <main className={`min-h-screen transition-colors duration-500 ${isLight ? 'bg-white' : 'bg-[#010101]'}`}>
       <Navbar />
       <div className="h-24 md:h-32" />
 
       <div className="max-w-7xl mx-auto px-6 mb-8">
-        <Link href="/" className="group inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.3em] text-[#D4AF37] font-bold">
+        <Link href="/" className="group inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.3em] text-[#D8C9B6] font-bold">
           <ArrowLeft size={14} /> {t('propertyDetail.back')}
         </Link>
       </div>
 
       <section className="max-w-7xl mx-auto px-6 mb-16">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:h-[550px]">
-          <div className="md:col-span-3 relative rounded-[2.5rem] md:rounded-[3rem] overflow-hidden shadow-2xl bg-slate-100 dark:bg-[#111] h-[400px] md:h-full">
+          <div className="md:col-span-3 relative rounded-[2.5rem] md:rounded-[3rem] overflow-hidden shadow-2xl bg-slate-100 dark:bg-[#171716] h-[400px] md:h-full">
             <div ref={scrollContainerRef} onScroll={handleScroll} className="flex md:block h-full overflow-x-auto md:overflow-x-hidden snap-x snap-mandatory scrollbar-hide">
               {images.map((img: string, idx: number) => (
                 <div key={idx} className="min-w-full h-full snap-center md:absolute md:inset-0 md:transition-opacity md:duration-700" style={{ opacity: activeImage === idx ? 1 : 0, zIndex: activeImage === idx ? 10 : 0 }}>
@@ -122,7 +122,7 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
           <div className="hidden md:flex flex-col gap-4 overflow-y-auto pr-2 custom-scrollbar">
             {images.map((img: string, idx: number) => (
               <button key={idx} onClick={() => { setActiveImage(idx); scrollContainerRef.current?.scrollTo({ left: idx * (scrollContainerRef.current?.clientWidth || 0), behavior: 'smooth' }); }} 
-                className={`relative h-24 min-h-[96px] rounded-2xl overflow-hidden border-2 transition-all ${activeImage === idx ? 'border-[#D4AF37] scale-95' : 'border-transparent opacity-60'}`}
+                className={`relative h-24 min-h-[96px] rounded-2xl overflow-hidden border-2 transition-all ${activeImage === idx ? 'border-[#D8C9B6] scale-95' : 'border-transparent opacity-60'}`}
               >
                 <img src={img} className="w-full h-full object-cover" alt="" />
               </button>
@@ -138,7 +138,7 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
           </h1>
           
           <div className="flex items-center gap-3 text-slate-500 mb-8 text-[11px] uppercase tracking-[0.2em] font-bold">
-            <MapPin size={18} className="text-[#D4AF37]" />
+            <MapPin size={18} className="text-[#D8C9B6]" />
             {property.town || property.ville} • {property.region}
           </div>
 
@@ -152,7 +152,7 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
               { icon: Car, key: 'parking', val: t('propertyDetail.parking') }
             ].map((item, i) => (
               <div key={i} className={`${isLight ? 'bg-slate-50' : 'bg-white/5'} p-6 rounded-3xl text-center border ${isLight ? 'border-slate-100' : 'border-white/10'}`}>
-                <item.icon className="mx-auto mb-2 text-[#D4AF37]" size={22} />
+                <item.icon className="mx-auto mb-2 text-[#D8C9B6]" size={22} />
                 <p className={`text-2xl font-serif ${isLight ? 'text-slate-900' : 'text-white'}`}>{item.val || "0"}</p>
                 <p className="text-[8px] uppercase text-slate-400 font-bold tracking-widest">{t(`propertyDetail.${item.key}`)}</p>
               </div>
@@ -168,7 +168,7 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
             
             <div className="space-y-8">
               <div className="flex items-center gap-4">
-                <div className="h-12 w-12 rounded-2xl bg-[#D4AF37]/10 flex items-center justify-center text-[#D4AF37]"><Navigation size={24} /></div>
+                <div className="h-12 w-12 rounded-2xl bg-[#D8C9B6]/10 flex items-center justify-center text-[#D8C9B6]"><Navigation size={24} /></div>
                 <div>
                   <h3 className={`text-2xl font-serif italic ${isLight ? 'text-slate-900' : 'text-white'}`}>{t('propertyDetail.location')}</h3>
                   <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold">{property.town}, Costa Blanca</p>
@@ -185,18 +185,18 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
           <div className="sticky top-40 space-y-6">
             {!isLight && (
               <Link href={`/contact-cashback?Property_ID=${property.id_externe || property.id}`} className="group relative block w-full overflow-hidden rounded-[2.5rem] bg-slate-900 p-[1px] shadow-2xl transition-transform hover:scale-[1.02]">
-                <div className="absolute inset-0 bg-gradient-to-br from-[#D4AF37] to-transparent opacity-30" />
+                <div className="absolute inset-0 bg-gradient-to-br from-[#D8C9B6] to-transparent opacity-30" />
                 <div className="relative bg-slate-900 rounded-[2.5rem] p-8 flex items-center gap-5">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#D4AF37]/20 text-[#D4AF37] border border-[#D4AF37]/30"><ShieldCheck size={28} /></div>
+                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#D8C9B6]/20 text-[#D8C9B6] border border-[#D8C9B6]/30"><ShieldCheck size={28} /></div>
                   <div className="flex flex-col">
-                    <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-[#D4AF37] mb-1">{t('propertyDetail.privilege')}</span>
+                    <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-[#D8C9B6] mb-1">{t('propertyDetail.privilege')}</span>
                     <span className="text-xl font-serif italic text-white leading-tight">{t('propertyDetail.activateCashback')}</span>
                   </div>
                 </div>
               </Link>
             )}
 
-            <div className={isLight ? "bg-slate-50 border border-slate-200 rounded-[3rem] p-4" : "bg-[#111] border border-white/10 rounded-[3rem] shadow-2xl overflow-hidden"}>
+            <div className={isLight ? "bg-slate-50 border border-slate-200 rounded-[3rem] p-4" : "bg-[#171716] border border-white/10 rounded-[3rem] shadow-2xl overflow-hidden"}>
                 <div className="p-10 pb-0">
                   <p className="text-[10px] uppercase text-slate-400 mb-2 font-bold tracking-widest">{t('propertyDetail.price')}</p>
                   <p className={`text-5xl font-serif leading-none mb-6 ${isLight ? 'text-slate-900' : 'text-white'}`}>

@@ -153,7 +153,7 @@ export default function AdminChantier() {
 
   if (!isAuthorized) {
     return (
-      <div className="min-h-screen bg-[#050505] flex items-center justify-center p-8 text-white relative">
+      <div className="min-h-screen bg-[#010101] flex items-center justify-center p-8 text-white relative">
         <button 
           onClick={() => window.location.href = '/'}
           className="absolute top-8 left-8 flex items-center gap-2 text-slate-500 hover:text-white transition-colors text-[10px] font-black uppercase tracking-widest"
@@ -163,7 +163,7 @@ export default function AdminChantier() {
 
         <div className="w-full max-w-md space-y-12 text-center">
           <div className="space-y-4">
-            <div className="w-24 h-24 bg-gradient-to-tr from-indigo-600 to-violet-500 rounded-[2.5rem] flex items-center justify-center mx-auto border border-white/10 shadow-[0_0_50px_rgba(79,70,229,0.3)]">
+            <div className="w-24 h-24 bg-gradient-to-tr from-indigo-600 to-violet-500 rounded-[2.5rem] flex items-center justify-center mx-auto border border-white/10 shadow-2xl">
               <Lock size={38} className="text-white" />
             </div>
             <h1 className="text-4xl font-serif italic tracking-tight">{t('adminChantier.title')}</h1>
@@ -189,7 +189,7 @@ export default function AdminChantier() {
   }
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white font-sans">
+    <div className="min-h-screen bg-[#010101] text-white font-sans">
       <header className="sticky top-0 z-50 bg-black/60 backdrop-blur-2xl border-b border-white/5 px-6 py-5">
         <div className="max-w-xl mx-auto flex justify-between items-center">
           <div className="flex items-center gap-4">
@@ -244,7 +244,7 @@ export default function AdminChantier() {
               </div>
             </div>
 
-            <div className="bg-[#111] rounded-[2.5rem] p-7 border border-white/5 space-y-4">
+            <div className="bg-[#171716] rounded-[2.5rem] p-7 border border-white/5 space-y-4">
               <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
                 <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-pulse" />
                 {t('adminChantier.constructionPhase')}
@@ -260,7 +260,7 @@ export default function AdminChantier() {
               </div>
             </div>
 
-            <div className="bg-[#111] rounded-[3rem] p-7 border border-white/5 space-y-6">
+            <div className="bg-[#171716] rounded-[3rem] p-7 border border-white/5 space-y-6">
               <div className="flex justify-between items-center">
                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{t('adminChantier.newReport')}</label>
                 {status && <span className="text-[10px] font-bold text-indigo-400 animate-pulse uppercase tracking-tighter">{status}</span>}

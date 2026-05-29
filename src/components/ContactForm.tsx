@@ -36,8 +36,8 @@ export default function ContactForm({ agency, propertyRef, isLight: forcedLight 
       <div className={`p-10 text-center rounded-[2.5rem] border animate-in fade-in zoom-in duration-500 ${
         isLight ? "bg-slate-50 border-slate-200" : "bg-white/5 border-white/10"
       }`}>
-        <div className="w-16 h-16 bg-[#D4AF37]/20 rounded-full flex items-center justify-center mx-auto mb-6">
-          <CheckCircle className="text-[#D4AF37]" size={32} />
+        <div className="w-16 h-16 bg-[#D8C9B6]/20 rounded-full flex items-center justify-center mx-auto mb-6">
+          <CheckCircle className="text-[#D8C9B6]" size={32} />
         </div>
         <h3 className={`text-2xl font-serif italic mb-2 ${isLight ? "text-slate-900" : "text-white"}`}>
           {t('propertyDetail.messageSent') || "Message envoyé"}
@@ -51,15 +51,15 @@ export default function ContactForm({ agency, propertyRef, isLight: forcedLight 
 
   // Styles dynamiques
   const containerStyle = isLight 
-    ? "bg-white border-slate-100 shadow-[0_20px_50px_rgba(0,0,0,0.05)]" 
-    : "bg-[#0A0A0A]/40 border-white/5 backdrop-blur-xl";
+    ? "bg-white border-slate-100 shadow-2xl" 
+    : "bg-[#010101]/40 border-white/5 backdrop-blur-xl";
 
   const titleStyle = isLight ? "text-slate-900" : "text-white";
   
   const inputBaseStyle = `w-full p-4 text-[10px] tracking-widest uppercase outline-none border transition-all duration-300 rounded-xl`;
   const inputThemeStyle = isLight 
     ? "bg-slate-50 border-slate-200 text-slate-900 focus:border-black placeholder:text-slate-400" 
-    : "bg-white/5 border-white/10 text-white focus:border-[#D4AF37] placeholder:text-white/20";
+    : "bg-white/5 border-white/10 text-white focus:border-[#D8C9B6] placeholder:text-white/20";
 
   return (
     <div className={`p-8 md:p-10 rounded-[2.5rem] border ${containerStyle}`}>
@@ -67,7 +67,7 @@ export default function ContactForm({ agency, propertyRef, isLight: forcedLight 
         <h3 className={`text-2xl md:text-3xl font-serif italic mb-2 ${titleStyle}`}>
           {isLight ? "Demander des informations" : "Contacter un Expert"}
         </h3>
-        <p className={`text-[9px] font-bold uppercase tracking-[0.3em] ${isLight ? 'text-slate-400' : 'text-[#D4AF37]/60'}`}>
+        <p className={`text-[9px] font-bold uppercase tracking-[0.3em] ${isLight ? 'text-slate-400' : 'text-[#D8C9B6]/60'}`}>
           Réf: {propertyRef || 'Général'} — {agency.name}
         </p>
       </div>
@@ -105,8 +105,8 @@ export default function ContactForm({ agency, propertyRef, isLight: forcedLight 
   disabled={status === "sending"}
   className={`w-full py-5 rounded-2xl font-black uppercase text-[10px] tracking-[0.4em] flex items-center justify-center gap-4 transition-all duration-500 shadow-lg ${
     isLight 
-      ? "bg-black text-white hover:bg-[#D4AF37] hover:text-black" 
-      : "bg-[#D4AF37] text-black hover:bg-white hover:text-black"
+      ? "bg-black text-white hover:bg-[#D8C9B6] hover:text-black" 
+      : "bg-[#D8C9B6] text-black hover:bg-white hover:text-black"
   }`}
 >
   {status === "sending" ? (

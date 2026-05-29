@@ -11,8 +11,8 @@ export default function GoogleTranslate() {
       <style jsx global>{`
         /* Personnalisation du bouton pour qu'il s'intègre à votre design sombre */
         .goog-te-gadget-simple {
-          background-color: rgba(255, 255, 255, 0.05) !important;
-          border: 1px solid rgba(255, 255, 255, 0.1) !important;
+          background-color: color-mix(in srgb, #FAFAFA 5%, transparent) !important;
+          border: 1px solid color-mix(in srgb, #FAFAFA 10%, transparent) !important;
           padding: 6px 10px !important;
           border-radius: 12px !important;
           display: flex !important;
@@ -20,7 +20,7 @@ export default function GoogleTranslate() {
           gap: 8px !important;
         }
         .goog-te-gadget-simple span {
-          color: #94a3b8 !important; /* Slate-400 */
+          color: #D8C9B6 !important; /* Slate-400 */
           font-size: 10px !important;
           font-weight: 800 !important;
           text-transform: uppercase !important;

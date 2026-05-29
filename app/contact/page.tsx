@@ -69,8 +69,8 @@ export default function ContactPage() {
   };
 
   const inputStyle = {
-    color: isDark ? '#ffffff' : '#0f172a',
-    backgroundColor: isDark ? 'rgba(0, 0, 0, 0.6)' : '#ffffff',
+    color: isDark ? '#FAFAFA' : '#171716',
+    backgroundColor: isDark ? 'color-mix(in srgb, #010101 60%, transparent)' : '#FAFAFA',
   };
 
   const inputClasses = `
@@ -78,21 +78,21 @@ export default function ContactPage() {
     text-[10px] font-black tracking-widest 
     border-2 border-slate-200 dark:border-white/20 
     placeholder:text-slate-400 dark:placeholder:text-white/40
-    focus:border-[#D4AF37] dark:focus:border-[#D4AF37]
+    focus:border-[#D8C9B6] dark:focus:border-[#D8C9B6]
   `;
 
   return (
-    <div className="min-h-screen transition-colors duration-500 bg-white dark:bg-[#0A0A0A] text-slate-900 dark:text-white">
+    <div className="min-h-screen transition-colors duration-500 bg-white dark:bg-[#010101] text-slate-900 dark:text-white">
       
       <Navbar />
 
       <main>
         {/* SECTION HÉRO */}
-        <section className="relative h-[65vh] w-full flex items-center justify-center transition-colors duration-1000 bg-slate-900 dark:bg-[#020617]">
+        <section className="relative h-[65vh] w-full flex items-center justify-center transition-colors duration-1000 bg-slate-900 dark:bg-[#010101]">
           <div className="absolute inset-0 z-0 opacity-50 bg-slate-900 dark:bg-black" />
           <div className="relative z-10 text-center px-6 max-w-5xl pt-20">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
-              <span className="text-[#D4AF37] text-[12px] font-black uppercase tracking-[0.6em] mb-6 block">
+              <span className="text-[#D8C9B6] text-[12px] font-black uppercase tracking-[0.6em] mb-6 block">
                 {t('contact.heroBadge')}
               </span>
               <h1 className="text-4xl md:text-7xl font-serif italic text-white mb-8">
@@ -126,7 +126,7 @@ export default function ContactPage() {
                     />
                   </div>
                   <div className="flex-1 space-y-5">
-                    <h3 className="text-3xl font-serif italic text-[#D4AF37]">
+                    <h3 className="text-3xl font-serif italic text-[#D8C9B6]">
                       {t(`contact.team.${idx}.name`)}
                     </h3>
                     <p className="text-base leading-relaxed font-light text-slate-600 dark:text-slate-300">
@@ -139,13 +139,13 @@ export default function ContactPage() {
                       */}
                       {idx === 2 ? (
                         <>
-                          <span className="text-[9px] font-black uppercase tracking-widest px-3 py-1 bg-[#D4AF37]/10 text-[#D4AF37] rounded-md border border-[#D4AF37]/20">
+                          <span className="text-[9px] font-black uppercase tracking-widest px-3 py-1 bg-[#D8C9B6]/10 text-[#D8C9B6] rounded-md border border-[#D8C9B6]/20">
                             {t('contact.team.2.skills.0')}
                           </span>
-                          <span className="text-[9px] font-black uppercase tracking-widest px-3 py-1 bg-[#D4AF37]/10 text-[#D4AF37] rounded-md border border-[#D4AF37]/20">
+                          <span className="text-[9px] font-black uppercase tracking-widest px-3 py-1 bg-[#D8C9B6]/10 text-[#D8C9B6] rounded-md border border-[#D8C9B6]/20">
                             {t('contact.team.2.skills.1')}
                           </span>
-                          <span className="text-[9px] font-black uppercase tracking-widest px-3 py-1 bg-[#D4AF37]/10 text-[#D4AF37] rounded-md border border-[#D4AF37]/20">
+                          <span className="text-[9px] font-black uppercase tracking-widest px-3 py-1 bg-[#D8C9B6]/10 text-[#D8C9B6] rounded-md border border-[#D8C9B6]/20">
                             {t('contact.team.2.skills.2')}
                           </span>
                         </>
@@ -153,7 +153,7 @@ export default function ContactPage() {
                         [0, 1, 2].map((skillIdx) => (
                           <span 
                             key={skillIdx} 
-                            className="text-[9px] font-black uppercase tracking-widest px-3 py-1 bg-[#D4AF37]/10 text-[#D4AF37] rounded-md border border-[#D4AF37]/20"
+                            className="text-[9px] font-black uppercase tracking-widest px-3 py-1 bg-[#D8C9B6]/10 text-[#D8C9B6] rounded-md border border-[#D8C9B6]/20"
                           >
                             {t(`contact.team.${idx}.skills.${skillIdx}`)}
                           </span>
@@ -168,15 +168,15 @@ export default function ContactPage() {
 
           {/* COLONNE FORMULAIRE */}
           <div className="xl:col-span-5">
-            <div className="sticky top-32 p-12 rounded-[3.5rem] transition-all duration-700 bg-slate-50 dark:bg-[#111] border border-slate-200 dark:border-white/10 shadow-2xl">
+            <div className="sticky top-32 p-12 rounded-[3.5rem] transition-all duration-700 bg-slate-50 dark:bg-[#171716] border border-slate-200 dark:border-white/10 shadow-2xl">
               <h3 
                 className="text-3xl md:text-4xl font-serif italic mb-2"
-                style={{ color: isDark ? '#FFFFFF' : '#0f172a' }}
+                style={{ color: isDark ? '#FAFAFA' : '#171716' }}
               >
                 {t('contact.formTitle')}
               </h3>
               
-              <p className="text-[#D4AF37] text-[10px] font-black uppercase tracking-[0.2em] mb-10">
+              <p className="text-[#D8C9B6] text-[10px] font-black uppercase tracking-[0.2em] mb-10">
                 {t('contact.formSubtitle')}
               </p>
               
@@ -224,7 +224,7 @@ export default function ContactPage() {
                 <button 
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full bg-[#D4AF37] text-black py-6 rounded-2xl font-black uppercase text-[10px] tracking-[0.4em] hover:bg-white transition-all shadow-xl disabled:opacity-50"
+                  className="w-full bg-[#D8C9B6] text-black py-6 rounded-2xl font-black uppercase text-[10px] tracking-[0.4em] hover:bg-white transition-all shadow-xl disabled:opacity-50"
                 >
                   {isSubmitting ? t('contact.submitting') : t('contact.submit')}
                 </button>

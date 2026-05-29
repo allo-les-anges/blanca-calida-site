@@ -1,5 +1,111 @@
 @import "tailwindcss";
 
+@theme {
+  --color-white: #FAFAFA;
+  --color-black: #010101;
+
+  --color-slate-50: #F2EFEA;
+  --color-slate-100: #F2EFEA;
+  --color-slate-200: #D8C9B6;
+  --color-slate-300: #D8C9B6;
+  --color-slate-400: #D8C9B6;
+  --color-slate-500: #171716;
+  --color-slate-600: #171716;
+  --color-slate-700: #171716;
+  --color-slate-800: #171716;
+  --color-slate-900: #171716;
+  --color-slate-950: #010101;
+
+  --color-gray-50: #F2EFEA;
+  --color-gray-100: #F2EFEA;
+  --color-gray-200: #D8C9B6;
+  --color-gray-300: #D8C9B6;
+  --color-gray-400: #D8C9B6;
+  --color-gray-500: #171716;
+  --color-gray-600: #171716;
+  --color-gray-700: #171716;
+  --color-gray-800: #171716;
+  --color-gray-900: #171716;
+  --color-gray-950: #010101;
+
+  --color-zinc-50: #F2EFEA;
+  --color-zinc-100: #F2EFEA;
+  --color-zinc-200: #D8C9B6;
+  --color-zinc-300: #D8C9B6;
+  --color-zinc-400: #D8C9B6;
+  --color-zinc-500: #171716;
+  --color-zinc-600: #171716;
+  --color-zinc-700: #171716;
+  --color-zinc-800: #171716;
+  --color-zinc-900: #171716;
+  --color-zinc-950: #010101;
+
+  --color-neutral-50: #F2EFEA;
+  --color-neutral-100: #F2EFEA;
+  --color-neutral-200: #D8C9B6;
+  --color-neutral-300: #D8C9B6;
+  --color-neutral-400: #D8C9B6;
+  --color-neutral-500: #171716;
+  --color-neutral-600: #171716;
+  --color-neutral-700: #171716;
+  --color-neutral-800: #171716;
+  --color-neutral-900: #171716;
+  --color-neutral-950: #010101;
+
+  --color-stone-50: #F2EFEA;
+  --color-stone-100: #F2EFEA;
+  --color-stone-200: #D8C9B6;
+  --color-stone-300: #D8C9B6;
+  --color-stone-400: #D8C9B6;
+  --color-stone-500: #171716;
+  --color-stone-600: #171716;
+  --color-stone-700: #171716;
+  --color-stone-800: #171716;
+  --color-stone-900: #171716;
+  --color-stone-950: #010101;
+
+  --color-red-50: #F2EFEA;
+  --color-red-100: #F2EFEA;
+  --color-red-200: #D8C9B6;
+  --color-red-300: #D8C9B6;
+  --color-red-400: #D8C9B6;
+  --color-red-500: #171716;
+  --color-red-600: #171716;
+  --color-red-700: #171716;
+  --color-red-800: #171716;
+  --color-red-900: #171716;
+  --color-orange-500: #D8C9B6;
+  --color-amber-500: #D8C9B6;
+  --color-yellow-400: #D8C9B6;
+  --color-yellow-500: #D8C9B6;
+  --color-lime-500: #D8C9B6;
+  --color-green-50: #F2EFEA;
+  --color-green-400: #D8C9B6;
+  --color-green-500: #D8C9B6;
+  --color-green-600: #171716;
+  --color-green-800: #171716;
+  --color-emerald-50: #F2EFEA;
+  --color-emerald-400: #D8C9B6;
+  --color-emerald-500: #D8C9B6;
+  --color-emerald-600: #171716;
+  --color-teal-500: #D8C9B6;
+  --color-cyan-500: #D8C9B6;
+  --color-sky-500: #D8C9B6;
+  --color-blue-500: #D8C9B6;
+  --color-blue-600: #171716;
+  --color-indigo-200: #D8C9B6;
+  --color-indigo-400: #D8C9B6;
+  --color-indigo-500: #D8C9B6;
+  --color-indigo-600: #171716;
+  --color-indigo-700: #010101;
+  --color-indigo-900: #010101;
+  --color-violet-500: #D8C9B6;
+  --color-purple-500: #D8C9B6;
+  --color-fuchsia-500: #D8C9B6;
+  --color-pink-500: #D8C9B6;
+  --color-rose-500: #171716;
+}
+
 @font-face {
   font-family: "Suisse Int'l";
   src: url("/fonts/SuisseIntl-Regular.woff2") format("woff2"),
@@ -39,8 +145,13 @@
 /* 1. Reset des forçages agressifs */
 @layer base {
   :root {
-    --background: #ffffff;
-    --foreground: #0f172a;
+    --brand-white: #FAFAFA;
+    --brand-almost-black: #171716;
+    --brand-sand-beige: #D8C9B6;
+    --brand-off-white: #F2EFEA;
+    --brand-black: #010101;
+    --background: #FAFAFA;
+    --foreground: #171716;
     --font-suisse: "Suisse Int'l", "Suisse Intl", Arial, sans-serif;
   }
 
@@ -55,8 +166,8 @@
 
   /* On ne force le dark QUE si on n'est pas en pack light */
   html.dark:not([data-package="light"]) {
-    --background: #020617;
-    --foreground: #ffffff;
+    --background: #010101;
+    --foreground: #FAFAFA;
   }
 }
 
@@ -64,23 +175,23 @@
 html.dark:not([data-package="light"]) section,
 html.dark:not([data-package="light"]) main,
 html.dark:not([data-package="light"]) footer {
-    background-color: #020617;
-    color: #ffffff;
+    background-color: #010101;
+    color: #FAFAFA;
 }
 
 /* 3. FORCE LE BLANC SI PACK LIGHT (Sécurité ultime) */
 html[data-package="light"], 
 html[data-package="light"] body,
 html[data-package="light"] section {
-  background-color: #ffffff !important;
-  color: #0f172a !important;
+  background-color: #FAFAFA !important;
+  color: #171716 !important;
 }
 
 html[data-package="light"] .text-white,
 html[data-package="light"] h2,
 html[data-package="light"] h3,
 html[data-package="light"] p {
-  color: #0f172a !important;
+  color: #171716 !important;
 }
 
 /* 4. LES VIGNETTES ET LE FOOTER (Uniquement si PAS en pack light) */
@@ -92,23 +203,23 @@ html.dark:not([data-package="light"]) .property-card,
 html.dark:not([data-package="light"]) .bg-slate-50,
 html.dark:not([data-package="light"]) .bg-gray-50,
 html.dark:not([data-package="light"]) .bg-slate-100 {
-  background-color: #020617 !important;
-  border-color: rgba(255, 255, 255, 0.2) !important; 
+  background-color: #010101 !important;
+  border-color: color-mix(in srgb, #FAFAFA 20%, transparent) !important; 
 }
 
 /* 5. EXCEPTIONS BOUTONS */
 html.dark button.bg-white span,
 html.dark .bg-white button span,
 html.dark .recherche-privee-btn span {
-  color: #020617 !important;
+  color: #010101 !important;
   font-weight: 700 !important; 
 }
 
 /* 6. SCROLLBAR & PIN */
 html.dark input[type="password"] {
-  background-color: #1e293b !important;
+  background-color: #171716 !important;
   color: var(--accent-gold) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid color-mix(in srgb, #FAFAFA 10%, transparent) !important;
 }
 
 ::-webkit-scrollbar { 
@@ -131,7 +242,7 @@ main {
 }
 
 .dark .mobile-menu-link {
-  color: #ffffff !important;
+  color: #FAFAFA !important;
   opacity: 1 !important;
 }
 
@@ -160,9 +271,9 @@ html[data-package="light"] .property-card,
 html[data-package="light"] [class*="bg-slate-900"],
 html[data-package="light"] [class*="bg-gray-900"],
 html[data-package="light"] footer {
-  background-color: #ffffff !important;
-  color: #0f172a !important;
-  border-color: #e2e8f0 !important;
+  background-color: #FAFAFA !important;
+  color: #171716 !important;
+  border-color: #D8C9B6 !important;
 }
 
 /* Force les textes dans les vignettes et le footer */
@@ -172,33 +283,33 @@ html[data-package="light"] footer h2,
 html[data-package="light"] footer h3,
 html[data-package="light"] footer p,
 html[data-package="light"] footer a {
-  color: #0f172a !important;
+  color: #171716 !important;
 }
 
 /* Ajuste les icônes ou petits textes secondaires */
 html[data-package="light"] .text-slate-400,
 html[data-package="light"] .text-gray-400 {
-  color: #64748b !important;
+  color: #171716 !important;
 }
 
 /* --- NOUVEAU : Amélioration du contraste des badges en mode Light --- */
 html[data-package="light"] .bg-black\/60 {
-  background-color: rgba(0, 0, 0, 0.8) !important;
+  background-color: color-mix(in srgb, #010101 80%, transparent) !important;
 }
 
 /* --- NOUVEAU : Garantit la lisibilité des boutons en mode Light --- */
 html[data-package="light"] button {
-  color: #000000 !important;
+  color: #010101 !important;
 }
 html[data-package="light"] button.bg-black,
 html[data-package="light"] button.bg-black span {
-  color: #ffffff !important;
+  color: #FAFAFA !important;
 }
-html[data-package="light"] button.bg-[#D4AF37],
-html[data-package="light"] button.bg-[#D4AF37] span {
-  color: #000000 !important;
+html[data-package="light"] button[class~="bg-[#D8C9B6]"],
+html[data-package="light"] button[class~="bg-[#D8C9B6]"] span {
+  color: #010101 !important;
 }
 
 html[data-package="light"] .bg-black\/60 {
-  background-color: rgba(0, 0, 0, 0.8) !important;
+  background-color: color-mix(in srgb, #010101 80%, transparent) !important;
 }

@@ -155,7 +155,7 @@ export default function PropertyDetailPage() {
 
           {/* SIDEBAR */}
           <div className="w-full lg:w-1/3">
-            <div className="lg:sticky lg:top-32 bg-white border border-slate-100 shadow-[0_20px_60px_rgba(0,0,0,0.05)] rounded-[3rem] p-10">
+            <div className="lg:sticky lg:top-32 bg-white border border-slate-100 shadow-2xl rounded-[3rem] p-10">
               <p className="text-[10px] font-black uppercase text-emerald-600 mb-2 tracking-[0.2em] text-center">Prix de vente</p>
               <div className="text-5xl font-serif text-slate-900 mb-10 text-center">
                 {property.price ? Number(property.price).toLocaleString("fr-FR") : "--"} €
@@ -171,7 +171,7 @@ export default function PropertyDetailPage() {
                   href={whatsappUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hidden lg:flex w-full bg-[#25D366] text-white py-5 rounded-2xl font-black uppercase text-[10px] tracking-widest items-center justify-center gap-3 hover:bg-[#20ba5a] transition-all"
+                  className="hidden lg:flex w-full bg-[#D8C9B6] text-white py-5 rounded-2xl font-black uppercase text-[10px] tracking-widest items-center justify-center gap-3 hover:bg-[#D8C9B6] transition-all"
                 >
                   <MessageCircle size={18} /> Contact WhatsApp
                 </a>
@@ -201,7 +201,7 @@ export default function PropertyDetailPage() {
           href={whatsappUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="w-full bg-[#25D366] text-white py-4 rounded-2xl font-black uppercase text-[10px] tracking-[0.2em] flex items-center justify-center gap-3 shadow-lg"
+          className="w-full bg-[#D8C9B6] text-white py-4 rounded-2xl font-black uppercase text-[10px] tracking-[0.2em] flex items-center justify-center gap-3 shadow-lg"
         >
           <MessageCircle size={20} /> Discuter sur WhatsApp
         </a>

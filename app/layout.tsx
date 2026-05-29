@@ -25,8 +25,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body 
         className="antialiased"
         style={{ 
-          backgroundColor: isLight ? '#FFFFFF' : '#020617',
-          color: isLight ? '#0f172a' : '#FFFFFF' 
+          backgroundColor: isLight ? '#FAFAFA' : '#010101',
+          color: isLight ? '#171716' : '#FAFAFA' 
         }}
       >
         <ThemeProvider 

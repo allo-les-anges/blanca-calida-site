@@ -494,7 +494,7 @@ export default function AdminDashboard() {
   };
 
   if (loading) return (
-    <div className="h-screen bg-[#020617] flex flex-col items-center justify-center">
+    <div className="h-screen bg-[#010101] flex flex-col items-center justify-center">
       <div className="relative">
         <Loader2 className="animate-spin text-emerald-500" size={48} />
         <div className="absolute inset-0 blur-2xl bg-emerald-500/20 animate-pulse"></div>
@@ -504,7 +504,7 @@ export default function AdminDashboard() {
   );
 
   return (
-    <div className="min-h-screen bg-[#020617] flex text-slate-200 font-sans text-left overflow-hidden selection:bg-emerald-500 selection:text-black">
+    <div className="min-h-screen bg-[#010101] flex text-slate-200 font-sans text-left overflow-hidden selection:bg-emerald-500 selection:text-black">
       
       {/* Overlay pour fermer la sidebar sur mobile */}
       {isSidebarOpen && (
@@ -516,7 +516,7 @@ export default function AdminDashboard() {
 
       {/* --- SIDEBAR DE NAVIGATION --- */}
       <div className={`
-        fixed lg:static inset-y-0 left-0 z-50 w-80 bg-[#0F172A]/50 border-r border-white/5 
+        fixed lg:static inset-y-0 left-0 z-50 w-80 bg-[#171716]/50 border-r border-white/5 
         flex flex-col backdrop-blur-3xl transition-transform duration-300 ease-in-out
         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `}>
@@ -565,7 +565,7 @@ export default function AdminDashboard() {
             {/* Nouveau bouton pour les filtres XML */}
             <button 
               onClick={() => setActiveTab('settings')} 
-              className={`w-full py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-500 flex items-center justify-center gap-2 ${activeTab === 'settings' ? 'bg-[#D4AF37] text-black' : 'border border-white/5 text-slate-500 hover:text-white hover:bg-white/5'}`}
+              className={`w-full py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-500 flex items-center justify-center gap-2 ${activeTab === 'settings' ? 'bg-[#D8C9B6] text-black' : 'border border-white/5 text-slate-500 hover:text-white hover:bg-white/5'}`}
             >
               <Settings size={14} /> {t('adminDashboard.filters.tabLabel')}
             </button>
@@ -591,19 +591,19 @@ export default function AdminDashboard() {
             <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
               {/* Filtre Commission */}
               <div className="p-5 rounded-2xl bg-white/5 border border-white/5 space-y-4">
-                <div className="flex items-center gap-2 text-[#D4AF37]">
+                <div className="flex items-center gap-2 text-[#D8C9B6]">
                   <Percent size={14} />
-                  <h3 className="text-[10px] font-black uppercase tracking-widest text-[#D4AF37]">{t('adminDashboard.filters.minCommission')}</h3>
+                  <h3 className="text-[10px] font-black uppercase tracking-widest text-[#D8C9B6]">{t('adminDashboard.filters.minCommission')}</h3>
                 </div>
                 <input 
                   type="range" min="0" max="10" step="0.5" 
                   value={minCommission} 
                   onChange={(e) => setMinCommission(parseFloat(e.target.value))}
-                  className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-[#D4AF37]"
+                  className="w-full h-1 bg-white/10 rounded-lg appearance-none cursor-pointer accent-[#D8C9B6]"
                 />
                 <div className="flex justify-between text-[11px] font-black text-white italic">
                   <span>0%</span>
-                  <span className="text-[#D4AF37] bg-[#D4AF37]/10 px-2 py-0.5 rounded-md">{minCommission}%</span>
+                  <span className="text-[#D8C9B6] bg-[#D8C9B6]/10 px-2 py-0.5 rounded-md">{minCommission}%</span>
                   <span>10%</span>
                 </div>
               </div>
@@ -712,7 +712,7 @@ export default function AdminDashboard() {
       {/* --- ZONE D'AFFICHAGE PRINCIPALE --- */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Header mobile avec bouton menu */}
-        <header className="lg:hidden bg-[#0F172A]/90 backdrop-blur-md border-b border-white/5 p-4 flex items-center justify-between sticky top-0 z-30">
+        <header className="lg:hidden bg-[#171716]/90 backdrop-blur-md border-b border-white/5 p-4 flex items-center justify-between sticky top-0 z-30">
           <button onClick={() => setIsSidebarOpen(true)} className="p-2 bg-white/5 rounded-lg text-white">
             <Menu size={24} />
           </button>
@@ -988,7 +988,7 @@ export default function AdminDashboard() {
                                     onChange={e => setEditFields({...editFields, etape_actuelle: e.target.value})}
                                   >
                                       {PHASES_CHANTIER.map(phase => (
-                                        <option key={phase} value={phase} className="bg-[#0F172A] text-white py-4 font-sans">{phase}</option>
+                                        <option key={phase} value={phase} className="bg-[#171716] text-white py-4 font-sans">{phase}</option>
                                       ))}
                                   </select>
                                   <ChevronRight size={20} className="absolute right-5 lg:right-6 top-1/2 -translate-y-1/2 text-emerald-500 rotate-90 pointer-events-none" />
@@ -1197,7 +1197,7 @@ export default function AdminDashboard() {
       {/* --- MODAL : CRÉATION DE PROJET (avec champs adresse) --- */}
       {showModal && (
         <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-3xl flex items-center justify-center p-4 lg:p-6 animate-in fade-in duration-500">
-          <div className="bg-[#0F172A] w-full max-w-2xl rounded-[2.5rem] lg:rounded-[3.5rem] border border-white/10 p-8 lg:p-12 text-left relative shadow-2xl animate-in zoom-in-95 duration-500 max-h-[90vh] overflow-y-auto custom-scrollbar">
+          <div className="bg-[#171716] w-full max-w-2xl rounded-[2.5rem] lg:rounded-[3.5rem] border border-white/10 p-8 lg:p-12 text-left relative shadow-2xl animate-in zoom-in-95 duration-500 max-h-[90vh] overflow-y-auto custom-scrollbar">
             <button 
               onClick={() => setShowModal(false)} 
               className="absolute top-6 right-6 lg:top-10 lg:right-10 text-slate-500 hover:text-white hover:rotate-90 transition-all duration-500"
@@ -1295,7 +1295,7 @@ export default function AdminDashboard() {
       {/* --- MODAL : AJOUT STAFF (AVEC RÔLE) --- */}
       {showStaffModal && (
         <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-3xl flex items-center justify-center p-4 lg:p-6 animate-in fade-in duration-500">
-          <div className="bg-[#0F172A] w-full max-w-xl rounded-[2.5rem] lg:rounded-[3.5rem] border border-white/10 p-8 lg:p-12 text-left relative shadow-2xl animate-in zoom-in-95 duration-500">
+          <div className="bg-[#171716] w-full max-w-xl rounded-[2.5rem] lg:rounded-[3.5rem] border border-white/10 p-8 lg:p-12 text-left relative shadow-2xl animate-in zoom-in-95 duration-500">
             <button 
               onClick={() => setShowStaffModal(false)} 
               className="absolute top-6 right-6 lg:top-10 lg:right-10 text-slate-500 hover:text-white hover:rotate-90 transition-all duration-500"
@@ -1323,9 +1323,9 @@ export default function AdminDashboard() {
                     value={newStaff.role} 
                     onChange={e => setNewStaff({...newStaff, role: e.target.value})}
                   >
-                      <option value="agent" className="bg-[#0F172A]">{t('adminStaff.agent')}</option>
-                      <option value="admin" className="bg-[#0F172A]">{t('adminStaff.admin')}</option>
-                      <option value="super_admin" className="bg-[#0F172A]">{t('adminStaff.superAdmin')}</option>
+                      <option value="agent" className="bg-[#171716]">{t('adminStaff.agent')}</option>
+                      <option value="admin" className="bg-[#171716]">{t('adminStaff.admin')}</option>
+                      <option value="super_admin" className="bg-[#171716]">{t('adminStaff.superAdmin')}</option>
                   </select>
                   <ChevronRight size={18} className="absolute right-5 top-1/2 -translate-y-1/2 text-blue-500 rotate-90 pointer-events-none" />
                 </div>
@@ -1352,7 +1352,7 @@ export default function AdminDashboard() {
       {/* --- MODALE DE VISUALISATION DES CONSTATS --- */}
       {selectedConstatsDate && selectedProjet && (
         <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex items-center justify-center p-3 lg:p-4">
-          <div className="bg-[#0F172A] w-full max-w-5xl rounded-[2rem] lg:rounded-[3rem] border border-white/10 flex flex-col max-h-[95vh] lg:max-h-[92vh] overflow-hidden shadow-2xl">
+          <div className="bg-[#171716] w-full max-w-5xl rounded-[2rem] lg:rounded-[3rem] border border-white/10 flex flex-col max-h-[95vh] lg:max-h-[92vh] overflow-hidden shadow-2xl">
             <div className="p-6 lg:p-10 border-b border-white/5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/[0.01]">
               <div>
                 <span className="text-[10px] text-emerald-500 font-black uppercase tracking-widest">{t('adminDashboard.inspectionReport')}</span>
@@ -1414,14 +1414,14 @@ export default function AdminDashboard() {
           background: transparent;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: rgba(16, 185, 129, 0.2);
+          background: color-mix(in srgb, #D8C9B6 20%, transparent);
           border-radius: 20px;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: rgba(16, 185, 129, 0.4);
+          background: color-mix(in srgb, #D8C9B6 40%, transparent);
         }
         .shadow-glow {
-          box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+          box-shadow: 0 0 10px color-mix(in srgb, #D8C9B6 50%, transparent);
         }
         .scrollbar-hide::-webkit-scrollbar {
           display: none;

@@ -41,8 +41,8 @@ export default function PropertyCard({ property, isLight = false }: { property: 
       <div 
         className="relative h-[380px] overflow-hidden rounded-none border transition-colors duration-500"
         style={{ 
-          backgroundColor: showDark ? '#0f172a' : '#f1f5f9',
-          borderColor: showDark ? 'rgba(255,255,255,0.05)' : '#e2e8f0'
+          backgroundColor: showDark ? '#171716' : '#F2EFEA',
+          borderColor: showDark ? 'color-mix(in srgb, #FAFAFA 5%, transparent)' : '#D8C9B6'
         }}
       >
         <img 
@@ -56,7 +56,7 @@ export default function PropertyCard({ property, isLight = false }: { property: 
 
         {/* BADGES GAUCHE */}
         <div className="absolute bottom-6 left-6 flex flex-wrap gap-2 max-w-[70%] z-10">
-          <span className={`${isLight ? 'bg-black text-white' : 'bg-[#D4AF37] text-black'} text-[9px] font-black px-4 py-2 rounded-none uppercase tracking-widest shadow-xl border ${isLight ? 'border-white/10' : 'border-black/5'}`}>
+          <span className={`${isLight ? 'bg-black text-white' : 'bg-[#D8C9B6] text-black'} text-[9px] font-black px-4 py-2 rounded-none uppercase tracking-widest shadow-xl border ${isLight ? 'border-white/10' : 'border-black/5'}`}>
             {translate('propertyCard.ref', { ref: property.ref || property.id_externe })}
           </span>
           
@@ -67,10 +67,10 @@ export default function PropertyCard({ property, isLight = false }: { property: 
 
         {/* BOUTONS DROITE */}
         <div className="absolute bottom-6 right-6 flex flex-col gap-2 z-10">
-          <button className="bg-black/40 backdrop-blur-md p-3 rounded-none border border-white/20 text-white hover:bg-[#D4AF37] hover:text-black transition-all">
+          <button className="bg-black/40 backdrop-blur-md p-3 rounded-none border border-white/20 text-white hover:bg-[#D8C9B6] hover:text-black transition-all">
             <Heart size={18} strokeWidth={1.5} />
           </button>
-          <div className={`${isLight ? 'bg-black text-white' : 'bg-[#D4AF37] text-black'} p-3 rounded-none shadow-xl transform group-hover:translate-x-1 transition-all border ${isLight ? 'border-white/10' : 'border-black/5'}`}>
+          <div className={`${isLight ? 'bg-black text-white' : 'bg-[#D8C9B6] text-black'} p-3 rounded-none shadow-xl transform group-hover:translate-x-1 transition-all border ${isLight ? 'border-white/10' : 'border-black/5'}`}>
             <ChevronRight size={20} strokeWidth={2.5} />
           </div>
         </div>
@@ -81,21 +81,21 @@ export default function PropertyCard({ property, isLight = false }: { property: 
         <div className="flex justify-between items-start gap-4 mb-3">
           <h3 
             className="font-serif text-2xl italic leading-tight flex-grow line-clamp-1 transition-colors"
-            style={{ color: showDark ? '#ffffff' : '#0f172a' }}
+            style={{ color: showDark ? '#FAFAFA' : '#171716' }}
           >
             {property.titre || property.type || t('propertyCard.fallbackTitle')}
           </h3>
           
-          <span className={`text-xl font-bold ${isLight ? 'text-black' : 'text-[#D4AF37]'} whitespace-nowrap pt-1`}>
+          <span className={`text-xl font-bold ${isLight ? 'text-black' : 'text-[#D8C9B6]'} whitespace-nowrap pt-1`}>
             {priceFormatted} €
           </span>
         </div>
 
         <div 
           className="flex items-center gap-2 text-[10px] tracking-[0.3em] uppercase font-bold transition-colors"
-          style={{ color: showDark ? '#e2e8f0' : '#475569' }}
+          style={{ color: showDark ? '#D8C9B6' : '#171716' }}
         >
-          <span className={isLight ? 'text-black' : 'text-[#D4AF37]'}>●</span>
+          <span className={isLight ? 'text-black' : 'text-[#D8C9B6]'}>●</span>
           {property.town} <span className="opacity-30">|</span> {property.region || 'Costa Blanca'}
         </div>
       </div>
@@ -103,7 +103,7 @@ export default function PropertyCard({ property, isLight = false }: { property: 
       {/* ICONES TECHNIQUES */}
       <div 
         className="grid grid-cols-3 gap-y-6 pt-6 border-t transition-colors"
-        style={{ borderColor: showDark ? 'rgba(255,255,255,0.1)' : '#f1f5f9' }}
+        style={{ borderColor: showDark ? 'color-mix(in srgb, #FAFAFA 10%, transparent)' : '#F2EFEA' }}
       >
         {[
           { icon: Maximize, value: `${property.surface_built || '0'} m²` },
@@ -117,15 +117,15 @@ export default function PropertyCard({ property, isLight = false }: { property: 
             <div 
               className="w-8 h-8 flex items-center justify-center border transition-colors"
               style={{ 
-                backgroundColor: showDark ? 'rgba(255,255,255,0.05)' : '#f8fafc',
-                borderColor: showDark ? 'rgba(255,255,255,0.1)' : '#e2e8f0'
+                backgroundColor: showDark ? 'color-mix(in srgb, #FAFAFA 5%, transparent)' : '#F2EFEA',
+                borderColor: showDark ? 'color-mix(in srgb, #FAFAFA 10%, transparent)' : '#D8C9B6'
               }}
             >
-              <item.icon size={14} className={isLight ? 'text-black' : 'text-[#D4AF37]'} />
+              <item.icon size={14} className={isLight ? 'text-black' : 'text-[#D8C9B6]'} />
             </div>
             <span 
               className="text-[11px] font-medium transition-colors"
-              style={{ color: showDark ? '#f1f5f9' : '#1e293b' }}
+              style={{ color: showDark ? '#F2EFEA' : '#171716' }}
             >
               {item.value}
             </span>

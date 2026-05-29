@@ -125,23 +125,23 @@ export default function PropertyGrid({
       
       {isAnimating && filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-40 space-y-4">
-          <Loader2 className="animate-spin text-[#D4AF37]" size={40} />
-          <p className="text-[#D4AF37] text-[10px] font-bold uppercase tracking-[0.4em] animate-pulse">
+          <Loader2 className="animate-spin text-[#D8C9B6]" size={40} />
+          <p className="text-[#D8C9B6] text-[10px] font-bold uppercase tracking-[0.4em] animate-pulse">
             {t('home.loading.updating')}
           </p>
         </div>
       ) : filtered.length === 0 && !isAnimating ? (
         <div className="flex flex-col items-center justify-center py-24 md:py-40 px-6 space-y-6">
-          <div className="w-16 h-16 md:w-20 md:h-20 rounded-none bg-[#D4AF37]/10 flex items-center justify-center border border-[#D4AF37]/20">
-            <SearchX size={32} className="text-[#D4AF37] opacity-60" />
+          <div className="w-16 h-16 md:w-20 md:h-20 rounded-none bg-[#D8C9B6]/10 flex items-center justify-center border border-[#D8C9B6]/20">
+            <SearchX size={32} className="text-[#D8C9B6] opacity-60" />
           </div>
           <div className="text-center space-y-3">
-            <p className="text-[#D4AF37] text-[10px] font-bold uppercase tracking-[0.4em]">
+            <p className="text-[#D8C9B6] text-[10px] font-bold uppercase tracking-[0.4em]">
               {t('home.collection.noMatch')}
             </p>
             <p 
               className="font-serif italic text-xl md:text-2xl leading-relaxed"
-              style={{ color: isDarkVisual ? '#FFFFFF' : '#0F172A' }}
+              style={{ color: isDarkVisual ? '#FAFAFA' : '#171716' }}
             >
               {t('home.collection.noMatchDescription')}
             </p>
@@ -151,8 +151,8 @@ export default function PropertyGrid({
           </div>
           <button 
             onClick={() => window.location.reload()}
-            className="mt-4 text-[10px] uppercase font-bold tracking-widest border-b border-[#D4AF37] pb-1 hover:text-[#D4AF37] transition-all"
-            style={{ color: isDarkVisual ? '#FFFFFF' : '#0F172A' }}
+            className="mt-4 text-[10px] uppercase font-bold tracking-widest border-b border-[#D8C9B6] pb-1 hover:text-[#D8C9B6] transition-all"
+            style={{ color: isDarkVisual ? '#FAFAFA' : '#171716' }}
           >
             {t('home.collection.reset')}
           </button>

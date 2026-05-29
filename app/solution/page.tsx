@@ -504,7 +504,7 @@ export default function DataHomeSolution() {
     const [pinCopied, setPinCopied] = useState(false);
 
     return (
-      <div className="w-full bg-[#0f172a] rounded-[2.5rem] border border-white/10 shadow-2xl overflow-hidden flex flex-col h-[400px] sm:h-[500px] md:h-[600px] relative">
+      <div className="w-full bg-[#171716] rounded-[2.5rem] border border-white/10 shadow-2xl overflow-hidden flex flex-col h-[400px] sm:h-[500px] md:h-[600px] relative">
         <div className="h-12 sm:h-14 md:h-16 border-b border-white/5 bg-slate-900/50 flex items-center justify-between px-3 sm:px-4 md:px-6 shrink-0">
           <div className="flex gap-2 sm:gap-3 md:gap-4 overflow-x-auto pb-1 scrollbar-hide">
             {t.saas.mockup.tabs.map((tab, i) => (
@@ -523,7 +523,7 @@ export default function DataHomeSolution() {
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto bg-[#020617]/40 custom-scrollbar">
+        <div className="flex-1 overflow-y-auto bg-[#010101]/40 custom-scrollbar">
           {activeTab === 0 ? (
             /* --- CONSOLE AGENCE (responsive) --- */
             <div className="flex flex-col sm:flex-row h-full">
@@ -685,7 +685,7 @@ export default function DataHomeSolution() {
     const getPrice = (base: number) => isYearly ? Math.floor(base * 0.8) : base;
 
     return (
-      <section id="pricing" className="py-12 sm:py-16 md:py-24 px-4 sm:px-6 bg-[#020617] relative z-10">
+      <section id="pricing" className="py-12 sm:py-16 md:py-24 px-4 sm:px-6 bg-[#010101] relative z-10">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-8 sm:mb-12 md:mb-16">
             <div className="inline-block px-3 sm:px-4 py-1 sm:py-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 text-[8px] sm:text-[10px] font-black uppercase mb-4 sm:mb-6 tracking-[0.2em]">{t.pricing.tag}</div>
@@ -696,7 +696,7 @@ export default function DataHomeSolution() {
 
           <div className="flex flex-wrap justify-center items-center gap-4 sm:gap-6 mb-10 sm:mb-12 md:mb-16">
             <span className={`text-[10px] sm:text-[11px] font-black uppercase tracking-widest transition-colors ${!isYearly ? 'text-white' : 'text-slate-600'}`}>{t.pricing.billing.monthly}</span>
-            <button onClick={() => setIsYearly(!isYearly)} className="w-14 h-7 sm:w-16 sm:h-8 bg-white/5 border border-white/10 rounded-full p-1 hover:bg-white/10 transition-all"><div className={`w-5 h-5 bg-emerald-500 rounded-full transition-transform duration-300 ${isYearly ? 'translate-x-8' : 'translate-x-0 shadow-[0_0_10px_rgba(16,185,129,0.5)]'}`} /></button>
+            <button onClick={() => setIsYearly(!isYearly)} className="w-14 h-7 sm:w-16 sm:h-8 bg-white/5 border border-white/10 rounded-full p-1 hover:bg-white/10 transition-all"><div className={`w-5 h-5 bg-emerald-500 rounded-full transition-transform duration-300 ${isYearly ? 'translate-x-8' : 'translate-x-0 shadow-lg'}`} /></button>
             <div className="flex items-center gap-2">
               <span className={`text-[10px] sm:text-[11px] font-black uppercase tracking-widest transition-colors ${isYearly ? 'text-white' : 'text-slate-600'}`}>{t.pricing.billing.yearly}</span>
               <span className="bg-emerald-500/20 text-emerald-400 text-[7px] sm:text-[9px] font-black px-1 sm:px-2 py-0.5 sm:py-1 rounded-md uppercase animate-pulse">{t.pricing.billing.save}</span>
@@ -729,13 +729,13 @@ export default function DataHomeSolution() {
   };
 
   return (
-    <div className="bg-[#020617] text-white min-h-screen font-sans selection:bg-emerald-500/30 overflow-x-hidden relative" dir={t.dir}>
+    <div className="bg-[#010101] text-white min-h-screen font-sans selection:bg-emerald-500/30 overflow-x-hidden relative" dir={t.dir}>
 
       <div className="fixed inset-0 z-0 opacity-[0.05] pointer-events-none">
         <Image src="/1.jpg" alt="Background" fill className="object-cover" priority />
       </div>
 
-      <nav className="border-b border-white/5 px-4 sm:px-6 py-4 sm:py-5 flex justify-between items-center backdrop-blur-2xl sticky top-0 z-50 bg-[#020617]/90">
+      <nav className="border-b border-white/5 px-4 sm:px-6 py-4 sm:py-5 flex justify-between items-center backdrop-blur-2xl sticky top-0 z-50 bg-[#010101]/90">
         <div className="relative h-10 w-24 sm:h-12 sm:w-32 md:w-64">
           <Image src="/logo_1.png" alt="Logo" fill className="object-contain object-left" />
         </div>
@@ -752,7 +752,7 @@ export default function DataHomeSolution() {
               <ChevronDown size={12} className={`text-slate-600 transition-transform ${isLangOpen ? 'rotate-180' : ''}`} />
             </button>
             {isLangOpen && (
-              <div className="absolute right-0 mt-4 w-36 sm:w-48 bg-[#0f172a] border border-white/10 rounded-[1.5rem] overflow-hidden shadow-3xl z-50 p-2">
+              <div className="absolute right-0 mt-4 w-36 sm:w-48 bg-[#171716] border border-white/10 rounded-[1.5rem] overflow-hidden shadow-3xl z-50 p-2">
                 {(Object.keys(translations) as Array<keyof typeof translations>).map((l) => (
                   <button key={l} onClick={() => { setLang(l); setIsLangOpen(false); }} className={`w-full text-left px-3 sm:px-5 py-2 sm:py-4 text-[9px] sm:text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${lang === l ? 'text-emerald-400 bg-white/5' : 'text-slate-400 hover:bg-emerald-500 hover:text-slate-950'}`}>
                     {translations[l].label}
@@ -771,7 +771,7 @@ export default function DataHomeSolution() {
 
         {/* Menu mobile déroulant */}
         {mobileMenuOpen && (
-          <div className="absolute top-full left-0 right-0 bg-[#0f172a] border-t border-white/5 p-4 flex flex-col gap-4 lg:hidden z-50">
+          <div className="absolute top-full left-0 right-0 bg-[#171716] border-t border-white/5 p-4 flex flex-col gap-4 lg:hidden z-50">
             {t.nav.slice(0, 4).map((item, i) => (
               <a key={i} href={`#${['vision','how','saas','pricing'][i]}`} className="text-sm font-black uppercase tracking-widest text-slate-400 hover:text-emerald-400 py-2" onClick={() => setMobileMenuOpen(false)}>
                 {item}
@@ -785,7 +785,7 @@ export default function DataHomeSolution() {
         <video autoPlay loop muted playsInline className="absolute inset-0 w-full h-full object-cover opacity-40 mix-blend-lighten">
           <source src="/hero_datahome.mp4" type="video/mp4" />
         </video>
-        <div className="absolute inset-0 bg-gradient-to-b from-[#020617]/20 via-[#020617]/40 to-[#020617]"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-[#010101]/20 via-[#010101]/40 to-[#010101]"></div>
         <div className="relative z-10 text-center px-4 max-w-5xl">
           <div className="inline-block px-3 sm:px-5 py-1 sm:py-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 text-[9px] sm:text-[11px] font-black uppercase mb-6 sm:mb-10 tracking-[0.2em] sm:tracking-[0.3em]">{t.hero.tag}</div>
           <h1 className="text-[12vw] sm:text-[11vw] md:text-[95px] font-black tracking-tighter leading-[0.85] mb-6 sm:mb-10 uppercase">
@@ -865,7 +865,7 @@ export default function DataHomeSolution() {
 
       <PricingSection />
 
-      <footer className="py-16 sm:py-20 md:py-24 border-t border-white/5 text-center opacity-40 z-10 relative bg-[#020617]">
+      <footer className="py-16 sm:py-20 md:py-24 border-t border-white/5 text-center opacity-40 z-10 relative bg-[#010101]">
         <div className="flex justify-center mb-6 sm:mb-8 md:mb-10">
           <div className="relative h-8 w-32 sm:h-10 sm:w-48 grayscale hover:grayscale-0 transition-all duration-700 cursor-pointer">
             <Image src="/logo_1.png" alt="Logo" fill className="object-contain" />

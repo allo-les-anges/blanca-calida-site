@@ -168,15 +168,15 @@ function HomeContent() {
   if (!mounted) return null;
 
   // Couleurs dynamiques
-  const bgColor = isLight ? 'bg-white' : 'bg-[#020617]';
+  const bgColor = isLight ? 'bg-white' : 'bg-[#010101]';
   const textColor = isLight ? 'text-slate-900' : 'text-white';
   const mutedText = isLight ? 'text-slate-500' : 'text-slate-400';
 
   if (loading) {
     return (
-      <div className={`h-screen flex flex-col items-center justify-center ${isLight ? 'bg-white' : 'bg-[#020617]'}`}>
-        <Loader2 className="animate-spin text-[#D4AF37] mb-8" size={48} />
-        <span className={`text-[10px] font-bold uppercase tracking-[0.5em] animate-pulse ${isLight ? 'text-black' : 'text-[#D4AF37]'}`}>
+      <div className={`h-screen flex flex-col items-center justify-center ${isLight ? 'bg-white' : 'bg-[#010101]'}`}>
+        <Loader2 className="animate-spin text-[#D8C9B6] mb-8" size={48} />
+        <span className={`text-[10px] font-bold uppercase tracking-[0.5em] animate-pulse ${isLight ? 'text-black' : 'text-[#D8C9B6]'}`}>
           {t('home.loading.amaruExcellence')}
         </span>
       </div>
@@ -184,7 +184,7 @@ function HomeContent() {
   }
 
   return (
-    <main className={`min-h-screen selection:bg-[#D4AF37]/30 font-sans overflow-x-hidden transition-colors duration-500 ${bgColor}`}>
+    <main className={`min-h-screen selection:bg-[#D8C9B6]/30 font-sans overflow-x-hidden transition-colors duration-500 ${bgColor}`}>
       <Navbar />
       
       {/* SECTION HERO */}
@@ -196,7 +196,7 @@ function HomeContent() {
                 onClick={() => setIsSearchOpen(true)}
                 className="group flex items-center gap-5 transition-all duration-700"
              >
-                <div className={`w-10 h-10 border border-[#D4AF37]/30 ${isLight ? 'bg-black text-white' : 'bg-transparent text-[#D4AF37]'} rounded-full flex items-center justify-center group-hover:bg-[#D4AF37] group-hover:text-white transition-all duration-500`}>
+                <div className={`w-10 h-10 border border-[#D8C9B6]/30 ${isLight ? 'bg-black text-white' : 'bg-transparent text-[#D8C9B6]'} rounded-full flex items-center justify-center group-hover:bg-[#D8C9B6] group-hover:text-white transition-all duration-500`}>
                   <Search size={16} strokeWidth={1.5} />
                 </div>
                 <span className={`text-[11px] md:text-[13px] font-light uppercase tracking-[0.6em] transition-colors duration-500 ${textColor}`}>
@@ -205,7 +205,7 @@ function HomeContent() {
              </button>
            )}
         </div>
-        <div className={`absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t ${isLight ? 'from-white' : 'from-[#020617]'} to-transparent pointer-events-none transition-colors duration-500`} />
+        <div className={`absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t ${isLight ? 'from-white' : 'from-[#010101]'} to-transparent pointer-events-none transition-colors duration-500`} />
       </div>
 
       <ScrollingBanner />
@@ -218,19 +218,19 @@ function HomeContent() {
       {/* SECTION ESPACE PROPRIÉTAIRE (Masquée en mode Light) */}
       {!isLight && (
         <section className={`max-w-[1600px] mx-auto px-4 py-12 ${bgColor}`}>
-          <div className="bg-[#0F172A]/40 p-12 border border-white/5 relative overflow-hidden">
+          <div className="bg-[#171716]/40 p-12 border border-white/5 relative overflow-hidden">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
               <div className="space-y-6">
-                <span className="text-[#D4AF37] text-[10px] font-bold uppercase tracking-[0.4em]">{t('home.ownerSection.badge')}</span>
+                <span className="text-[#D8C9B6] text-[10px] font-bold uppercase tracking-[0.4em]">{t('home.ownerSection.badge')}</span>
                 <h2 className="text-4xl md:text-6xl font-serif italic text-white leading-tight">
                   {t('home.ownerSection.title')} <br />
-                  <span className="text-[#D4AF37] not-italic font-sans font-extrabold text-3xl md:text-5xl uppercase">{t('home.ownerSection.subtitle')}</span>
+                  <span className="text-[#D8C9B6] not-italic font-sans font-extrabold text-3xl md:text-5xl uppercase">{t('home.ownerSection.subtitle')}</span>
                 </h2>
               </div>
-              <div className="p-10 border border-[#D4AF37]/20 bg-[#020617] shadow-xl">
+              <div className="p-10 border border-[#D8C9B6]/20 bg-[#010101] shadow-xl">
                 <form className="space-y-8">
-                  <input type="password" placeholder={t('home.ownerSection.pinPlaceholder')} className="w-full bg-transparent border-b border-white/10 py-4 text-center text-2xl font-black tracking-[0.6em] outline-none focus:border-[#D4AF37] text-white" />
-                  <button type="submit" className="w-full bg-[#D4AF37] text-black py-5 font-bold text-[10px] uppercase tracking-[0.3em] hover:bg-white transition-all flex items-center justify-center gap-4">
+                  <input type="password" placeholder={t('home.ownerSection.pinPlaceholder')} className="w-full bg-transparent border-b border-white/10 py-4 text-center text-2xl font-black tracking-[0.6em] outline-none focus:border-[#D8C9B6] text-white" />
+                  <button type="submit" className="w-full bg-[#D8C9B6] text-black py-5 font-bold text-[10px] uppercase tracking-[0.3em] hover:bg-white transition-all flex items-center justify-center gap-4">
                     {t('home.ownerSection.accessButton')} <ArrowRight size={18} />
                   </button>
                 </form>
@@ -247,10 +247,10 @@ function HomeContent() {
             <h3 className={`text-4xl md:text-6xl font-serif italic leading-none ${textColor}`}>
               {filters.region ? filters.region : t('home.collection.title')}
             </h3>
-            <p className="text-[#D4AF37] text-[10px] font-bold uppercase tracking-[0.4em] flex items-center justify-center gap-4">
-               <span className="w-4 h-px bg-[#D4AF37]/40"></span>
+            <p className="text-[#D8C9B6] text-[10px] font-bold uppercase tracking-[0.4em] flex items-center justify-center gap-4">
+               <span className="w-4 h-px bg-[#D8C9B6]/40"></span>
                {filteredProperties.length} {t('home.collection.propertiesSelected')}
-               <span className="w-4 h-px bg-[#D4AF37]/40"></span>
+               <span className="w-4 h-px bg-[#D8C9B6]/40"></span>
             </p>
           </header>
           {/* On passe isLight au Grid pour les vignettes */}
@@ -262,12 +262,12 @@ function HomeContent() {
       {isLight && (
         <section className="max-w-7xl mx-auto px-6 py-24">
           <div className="bg-black text-white p-12 md:p-20 text-center space-y-8">
-            <Mail className="mx-auto text-[#D4AF37]" size={40} />
+            <Mail className="mx-auto text-[#D8C9B6]" size={40} />
             <h2 className="text-3xl md:text-5xl font-serif italic">Recevez notre sélection Off-Market</h2>
             <p className="text-slate-400 max-w-xl mx-auto text-sm uppercase tracking-widest">Inscrivez-vous pour accéder aux propriétés avant leur publication officielle.</p>
             <div className="flex flex-col md:flex-row gap-4 max-w-md mx-auto pt-4">
-              <input type="email" placeholder="VOTRE EMAIL" className="bg-transparent border border-white/20 px-6 py-4 outline-none focus:border-[#D4AF37] flex-1 text-[10px] tracking-widest text-white" />
-              <button className="bg-[#D4AF37] text-black px-8 py-4 font-bold text-[10px] tracking-widest uppercase hover:bg-white transition-all">S'inscrire</button>
+              <input type="email" placeholder="VOTRE EMAIL" className="bg-transparent border border-white/20 px-6 py-4 outline-none focus:border-[#D8C9B6] flex-1 text-[10px] tracking-widest text-white" />
+              <button className="bg-[#D8C9B6] text-black px-8 py-4 font-bold text-[10px] tracking-widest uppercase hover:bg-white transition-all">S'inscrire</button>
             </div>
           </div>
         </section>
@@ -276,8 +276,8 @@ function HomeContent() {
       {/* MODAL DE RECHERCHE */}
       <div className={`fixed inset-0 z-[100] flex items-center justify-center p-4 transition-all duration-500 ${isSearchOpen ? 'visible opacity-100' : 'invisible opacity-0'}`}>
         <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-md" onClick={() => setIsSearchOpen(false)} />
-        <div className={`relative w-full max-w-5xl overflow-hidden shadow-2xl transition-all duration-500 ${isSearchOpen ? 'scale-100' : 'scale-95'} ${isLight ? 'bg-white' : 'bg-[#0A0A0A]'}`}>
-          <button onClick={() => setIsSearchOpen(false)} className="absolute top-5 right-5 w-10 h-10 bg-black text-[#D4AF37] flex items-center justify-center hover:bg-[#D4AF37] hover:text-black z-50 transition-all"><X size={20} /></button>
+        <div className={`relative w-full max-w-5xl overflow-hidden shadow-2xl transition-all duration-500 ${isSearchOpen ? 'scale-100' : 'scale-95'} ${isLight ? 'bg-white' : 'bg-[#010101]'}`}>
+          <button onClick={() => setIsSearchOpen(false)} className="absolute top-5 right-5 w-10 h-10 bg-black text-[#D8C9B6] flex items-center justify-center hover:bg-[#D8C9B6] hover:text-black z-50 transition-all"><X size={20} /></button>
           <div className="p-8 md:p-12 max-h-[85vh] overflow-y-auto">
             <AdvancedSearch properties={allProperties} onSearch={handleSearch} activeFilters={filters} isLight={isLight} />
           </div>
@@ -293,7 +293,7 @@ export default function Home() {
   return (
     <>
       <IntroGate />
-      <Suspense fallback={<div className="h-screen bg-[#020617] flex items-center justify-center"><Loader2 className="animate-spin text-[#D4AF37]" size={48} /></div>}>
+      <Suspense fallback={<div className="h-screen bg-[#010101] flex items-center justify-center"><Loader2 className="animate-spin text-[#D8C9B6]" size={48} /></div>}>
         <HomeContent />
       </Suspense>
     </>

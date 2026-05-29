@@ -41,11 +41,11 @@ export default function TestDBPage() {
   }, []);
 
   if (loading) {
-    return <div className="p-10 text-white bg-[#020617] min-h-screen">Chargement des tables...</div>;
+    return <div className="p-10 text-white bg-[#010101] min-h-screen">Chargement des tables...</div>;
   }
 
   return (
-    <div className="min-h-screen bg-[#020617] p-10 text-white font-sans text-left">
+    <div className="min-h-screen bg-[#010101] p-10 text-white font-sans text-left">
       <h1 className="text-2xl font-black mb-8 text-emerald-500 uppercase">Inspecteur de Tables Supabase</h1>
 
       {/* SECTION TABLE PROFILES */}
@@ -54,7 +54,7 @@ export default function TestDBPage() {
           <span className="w-3 h-3 bg-blue-500 rounded-full"></span>
           Table: profiles
         </h2>
-        <div className="overflow-x-auto border border-white/10 rounded-2xl bg-[#0F172A]">
+        <div className="overflow-x-auto border border-white/10 rounded-2xl bg-[#171716]">
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-white/5 text-slate-400">
@@ -86,7 +86,7 @@ export default function TestDBPage() {
           <span className="w-3 h-3 bg-emerald-500 rounded-full"></span>
           Table: staff_prestataires
         </h2>
-        <div className="overflow-x-auto border border-white/10 rounded-2xl bg-[#0F172A]">
+        <div className="overflow-x-auto border border-white/10 rounded-2xl bg-[#171716]">
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-white/5 text-slate-400">

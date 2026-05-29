@@ -63,7 +63,7 @@ export default function AdvancedSearch({
   };
 
   // --- STYLES DYNAMIQUES ---
-  const cardBg = isLight ? "bg-white" : "bg-white dark:bg-[#0f172a]";
+  const cardBg = isLight ? "bg-white" : "bg-white dark:bg-[#171716]";
   const textColor = isLight ? "text-slate-900" : "text-slate-900 dark:text-white";
   const borderColor = isLight ? "border-slate-100" : "border-slate-100 dark:border-slate-800";
   const sliderTrack = isLight ? "bg-slate-200" : "bg-slate-200 dark:bg-slate-700";
@@ -75,7 +75,7 @@ export default function AdvancedSearch({
           -webkit-appearance: none;
           width: 100%;
           height: 4px;
-          background: ${isLight ? '#e2e8f0' : '#334155'};
+          background: ${isLight ? '#D8C9B6' : '#D8C9B6'};
           border-radius: 5px;
           outline: none;
         }
@@ -84,11 +84,11 @@ export default function AdvancedSearch({
           appearance: none;
           width: 20px;
           height: 20px;
-          background: #D4AF37;
+          background: #D8C9B6;
           border-radius: 50%;
           cursor: pointer;
           border: 2px solid white;
-          box-shadow: 0 0 10px rgba(212, 175, 55, 0.4);
+          box-shadow: 0 0 10px color-mix(in srgb, #D8C9B6 40%, transparent);
         }
       `}</style>
 
@@ -96,7 +96,7 @@ export default function AdvancedSearch({
       {onClose && (
         <button 
           onClick={onClose}
-          className={`absolute -top-6 -right-2 md:right-4 w-12 h-12 rounded-full flex items-center justify-center shadow-2xl hover:bg-[#D4AF37] hover:text-white transition-all z-[110] border ${
+          className={`absolute -top-6 -right-2 md:right-4 w-12 h-12 rounded-full flex items-center justify-center shadow-2xl hover:bg-[#D8C9B6] hover:text-white transition-all z-[110] border ${
             isLight ? "bg-white text-slate-900 border-slate-200" : "bg-white dark:bg-slate-800 text-slate-900 dark:text-white border-slate-200 dark:border-slate-700"
           }`}
         >
@@ -105,14 +105,14 @@ export default function AdvancedSearch({
       )}
 
       {/* Container Principal */}
-      <div className={`${cardBg} rounded-[2.5rem] shadow-[0_30px_100px_rgba(0,0,0,0.2)] border ${borderColor} p-3 relative`}>
+      <div className={`${cardBg} rounded-[2.5rem] shadow-2xl border ${borderColor} p-3 relative`}>
         
         <div className={`w-12 h-1.5 rounded-full mx-auto mt-2 mb-4 lg:hidden ${isLight ? 'bg-slate-100' : 'bg-slate-100 dark:bg-slate-800'}`} />
 
         {/* LIGNE 1 : RÉFÉRENCE */}
         <div className={`border-b ${isLight ? 'border-slate-50' : 'border-slate-50 dark:border-slate-800/50'}`}>
           <div className="p-6 lg:p-8">
-            <label className="flex items-center gap-2 text-[9px] uppercase font-black tracking-[0.2em] text-[#D4AF37] mb-2">
+            <label className="flex items-center gap-2 text-[9px] uppercase font-black tracking-[0.2em] text-[#D8C9B6] mb-2">
               <Hash size={12} /> Référence Propriété
             </label>
             <input 
@@ -139,8 +139,8 @@ export default function AdvancedSearch({
                 onChange={(e) => setLocalFilters({ ...localFilters, region: e.target.value })}
                 className={`w-full bg-transparent text-[13px] font-bold outline-none cursor-pointer appearance-none uppercase ${textColor}`}
               >
-                <option value="" className={isLight ? "" : "dark:bg-[#0f172a]"}>Espagne (Toutes)</option>
-                {regions.map(r => <option key={r} value={r} className={isLight ? "" : "dark:bg-[#0f172a]"}>{r}</option>)}
+                <option value="" className={isLight ? "" : "dark:bg-[#171716]"}>Espagne (Toutes)</option>
+                {regions.map(r => <option key={r} value={r} className={isLight ? "" : "dark:bg-[#171716]"}>{r}</option>)}
               </select>
             </div>
 
@@ -154,8 +154,8 @@ export default function AdvancedSearch({
                 onChange={(e) => setLocalFilters({ ...localFilters, type: e.target.value })}
                 className={`w-full bg-transparent text-[13px] font-bold outline-none cursor-pointer appearance-none uppercase ${textColor}`}
               >
-                <option value="" className={isLight ? "" : "dark:bg-[#0f172a]"}>Indifférent</option>
-                {types.map(t => <option key={t.id} value={t.id} className={isLight ? "" : "dark:bg-[#0f172a]"}>{t.label}</option>)}
+                <option value="" className={isLight ? "" : "dark:bg-[#171716]"}>Indifférent</option>
+                {types.map(t => <option key={t.id} value={t.id} className={isLight ? "" : "dark:bg-[#171716]"}>{t.label}</option>)}
               </select>
             </div>
 
@@ -163,7 +163,7 @@ export default function AdvancedSearch({
             <div className={`p-6 border-b md:border-b-0 md:border-r ${isLight ? 'border-slate-50' : 'border-slate-50 dark:border-slate-800/50'}`}>
               <div className="flex justify-between items-center mb-3">
                 <label className="text-[9px] uppercase font-black tracking-[0.2em] text-slate-400">Min</label>
-                <span className={`text-[11px] font-bold ${isLight ? 'text-slate-900' : 'text-slate-900 dark:text-[#D4AF37]'}`}>
+                <span className={`text-[11px] font-bold ${isLight ? 'text-slate-900' : 'text-slate-900 dark:text-[#D8C9B6]'}`}>
                   {parseInt(localFilters.minPrice || DEFAULT_MIN_PRICE).toLocaleString()} €
                 </span>
               </div>
@@ -182,7 +182,7 @@ export default function AdvancedSearch({
             <div className={`p-6 border-b md:border-b-0 md:border-r ${isLight ? 'border-slate-50' : 'border-slate-50 dark:border-slate-800/50'}`}>
               <div className="flex justify-between items-center mb-3">
                 <label className="text-[9px] uppercase font-black tracking-[0.2em] text-slate-400">Max</label>
-                <span className={`text-[11px] font-bold ${isLight ? 'text-slate-900' : 'text-slate-900 dark:text-[#D4AF37]'}`}>
+                <span className={`text-[11px] font-bold ${isLight ? 'text-slate-900' : 'text-slate-900 dark:text-[#D8C9B6]'}`}>
                   {parseInt(localFilters.maxPrice || "5000000").toLocaleString()} €
                 </span>
               </div>
@@ -210,7 +210,7 @@ export default function AdvancedSearch({
                     onClick={() => setLocalFilters({ ...localFilters, beds: n.toString() })}
                     className={`flex-1 h-8 rounded-lg text-[10px] font-black transition-all ${
                       localFilters.beds === n.toString() 
-                      ? "bg-[#D4AF37] text-white" 
+                      ? "bg-[#D8C9B6] text-white" 
                       : `${isLight ? 'bg-slate-50 hover:bg-slate-100' : 'bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700'} text-slate-400`
                     }`}
                   >
@@ -227,7 +227,7 @@ export default function AdvancedSearch({
             <button 
               onClick={handleSearchClick}
               className={`w-full lg:w-20 h-16 lg:h-20 rounded-3xl flex items-center justify-center hover:scale-105 transition-all duration-300 shadow-xl ${
-                isLight ? "bg-black text-white" : "bg-slate-950 dark:bg-[#D4AF37] text-white dark:text-slate-900"
+                isLight ? "bg-black text-white" : "bg-slate-950 dark:bg-[#D8C9B6] text-white dark:text-slate-900"
               }`}
             >
               <Search size={24} strokeWidth={2.5} />

@@ -6,7 +6,7 @@ const reviews = [
 
 export default function Testimonials() {
   return (
-    <section className="bg-[#fcfaf7] py-24 px-4">
+    <section className="bg-[#F2EFEA] py-24 px-4">
       <div className="max-w-7xl mx-auto">
         <h2 className="text-center font-serif text-4xl md:text-5xl text-slate-800 mb-4 italic">La confiance est une valeur fondamentale</h2>
         <p className="text-center text-slate-500 mb-16 max-w-2xl mx-auto">La satisfaction de nos clients est notre plus belle réussite.</p>

@@ -72,13 +72,13 @@ export default function IntroGate() {
     >
       <span
         aria-hidden="true"
-        className={`absolute left-0 top-0 h-full w-[50.2vw] origin-left bg-black shadow-[20px_0_60px_rgba(0,0,0,0.45)] transition-transform duration-[3000ms] ease-[cubic-bezier(0.83,0,0.17,1)] motion-reduce:duration-200 ${
+        className={`absolute left-0 top-0 h-full w-[50.2vw] origin-left bg-black shadow-2xl transition-transform duration-[3000ms] ease-[cubic-bezier(0.83,0,0.17,1)] motion-reduce:duration-200 ${
           isOpen ? "-translate-x-full" : "translate-x-0"
         }`}
       />
       <span
         aria-hidden="true"
-        className={`absolute right-0 top-0 h-full w-[50.2vw] origin-right bg-black shadow-[-20px_0_60px_rgba(0,0,0,0.45)] transition-transform duration-[3000ms] ease-[cubic-bezier(0.83,0,0.17,1)] motion-reduce:duration-200 ${
+        className={`absolute right-0 top-0 h-full w-[50.2vw] origin-right bg-black shadow-2xl transition-transform duration-[3000ms] ease-[cubic-bezier(0.83,0,0.17,1)] motion-reduce:duration-200 ${
           isOpen ? "translate-x-full" : "translate-x-0"
         }`}
       />

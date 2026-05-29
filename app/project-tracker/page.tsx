@@ -171,14 +171,14 @@ export default function ProjectTracker() {
     }
   };
 
-  if (loading) return <div className="h-screen flex items-center justify-center bg-[#020617]"><Loader2 className="animate-spin text-emerald-500" size={40} /></div>;
+  if (loading) return <div className="h-screen flex items-center justify-center bg-[#010101]"><Loader2 className="animate-spin text-emerald-500" size={40} /></div>;
 
   return (
-    <div className="min-h-screen bg-[#020617] text-slate-200 p-6 md:p-12">
+    <div className="min-h-screen bg-[#010101] text-slate-200 p-6 md:p-12">
       <div className="max-w-6xl mx-auto space-y-12">
         
         {/* HEADER */}
-        <header className="flex justify-between items-center bg-[#0F172A] p-8 rounded-[2rem] border border-white/5 shadow-xl">
+        <header className="flex justify-between items-center bg-[#171716] p-8 rounded-[2rem] border border-white/5 shadow-xl">
           <div className="flex items-center gap-5">
             <div className="bg-emerald-500 p-4 rounded-2xl shadow-lg shadow-emerald-500/20"><HardHat className="text-black" /></div>
             <div>
@@ -194,7 +194,7 @@ export default function ProjectTracker() {
         </header>
 
         {/* DOCUMENTS SECTION */}
-        <section className="bg-[#0F172A]/50 p-8 rounded-[2rem] border border-white/5">
+        <section className="bg-[#171716]/50 p-8 rounded-[2rem] border border-white/5">
           <h3 className="text-xs font-black uppercase tracking-[0.3em] text-emerald-500 mb-6 flex items-center gap-2">
             <FileText size={16}/> {t('projectTracker.documents')}
           </h3>
@@ -215,10 +215,10 @@ export default function ProjectTracker() {
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {Object.keys(groupedPhotos).map((date) => (
-              <div key={date} onClick={() => setSelectedDay(date)} className="group bg-[#0F172A] rounded-[3rem] border border-white/5 overflow-hidden cursor-pointer hover:border-emerald-500/30 transition-all shadow-2xl">
+              <div key={date} onClick={() => setSelectedDay(date)} className="group bg-[#171716] rounded-[3rem] border border-white/5 overflow-hidden cursor-pointer hover:border-emerald-500/30 transition-all shadow-2xl">
                 <div className="h-56 relative">
                   <img src={groupedPhotos[date][0].url_image} className="w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A] to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#171716] to-transparent" />
                   <div className="absolute bottom-6 left-8">
                     <p className="text-white font-black text-2xl tracking-tighter">{date}</p>
                     <p className="text-[10px] text-emerald-500 font-bold uppercase mt-1">{t('projectTracker.reportValidated')}</p>
@@ -240,7 +240,7 @@ export default function ProjectTracker() {
       {/* MODALE PRÉVISUALISATION */}
       {selectedDay && (
         <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex items-center justify-center p-4">
-          <div className="bg-[#0F172A] w-full max-w-5xl rounded-[3rem] border border-white/10 flex flex-col max-h-[92vh] overflow-hidden shadow-2xl">
+          <div className="bg-[#171716] w-full max-w-5xl rounded-[3rem] border border-white/10 flex flex-col max-h-[92vh] overflow-hidden shadow-2xl">
             <div className="p-10 border-b border-white/5 flex justify-between items-center bg-white/[0.01]">
               <div>
                 <span className="text-[10px] text-emerald-500 font-black uppercase tracking-widest">{t('projectTracker.inspectionReport')}</span>
@@ -286,7 +286,7 @@ export default function ProjectTracker() {
       
       <style jsx global>{`
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #10b981; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #D8C9B6; border-radius: 10px; }
       `}</style>
     </div>
   );

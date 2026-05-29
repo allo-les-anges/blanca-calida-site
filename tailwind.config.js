@@ -14,13 +14,13 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: '#0A0A0A',
-        secondary: '#1A1A1A',
-        accent: '#FFE7C2',
-        neutral: '#E9E3DA',
-        'soft-text': '#1A1A1A',
-        'gold-light': '#F5E8D0',
-        'navy-dark': '#0A0A0A',
+        primary: '#010101',
+        secondary: '#171716',
+        accent: '#D8C9B6',
+        neutral: '#F2EFEA',
+        'soft-text': '#171716',
+        'gold-light': '#D8C9B6',
+        'navy-dark': '#010101',
       },
       fontFamily: {
         'serif': ['"Suisse Int\'l"', '"Suisse Intl"', 'Arial', 'sans-serif'],

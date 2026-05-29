@@ -42,7 +42,7 @@ export default function CashbackForm() {
       className='zcwf_lblLeft crmWebToEntityForm' 
       style={{
         backgroundColor: 'white', 
-        color: '#1e293b', 
+        color: '#171716', 
         maxWidth: '600px', 
         margin: '0 auto', 
         fontFamily: 'sans-serif',
@@ -57,7 +57,7 @@ export default function CashbackForm() {
         .zcwf_title { 
             font-family: serif; 
             font-size: 28px; 
-            color: #0f172a; 
+            color: #171716; 
             margin-bottom: 30px; 
             text-align: center; 
         }
@@ -67,14 +67,14 @@ export default function CashbackForm() {
             text-transform: uppercase; 
             letter-spacing: 0.1em; 
             font-weight: 700; 
-            color: #64748b; 
+            color: #171716; 
             margin-bottom: 8px; 
             display: block;
         }
         .zcwf_col_fld input[type=text] {
             width: 100% !important;
-            border: 1px solid #e2e8f0 !important;
-            background-color: #f8fafc !important;
+            border: 1px solid #D8C9B6 !important;
+            background-color: #F2EFEA !important;
             padding: 14px !important;
             border-radius: 12px !important;
             font-size: 15px !important;
@@ -82,12 +82,12 @@ export default function CashbackForm() {
             outline: none;
         }
         .zcwf_col_fld input[type=text]:focus {
-            border-color: #94a3b8 !important;
-            background-color: #ffffff !important;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            border-color: #D8C9B6 !important;
+            background-color: #FAFAFA !important;
+            box-shadow: 0 4px 12px color-mix(in srgb, #010101 3%, transparent);
         }
         .formsubmit.zcwf_button {
-            background: #0f172a !important;
+            background: #171716 !important;
             color: white !important;
             border: none !important;
             border-radius: 14px !important;
@@ -102,7 +102,7 @@ export default function CashbackForm() {
             transition: transform 0.2s ease, background 0.2s ease !important;
         }
         .formsubmit.zcwf_button:hover {
-            background: #1e293b !important;
+            background: #171716 !important;
             transform: translateY(-2px);
         }
         .wfrm_fld_dpNn { display: none !important; }
@@ -129,17 +129,17 @@ export default function CashbackForm() {
         <div className='zcwf_title'>Activer mon Cashback</div>
 
         <div className='zcwf_row'>
-          <div className='zcwf_col_lab'><label htmlFor='Company'>Prénom <span style={{color:'#ef4444'}}>*</span></label></div>
+          <div className='zcwf_col_lab'><label htmlFor='Company'>Prénom <span style={{color:'#171716'}}>*</span></label></div>
           <div className='zcwf_col_fld'><input type='text' id='Company' name='Company' maxLength={200} placeholder='Jean' /></div>
         </div>
 
         <div className='zcwf_row'>
-          <div className='zcwf_col_lab'><label htmlFor='Last_Name'>Nom <span style={{color:'#ef4444'}}>*</span></label></div>
+          <div className='zcwf_col_lab'><label htmlFor='Last_Name'>Nom <span style={{color:'#171716'}}>*</span></label></div>
           <div className='zcwf_col_fld'><input type='text' id='Last_Name' name='Last Name' maxLength={80} placeholder='Dupont' /></div>
         </div>
 
         <div className='zcwf_row'>
-          <div className='zcwf_col_lab'><label htmlFor='Email'>E-mail <span style={{color:'#ef4444'}}>*</span></label></div>
+          <div className='zcwf_col_lab'><label htmlFor='Email'>E-mail <span style={{color:'#171716'}}>*</span></label></div>
           <div className='zcwf_col_fld'><input type='text' id='Email' name='Email' maxLength={100} placeholder='jean@exemple.com' /></div>
         </div>
 

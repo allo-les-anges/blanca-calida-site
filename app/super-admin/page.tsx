@@ -159,14 +159,14 @@ export default function SuperAdminDashboard() {
 
   // RENDUS CONDITIONNELS
   if (authStatus === 'loading') return (
-    <div className="min-h-screen bg-[#050505] flex items-center justify-center text-white font-mono text-xs uppercase tracking-widest">
+    <div className="min-h-screen bg-[#010101] flex items-center justify-center text-white font-mono text-xs uppercase tracking-widest">
       <Loader2 className="animate-spin text-red-600 mr-3" /> Initialisation du terminal...
     </div>
   );
 
   if (authStatus === 'denied') return (
-    <div className="min-h-screen bg-[#050505] flex items-center justify-center p-6 text-white text-center">
-      <div className="bg-[#0a0a0a] border border-red-900/30 p-12 rounded-[3rem] shadow-2xl max-w-md w-full">
+    <div className="min-h-screen bg-[#010101] flex items-center justify-center p-6 text-white text-center">
+      <div className="bg-[#010101] border border-red-900/30 p-12 rounded-[3rem] shadow-2xl max-w-md w-full">
         <XCircle size={64} className="text-red-600 mx-auto mb-6" />
         <h2 className="text-3xl font-serif mb-6">Accès Refusé</h2>
         <p className="text-slate-500 mb-8 text-sm">Votre compte n'a pas les privilèges Super-Admin.<br/>Session : {userEmail}</p>
@@ -176,7 +176,7 @@ export default function SuperAdminDashboard() {
   );
 
   return (
-    <div className="min-h-screen bg-[#050505] text-slate-200 font-sans selection:bg-red-500/30">
+    <div className="min-h-screen bg-[#010101] text-slate-200 font-sans selection:bg-red-500/30">
       <div className="fixed inset-0 overflow-hidden pointer-events-none opacity-50">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-red-900/10 blur-[120px] rounded-full" />
       </div>
@@ -195,10 +195,10 @@ export default function SuperAdminDashboard() {
             </div>
           </div>
           <div className="flex gap-4 w-full md:w-auto">
-            <Link href="/" className="flex-1 md:flex-none flex items-center justify-center gap-3 bg-[#0f0f0f] border border-slate-800 px-6 py-3 rounded-xl hover:bg-slate-900 transition-all text-[10px] font-black uppercase tracking-widest text-slate-400">
+            <Link href="/" className="flex-1 md:flex-none flex items-center justify-center gap-3 bg-[#171716] border border-slate-800 px-6 py-3 rounded-xl hover:bg-slate-900 transition-all text-[10px] font-black uppercase tracking-widest text-slate-400">
               <ArrowLeft size={16} /> Site Public
             </Link>
-            <button onClick={handleLogout} className="h-12 w-12 flex items-center justify-center bg-[#0f0f0f] border border-slate-800 rounded-xl hover:bg-red-950/30 transition-all text-slate-500">
+            <button onClick={handleLogout} className="h-12 w-12 flex items-center justify-center bg-[#171716] border border-slate-800 rounded-xl hover:bg-red-950/30 transition-all text-slate-500">
               <LogOut size={20} />
             </button>
           </div>
@@ -207,7 +207,7 @@ export default function SuperAdminDashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
           {/* Section Déploiement */}
           <section className="lg:col-span-5 space-y-6">
-            <div className="bg-[#0a0a0a] border border-slate-800/60 rounded-[2.5rem] p-8 shadow-2xl">
+            <div className="bg-[#010101] border border-slate-800/60 rounded-[2.5rem] p-8 shadow-2xl">
               <h2 className="text-xl font-serif italic text-white mb-8 flex items-center gap-3">
                 <Plus size={20} className="text-red-500" /> Déployer un compte
               </h2>
@@ -215,28 +215,28 @@ export default function SuperAdminDashboard() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <label className="text-[9px] uppercase tracking-widest font-black text-slate-500 ml-2">Prénom</label>
-                    <input className="w-full bg-[#050505] border border-slate-800 rounded-xl p-3 text-sm text-white focus:border-red-600 outline-none" value={form.prenom} onChange={e => setForm({...form, prenom: e.target.value})} required />
+                    <input className="w-full bg-[#010101] border border-slate-800 rounded-xl p-3 text-sm text-white focus:border-red-600 outline-none" value={form.prenom} onChange={e => setForm({...form, prenom: e.target.value})} required />
                   </div>
                   <div className="space-y-1">
                     <label className="text-[9px] uppercase tracking-widest font-black text-slate-500 ml-2">Nom</label>
-                    <input className="w-full bg-[#050505] border border-slate-800 rounded-xl p-3 text-sm text-white focus:border-red-600 outline-none" value={form.nom} onChange={e => setForm({...form, nom: e.target.value})} required />
+                    <input className="w-full bg-[#010101] border border-slate-800 rounded-xl p-3 text-sm text-white focus:border-red-600 outline-none" value={form.nom} onChange={e => setForm({...form, nom: e.target.value})} required />
                   </div>
                 </div>
                 <div className="space-y-1">
                   <label className="text-[9px] uppercase tracking-widest font-black text-slate-500 ml-2">Agence / Partenaire</label>
-                  <input className="w-full bg-[#050505] border border-slate-800 rounded-xl p-3 text-sm text-white focus:border-red-600 outline-none" value={form.companyName} onChange={e => setForm({...form, companyName: e.target.value})} required />
+                  <input className="w-full bg-[#010101] border border-slate-800 rounded-xl p-3 text-sm text-white focus:border-red-600 outline-none" value={form.companyName} onChange={e => setForm({...form, companyName: e.target.value})} required />
                 </div>
                 <div className="space-y-1">
                   <label className="text-[9px] uppercase tracking-widest font-black text-slate-500 ml-2">Niveau du Pack</label>
-                  <select className="w-full bg-[#050505] border border-slate-800 rounded-xl p-3 text-sm text-white outline-none focus:border-red-600" value={form.pack} onChange={e => setForm({...form, pack: e.target.value})}>
+                  <select className="w-full bg-[#010101] border border-slate-800 rounded-xl p-3 text-sm text-white outline-none focus:border-red-600" value={form.pack} onChange={e => setForm({...form, pack: e.target.value})}>
                     <option value="CORE">CORE (2 Experts)</option>
                     <option value="ASCENT">ASCENT (10 Experts)</option>
                     <option value="HORIZON">HORIZON (Illimité)</option>
                   </select>
                 </div>
                 <div className="pt-4 border-t border-slate-900 space-y-4">
-                  <input placeholder="Email de connexion" className="w-full bg-[#050505] border border-slate-800 rounded-xl p-3 text-sm text-white focus:border-red-600 outline-none" value={form.email} onChange={e => setForm({...form, email: e.target.value})} required />
-                  <input type="password" placeholder="Mot de passe" className="w-full bg-[#050505] border border-slate-800 rounded-xl p-3 text-sm text-white focus:border-red-600 outline-none" value={form.password} onChange={e => setForm({...form, password: e.target.value})} required />
+                  <input placeholder="Email de connexion" className="w-full bg-[#010101] border border-slate-800 rounded-xl p-3 text-sm text-white focus:border-red-600 outline-none" value={form.email} onChange={e => setForm({...form, email: e.target.value})} required />
+                  <input type="password" placeholder="Mot de passe" className="w-full bg-[#010101] border border-slate-800 rounded-xl p-3 text-sm text-white focus:border-red-600 outline-none" value={form.password} onChange={e => setForm({...form, password: e.target.value})} required />
                 </div>
                 <button type="submit" disabled={isGlobalLoading} className="w-full bg-red-700 hover:bg-red-600 py-4 mt-6 rounded-xl font-black uppercase text-[10px] tracking-widest shadow-lg transition-all text-white">
                   {isGlobalLoading ? <Loader2 className="animate-spin mx-auto" /> : "ACTIVER LA LICENCE"}
@@ -263,7 +263,7 @@ export default function SuperAdminDashboard() {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-600" size={14} />
                 <input 
                   placeholder="Rechercher..." 
-                  className="w-full pl-10 pr-4 py-2 bg-[#0a0a0a] border border-slate-800 rounded-full text-[11px] outline-none focus:border-red-900 transition-all text-white"
+                  className="w-full pl-10 pr-4 py-2 bg-[#010101] border border-slate-800 rounded-full text-[11px] outline-none focus:border-red-900 transition-all text-white"
                   value={searchTerm}
                   onChange={e => setSearchTerm(e.target.value)}
                 />
@@ -272,7 +272,7 @@ export default function SuperAdminDashboard() {
 
             <div className="space-y-4 max-h-[700px] overflow-y-auto pr-2 custom-scrollbar">
               {filteredAdmins.map((admin) => (
-                <div key={admin.id} className="group bg-[#0a0a0a] border border-slate-800/60 p-6 rounded-[2rem] hover:border-red-900/40 transition-all">
+                <div key={admin.id} className="group bg-[#010101] border border-slate-800/60 p-6 rounded-[2rem] hover:border-red-900/40 transition-all">
                   <div className="flex justify-between items-center">
                     <div className="flex items-center gap-5">
                       <div className="h-12 w-12 bg-black border border-slate-800 rounded-xl flex items-center justify-center text-red-600">
