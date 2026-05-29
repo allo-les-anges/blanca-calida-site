@@ -41,6 +41,14 @@ export default function ContactPage() {
   if (!mounted) return null;
 
   const isDark = resolvedTheme === "dark";
+  const pageBg = isDark ? '#010101' : '#FAFAFA';
+  const sectionBg = isDark ? '#010101' : '#FAFAFA';
+  const heroBg = isDark ? '#010101' : '#F2EFEA';
+  const heroText = isDark ? '#FAFAFA' : '#171716';
+  const cardBg = isDark ? 'color-mix(in srgb, #FAFAFA 5%, transparent)' : '#FAFAFA';
+  const cardBorder = isDark ? 'color-mix(in srgb, #FAFAFA 10%, transparent)' : '#D8C9B6';
+  const mutedText = isDark ? '#F2EFEA' : '#171716';
+  const formBg = isDark ? '#171716' : '#F2EFEA';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -82,23 +90,36 @@ export default function ContactPage() {
   `;
 
   return (
-    <div className="min-h-screen transition-colors duration-500 bg-white dark:bg-[#010101] text-slate-900 dark:text-white">
+    <div
+      className="min-h-screen transition-colors duration-500"
+      style={{ backgroundColor: pageBg, color: heroText }}
+    >
       
       <Navbar />
 
       <main>
         {/* SECTION HÉRO */}
-        <section className="relative h-[65vh] w-full flex items-center justify-center transition-colors duration-1000 bg-slate-900 dark:bg-[#010101]">
-          <div className="absolute inset-0 z-0 opacity-50 bg-slate-900 dark:bg-black" />
+        <section
+          className="relative h-[65vh] w-full flex items-center justify-center overflow-hidden transition-colors duration-1000"
+          style={{ backgroundColor: heroBg }}
+        >
+          <div
+            className="absolute inset-0 z-0"
+            style={{
+              background: isDark
+                ? 'linear-gradient(180deg, #010101 0%, #171716 100%)'
+                : 'linear-gradient(180deg, #F2EFEA 0%, #FAFAFA 100%)',
+            }}
+          />
           <div className="relative z-10 text-center px-6 max-w-5xl pt-20">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
               <span className="text-[#D8C9B6] text-[12px] font-black uppercase tracking-[0.6em] mb-6 block">
                 {t('contact.heroBadge')}
               </span>
-              <h1 className="text-4xl md:text-7xl font-serif italic text-white mb-8">
+              <h1 className="text-4xl md:text-7xl font-serif italic mb-8" style={{ color: heroText }}>
                 {t('contact.heroTitle')}
               </h1>
-              <p className="text-white/70 text-base md:text-lg font-light max-w-3xl mx-auto leading-relaxed italic">
+              <p className="text-base md:text-lg font-light max-w-3xl mx-auto leading-relaxed italic" style={{ color: mutedText }}>
                 {t('contact.heroQuote')}
               </p>
             </motion.div>
@@ -106,7 +127,10 @@ export default function ContactPage() {
         </section>
 
         {/* SECTION ÉQUIPE */}
-        <section className="max-w-[1400px] mx-auto px-6 py-24 grid grid-cols-1 xl:grid-cols-12 gap-20">
+        <section
+          className="max-w-[1400px] mx-auto px-6 py-24 grid grid-cols-1 xl:grid-cols-12 gap-20 transition-colors duration-500"
+          style={{ backgroundColor: sectionBg, color: heroText }}
+        >
           <div className="xl:col-span-7 space-y-12">
             {teamMembers.map((member, idx) => (
               <motion.div 
@@ -115,7 +139,8 @@ export default function ContactPage() {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: idx * 0.1 }}
-                className="p-8 md:p-12 rounded-[2.5rem] border transition-all duration-700 bg-white dark:bg-white/5 border-slate-100 dark:border-white/10 shadow-xl"
+                className="p-8 md:p-12 rounded-[2.5rem] border transition-all duration-700 shadow-xl"
+                style={{ backgroundColor: cardBg, borderColor: cardBorder }}
               >
                 <div className="flex flex-col md:flex-row gap-10">
                   <div className="relative w-full md:w-48 h-60 shrink-0 overflow-hidden rounded-[2rem] bg-slate-100 dark:bg-white/5">
@@ -129,7 +154,7 @@ export default function ContactPage() {
                     <h3 className="text-3xl font-serif italic text-[#D8C9B6]">
                       {t(`contact.team.${idx}.name`)}
                     </h3>
-                    <p className="text-base leading-relaxed font-light text-slate-600 dark:text-slate-300">
+                    <p className="text-base leading-relaxed font-light" style={{ color: mutedText }}>
                       {t(`contact.team.${idx}.background`)}
                     </p>
                     <div className="flex flex-wrap gap-2 pt-4">
@@ -168,7 +193,10 @@ export default function ContactPage() {
 
           {/* COLONNE FORMULAIRE */}
           <div className="xl:col-span-5">
-            <div className="sticky top-32 p-12 rounded-[3.5rem] transition-all duration-700 bg-slate-50 dark:bg-[#171716] border border-slate-200 dark:border-white/10 shadow-2xl">
+            <div
+              className="sticky top-32 p-8 md:p-12 rounded-[3.5rem] transition-all duration-700 border shadow-2xl"
+              style={{ backgroundColor: formBg, borderColor: cardBorder }}
+            >
               <h3 
                 className="text-3xl md:text-4xl font-serif italic mb-2"
                 style={{ color: isDark ? '#FAFAFA' : '#171716' }}
@@ -245,7 +273,7 @@ export default function ContactPage() {
         </section>
       </main>
 
-      <Footer />
+      <Footer isLight={!isDark} />
     </div>
   );
 }
