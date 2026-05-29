@@ -1336,8 +1336,6 @@ export default function AdminDashboard() {
                     onChange={e => setNewStaff({...newStaff, role: e.target.value})}
                   >
                       <option value="agent" className="bg-[#171716]">{t('adminStaff.agent')}</option>
-                      <option value="admin" className="bg-[#171716]">{t('adminStaff.admin')}</option>
-                      <option value="super_admin" className="bg-[#171716]">{t('adminStaff.superAdmin')}</option>
                   </select>
                   <ChevronRight size={18} className="absolute right-5 top-1/2 -translate-y-1/2 text-blue-500 rotate-90 pointer-events-none" />
                 </div>

@@ -129,6 +129,43 @@ export default function SuperAdminDashboard() {
     }
   };
 
+  const createAgencyAdminAccount = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsGlobalLoading(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Session super-admin introuvable");
+
+      const response = await fetch("/api/super-admin/create-agency-admin", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          ...form,
+          email: form.email.toLowerCase().trim(),
+          companyName: form.companyName.trim(),
+        }),
+      });
+
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Erreur lors de la creation");
+
+      alert(
+        result.reusedExistingUser
+          ? `Compte existant rattache a ${form.companyName}. PIN genere : ${result.pin}`
+          : `Licence ${form.pack} activee pour ${form.companyName}. PIN genere : ${result.pin}`
+      );
+      setForm({ email: "", password: "", companyName: "", prenom: "", nom: "", pack: "CORE" });
+      fetchAdmins();
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setIsGlobalLoading(false);
+    }
+  };
+
   const deleteAdminAccount = async (adminId: string, company: string) => {
     if (!confirm(`Révoquer définitivement l'accès de "${company}" ?`)) return;
     setDeletingId(adminId);
@@ -211,7 +248,7 @@ export default function SuperAdminDashboard() {
               <h2 className="text-xl font-serif italic text-white mb-8 flex items-center gap-3">
                 <Plus size={20} className="text-red-500" /> Déployer un compte
               </h2>
-              <form onSubmit={createAdminAccount} className="space-y-4 text-left">
+              <form onSubmit={createAgencyAdminAccount} className="space-y-4 text-left">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <label className="text-[9px] uppercase tracking-widest font-black text-slate-500 ml-2">Prénom</label>
