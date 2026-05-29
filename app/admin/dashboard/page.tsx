@@ -1236,11 +1236,12 @@ export default function AdminDashboard() {
             <form onSubmit={async (e) => {
               e.preventDefault();
               setUpdating(true);
+              const clientPin = Math.floor(100000 + Math.random() * 900000).toString();
               
               const baseProjectData = {
                 ...newProject,
                 company_name: agencyProfile.company_name,
-                pin_code: Math.floor(100000 + Math.random() * 900000).toString(),
+                pin_code: clientPin,
                 etape_actuelle: PHASES_CHANTIER[0]
               };
               
@@ -1250,7 +1251,31 @@ export default function AdminDashboard() {
               
               const { error } = await supabase.from("suivi_chantier").insert([projectData]);
               
-              if (!error) { 
+              if (!error) {
+                try {
+                  const { data: { session } } = await supabase.auth.getSession();
+                  const emailResponse = await fetch("/api/admin/send-client-pin", {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                      Authorization: `Bearer ${session?.access_token || ""}`,
+                    },
+                    body: JSON.stringify({
+                      email: newProject.email_client,
+                      firstName: newProject.client_prenom,
+                      projectName: newProject.nom_villa,
+                      pin: clientPin,
+                      agencyName: agencyProfile.company_name,
+                    }),
+                  });
+
+                  if (!emailResponse.ok) {
+                    const result = await emailResponse.json();
+                    alert(`Dossier cree, mais l'email PIN n'a pas pu etre envoye : ${result.error || "erreur inconnue"}`);
+                  }
+                } catch (mailError: any) {
+                  alert(`Dossier cree, mais l'email PIN n'a pas pu etre envoye : ${mailError.message}`);
+                }
                 setShowModal(false); 
                 setUpdating(false);
                 loadData(); 
