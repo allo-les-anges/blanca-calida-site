@@ -15,6 +15,7 @@ import ScrollingBanner from "@/components/ScrollingBanner";
 import RegionGrid from "@/components/RegionGrid";
 import PropertyGrid from "@/components/PropertyGrid";
 import Footer from "@/components/Footer";
+import IntroGate from "@/components/IntroGate";
 
 type Property = any;
 
@@ -235,8 +236,11 @@ function HomeContent() {
 
 export default function Home() {
   return (
-    <Suspense fallback={<div className="h-screen bg-[#020617] flex items-center justify-center"><Loader2 className="animate-spin text-[#D4AF37]" size={48} /></div>}>
-      <HomeContent />
-    </Suspense>
+    <>
+      <IntroGate />
+      <Suspense fallback={<div className="h-screen bg-[#020617] flex items-center justify-center"><Loader2 className="animate-spin text-[#D4AF37]" size={48} /></div>}>
+        <HomeContent />
+      </Suspense>
+    </>
   );
 }
