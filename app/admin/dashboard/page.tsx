@@ -334,28 +334,45 @@ export default function AdminDashboard() {
     router.push('/login');
   };
 
-  const copyToClipboard = async (text: string, id: string) => {
-    if (!text) {
+  const copyToClipboard = async (text: string | number | null | undefined, id: string) => {
+    const value = String(text || "").trim();
+    if (!value) {
       console.warn('Tentative de copie d\'un code PIN vide');
       return;
     }
-    try {
-      await navigator.clipboard.writeText(text);
+    const markCopied = () => {
       setCopySuccess(id);
       setTimeout(() => setCopySuccess(null), 2000);
+    };
+    try {
+      if (navigator.clipboard?.writeText && window.isSecureContext) {
+        await navigator.clipboard.writeText(value);
+        markCopied();
+        return;
+      }
+      throw new Error('Clipboard API unavailable');
     } catch (err) {
       console.error('Échec de la copie avec API Clipboard :', err);
       try {
         const textarea = document.createElement('textarea');
-        textarea.value = text;
+        textarea.value = value;
         textarea.style.position = 'fixed';
+        textarea.style.top = '0';
+        textarea.style.left = '0';
+        textarea.style.width = '1px';
+        textarea.style.height = '1px';
+        textarea.style.padding = '0';
+        textarea.style.border = '0';
         textarea.style.opacity = '0';
+        textarea.setAttribute('readonly', '');
         document.body.appendChild(textarea);
+        textarea.focus();
         textarea.select();
-        document.execCommand('copy');
+        textarea.setSelectionRange(0, value.length);
+        const copied = document.execCommand('copy');
         document.body.removeChild(textarea);
-        setCopySuccess(id);
-        setTimeout(() => setCopySuccess(null), 2000);
+        if (!copied) throw new Error('document.execCommand returned false');
+        markCopied();
       } catch (fallbackErr) {
         console.error('Fallback copy failed:', fallbackErr);
         alert('Impossible de copier le code. Veuillez le sélectionner manuellement.');
@@ -1214,7 +1231,14 @@ export default function AdminDashboard() {
                                       alert(t('adminDashboard.pin.notDefined')); // À créer dans les fichiers de langue
                                     }
                                   }}
-                                  className="mt-6 text-[9px] font-black text-emerald-500 uppercase tracking-widest flex items-center gap-2 hover:bg-emerald-500/10 px-4 py-2 rounded-xl transition-all"
+                                  disabled={!editFields.pin_code}
+                                  className={`mt-6 text-[9px] font-black uppercase tracking-widest flex items-center gap-2 px-4 py-2 rounded-xl transition-all ${
+                                    copySuccess === 'pin'
+                                      ? 'bg-emerald-500 text-black'
+                                      : editFields.pin_code
+                                        ? 'text-emerald-500 hover:bg-emerald-500/10 cursor-pointer'
+                                        : 'text-slate-600 cursor-not-allowed'
+                                  }`}
                                   aria-label={copySuccess === 'pin' ? t('adminDashboard.pin.copied') : t('adminDashboard.pin.copy')}
                                 >
                                   {copySuccess === 'pin' ? <CheckCircle2 size={12} /> : <Copy size={12} />} 
