@@ -218,20 +218,41 @@ function HomeContent() {
 
       {/* SECTION ESPACE PROPRIÉTAIRE (Masquée en mode Light) */}
       {!isLight && (
-        <section className={`max-w-[1600px] mx-auto px-4 py-12 ${bgColor}`}>
-          <div className="bg-[#171716]/40 p-12 border border-white/5 relative overflow-hidden">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-              <div className="space-y-6">
-                <span className="text-[#D8C9B6] text-[10px] font-bold uppercase tracking-[0.4em]">{t('home.ownerSection.badge')}</span>
-                <h2 className="text-4xl md:text-6xl font-serif italic text-white leading-tight">
+        <section className={`max-w-[1600px] mx-auto px-4 sm:px-6 py-10 sm:py-12 ${bgColor}`}>
+          <div
+            className="relative overflow-hidden border p-6 sm:p-8 md:p-12 transition-colors duration-500"
+            style={{
+              backgroundColor: isDarkVisual ? '#171716' : '#F2EFEA',
+              borderColor: '#D8C9B6',
+            }}
+          >
+            <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_minmax(320px,480px)] lg:gap-12 lg:items-center">
+              <div className="space-y-5 sm:space-y-6">
+                <span className="block text-[#D8C9B6] text-[10px] font-bold uppercase tracking-[0.35em] sm:tracking-[0.4em]">{t('home.ownerSection.badge')}</span>
+                <h2 className={`text-4xl sm:text-5xl md:text-6xl font-serif italic leading-[1.02] ${textColor}`}>
                   {t('home.ownerSection.title')} <br />
-                  <span className="text-[#D8C9B6] not-italic font-sans font-extrabold text-3xl md:text-5xl uppercase">{t('home.ownerSection.subtitle')}</span>
+                  <span className="text-[#D8C9B6] not-italic font-sans font-extrabold text-3xl sm:text-4xl md:text-5xl uppercase">{t('home.ownerSection.subtitle')}</span>
                 </h2>
+                <p className={`max-w-xl text-sm sm:text-base leading-7 ${mutedText}`}>
+                  {t('home.ownerSection.description')}
+                </p>
               </div>
-              <div className="p-10 border border-[#D8C9B6]/20 bg-[#010101] shadow-xl">
-                <form className="space-y-8">
-                  <input type="password" placeholder={t('home.ownerSection.pinPlaceholder')} className="w-full bg-transparent border-b border-white/10 py-4 text-center text-2xl font-black tracking-[0.6em] outline-none focus:border-[#D8C9B6] text-white" />
-                  <button type="submit" className="w-full bg-[#D8C9B6] text-black py-5 font-bold text-[10px] uppercase tracking-[0.3em] hover:bg-white transition-all flex items-center justify-center gap-4">
+
+              <div
+                className="w-full border p-6 sm:p-8 md:p-10 shadow-xl transition-colors duration-500"
+                style={{
+                  backgroundColor: isDarkVisual ? '#010101' : '#FAFAFA',
+                  borderColor: '#D8C9B6',
+                }}
+              >
+                <form className="space-y-7">
+                  <input
+                    type="password"
+                    placeholder={t('home.ownerSection.pinPlaceholder')}
+                    className={`w-full bg-transparent border-b py-4 text-center text-xl sm:text-2xl font-black tracking-[0.35em] sm:tracking-[0.55em] outline-none transition-all focus:border-[#D8C9B6] ${textColor}`}
+                    style={{ borderColor: isDarkVisual ? 'color-mix(in srgb, #FAFAFA 15%, transparent)' : '#D8C9B6' }}
+                  />
+                  <button type="submit" className="w-full bg-[#D8C9B6] text-[#010101] py-5 px-5 font-bold text-[10px] uppercase tracking-[0.24em] sm:tracking-[0.3em] hover:bg-[#171716] hover:text-[#FAFAFA] transition-all flex items-center justify-center gap-4">
                     {t('home.ownerSection.accessButton')} <ArrowRight size={18} />
                   </button>
                 </form>
