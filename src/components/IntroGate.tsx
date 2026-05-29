@@ -3,18 +3,29 @@
 import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
 
+const INTRO_STORAGE_KEY = "amaru_intro_seen";
+
 export default function IntroGate() {
+  const [isReady, setIsReady] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isGone, setIsGone] = useState(false);
 
   const openIntro = useCallback(() => {
     if (isOpen) return;
     setIsOpen(true);
+    sessionStorage.setItem(INTRO_STORAGE_KEY, "true");
     window.setTimeout(() => setIsGone(true), 3200);
   }, [isOpen]);
 
   useEffect(() => {
-    if (isGone) return;
+    if (sessionStorage.getItem(INTRO_STORAGE_KEY) === "true") {
+      setIsGone(true);
+    }
+    setIsReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isReady || isGone) return;
 
     const handleWheel = (event: WheelEvent) => {
       if (Math.abs(event.deltaY) < 8) return;
@@ -57,9 +68,9 @@ export default function IntroGate() {
       window.removeEventListener("touchstart", handleTouchStart);
       window.removeEventListener("touchmove", handleTouchMove);
     };
-  }, [isGone, openIntro]);
+  }, [isReady, isGone, openIntro]);
 
-  if (isGone) return null;
+  if (!isReady || isGone) return null;
 
   return (
     <button
