@@ -434,13 +434,24 @@ export default function AdminDashboard() {
           ? `${Number(c.latitude).toFixed(6)}, ${Number(c.longitude).toFixed(6)}`
           : "Coordonnees non disponibles";
       const cleanPdfText = (value: string) => {
-        let output = cleanText(value).replace(/[\u00A0\u202F]/g, " ");
-        for (let i = 0; i < 4; i += 1) {
-          output = output.replace(/(^|[^\p{L}])((?:\p{L}\s+){2,}\p{L})(?=[^\p{L}]|$)/gu, (_match, prefix, spacedWord) => {
-            return `${prefix}${spacedWord.replace(/\s+/g, "")}`;
-          });
+        const tokens = cleanText(value).replace(/[\u00A0\u202F]/g, " ").split(/\s+/).filter(Boolean);
+        const rebuilt: string[] = [];
+
+        for (let i = 0; i < tokens.length; i += 1) {
+          if (/^\p{L}$/u.test(tokens[i])) {
+            const letters: string[] = [];
+            while (i < tokens.length && /^\p{L}$/u.test(tokens[i])) {
+              letters.push(tokens[i]);
+              i += 1;
+            }
+            i -= 1;
+            rebuilt.push(letters.length >= 3 ? letters.join("") : letters.join(" "));
+          } else {
+            rebuilt.push(tokens[i]);
+          }
         }
-        return output.replace(/\s+/g, " ").trim();
+
+        return rebuilt.join(" ").replace(/\s+([,.;:!?])/g, "$1").trim();
       };
       const limitPdfText = (value: string, maxLength: number) => {
         const text = cleanPdfText(value);
@@ -564,7 +575,7 @@ export default function AdminDashboard() {
       doc.setFontSize(6.8);
       const analysisColumnWidth = 80;
       const observationRows = dailyConstats.map((c, i) => {
-        const analysisText = `${t('adminDashboard.statusConforme')}\n${limitPdfText(c.note_expert || t('adminDashboard.defaultObservation'), 180)}`;
+        const analysisText = `${t('adminDashboard.statusConforme')}\nObservation detaillee en annexe PV-${String(i + 1).padStart(2, "0")}.`;
         return [
           `PV-${String(i + 1).padStart(2, "0")}`,
           new Date(c.created_at).toLocaleString(),
@@ -603,47 +614,45 @@ export default function AdminDashboard() {
       doc.setTextColor(...brandDark);
       doc.text(t('adminDashboard.photoAnnex'), margin, 38);
 
-      let yPos = 48;
       for (let i = 0; i < dailyConstats.length; i++) {
         const c = dailyConstats[i];
-        if (yPos > 205) {
+        if (i > 0) {
           addFooter();
           doc.addPage();
           pageNumber += 1;
           addHeader("Annexe photographique");
-          yPos = 34;
         }
 
+        const yPos = 36;
         doc.setDrawColor(...brandGold);
         doc.setFillColor(250, 250, 250);
-        doc.roundedRect(margin, yPos, pageWidth - margin * 2, 78, 2, 2, "FD");
+        doc.roundedRect(margin, yPos, pageWidth - margin * 2, 226, 2, 2, "FD");
         doc.setFont("helvetica", "bold");
-        doc.setFontSize(9);
+        doc.setFontSize(12);
         doc.setTextColor(...brandDark);
         doc.text(`PV-${String(i + 1).padStart(2, "0")}`, margin + 6, yPos + 8);
         doc.setFont("helvetica", "normal");
-        doc.setFontSize(7.5);
+        doc.setFontSize(8);
         doc.setTextColor(80, 80, 80);
         doc.text(`Capture : ${new Date(c.created_at).toLocaleString()}`, margin + 6, yPos + 14);
         doc.text(`GPS : ${gpsText(c)}`, margin + 6, yPos + 19);
         doc.text(`Operateur : ${c.captured_by || expertNom}`, margin + 6, yPos + 24);
 
         try {
-          doc.addImage(c.url_image, "JPEG", margin + 92, yPos + 6, 82, 52);
+          doc.addImage(c.url_image, "JPEG", margin + 12, yPos + 34, pageWidth - margin * 2 - 24, 96);
         } catch (e) {
           doc.setFont("helvetica", "italic");
-          doc.text(t('adminDashboard.imageNotAvailable'), margin + 100, yPos + 30);
+          doc.text(t('adminDashboard.imageNotAvailable'), margin + 12, yPos + 70);
         }
 
         doc.setFont("helvetica", "bold");
-        doc.setFontSize(8);
+        doc.setFontSize(10);
         doc.setTextColor(...brandDark);
-        doc.text("Observation", margin + 6, yPos + 36);
+        doc.text("Observation technique", margin + 6, yPos + 146);
         doc.setFont("helvetica", "normal");
-        doc.setFontSize(8);
-        const noteLines = forceWrapText(limitPdfText(c.note_expert || t('adminDashboard.defaultObservation'), 300), 66);
-        doc.text(noteLines.slice(0, 7), margin + 6, yPos + 42);
-        yPos += 88;
+        doc.setFontSize(8.2);
+        const noteLines = forceWrapText(limitPdfText(c.note_expert || t('adminDashboard.defaultObservation'), 1100), pageWidth - margin * 2 - 18);
+        doc.text(noteLines.slice(0, 22), margin + 6, yPos + 156);
       }
 
       addFooter();
