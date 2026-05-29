@@ -132,7 +132,10 @@ export default function AdminChantier() {
         id_projet: project.id,
         url_image: p.url,
         note_expert: p.commentaire,
-        created_at: p.date
+        created_at: p.date,
+        latitude: p.gps?.lat || null,
+        longitude: p.gps?.lng || null,
+        captured_by: p.agent || agentName
       }));
 
       const { error: insertError } = await supabase.from('constats-photos').insert(photosToInsert);

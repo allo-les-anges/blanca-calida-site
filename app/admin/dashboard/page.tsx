@@ -388,6 +388,238 @@ export default function AdminDashboard() {
     setIsGeneratingPDF(true);
 
     try {
+      const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const margin = 14;
+      const brandDark: [number, number, number] = [23, 23, 22];
+      const brandGold: [number, number, number] = [216, 201, 182];
+      const brandSoft: [number, number, number] = [242, 239, 234];
+      const agencyName = agencyProfile.company_name || "Amaru-Homes";
+      const expertNom =
+        agencyProfile?.prenom && agencyProfile?.nom
+          ? `${agencyProfile.prenom} ${agencyProfile.nom}`
+          : agencyProfile?.email || "Responsable technique";
+      const projectName = selectedProjet?.nom_villa || "Projet non renseigne";
+      const clientName = `${selectedProjet?.client_prenom || ""} ${selectedProjet?.client_nom || ""}`.trim() || "Client non renseigne";
+      const reportRef = `RC-${date.replace(/[^0-9A-Za-z]/g, "")}`;
+      const generatedAt = new Date().toLocaleString();
+      const gpsCount = dailyConstats.filter((c) => c.latitude && c.longitude).length;
+      let pageNumber = 1;
+
+      const cleanText = (value: string) => String(value || "").replace(/\s+/g, " ").trim();
+      const gpsText = (c: any) =>
+        c.latitude && c.longitude
+          ? `${Number(c.latitude).toFixed(6)}, ${Number(c.longitude).toFixed(6)}`
+          : "Coordonnees non disponibles";
+
+      const addFooter = () => {
+        doc.setDrawColor(...brandGold);
+        doc.setLineWidth(0.2);
+        doc.line(margin, pageHeight - 16, pageWidth - margin, pageHeight - 16);
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(7);
+        doc.setTextColor(90, 90, 90);
+        doc.text(`${agencyName} - Rapport technique ${reportRef}`, margin, pageHeight - 10);
+        doc.text(`Page ${pageNumber}`, pageWidth - margin, pageHeight - 10, { align: "right" });
+      };
+
+      const addHeader = (title: string) => {
+        doc.setFillColor(...brandDark);
+        doc.rect(0, 0, pageWidth, 22, "F");
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(9);
+        doc.setTextColor(...brandGold);
+        doc.text(agencyName.toUpperCase(), margin, 9);
+        doc.setFontSize(8);
+        doc.setTextColor(250, 250, 250);
+        doc.text(title.toUpperCase(), pageWidth - margin, 9, { align: "right" });
+      };
+
+      doc.setFillColor(...brandDark);
+      doc.rect(0, 0, pageWidth, 86, "F");
+      doc.setFillColor(...brandGold);
+      doc.rect(0, 86, pageWidth, 2, "F");
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(12);
+      doc.setTextColor(...brandGold);
+      doc.text(agencyName.toUpperCase(), margin, 20);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8);
+      doc.setTextColor(250, 250, 250);
+      doc.text("Bureau d'etudes technique - Suivi chantier & controle photographique", margin, 27);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(26);
+      doc.setTextColor(250, 250, 250);
+      doc.text("RAPPORT DE CONSTAT", margin, 50);
+      doc.setFontSize(15);
+      doc.setTextColor(...brandGold);
+      doc.text("Inspection technique geolocalisee", margin, 62);
+
+      doc.setFillColor(...brandSoft);
+      doc.roundedRect(margin, 104, pageWidth - margin * 2, 78, 3, 3, "F");
+      doc.setDrawColor(...brandGold);
+      doc.roundedRect(margin, 104, pageWidth - margin * 2, 78, 3, 3, "S");
+
+      autoTable(doc, {
+        startY: 112,
+        body: [
+          ["Reference", reportRef],
+          ["Agence", agencyName],
+          ["Client", clientName],
+          ["Projet", projectName],
+          ["Phase chantier", selectedProjet?.etape_actuelle || "N/A"],
+          ["Date de visite", date],
+          ["Rapport etabli par", expertNom],
+          ["Date de generation", generatedAt],
+        ],
+        theme: "plain",
+        margin: { left: margin + 8, right: margin + 8 },
+        styles: { fontSize: 9, cellPadding: 2.4, textColor: brandDark },
+        columnStyles: { 0: { cellWidth: 48, fontStyle: "bold", textColor: [90, 90, 90] } },
+      });
+
+      doc.setFillColor(250, 250, 250);
+      doc.roundedRect(margin, 194, pageWidth - margin * 2, 34, 3, 3, "F");
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(10);
+      doc.setTextColor(...brandDark);
+      doc.text("Synthese du controle", margin + 8, 206);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
+      doc.text(`Nombre de constats photographiques : ${dailyConstats.length}`, margin + 8, 214);
+      doc.text(`Photos avec coordonnees GPS : ${gpsCount}/${dailyConstats.length}`, margin + 8, 221);
+      addFooter();
+
+      doc.addPage();
+      pageNumber += 1;
+      addHeader("Synthese technique");
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(15);
+      doc.setTextColor(...brandDark);
+      doc.text("Tableau des observations", margin, 38);
+      doc.setFontSize(8);
+      doc.setTextColor(90, 90, 90);
+      doc.text(`Dossier : ${projectName} | Client : ${clientName} | Auteur : ${expertNom}`, margin, 45);
+
+      autoTable(doc, {
+        startY: 52,
+        head: [["Ref.", "Date", "Geolocalisation", "Operateur", "Analyse technique"]],
+        body: dailyConstats.map((c, i) => [
+          `PV-${String(i + 1).padStart(2, "0")}`,
+          new Date(c.created_at).toLocaleString(),
+          gpsText(c),
+          c.captured_by || expertNom,
+          `${t('adminDashboard.statusConforme')}\n${cleanText(c.note_expert || t('adminDashboard.defaultObservation'))}`,
+        ]),
+        theme: "grid",
+        headStyles: { fillColor: brandDark, textColor: [250, 250, 250], fontSize: 7.5, cellPadding: 3 },
+        alternateRowStyles: { fillColor: [250, 250, 250] },
+        bodyStyles: { textColor: brandDark },
+        columnStyles: {
+          0: { cellWidth: 17, fontStyle: "bold" },
+          1: { cellWidth: 30 },
+          2: { cellWidth: 38 },
+          3: { cellWidth: 30 },
+          4: { cellWidth: 73 },
+        },
+        styles: { fontSize: 7.5, cellPadding: 3, overflow: "linebreak", valign: "top", lineColor: brandGold, lineWidth: 0.15 },
+        margin: { left: margin, right: margin },
+        didDrawPage: addFooter,
+      });
+
+      doc.addPage();
+      pageNumber += 1;
+      addHeader("Annexe photographique");
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(15);
+      doc.setTextColor(...brandDark);
+      doc.text(t('adminDashboard.photoAnnex'), margin, 38);
+
+      let yPos = 48;
+      for (let i = 0; i < dailyConstats.length; i++) {
+        const c = dailyConstats[i];
+        if (yPos > 205) {
+          addFooter();
+          doc.addPage();
+          pageNumber += 1;
+          addHeader("Annexe photographique");
+          yPos = 34;
+        }
+
+        doc.setDrawColor(...brandGold);
+        doc.setFillColor(250, 250, 250);
+        doc.roundedRect(margin, yPos, pageWidth - margin * 2, 78, 2, 2, "FD");
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(9);
+        doc.setTextColor(...brandDark);
+        doc.text(`PV-${String(i + 1).padStart(2, "0")}`, margin + 6, yPos + 8);
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(7.5);
+        doc.setTextColor(80, 80, 80);
+        doc.text(`Capture : ${new Date(c.created_at).toLocaleString()}`, margin + 6, yPos + 14);
+        doc.text(`GPS : ${gpsText(c)}`, margin + 6, yPos + 19);
+        doc.text(`Operateur : ${c.captured_by || expertNom}`, margin + 6, yPos + 24);
+
+        try {
+          doc.addImage(c.url_image, "JPEG", margin + 92, yPos + 6, 82, 52);
+        } catch (e) {
+          doc.setFont("helvetica", "italic");
+          doc.text(t('adminDashboard.imageNotAvailable'), margin + 100, yPos + 30);
+        }
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(8);
+        doc.setTextColor(...brandDark);
+        doc.text("Observation", margin + 6, yPos + 36);
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(8);
+        const noteLines = doc.splitTextToSize(cleanText(c.note_expert || t('adminDashboard.defaultObservation')), 78);
+        doc.text(noteLines.slice(0, 6), margin + 6, yPos + 42);
+        yPos += 88;
+      }
+
+      addFooter();
+      doc.addPage();
+      pageNumber += 1;
+      addHeader("Certification");
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(15);
+      doc.setTextColor(...brandDark);
+      doc.text("Certification du rapport", margin, 42);
+      doc.setDrawColor(...brandGold);
+      doc.line(margin, 48, pageWidth - margin, 48);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+      doc.text(doc.splitTextToSize(t('adminDashboard.certificationText', { expert: expertNom }), pageWidth - margin * 2), margin, 62);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(9);
+      doc.text("Identite du redacteur", margin, 96);
+      doc.setFont("helvetica", "italic");
+      doc.setFontSize(11);
+      doc.text(expertNom, margin, 106);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8);
+      doc.text(`Agence : ${agencyName}`, margin, 114);
+      doc.text(`Reference : ${reportRef}`, margin, 121);
+      doc.text(`Genere le : ${generatedAt}`, margin, 128);
+      addFooter();
+
+      if (action === 'save') {
+        doc.save(`Rapport_Technique_${projectName}_${date}.pdf`);
+      } else {
+        window.open(doc.output('bloburl'), '_blank');
+      }
+      return;
+    } catch (e) {
+      console.error(e);
+      alert(t('adminDashboard.pdfError'));
+      return;
+    } finally {
+      setIsGeneratingPDF(false);
+    }
+
+    try {
       const doc = new jsPDF();
       const pageWidth = doc.internal.pageSize.getWidth();
 
