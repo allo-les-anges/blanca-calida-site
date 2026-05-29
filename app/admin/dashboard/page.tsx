@@ -1175,7 +1175,7 @@ export default function AdminDashboard() {
               <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
                  <button 
                   onClick={() => setShowModal(true)} 
-                  className="px-10 sm:px-16 py-5 sm:py-7 bg-slate-900 text-white rounded-[2rem] sm:rounded-[2.5rem] font-black uppercase text-xs tracking-[0.3em] sm:tracking-[0.4em] hover:bg-emerald-600 transition-all duration-500 shadow-2xl shadow-slate-200 hover:-translate-y-2"
+                  className="admin-primary-action px-10 sm:px-16 py-5 sm:py-7 bg-slate-900 text-white rounded-[2rem] sm:rounded-[2.5rem] font-black uppercase text-xs tracking-[0.3em] sm:tracking-[0.4em] hover:bg-emerald-600 transition-all duration-500 shadow-2xl shadow-slate-200 hover:-translate-y-2"
                  >
                    {t('adminDashboard.newProject')}
                  </button>
