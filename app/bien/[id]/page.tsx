@@ -173,7 +173,7 @@ export default function PropertyDetailPage() {
                   rel="noopener noreferrer"
                   className="hidden lg:flex w-full bg-[#D8C9B6] text-white py-5 rounded-2xl font-black uppercase text-[10px] tracking-widest items-center justify-center gap-3 hover:bg-[#D8C9B6] transition-all"
                 >
-                  <MessageCircle size={18} /> Contact WhatsApp
+                  <MessageCircle size={18} style={{ color: "#25D366" }} /> Contact WhatsApp
                 </a>
 
                 <button className="w-full border border-slate-200 text-slate-900 py-5 rounded-2xl font-black uppercase text-[10px] tracking-widest flex items-center justify-center gap-3 hover:bg-slate-50 transition-all">
@@ -203,7 +203,7 @@ export default function PropertyDetailPage() {
           rel="noopener noreferrer"
           className="w-full bg-[#D8C9B6] text-white py-4 rounded-2xl font-black uppercase text-[10px] tracking-[0.2em] flex items-center justify-center gap-3 shadow-lg"
         >
-          <MessageCircle size={20} /> Discuter sur WhatsApp
+          <MessageCircle size={20} style={{ color: "#25D366" }} /> Discuter sur WhatsApp
         </a>
       </div>
 

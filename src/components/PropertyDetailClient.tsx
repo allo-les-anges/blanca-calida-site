@@ -206,7 +206,7 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
               <ContactForm agency={currentAgency} propertyRef={property.id_externe || property.id} isLight={isLight} />
               <div className="px-8 pb-8">
                 <a href={`https://wa.me/34627768233?text=Info ref: ${property.ref}`} target="_blank" className={`w-full border ${isLight ? 'border-slate-200 bg-white' : 'border-white/10'} flex items-center justify-center gap-3 py-4 rounded-2xl font-bold uppercase text-[10px] hover:bg-slate-50 transition-all ${isLight ? 'text-slate-900' : 'text-white'}`}>
-                  <MessageCircle size={18} className="text-green-500" /> {t('propertyDetail.whatsappDirect')}
+                  <MessageCircle size={18} style={{ color: "#25D366" }} /> {t('propertyDetail.whatsappDirect')}
                 </a>
               </div>
             </div>
