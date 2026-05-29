@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { Mail, Phone, Instagram, Facebook, MapPin } from "lucide-react";
+import { Mail, Phone, Instagram, Facebook, MapPin, ShieldCheck } from "lucide-react";
 import { useTranslation } from "@/contexts/I18nContext";
 
 // 1. Définition de l'interface pour TypeScript
@@ -65,6 +65,18 @@ export default function Footer({ isLight = false }: FooterProps) {
             <div className="flex gap-6">
               <a href="#" className={`${mutedText} hover:text-[#D8C9B6] transition-colors`}><Instagram size={20} /></a>
               <a href="#" className={`${mutedText} hover:text-[#D8C9B6] transition-colors`}><Facebook size={20} /></a>
+            </div>
+
+            <div className={`border-t pt-6 ${isLight ? 'border-slate-200' : 'border-white/5'}`}>
+              <h4 className={`mb-4 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.3em] ${textColor}`}>
+                <ShieldCheck size={14} className={iconColor} />
+                Accès interne
+              </h4>
+              <ul className={`space-y-3 text-[10px] uppercase tracking-widest ${mutedText}`}>
+                <li><Link href="/login" className="hover:text-[#D8C9B6] transition-colors">Connexion</Link></li>
+                <li><Link href="/admin/dashboard" className="hover:text-[#D8C9B6] transition-colors">Admin</Link></li>
+                <li><Link href="/super-admin" className="hover:text-[#D8C9B6] transition-colors">Super Admin</Link></li>
+              </ul>
             </div>
           </div>
 
