@@ -20,6 +20,9 @@ export async function GET(request: Request) {
     // 2. Nouveaux paramètres de filtrage admin
     const minCommission = searchParams.get('minCommission');
     const excludedDevelopments = searchParams.get('excluded'); // Format attendu: "Promotion A,Promotion B"
+    const minPrice = searchParams.get('minPrice');
+    const limitParam = Number(searchParams.get('limit') || 24);
+    const limit = Number.isFinite(limitParam) ? Math.min(Math.max(limitParam, 1), 200) : 24;
 
     // Initialisation de la requête Supabase
     let query = supabase
@@ -35,6 +38,13 @@ export async function GET(request: Request) {
       }
     }
 
+    if (minPrice) {
+      const minPriceValue = parseFloat(minPrice);
+      if (!isNaN(minPriceValue)) {
+        query = query.gte('price', minPriceValue);
+      }
+    }
+
     // 4. Application du filtre d'exclusion par nom de promotion/promoteur
     if (excludedDevelopments) {
       const excludedList = excludedDevelopments.split(',').map(s => s.trim());
@@ -43,7 +53,7 @@ export async function GET(request: Request) {
       }
     }
 
-    const { data: properties, error } = await query.order('price', { ascending: true }).limit(24);
+    const { data: properties, error } = await query.order('price', { ascending: true }).limit(limit);
 
     if (error) {
       console.error("Erreur Supabase:", error.message);

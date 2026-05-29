@@ -57,7 +57,7 @@ function HomeContent() {
     async function loadData() {
       try {
         setLoading(true);
-        const res = await fetch("/api/properties");
+        const res = await fetch(`/api/properties?minPrice=${DEFAULT_MIN_PRICE}&limit=96`);
         const data = await res.json();
         
         // CORRECTION : On s'assure que data est bien un tableau pour éviter "filter is not a function"

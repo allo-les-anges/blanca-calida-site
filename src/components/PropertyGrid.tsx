@@ -13,6 +13,14 @@ interface PropertyGridProps {
   isLight?: boolean; // Ajout de la prop pour TypeScript
 }
 
+function parsePropertyPrice(value: unknown) {
+  if (typeof value === "number") return Number.isFinite(value) ? value : 0;
+  if (typeof value !== "string") return 0;
+
+  const digitsOnly = value.replace(/[^\d]/g, "");
+  return digitsOnly ? Number(digitsOnly) : 0;
+}
+
 export default function PropertyGrid({ 
   activeFilters, 
   properties, 
@@ -48,7 +56,7 @@ export default function PropertyGrid({
       const matchTown = !activeFilters.town || p.town?.toLowerCase().includes(activeFilters.town.toLowerCase());
       const matchRegion = !activeFilters.region || p.region?.toLowerCase().includes(activeFilters.region.toLowerCase());
       const matchBeds = !activeFilters.beds || Number(p.beds) >= Number(activeFilters.beds);
-      const price = Number(p.price || p.prix || 0);
+      const price = parsePropertyPrice(p.price || p.prix);
       const matchMin = !activeFilters.minPrice || price >= Number(activeFilters.minPrice);
       const matchMax = !activeFilters.maxPrice || price <= Number(activeFilters.maxPrice);
       const matchRef = !activeFilters.reference || p.ref?.toLowerCase().includes(activeFilters.reference.toLowerCase());
