@@ -37,7 +37,7 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
     setMounted(true);
     async function fetchData() {
       try {
-        const res = await fetch(`/api/properties?lang=${locale}`);
+        const res = await fetch(`/api/properties?lang=${locale}&id=${encodeURIComponent(id)}`);
         const data = await res.json();
         const propertiesArray = Array.isArray(data) ? data : (data.properties || []);
         const current = propertiesArray.find((p: any) => 

@@ -20,9 +20,9 @@ export default function PropertyDetailPage() {
   useEffect(() => {
     async function load() {
       try {
-        const res = await fetch("/api/properties");
+        const res = await fetch(`/api/properties?id=${encodeURIComponent(String(id))}`);
         const data = await res.json();
-        const found = data.find((p: any) => String(p.id) === String(id));
+        const found = data.find((p: any) => String(p.id) === String(id) || String(p.id_externe) === String(id));
         setProperty(found);
       } catch (err) {
         console.error("Erreur chargement bien:", err);

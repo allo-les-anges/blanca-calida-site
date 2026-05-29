@@ -21,6 +21,7 @@ export async function GET(request: Request) {
     const minCommission = searchParams.get('minCommission');
     const excludedDevelopments = searchParams.get('excluded'); // Format attendu: "Promotion A,Promotion B"
     const minPrice = searchParams.get('minPrice');
+    const id = searchParams.get('id');
     const limitParam = Number(searchParams.get('limit') || 24);
     const limit = Number.isFinite(limitParam) ? Math.min(Math.max(limitParam, 1), 200) : 24;
 
@@ -30,15 +31,20 @@ export async function GET(request: Request) {
       .select('*')
       .eq('is_excluded', false); // On exclut d'office les biens marqués "is_excluded" manuellement
 
+    if (id) {
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+      query = isUuid ? query.or(`id.eq.${id},id_externe.eq.${id}`) : query.eq('id_externe', id);
+    }
+
     // 3. Application du filtre de commission minimale
-    if (minCommission) {
+    if (!id && minCommission) {
       const minCommValue = parseFloat(minCommission);
       if (!isNaN(minCommValue)) {
         query = query.gte('commission_quantity', minCommValue);
       }
     }
 
-    if (minPrice) {
+    if (!id && minPrice) {
       const minPriceValue = parseFloat(minPrice);
       if (!isNaN(minPriceValue)) {
         query = query.gte('price', minPriceValue);
@@ -46,7 +52,7 @@ export async function GET(request: Request) {
     }
 
     // 4. Application du filtre d'exclusion par nom de promotion/promoteur
-    if (excludedDevelopments) {
+    if (!id && excludedDevelopments) {
       const excludedList = excludedDevelopments.split(',').map(s => s.trim());
       if (excludedList.length > 0) {
         query = query.not('development_name', 'in', `(${excludedList.join(',')})`);
