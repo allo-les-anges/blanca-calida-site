@@ -167,16 +167,17 @@ function HomeContent() {
 
   if (!mounted) return null;
 
-  // Couleurs dynamiques
-  const bgColor = isLight ? 'bg-white' : 'bg-[#010101]';
-  const textColor = isLight ? 'text-slate-900' : 'text-white';
-  const mutedText = isLight ? 'text-slate-500' : 'text-slate-400';
+  // Couleurs dynamiques : le mode jour dépend du thème, pas seulement du pack light.
+  const isDarkVisual = resolvedTheme === "dark" && !isLight;
+  const bgColor = isDarkVisual ? 'bg-[#010101]' : 'bg-[#FAFAFA]';
+  const textColor = isDarkVisual ? 'text-[#FAFAFA]' : 'text-[#171716]';
+  const mutedText = isDarkVisual ? 'text-[#F2EFEA]' : 'text-[#171716]';
 
   if (loading) {
     return (
-      <div className={`h-screen flex flex-col items-center justify-center ${isLight ? 'bg-white' : 'bg-[#010101]'}`}>
+      <div className={`h-screen flex flex-col items-center justify-center ${bgColor}`}>
         <Loader2 className="animate-spin text-[#D8C9B6] mb-8" size={48} />
-        <span className={`text-[10px] font-bold uppercase tracking-[0.5em] animate-pulse ${isLight ? 'text-black' : 'text-[#D8C9B6]'}`}>
+        <span className={`text-[10px] font-bold uppercase tracking-[0.5em] animate-pulse ${isDarkVisual ? 'text-[#D8C9B6]' : 'text-[#171716]'}`}>
           {t('home.loading.amaruExcellence')}
         </span>
       </div>
@@ -196,7 +197,7 @@ function HomeContent() {
                 onClick={() => setIsSearchOpen(true)}
                 className="group flex items-center gap-5 transition-all duration-700"
              >
-                <div className={`w-10 h-10 border border-[#D8C9B6]/30 ${isLight ? 'bg-black text-white' : 'bg-transparent text-[#D8C9B6]'} rounded-full flex items-center justify-center group-hover:bg-[#D8C9B6] group-hover:text-white transition-all duration-500`}>
+                <div className={`w-10 h-10 border border-[#D8C9B6]/30 ${isDarkVisual ? 'bg-transparent text-[#D8C9B6]' : 'bg-[#010101] text-[#FAFAFA]'} rounded-full flex items-center justify-center group-hover:bg-[#D8C9B6] group-hover:text-[#010101] transition-all duration-500`}>
                   <Search size={16} strokeWidth={1.5} />
                 </div>
                 <span className={`text-[11px] md:text-[13px] font-light uppercase tracking-[0.6em] transition-colors duration-500 ${textColor}`}>
@@ -205,7 +206,7 @@ function HomeContent() {
              </button>
            )}
         </div>
-        <div className={`absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t ${isLight ? 'from-white' : 'from-[#010101]'} to-transparent pointer-events-none transition-colors duration-500`} />
+        <div className={`absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t ${isDarkVisual ? 'from-[#010101]' : 'from-[#FAFAFA]'} to-transparent pointer-events-none transition-colors duration-500`} />
       </div>
 
       <ScrollingBanner />
@@ -276,7 +277,7 @@ function HomeContent() {
       {/* MODAL DE RECHERCHE */}
       <div className={`fixed inset-0 z-[100] flex items-center justify-center p-4 transition-all duration-500 ${isSearchOpen ? 'visible opacity-100' : 'invisible opacity-0'}`}>
         <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-md" onClick={() => setIsSearchOpen(false)} />
-        <div className={`relative w-full max-w-5xl overflow-hidden shadow-2xl transition-all duration-500 ${isSearchOpen ? 'scale-100' : 'scale-95'} ${isLight ? 'bg-white' : 'bg-[#010101]'}`}>
+        <div className={`relative w-full max-w-5xl overflow-hidden shadow-2xl transition-all duration-500 ${isSearchOpen ? 'scale-100' : 'scale-95'} ${bgColor}`}>
           <button onClick={() => setIsSearchOpen(false)} className="absolute top-5 right-5 w-10 h-10 bg-black text-[#D8C9B6] flex items-center justify-center hover:bg-[#D8C9B6] hover:text-black z-50 transition-all"><X size={20} /></button>
           <div className="p-8 md:p-12 max-h-[85vh] overflow-y-auto">
             <AdvancedSearch properties={allProperties} onSearch={handleSearch} activeFilters={filters} isLight={isLight} />
@@ -284,7 +285,7 @@ function HomeContent() {
         </div>
       </div>
 
-      <Footer isLight={isLight} />
+      <Footer isLight={!isDarkVisual} />
     </main>
   );
 }
