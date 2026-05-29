@@ -207,6 +207,30 @@ html.dark:not([data-package="light"]) .bg-slate-100 {
   border-color: color-mix(in srgb, #FAFAFA 20%, transparent) !important; 
 }
 
+html.dark:not([data-package="light"]) .guide-shell,
+html.dark:not([data-package="light"]) .guide-shell section {
+  background-color: #010101 !important;
+  color: #FAFAFA !important;
+}
+
+html.dark:not([data-package="light"]) .guide-shell .guide-surface {
+  background-color: #171716 !important;
+  color: #FAFAFA !important;
+  border-color: #D8C9B6 !important;
+}
+
+html.dark:not([data-package="light"]) .guide-shell .guide-soft {
+  background-color: #010101 !important;
+  color: #FAFAFA !important;
+}
+
+html.dark:not([data-package="light"]) .guide-shell .guide-text,
+html.dark:not([data-package="light"]) .guide-shell .guide-surface h2,
+html.dark:not([data-package="light"]) .guide-shell .guide-surface h3,
+html.dark:not([data-package="light"]) .guide-shell .guide-surface p {
+  color: #FAFAFA !important;
+}
+
 /* 5. EXCEPTIONS BOUTONS */
 html.dark button.bg-white span,
 html.dark .bg-white button span,

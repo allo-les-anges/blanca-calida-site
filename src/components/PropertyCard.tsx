@@ -31,11 +31,12 @@ export default function PropertyCard({ property, isLight = false }: { property: 
   if (!mounted) return null;
 
   const showDark = resolvedTheme === 'dark' && !isLight;
+  const useLightChrome = isLight || !showDark;
 
   return (
     <Link 
       href={detailUrl} 
-      className="group flex flex-col w-full transition-all duration-500"
+      className="property-card group flex flex-col w-full transition-all duration-500"
     >
       {/* IMAGE & BADGES */}
       <div 
@@ -52,11 +53,11 @@ export default function PropertyCard({ property, isLight = false }: { property: 
         />
         
         {/* Overlay dégradé plus prononcé pour la lisibilité */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-90" />
+        <div className={`absolute inset-0 bg-gradient-to-t ${showDark ? 'from-black/80' : 'from-black/55'} via-transparent to-transparent opacity-90`} />
 
         {/* BADGES GAUCHE */}
         <div className="absolute bottom-6 left-6 flex flex-wrap gap-2 max-w-[70%] z-10">
-          <span className={`${isLight ? 'bg-black text-white' : 'bg-[#D8C9B6] text-black'} text-[9px] font-black px-4 py-2 rounded-none uppercase tracking-widest shadow-xl border ${isLight ? 'border-white/10' : 'border-black/5'}`}>
+          <span className={`${useLightChrome ? 'bg-black text-white' : 'bg-[#D8C9B6] text-black'} text-[9px] font-black px-4 py-2 rounded-none uppercase tracking-widest shadow-xl border ${useLightChrome ? 'border-white/10' : 'border-black/5'}`}>
             {translate('propertyCard.ref', { ref: property.ref || property.id_externe })}
           </span>
           
@@ -70,7 +71,7 @@ export default function PropertyCard({ property, isLight = false }: { property: 
           <button className="bg-black/40 backdrop-blur-md p-3 rounded-none border border-white/20 text-white hover:bg-[#D8C9B6] hover:text-black transition-all">
             <Heart size={18} strokeWidth={1.5} />
           </button>
-          <div className={`${isLight ? 'bg-black text-white' : 'bg-[#D8C9B6] text-black'} p-3 rounded-none shadow-xl transform group-hover:translate-x-1 transition-all border ${isLight ? 'border-white/10' : 'border-black/5'}`}>
+          <div className={`${useLightChrome ? 'bg-black text-white' : 'bg-[#D8C9B6] text-black'} p-3 rounded-none shadow-xl transform group-hover:translate-x-1 transition-all border ${useLightChrome ? 'border-white/10' : 'border-black/5'}`}>
             <ChevronRight size={20} strokeWidth={2.5} />
           </div>
         </div>
@@ -86,7 +87,7 @@ export default function PropertyCard({ property, isLight = false }: { property: 
             {property.titre || property.type || t('propertyCard.fallbackTitle')}
           </h3>
           
-          <span className={`text-xl font-bold ${isLight ? 'text-black' : 'text-[#D8C9B6]'} whitespace-nowrap pt-1`}>
+          <span className={`text-xl font-bold ${useLightChrome ? 'text-black' : 'text-[#D8C9B6]'} whitespace-nowrap pt-1`}>
             {priceFormatted} €
           </span>
         </div>
@@ -95,7 +96,7 @@ export default function PropertyCard({ property, isLight = false }: { property: 
           className="flex items-center gap-2 text-[10px] tracking-[0.3em] uppercase font-bold transition-colors"
           style={{ color: showDark ? '#D8C9B6' : '#171716' }}
         >
-          <span className={isLight ? 'text-black' : 'text-[#D8C9B6]'}>●</span>
+          <span className={useLightChrome ? 'text-black' : 'text-[#D8C9B6]'}>●</span>
           {property.town} <span className="opacity-30">|</span> {property.region || 'Costa Blanca'}
         </div>
       </div>
@@ -121,7 +122,7 @@ export default function PropertyCard({ property, isLight = false }: { property: 
                 borderColor: showDark ? 'color-mix(in srgb, #FAFAFA 10%, transparent)' : '#D8C9B6'
               }}
             >
-              <item.icon size={14} className={isLight ? 'text-black' : 'text-[#D8C9B6]'} />
+              <item.icon size={14} className={useLightChrome ? 'text-black' : 'text-[#D8C9B6]'} />
             </div>
             <span 
               className="text-[11px] font-medium transition-colors"

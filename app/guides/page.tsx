@@ -65,13 +65,13 @@ const metrics = [
 
 export default function GuidesPage() {
   return (
-    <main className="min-h-screen bg-[#FAFAFA] text-[#171716]">
+    <main className="guide-shell min-h-screen bg-[#FAFAFA] text-[#171716]">
       <Navbar />
 
       <div className="mx-auto flex max-w-[1800px]">
-        <aside className="sticky top-0 hidden h-screen w-72 shrink-0 border-r border-[#D8C9B6] bg-[#F2EFEA] px-6 py-8 pt-28 xl:block">
+        <aside className="guide-surface sticky top-0 hidden h-screen w-72 shrink-0 border-r border-[#D8C9B6] bg-[#F2EFEA] px-6 py-8 pt-28 xl:block">
           <div className="mb-10">
-            <p className="text-[10px] font-black uppercase tracking-[0.35em] text-[#171716]">Amaru Homes</p>
+            <p className="guide-text text-[10px] font-black uppercase tracking-[0.35em] text-[#171716]">Amaru Homes</p>
             <h2 className="mt-4 text-2xl font-serif uppercase leading-tight">Spain Property Guide</h2>
           </div>
 
@@ -80,7 +80,7 @@ export default function GuidesPage() {
               <a
                 key={section.title}
                 href={`#${section.title.toLowerCase().replace(/\s+/g, "-")}`}
-                className="flex items-center gap-3 border border-[#D8C9B6] bg-[#FAFAFA] px-4 py-4 text-[10px] font-black uppercase tracking-[0.18em] transition-colors hover:bg-[#D8C9B6]"
+                className="guide-surface flex items-center gap-3 border border-[#D8C9B6] bg-[#FAFAFA] px-4 py-4 text-[10px] font-black uppercase tracking-[0.18em] transition-colors hover:bg-[#D8C9B6]"
               >
                 <span>{String(index + 1).padStart(2, "0")}</span>
                 {section.title}
@@ -120,13 +120,13 @@ export default function GuidesPage() {
             </div>
           </section>
 
-          <section className="grid grid-cols-1 border-b border-[#D8C9B6] bg-[#FAFAFA] md:grid-cols-5">
+          <section className="guide-surface grid grid-cols-1 border-b border-[#D8C9B6] bg-[#FAFAFA] md:grid-cols-5">
             {metrics.map((metric) => (
               <div key={metric.label} className="flex items-center gap-4 border-r border-[#D8C9B6] px-6 py-8">
                 <metric.icon className="text-[#D8C9B6]" size={30} strokeWidth={1.4} />
                 <div>
                   <p className="text-[9px] font-black uppercase tracking-[0.25em]">{metric.label}</p>
-                  <p className="mt-1 text-sm text-[#171716]">{metric.value}</p>
+                  <p className="guide-text mt-1 text-sm text-[#171716]">{metric.value}</p>
                 </div>
               </div>
             ))}
@@ -159,7 +159,7 @@ export default function GuidesPage() {
             </div>
           </section>
 
-          <section id="regions-overview" className="border-y border-[#D8C9B6] bg-[#F2EFEA] px-6 py-16 md:px-12 lg:px-20">
+          <section id="regions-overview" className="guide-soft border-y border-[#D8C9B6] bg-[#F2EFEA] px-6 py-16 md:px-12 lg:px-20">
             <div className="mb-10 max-w-3xl">
               <p className="mb-4 text-[10px] font-black uppercase tracking-[0.35em] text-[#D8C9B6]">Regions overview</p>
               <h2 className="text-4xl font-serif uppercase leading-tight">Explore Spain&apos;s top regions</h2>
@@ -168,7 +168,7 @@ export default function GuidesPage() {
 
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
               {regions.map((region) => (
-                <article key={region.name} className="group bg-[#FAFAFA]">
+                <article key={region.name} className="guide-surface group bg-[#FAFAFA]">
                   <div className="aspect-[4/3] overflow-hidden">
                     <img src={region.image} alt={`${region.name} property guide`} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
                   </div>
@@ -190,7 +190,7 @@ export default function GuidesPage() {
           </section>
 
           <section id="property-market" className="grid grid-cols-1 gap-6 px-6 py-16 md:px-12 lg:grid-cols-2 lg:px-20">
-            <div className="bg-[#FAFAFA] p-10 ring-1 ring-[#D8C9B6]">
+            <div className="guide-surface bg-[#FAFAFA] p-10 ring-1 ring-[#D8C9B6]">
               <p className="mb-4 text-[10px] font-black uppercase tracking-[0.35em] text-[#D8C9B6]">Property market</p>
               <h2 className="text-3xl font-serif uppercase">Spain market snapshot</h2>
               <div className="mt-10 grid grid-cols-2 gap-8">
@@ -209,7 +209,7 @@ export default function GuidesPage() {
               </div>
             </div>
 
-            <div id="buying-guide" className="bg-[#F2EFEA] p-10 ring-1 ring-[#D8C9B6]">
+            <div id="buying-guide" className="guide-surface bg-[#F2EFEA] p-10 ring-1 ring-[#D8C9B6]">
               <p className="mb-4 text-[10px] font-black uppercase tracking-[0.35em] text-[#D8C9B6]">Buying guide</p>
               <h2 className="text-3xl font-serif uppercase">How to choose the right region</h2>
               <p className="mt-6 leading-8">The best region depends on your lifestyle, access needs, usage plan and investment goals. Amaru Homes helps buyers compare areas before selecting properties to visit.</p>
@@ -248,7 +248,7 @@ export default function GuidesPage() {
                 ["Can Amaru Homes help me compare regions?", "Yes. We help buyers understand lifestyle, access, budgets and property options before arranging viewings."],
                 ["Can I start with a region guide before viewing properties?", "Yes. These guides are designed to support early research and improve the quality of each shortlist."],
               ].map(([question, answer]) => (
-                <div key={question} className="border border-[#D8C9B6] bg-[#FAFAFA] p-6">
+                <div key={question} className="guide-surface border border-[#D8C9B6] bg-[#FAFAFA] p-6">
                   <h3 className="font-bold uppercase tracking-[0.12em]">{question}</h3>
                   <p className="mt-4 text-sm leading-7">{answer}</p>
                 </div>
@@ -256,7 +256,7 @@ export default function GuidesPage() {
             </div>
           </section>
 
-          <Footer isLight />
+          <Footer />
         </div>
       </div>
     </main>
