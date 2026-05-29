@@ -11,6 +11,7 @@ interface Property {
   town?: string;
   ville?: string;
   region?: string;
+  province?: string;
 }
 
 interface RegionGridProps {
@@ -30,7 +31,7 @@ const CITY_TO_REGION_MAP: Record<string, string> = {
   "fuengirola": "Costa del Sol", "benalmadena": "Costa del Sol", "torremolinos": "Costa del Sol",
   "malaga": "Costa del Sol", "nerja": "Costa del Sol", "casares": "Costa del Sol",
   "manilva": "Costa del Sol", "sotogrande": "Costa del Sol", "san pedro de alcantara": "Costa del Sol",
-  "benahavis": "Costa del Sol", "cancelada": "Costa del Sol",
+  "benahavis": "Costa del Sol", "cancelada": "Costa del Sol", "san roque": "Costa del Sol",
   "murcia": "Costa Calida", "cartagena": "Costa Calida", "los alcazares": "Costa Calida",
   "san javier": "Costa Calida", "san pedro del pinatar": "Costa Calida", "mazarron": "Costa Calida",
   "aguilas": "Costa Calida", "la manga": "Costa Calida", "sucina": "Costa Calida",
@@ -39,6 +40,28 @@ const CITY_TO_REGION_MAP: Record<string, string> = {
   "vera": "Costa Almeria", "san juan de los terreros": "Costa Almeria", "pulpi": "Costa Almeria",
   "cuevas del almanzora": "Costa Almeria"
 };
+const PROVINCE_TO_REGION_MAP: Record<string, string> = {
+  "alicante": "Costa Blanca",
+  "malaga": "Costa del Sol",
+  "cadiz": "Costa del Sol",
+  "murcia": "Costa Calida",
+  "almeria": "Costa Almeria"
+};
+
+function normalizeLocation(value: unknown) {
+  return typeof value === "string"
+    ? value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim()
+    : "";
+}
+
+function getPropertyRegion(property: Property) {
+  const directRegion = property.region?.trim();
+  if (directRegion) return directRegion;
+
+  const city = normalizeLocation(property.town || property.ville);
+  const province = normalizeLocation(property.province);
+  return CITY_TO_REGION_MAP[city] || PROVINCE_TO_REGION_MAP[province] || "";
+}
 
 const REGIONS_DISPLAY = [
   { name: "Costa Blanca", image: "/images/regions/1.jpg", size: "md:col-span-2 md:row-span-1" },
@@ -65,13 +88,8 @@ export default function RegionGrid({ properties, onRegionClick }: RegionGridProp
     };
     if (!properties || properties.length === 0) return counts;
     properties.forEach(p => {
-      const rawCity = (p.town || p.ville || "").toLowerCase().trim();
-      const regionFound = CITY_TO_REGION_MAP[rawCity];
-      if (regionFound) counts[regionFound]++;
-      else {
-        const rawRegion = p.region?.trim();
-        if (rawRegion && counts[rawRegion] !== undefined) counts[rawRegion]++;
-      }
+      const regionFound = getPropertyRegion(p);
+      if (regionFound && counts[regionFound] !== undefined) counts[regionFound]++;
     });
     return counts;
   }, [properties]);
