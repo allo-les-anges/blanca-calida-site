@@ -433,6 +433,19 @@ export default function AdminDashboard() {
         c.latitude && c.longitude
           ? `${Number(c.latitude).toFixed(6)}, ${Number(c.longitude).toFixed(6)}`
           : "Coordonnees non disponibles";
+      const cleanPdfText = (value: string) => {
+        let output = cleanText(value).replace(/[\u00A0\u202F]/g, " ");
+        for (let i = 0; i < 4; i += 1) {
+          output = output.replace(/(^|[^\p{L}])((?:\p{L}\s+){2,}\p{L})(?=[^\p{L}]|$)/gu, (_match, prefix, spacedWord) => {
+            return `${prefix}${spacedWord.replace(/\s+/g, "")}`;
+          });
+        }
+        return output.replace(/\s+/g, " ").trim();
+      };
+      const limitPdfText = (value: string, maxLength: number) => {
+        const text = cleanPdfText(value);
+        return text.length > maxLength ? `${text.slice(0, maxLength).trim()}...` : text;
+      };
 
       const addFooter = () => {
         doc.setDrawColor(...brandGold);
@@ -527,7 +540,7 @@ export default function AdminDashboard() {
       doc.setFontSize(6.8);
       const analysisColumnWidth = 80;
       const observationRows = dailyConstats.map((c, i) => {
-        const analysisText = `${t('adminDashboard.statusConforme')}\n${cleanText(c.note_expert || t('adminDashboard.defaultObservation'))}`;
+        const analysisText = `${t('adminDashboard.statusConforme')}\n${limitPdfText(c.note_expert || t('adminDashboard.defaultObservation'), 180)}`;
         return [
           `PV-${String(i + 1).padStart(2, "0")}`,
           new Date(c.created_at).toLocaleString(),
@@ -604,8 +617,8 @@ export default function AdminDashboard() {
         doc.text("Observation", margin + 6, yPos + 36);
         doc.setFont("helvetica", "normal");
         doc.setFontSize(8);
-        const noteLines = doc.splitTextToSize(cleanText(c.note_expert || t('adminDashboard.defaultObservation')), 78);
-        doc.text(noteLines.slice(0, 6), margin + 6, yPos + 42);
+        const noteLines = doc.splitTextToSize(limitPdfText(c.note_expert || t('adminDashboard.defaultObservation'), 360), 72);
+        doc.text(noteLines.slice(0, 7), margin + 6, yPos + 42);
         yPos += 88;
       }
 
