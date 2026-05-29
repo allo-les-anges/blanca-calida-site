@@ -231,6 +231,67 @@ html.dark:not([data-package="light"]) .guide-shell .guide-surface p {
   color: #FAFAFA !important;
 }
 
+.admin-dashboard-light,
+.admin-dashboard-light [class*="bg-[#010101]"],
+.admin-dashboard-light [class*="bg-[#171716]"],
+.admin-dashboard-light [class*="bg-black"],
+.admin-dashboard-light [class*="bg-white/5"],
+.admin-dashboard-light [class*="bg-white/10"],
+.admin-dashboard-light [class*="bg-black/20"],
+.admin-dashboard-light [class*="bg-black/40"],
+.admin-dashboard-light [class*="bg-black/50"],
+.admin-dashboard-light [class*="bg-black/60"] {
+  background-color: #FAFAFA !important;
+}
+
+.admin-dashboard-light [class*="bg-[#171716]/"],
+.admin-dashboard-light [class*="bg-[#010101]/"] {
+  background-color: #F2EFEA !important;
+}
+
+.admin-dashboard-light,
+.admin-dashboard-light h1,
+.admin-dashboard-light h2,
+.admin-dashboard-light h3,
+.admin-dashboard-light h4,
+.admin-dashboard-light p,
+.admin-dashboard-light span,
+.admin-dashboard-light label,
+.admin-dashboard-light button,
+.admin-dashboard-light input,
+.admin-dashboard-light textarea,
+.admin-dashboard-light select,
+.admin-dashboard-light [class*="text-white"],
+.admin-dashboard-light [class*="text-slate-"],
+.admin-dashboard-light [class*="text-rose-"] {
+  color: #171716 !important;
+}
+
+.admin-dashboard-light [class*="text-emerald"],
+.admin-dashboard-light [class*="text-[#D8C9B6]"],
+.admin-dashboard-light .text-emerald-500,
+.admin-dashboard-light .text-\[\#D8C9B6\] {
+  color: #D8C9B6 !important;
+}
+
+.admin-dashboard-light [class*="border-white"],
+.admin-dashboard-light [class*="border-slate"],
+.admin-dashboard-light [class*="border-[#D8C9B6]"] {
+  border-color: #D8C9B6 !important;
+}
+
+.admin-dashboard-light input,
+.admin-dashboard-light textarea,
+.admin-dashboard-light select {
+  background-color: #FAFAFA !important;
+  border-color: #D8C9B6 !important;
+}
+
+.admin-dashboard-light ::placeholder {
+  color: #171716 !important;
+  opacity: 0.55 !important;
+}
+
 /* 5. EXCEPTIONS BOUTONS */
 html.dark button.bg-white span,
 html.dark .bg-white button span,

@@ -74,8 +74,8 @@ export default function Footer({ isLight = false }: FooterProps) {
               </h4>
               <ul className={`space-y-3 text-[10px] uppercase tracking-widest ${mutedText}`}>
                 <li><Link href="/login" className="hover:text-[#D8C9B6] transition-colors">Connexion</Link></li>
-                <li><Link href="/admin/dashboard" className="hover:text-[#D8C9B6] transition-colors">Admin</Link></li>
-                <li><Link href="/super-admin" className="hover:text-[#D8C9B6] transition-colors">Super Admin</Link></li>
+                <li><Link href="/login" className="hover:text-[#D8C9B6] transition-colors">Admin</Link></li>
+                <li><Link href="/login" className="hover:text-[#D8C9B6] transition-colors">Super Admin</Link></li>
               </ul>
             </div>
           </div>

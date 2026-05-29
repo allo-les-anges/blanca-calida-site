@@ -16,6 +16,7 @@ import { supabase } from '../../../lib/supabase';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { useTranslation } from '@/contexts/I18nContext';
+import { useTheme } from "next-themes";
 
 const PHASES_CHANTIER = [
   "0. Signature & Réservation", 
@@ -36,6 +37,7 @@ const PHASES_CHANTIER = [
 export default function AdminDashboard() {
   const router = useRouter();
   const { t } = useTranslation();
+  const { resolvedTheme } = useTheme();
   
   // --- ÉTATS DE L'INTERFACE ---
   const [activeTab, setActiveTab] = useState<'clients' | 'staff' | 'settings'>('clients');
@@ -111,8 +113,15 @@ export default function AdminDashboard() {
         .select('*')
         .eq('id', session.user.id)
         .single();
+
+      const allowedRoles = ['admin', 'staff', 'super_admin'];
+      if (!profile || !allowedRoles.includes(profile.role)) {
+        await supabase.auth.signOut();
+        router.replace("/login");
+        return;
+      }
       
-      if (profile) setAgencyProfile(profile);
+      setAgencyProfile(profile);
 
       const { data: projs, error: errorProjs } = await supabase
         .from('suivi_chantier')
@@ -493,8 +502,11 @@ export default function AdminDashboard() {
     }
   };
 
+  const isDarkVisual = resolvedTheme === "dark";
+  const dashboardThemeClass = isDarkVisual ? "" : "admin-dashboard-light";
+
   if (loading) return (
-    <div className="h-screen bg-[#010101] flex flex-col items-center justify-center">
+    <div className={`h-screen bg-[#010101] flex flex-col items-center justify-center ${dashboardThemeClass}`}>
       <div className="relative">
         <Loader2 className="animate-spin text-emerald-500" size={48} />
         <div className="absolute inset-0 blur-2xl bg-emerald-500/20 animate-pulse"></div>
@@ -504,7 +516,7 @@ export default function AdminDashboard() {
   );
 
   return (
-    <div className="min-h-screen bg-[#010101] flex text-slate-200 font-sans text-left overflow-hidden selection:bg-emerald-500 selection:text-black">
+    <div className={`min-h-screen bg-[#010101] flex text-slate-200 font-sans text-left overflow-hidden selection:bg-emerald-500 selection:text-black ${dashboardThemeClass}`}>
       
       {/* Overlay pour fermer la sidebar sur mobile */}
       {isSidebarOpen && (
