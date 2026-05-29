@@ -238,6 +238,42 @@ export default function Navbar() {
                 </button>
               )}
             </nav>
+
+            <div className="mt-12 border-t border-[#D8C9B6]/30 pt-8">
+              <div
+                className="mb-4 flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.25em]"
+                style={{ color: isDarkVisual ? '#D8C9B6' : '#171716' }}
+              >
+                <Globe size={15} />
+                <span>{locale.toUpperCase()}</span>
+              </div>
+
+              <div className="grid grid-cols-4 gap-2">
+                {languages.map((l) => {
+                  const isActive = locale === l.code;
+
+                  return (
+                    <button
+                      key={l.code}
+                      type="button"
+                      onClick={() => {
+                        setLocale(l.code as any);
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className="border px-3 py-3 text-[10px] font-black uppercase tracking-[0.18em] transition-colors"
+                      style={{
+                        backgroundColor: isActive ? '#D8C9B6' : 'transparent',
+                        borderColor: isActive ? '#D8C9B6' : 'color-mix(in srgb, #D8C9B6 45%, transparent)',
+                        color: isActive ? '#010101' : (isDarkVisual ? '#FAFAFA' : '#171716'),
+                      }}
+                      aria-pressed={isActive}
+                    >
+                      {l.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         </div>
       )}
