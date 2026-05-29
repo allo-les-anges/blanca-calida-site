@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import {
@@ -11,12 +12,17 @@ import { useTheme } from "next-themes";
 import ThemeToggle from "./ThemeToggle";
 import { useTranslation } from "@/contexts/I18nContext";
 
-// Logo SVG
-const DataHomeLogo = ({ className, style }: { className?: string, style?: React.CSSProperties }) => (
-  <svg viewBox="0 0 150 35" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} style={style}>
-    <path d="M15 12L20 5L25 12H15Z" fill="currentColor" />
-    <text x="10" y="28" fontFamily="Suisse Int'l, Suisse Intl, Arial, sans-serif" fontSize="22" fontWeight="300" fill="currentColor" letterSpacing="-0.02em">data home</text>
-  </svg>
+const AmaruLogo = ({ className = "" }: { className?: string }) => (
+  <span className={`relative block h-14 w-40 overflow-hidden ${className}`}>
+    <Image
+      src="/amaru-navbar-logo.png"
+      alt="Amaru-Homes"
+      fill
+      priority
+      sizes="160px"
+      className="object-contain"
+    />
+  </span>
 );
 
 const supabase = createBrowserClient(
@@ -109,10 +115,7 @@ export default function Navbar() {
           
           {/* LOGO */}
           <Link href={isLight ? "/?pack=light" : "/"} className="z-[110] flex items-center group">
-            <DataHomeLogo 
-              className="h-10 w-auto transition-colors group-hover:text-[#D8C9B6]" 
-              style={{ color: isDarkVisual ? '#FAFAFA' : '#171716' }}
-            />
+            <AmaruLogo />
           </Link>
 
           {/* DESKTOP MENU */}
@@ -206,10 +209,7 @@ export default function Navbar() {
             style={{ backgroundColor: isDarkVisual ? '#171716' : '#FAFAFA' }}
           >
             <div className="flex justify-between items-center mb-12">
-              <DataHomeLogo 
-                className="h-8 w-auto" 
-                style={{ color: isDarkVisual ? '#FAFAFA' : '#171716' }}
-              />
+              <AmaruLogo className="h-14 w-36" />
               <button onClick={() => setIsMobileMenuOpen(false)} style={{ color: isDarkVisual ? '#FAFAFA' : '#171716' }}>
                 <X size={32} />
               </button>

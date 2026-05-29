@@ -26,9 +26,7 @@ export default function Footer({ isLight = false }: FooterProps) {
           
           {/* LOGO & DESCRIPTION */}
           <div className="col-span-1 md:col-span-1 space-y-6">
-            <h3 className={`text-2xl font-serif italic ${textColor}`}>
-              Amaru <span className="text-[#D8C9B6] not-italic font-sans font-bold text-sm tracking-widest ml-2 uppercase">Excellence</span>
-            </h3>
+            <h3 className={`text-2xl font-serif italic ${textColor}`}>Amaru-Homes</h3>
             <p className={`${mutedText} text-xs leading-relaxed uppercase tracking-widest`}>
               {t('footer.description')}
             </p>
@@ -50,7 +48,7 @@ export default function Footer({ isLight = false }: FooterProps) {
             <h4 className={`text-[10px] font-bold uppercase tracking-[0.3em] ${textColor}`}>Contact</h4>
             <ul className={`space-y-4 text-[10px] uppercase tracking-widest ${mutedText}`}>
               <li className="flex items-center gap-3">
-                <Mail size={14} className={iconColor} /> info@amaru-excellence.com
+                <Mail size={14} className={iconColor} /> info@amaru-homes.com
               </li>
               <li className="flex items-center gap-3">
                 <Phone size={14} className={iconColor} /> +34 000 000 000
@@ -74,7 +72,10 @@ export default function Footer({ isLight = false }: FooterProps) {
 
         <div className={`mt-20 pt-8 border-t ${isLight ? 'border-slate-200' : 'border-white/5'} text-center`}>
           <p className={`${mutedText} text-[9px] uppercase tracking-[0.5em]`}>
-            © {new Date().getFullYear()} Amaru Excellence — All Rights Reserved
+            © {new Date().getFullYear()} Amaru-Homes — All Rights Reserved
+          </p>
+          <p className={`${mutedText} mt-4 text-[8px] uppercase tracking-[0.4em]`}>
+            Site powered by data-home
           </p>
         </div>
       </div>
