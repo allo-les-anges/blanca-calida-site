@@ -146,6 +146,8 @@
     "whatsapp_msg": "Hello, I would like more information about"
   },
   "cashback": {
+    "back": "Back",
+    "subtitle": "Cashback, furniture or services depending on your project",
     "title": "The Negotiated Advantages Program",
     "description": "At Amaru, each transaction is unique. \"Cashback\" is not a fixed scale, but a pre-negotiated condition with our partners to maximize the value of your investment from the outset.",
     "flexibility": "Total Flexibility",

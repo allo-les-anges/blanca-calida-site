@@ -146,6 +146,8 @@
     "whatsapp_msg": "Bonjour, je souhaite plus d'informations sur"
   },
   "cashback": {
+    "back": "Retour",
+    "subtitle": "Cashback, mobilier ou services selon votre projet",
     "title": "Le Programme Avantages Négociés",
     "description": "Chez Amaru, chaque transaction est unique. Le \"Cashback\" n'est pas un barème fixe, mais une condition pré-négociée avec nos partenaires pour maximiser la valeur de votre investissement dès l'acquisition.",
     "flexibility": "Flexibilité Totale",
