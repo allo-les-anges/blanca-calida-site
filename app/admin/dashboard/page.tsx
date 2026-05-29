@@ -407,7 +407,11 @@ export default function AdminDashboard() {
       const gpsCount = dailyConstats.filter((c) => c.latitude && c.longitude).length;
       let pageNumber = 1;
 
-      const cleanText = (value: string) => String(value || "").replace(/\s+/g, " ").trim();
+      const cleanText = (value: string) =>
+        String(value || "")
+          .replace(/(?:\b[A-Za-zÀ-ÿ]\s+){3,}[A-Za-zÀ-ÿ]\b/g, (match) => match.replace(/\s+/g, ""))
+          .replace(/\s+/g, " ")
+          .trim();
       const gpsText = (c: any) =>
         c.latitude && c.longitude
           ? `${Number(c.latitude).toFixed(6)}, ${Number(c.longitude).toFixed(6)}`
@@ -502,28 +506,37 @@ export default function AdminDashboard() {
       doc.setTextColor(90, 90, 90);
       doc.text(`Dossier : ${projectName} | Client : ${clientName} | Auteur : ${expertNom}`, margin, 45);
 
-      autoTable(doc, {
-        startY: 52,
-        head: [["Ref.", "Date", "Geolocalisation", "Operateur", "Analyse technique"]],
-        body: dailyConstats.map((c, i) => [
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(6.8);
+      const analysisColumnWidth = 80;
+      const observationRows = dailyConstats.map((c, i) => {
+        const analysisText = `${t('adminDashboard.statusConforme')}\n${cleanText(c.note_expert || t('adminDashboard.defaultObservation'))}`;
+        return [
           `PV-${String(i + 1).padStart(2, "0")}`,
           new Date(c.created_at).toLocaleString(),
           gpsText(c),
           c.captured_by || expertNom,
-          `${t('adminDashboard.statusConforme')}\n${cleanText(c.note_expert || t('adminDashboard.defaultObservation'))}`,
-        ]),
+          doc.splitTextToSize(analysisText, analysisColumnWidth).join("\n"),
+        ];
+      });
+
+      autoTable(doc, {
+        startY: 52,
+        head: [["Ref.", "Date", "Geolocalisation", "Operateur", "Analyse technique"]],
+        body: observationRows,
         theme: "grid",
-        headStyles: { fillColor: brandDark, textColor: [250, 250, 250], fontSize: 7.5, cellPadding: 3 },
+        tableWidth: pageWidth - margin * 2,
+        headStyles: { fillColor: brandDark, textColor: [250, 250, 250], fontSize: 7, cellPadding: 2.2 },
         alternateRowStyles: { fillColor: [250, 250, 250] },
         bodyStyles: { textColor: brandDark },
         columnStyles: {
-          0: { cellWidth: 17, fontStyle: "bold" },
-          1: { cellWidth: 30 },
-          2: { cellWidth: 38 },
-          3: { cellWidth: 30 },
-          4: { cellWidth: 73 },
+          0: { cellWidth: 14, fontStyle: "bold" },
+          1: { cellWidth: 26 },
+          2: { cellWidth: 34 },
+          3: { cellWidth: 26 },
+          4: { cellWidth: analysisColumnWidth },
         },
-        styles: { fontSize: 7.5, cellPadding: 3, overflow: "linebreak", valign: "top", lineColor: brandGold, lineWidth: 0.15 },
+        styles: { fontSize: 6.8, cellPadding: 2.2, overflow: "linebreak", valign: "top", lineColor: brandGold, lineWidth: 0.15, minCellHeight: 8 },
         margin: { left: margin, right: margin },
         didDrawPage: addFooter,
       });
