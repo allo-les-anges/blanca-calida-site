@@ -473,6 +473,7 @@
     "copyPin": "Copier le PIN",
     "delete": "Supprimer ce collaborateur",
     "securityCode": "Code de sécurité",
+    "createdBy": "Créé par",
     "superAdmin": "Super Administrateur",
     "admin": "Administrateur Agence",
     "agent": "Agent (Accès Limité)",

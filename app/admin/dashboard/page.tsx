@@ -285,6 +285,9 @@ export default function AdminDashboard() {
         email: newStaff.email,
         role: newStaff.role, 
         company_name: agencyProfile.company_name,
+        created_by_admin_id: agencyProfile.id,
+        created_by_admin_email: agencyProfile.email,
+        created_by_admin_name: `${agencyProfile.prenom || ""} ${agencyProfile.nom || ""}`.trim() || agencyProfile.email,
         pin_code: autoPin,
         pack: "Standard"
       }]);
@@ -705,6 +708,14 @@ export default function AdminDashboard() {
                     <p className="text-[9px] font-mono text-slate-500 uppercase">{t('adminStaff.securityCode')}</p>
                     <p className="text-[11px] font-black text-emerald-500 tracking-[0.2em]">{s.pin_code || '------'}</p>
                   </div>
+                  {s.created_by_admin_email && (
+                    <div className="flex items-center justify-between pt-3 border-t border-white/5">
+                      <p className="text-[9px] font-mono text-slate-500 uppercase">{t('adminStaff.createdBy')}</p>
+                      <p className="max-w-[60%] truncate text-right text-[10px] font-bold text-slate-400">
+                        {s.created_by_admin_name || s.created_by_admin_email}
+                      </p>
+                    </div>
+                  )}
                 </div>
               ))
           )}

@@ -473,6 +473,7 @@
     "copyPin": "PIN kopiëren",
     "delete": "Deze medewerker verwijderen",
     "securityCode": "Veiligheidscode",
+    "createdBy": "Aangemaakt door",
     "superAdmin": "Superbeheerder",
     "admin": "Agentschapsbeheerder",
     "agent": "Agent (Beperkte toegang)",

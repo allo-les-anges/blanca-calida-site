@@ -473,6 +473,7 @@
     "copyPin": "Copy PIN",
     "delete": "Delete this team member",
     "securityCode": "Security code",
+    "createdBy": "Created by",
     "superAdmin": "Super Administrator",
     "admin": "Agency Administrator",
     "agent": "Agent (Limited Access)",

@@ -473,6 +473,7 @@
     "copyPin": "نسخ PIN",
     "delete": "حذف هذا الموظف",
     "securityCode": "رمز الأمان",
+    "createdBy": "تم الإنشاء بواسطة",
     "superAdmin": "مدير عام",
     "admin": "مدير الوكالة",
     "agent": "وكيل (وصول محدود)",
