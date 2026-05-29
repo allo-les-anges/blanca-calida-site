@@ -14,7 +14,8 @@
     "success": "Succes",
     "yes": "Ja",
     "no": "Nee",
-    "optional": "Optioneel"
+    "optional": "Optioneel",
+    "access": "Toegang"
   },
   "nav": {
     "home": "Home",

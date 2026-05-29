@@ -14,7 +14,8 @@
     "success": "Éxito",
     "yes": "Sí",
     "no": "No",
-    "optional": "Opcional"
+    "optional": "Opcional",
+    "access": "Acceder"
   },
   "nav": {
     "home": "Inicio",
