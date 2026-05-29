@@ -1227,15 +1227,22 @@ export default function AdminDashboard() {
 
                           {/* Carte PIN Client */}
                           <div className="bg-white/5 p-8 lg:p-10 rounded-[2rem] lg:rounded-[3rem] border border-white/5 flex flex-col items-center text-center relative group overflow-hidden">
-                            <div className="absolute inset-0 bg-emerald-500/0 group-hover:bg-emerald-500/5 transition-colors duration-700"></div>
-                            <ShieldCheck size={40} className="text-emerald-500 mb-6 group-hover:scale-110 transition-transform duration-500" />
-                            <p className="text-[10px] font-black uppercase text-slate-500 tracking-[0.3em]">{t('adminDashboard.pin.code')}</p>
-                            <p className="text-3xl sm:text-4xl font-black text-white tracking-[0.4em] mt-4 ml-4 leading-none italic select-all break-all">
+                            <div className="pointer-events-none absolute inset-0 bg-emerald-500/0 group-hover:bg-emerald-500/5 transition-colors duration-700"></div>
+                            <ShieldCheck size={40} className="relative z-10 text-emerald-500 mb-6 group-hover:scale-110 transition-transform duration-500" />
+                            <p className="relative z-10 text-[10px] font-black uppercase text-slate-500 tracking-[0.3em]">{t('adminDashboard.pin.code')}</p>
+                            <button
+                              type="button"
+                              onClick={() => copyToClipboard(editFields.pin_code, 'pin')}
+                              disabled={!editFields.pin_code}
+                              className="relative z-10 text-3xl sm:text-4xl font-black text-white tracking-[0.4em] mt-4 ml-4 leading-none italic select-all break-all disabled:cursor-not-allowed"
+                              title={t('adminDashboard.pin.copy')}
+                            >
                               {editFields.pin_code || '------'}
-                            </p>
+                            </button>
                             
                             {/* Bouton avec feedback et gestion du cas PIN absent */}
                             <button 
+                                  type="button"
                                   onClick={() => {
                                     const pin = editFields.pin_code;
                                     if (pin) {
@@ -1245,7 +1252,7 @@ export default function AdminDashboard() {
                                     }
                                   }}
                                   disabled={!editFields.pin_code}
-                                  className={`mt-6 text-[9px] font-black uppercase tracking-widest flex items-center gap-2 px-4 py-2 rounded-xl transition-all ${
+                                  className={`relative z-10 mt-6 text-[9px] font-black uppercase tracking-widest flex items-center gap-2 px-4 py-2 rounded-xl transition-all ${
                                     copySuccess === 'pin'
                                       ? 'bg-emerald-500 text-black'
                                       : editFields.pin_code
@@ -1257,7 +1264,7 @@ export default function AdminDashboard() {
                                   {copySuccess === 'pin' ? <CheckCircle2 size={12} /> : <Copy size={12} />} 
                                   {copySuccess === 'pin' ? t('adminDashboard.pin.copied') : t('adminDashboard.pin.copy')}
                                 </button>
-                            <p className="text-[9px] text-slate-600 font-bold uppercase mt-8 flex items-center gap-2">
+                            <p className="relative z-10 text-[9px] text-slate-600 font-bold uppercase mt-8 flex items-center gap-2">
                               <Lock size={10} /> {t('adminDashboard.pin.encryption')}
                             </p>
                           </div>
