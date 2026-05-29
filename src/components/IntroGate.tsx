@@ -10,7 +10,7 @@ export default function IntroGate() {
   const openIntro = useCallback(() => {
     if (isOpen) return;
     setIsOpen(true);
-    window.setTimeout(() => setIsGone(true), 1900);
+    window.setTimeout(() => setIsGone(true), 3200);
   }, [isOpen]);
 
   useEffect(() => {
@@ -72,19 +72,19 @@ export default function IntroGate() {
     >
       <span
         aria-hidden="true"
-        className={`absolute left-0 top-0 h-full w-[50.2vw] origin-left bg-black shadow-[20px_0_60px_rgba(0,0,0,0.45)] transition-transform duration-[1800ms] ease-[cubic-bezier(0.83,0,0.17,1)] motion-reduce:duration-200 ${
+        className={`absolute left-0 top-0 h-full w-[50.2vw] origin-left bg-black shadow-[20px_0_60px_rgba(0,0,0,0.45)] transition-transform duration-[3000ms] ease-[cubic-bezier(0.83,0,0.17,1)] motion-reduce:duration-200 ${
           isOpen ? "-translate-x-full" : "translate-x-0"
         }`}
       />
       <span
         aria-hidden="true"
-        className={`absolute right-0 top-0 h-full w-[50.2vw] origin-right bg-black shadow-[-20px_0_60px_rgba(0,0,0,0.45)] transition-transform duration-[1800ms] ease-[cubic-bezier(0.83,0,0.17,1)] motion-reduce:duration-200 ${
+        className={`absolute right-0 top-0 h-full w-[50.2vw] origin-right bg-black shadow-[-20px_0_60px_rgba(0,0,0,0.45)] transition-transform duration-[3000ms] ease-[cubic-bezier(0.83,0,0.17,1)] motion-reduce:duration-200 ${
           isOpen ? "translate-x-full" : "translate-x-0"
         }`}
       />
 
       <span
-        className={`relative z-10 flex h-full w-full items-center justify-center transition-all duration-700 motion-reduce:duration-200 ${
+        className={`relative z-10 flex h-full w-full items-center justify-center transition-all duration-[1200ms] motion-reduce:duration-200 ${
           isOpen ? "scale-90 opacity-0" : "scale-100 opacity-100"
         }`}
       >
