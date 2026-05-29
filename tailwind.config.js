@@ -23,8 +23,8 @@ export default {
         'navy-dark': '#0A0A0A',
       },
       fontFamily: {
-        'serif': ['"Playfair Display"', 'Georgia', 'serif'],
-        'sans': ['"Inter"', '-apple-system', 'sans-serif'],
+        'serif': ['"Suisse Int\'l"', '"Suisse Intl"', 'Arial', 'sans-serif'],
+        'sans': ['"Suisse Int\'l"', '"Suisse Intl"', 'Arial', 'sans-serif'],
       },
     },
   },

@@ -15,7 +15,7 @@ import { useTranslation } from "@/contexts/I18nContext";
 const DataHomeLogo = ({ className, style }: { className?: string, style?: React.CSSProperties }) => (
   <svg viewBox="0 0 150 35" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} style={style}>
     <path d="M15 12L20 5L25 12H15Z" fill="currentColor" />
-    <text x="10" y="28" fontFamily="sans-serif" fontSize="22" fontWeight="300" fill="currentColor" letterSpacing="-0.02em">data home</text>
+    <text x="10" y="28" fontFamily="Suisse Int'l, Suisse Intl, Arial, sans-serif" fontSize="22" fontWeight="300" fill="currentColor" letterSpacing="-0.02em">data home</text>
   </svg>
 );
 

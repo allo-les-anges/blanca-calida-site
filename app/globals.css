@@ -1,10 +1,56 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: "Suisse Int'l";
+  src: url("/fonts/SuisseIntl-Regular.woff2") format("woff2"),
+       url("/fonts/SuisseIntl-Regular.woff") format("woff");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Suisse Int'l";
+  src: url("/fonts/SuisseIntl-Regular.woff2") format("woff2"),
+       url("/fonts/SuisseIntl-Regular.woff") format("woff");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Suisse Int'l";
+  src: url("/fonts/SuisseIntl-Bold.woff2") format("woff2"),
+       url("/fonts/SuisseIntl-Bold.woff") format("woff");
+  font-weight: 700 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Suisse Int'l";
+  src: url("/fonts/SuisseIntl-Regular.woff2") format("woff2"),
+       url("/fonts/SuisseIntl-Regular.woff") format("woff");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
 /* 1. Reset des forçages agressifs */
 @layer base {
   :root {
     --background: #ffffff;
     --foreground: #0f172a;
+    --font-suisse: "Suisse Int'l", "Suisse Intl", Arial, sans-serif;
+  }
+
+  html,
+  body,
+  button,
+  input,
+  textarea,
+  select {
+    font-family: var(--font-suisse);
   }
 
   /* On ne force le dark QUE si on n'est pas en pack light */

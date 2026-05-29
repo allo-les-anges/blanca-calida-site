@@ -11,7 +11,7 @@ const DataHomeLogo = ({ className }: { className?: string }) => (
     <text 
       x="10" 
       y="28" 
-      fontFamily="sans-serif" 
+      fontFamily="Suisse Int'l, Suisse Intl, Arial, sans-serif" 
       fontSize="22" 
       fontWeight="300" 
       fill="currentColor" 

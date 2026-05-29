@@ -1,13 +1,8 @@
 import type { Metadata } from "next";
-import { Inter, Playfair_Display, Montserrat } from "next/font/google";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { I18nProvider } from "@/contexts/I18nContext";
 import "./globals.css";  
 import { headers } from "next/headers";
-
-const inter = Inter({ subsets: ["latin"], variable: "--font-sans", display: 'swap' });
-const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-serif", display: 'swap' });
-const montserrat = Montserrat({ subsets: ["latin"], variable: "--font-montserrat", weight: ["100", "200"], display: 'swap' });
 
 export const metadata: Metadata = {
   title: "Data Home | Immobilier de Prestige",
@@ -23,7 +18,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html 
       lang="fr" 
-      className={`${inter.variable} ${playfair.variable} ${montserrat.variable} ${isLight ? 'light' : 'dark'}`} 
+      className={isLight ? 'light' : 'dark'} 
       suppressHydrationWarning
       data-package={isLight ? 'light' : 'gold'}
     >
