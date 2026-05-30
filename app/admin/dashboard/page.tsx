@@ -433,11 +433,18 @@ export default function AdminDashboard() {
         c.latitude && c.longitude
           ? `${Number(c.latitude).toFixed(6)}, ${Number(c.longitude).toFixed(6)}`
           : "Coordonnees non disponibles";
-      const cleanPdfText = (value: string) =>
-        cleanText(value)
-          .replace(/[\u00A0\u202F]/g, " ")
-          .replace(/\s+([,.;:!?])/g, "$1")
-          .trim();
+      const cleanPdfText = (value: string) => {
+        let text = cleanText(value).replace(/[\u00A0\u202F]/g, " ");
+
+        for (let i = 0; i < 4; i += 1) {
+          text = text.replace(
+            /(^|[\s([{"'«])((?:[\p{L}]\s+){3,}[\p{L}])(?=([\s,.;:!?)]|$))/gu,
+            (_match, prefix, spacedWord) => `${prefix}${spacedWord.replace(/\s+/g, "")}`
+          );
+        }
+
+        return text.replace(/\s+([,.;:!?])/g, "$1").replace(/\s+/g, " ").trim();
+      };
       const limitPdfText = (value: string, maxLength: number) => {
         const text = cleanPdfText(value);
         return text.length > maxLength ? `${text.slice(0, maxLength).trim()}...` : text;
@@ -483,7 +490,10 @@ export default function AdminDashboard() {
         const lineHeight = options?.lineHeight || 4;
         const maxLines = options?.maxLines || 999;
         const lines = forceWrapText(value, maxWidth).slice(0, maxLines);
-        doc.text(lines, x, y, { maxWidth });
+        doc.setCharSpace(0);
+        lines.forEach((line, index) => {
+          doc.text(line, x, y + index * lineHeight);
+        });
         return y + lines.length * lineHeight;
       };
 
