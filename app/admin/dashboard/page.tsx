@@ -433,53 +433,58 @@ export default function AdminDashboard() {
         c.latitude && c.longitude
           ? `${Number(c.latitude).toFixed(6)}, ${Number(c.longitude).toFixed(6)}`
           : "Coordonnees non disponibles";
-      const cleanPdfText = (value: string) => {
-        const tokens = cleanText(value).replace(/[\u00A0\u202F]/g, " ").split(/\s+/).filter(Boolean);
-        const rebuilt: string[] = [];
-
-        for (let i = 0; i < tokens.length; i += 1) {
-          if (/^\p{L}$/u.test(tokens[i])) {
-            const letters: string[] = [];
-            while (i < tokens.length && /^\p{L}$/u.test(tokens[i])) {
-              letters.push(tokens[i]);
-              i += 1;
-            }
-            i -= 1;
-            rebuilt.push(letters.length >= 3 ? letters.join("") : letters.join(" "));
-          } else {
-            rebuilt.push(tokens[i]);
-          }
-        }
-
-        return rebuilt.join(" ").replace(/\s+([,.;:!?])/g, "$1").trim();
-      };
+      const cleanPdfText = (value: string) =>
+        cleanText(value)
+          .replace(/[\u00A0\u202F]/g, " ")
+          .replace(/\s+([,.;:!?])/g, "$1")
+          .trim();
       const limitPdfText = (value: string, maxLength: number) => {
         const text = cleanPdfText(value);
         return text.length > maxLength ? `${text.slice(0, maxLength).trim()}...` : text;
       };
       const forceWrapText = (value: string, maxWidth: number) => {
-        const words = cleanPdfText(value).split(/\s+/).filter(Boolean);
+        const hardBreakLongWord = (word: string) => {
+          if (doc.getTextWidth(word) <= maxWidth) return [word];
+          const pieces: string[] = [];
+          let chunk = "";
+
+          for (const char of word) {
+            const candidate = `${chunk}${char}`;
+            if (chunk && doc.getTextWidth(candidate) > maxWidth) {
+              pieces.push(chunk);
+              chunk = char;
+            } else {
+              chunk = candidate;
+            }
+          }
+
+          if (chunk) pieces.push(chunk);
+          return pieces;
+        };
+
+        const words = cleanPdfText(value).split(/\s+/).filter(Boolean).flatMap(hardBreakLongWord);
         const lines: string[] = [];
         let current = "";
 
         for (const word of words) {
-          const pieces = doc.getTextWidth(word) > maxWidth
-            ? word.match(new RegExp(`.{1,${Math.max(4, Math.floor(maxWidth / 2))}}`, "g")) || [word]
-            : [word];
-
-          for (const piece of pieces) {
-            const candidate = current ? `${current} ${piece}` : piece;
-            if (doc.getTextWidth(candidate) <= maxWidth) {
-              current = candidate;
-            } else {
-              if (current) lines.push(current);
-              current = piece;
-            }
+          const candidate = current ? `${current} ${word}` : word;
+          if (doc.getTextWidth(candidate) <= maxWidth) {
+            current = candidate;
+          } else {
+            if (current) lines.push(current);
+            current = word;
           }
         }
 
         if (current) lines.push(current);
         return lines;
+      };
+      const drawWrappedText = (value: string, x: number, y: number, maxWidth: number, options?: { maxLines?: number; lineHeight?: number }) => {
+        const lineHeight = options?.lineHeight || 4;
+        const maxLines = options?.maxLines || 999;
+        const lines = forceWrapText(value, maxWidth).slice(0, maxLines);
+        doc.text(lines, x, y, { maxWidth });
+        return y + lines.length * lineHeight;
       };
 
       const addFooter = () => {
@@ -621,38 +626,51 @@ export default function AdminDashboard() {
           doc.addPage();
           pageNumber += 1;
           addHeader("Annexe photographique");
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(15);
+          doc.setTextColor(...brandDark);
+          doc.text(t('adminDashboard.photoAnnex'), margin, 38);
         }
 
-        const yPos = 36;
+        const yPos = 50;
+        const cardWidth = pageWidth - margin * 2;
+        const cardHeight = pageHeight - yPos - 26;
+        const innerX = margin + 7;
+        const innerWidth = cardWidth - 14;
         doc.setDrawColor(...brandGold);
         doc.setFillColor(250, 250, 250);
-        doc.roundedRect(margin, yPos, pageWidth - margin * 2, 226, 2, 2, "FD");
+        doc.roundedRect(margin, yPos, cardWidth, cardHeight, 2, 2, "FD");
         doc.setFont("helvetica", "bold");
         doc.setFontSize(12);
         doc.setTextColor(...brandDark);
-        doc.text(`PV-${String(i + 1).padStart(2, "0")}`, margin + 6, yPos + 8);
+        doc.text(`PV-${String(i + 1).padStart(2, "0")}`, innerX, yPos + 10);
         doc.setFont("helvetica", "normal");
         doc.setFontSize(8);
         doc.setTextColor(80, 80, 80);
-        doc.text(`Capture : ${new Date(c.created_at).toLocaleString()}`, margin + 6, yPos + 14);
-        doc.text(`GPS : ${gpsText(c)}`, margin + 6, yPos + 19);
-        doc.text(`Operateur : ${c.captured_by || expertNom}`, margin + 6, yPos + 24);
+        doc.text(`Capture : ${new Date(c.created_at).toLocaleString()}`, innerX, yPos + 17);
+        doc.text(`GPS : ${gpsText(c)}`, innerX, yPos + 23);
+        doc.text(`Operateur : ${c.captured_by || expertNom}`, innerX, yPos + 29);
 
         try {
-          doc.addImage(c.url_image, "JPEG", margin + 12, yPos + 34, pageWidth - margin * 2 - 24, 96);
+          doc.addImage(c.url_image, "JPEG", innerX, yPos + 40, innerWidth, 82);
         } catch (e) {
           doc.setFont("helvetica", "italic");
-          doc.text(t('adminDashboard.imageNotAvailable'), margin + 12, yPos + 70);
+          doc.text(t('adminDashboard.imageNotAvailable'), innerX, yPos + 78);
         }
 
         doc.setFont("helvetica", "bold");
         doc.setFontSize(10);
         doc.setTextColor(...brandDark);
-        doc.text("Observation technique", margin + 6, yPos + 146);
+        doc.text("Observation technique", innerX, yPos + 136);
         doc.setFont("helvetica", "normal");
-        doc.setFontSize(8.2);
-        const noteLines = forceWrapText(limitPdfText(c.note_expert || t('adminDashboard.defaultObservation'), 1100), pageWidth - margin * 2 - 18);
-        doc.text(noteLines.slice(0, 22), margin + 6, yPos + 156);
+        doc.setFontSize(7.6);
+        drawWrappedText(
+          limitPdfText(c.note_expert || t('adminDashboard.defaultObservation'), 1300),
+          innerX,
+          yPos + 146,
+          innerWidth,
+          { maxLines: 24, lineHeight: 3.7 }
+        );
       }
 
       addFooter();
