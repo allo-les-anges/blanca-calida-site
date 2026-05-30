@@ -434,7 +434,15 @@ export default function AdminDashboard() {
           ? `${Number(c.latitude).toFixed(6)}, ${Number(c.longitude).toFixed(6)}`
           : "Coordonnees non disponibles";
       const cleanPdfText = (value: string) => {
-        let text = cleanText(value).replace(/[\u00A0\u202F]/g, " ");
+        let text = String(value || "")
+          .replace(/[\u00A0\u202F]/g, " ")
+          .replace(/\r?\n/g, " ");
+
+        for (let i = 0; i < 5; i += 1) {
+          text = text.replace(/((?:\p{L}[ \t]){2,}\p{L})/gu, (spacedWord) => spacedWord.replace(/[ \t]/g, ""));
+        }
+
+        text = cleanText(text);
 
         for (let i = 0; i < 4; i += 1) {
           text = text.replace(
@@ -489,7 +497,8 @@ export default function AdminDashboard() {
       const drawWrappedText = (value: string, x: number, y: number, maxWidth: number, options?: { maxLines?: number; lineHeight?: number }) => {
         const lineHeight = options?.lineHeight || 4;
         const maxLines = options?.maxLines || 999;
-        const lines = forceWrapText(value, maxWidth).slice(0, maxLines);
+        const safeWidth = Math.max(20, maxWidth - 18);
+        const lines = forceWrapText(value, safeWidth).slice(0, maxLines);
         doc.setCharSpace(0);
         lines.forEach((line, index) => {
           doc.text(line, x, y + index * lineHeight);
