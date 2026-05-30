@@ -132,6 +132,26 @@ function HomeContent() {
     type: "", town: "", region: "", beds: "",
     minPrice: DEFAULT_MIN_PRICE, maxPrice: "", reference: "", development: "", availableOnly: false,
   });
+  const filterQueryString = searchParamsOrigin.toString();
+
+  useEffect(() => {
+    const region = searchParamsOrigin.get("region") || "";
+    const town = searchParamsOrigin.get("town") || "";
+    if (!region && !town) return;
+
+    setFilters({
+      type: "",
+      town,
+      region,
+      beds: "",
+      minPrice: DEFAULT_MIN_PRICE,
+      maxPrice: "",
+      reference: "",
+      development: "",
+      availableOnly: false,
+    });
+    setVisibleCount(12);
+  }, [filterQueryString, searchParamsOrigin]);
 
   // CORRECTION : Sécurisation du filter
   const filteredProperties = useMemo(() => {
@@ -140,7 +160,7 @@ function HomeContent() {
     return baseProps.filter((p) => {
       if (!p) return false;
       const matchDev = !filters.development || p.development_name?.toLowerCase().trim() === filters.development.toLowerCase().trim();
-      const matchTown = !filters.town || p.town === filters.town;
+      const matchTown = !filters.town || normalizeLocation(p.town || p.ville) === normalizeLocation(filters.town);
       const matchRegion = !filters.region || getPropertyRegion(p) === filters.region;
       const matchType = !filters.type || p.type?.toLowerCase().includes(filters.type.toLowerCase());
       const matchBeds = !filters.beds || Number(p.beds) >= Number(filters.beds);

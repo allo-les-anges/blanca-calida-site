@@ -3,6 +3,7 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import {
   ArrowRight,
   Building2,
@@ -21,6 +22,50 @@ import { useTranslation } from "@/contexts/I18nContext";
 
 const regionImages = ["/images/regions/2.jpg", "/images/regions/1.jpg", "/images/regions/3.jpg", "/images/regions/4.jpg"];
 const metricIcons = [Sun, Plane, HeartHandshake, Building2, ShieldCheck];
+
+const regionExplorer = [
+  {
+    name: "Costa Blanca",
+    image: "/images/regions/1.jpg",
+    description: "Une cote elegante entre Alicante, Marina Alta et Marina Baixa.",
+    subregions: [
+      {
+        name: "Costa Blanca Nord",
+        description: "Villages premium, criques, ports de plaisance et vues mer.",
+        towns: ["Moraira", "Javea", "Calpe", "Altea", "Denia"],
+      },
+      {
+        name: "Costa Blanca Sud",
+        description: "Stations balneaires, golf, plages longues et acces rapide a Alicante.",
+        towns: ["Alicante", "Torrevieja", "Orihuela Costa", "Guardamar", "Santa Pola"],
+      },
+    ],
+  },
+  {
+    name: "Costa Calida",
+    image: "/images/regions/3.jpg",
+    description: "Murcie, Mar Menor et resorts de golf avec fort potentiel.",
+    subregions: [
+      {
+        name: "Murcia Coast",
+        description: "Plages, marinas et golf autour de Cartagena et Mar Menor.",
+        towns: ["Cartagena", "Los Alcazares", "San Javier", "La Manga", "Aguilas"],
+      },
+    ],
+  },
+  {
+    name: "Costa del Sol",
+    image: "/images/regions/2.jpg",
+    description: "Marbella, Estepona et Sotogrande : le coeur lifestyle du sud.",
+    subregions: [
+      {
+        name: "Golden Triangle",
+        description: "Adresses prime, golf, beach clubs et forte demande internationale.",
+        towns: ["Marbella", "Estepona", "Benahavis", "Mijas", "Sotogrande"],
+      },
+    ],
+  },
+];
 
 const copy = {
   fr: {
@@ -244,11 +289,20 @@ const copy = {
 export default function GuidesContent() {
   const { locale, dir } = useTranslation();
   const c = { ...copy.en, ...(copy[locale as keyof typeof copy] || {}) };
+  const [activeRegionName, setActiveRegionName] = useState(regionExplorer[0].name);
+  const activeRegion = regionExplorer.find((region) => region.name === activeRegionName) || regionExplorer[0];
+  const [activeSubregionName, setActiveSubregionName] = useState(activeRegion.subregions[0].name);
+  const activeSubregion = activeRegion.subregions.find((subregion) => subregion.name === activeSubregionName) || activeRegion.subregions[0];
   const regions = c.regions || copy.en.regions;
   const metrics = c.metrics || copy.en.metrics;
   const marketStats = c.marketStats || copy.en.marketStats;
   const buyingItems = c.buyingItems || copy.en.buyingItems;
   const faq = c.faq || copy.en.faq;
+  const chooseRegion = (name: string) => {
+    const nextRegion = regionExplorer.find((region) => region.name === name) || regionExplorer[0];
+    setActiveRegionName(nextRegion.name);
+    setActiveSubregionName(nextRegion.subregions[0].name);
+  };
 
   return (
     <main dir={dir} className="guide-shell min-h-screen bg-[#FAFAFA] text-[#171716]">
@@ -316,6 +370,74 @@ export default function GuidesContent() {
 
           <section id="regions-overview" className="guide-soft border-y border-[#D8C9B6] bg-[#F2EFEA] px-6 py-16 md:px-12 lg:px-20">
             <div className="mb-10 max-w-3xl"><p className="mb-4 text-[10px] font-black uppercase tracking-[0.35em] text-[#D8C9B6]">{c.regionsBadge}</p><h2 className="text-4xl font-serif uppercase leading-tight">{c.regionsTitle}</h2><p className="mt-5 leading-8">{c.regionsText}</p></div>
+            <div className="guide-surface mb-12 grid grid-cols-1 border border-[#D8C9B6] bg-[#FAFAFA] lg:grid-cols-[1fr_1fr_1.35fr]">
+              <div className="border-b border-[#D8C9B6] p-6 lg:border-b-0 lg:border-r">
+                <p className="mb-4 text-[9px] font-black uppercase tracking-[0.3em] text-[#D8C9B6]">01. Choisir la cote</p>
+                <div className="space-y-3">
+                  {regionExplorer.map((region) => (
+                    <button
+                      key={region.name}
+                      type="button"
+                      onClick={() => chooseRegion(region.name)}
+                      className={`flex w-full items-center justify-between border px-4 py-4 text-left transition-colors ${
+                        activeRegion.name === region.name
+                          ? "border-[#171716] bg-[#171716] text-[#FAFAFA]"
+                          : "border-[#D8C9B6] bg-[#FAFAFA] text-[#171716] hover:bg-[#F2EFEA]"
+                      }`}
+                    >
+                      <span>
+                        <span className="block text-[11px] font-black uppercase tracking-[0.18em]">{region.name}</span>
+                        <span className={`mt-2 block text-xs leading-5 ${activeRegion.name === region.name ? "text-[#F2EFEA]" : "text-[#171716]"}`}>{region.description}</span>
+                      </span>
+                      <ArrowRight size={16} />
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="border-b border-[#D8C9B6] p-6 lg:border-b-0 lg:border-r">
+                <p className="mb-4 text-[9px] font-black uppercase tracking-[0.3em] text-[#D8C9B6]">02. Choisir la zone</p>
+                <div className="space-y-3">
+                  {activeRegion.subregions.map((subregion) => (
+                    <button
+                      key={subregion.name}
+                      type="button"
+                      onClick={() => setActiveSubregionName(subregion.name)}
+                      className={`w-full border px-4 py-4 text-left transition-colors ${
+                        activeSubregion.name === subregion.name
+                          ? "border-[#171716] bg-[#171716] text-[#FAFAFA]"
+                          : "border-[#D8C9B6] bg-[#FAFAFA] text-[#171716] hover:bg-[#F2EFEA]"
+                      }`}
+                    >
+                      <span className="block text-[11px] font-black uppercase tracking-[0.18em]">{subregion.name}</span>
+                      <span className={`mt-2 block text-xs leading-5 ${activeSubregion.name === subregion.name ? "text-[#F2EFEA]" : "text-[#171716]"}`}>{subregion.description}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="p-6">
+                <div className="mb-5 overflow-hidden">
+                  <img src={activeRegion.image} alt={activeRegion.name} className="h-44 w-full object-cover" />
+                </div>
+                <p className="mb-4 text-[9px] font-black uppercase tracking-[0.3em] text-[#D8C9B6]">03. Explorer les villes</p>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  {activeSubregion.towns.map((town) => (
+                    <Link
+                      key={town}
+                      href={`/?region=${encodeURIComponent(activeRegion.name)}&town=${encodeURIComponent(town)}#collection`}
+                      className="group flex items-center justify-between border border-[#D8C9B6] bg-[#FAFAFA] px-4 py-4 text-[#171716] transition-colors hover:bg-[#171716] hover:text-[#FAFAFA]"
+                    >
+                      <span>
+                        <span className="block text-sm font-serif uppercase">{town}</span>
+                        <span className="mt-1 block text-[9px] font-black uppercase tracking-[0.18em] text-[#D8C9B6]">Voir les biens</span>
+                      </span>
+                      <ArrowRight size={15} className="transition-transform group-hover:translate-x-1" />
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </div>
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
               {regions.map(([name, description, highlights], index) => (
                 <article key={name} className="guide-surface group bg-[#FAFAFA]">
