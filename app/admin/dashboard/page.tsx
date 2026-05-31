@@ -442,6 +442,10 @@ export default function AdminDashboard() {
           .trim();
 
         const spacedWords = [
+          "a", "au", "aux", "ce", "ces", "de", "des", "du", "et", "le", "la",
+          "les", "en", "un", "une", "ou", "par", "sur", "sous", "avec",
+          "completee", "contrairement", "systeme", "constructif", "mixte", "observe",
+          "structure", "porteuse", "arme", "dalles",
           "remplissage", "briques", "terre", "cuite", "alveolees", "infrastructure",
           "premier", "plan", "montre", "murs", "soutenement", "soubassement",
           "parpaings", "beton", "gris", "delimitant", "semble", "futur", "espace",
@@ -455,6 +459,35 @@ export default function AdminDashboard() {
           "methodes", "travail", "artisanales", "locales", "rapport", "standards",
           "europeens", "securite"
         ];
+        const stripAccents = (text: string) =>
+          text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+        const wordSet = new Set(spacedWords.map(stripAccents));
+        const orderedWords = [...wordSet].sort((a, b) => b.length - a.length);
+        const rebuildSpacedLetters = (chunk: string) => {
+          const compact = chunk.replace(/\s+/g, "");
+          const normalized = stripAccents(compact);
+          const best: string[][] = Array.from({ length: normalized.length + 1 }, () => []);
+          const reachable = Array.from({ length: normalized.length + 1 }, () => false);
+          reachable[0] = true;
+
+          for (let index = 0; index < normalized.length; index += 1) {
+            if (!reachable[index]) continue;
+
+            for (const word of orderedWords) {
+              if (!normalized.startsWith(word, index)) continue;
+              const next = index + word.length;
+              const candidate = [...best[index], word];
+              if (!reachable[next] || candidate.length < best[next].length) {
+                reachable[next] = true;
+                best[next] = candidate;
+              }
+            }
+          }
+
+          return reachable[normalized.length] ? best[normalized.length].join(" ") : chunk;
+        };
+
+        normalizedText = normalizedText.replace(/(?:\p{L}\s+){2,}\p{L}/gu, rebuildSpacedLetters);
 
         for (const word of spacedWords) {
           const accentClass = (char: string) => {
