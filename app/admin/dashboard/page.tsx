@@ -434,6 +434,14 @@ export default function AdminDashboard() {
           ? `${Number(c.latitude).toFixed(6)}, ${Number(c.longitude).toFixed(6)}`
           : "Coordonnees non disponibles";
       const cleanPdfText = (value: string) => {
+        const normalizedText = String(value || "")
+          .replace(/[\u00A0\u202F]/g, " ")
+          .replace(/\r?\n/g, " ")
+          .replace(/\s+([,.;:!?])/g, "$1")
+          .replace(/\s+/g, " ")
+          .trim();
+        return normalizedText;
+
         let text = String(value || "")
           .replace(/[\u00A0\u202F]/g, " ")
           .replace(/\r?\n/g, " ");
