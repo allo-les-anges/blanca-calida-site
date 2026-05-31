@@ -434,12 +434,50 @@ export default function AdminDashboard() {
           ? `${Number(c.latitude).toFixed(6)}, ${Number(c.longitude).toFixed(6)}`
           : "Coordonnees non disponibles";
       const cleanPdfText = (value: string) => {
-        const normalizedText = String(value || "")
+        let normalizedText = String(value || "")
           .replace(/[\u00A0\u202F]/g, " ")
           .replace(/\r?\n/g, " ")
           .replace(/\s+([,.;:!?])/g, "$1")
           .replace(/\s+/g, " ")
           .trim();
+
+        const spacedWords = [
+          "remplissage", "briques", "terre", "cuite", "alveolees", "infrastructure",
+          "premier", "plan", "montre", "murs", "soutenement", "soubassement",
+          "parpaings", "beton", "gris", "delimitant", "semble", "futur", "espace",
+          "technique", "piscine", "garage", "elements", "remarquables", "presence",
+          "porte-a-faux", "significatifs", "stabilises", "poteaux", "circulaires",
+          "carres", "utilisation", "chainage", "horizontal", "tete", "chantier",
+          "ciel", "ouvert", "absence", "toiture", "contrairement", "premiere",
+          "photo", "mise", "hors", "avancee", "couverture", "acier", "panneaux",
+          "sandwichs", "charpente", "legere", "offrant", "protection", "immediate",
+          "interieurs", "echafaudages", "fortune", "visibles", "suggerant",
+          "methodes", "travail", "artisanales", "locales", "rapport", "standards",
+          "europeens", "securite"
+        ];
+
+        for (const word of spacedWords) {
+          const accentClass = (char: string) => {
+            const classes: Record<string, string> = {
+              a: "[aàáâäãå]",
+              c: "[cç]",
+              e: "[eéèêë]",
+              i: "[iíìîï]",
+              o: "[oóòôöõ]",
+              u: "[uúùûü]",
+              y: "[yÿ]",
+            };
+            return classes[char] || char.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+          };
+          const spacedPattern = word
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .split("")
+            .map(accentClass)
+            .join("\\s+");
+          normalizedText = normalizedText.replace(new RegExp(spacedPattern, "gi"), word);
+        }
+
         return normalizedText;
 
         let text = String(value || "")
@@ -505,13 +543,39 @@ export default function AdminDashboard() {
       const drawWrappedText = (value: string, x: number, y: number, maxWidth: number, options?: { maxLines?: number; lineHeight?: number }) => {
         const lineHeight = options?.lineHeight || 4;
         const maxLines = options?.maxLines || 999;
-        const safeWidth = Math.max(20, maxWidth - 18);
-        const lines = forceWrapText(value, safeWidth).slice(0, maxLines);
+        const maxChars = 92;
+        const words = cleanPdfText(value).split(/\s+/).filter(Boolean);
+        const lines: string[] = [];
+        let current = "";
+
+        for (const word of words) {
+          if (word.length > maxChars) {
+            if (current) {
+              lines.push(current);
+              current = "";
+            }
+            for (let i = 0; i < word.length; i += maxChars) {
+              lines.push(word.slice(i, i + maxChars));
+            }
+            continue;
+          }
+
+          const candidate = current ? `${current} ${word}` : word;
+          if (candidate.length <= maxChars) {
+            current = candidate;
+          } else {
+            if (current) lines.push(current);
+            current = word;
+          }
+        }
+
+        if (current) lines.push(current);
         doc.setCharSpace(0);
-        lines.forEach((line, index) => {
+        const visibleLines = lines.slice(0, maxLines);
+        visibleLines.forEach((line, index) => {
           doc.text(line, x, y + index * lineHeight);
         });
-        return y + lines.length * lineHeight;
+        return y + visibleLines.length * lineHeight;
       };
 
       const addFooter = () => {
