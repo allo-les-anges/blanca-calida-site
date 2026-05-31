@@ -442,10 +442,12 @@ export default function AdminDashboard() {
           .trim();
 
         const spacedWords = [
-          "a", "au", "aux", "ce", "ces", "de", "des", "du", "et", "le", "la",
-          "les", "en", "un", "une", "ou", "par", "sur", "sous", "avec",
+          "a", "au", "aux", "ce", "ces", "de", "des", "du", "et", "est", "le", "la",
+          "les", "en", "un", "une", "ou", "par", "sur", "sous", "avec", "bien",
+          "plus", "ici", "on", "ne", "pas", "se", "qui",
           "completee", "contrairement", "systeme", "constructif", "mixte", "observe",
-          "structure", "porteuse", "arme", "dalles",
+          "structure", "porteuse", "arme", "dalles", "rouges", "regularite",
+          "trames", "indique", "construction", "industrialisee", "integral",
           "remplissage", "briques", "terre", "cuite", "alveolees", "infrastructure",
           "premier", "plan", "montre", "murs", "soutenement", "soubassement",
           "parpaings", "beton", "gris", "delimitant", "semble", "futur", "espace",
@@ -453,11 +455,13 @@ export default function AdminDashboard() {
           "porte-a-faux", "significatifs", "stabilises", "poteaux", "circulaires",
           "carres", "utilisation", "chainage", "horizontal", "tete", "chantier",
           "ciel", "ouvert", "absence", "toiture", "contrairement", "premiere",
-          "photo", "mise", "hors", "avancee", "couverture", "acier", "panneaux",
+          "photo", "mise", "hors", "avancee", "couverture", "bac", "acier", "panneaux",
           "sandwichs", "charpente", "legere", "offrant", "protection", "immediate",
-          "interieurs", "echafaudages", "fortune", "visibles", "suggerant",
+          "interieurs", "gestion", "sol", "jonche", "remblais", "sable", "gravats",
+          "echafaudages", "fortune", "bois", "visibles", "suggerant",
           "methodes", "travail", "artisanales", "locales", "rapport", "standards",
-          "europeens", "securite"
+          "europeens", "securite", "clients", "qualite", "avancement", "travaux",
+          "chantier", "constat", "inspection"
         ];
         const stripAccents = (text: string) =>
           text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
@@ -484,7 +488,9 @@ export default function AdminDashboard() {
             }
           }
 
-          return reachable[normalized.length] ? best[normalized.length].join(" ") : chunk;
+          if (reachable[normalized.length]) return best[normalized.length].join(" ");
+          const fallbackCompact = chunk.replace(/\s+/g, "");
+          return fallbackCompact.length <= 14 ? fallbackCompact : fallbackCompact.replace(/(.{1,14})/g, "$1 ").trim();
         };
 
         normalizedText = normalizedText.replace(/(?:\p{L}\s+){2,}\p{L}/gu, rebuildSpacedLetters);
