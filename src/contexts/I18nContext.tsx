@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-type Language = 'fr' | 'en' | 'nl' | 'es' | 'pl' | 'ar';
+type Language = 'fr' | 'en' | 'nl' | 'es' | 'pl' | 'ar' | 'ka';
 
 interface I18nContextType {
   locale: Language;
@@ -30,11 +30,11 @@ export const I18nProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     const saved = localStorage.getItem('locale') as Language;
-    if (saved && ['fr', 'en', 'nl', 'es', 'pl', 'ar'].includes(saved)) {
+    if (saved && ['fr', 'en', 'nl', 'es', 'pl', 'ar', 'ka'].includes(saved)) {
       setLocale(saved);
     } else {
       const browserLang = navigator.language.split('-')[0];
-      if (browserLang === 'en' || browserLang === 'nl' || browserLang === 'es' || browserLang === 'pl' || browserLang === 'ar') {
+      if (browserLang === 'en' || browserLang === 'nl' || browserLang === 'es' || browserLang === 'pl' || browserLang === 'ar' || browserLang === 'ka') {
         setLocale(browserLang as Language);
       } else {
         setLocale('fr');

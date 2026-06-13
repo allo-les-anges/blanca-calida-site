@@ -10,7 +10,8 @@ const languages = [
   { code: 'nl', label: 'NL' },
   { code: 'es', label: 'ES' },
   { code: 'ar', label: 'AR' },
-  { code: 'pl', label: 'PL' }
+  { code: 'pl', label: 'PL' },
+  { code: 'ka', label: 'KA' }
 ];
 
 export default function LanguageSelector() {

@@ -84,6 +84,9 @@ export default function Navbar() {
     { code: "en", label: "EN" },
     { code: "es", label: "ES" },
     { code: "nl", label: "NL" },
+    { code: "ar", label: "AR" },
+    { code: "pl", label: "PL" },
+    { code: "ka", label: "KA" },
   ] as const;
 
   const handleAuthSubmit = async (e: React.FormEvent) => {
