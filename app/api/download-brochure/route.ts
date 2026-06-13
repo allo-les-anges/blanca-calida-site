@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 
 const ALLOWED_HOST = 'medianewbuild.com';
 const ALLOWED_PATH_PREFIX = '/file/hh-media-bucket/';
+const ALLOWED_EXTENSIONS = ['.pdf', '.jpg', '.jpeg', '.png', '.webp'];
 
 export async function GET(request: Request) {
   try {
@@ -17,7 +18,7 @@ export async function GET(request: Request) {
       brochureUrl.protocol === 'https:' &&
       brochureUrl.hostname === ALLOWED_HOST &&
       brochureUrl.pathname.startsWith(ALLOWED_PATH_PREFIX) &&
-      brochureUrl.pathname.toLowerCase().endsWith('.pdf');
+      ALLOWED_EXTENSIONS.some((extension) => brochureUrl.pathname.toLowerCase().endsWith(extension));
 
     if (!isAllowed) {
       return NextResponse.json({ error: 'Invalid brochure URL' }, { status: 400 });

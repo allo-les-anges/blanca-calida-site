@@ -98,7 +98,7 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
           if (typeof item?.plan?.url === "string") return item.plan.url;
           return null;
         })
-        .filter((url: any): url is string => typeof url === "string" && url.toLowerCase().endsWith(".pdf"))
+        .filter((url: any): url is string => typeof url === "string" && /^https?:\/\//i.test(url))
     : [];
   const brochureUrl = planUrls[0];
   const numericPrice = Number(property.price || property.prix || 0);
