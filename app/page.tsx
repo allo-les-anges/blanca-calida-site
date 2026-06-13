@@ -102,7 +102,7 @@ function HomeContent() {
       try {
         setLoading(true);
         const [propertiesRes, regionCountsRes] = await Promise.all([
-          fetch(`/api/properties?limit=96&lang=${locale}`),
+          fetch(`/api/properties?limit=200&lang=${locale}`),
           fetch('/api/properties?regionCounts=true'),
         ]);
         const data = await propertiesRes.json();
@@ -179,7 +179,7 @@ function HomeContent() {
   const propertiesToShow = hasActiveFilters ? filteredProperties : filteredProperties.slice(0, visibleCount);
 
   const handleSearch = (newFilters: any) => {
-    setFilters({ ...filters, ...newFilters, region: "" });
+    setFilters({ ...filters, ...newFilters });
     setVisibleCount(12);
     setIsSearchOpen(false);
     const section = document.getElementById("collection");

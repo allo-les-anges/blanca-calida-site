@@ -52,7 +52,7 @@ export default function AdvancedSearch({
       type: localFilters.type || "",
       beds: localFilters.beds || "",
       minPrice: localFilters.minPrice || "",
-      maxPrice: localFilters.maxPrice || "75000000"
+      maxPrice: localFilters.maxPrice || ""
     };
     onSearch(cleanedFilters);
     if (onClose) onClose();
@@ -61,7 +61,7 @@ export default function AdvancedSearch({
   const reset = () => {
     const empty = { 
       region: "", town: "", type: "", beds: "", 
-      minPrice: DEFAULT_MIN_PRICE, maxPrice: "75000000", reference: "" 
+      minPrice: DEFAULT_MIN_PRICE, maxPrice: "", reference: ""
     };
     setLocalFilters(empty);
     onSearch(empty);
