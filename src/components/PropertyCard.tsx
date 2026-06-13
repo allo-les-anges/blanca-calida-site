@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Bed, Bath, Waves, Car, Maximize, Map, ChevronRight, Heart } from 'lucide-react';
+import { Bed, Bath, Waves, Car, Maximize, Map, ChevronRight, Heart, FileText } from 'lucide-react';
 import Link from 'next/link';
 import { useTheme } from "next-themes";
 import { useTranslation } from "@/contexts/I18nContext";
@@ -27,6 +27,13 @@ export default function PropertyCard({ property, isLight = false }: { property: 
   };
 
   const detailUrl = `/property/${property.id_externe || property.id}${isLight ? '?pack=light' : ''}`;
+  const hasDownloadableDocuments = Array.isArray(property.plans)
+    ? property.plans.some((item: any) => {
+        if (typeof item === "string") return item.trim().length > 0;
+        if (item && typeof item === "object") return typeof item.url === "string" && item.url.trim().length > 0;
+        return false;
+      })
+    : false;
 
   const getTranslatedPropertyType = (raw?: string) => {
     const type = String(raw || "").toLowerCase();
@@ -69,6 +76,16 @@ export default function PropertyCard({ property, isLight = false }: { property: 
         
         {/* Overlay dégradé plus prononcé pour la lisibilité */}
         <div className={`absolute inset-0 bg-gradient-to-t ${showDark ? 'from-black/80' : 'from-black/55'} via-transparent to-transparent opacity-90`} />
+
+        {hasDownloadableDocuments && (
+          <div
+            className="absolute top-5 right-5 z-10 flex h-11 w-11 items-center justify-center border border-white/25 bg-black/55 text-white backdrop-blur-md shadow-xl"
+            title="Document téléchargeable"
+            aria-label="Document téléchargeable"
+          >
+            <FileText size={18} strokeWidth={1.8} />
+          </div>
+        )}
 
         {/* BADGES GAUCHE */}
         <div className="absolute bottom-6 left-6 flex flex-wrap gap-2 max-w-[70%] z-10">
