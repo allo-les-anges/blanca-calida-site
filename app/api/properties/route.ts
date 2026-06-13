@@ -53,6 +53,29 @@ function getPropertyRegion(property: any) {
   return CITY_TO_REGION_MAP[city] || PROVINCE_TO_REGION_MAP[province] || "";
 }
 
+function getGeorgianPropertyType(raw?: string | null) {
+  const type = normalizeLocation(raw);
+  if (type.includes("apartment") || type.includes("apart")) return "ბინა";
+  if (type.includes("penthouse")) return "პენტჰაუსი";
+  if (type.includes("townhouse")) return "თაუნჰაუსი";
+  if (type.includes("bungalow")) return "ბუნგალო";
+  if (type.includes("villa")) return "ვილა";
+  return "უძრავი ქონება";
+}
+
+function getLocalizedTitle(property: any, selectedLang: string) {
+  const localizedTitle = property[`titre_${selectedLang}`];
+  if (localizedTitle) return localizedTitle;
+
+  if (selectedLang === "ka") {
+    const town = property.town || property.ville;
+    const type = getGeorgianPropertyType(property.type);
+    return town ? `${type} ${town}-ში` : type;
+  }
+
+  return property.titre_fr;
+}
+
 async function getRegionCounts() {
   const counts: Record<string, number> = {
     "Costa Blanca": 0,
@@ -150,7 +173,7 @@ export async function GET(request: Request) {
     // 5. Transformation pour renvoyer les champs dans la bonne langue
     const formatted = properties.map((p: any) => ({
       ...p,
-      titre: p[`titre_${selectedLang}`] || p.titre_fr,
+      titre: getLocalizedTitle(p, selectedLang),
       description: p[`description_${selectedLang}`] || p.description_fr,
       
       // Nettoyage des champs linguistiques bruts pour alléger le JSON

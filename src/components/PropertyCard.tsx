@@ -8,7 +8,7 @@ import { useTranslation } from "@/contexts/I18nContext";
 
 export default function PropertyCard({ property, isLight = false }: { property: any, isLight?: boolean }) {
   const { resolvedTheme } = useTheme();
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const [mounted, setMounted] = useState(false);
   const priceFormatted = new Intl.NumberFormat('de-DE').format(property.price || property.prix || 0);
 
@@ -27,6 +27,21 @@ export default function PropertyCard({ property, isLight = false }: { property: 
   };
 
   const detailUrl = `/property/${property.id_externe || property.id}${isLight ? '?pack=light' : ''}`;
+
+  const getTranslatedPropertyType = (raw?: string) => {
+    const type = String(raw || "").toLowerCase();
+    const propertyTypes = t("propertyTypes");
+    if (propertyTypes && typeof propertyTypes === "object") {
+      if (type.includes("apartment") || type.includes("apart")) return propertyTypes.apartment || raw;
+      if (type.includes("penthouse")) return propertyTypes.penthouse || raw;
+      if (type.includes("bungalow")) return propertyTypes.bungalow || raw;
+      if (type.includes("townhouse")) return propertyTypes.townhouse || raw;
+      if (type.includes("villa")) return propertyTypes.villa || raw;
+    }
+    return raw || t('propertyCard.exclusivity');
+  };
+
+  const displayTitle = property.titre || (locale === "ka" ? getTranslatedPropertyType(property.type) : property.type) || t('propertyCard.fallbackTitle');
 
   if (!mounted) return null;
 
@@ -62,7 +77,7 @@ export default function PropertyCard({ property, isLight = false }: { property: 
           </span>
           
           <span className="bg-black/60 backdrop-blur-md text-white border border-white/30 text-[8px] font-bold px-4 py-2 rounded-none uppercase tracking-[0.2em]">
-            {property.type ? property.type : t('propertyCard.exclusivity')}
+            {getTranslatedPropertyType(property.type)}
           </span>
         </div>
 
@@ -84,7 +99,7 @@ export default function PropertyCard({ property, isLight = false }: { property: 
             className="font-serif text-2xl italic leading-tight flex-grow line-clamp-1 transition-colors"
             style={{ color: showDark ? '#FAFAFA' : '#171716' }}
           >
-            {property.titre || property.type || t('propertyCard.fallbackTitle')}
+            {displayTitle}
           </h3>
           
           <span className={`text-xl font-bold ${useLightChrome ? 'text-black' : 'text-[#D8C9B6]'} whitespace-nowrap pt-1`}>
