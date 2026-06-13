@@ -56,7 +56,6 @@ export default function AdminDashboard() {
   const [minPropertyPrice, setMinPropertyPrice] = useState(20000);
   const [excludedPromoters, setExcludedPromoters] = useState<string[]>([]);
   const [availablePromoters, setAvailablePromoters] = useState<string[]>([]);
-  const [agencySettingsId, setAgencySettingsId] = useState<string | null>(null);
   const [filterConfig, setFilterConfig] = useState<Record<string, any>>({});
   const [savingFilters, setSavingFilters] = useState(false);
 
@@ -153,7 +152,6 @@ export default function AdminDashboard() {
 
       if (settings) {
         const currentFilterConfig = settings.filter_config || {};
-        setAgencySettingsId(settings.id);
         setFilterConfig(currentFilterConfig);
         setMinCommission(Number(currentFilterConfig.minCommission || 0));
         setExcludedPromoters(Array.isArray(currentFilterConfig.excludedPromoters) ? currentFilterConfig.excludedPromoters : []);
@@ -215,29 +213,34 @@ export default function AdminDashboard() {
   // --- ACTIONS DE GESTION ---
 
   const handleSaveFilters = async () => {
-    if (!agencySettingsId) {
-      alert(t('adminDashboard.filters.saveError'));
-      return;
-    }
-
     setSavingFilters(true);
-    const nextFilterConfig = {
-      ...filterConfig,
-      minCommission,
-      excludedPromoters,
-      minPropertyPrice: Math.max(0, Number(minPropertyPrice) || 0),
-    };
+    const { data: { session } } = await supabase.auth.getSession();
 
-    const { error } = await supabase
-      .from('agency_settings')
-      .update({ filter_config: nextFilterConfig })
-      .eq('id', agencySettingsId);
+    try {
+      const response = await fetch('/api/admin/save-filters', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session?.access_token || ""}`,
+        },
+        body: JSON.stringify({
+          minCommission,
+          excludedPromoters,
+          minPropertyPrice,
+        }),
+      });
+      const result = await response.json();
 
-    if (error) {
+      if (!response.ok) {
+        console.error("Erreur sauvegarde filtres:", result?.error);
+        alert(t('adminDashboard.filters.saveError'));
+      } else {
+        setFilterConfig(result.filterConfig || filterConfig);
+        alert(t('adminDashboard.filters.saveSuccess'));
+      }
+    } catch (error) {
+      console.error("Erreur sauvegarde filtres:", error);
       alert(t('adminDashboard.filters.saveError'));
-    } else {
-      setFilterConfig(nextFilterConfig);
-      alert(t('adminDashboard.filters.saveSuccess'));
     }
 
     setSavingFilters(false);
