@@ -358,7 +358,12 @@
     "filters": {
       "tabLabel": "Filtry Sprzedaży (XML)",
       "minCommission": "Minimalna Prowizja",
+      "minPropertyPrice": "Minimalna wyświetlana cena",
+      "minPropertyPriceHelp": "Nieruchomości poniżej tej kwoty nie będą widoczne w publicznym portfolio.",
       "excludePromoters": "Wyklucz Deweloperów",
+      "saveFilters": "Zapisz filtry",
+      "saveSuccess": "Filtry zapisane.",
+      "saveError": "Nie można zapisać filtrów.",
       "description": "* Parametry te filtrują w czasie rzeczywistym nieruchomości importowane za pośrednictwem kanału XML na stronie publicznej."
     },
     "clientInfo": {

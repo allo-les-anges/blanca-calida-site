@@ -76,7 +76,15 @@ function getLocalizedTitle(property: any, selectedLang: string) {
   return property.titre_fr;
 }
 
-async function getRegionCounts() {
+const MIN_PUBLIC_PROPERTY_PRICE = 20000;
+
+function parseMinPublicPrice(rawPrice: string | null) {
+  const parsedPrice = Number(rawPrice);
+  if (!Number.isFinite(parsedPrice) || parsedPrice <= 0) return MIN_PUBLIC_PROPERTY_PRICE;
+  return Math.max(parsedPrice, MIN_PUBLIC_PROPERTY_PRICE);
+}
+
+async function getRegionCounts(minPrice: number) {
   const counts: Record<string, number> = {
     "Costa Blanca": 0,
     "Costa del Sol": 0,
@@ -91,6 +99,7 @@ async function getRegionCounts() {
       .from('villas')
       .select('town,ville,region,province')
       .eq('is_excluded', false)
+      .gte('price', minPrice)
       .range(from, to);
 
     if (error) throw error;
@@ -111,9 +120,10 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const regionCounts = searchParams.get('regionCounts') === 'true';
+    const minPrice = searchParams.get('minPrice');
 
     if (regionCounts) {
-      return NextResponse.json(await getRegionCounts());
+      return NextResponse.json(await getRegionCounts(parseMinPublicPrice(minPrice)));
     }
     
     // 1. Paramètres de langue
@@ -124,7 +134,6 @@ export async function GET(request: Request) {
     // 2. Nouveaux paramètres de filtrage admin
     const minCommission = searchParams.get('minCommission');
     const excludedDevelopments = searchParams.get('excluded'); // Format attendu: "Promotion A,Promotion B"
-    const minPrice = searchParams.get('minPrice');
     const maxPrice = searchParams.get('maxPrice');
     const type = searchParams.get('type');
     const reference = searchParams.get('reference');
@@ -139,7 +148,7 @@ export async function GET(request: Request) {
       .eq('is_excluded', false); // On exclut d'office les biens marqués "is_excluded" manuellement
 
     if (!id) {
-      query = query.gte('price', 20000);
+      query = query.gte('price', MIN_PUBLIC_PROPERTY_PRICE);
     }
 
     if (id) {

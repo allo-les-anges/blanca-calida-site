@@ -358,7 +358,12 @@
     "filters": {
       "tabLabel": "Verkoopfilters (XML)",
       "minCommission": "Minimale Commissie",
+      "minPropertyPrice": "Minimaal weergegeven prijs",
+      "minPropertyPriceHelp": "Woningen onder dit bedrag worden niet weergegeven in het publieke portfolio.",
       "excludePromoters": "Promotoren Uitsluiten",
+      "saveFilters": "Filters opslaan",
+      "saveSuccess": "Filters opgeslagen.",
+      "saveError": "Filters konden niet worden opgeslagen.",
       "description": "* Deze parameters filteren in realtime de eigendommen die via de XML-feed op de openbare pagina worden geïmporteerd."
     },
     "clientInfo": {

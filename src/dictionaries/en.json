@@ -358,7 +358,12 @@
     "filters": {
       "tabLabel": "Sales Filters (XML)",
       "minCommission": "Minimum Commission",
+      "minPropertyPrice": "Minimum displayed price",
+      "minPropertyPriceHelp": "Properties below this amount will not appear in the public portfolio.",
       "excludePromoters": "Exclude Promoters",
+      "saveFilters": "Save filters",
+      "saveSuccess": "Filters saved.",
+      "saveError": "Unable to save filters.",
       "description": "* These parameters filter in real time the properties imported via the XML feed on the public page."
     },
     "clientInfo": {

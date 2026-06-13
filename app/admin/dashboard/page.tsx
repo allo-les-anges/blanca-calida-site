@@ -53,8 +53,12 @@ export default function AdminDashboard() {
 
   // --- NOUVEAUX ÉTATS POUR LE FILTRAGE XML/SUPABASE ---
   const [minCommission, setMinCommission] = useState(0);
+  const [minPropertyPrice, setMinPropertyPrice] = useState(20000);
   const [excludedPromoters, setExcludedPromoters] = useState<string[]>([]);
   const [availablePromoters, setAvailablePromoters] = useState<string[]>([]);
+  const [agencySettingsId, setAgencySettingsId] = useState<string | null>(null);
+  const [filterConfig, setFilterConfig] = useState<Record<string, any>>({});
+  const [savingFilters, setSavingFilters] = useState(false);
 
   // --- DONNÉES ---
   const [projets, setProjets] = useState<any[]>([]);
@@ -139,6 +143,23 @@ export default function AdminDashboard() {
       
       if (!errorStaff) setStaffList(staff || []);
 
+      const settingsQuery = supabase
+        .from('agency_settings')
+        .select('id, filter_config')
+        .limit(1);
+      const { data: settings } = profile?.agency_id
+        ? await settingsQuery.eq('id', profile.agency_id).maybeSingle()
+        : await settingsQuery.eq('agency_name', profile?.company_name || "Amaru-Homes").maybeSingle();
+
+      if (settings) {
+        const currentFilterConfig = settings.filter_config || {};
+        setAgencySettingsId(settings.id);
+        setFilterConfig(currentFilterConfig);
+        setMinCommission(Number(currentFilterConfig.minCommission || 0));
+        setExcludedPromoters(Array.isArray(currentFilterConfig.excludedPromoters) ? currentFilterConfig.excludedPromoters : []);
+        setMinPropertyPrice(Number(currentFilterConfig.minPropertyPrice || 20000));
+      }
+
       // 4. Charger les Promoteurs uniques pour le filtre d'exclusion
       const { data: villas } = await supabase
         .from('villas')
@@ -192,6 +213,35 @@ export default function AdminDashboard() {
   };
 
   // --- ACTIONS DE GESTION ---
+
+  const handleSaveFilters = async () => {
+    if (!agencySettingsId) {
+      alert(t('adminDashboard.filters.saveError'));
+      return;
+    }
+
+    setSavingFilters(true);
+    const nextFilterConfig = {
+      ...filterConfig,
+      minCommission,
+      excludedPromoters,
+      minPropertyPrice: Math.max(0, Number(minPropertyPrice) || 0),
+    };
+
+    const { error } = await supabase
+      .from('agency_settings')
+      .update({ filter_config: nextFilterConfig })
+      .eq('id', agencySettingsId);
+
+    if (error) {
+      alert(t('adminDashboard.filters.saveError'));
+    } else {
+      setFilterConfig(nextFilterConfig);
+      alert(t('adminDashboard.filters.saveSuccess'));
+    }
+
+    setSavingFilters(false);
+  };
 
   const handleUpdateDossier = async () => {
     if (!selectedProjet) return;
@@ -1079,6 +1129,25 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
+              {/* Filtre Prix Minimum */}
+              <div className="p-5 rounded-2xl bg-white/5 border border-white/5 space-y-4">
+                <div className="flex items-center gap-2 text-[#D8C9B6]">
+                  <Euro size={14} />
+                  <h3 className="text-[10px] font-black uppercase tracking-widest text-[#D8C9B6]">{t('adminDashboard.filters.minPropertyPrice')}</h3>
+                </div>
+                <input
+                  type="number"
+                  min="0"
+                  step="5000"
+                  value={minPropertyPrice}
+                  onChange={(e) => setMinPropertyPrice(Number(e.target.value))}
+                  className="w-full px-4 py-3 rounded-xl bg-black/30 border border-white/10 text-white text-sm font-black outline-none focus:border-[#D8C9B6] transition-all"
+                />
+                <p className="text-[9px] text-slate-500 italic leading-relaxed">
+                  {t('adminDashboard.filters.minPropertyPriceHelp')}
+                </p>
+              </div>
+
               {/* Filtre Promoteurs */}
               <div className="p-5 rounded-2xl bg-white/5 border border-white/5 space-y-4">
                 <div className="flex items-center gap-2 text-rose-500">
@@ -1106,6 +1175,15 @@ export default function AdminDashboard() {
               <p className="text-[9px] text-slate-500 italic px-2 leading-relaxed">
                 {t('adminDashboard.filters.description')}
               </p>
+              <button
+                type="button"
+                onClick={handleSaveFilters}
+                disabled={savingFilters}
+                className="w-full py-4 rounded-2xl bg-[#D8C9B6] text-black text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 disabled:opacity-60"
+              >
+                {savingFilters ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+                {t('adminDashboard.filters.saveFilters')}
+              </button>
             </div>
           ) 
           

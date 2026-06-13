@@ -18,7 +18,8 @@ import Footer from "@/components/Footer";
 import IntroGate from "@/components/IntroGate";
 
 type Property = any;
-const DEFAULT_MIN_PRICE = "";
+const DEFAULT_MIN_PRICE = "20000";
+const AGENCY_CONFIG_SLUG = process.env.NEXT_PUBLIC_AGENCY_SLUG || "amaru-homes";
 const CITY_TO_REGION_MAP: Record<string, string> = {
   alicante: "Costa Blanca", benidorm: "Costa Blanca", altea: "Costa Blanca",
   calpe: "Costa Blanca", denia: "Costa Blanca", javea: "Costa Blanca",
@@ -71,6 +72,13 @@ function parsePropertyPrice(value: unknown) {
   return digitsOnly ? Number(digitsOnly) : 0;
 }
 
+function getConfiguredMinPrice(config: any) {
+  const rawMinPrice = config?.filter_config?.minPropertyPrice;
+  const minPrice = Number(rawMinPrice);
+  if (!Number.isFinite(minPrice) || minPrice <= 0) return DEFAULT_MIN_PRICE;
+  return String(Math.max(minPrice, Number(DEFAULT_MIN_PRICE)));
+}
+
 function HomeContent() {
   const router = useRouter();
   const searchParamsOrigin = useSearchParams();
@@ -81,6 +89,7 @@ function HomeContent() {
   const [allProperties, setAllProperties] = useState<Property[]>([]);
   const [regionCounts, setRegionCounts] = useState<Record<string, number>>({});
   const [visibleCount, setVisibleCount] = useState(12);
+  const [portfolioMinPrice, setPortfolioMinPrice] = useState(DEFAULT_MIN_PRICE);
   const [loading, setLoading] = useState(true);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
@@ -101,9 +110,24 @@ function HomeContent() {
     async function loadData() {
       try {
         setLoading(true);
+        const configRes = await fetch(`/api/config?slug=${AGENCY_CONFIG_SLUG}`);
+        const config = configRes.ok ? await configRes.json() : null;
+        const configuredMinPrice = getConfiguredMinPrice(config);
+        setPortfolioMinPrice(configuredMinPrice);
+
+        const propertyQuery = new URLSearchParams({
+          limit: "200",
+          lang: locale,
+          minPrice: configuredMinPrice,
+        });
+        const regionQuery = new URLSearchParams({
+          regionCounts: "true",
+          minPrice: configuredMinPrice,
+        });
+
         const [propertiesRes, regionCountsRes] = await Promise.all([
-          fetch(`/api/properties?limit=200&lang=${locale}`),
-          fetch('/api/properties?regionCounts=true'),
+          fetch(`/api/properties?${propertyQuery.toString()}`),
+          fetch(`/api/properties?${regionQuery.toString()}`),
         ]);
         const data = await propertiesRes.json();
         const countsData = await regionCountsRes.json();
@@ -135,6 +159,13 @@ function HomeContent() {
   const filterQueryString = searchParamsOrigin.toString();
 
   useEffect(() => {
+    setFilters((prev) => ({
+      ...prev,
+      minPrice: prev.minPrice && Number(prev.minPrice) > Number(portfolioMinPrice) ? prev.minPrice : portfolioMinPrice,
+    }));
+  }, [portfolioMinPrice]);
+
+  useEffect(() => {
     const region = searchParamsOrigin.get("region") || "";
     const town = searchParamsOrigin.get("town") || "";
     if (!region && !town) return;
@@ -144,14 +175,14 @@ function HomeContent() {
       town,
       region,
       beds: "",
-      minPrice: DEFAULT_MIN_PRICE,
+      minPrice: portfolioMinPrice,
       maxPrice: "",
       reference: "",
       development: "",
       availableOnly: false,
     });
     setVisibleCount(12);
-  }, [filterQueryString, searchParamsOrigin]);
+  }, [filterQueryString, portfolioMinPrice, searchParamsOrigin]);
 
   // CORRECTION : Sécurisation du filter
   const filteredProperties = useMemo(() => {
@@ -165,15 +196,16 @@ function HomeContent() {
       const matchType = !filters.type || p.type?.toLowerCase().includes(filters.type.toLowerCase());
       const matchBeds = !filters.beds || Number(p.beds) >= Number(filters.beds);
       const price = parsePropertyPrice(p.price);
-      const matchMin = !filters.minPrice || price >= Number(filters.minPrice);
+      const effectiveMinPrice = filters.minPrice || portfolioMinPrice;
+      const matchMin = !effectiveMinPrice || price >= Number(effectiveMinPrice);
       const matchMax = !filters.maxPrice || price <= Number(filters.maxPrice);
       const matchRef = !filters.reference || p.ref?.toLowerCase().includes(filters.reference.toLowerCase());
       return matchDev && matchTown && matchRegion && matchType && matchBeds && matchMin && matchMax && matchRef;
     });
-  }, [allProperties, filters]);
+  }, [allProperties, filters, portfolioMinPrice]);
 
   const hasActiveFilters = Object.entries(filters).some(([key, value]) => {
-    if (key === "minPrice") return value !== DEFAULT_MIN_PRICE;
+    if (key === "minPrice") return value !== portfolioMinPrice;
     return value !== "" && value !== false;
   });
   const propertiesToShow = filteredProperties.slice(0, visibleCount);
@@ -186,7 +218,7 @@ function HomeContent() {
       lang: locale,
     });
 
-    if (nextFilters.minPrice) query.set("minPrice", nextFilters.minPrice);
+    query.set("minPrice", nextFilters.minPrice || portfolioMinPrice);
     if (nextFilters.maxPrice) query.set("maxPrice", nextFilters.maxPrice);
     if (nextFilters.type) query.set("type", nextFilters.type);
     if (nextFilters.beds) query.set("beds", nextFilters.beds);
@@ -209,7 +241,7 @@ function HomeContent() {
   };
 
   const handleRegionClick = (regionName: string) => {
-    setFilters({ type: "", town: "", region: regionName, beds: "", minPrice: DEFAULT_MIN_PRICE, maxPrice: "", reference: "", development: "", availableOnly: false });
+    setFilters({ type: "", town: "", region: regionName, beds: "", minPrice: portfolioMinPrice, maxPrice: "", reference: "", development: "", availableOnly: false });
     setVisibleCount(12);
     const section = document.getElementById("collection");
     if (section) setTimeout(() => section.scrollIntoView({ behavior: "smooth" }), 100);

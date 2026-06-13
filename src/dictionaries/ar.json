@@ -358,7 +358,12 @@
     "filters": {
       "tabLabel": "مرشحات المبيعات (XML)",
       "minCommission": "الحد الأدنى للعمولة",
+      "minPropertyPrice": "الحد الأدنى للسعر المعروض",
+      "minPropertyPriceHelp": "لن تظهر العقارات الأقل من هذا المبلغ في المحفظة العامة.",
       "excludePromoters": "استبعاد المطورين",
+      "saveFilters": "حفظ المرشحات",
+      "saveSuccess": "تم حفظ المرشحات.",
+      "saveError": "تعذر حفظ المرشحات.",
       "description": "* تقوم هذه المعلمات بتصفية العقارات المستوردة عبر خلاصة XML في الوقت الفعلي على الصفحة العامة."
     },
     "clientInfo": {

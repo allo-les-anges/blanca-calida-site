@@ -358,7 +358,12 @@
     "filters": {
       "tabLabel": "Filtres Ventes (XML)",
       "minCommission": "Commission Minimale",
+      "minPropertyPrice": "Prix minimum affiché",
+      "minPropertyPriceHelp": "Les biens sous ce montant ne seront pas affichés dans le portfolio public.",
       "excludePromoters": "Exclure Promoteurs",
+      "saveFilters": "Sauvegarder les filtres",
+      "saveSuccess": "Filtres sauvegardés.",
+      "saveError": "Impossible de sauvegarder les filtres.",
       "description": "* Ces paramètres filtrent en temps réel les biens importés via le flux XML sur la page publique."
     },
     "clientInfo": {
