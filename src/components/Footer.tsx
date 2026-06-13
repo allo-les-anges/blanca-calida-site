@@ -124,7 +124,9 @@ export default function Footer({ isLight = false }: FooterProps) {
       <div className="max-w-7xl mx-auto px-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 md:gap-8">
           <div className="col-span-1 md:col-span-1 space-y-6">
-            <h3 className={`text-2xl font-serif italic ${textColor}`}>Amaru-Homes</h3>
+            <Link href="/" aria-label="Amaru Homes" className="inline-flex">
+              <img src="/amaru-navbar-logo.png" alt="Amaru Homes" className="h-12 w-auto object-contain" />
+            </Link>
             <p className={`${mutedText} text-xs leading-relaxed uppercase tracking-widest`}>
               {t("footer.description")}
             </p>
@@ -134,23 +136,25 @@ export default function Footer({ isLight = false }: FooterProps) {
             <h4 className={`text-[10px] font-bold uppercase tracking-[0.3em] ${textColor}`}>{copy.menu}</h4>
             <ul className={`space-y-4 text-[10px] uppercase tracking-widest ${mutedText}`}>
               <li><Link href="/" className="hover:text-[#D8C9B6] transition-colors">{copy.home}</Link></li>
-              <li><Link href="/properties" className="hover:text-[#D8C9B6] transition-colors">{copy.properties}</Link></li>
-              <li><Link href="/about" className="hover:text-[#D8C9B6] transition-colors">{copy.about}</Link></li>
+              <li><Link href="/#collection" className="hover:text-[#D8C9B6] transition-colors">{copy.properties}</Link></li>
               <li><Link href="/contact" className="hover:text-[#D8C9B6] transition-colors">{copy.contact}</Link></li>
             </ul>
           </div>
 
           <div className="space-y-6">
             <h4 className={`text-[10px] font-bold uppercase tracking-[0.3em] ${textColor}`}>{copy.contact}</h4>
-            <ul className={`space-y-4 text-[10px] uppercase tracking-widest ${mutedText}`}>
+            <ul className={`space-y-4 text-[10px] tracking-widest ${mutedText}`}>
               <li className="flex items-center gap-3">
-                <Mail size={14} className={iconColor} /> info@amaru-homes.com
+                <Mail size={14} className={iconColor} />
+                <a href="mailto:info@amaru-homes.com" className="hover:text-[#D8C9B6] transition-colors">info@amaru-homes.com</a>
               </li>
               <li className="flex items-center gap-3">
-                <Phone size={14} className={iconColor} /> +34 000 000 000
+                <Phone size={14} className={iconColor} />
+                <a href="tel:+34627768233" className="hover:text-[#D8C9B6] transition-colors">+34 627 76 82 33</a>
               </li>
               <li className="flex items-center gap-3 italic">
-                <MapPin size={14} className={iconColor} /> Costa Blanca, España
+                <MapPin size={14} className={iconColor} />
+                <a href="https://www.google.com/maps/search/?api=1&query=Altea%2C%20Spain" target="_blank" rel="noopener noreferrer" className="hover:text-[#D8C9B6] transition-colors">Altea</a>
               </li>
             </ul>
           </div>
