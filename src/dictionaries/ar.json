@@ -71,7 +71,8 @@
       "noMatch": "لا يوجد تطابق",
       "noMatchDescription": "لم نجد عقارًا يطابق معاييرك.",
       "tryWider": "حاول توسيع نطاق البحث.",
-      "reset": "إعادة تعيين"
+      "reset": "إعادة تعيين",
+      "showMore": "عرض المزيد"
     },
     "regionGrid": {
       "ourDestinations": "وجهاتنا",

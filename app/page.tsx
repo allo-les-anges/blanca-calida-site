@@ -176,7 +176,8 @@ function HomeContent() {
     if (key === "minPrice") return value !== DEFAULT_MIN_PRICE;
     return value !== "" && value !== false;
   });
-  const propertiesToShow = hasActiveFilters ? filteredProperties : filteredProperties.slice(0, visibleCount);
+  const propertiesToShow = filteredProperties.slice(0, visibleCount);
+  const hasMoreProperties = filteredProperties.length > propertiesToShow.length;
 
   const handleSearch = async (newFilters: any) => {
     const nextFilters = { ...filters, ...newFilters };
@@ -326,6 +327,17 @@ function HomeContent() {
           </header>
           {/* On passe isLight au Grid pour les vignettes */}
           <PropertyGrid activeFilters={filters} properties={propertiesToShow} isLight={isLight} />
+          {hasMoreProperties && (
+            <div className="mt-14 flex justify-center">
+              <button
+                type="button"
+                onClick={() => setVisibleCount((count) => count + 12)}
+                className="border border-[#D8C9B6] px-8 py-4 text-[10px] font-bold uppercase tracking-[0.3em] text-[#D8C9B6] transition-all hover:bg-[#D8C9B6] hover:text-[#010101]"
+              >
+                {t('home.collection.showMore')}
+              </button>
+            </div>
+          )}
         </div>
       </section>
 

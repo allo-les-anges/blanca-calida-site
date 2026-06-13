@@ -71,7 +71,8 @@
       "noMatch": "Sin coincidencias",
       "noMatchDescription": "No encontramos ninguna propiedad que coincida con sus criterios.",
       "tryWider": "Intente ampliar sus filtros.",
-      "reset": "Reiniciar"
+      "reset": "Reiniciar",
+      "showMore": "Ver más"
     },
     "regionGrid": {
       "ourDestinations": "Nuestros Destinos",

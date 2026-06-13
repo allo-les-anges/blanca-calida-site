@@ -71,7 +71,8 @@
       "noMatch": "No match",
       "noMatchDescription": "We did not find a property matching your criteria.",
       "tryWider": "Try widening your filters.",
-      "reset": "Reset"
+      "reset": "Reset",
+      "showMore": "Show more"
     },
     "regionGrid": {
       "ourDestinations": "Our Destinations",

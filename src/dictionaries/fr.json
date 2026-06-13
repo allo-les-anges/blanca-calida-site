@@ -71,7 +71,8 @@
       "noMatch": "Aucune correspondance",
       "noMatchDescription": "Nous n'avons pas trouvé de propriété correspondant à vos critères.",
       "tryWider": "Essayez d'élargir vos filtres.",
-      "reset": "Réinitialiser"
+      "reset": "Réinitialiser",
+      "showMore": "Voir plus"
     },
     "regionGrid": {
       "ourDestinations": "Nos Destinations",
