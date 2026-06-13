@@ -19,13 +19,13 @@ const loadDictionary = async (lang: Language) => {
     return dict.default;
   } catch (error) {
     console.error(`Failed to load dictionary for ${lang}`, error);
-    const fallback = await import(`../dictionaries/fr.json`);
+    const fallback = await import(`../dictionaries/en.json`);
     return fallback.default;
   }
 };
 
 export const I18nProvider = ({ children }: { children: React.ReactNode }) => {
-  const [locale, setLocale] = useState<Language>('fr');
+  const [locale, setLocale] = useState<Language>('en');
   const [dictionary, setDictionary] = useState<any>(null);
 
   useEffect(() => {
@@ -33,12 +33,7 @@ export const I18nProvider = ({ children }: { children: React.ReactNode }) => {
     if (saved && ['fr', 'en', 'nl', 'es', 'pl', 'ar', 'ka'].includes(saved)) {
       setLocale(saved);
     } else {
-      const browserLang = navigator.language.split('-')[0];
-      if (browserLang === 'en' || browserLang === 'nl' || browserLang === 'es' || browserLang === 'pl' || browserLang === 'ar' || browserLang === 'ka') {
-        setLocale(browserLang as Language);
-      } else {
-        setLocale('fr');
-      }
+      setLocale('en');
     }
   }, []);
 
