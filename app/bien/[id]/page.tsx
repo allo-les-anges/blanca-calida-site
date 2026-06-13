@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { useTranslation } from "@/contexts/I18nContext";
 import { 
   Bed, Bath, Maximize, MapPin, ArrowLeft, 
   CheckCircle2, Share2, Mail, Phone, Calendar,
@@ -13,6 +14,7 @@ import Link from "next/link";
 
 export default function PropertyDetailPage() {
   const { id } = useParams();
+  const { t, locale } = useTranslation();
   const [property, setProperty] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [activeImage, setActiveImage] = useState(0);
@@ -20,7 +22,7 @@ export default function PropertyDetailPage() {
   useEffect(() => {
     async function load() {
       try {
-        const res = await fetch(`/api/properties?id=${encodeURIComponent(String(id))}`);
+        const res = await fetch(`/api/properties?lang=${locale}&id=${encodeURIComponent(String(id))}`);
         const data = await res.json();
         const found = data.find((p: any) => String(p.id) === String(id) || String(p.id_externe) === String(id));
         setProperty(found);
@@ -31,7 +33,7 @@ export default function PropertyDetailPage() {
       }
     }
     load();
-  }, [id]);
+  }, [id, locale]);
 
   if (loading) return (
     <div className="h-screen flex items-center justify-center bg-white">
@@ -39,7 +41,7 @@ export default function PropertyDetailPage() {
     </div>
   );
 
-  if (!property) return <div className="h-screen flex items-center justify-center font-serif italic text-slate-400">Bien introuvable.</div>;
+  if (!property) return <div className="h-screen flex items-center justify-center font-serif italic text-slate-400">{t("propertyDetail.propertyNotFound")}</div>;
 
   // --- EXTRACTION SÉCURISÉE ---
   const allImages = Array.isArray(property.images) 
@@ -56,6 +58,8 @@ export default function PropertyDetailPage() {
     : [];
 
   const whatsappUrl = `https://wa.me/34627768233?text=Bonjour, je souhaite plus d'informations sur le bien "${property.titre}" (Réf: ${property.reference || property.id})`;
+
+  const pendingDescription = locale === "ka" ? "აღწერა მალე დაემატება..." : "Description en attente...";
 
   return (
     <main className="bg-white min-h-screen pb-20 lg:pb-0">
@@ -128,7 +132,7 @@ export default function PropertyDetailPage() {
 
             <div className="prose prose-slate max-w-none mb-16 text-slate-600 leading-relaxed">
               <h2 className="text-3xl font-serif italic text-slate-900 mb-6">L'Art de Vivre</h2>
-              <div dangerouslySetInnerHTML={{ __html: property.description_fr || property.description || "Description en attente..." }} />
+              <div dangerouslySetInnerHTML={{ __html: property.description || pendingDescription }} />
             </div>
 
             {plans.length > 0 && (

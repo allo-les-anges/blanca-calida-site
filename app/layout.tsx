@@ -17,7 +17,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html 
-      lang="fr" 
+      lang="en"
       className={isLight ? 'light' : 'dark'} 
       suppressHydrationWarning
       data-package={isLight ? 'light' : 'gold'}

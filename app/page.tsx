@@ -75,7 +75,7 @@ function HomeContent() {
   const router = useRouter();
   const searchParamsOrigin = useSearchParams();
   const { resolvedTheme } = useTheme();
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   
   const [mounted, setMounted] = useState(false);
   const [allProperties, setAllProperties] = useState<Property[]>([]);
@@ -102,7 +102,7 @@ function HomeContent() {
       try {
         setLoading(true);
         const [propertiesRes, regionCountsRes] = await Promise.all([
-          fetch(`/api/properties?minPrice=${DEFAULT_MIN_PRICE}&limit=96`),
+          fetch(`/api/properties?minPrice=${DEFAULT_MIN_PRICE}&limit=96&lang=${locale}`),
           fetch('/api/properties?regionCounts=true'),
         ]);
         const data = await propertiesRes.json();
@@ -126,7 +126,7 @@ function HomeContent() {
       }
     }
     loadData();
-  }, []);
+  }, [locale]);
 
   const [filters, setFilters] = useState({
     type: "", town: "", region: "", beds: "",
