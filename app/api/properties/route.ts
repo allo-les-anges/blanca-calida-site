@@ -125,6 +125,9 @@ export async function GET(request: Request) {
     const minCommission = searchParams.get('minCommission');
     const excludedDevelopments = searchParams.get('excluded'); // Format attendu: "Promotion A,Promotion B"
     const minPrice = searchParams.get('minPrice');
+    const maxPrice = searchParams.get('maxPrice');
+    const type = searchParams.get('type');
+    const reference = searchParams.get('reference');
     const id = searchParams.get('id');
     const limitParam = Number(searchParams.get('limit') || 24);
     const limit = Number.isFinite(limitParam) ? Math.min(Math.max(limitParam, 1), 200) : 24;
@@ -153,6 +156,21 @@ export async function GET(request: Request) {
       if (!isNaN(minPriceValue)) {
         query = query.gte('price', minPriceValue);
       }
+    }
+
+    if (!id && maxPrice) {
+      const maxPriceValue = parseFloat(maxPrice);
+      if (!isNaN(maxPriceValue)) {
+        query = query.lte('price', maxPriceValue);
+      }
+    }
+
+    if (!id && type) {
+      query = query.ilike('type', `%${type}%`);
+    }
+
+    if (!id && reference) {
+      query = query.ilike('ref', `%${reference}%`);
     }
 
     // 4. Application du filtre d'exclusion par nom de promotion/promoteur

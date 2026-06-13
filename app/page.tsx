@@ -178,8 +178,29 @@ function HomeContent() {
   });
   const propertiesToShow = hasActiveFilters ? filteredProperties : filteredProperties.slice(0, visibleCount);
 
-  const handleSearch = (newFilters: any) => {
-    setFilters({ ...filters, ...newFilters });
+  const handleSearch = async (newFilters: any) => {
+    const nextFilters = { ...filters, ...newFilters };
+    const query = new URLSearchParams({
+      limit: "200",
+      lang: locale,
+    });
+
+    if (nextFilters.minPrice) query.set("minPrice", nextFilters.minPrice);
+    if (nextFilters.maxPrice) query.set("maxPrice", nextFilters.maxPrice);
+    if (nextFilters.type) query.set("type", nextFilters.type);
+    if (nextFilters.beds) query.set("beds", nextFilters.beds);
+    if (nextFilters.reference) query.set("reference", nextFilters.reference);
+
+    try {
+      const response = await fetch(`/api/properties?${query.toString()}`);
+      const data = await response.json();
+      setAllProperties(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error("Erreur recherche:", error);
+      setAllProperties([]);
+    }
+
+    setFilters(nextFilters);
     setVisibleCount(12);
     setIsSearchOpen(false);
     const section = document.getElementById("collection");
