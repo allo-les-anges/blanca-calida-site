@@ -18,7 +18,7 @@ import Footer from "@/components/Footer";
 import IntroGate from "@/components/IntroGate";
 
 type Property = any;
-const DEFAULT_MIN_PRICE = "500000";
+const DEFAULT_MIN_PRICE = "";
 const CITY_TO_REGION_MAP: Record<string, string> = {
   alicante: "Costa Blanca", benidorm: "Costa Blanca", altea: "Costa Blanca",
   calpe: "Costa Blanca", denia: "Costa Blanca", javea: "Costa Blanca",
@@ -102,7 +102,7 @@ function HomeContent() {
       try {
         setLoading(true);
         const [propertiesRes, regionCountsRes] = await Promise.all([
-          fetch(`/api/properties?minPrice=${DEFAULT_MIN_PRICE}&limit=96&lang=${locale}`),
+          fetch(`/api/properties?limit=96&lang=${locale}`),
           fetch('/api/properties?regionCounts=true'),
         ]);
         const data = await propertiesRes.json();

@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { RotateCcw, Search, Map, Home, Hash, Bed, X } from "lucide-react";
 
-const DEFAULT_MIN_PRICE = "500000";
+const DEFAULT_MIN_PRICE = "";
 
 interface AdvancedSearchProps {
   onSearch: (filters: any) => void;
@@ -51,7 +51,7 @@ export default function AdvancedSearch({
       region: localFilters.region || "",
       type: localFilters.type || "",
       beds: localFilters.beds || "",
-      minPrice: localFilters.minPrice || DEFAULT_MIN_PRICE,
+      minPrice: localFilters.minPrice || "",
       maxPrice: localFilters.maxPrice || "75000000"
     };
     onSearch(cleanedFilters);
@@ -177,7 +177,7 @@ export default function AdvancedSearch({
                     inputMode="numeric"
                     value={localFilters.minPrice || ""}
                     onChange={(e) => updatePriceFilter("minPrice", e.target.value)}
-                    placeholder={DEFAULT_MIN_PRICE}
+                    placeholder="0"
                     className={`w-20 bg-transparent text-right text-[11px] font-bold outline-none ${inputText}`}
                   />
                   <span className={`text-[11px] font-bold ${mutedText}`}>€</span>
@@ -185,10 +185,10 @@ export default function AdvancedSearch({
               </div>
               <input
                 type="range"
-                min="100000"
+                min="0"
                 max="75000000"
                 step="50000"
-                value={localFilters.minPrice || DEFAULT_MIN_PRICE}
+                value={localFilters.minPrice || "0"}
                 onChange={(e) => setLocalFilters({ ...localFilters, minPrice: e.target.value })}
                 className="custom-slider"
               />
