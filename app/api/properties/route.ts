@@ -138,6 +138,10 @@ export async function GET(request: Request) {
       .select('*')
       .eq('is_excluded', false); // On exclut d'office les biens marqués "is_excluded" manuellement
 
+    if (!id) {
+      query = query.gte('price', 20000);
+    }
+
     if (id) {
       const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
       query = isUuid ? query.or(`id.eq.${id},id_externe.eq.${id}`) : query.eq('id_externe', id);
