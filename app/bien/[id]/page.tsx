@@ -6,9 +6,9 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useTranslation } from "@/contexts/I18nContext";
 import { 
-  Bed, Bath, Maximize, MapPin, ArrowLeft, 
-  CheckCircle2, Share2, Mail, Phone, Calendar,
-  Waves, Flag, Car, Sun, Layout, MessageCircle
+  Bed, Bath, Maximize, MapPin, ArrowLeft,
+  Share2, Phone, Calendar,
+  Waves, Flag, Car, Sun, Layout, MessageCircle, Download
 } from "lucide-react";
 import Link from "next/link";
 
@@ -56,6 +56,7 @@ export default function PropertyDetailPage() {
         return null;
       }).filter((url: any): url is string => Boolean(url)) 
     : [];
+  const brochureUrl = plans.find((url: string) => url.toLowerCase().endsWith(".pdf"));
 
   const whatsappUrl = `https://wa.me/34627768233?text=Bonjour, je souhaite plus d'informations sur le bien "${property.titre}" (Réf: ${property.reference || property.id})`;
 
@@ -149,7 +150,16 @@ export default function PropertyDetailPage() {
                 <div className="grid gap-12 bg-slate-50 p-6 md:p-12 rounded-[3rem] border border-slate-100">
                   {plans.map((url: string, idx: number) => (
                     <div key={idx} className="bg-white p-4 md:p-8 rounded-3xl shadow-sm">
-                      <img src={url} alt={`Plan ${idx + 1}`} className="w-full h-auto" loading="lazy" />
+                      {url.toLowerCase().endsWith(".pdf") ? (
+                        <a
+                          href={`/api/download-brochure?url=${encodeURIComponent(url)}`}
+                          className="flex items-center justify-center gap-3 rounded-2xl border border-slate-200 px-6 py-5 text-[10px] font-black uppercase tracking-widest text-slate-900 transition-colors hover:bg-slate-50"
+                        >
+                          <Download size={16} /> Plan {idx + 1}
+                        </a>
+                      ) : (
+                        <img src={url} alt={`Plan ${idx + 1}`} className="w-full h-auto" loading="lazy" />
+                      )}
                     </div>
                   ))}
                 </div>
@@ -166,9 +176,14 @@ export default function PropertyDetailPage() {
               </div>
               
               <div className="space-y-4">
-                <button className="w-full bg-slate-950 text-white py-5 rounded-2xl font-black uppercase text-[10px] tracking-widest flex items-center justify-center gap-3 hover:bg-slate-800 transition-all">
-                  <Mail size={16} /> Brochure PDF
-                </button>
+                {brochureUrl && (
+                  <a
+                    href={`/api/download-brochure?url=${encodeURIComponent(brochureUrl)}`}
+                    className="w-full bg-slate-950 text-white py-5 rounded-2xl font-black uppercase text-[10px] tracking-widest flex items-center justify-center gap-3 hover:bg-slate-800 transition-all"
+                  >
+                    <Download size={16} /> Brochure PDF
+                  </a>
+                )}
                 
                 {/* WHATSAPP SIDEBAR (Hidden on mobile via lg:flex) */}
                 <a 

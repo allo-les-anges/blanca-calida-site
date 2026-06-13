@@ -5,8 +5,8 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ContactForm from "@/components/ContactForm";
 import { 
-  Bed, Bath, Maximize, MapPin, MessageCircle, ArrowLeft, 
-  Loader2, Image as ImageIcon, Home, Waves, Car, ShieldCheck, Navigation
+  Bed, Bath, Maximize, MapPin, MessageCircle, ArrowLeft,
+  Loader2, Image as ImageIcon, Home, Waves, Car, ShieldCheck, Navigation, Download
 } from "lucide-react";
 import Link from "next/link";
 import { useTranslation } from "@/contexts/I18nContext";
@@ -90,6 +90,17 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
   );
 
   const images = property.images || [];
+  const planUrls = Array.isArray(property.plans)
+    ? property.plans
+        .map((item: any) => {
+          if (typeof item === "string") return item;
+          if (typeof item?.url === "string") return item.url;
+          if (typeof item?.plan?.url === "string") return item.plan.url;
+          return null;
+        })
+        .filter((url: any): url is string => typeof url === "string" && url.toLowerCase().endsWith(".pdf"))
+    : [];
+  const brochureUrl = planUrls[0];
   const numericPrice = Number(property.price || property.prix || 0);
   const mapQuery = encodeURIComponent(`${property.town || ""}, ${property.region || ""}, Espagne`);
   const fallbackMapUrl = `https://maps.google.com/maps?q=${mapQuery}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
@@ -204,7 +215,15 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
                   </p>
                 </div>
               <ContactForm agency={currentAgency} propertyRef={property.id_externe || property.id} isLight={isLight} />
-              <div className="px-8 pb-8">
+              <div className="px-8 pb-8 space-y-3">
+                {brochureUrl && (
+                  <a
+                    href={`/api/download-brochure?url=${encodeURIComponent(brochureUrl)}`}
+                    className={`w-full border ${isLight ? 'border-slate-200 bg-white' : 'border-white/10'} flex items-center justify-center gap-3 py-4 rounded-2xl font-bold uppercase text-[10px] hover:bg-slate-50 transition-all ${isLight ? 'text-slate-900' : 'text-white'}`}
+                  >
+                    <Download size={16} /> {t('propertyDetail.brochure')}
+                  </a>
+                )}
                 <a href={`https://wa.me/34627768233?text=Info ref: ${property.ref}`} target="_blank" className={`w-full border ${isLight ? 'border-slate-200 bg-white' : 'border-white/10'} flex items-center justify-center gap-3 py-4 rounded-2xl font-bold uppercase text-[10px] hover:bg-slate-50 transition-all ${isLight ? 'text-slate-900' : 'text-white'}`}>
                   <MessageCircle size={18} style={{ color: "#25D366" }} /> {t('propertyDetail.whatsappDirect')}
                 </a>

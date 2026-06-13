@@ -8,9 +8,16 @@ const supabase = createClient(
 );
 
 const SOURCES = [
-  { defaultRegion: "Costa Blanca", url: "https://medianewbuild.com/file/hh-media-bucket/agents/6d5cb68a-3636-4095-b0ce-7dc9ec2df2d2/feed_blanca_calida.xml" },
+  { defaultRegion: "Costa Blanca", url: "https://medianewbuild.com/file/hh-media-bucket/agents/7b38827b-c741-4817-a35c-b4e886e7ff6d/feed_blanca_calida.xml" },
   { defaultRegion: "Costa del Sol", url: "https://medianewbuild.com/file/hh-media-bucket/agents/6d5cb68a-3636-4095-b0ce-7dc9ec2df2d2/feed_sol.xml" }
 ];
+
+function extractPlanUrls(plans: any): string[] {
+  const rawPlans = plans?.plan ? (Array.isArray(plans.plan) ? plans.plan : [plans.plan]) : [];
+  return rawPlans
+    .map((plan: any) => (typeof plan === 'string' ? plan : plan?.url))
+    .filter((url: any): url is string => typeof url === 'string' && /^https?:\/\//i.test(url));
+}
 
 export async function GET() {
   try {
@@ -65,6 +72,7 @@ export async function GET() {
           surface_plot: String(surf.plot || "0"),
           surface_useful: String(surf.useful || "0"),
           images: imagesArray,
+          plans: extractPlanUrls(p.plans),
           updated_at: new Date().toISOString(),
           
           // MAPPING CORRIGÉ SELON VOTRE SQL :
