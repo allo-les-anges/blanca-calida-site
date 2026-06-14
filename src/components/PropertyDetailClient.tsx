@@ -313,8 +313,8 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
       </section>
 
       <section className="editorial-bg-paper bg-[#FAFAFA] px-6 py-20 md:px-10 md:py-28">
-        <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-2 lg:items-center lg:gap-16">
-          <div className="flex min-h-[520px] flex-col justify-center">
+        <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-2 lg:items-start lg:gap-16">
+          <div className="pt-1 lg:pt-8">
             <p className="mb-5 text-[10px] font-black uppercase tracking-[0.35em] text-[#D8C9B6]">{t("propertyDetail.thePropertyEyebrow")}</p>
             <h2 className="max-w-xl font-serif text-4xl italic leading-tight text-[#010101] md:text-6xl">{t("propertyDetail.theProperty")}</h2>
             <article className="mt-8 max-w-xl">
@@ -334,7 +334,7 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
           <button
             type="button"
             onClick={() => setLightboxImage(galleryImages.indexOf(propertyImage))}
-            className="group relative min-h-[420px] overflow-hidden border border-[#D8C9B6]/35 bg-[#F2EFEA] text-left md:min-h-[620px]"
+            className="group relative min-h-[420px] overflow-hidden border border-[#D8C9B6]/35 bg-[#F2EFEA] text-left md:min-h-[560px] lg:min-h-[620px]"
           >
             <img src={propertyImage} alt={title} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
             <span className="absolute bottom-5 left-5 flex items-center gap-2 bg-[#010101]/75 px-4 py-3 text-[9px] font-black uppercase tracking-[0.24em] text-[#FAFAFA] backdrop-blur-md">
@@ -353,18 +353,33 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
       </section>
 
       <section className="editorial-bg-paper bg-[#FAFAFA] px-6 py-20 md:px-10 md:py-28">
-        <div className="mx-auto max-w-7xl">
-          <div className="mb-10 flex flex-col justify-between gap-6 md:flex-row md:items-end">
-            <div>
+        <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.75fr_1.85fr] lg:items-start lg:gap-14">
+          <div className="pt-1 lg:pt-8">
               <p className="mb-4 text-[10px] font-black uppercase tracking-[0.35em] text-[#D8C9B6]">{t("propertyDetail.galleryEyebrow")}</p>
-              <h2 className="font-serif text-4xl italic text-[#010101] md:text-6xl">{t("propertyDetail.magazineGallery")}</h2>
-            </div>
-            <p className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.28em] text-[#171716]/60">
+              <h2 className="max-w-sm font-serif text-4xl italic leading-tight text-[#010101] md:text-6xl">{t("propertyDetail.magazineGallery")}</h2>
+            <div className="mt-12 flex items-center gap-8 text-[#171716]/60">
+              <p className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.28em]">
               <ImageIcon size={14} /> 1 / {galleryImages.length}
             </p>
+              <div className="hidden items-center gap-4 md:flex">
+                <button type="button" onClick={() => setLightboxImage(galleryImages.length - 1)} className="text-[#171716]/60 transition-colors hover:text-[#010101]" aria-label={t("propertyDetail.previousImage")}>
+                  <ChevronLeft size={22} />
+                </button>
+                <button type="button" onClick={() => setLightboxImage(1 % galleryImages.length)} className="text-[#171716]/60 transition-colors hover:text-[#010101]" aria-label={t("propertyDetail.nextImage")}>
+                  <ChevronRight size={22} />
+                </button>
+              </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setLightboxImage(0)}
+            className="mt-10 border border-[#D8C9B6] px-7 py-4 text-[10px] font-black uppercase tracking-[0.24em] text-[#171716] transition-colors hover:bg-[#171716] hover:text-[#FAFAFA]"
+          >
+            {t("propertyDetail.viewFullGallery")}
+          </button>
           </div>
 
-          <div ref={galleryRef} className="grid grid-cols-2 gap-4 lg:grid-cols-5 lg:grid-rows-[230px_230px]">
+          <div ref={galleryRef} className="grid grid-cols-2 gap-4 lg:grid-cols-4 lg:grid-rows-[220px_220px]">
             {visibleGalleryImages.map((image: string, index: number) => (
               <button
                 key={`${image}-${index}`}
@@ -392,23 +407,15 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
               </button>
             ))}
           </div>
-
-          <button
-            type="button"
-            onClick={() => setLightboxImage(0)}
-            className="mt-8 border border-[#D8C9B6] px-7 py-4 text-[10px] font-black uppercase tracking-[0.24em] text-[#171716] transition-colors hover:bg-[#171716] hover:text-[#FAFAFA]"
-          >
-            {t("propertyDetail.viewFullGallery")}
-          </button>
         </div>
       </section>
 
       <section className="editorial-bg-soft bg-[#F2EFEA] px-6 py-20 md:px-10 md:py-28">
-        <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-2 lg:items-center lg:gap-16">
+        <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-2 lg:items-start lg:gap-16">
           <button
             type="button"
             onClick={() => setLightboxImage(galleryImages.indexOf(outdoorImage))}
-            className="group relative min-h-[420px] overflow-hidden border border-[#D8C9B6]/35 bg-[#FAFAFA] text-left md:min-h-[620px]"
+            className="group relative min-h-[420px] overflow-hidden border border-[#D8C9B6]/35 bg-[#FAFAFA] text-left md:min-h-[560px] lg:min-h-[620px]"
           >
             <img src={outdoorImage} alt={t("propertyDetail.mediterraneanLifestyle")} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
             <span className="absolute bottom-5 left-5 flex items-center gap-2 bg-[#010101]/75 px-4 py-3 text-[9px] font-black uppercase tracking-[0.24em] text-[#FAFAFA] backdrop-blur-md">
@@ -416,7 +423,7 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
             </span>
           </button>
 
-          <div className="flex min-h-[520px] flex-col justify-center">
+          <div className="pt-1 lg:pt-8">
           <div className="mb-10 max-w-xl">
             <p className="mb-4 text-[10px] font-black uppercase tracking-[0.35em] text-[#D8C9B6]">{t("propertyDetail.lifestyleEyebrow")}</p>
             <h2 className="font-serif text-4xl italic leading-tight text-[#010101] md:text-6xl">{t("propertyDetail.outdoorAreas")}</h2>
