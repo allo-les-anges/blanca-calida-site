@@ -12,9 +12,10 @@ interface ContactFormProps {
   };
   propertyRef?: string;
   isLight?: boolean;
+  variant?: "phone" | "card";
 }
 
-export default function ContactForm({ agency, propertyRef, isLight: forcedLight }: ContactFormProps) {
+export default function ContactForm({ agency, propertyRef, isLight: forcedLight, variant = "phone" }: ContactFormProps) {
   const { t } = useTranslation();
   const [status, setStatus] = useState<"idle" | "sending" | "success">("idle");
   const isLight = agency.package_level === "light" || forcedLight === true;
@@ -56,6 +57,55 @@ export default function ContactForm({ agency, propertyRef, isLight: forcedLight 
   const inputThemeStyle = isLight
     ? "bg-slate-50 border-slate-200 text-slate-900 focus:border-black placeholder:text-slate-400"
     : "bg-white/5 border-white/10 text-white focus:border-[#D8C9B6] placeholder:text-white/20";
+
+  if (variant === "card") {
+    return (
+      <div className="w-full border border-[#D8C9B6]/35 bg-[#FAFAFA] p-6 shadow-sm md:p-8">
+        <div className="mb-8 border-b border-[#D8C9B6]/30 pb-6">
+          <div className="mb-4 flex items-center justify-between">
+            <span className="text-[9px] font-black uppercase tracking-[0.32em] text-[#D8C9B6]">
+              Amaru Homes
+            </span>
+            <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: "#25D366" }} />
+          </div>
+          <h3 className="font-serif text-3xl italic leading-tight text-[#010101] md:text-4xl">
+            {formTitle}
+          </h3>
+          <p className="mt-3 text-[9px] font-bold uppercase tracking-[0.25em] text-[#171716]/50">
+            {t("propertyDetail.refLabel")}: {refValue} - {agency.name}
+          </p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <input type="text" name="name" required placeholder={t("contact.namePlaceholder")} className="w-full border border-[#D8C9B6]/35 bg-[#F2EFEA] p-5 text-[10px] uppercase tracking-widest text-[#010101] outline-none transition-colors placeholder:text-[#171716]/45 focus:border-[#010101]" />
+          <input type="email" name="email" required placeholder={t("contact.emailPlaceholder")} className="w-full border border-[#D8C9B6]/35 bg-[#F2EFEA] p-5 text-[10px] uppercase tracking-widest text-[#010101] outline-none transition-colors placeholder:text-[#171716]/45 focus:border-[#010101]" />
+          <textarea name="message" rows={5} placeholder={t("propertyDetail.contactMessagePlaceholder")} className="w-full resize-none border border-[#D8C9B6]/35 bg-[#F2EFEA] p-5 text-[10px] uppercase tracking-widest text-[#010101] outline-none transition-colors placeholder:text-[#171716]/45 focus:border-[#010101]" />
+
+          <input type="hidden" name="agency_id" value={agency.id} />
+          <input type="hidden" name="source" value={isLight ? "Pack_Light" : "Pack_Gold"} />
+
+          <button
+            type="submit"
+            disabled={status === "sending"}
+            className="flex w-full items-center justify-center gap-4 bg-[#010101] px-7 py-5 text-[10px] font-black uppercase tracking-[0.3em] text-[#FAFAFA] transition-colors hover:bg-[#D8C9B6] hover:text-[#010101]"
+          >
+            {status === "sending" ? (
+              <Loader2 className="animate-spin" size={16} />
+            ) : (
+              <>
+                <span>{t("propertyDetail.send")}</span>
+                <Send size={14} />
+              </>
+            )}
+          </button>
+        </form>
+
+        <p className="mt-5 text-center text-[8px] uppercase tracking-widest text-[#171716]/45">
+          {t("propertyDetail.privacyNotice")}
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className={`relative mx-auto w-full max-w-[390px] rounded-[3rem] p-2 ${phoneShellStyle}`}>

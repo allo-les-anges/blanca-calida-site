@@ -84,6 +84,17 @@ function cleanDescription(html: string) {
     .replace(/&nbsp;/g, " ");
 }
 
+function WhatsAppIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+      <path
+        fill="currentColor"
+        d="M16.02 3.2A12.62 12.62 0 0 0 5.22 22.35L3.6 28.8l6.6-1.55a12.6 12.6 0 0 0 5.82 1.44h.01A12.75 12.75 0 0 0 28.8 16 12.75 12.75 0 0 0 16.02 3.2Zm0 23.33h-.01a10.48 10.48 0 0 1-5.34-1.46l-.38-.23-3.91.92.95-3.8-.25-.4a10.46 10.46 0 1 1 8.94 4.97Zm5.74-7.83c-.31-.16-1.85-.91-2.14-1.02-.29-.1-.5-.16-.71.16-.21.31-.82 1.02-1 1.23-.18.21-.37.23-.68.08-.31-.16-1.32-.49-2.52-1.55-.93-.83-1.56-1.86-1.74-2.17-.18-.31-.02-.48.14-.64.14-.14.31-.37.47-.55.16-.18.21-.31.31-.52.1-.21.05-.39-.03-.55-.08-.16-.71-1.7-.97-2.33-.26-.61-.52-.53-.71-.54h-.6c-.21 0-.55.08-.84.39-.29.31-1.1 1.08-1.1 2.62 0 1.55 1.13 3.04 1.29 3.25.16.21 2.23 3.4 5.4 4.77.75.33 1.34.52 1.8.66.76.24 1.45.21 1.99.13.61-.09 1.85-.76 2.11-1.49.26-.73.26-1.36.18-1.49-.08-.13-.29-.21-.6-.37Z"
+      />
+    </svg>
+  );
+}
+
 export default function PropertyDetailClient({ id }: PropertyDetailClientProps) {
   const { t, locale } = useTranslation();
   const searchParams = useSearchParams();
@@ -91,6 +102,8 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
   const [loading, setLoading] = useState(true);
   const [activeImage, setActiveImage] = useState(0);
   const [lightboxImage, setLightboxImage] = useState<number | null>(null);
+  const [lightboxZoom, setLightboxZoom] = useState(false);
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
   const [mounted, setMounted] = useState(false);
   const galleryRef = useRef<HTMLDivElement>(null);
 
@@ -135,9 +148,11 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") setLightboxImage(null);
       if (event.key === "ArrowLeft") {
+        setLightboxZoom(false);
         setLightboxImage((current) => (current === null ? current : (current - 1 + galleryImages.length) % galleryImages.length));
       }
       if (event.key === "ArrowRight") {
+        setLightboxZoom(false);
         setLightboxImage((current) => (current === null ? current : (current + 1) % galleryImages.length));
       }
     };
@@ -176,7 +191,8 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
   const heroImage = galleryImages[activeImage] || galleryImages[0];
   const propertyImage = galleryImages[1] || heroImage;
   const outdoorImage = galleryImages[2] || propertyImage;
-  const visibleGalleryImages = galleryImages.slice(0, Math.min(galleryImages.length, 12));
+  const visibleGalleryImages = galleryImages.slice(0, Math.min(galleryImages.length, 5));
+  const remainingGalleryCount = Math.max(galleryImages.length - visibleGalleryImages.length, 0);
 
   const planUrls = Array.isArray(property.plans)
     ? property.plans
@@ -297,25 +313,28 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
       </section>
 
       <section className="editorial-bg-paper bg-[#FAFAFA] px-6 py-20 md:px-10 md:py-28">
-        <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
-          <div className="max-w-2xl">
+        <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-2 lg:items-center lg:gap-16">
+          <div className="flex min-h-[520px] flex-col justify-center">
             <p className="mb-5 text-[10px] font-black uppercase tracking-[0.35em] text-[#D8C9B6]">{t("propertyDetail.thePropertyEyebrow")}</p>
-            <h2 className="font-serif text-4xl italic leading-tight text-[#010101] md:text-6xl">{t("propertyDetail.theProperty")}</h2>
-            <article className="mt-8">
-            {hasDescription ? (
-              <div
-                className="space-y-6 text-lg leading-[1.9] text-[#171716]/80 [&_p]:mb-6 [&_strong]:text-[#010101]"
-                dangerouslySetInnerHTML={{ __html: description }}
-              />
-            ) : (
-              <p className="text-lg leading-[1.9] text-[#171716]/70">{t("propertyDetail.descriptionFallback")}</p>
-            )}
-          </article>
+            <h2 className="max-w-xl font-serif text-4xl italic leading-tight text-[#010101] md:text-6xl">{t("propertyDetail.theProperty")}</h2>
+            <article className="mt-8 max-w-xl">
+              {hasDescription ? (
+                <div
+                  className="max-h-[350px] overflow-hidden text-lg leading-[1.9] text-[#171716]/80 [&_p]:mb-6 [&_strong]:text-[#010101]"
+                  dangerouslySetInnerHTML={{ __html: description }}
+                />
+              ) : (
+                <p className="text-lg leading-[1.9] text-[#171716]/70">{t("propertyDetail.descriptionFallback")}</p>
+              )}
+            </article>
+            <a href="#property-contact" className="mt-10 inline-flex w-fit items-center gap-3 border border-[#D8C9B6] px-7 py-4 text-[10px] font-black uppercase tracking-[0.24em] text-[#171716] transition-colors hover:bg-[#171716] hover:text-[#FAFAFA]">
+              <Calendar size={15} /> {t("propertyDetail.bookViewing")}
+            </a>
           </div>
           <button
             type="button"
             onClick={() => setLightboxImage(galleryImages.indexOf(propertyImage))}
-            className="group relative min-h-[420px] overflow-hidden border border-[#D8C9B6]/35 bg-[#F2EFEA] text-left md:min-h-[560px]"
+            className="group relative min-h-[420px] overflow-hidden border border-[#D8C9B6]/35 bg-[#F2EFEA] text-left md:min-h-[620px]"
           >
             <img src={propertyImage} alt={title} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
             <span className="absolute bottom-5 left-5 flex items-center gap-2 bg-[#010101]/75 px-4 py-3 text-[9px] font-black uppercase tracking-[0.24em] text-[#FAFAFA] backdrop-blur-md">
@@ -341,11 +360,11 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
               <h2 className="font-serif text-4xl italic text-[#010101] md:text-6xl">{t("propertyDetail.magazineGallery")}</h2>
             </div>
             <p className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.28em] text-[#171716]/60">
-              <ImageIcon size={14} /> {activeImage + 1} / {galleryImages.length}
+              <ImageIcon size={14} /> 1 / {galleryImages.length}
             </p>
           </div>
 
-          <div ref={galleryRef} className="columns-2 gap-4 md:columns-3 lg:columns-4">
+          <div ref={galleryRef} className="grid grid-cols-2 gap-4 lg:grid-cols-5 lg:grid-rows-[230px_230px]">
             {visibleGalleryImages.map((image: string, index: number) => (
               <button
                 key={`${image}-${index}`}
@@ -353,18 +372,23 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
                   setActiveImage(index);
                   setLightboxImage(index);
                 }}
-                className="group relative mb-4 block w-full overflow-hidden border border-[#D8C9B6]/25 bg-[#F2EFEA] text-left"
+                className={`group relative overflow-hidden border border-[#D8C9B6]/25 bg-[#F2EFEA] text-left ${
+                  index === 0 ? "min-h-[280px] lg:col-span-2 lg:row-span-2" : "min-h-[180px]"
+                }`}
               >
                 <img
                   src={image}
                   alt={`${title} ${index + 1}`}
-                  className={`w-full object-cover transition-transform duration-700 group-hover:scale-105 ${
-                    index % 5 === 0 ? "aspect-[4/5]" : index % 3 === 0 ? "aspect-[5/4]" : "aspect-[4/3]"
-                  }`}
+                  className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
                 />
                 <span className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center bg-[#010101]/70 text-[#FAFAFA] opacity-0 backdrop-blur-md transition-opacity group-hover:opacity-100">
                   <Expand size={15} />
                 </span>
+                {index === visibleGalleryImages.length - 1 && remainingGalleryCount > 0 && (
+                  <span className="absolute inset-0 flex items-center justify-center bg-[#010101]/55 text-center font-serif text-3xl italic text-[#FAFAFA] backdrop-blur-[2px]">
+                    +{remainingGalleryCount} {t("propertyDetail.morePhotos")}
+                  </span>
+                )}
               </button>
             ))}
           </div>
@@ -380,11 +404,11 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
       </section>
 
       <section className="editorial-bg-soft bg-[#F2EFEA] px-6 py-20 md:px-10 md:py-28">
-        <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+        <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-2 lg:items-center lg:gap-16">
           <button
             type="button"
             onClick={() => setLightboxImage(galleryImages.indexOf(outdoorImage))}
-            className="group relative min-h-[420px] overflow-hidden border border-[#D8C9B6]/35 bg-[#FAFAFA] text-left md:min-h-[600px]"
+            className="group relative min-h-[420px] overflow-hidden border border-[#D8C9B6]/35 bg-[#FAFAFA] text-left md:min-h-[620px]"
           >
             <img src={outdoorImage} alt={t("propertyDetail.mediterraneanLifestyle")} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
             <span className="absolute bottom-5 left-5 flex items-center gap-2 bg-[#010101]/75 px-4 py-3 text-[9px] font-black uppercase tracking-[0.24em] text-[#FAFAFA] backdrop-blur-md">
@@ -392,10 +416,11 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
             </span>
           </button>
 
-          <div>
-          <div className="mb-12 max-w-3xl">
+          <div className="flex min-h-[520px] flex-col justify-center">
+          <div className="mb-10 max-w-xl">
             <p className="mb-4 text-[10px] font-black uppercase tracking-[0.35em] text-[#D8C9B6]">{t("propertyDetail.lifestyleEyebrow")}</p>
-            <h2 className="font-serif text-4xl italic leading-tight text-[#010101] md:text-6xl">{t("propertyDetail.mediterraneanLifestyle")}</h2>
+            <h2 className="font-serif text-4xl italic leading-tight text-[#010101] md:text-6xl">{t("propertyDetail.outdoorAreas")}</h2>
+            <p className="mt-8 text-lg leading-8 text-[#171716]/70">{t("propertyDetail.lifestyle.outdoorText")}</p>
           </div>
 
           {lifestyleItems.length > 0 ? (
@@ -411,6 +436,9 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
           ) : (
             <p className="max-w-2xl text-lg leading-8 text-[#171716]/70">{t("propertyDetail.lifestyleFallback")}</p>
           )}
+          <a href="#property-contact" className="mt-10 inline-flex w-fit items-center gap-3 border border-[#D8C9B6] px-7 py-4 text-[10px] font-black uppercase tracking-[0.24em] text-[#171716] transition-colors hover:bg-[#171716] hover:text-[#FAFAFA]">
+            <MessageCircle size={15} /> {t("propertyDetail.requestInformation")}
+          </a>
           </div>
         </div>
       </section>
@@ -441,11 +469,14 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
       </section>
 
       <section id="property-contact" className="editorial-bg-paper bg-[#FAFAFA] px-6 py-20 md:px-10 md:py-28">
-        <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[0.8fr_1.2fr]">
-          <aside className="space-y-5">
-            <div className="border border-[#D8C9B6]/40 bg-[#F2EFEA] p-8 md:p-10">
-              <p className="mb-3 text-[10px] font-black uppercase tracking-[0.3em] text-[#D8C9B6]">{t("propertyDetail.price")}</p>
-              <p className="mb-8 font-serif text-4xl text-[#010101] md:text-5xl">{formattedPrice}</p>
+        <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-2 lg:items-stretch">
+          <aside className="flex">
+            <div className="flex w-full flex-col justify-between border border-[#D8C9B6]/40 bg-[#F2EFEA] p-8 md:p-10">
+              <div>
+                <p className="mb-3 text-[10px] font-black uppercase tracking-[0.3em] text-[#D8C9B6]">{t("propertyDetail.price")}</p>
+                <p className="mb-6 font-serif text-5xl text-[#010101] md:text-6xl">{formattedPrice}</p>
+                <p className="max-w-md text-sm leading-7 text-[#171716]/65">{title} · {t("propertyDetail.ref", { ref: reference })}</p>
+              </div>
               <div className="space-y-3">
                 {brochureUrl && (
                   <a href={`/api/download-brochure?url=${encodeURIComponent(brochureUrl)}`} className="flex items-center justify-center gap-3 border border-[#171716] px-5 py-4 text-[10px] font-black uppercase tracking-[0.24em] text-[#171716] transition-colors hover:bg-[#171716] hover:text-[#FAFAFA]">
@@ -458,7 +489,7 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
                   </Link>
                 )}
                 <a href={`https://wa.me/34627768233?text=Info ref: ${reference}`} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-3 border border-[#D8C9B6] bg-[#D8C9B6] px-5 py-4 text-[10px] font-black uppercase tracking-[0.24em] text-[#010101] transition-colors hover:bg-[#FAFAFA]">
-                  <MessageCircle size={17} /> {t("propertyDetail.whatsappDirect")}
+                  <WhatsAppIcon className="h-5 w-5 text-[#25D366]" /> {t("propertyDetail.whatsappDirect")}
                 </a>
               </div>
             </div>
@@ -466,7 +497,7 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
           <div>
             <p className="mb-4 text-[10px] font-black uppercase tracking-[0.35em] text-[#D8C9B6]">{t("propertyDetail.expertEyebrow")}</p>
             <h2 className="mb-8 font-serif text-4xl italic text-[#010101] md:text-6xl">{t("propertyDetail.yourLocalExpert")}</h2>
-            <ContactForm agency={currentAgency} propertyRef={property.id_externe || property.id} isLight />
+            <ContactForm agency={currentAgency} propertyRef={property.id_externe || property.id} isLight variant="card" />
           </div>
         </div>
       </section>
@@ -491,7 +522,19 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
       <Footer isLight />
 
       {lightboxImage !== null && (
-        <div className="fixed inset-0 z-[200] bg-[#010101] text-[#FAFAFA]">
+        <div
+          className="fixed inset-0 z-[200] bg-[#010101] text-[#FAFAFA]"
+          onTouchStart={(event) => setTouchStartX(event.touches[0]?.clientX ?? null)}
+          onTouchEnd={(event) => {
+            if (touchStartX === null) return;
+            const delta = (event.changedTouches[0]?.clientX ?? touchStartX) - touchStartX;
+            if (Math.abs(delta) > 45) {
+              setLightboxZoom(false);
+              setLightboxImage((delta > 0 ? lightboxImage - 1 + galleryImages.length : lightboxImage + 1) % galleryImages.length);
+            }
+            setTouchStartX(null);
+          }}
+        >
           <button
             type="button"
             onClick={() => setLightboxImage(null)}
@@ -502,7 +545,18 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
           </button>
           <button
             type="button"
-            onClick={() => setLightboxImage((lightboxImage - 1 + galleryImages.length) % galleryImages.length)}
+            onClick={() => setLightboxZoom((current) => !current)}
+            className="absolute left-1/2 top-4 z-20 flex h-12 -translate-x-1/2 items-center justify-center border border-[#FAFAFA]/20 bg-[#171716]/80 px-5 text-[10px] font-black uppercase tracking-[0.22em] text-[#FAFAFA] backdrop-blur-md transition-colors hover:bg-[#D8C9B6] hover:text-[#010101]"
+            aria-label={t("propertyDetail.zoomImage")}
+          >
+            {lightboxZoom ? "1x" : t("propertyDetail.zoomImage")}
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setLightboxZoom(false);
+              setLightboxImage((lightboxImage - 1 + galleryImages.length) % galleryImages.length);
+            }}
             className="absolute left-4 top-1/2 z-20 flex h-12 w-12 -translate-y-1/2 items-center justify-center border border-[#FAFAFA]/20 bg-[#171716]/80 text-[#FAFAFA] backdrop-blur-md transition-colors hover:bg-[#D8C9B6] hover:text-[#010101]"
             aria-label={t("propertyDetail.previousImage")}
           >
@@ -511,11 +565,15 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
           <img
             src={galleryImages[lightboxImage]}
             alt={`${title} ${lightboxImage + 1}`}
-            className="h-full w-full object-contain"
+            className={`h-full w-full object-contain transition-transform duration-300 ${lightboxZoom ? "scale-150 cursor-zoom-out" : "cursor-zoom-in"}`}
+            onClick={() => setLightboxZoom((current) => !current)}
           />
           <button
             type="button"
-            onClick={() => setLightboxImage((lightboxImage + 1) % galleryImages.length)}
+            onClick={() => {
+              setLightboxZoom(false);
+              setLightboxImage((lightboxImage + 1) % galleryImages.length);
+            }}
             className="absolute right-4 top-1/2 z-20 flex h-12 w-12 -translate-y-1/2 items-center justify-center border border-[#FAFAFA]/20 bg-[#171716]/80 text-[#FAFAFA] backdrop-blur-md transition-colors hover:bg-[#D8C9B6] hover:text-[#010101]"
             aria-label={t("propertyDetail.nextImage")}
           >
