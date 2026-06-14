@@ -18,6 +18,8 @@ export default function ContactForm({ agency, propertyRef, isLight: forcedLight 
   const { t } = useTranslation();
   const [status, setStatus] = useState<"idle" | "sending" | "success">("idle");
   const isLight = agency.package_level === "light" || forcedLight === true;
+  const formTitle = isLight ? t("propertyDetail.contactFormTitle") : t("propertyDetail.contactExpertTitle");
+  const refValue = propertyRef || t("propertyDetail.general");
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -34,10 +36,10 @@ export default function ContactForm({ agency, propertyRef, isLight: forcedLight 
           <CheckCircle className="text-[#D8C9B6]" size={32} />
         </div>
         <h3 className={`text-2xl font-serif italic mb-2 ${isLight ? "text-slate-900" : "text-white"}`}>
-          {t("propertyDetail.messageSent") || "Message envoye"}
+          {t("propertyDetail.messageSent")}
         </h3>
         <p className={`text-[10px] uppercase tracking-[0.2em] ${isLight ? "text-slate-500" : "text-slate-400"}`}>
-          {t("propertyDetail.weWillContactYou") || "Nous reviendrons vers vous rapidement."}
+          {t("propertyDetail.weWillContactYou")}
         </p>
       </div>
     );
@@ -71,17 +73,17 @@ export default function ContactForm({ agency, propertyRef, isLight: forcedLight 
             <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: "#25D366" }} />
           </div>
           <h3 className={`text-2xl font-serif italic leading-tight ${titleStyle}`}>
-            {isLight ? "Demander des informations" : "Contacter un Expert"}
+            {formTitle}
           </h3>
           <p className={`mt-2 text-[8px] font-bold uppercase tracking-[0.25em] ${isLight ? "text-slate-400" : "text-[#D8C9B6]/60"}`}>
-            Ref: {propertyRef || "General"} - {agency.name}
+            {t("propertyDetail.refLabel")}: {refValue} - {agency.name}
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-3">
-          <input type="text" name="name" required placeholder="NOM COMPLET" className={`${inputBaseStyle} ${inputThemeStyle}`} />
-          <input type="email" name="email" required placeholder="VOTRE EMAIL" className={`${inputBaseStyle} ${inputThemeStyle}`} />
-          <textarea name="message" rows={3} placeholder="VOTRE MESSAGE..." className={`${inputBaseStyle} ${inputThemeStyle} resize-none`} />
+          <input type="text" name="name" required placeholder={t("contact.namePlaceholder")} className={`${inputBaseStyle} ${inputThemeStyle}`} />
+          <input type="email" name="email" required placeholder={t("contact.emailPlaceholder")} className={`${inputBaseStyle} ${inputThemeStyle}`} />
+          <textarea name="message" rows={3} placeholder={t("propertyDetail.contactMessagePlaceholder")} className={`${inputBaseStyle} ${inputThemeStyle} resize-none`} />
 
           <input type="hidden" name="agency_id" value={agency.id} />
           <input type="hidden" name="source" value={isLight ? "Pack_Light" : "Pack_Gold"} />
@@ -99,7 +101,7 @@ export default function ContactForm({ agency, propertyRef, isLight: forcedLight 
               <Loader2 className="animate-spin" size={16} />
             ) : (
               <>
-                <span>ENVOYER</span>
+                <span>{t("propertyDetail.send")}</span>
                 <Send size={14} />
               </>
             )}
@@ -107,7 +109,7 @@ export default function ContactForm({ agency, propertyRef, isLight: forcedLight 
         </form>
 
         <p className={`text-center mt-5 text-[7px] uppercase tracking-widest ${isLight ? "text-slate-400" : "text-white/20"}`}>
-          Vos donnees sont protegees par le secret professionnel
+          {t("propertyDetail.privacyNotice")}
         </p>
         <div className="mx-auto mt-5 h-1.5 w-24 rounded-full bg-[#D8C9B6]/70" />
       </div>
