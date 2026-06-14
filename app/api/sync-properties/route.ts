@@ -12,6 +12,14 @@ const SOURCES = [
   { defaultRegion: "Costa del Sol", url: "https://medianewbuild.com/file/hh-media-bucket/agents/6d5cb68a-3636-4095-b0ce-7dc9ec2df2d2/feed_sol.xml" }
 ];
 
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+const TRANSLATION_MODEL = process.env.OPENAI_TRANSLATION_MODEL || "gpt-4o-mini";
+const MAX_TRANSLATION_FIELDS_PER_SYNC = Number(process.env.MAX_TRANSLATION_FIELDS_PER_SYNC || 60);
+const TRANSLATION_TARGETS = {
+  ar: { label: "Arabic", scriptPattern: /[\u0600-\u06FF]/ },
+  ka: { label: "Georgian", scriptPattern: /[\u10A0-\u10FF]/ },
+} as const;
+
 function extractPlanUrls(plans: any): string[] {
   const rawPlans = plans?.plan ? (Array.isArray(plans.plan) ? plans.plan : [plans.plan]) : [];
   return rawPlans
@@ -19,10 +27,114 @@ function extractPlanUrls(plans: any): string[] {
     .filter((url: any): url is string => typeof url === 'string' && /^https?:\/\//i.test(url));
 }
 
+function normalizeText(value: unknown) {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function hasTargetScript(value: unknown, target: keyof typeof TRANSLATION_TARGETS) {
+  return TRANSLATION_TARGETS[target].scriptPattern.test(normalizeText(value));
+}
+
+function pickSourceText(...values: unknown[]) {
+  return values.map(normalizeText).find(Boolean) || "";
+}
+
+function normalizePositiveNumberText(value: unknown) {
+  const text = normalizeText(value).replace(/\s/g, "").replace(",", ".");
+  if (!text) return "";
+
+  const number = Number(text);
+  if (!Number.isFinite(number) || number <= 0) return "";
+  return Number.isInteger(number) ? String(number) : String(number).replace(/\.0+$/, "");
+}
+
+function pickSurfaceValue(xmlValue: unknown, existingValue: unknown) {
+  return normalizePositiveNumberText(xmlValue) || normalizePositiveNumberText(existingValue) || "0";
+}
+
+async function translateText(text: string, target: keyof typeof TRANSLATION_TARGETS, isHtml = false) {
+  if (!OPENAI_API_KEY || !text.trim()) return "";
+
+  const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${OPENAI_API_KEY}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: TRANSLATION_MODEL,
+      temperature: 0.1,
+      messages: [
+        {
+          role: "system",
+          content: [
+            `Translate real estate property content into ${TRANSLATION_TARGETS[target].label}.`,
+            "Preserve meaning, tone, numbers, property references, place names, and HTML structure.",
+            isHtml ? "Return valid translated HTML only." : "Return the translated text only.",
+            "Do not add explanations, markdown, or extra content.",
+          ].join(" "),
+        },
+        { role: "user", content: text },
+      ],
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Translation failed for ${target}: ${response.status} ${errorText}`);
+  }
+
+  const payload = await response.json();
+  return normalizeText(payload?.choices?.[0]?.message?.content);
+}
+
+async function translateIfMissing(options: {
+  existingValue?: unknown;
+  xmlValue?: unknown;
+  sourceValue: string;
+  target: keyof typeof TRANSLATION_TARGETS;
+  isHtml?: boolean;
+  canTranslate: boolean;
+}) {
+  const xmlValue = normalizeText(options.xmlValue);
+  if (xmlValue && hasTargetScript(xmlValue, options.target)) return xmlValue;
+
+  const existingValue = normalizeText(options.existingValue);
+  if (existingValue && hasTargetScript(existingValue, options.target)) return existingValue;
+
+  if (!options.canTranslate) return existingValue || xmlValue || "";
+
+  const translated = await translateText(options.sourceValue, options.target, options.isHtml);
+  if (translated && hasTargetScript(translated, options.target)) return translated;
+
+  return existingValue || xmlValue || "";
+}
+
+async function fetchExistingTranslations(externalIds: string[]) {
+  const rows: any[] = [];
+  const batchSize = 300;
+
+  for (let index = 0; index < externalIds.length; index += batchSize) {
+    const batch = externalIds.slice(index, index + batchSize);
+    const { data, error } = await supabase
+      .from('villas')
+      .select('id_externe,titre_ar,description_ar,description_ka,surface_built,surface_plot,surface_useful')
+      .in('id_externe', batch);
+
+    if (error) throw error;
+    if (data) rows.push(...data);
+  }
+
+  return rows;
+}
+
 export async function GET() {
   try {
     let totalSynced = 0;
-    const languages = ['fr', 'en', 'es', 'nl', 'pl', 'ar'];
+    let totalTranslated = 0;
+    let translationSkipped = 0;
+    let translationFieldsUsed = 0;
+    const languages = ['fr', 'en', 'es', 'nl', 'pl'];
 
     for (const source of SOURCES) {
       const response = await fetch(source.url, { cache: 'no-store' });
@@ -34,10 +146,24 @@ export async function GET() {
       let properties = result[rootKey].property || [];
       if (!Array.isArray(properties)) properties = [properties];
 
-      const updates = properties.map((p: any) => {
+      const externalIds = properties.map((p: any) => String(p.id)).filter(Boolean);
+      let existingRows: any[] = [];
+      try {
+        existingRows = await fetchExistingTranslations(externalIds);
+      } catch (existingError: any) {
+        console.error(`Erreur lecture traductions existantes pour ${source.url}:`, existingError.message);
+      }
+
+      const existingByExternalId = new Map(
+        existingRows.map((row: any) => [String(row.id_externe), row])
+      );
+
+      const updates = await Promise.all(properties.map(async (p: any) => {
         const surf = p.surface_area || {};
         const loc = p.location || {};
         const dists = p.distances || {}; 
+        const existing = existingByExternalId.get(String(p.id)) || {};
+        const isNewProperty = !existingByExternalId.has(String(p.id));
         
         // Gestion des images (extraction de l'URL si objet ou string)
         let imagesArray: string[] = [];
@@ -68,9 +194,9 @@ export async function GET() {
           distance_beach: dists.beach ? String(dists.beach) : null,
           distance_golf: dists.golf ? String(dists.golf) : null,
           distance_town: dists.town_distance || dists.town || null,
-          surface_built: String(surf.built || "0"),
-          surface_plot: String(surf.plot || "0"),
-          surface_useful: String(surf.useful || "0"),
+          surface_built: pickSurfaceValue(surf.built, existing.surface_built),
+          surface_plot: pickSurfaceValue(surf.plot, existing.surface_plot),
+          surface_useful: pickSurfaceValue(surf.useful, existing.surface_useful),
           images: imagesArray,
           plans: extractPlanUrls(p.plans),
           updated_at: new Date().toISOString(),
@@ -81,20 +207,69 @@ export async function GET() {
           is_excluded: false // Valeur par défaut
         };
 
-        // Titres et descriptions multilingues
+        // Titres et descriptions multilingues fournis par le XML.
         const titleObj = p.title || {};
         const descObj = p.desc || {};
+        const sourceTitle = pickSourceText(p.development_name, titleObj.fr, titleObj.en, "Villa Moderne");
+        const sourceDescription = pickSourceText(descObj.fr, descObj.en);
 
         for (const lang of languages) {
-          let titre = p.development_name || titleObj[lang] || titleObj.fr || titleObj.en || "Villa Moderne";
+          const titre = p.development_name || titleObj[lang] || titleObj.fr || titleObj.en || "Villa Moderne";
           base[`titre_${lang}`] = String(titre).trim();
 
-          let description = descObj[lang] || descObj.fr || descObj.en || "";
+          const description = descObj[lang] || descObj.fr || descObj.en || "";
           base[`description_${lang}`] = String(description).trim();
         }
 
+        const canTranslateField = (currentValue: unknown, target: keyof typeof TRANSLATION_TARGETS) => {
+          const needsTranslation = !hasTargetScript(currentValue, target);
+          const hasBudget = translationFieldsUsed < MAX_TRANSLATION_FIELDS_PER_SYNC;
+          if ((isNewProperty || needsTranslation) && hasBudget) {
+            translationFieldsUsed++;
+            return true;
+          }
+          return false;
+        };
+
+        try {
+          base.titre_ar = await translateIfMissing({
+            existingValue: existing.titre_ar,
+            xmlValue: titleObj.ar,
+            sourceValue: sourceTitle,
+            target: "ar",
+            canTranslate: canTranslateField(existing.titre_ar || titleObj.ar, "ar"),
+          });
+          base.description_ar = await translateIfMissing({
+            existingValue: existing.description_ar,
+            xmlValue: descObj.ar,
+            sourceValue: sourceDescription,
+            target: "ar",
+            isHtml: true,
+            canTranslate: canTranslateField(existing.description_ar || descObj.ar, "ar"),
+          });
+          base.description_ka = await translateIfMissing({
+            existingValue: existing.description_ka,
+            xmlValue: descObj.ka,
+            sourceValue: sourceDescription,
+            target: "ka",
+            isHtml: true,
+            canTranslate: canTranslateField(existing.description_ka || descObj.ka, "ka"),
+          });
+
+          if (hasTargetScript(base.titre_ar, "ar")) totalTranslated++;
+          if (hasTargetScript(base.description_ar, "ar")) totalTranslated++;
+          if (hasTargetScript(base.description_ka, "ka")) totalTranslated++;
+        } catch (translationError: any) {
+          translationSkipped++;
+          console.error(`Erreur traduction pour le bien ${base.id_externe}:`, translationError.message);
+
+          base.titre_ar = normalizeText(existing.titre_ar) || normalizeText(titleObj.ar);
+          base.description_ar = normalizeText(existing.description_ar) || normalizeText(descObj.ar);
+          base.description_ka = normalizeText(existing.description_ka) || normalizeText(descObj.ka);
+        }
+
         return base;
-      });
+      }));
 
       // Upsert vers Supabase
       const { error, data } = await supabase
@@ -109,7 +284,7 @@ export async function GET() {
       }
     }
 
-    return NextResponse.json({ success: true, totalSynced });
+    return NextResponse.json({ success: true, totalSynced, totalTranslated, translationSkipped, translationFieldsUsed });
   } catch (error: any) {
     console.error("Erreur de synchronisation:", error.message);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
