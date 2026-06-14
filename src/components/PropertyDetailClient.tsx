@@ -22,6 +22,10 @@ import {
   Download,
   Calendar,
   FileText,
+  X,
+  ChevronLeft,
+  ChevronRight,
+  Expand,
 } from "lucide-react";
 import Link from "next/link";
 import { useTranslation } from "@/contexts/I18nContext";
@@ -86,6 +90,7 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
   const [property, setProperty] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [activeImage, setActiveImage] = useState(0);
+  const [lightboxImage, setLightboxImage] = useState<number | null>(null);
   const [mounted, setMounted] = useState(false);
   const galleryRef = useRef<HTMLDivElement>(null);
 
@@ -96,6 +101,13 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
     package_level: isLight ? "light" : "gold",
     name: "Data Home",
   };
+
+  const images = property && Array.isArray(property.images)
+    ? property.images
+        .map((image: any) => (typeof image === "string" ? image : image?.url))
+        .filter((image: any): image is string => typeof image === "string" && image.trim().length > 0)
+    : [];
+  const galleryImages = images.length > 0 ? images : [FALLBACK_IMAGE];
 
   useEffect(() => {
     setMounted(true);
@@ -116,6 +128,28 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
     }
     fetchData();
   }, [id, locale]);
+
+  useEffect(() => {
+    if (lightboxImage === null) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setLightboxImage(null);
+      if (event.key === "ArrowLeft") {
+        setLightboxImage((current) => (current === null ? current : (current - 1 + galleryImages.length) % galleryImages.length));
+      }
+      if (event.key === "ArrowRight") {
+        setLightboxImage((current) => (current === null ? current : (current + 1) % galleryImages.length));
+      }
+    };
+
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [lightboxImage, galleryImages.length]);
 
   if (!mounted) return null;
 
@@ -139,13 +173,10 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
     );
   }
 
-  const images = Array.isArray(property.images)
-    ? property.images
-        .map((image: any) => (typeof image === "string" ? image : image?.url))
-        .filter((image: any): image is string => typeof image === "string" && image.trim().length > 0)
-    : [];
-  const galleryImages = images.length > 0 ? images : [FALLBACK_IMAGE];
   const heroImage = galleryImages[activeImage] || galleryImages[0];
+  const propertyImage = galleryImages[1] || heroImage;
+  const outdoorImage = galleryImages[2] || propertyImage;
+  const visibleGalleryImages = galleryImages.slice(0, Math.min(galleryImages.length, 12));
 
   const planUrls = Array.isArray(property.plans)
     ? property.plans
@@ -242,7 +273,7 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
             </div>
 
             <div className="mt-10 flex flex-col gap-3 sm:flex-row">
-              <a href="#property-contact" className="border border-[#D8C9B6] bg-[#D8C9B6] px-7 py-4 text-center text-[10px] font-black uppercase tracking-[0.28em] text-[#010101] transition-colors hover:bg-[#FAFAFA]">
+              <a href="#property-contact" className="sticky bottom-6 z-20 border border-[#D8C9B6] bg-[#D8C9B6] px-7 py-4 text-center text-[10px] font-black uppercase tracking-[0.28em] text-[#010101] transition-colors hover:bg-[#FAFAFA]">
                 {t("propertyDetail.bookViewing")}
               </a>
               <a href="#property-contact" className="border border-[#FAFAFA]/35 px-7 py-4 text-center text-[10px] font-black uppercase tracking-[0.28em] text-[#FAFAFA] transition-colors hover:border-[#D8C9B6] hover:text-[#D8C9B6]">
@@ -266,12 +297,11 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
       </section>
 
       <section className="editorial-bg-paper bg-[#FAFAFA] px-6 py-20 md:px-10 md:py-28">
-        <div className="mx-auto grid max-w-7xl gap-14 lg:grid-cols-[0.8fr_1.2fr]">
-          <div>
+        <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+          <div className="max-w-2xl">
             <p className="mb-5 text-[10px] font-black uppercase tracking-[0.35em] text-[#D8C9B6]">{t("propertyDetail.thePropertyEyebrow")}</p>
             <h2 className="font-serif text-4xl italic leading-tight text-[#010101] md:text-6xl">{t("propertyDetail.theProperty")}</h2>
-          </div>
-          <article className="max-w-3xl">
+            <article className="mt-8">
             {hasDescription ? (
               <div
                 className="space-y-6 text-lg leading-[1.9] text-[#171716]/80 [&_p]:mb-6 [&_strong]:text-[#010101]"
@@ -281,6 +311,17 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
               <p className="text-lg leading-[1.9] text-[#171716]/70">{t("propertyDetail.descriptionFallback")}</p>
             )}
           </article>
+          </div>
+          <button
+            type="button"
+            onClick={() => setLightboxImage(galleryImages.indexOf(propertyImage))}
+            className="group relative min-h-[420px] overflow-hidden border border-[#D8C9B6]/35 bg-[#F2EFEA] text-left md:min-h-[560px]"
+          >
+            <img src={propertyImage} alt={title} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
+            <span className="absolute bottom-5 left-5 flex items-center gap-2 bg-[#010101]/75 px-4 py-3 text-[9px] font-black uppercase tracking-[0.24em] text-[#FAFAFA] backdrop-blur-md">
+              <Expand size={13} /> {t("propertyDetail.viewPhoto")}
+            </span>
+          </button>
         </div>
       </section>
 
@@ -304,32 +345,61 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
             </p>
           </div>
 
-          <div ref={galleryRef} className="grid gap-4 md:grid-cols-12 md:grid-rows-[260px_260px]">
-            <button onClick={() => setActiveImage(0)} className="group relative min-h-[360px] overflow-hidden bg-[#F2EFEA] text-left md:col-span-7 md:row-span-2">
-              <img src={galleryImages[0]} alt={title} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
-            </button>
-            {(galleryImages.length > 1 ? galleryImages.slice(1, 5) : galleryImages).map((image: string, index: number) => (
+          <div ref={galleryRef} className="columns-2 gap-4 md:columns-3 lg:columns-4">
+            {visibleGalleryImages.map((image: string, index: number) => (
               <button
                 key={`${image}-${index}`}
-                onClick={() => setActiveImage(galleryImages.indexOf(image))}
-                className="group relative min-h-[220px] overflow-hidden bg-[#F2EFEA] text-left md:col-span-5"
+                onClick={() => {
+                  setActiveImage(index);
+                  setLightboxImage(index);
+                }}
+                className="group relative mb-4 block w-full overflow-hidden border border-[#D8C9B6]/25 bg-[#F2EFEA] text-left"
               >
-                <img src={image} alt={`${title} ${index + 2}`} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                <img
+                  src={image}
+                  alt={`${title} ${index + 1}`}
+                  className={`w-full object-cover transition-transform duration-700 group-hover:scale-105 ${
+                    index % 5 === 0 ? "aspect-[4/5]" : index % 3 === 0 ? "aspect-[5/4]" : "aspect-[4/3]"
+                  }`}
+                />
+                <span className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center bg-[#010101]/70 text-[#FAFAFA] opacity-0 backdrop-blur-md transition-opacity group-hover:opacity-100">
+                  <Expand size={15} />
+                </span>
               </button>
             ))}
           </div>
+
+          <button
+            type="button"
+            onClick={() => setLightboxImage(0)}
+            className="mt-8 border border-[#D8C9B6] px-7 py-4 text-[10px] font-black uppercase tracking-[0.24em] text-[#171716] transition-colors hover:bg-[#171716] hover:text-[#FAFAFA]"
+          >
+            {t("propertyDetail.viewFullGallery")}
+          </button>
         </div>
       </section>
 
       <section className="editorial-bg-soft bg-[#F2EFEA] px-6 py-20 md:px-10 md:py-28">
-        <div className="mx-auto max-w-7xl">
+        <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+          <button
+            type="button"
+            onClick={() => setLightboxImage(galleryImages.indexOf(outdoorImage))}
+            className="group relative min-h-[420px] overflow-hidden border border-[#D8C9B6]/35 bg-[#FAFAFA] text-left md:min-h-[600px]"
+          >
+            <img src={outdoorImage} alt={t("propertyDetail.mediterraneanLifestyle")} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
+            <span className="absolute bottom-5 left-5 flex items-center gap-2 bg-[#010101]/75 px-4 py-3 text-[9px] font-black uppercase tracking-[0.24em] text-[#FAFAFA] backdrop-blur-md">
+              <Expand size={13} /> {t("propertyDetail.viewPhoto")}
+            </span>
+          </button>
+
+          <div>
           <div className="mb-12 max-w-3xl">
             <p className="mb-4 text-[10px] font-black uppercase tracking-[0.35em] text-[#D8C9B6]">{t("propertyDetail.lifestyleEyebrow")}</p>
             <h2 className="font-serif text-4xl italic leading-tight text-[#010101] md:text-6xl">{t("propertyDetail.mediterraneanLifestyle")}</h2>
           </div>
 
           {lifestyleItems.length > 0 ? (
-            <div className="grid gap-px bg-[#D8C9B6]/35 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-px bg-[#D8C9B6]/35 md:grid-cols-2">
               {lifestyleItems.map((item) => (
                 <div key={`${item.title}-${item.text}`} className="bg-[#F2EFEA] p-8">
                   <item.icon size={22} className="mb-8 text-[#D8C9B6]" />
@@ -341,6 +411,7 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
           ) : (
             <p className="max-w-2xl text-lg leading-8 text-[#171716]/70">{t("propertyDetail.lifestyleFallback")}</p>
           )}
+          </div>
         </div>
       </section>
 
@@ -418,6 +489,43 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
       </section>
 
       <Footer isLight />
+
+      {lightboxImage !== null && (
+        <div className="fixed inset-0 z-[200] bg-[#010101] text-[#FAFAFA]">
+          <button
+            type="button"
+            onClick={() => setLightboxImage(null)}
+            className="absolute right-4 top-4 z-20 flex h-12 w-12 items-center justify-center border border-[#FAFAFA]/20 bg-[#171716]/80 text-[#FAFAFA] backdrop-blur-md transition-colors hover:bg-[#D8C9B6] hover:text-[#010101]"
+            aria-label={t("propertyDetail.closeGallery")}
+          >
+            <X size={22} />
+          </button>
+          <button
+            type="button"
+            onClick={() => setLightboxImage((lightboxImage - 1 + galleryImages.length) % galleryImages.length)}
+            className="absolute left-4 top-1/2 z-20 flex h-12 w-12 -translate-y-1/2 items-center justify-center border border-[#FAFAFA]/20 bg-[#171716]/80 text-[#FAFAFA] backdrop-blur-md transition-colors hover:bg-[#D8C9B6] hover:text-[#010101]"
+            aria-label={t("propertyDetail.previousImage")}
+          >
+            <ChevronLeft size={26} />
+          </button>
+          <img
+            src={galleryImages[lightboxImage]}
+            alt={`${title} ${lightboxImage + 1}`}
+            className="h-full w-full object-contain"
+          />
+          <button
+            type="button"
+            onClick={() => setLightboxImage((lightboxImage + 1) % galleryImages.length)}
+            className="absolute right-4 top-1/2 z-20 flex h-12 w-12 -translate-y-1/2 items-center justify-center border border-[#FAFAFA]/20 bg-[#171716]/80 text-[#FAFAFA] backdrop-blur-md transition-colors hover:bg-[#D8C9B6] hover:text-[#010101]"
+            aria-label={t("propertyDetail.nextImage")}
+          >
+            <ChevronRight size={26} />
+          </button>
+          <div className="absolute bottom-5 left-5 bg-[#171716]/80 px-5 py-3 text-[10px] font-black uppercase tracking-[0.26em] text-[#D8C9B6] backdrop-blur-md">
+            {lightboxImage + 1} / {galleryImages.length}
+          </div>
+        </div>
+      )}
     </main>
   );
 }
