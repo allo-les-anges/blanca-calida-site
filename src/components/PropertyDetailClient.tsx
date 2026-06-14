@@ -320,7 +320,7 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
             <article className="mt-8 max-w-xl">
               {hasDescription ? (
                 <div
-                  className="max-h-[350px] overflow-hidden text-lg leading-[1.9] text-[#171716]/80 [&_p]:mb-6 [&_strong]:text-[#010101]"
+                  className="text-lg leading-[1.9] text-[#171716]/80 [&_p]:mb-6 [&_strong]:text-[#010101]"
                   dangerouslySetInnerHTML={{ __html: description }}
                 />
               ) : (
@@ -519,7 +519,7 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
         </div>
       </section>
 
-      <Footer isLight />
+      <Footer isLight={isLight} />
 
       {lightboxImage !== null && (
         <div
