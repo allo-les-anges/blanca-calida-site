@@ -154,6 +154,10 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
   const [lightboxZoom, setLightboxZoom] = useState(false);
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [brochureModalOpen, setBrochureModalOpen] = useState(false);
+  const [brochureLead, setBrochureLead] = useState({ firstName: "", lastName: "", email: "" });
+  const [brochureStatus, setBrochureStatus] = useState<"idle" | "sending" | "error">("idle");
+  const [brochureError, setBrochureError] = useState("");
   const galleryRef = useRef<HTMLDivElement>(null);
 
   const isLight = searchParams.get("pack") === "light";
@@ -266,6 +270,41 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
   const editorialSections = hasDescription ? parseEditorialDescription(description) : [];
   const mapQuery = encodeURIComponent(`${town}, ${region}, Espagne`);
   const fallbackMapUrl = `https://maps.google.com/maps?q=${mapQuery}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
+  const downloadBrochureUrl = brochureUrl ? `/api/download-brochure?url=${encodeURIComponent(brochureUrl)}` : "";
+
+  const handleBrochureLeadSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!brochureUrl) return;
+
+    setBrochureStatus("sending");
+    setBrochureError("");
+
+    try {
+      const response = await fetch("/api/brochure-lead", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...brochureLead,
+          propertyRef: reference,
+          propertyTitle: title,
+          brochureUrl,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Unable to save lead");
+      }
+
+      setBrochureModalOpen(false);
+      setBrochureLead({ firstName: "", lastName: "", email: "" });
+      window.location.href = downloadBrochureUrl;
+    } catch (error) {
+      setBrochureError(t("propertyDetail.brochureLeadError"));
+      setBrochureStatus("error");
+    }
+  };
 
   const overviewItems: FactItem[] = [
     { icon: Bed, label: t("propertyDetail.bedrooms"), value: hasUsableValue(property.beds) ? String(property.beds) : t("propertyDetail.notAvailable") },
@@ -525,9 +564,17 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
               </div>
               <div className="space-y-3">
                 {brochureUrl && (
-                  <a href={`/api/download-brochure?url=${encodeURIComponent(brochureUrl)}`} className="flex items-center justify-center gap-3 border border-[#171716] px-5 py-4 text-[10px] font-black uppercase tracking-[0.24em] text-[#171716] transition-colors hover:bg-[#171716] hover:text-[#FAFAFA]">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setBrochureError("");
+                      setBrochureStatus("idle");
+                      setBrochureModalOpen(true);
+                    }}
+                    className="flex w-full items-center justify-center gap-3 border border-[#171716] px-5 py-4 text-[10px] font-black uppercase tracking-[0.24em] text-[#171716] transition-colors hover:bg-[#171716] hover:text-[#FAFAFA]"
+                  >
                     <Download size={16} /> {t("propertyDetail.brochure")}
-                  </a>
+                  </button>
                 )}
                 {!isLight && (
                   <Link href={`/contact-cashback?Property_ID=${property.id_externe || property.id}`} className="flex items-center justify-center gap-3 bg-[#171716] px-5 py-4 text-[10px] font-black uppercase tracking-[0.24em] text-[#FAFAFA] transition-colors hover:bg-[#010101]">
@@ -566,6 +613,69 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
       </section>
 
       <Footer isLight={isLight} />
+
+      {brochureModalOpen && (
+        <div className="fixed inset-0 z-[190] flex items-center justify-center bg-[#010101]/70 px-5 py-8 backdrop-blur-sm">
+          <div className="w-full max-w-lg border border-[#D8C9B6]/45 bg-[#FAFAFA] p-6 shadow-2xl md:p-8">
+            <div className="mb-7 flex items-start justify-between gap-5 border-b border-[#D8C9B6]/35 pb-5">
+              <div>
+                <p className="mb-3 text-[10px] font-black uppercase tracking-[0.32em] text-[#D8C9B6]">{t("propertyDetail.brochureLeadEyebrow")}</p>
+                <h2 className="font-serif text-3xl italic leading-tight text-[#010101] md:text-4xl">{t("propertyDetail.brochureLeadTitle")}</h2>
+                <p className="mt-3 text-sm leading-7 text-[#171716]/65">{t("propertyDetail.brochureLeadText")}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setBrochureModalOpen(false)}
+                className="flex h-11 w-11 shrink-0 items-center justify-center border border-[#D8C9B6]/55 text-[#171716] transition-colors hover:bg-[#171716] hover:text-[#FAFAFA]"
+                aria-label={t("common.close")}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleBrochureLeadSubmit} className="space-y-4">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <input
+                  type="text"
+                  required
+                  value={brochureLead.firstName}
+                  onChange={(event) => setBrochureLead((current) => ({ ...current, firstName: event.target.value }))}
+                  placeholder={t("propertyDetail.firstNamePlaceholder")}
+                  className="w-full border border-[#D8C9B6]/45 bg-[#F2EFEA] p-4 text-[10px] uppercase tracking-widest text-[#010101] outline-none transition-colors placeholder:text-[#171716]/45 focus:border-[#010101]"
+                />
+                <input
+                  type="text"
+                  required
+                  value={brochureLead.lastName}
+                  onChange={(event) => setBrochureLead((current) => ({ ...current, lastName: event.target.value }))}
+                  placeholder={t("propertyDetail.lastNamePlaceholder")}
+                  className="w-full border border-[#D8C9B6]/45 bg-[#F2EFEA] p-4 text-[10px] uppercase tracking-widest text-[#010101] outline-none transition-colors placeholder:text-[#171716]/45 focus:border-[#010101]"
+                />
+              </div>
+              <input
+                type="email"
+                required
+                value={brochureLead.email}
+                onChange={(event) => setBrochureLead((current) => ({ ...current, email: event.target.value }))}
+                placeholder={t("contact.emailPlaceholder")}
+                className="w-full border border-[#D8C9B6]/45 bg-[#F2EFEA] p-4 text-[10px] uppercase tracking-widest text-[#010101] outline-none transition-colors placeholder:text-[#171716]/45 focus:border-[#010101]"
+              />
+              <p className="text-[8px] uppercase leading-5 tracking-widest text-[#171716]/45">{t("propertyDetail.brochureLeadPrivacy")}</p>
+              {brochureError && (
+                <p className="border border-[#D8C9B6]/45 bg-[#F2EFEA] p-3 text-[10px] font-bold uppercase tracking-[0.18em] text-[#171716]">{brochureError}</p>
+              )}
+              <button
+                type="submit"
+                disabled={brochureStatus === "sending"}
+                className="flex w-full items-center justify-center gap-3 bg-[#010101] px-6 py-5 text-[10px] font-black uppercase tracking-[0.24em] text-[#FAFAFA] transition-colors hover:bg-[#D8C9B6] hover:text-[#010101] disabled:cursor-wait disabled:opacity-70"
+              >
+                {brochureStatus === "sending" ? <Loader2 className="animate-spin" size={16} /> : <Download size={16} />}
+                {brochureStatus === "sending" ? t("propertyDetail.brochureLeadSending") : t("propertyDetail.brochureLeadSubmit")}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
 
       {lightboxImage !== null && (
         <div
