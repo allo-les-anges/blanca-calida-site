@@ -208,10 +208,10 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
   ].filter(Boolean) as { icon: ElementType; title: string; text: string }[];
 
   return (
-    <main className="min-h-screen bg-[#FAFAFA] text-[#171716]">
+    <main className="property-detail-editorial min-h-screen bg-[#FAFAFA] text-[#171716]">
       <Navbar />
 
-      <section className="relative min-h-screen overflow-hidden bg-[#010101] text-[#FAFAFA]">
+      <section className="editorial-bg-ink relative min-h-screen overflow-hidden bg-[#010101] text-[#FAFAFA]">
         <img src={heroImage} alt={title} className="absolute inset-0 h-full w-full object-cover opacity-70" style={{ objectPosition: "center 45%" }} />
         <div className="absolute inset-0 bg-[#010101]/45" />
         <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#010101] to-transparent" />
@@ -253,7 +253,7 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
         </div>
       </section>
 
-      <section className="border-b border-[#D8C9B6]/35 bg-[#F2EFEA] px-6 py-8 md:px-10">
+      <section className="editorial-bg-soft border-b border-[#D8C9B6]/35 bg-[#F2EFEA] px-6 py-8 md:px-10">
         <div className="mx-auto grid max-w-7xl grid-cols-2 gap-px bg-[#D8C9B6]/35 md:grid-cols-4 lg:grid-cols-7">
           {overviewItems.map((item) => (
             <div key={`${item.label}-${item.value}`} className="bg-[#F2EFEA] p-5 md:p-6">
@@ -265,7 +265,7 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
         </div>
       </section>
 
-      <section className="bg-[#FAFAFA] px-6 py-20 md:px-10 md:py-28">
+      <section className="editorial-bg-paper bg-[#FAFAFA] px-6 py-20 md:px-10 md:py-28">
         <div className="mx-auto grid max-w-7xl gap-14 lg:grid-cols-[0.8fr_1.2fr]">
           <div>
             <p className="mb-5 text-[10px] font-black uppercase tracking-[0.35em] text-[#D8C9B6]">{t("propertyDetail.thePropertyEyebrow")}</p>
@@ -284,7 +284,7 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
         </div>
       </section>
 
-      <section className="bg-[#F2EFEA] px-6 py-20 md:px-10 md:py-28">
+      <section className="editorial-bg-soft bg-[#F2EFEA] px-6 py-20 md:px-10 md:py-28">
         <div className="mx-auto max-w-6xl text-center">
           <p className="font-serif text-5xl italic leading-tight text-[#010101] md:text-7xl">
             “{t("propertyDetail.editorialQuote")}”
@@ -292,7 +292,7 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
         </div>
       </section>
 
-      <section className="bg-[#FAFAFA] px-6 py-20 md:px-10 md:py-28">
+      <section className="editorial-bg-paper bg-[#FAFAFA] px-6 py-20 md:px-10 md:py-28">
         <div className="mx-auto max-w-7xl">
           <div className="mb-10 flex flex-col justify-between gap-6 md:flex-row md:items-end">
             <div>
@@ -321,7 +321,7 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
         </div>
       </section>
 
-      <section className="bg-[#F2EFEA] px-6 py-20 md:px-10 md:py-28">
+      <section className="editorial-bg-soft bg-[#F2EFEA] px-6 py-20 md:px-10 md:py-28">
         <div className="mx-auto max-w-7xl">
           <div className="mb-12 max-w-3xl">
             <p className="mb-4 text-[10px] font-black uppercase tracking-[0.35em] text-[#D8C9B6]">{t("propertyDetail.lifestyleEyebrow")}</p>
@@ -344,7 +344,7 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
         </div>
       </section>
 
-      <section className="bg-[#FAFAFA] px-6 py-20 md:px-10 md:py-28">
+      <section className="editorial-bg-paper bg-[#FAFAFA] px-6 py-20 md:px-10 md:py-28">
         <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.75fr_1.25fr]">
           <div>
             <p className="mb-4 text-[10px] font-black uppercase tracking-[0.35em] text-[#D8C9B6]">{t("propertyDetail.locationEyebrow")}</p>
@@ -361,7 +361,7 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
         </div>
       </section>
 
-      <section className="bg-[#F2EFEA] px-6 py-20 md:px-10 md:py-28">
+      <section className="editorial-bg-soft bg-[#F2EFEA] px-6 py-20 md:px-10 md:py-28">
         <div className="mx-auto max-w-5xl border-y border-[#D8C9B6]/45 py-16 text-center">
           <p className="mb-5 text-[10px] font-black uppercase tracking-[0.35em] text-[#D8C9B6]">{t("propertyDetail.whyEyebrow")}</p>
           <h2 className="mb-8 font-serif text-4xl italic text-[#010101] md:text-6xl">{t("propertyDetail.whyTitle")}</h2>
@@ -369,7 +369,7 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
         </div>
       </section>
 
-      <section id="property-contact" className="bg-[#FAFAFA] px-6 py-20 md:px-10 md:py-28">
+      <section id="property-contact" className="editorial-bg-paper bg-[#FAFAFA] px-6 py-20 md:px-10 md:py-28">
         <div className="mx-auto grid max-w-7xl gap-12 lg:grid-cols-[0.8fr_1.2fr]">
           <aside className="space-y-5">
             <div className="border border-[#D8C9B6]/40 bg-[#F2EFEA] p-8 md:p-10">
@@ -400,7 +400,7 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
         </div>
       </section>
 
-      <section className="bg-[#171716] px-6 py-20 text-[#FAFAFA] md:px-10 md:py-28">
+      <section className="editorial-bg-charcoal bg-[#171716] px-6 py-20 text-[#FAFAFA] md:px-10 md:py-28">
         <div className="mx-auto flex max-w-7xl flex-col justify-between gap-10 md:flex-row md:items-end">
           <div className="max-w-3xl">
             <p className="mb-4 text-[10px] font-black uppercase tracking-[0.35em] text-[#D8C9B6]">{t("propertyDetail.finalEyebrow")}</p>

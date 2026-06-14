@@ -393,6 +393,28 @@ html[data-package="light"] .bg-black\/60 {
   background-color: color-mix(in srgb, #010101 80%, transparent) !important;
 }
 
+/* Preserve the editorial property detail surfaces from global dark-mode section overrides. */
+html.dark:not([data-package="light"]) .property-detail-editorial,
+html.dark:not([data-package="light"]) .property-detail-editorial .editorial-bg-paper {
+  background-color: #FAFAFA !important;
+  color: #171716 !important;
+}
+
+html.dark:not([data-package="light"]) .property-detail-editorial .editorial-bg-soft {
+  background-color: #F2EFEA !important;
+  color: #171716 !important;
+}
+
+html.dark:not([data-package="light"]) .property-detail-editorial .editorial-bg-ink {
+  background-color: #010101 !important;
+  color: #FAFAFA !important;
+}
+
+html.dark:not([data-package="light"]) .property-detail-editorial .editorial-bg-charcoal {
+  background-color: #171716 !important;
+  color: #FAFAFA !important;
+}
+
 /* --- NOUVEAU : Garantit la lisibilité des boutons en mode Light --- */
 html[data-package="light"] button {
   color: #010101 !important;
