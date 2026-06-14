@@ -9,7 +9,6 @@ import {
   Bed,
   Bath,
   Maximize,
-  MapPin,
   MessageCircle,
   ArrowLeft,
   Loader2,
@@ -18,7 +17,6 @@ import {
   Waves,
   Car,
   ShieldCheck,
-  Navigation,
   Download,
   Calendar,
   FileText,
@@ -41,6 +39,11 @@ type FactItem = {
   value: string;
 };
 
+type EditorialDescriptionSection = {
+  heading: string | null;
+  body: string;
+};
+
 const FALLBACK_IMAGE = "/images/regions/1.jpg";
 
 function safeText(value: unknown, fallback: string) {
@@ -55,25 +58,6 @@ function hasUsableValue(value: unknown) {
   return text.length > 0 && text !== "0" && text.toLowerCase() !== "non";
 }
 
-function formatDistance(value: unknown) {
-  if (value === null || value === undefined) return null;
-
-  const normalized =
-    typeof value === "number"
-      ? value
-      : Number(String(value).trim().replace(",", ".").replace(/[^\d.]/g, ""));
-
-  if (!Number.isFinite(normalized) || normalized <= 0) return null;
-
-  if (normalized >= 1000) {
-    const kilometers = normalized / 1000;
-    const formatted = Number.isInteger(kilometers) ? String(kilometers) : kilometers.toFixed(1).replace(/\.0$/, "");
-    return `${formatted} km`;
-  }
-
-  return `${Math.round(normalized)} m`;
-}
-
 function cleanDescription(html: string) {
   if (!html) return "";
   return html
@@ -82,6 +66,71 @@ function cleanDescription(html: string) {
     .replace(/<font[^>]*>/gi, "")
     .replace(/<\/font>/gi, "")
     .replace(/&nbsp;/g, " ");
+}
+
+function stripHtml(value: string) {
+  return value
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&nbsp;/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function isEditorialHeading(text: string) {
+  const normalized = text.replace(/\s+/g, " ").trim();
+  if (!normalized) return false;
+
+  const knownHeadings = new Set(["OUTDOOR AREAS", "INDOOR AREAS", "COMMON AREAS", "LOCATION", "EQUIPMENT", "FEATURES"]);
+  if (knownHeadings.has(normalized.toUpperCase())) return true;
+
+  const hasLetter = /[A-Z]/.test(normalized);
+  const hasLowercase = /[a-z]/.test(normalized);
+  const wordCount = normalized.split(/\s+/).length;
+  const endsAsSentence = /[.!?;:]$/.test(normalized);
+
+  return hasLetter && !hasLowercase && wordCount <= 6 && normalized.length <= 60 && !endsAsSentence;
+}
+
+function parseEditorialDescription(description: string): EditorialDescriptionSection[] {
+  const source = cleanDescription(description);
+  if (!source.trim()) return [];
+
+  const blockMatches = source.match(/<(p|div|h[1-6])\b[^>]*>[\s\S]*?<\/\1>/gi);
+  const blocks = blockMatches && blockMatches.length > 0
+    ? blockMatches
+    : source
+        .replace(/<br\s*\/?>/gi, "\n")
+        .split(/\n{2,}|\r?\n/)
+        .map((line) => line.trim())
+        .filter(Boolean)
+        .map((line) => `<p>${line}</p>`);
+
+  const sections: EditorialDescriptionSection[] = [];
+  let current: EditorialDescriptionSection = { heading: null, body: "" };
+
+  blocks.forEach((block) => {
+    const text = stripHtml(block);
+    if (!text) return;
+
+    if (isEditorialHeading(text)) {
+      if (stripHtml(current.body)) sections.push(current);
+      current = { heading: text, body: "" };
+      return;
+    }
+
+    current.body = `${current.body}${block}`;
+  });
+
+  if (stripHtml(current.body)) sections.push(current);
+
+  return sections.length > 0 ? sections : [{ heading: null, body: source }];
+}
+
+function formatEditorialHeading(heading: string) {
+  return heading
+    .toLowerCase()
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
 function WhatsAppIcon({ className = "" }: { className?: string }) {
@@ -190,7 +239,6 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
 
   const heroImage = galleryImages[activeImage] || galleryImages[0];
   const propertyImage = galleryImages[1] || heroImage;
-  const outdoorImage = galleryImages[2] || propertyImage;
   const visibleGalleryImages = galleryImages.slice(0, Math.min(galleryImages.length, 5));
   const remainingGalleryCount = Math.max(galleryImages.length - visibleGalleryImages.length, 0);
 
@@ -215,8 +263,7 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
   const editorialTitle = t("propertyDetail.editorialTitle", { type: propertyType, town });
   const description = cleanDescription(property.description || "");
   const hasDescription = description.trim().length > 0;
-  const distanceBeach = formatDistance(property.distance_beach);
-  const distanceGolf = formatDistance(property.distance_golf);
+  const editorialSections = hasDescription ? parseEditorialDescription(description) : [];
   const mapQuery = encodeURIComponent(`${town}, ${region}, Espagne`);
   const fallbackMapUrl = `https://maps.google.com/maps?q=${mapQuery}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
 
@@ -237,22 +284,6 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
     { icon: Car, label: t("propertyDetail.parking"), value: t("propertyDetail.parking") },
     { icon: FileText, label: t("propertyDetail.refLabel"), value: reference },
   ];
-
-  const lifestyleItems = [
-    property.pool === "Oui" ? { icon: Waves, title: t("propertyDetail.lifestyle.pool"), text: t("propertyDetail.lifestyle.poolText") } : null,
-    hasUsableValue(property.surface_plot)
-      ? { icon: Home, title: t("propertyDetail.lifestyle.outdoor"), text: t("propertyDetail.lifestyle.outdoorText") }
-      : null,
-    distanceBeach
-      ? { icon: Navigation, title: t("propertyDetail.lifestyle.sea"), text: t("propertyDetail.distanceSea", { distance: distanceBeach }) }
-      : null,
-    distanceGolf
-      ? { icon: ShieldCheck, title: t("propertyDetail.lifestyle.golf"), text: t("propertyDetail.golf", { distance: distanceGolf }) }
-      : null,
-    hasUsableValue(property.type)
-      ? { icon: Home, title: t("propertyDetail.lifestyle.architecture"), text: propertyType }
-      : null,
-  ].filter(Boolean) as { icon: ElementType; title: string; text: string }[];
 
   return (
     <main className="property-detail-editorial min-h-screen bg-[#FAFAFA] text-[#171716]">
@@ -312,37 +343,85 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
         </div>
       </section>
 
-      <section className="editorial-bg-paper bg-[#FAFAFA] px-6 py-20 md:px-10 md:py-28">
-        <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-2 lg:items-start lg:gap-16">
-          <div className="pt-1 lg:pt-8">
-            <p className="mb-5 text-[10px] font-black uppercase tracking-[0.35em] text-[#D8C9B6]">{t("propertyDetail.thePropertyEyebrow")}</p>
-            <h2 className="max-w-xl font-serif text-4xl italic leading-tight text-[#010101] md:text-6xl">{t("propertyDetail.theProperty")}</h2>
-            <article className="mt-8 max-w-xl">
-              {hasDescription ? (
+      {editorialSections.length > 0 ? (
+        editorialSections.map((section, index) => {
+          const image = galleryImages[index + 1] || galleryImages[index] || heroImage || FALLBACK_IMAGE;
+          const imageIndex = Math.max(galleryImages.indexOf(image), 0);
+          const textFirst = index % 2 === 0;
+          const sectionBg = index % 2 === 0 ? "editorial-bg-paper bg-[#FAFAFA]" : "editorial-bg-soft bg-[#F2EFEA]";
+          const label = section.heading || t("propertyDetail.thePropertyEyebrow");
+          const titleText = section.heading ? formatEditorialHeading(section.heading) : t("propertyDetail.theProperty");
+
+          const textBlock = (
+            <div className="pt-1 lg:pt-8">
+              <p className="mb-5 text-[10px] font-black uppercase tracking-[0.35em] text-[#D8C9B6]">{label}</p>
+              <h2 className="max-w-xl font-serif text-4xl italic leading-tight text-[#010101] md:text-6xl">{titleText}</h2>
+              <article className="mt-8 max-w-xl">
                 <div
                   className="text-lg leading-[1.9] text-[#171716]/80 [&_p]:mb-6 [&_strong]:text-[#010101]"
-                  dangerouslySetInnerHTML={{ __html: description }}
+                  dangerouslySetInnerHTML={{ __html: section.body }}
                 />
-              ) : (
-                <p className="text-lg leading-[1.9] text-[#171716]/70">{t("propertyDetail.descriptionFallback")}</p>
+              </article>
+              {index === 0 && (
+                <a href="#property-contact" className="mt-10 inline-flex w-fit items-center gap-3 border border-[#D8C9B6] px-7 py-4 text-[10px] font-black uppercase tracking-[0.24em] text-[#171716] transition-colors hover:bg-[#171716] hover:text-[#FAFAFA]">
+                  <Calendar size={15} /> {t("propertyDetail.bookViewing")}
+                </a>
               )}
-            </article>
-            <a href="#property-contact" className="mt-10 inline-flex w-fit items-center gap-3 border border-[#D8C9B6] px-7 py-4 text-[10px] font-black uppercase tracking-[0.24em] text-[#171716] transition-colors hover:bg-[#171716] hover:text-[#FAFAFA]">
-              <Calendar size={15} /> {t("propertyDetail.bookViewing")}
-            </a>
+            </div>
+          );
+
+          const imageBlock = (
+            <button
+              type="button"
+              onClick={() => setLightboxImage(imageIndex)}
+              className="group relative min-h-[360px] overflow-hidden border border-[#D8C9B6]/35 bg-[#F2EFEA] text-left md:min-h-[520px] lg:min-h-[620px]"
+            >
+              <img src={image} alt={titleText} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
+              <span className="absolute bottom-5 left-5 flex items-center gap-2 bg-[#010101]/75 px-4 py-3 text-[9px] font-black uppercase tracking-[0.24em] text-[#FAFAFA] backdrop-blur-md">
+                <Expand size={13} /> {t("propertyDetail.viewPhoto")}
+              </span>
+            </button>
+          );
+
+          return (
+            <section key={`${label}-${index}`} className={`${sectionBg} px-6 py-20 md:px-10 md:py-28`}>
+              <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-2 lg:items-start lg:gap-16">
+                {textFirst ? (
+                  <>
+                    {textBlock}
+                    {imageBlock}
+                  </>
+                ) : (
+                  <>
+                    {imageBlock}
+                    {textBlock}
+                  </>
+                )}
+              </div>
+            </section>
+          );
+        })
+      ) : (
+        <section className="editorial-bg-paper bg-[#FAFAFA] px-6 py-20 md:px-10 md:py-28">
+          <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-2 lg:items-start lg:gap-16">
+            <div className="pt-1 lg:pt-8">
+              <p className="mb-5 text-[10px] font-black uppercase tracking-[0.35em] text-[#D8C9B6]">{t("propertyDetail.thePropertyEyebrow")}</p>
+              <h2 className="max-w-xl font-serif text-4xl italic leading-tight text-[#010101] md:text-6xl">{t("propertyDetail.theProperty")}</h2>
+              <p className="mt-8 max-w-xl text-lg leading-[1.9] text-[#171716]/70">{t("propertyDetail.descriptionFallback")}</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setLightboxImage(galleryImages.indexOf(propertyImage))}
+              className="group relative min-h-[360px] overflow-hidden border border-[#D8C9B6]/35 bg-[#F2EFEA] text-left md:min-h-[520px] lg:min-h-[620px]"
+            >
+              <img src={propertyImage} alt={title} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
+              <span className="absolute bottom-5 left-5 flex items-center gap-2 bg-[#010101]/75 px-4 py-3 text-[9px] font-black uppercase tracking-[0.24em] text-[#FAFAFA] backdrop-blur-md">
+                <Expand size={13} /> {t("propertyDetail.viewPhoto")}
+              </span>
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={() => setLightboxImage(galleryImages.indexOf(propertyImage))}
-            className="group relative min-h-[420px] overflow-hidden border border-[#D8C9B6]/35 bg-[#F2EFEA] text-left md:min-h-[560px] lg:min-h-[620px]"
-          >
-            <img src={propertyImage} alt={title} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
-            <span className="absolute bottom-5 left-5 flex items-center gap-2 bg-[#010101]/75 px-4 py-3 text-[9px] font-black uppercase tracking-[0.24em] text-[#FAFAFA] backdrop-blur-md">
-              <Expand size={13} /> {t("propertyDetail.viewPhoto")}
-            </span>
-          </button>
-        </div>
-      </section>
+        </section>
+      )}
 
       <section className="editorial-bg-soft bg-[#F2EFEA] px-6 py-20 md:px-10 md:py-28">
         <div className="mx-auto max-w-6xl text-center">
@@ -406,46 +485,6 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
                 )}
               </button>
             ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="editorial-bg-soft bg-[#F2EFEA] px-6 py-20 md:px-10 md:py-28">
-        <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-2 lg:items-start lg:gap-16">
-          <button
-            type="button"
-            onClick={() => setLightboxImage(galleryImages.indexOf(outdoorImage))}
-            className="group relative min-h-[420px] overflow-hidden border border-[#D8C9B6]/35 bg-[#FAFAFA] text-left md:min-h-[560px] lg:min-h-[620px]"
-          >
-            <img src={outdoorImage} alt={t("propertyDetail.mediterraneanLifestyle")} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
-            <span className="absolute bottom-5 left-5 flex items-center gap-2 bg-[#010101]/75 px-4 py-3 text-[9px] font-black uppercase tracking-[0.24em] text-[#FAFAFA] backdrop-blur-md">
-              <Expand size={13} /> {t("propertyDetail.viewPhoto")}
-            </span>
-          </button>
-
-          <div className="pt-1 lg:pt-8">
-          <div className="mb-10 max-w-xl">
-            <p className="mb-4 text-[10px] font-black uppercase tracking-[0.35em] text-[#D8C9B6]">{t("propertyDetail.lifestyleEyebrow")}</p>
-            <h2 className="font-serif text-4xl italic leading-tight text-[#010101] md:text-6xl">{t("propertyDetail.outdoorAreas")}</h2>
-            <p className="mt-8 text-lg leading-8 text-[#171716]/70">{t("propertyDetail.lifestyle.outdoorText")}</p>
-          </div>
-
-          {lifestyleItems.length > 0 ? (
-            <div className="grid gap-px bg-[#D8C9B6]/35 md:grid-cols-2">
-              {lifestyleItems.map((item) => (
-                <div key={`${item.title}-${item.text}`} className="bg-[#F2EFEA] p-8">
-                  <item.icon size={22} className="mb-8 text-[#D8C9B6]" />
-                  <h3 className="mb-4 font-serif text-2xl italic text-[#010101]">{item.title}</h3>
-                  <p className="text-sm leading-7 text-[#171716]/70">{item.text}</p>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="max-w-2xl text-lg leading-8 text-[#171716]/70">{t("propertyDetail.lifestyleFallback")}</p>
-          )}
-          <a href="#property-contact" className="mt-10 inline-flex w-fit items-center gap-3 border border-[#D8C9B6] px-7 py-4 text-[10px] font-black uppercase tracking-[0.24em] text-[#171716] transition-colors hover:bg-[#171716] hover:text-[#FAFAFA]">
-            <MessageCircle size={15} /> {t("propertyDetail.requestInformation")}
-          </a>
           </div>
         </div>
       </section>
