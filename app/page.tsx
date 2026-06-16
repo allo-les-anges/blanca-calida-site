@@ -125,40 +125,48 @@ const COUNTRY_COPY = {
     title: "Choisissez votre destination",
     description: "Retrouvez les pays pour lesquels Amaru Homes dispose d'un catalogue immobilier, actif ou en cours de preparation.",
     spain: ["Espagne", "Catalogue actif", "Costa Blanca, Costa del Sol, Costa Calida et Costa Almeria.", "Explorer les regions"],
-    portugal: ["Portugal", "Catalogue actif", "Biens synchronises depuis le catalogue Portugal.", "Voir les biens"],
-    georgia: ["Georgie", "Bientot disponible", "Catalogue en attente du flux XML pour activer la destination.", "Bientot disponible"],
+    portugal: ["Portugal", "Catalogue actif", "Algarve, Lisbonne, Porto, Silver Coast et Madere.", "Explorer les regions"],
+    georgia: ["Georgie", "Bientot disponible", "Catalogue bientot disponible.", "Bientot disponible"],
   },
   en: {
     eyebrow: "International catalogues",
     title: "Choose your destination",
     description: "Browse the countries where Amaru Homes has an active or upcoming property catalogue.",
     spain: ["Spain", "Active catalogue", "Costa Blanca, Costa del Sol, Costa Calida and Costa Almeria.", "Explore regions"],
-    portugal: ["Portugal", "Active catalogue", "Properties synchronized from the Portugal catalogue.", "View properties"],
-    georgia: ["Georgia", "Coming soon", "Catalogue pending XML feed activation.", "Coming soon"],
+    portugal: ["Portugal", "Active catalogue", "Algarve, Lisbon, Porto, Silver Coast and Madeira.", "Explore regions"],
+    georgia: ["Georgia", "Coming soon", "Catalogue bientot disponible.", "Coming soon"],
   },
   es: {
     eyebrow: "Catalogos internacionales",
     title: "Elija su destino",
     description: "Consulte los paises donde Amaru Homes tiene un catalogo inmobiliario activo o en preparacion.",
     spain: ["Espana", "Catalogo activo", "Costa Blanca, Costa del Sol, Costa Calida y Costa Almeria.", "Explorar regiones"],
-    portugal: ["Portugal", "Catalogo activo", "Propiedades sincronizadas desde el catalogo de Portugal.", "Ver propiedades"],
-    georgia: ["Georgia", "Proximamente", "Catalogo pendiente de activacion del feed XML.", "Proximamente"],
+    portugal: ["Portugal", "Catalogo activo", "Algarve, Lisboa, Porto, Silver Coast y Madeira.", "Explorar regiones"],
+    georgia: ["Georgia", "Proximamente", "Catalogo pronto disponible.", "Proximamente"],
   },
   nl: {
     eyebrow: "Internationale catalogi",
     title: "Kies uw bestemming",
     description: "Bekijk de landen waarvoor Amaru Homes een actieve of aankomende vastgoedcatalogus heeft.",
     spain: ["Spanje", "Actieve catalogus", "Costa Blanca, Costa del Sol, Costa Calida en Costa Almeria.", "Regio's bekijken"],
-    portugal: ["Portugal", "Actieve catalogus", "Woningen gesynchroniseerd vanuit de Portugal-catalogus.", "Woningen bekijken"],
-    georgia: ["Georgie", "Binnenkort", "Catalogus wacht op activering van de XML-feed.", "Binnenkort"],
+    portugal: ["Portugal", "Actieve catalogus", "Algarve, Lissabon, Porto, Silver Coast en Madeira.", "Regio's bekijken"],
+    georgia: ["Georgie", "Binnenkort", "Catalogus binnenkort beschikbaar.", "Binnenkort"],
   },
   pl: {
     eyebrow: "Katalogi miedzynarodowe",
     title: "Wybierz kierunek",
     description: "Zobacz kraje, dla ktorych Amaru Homes ma aktywny lub przygotowywany katalog nieruchomosci.",
     spain: ["Hiszpania", "Aktywny katalog", "Costa Blanca, Costa del Sol, Costa Calida i Costa Almeria.", "Odkryj regiony"],
-    portugal: ["Portugalia", "Aktywny katalog", "Nieruchomosci zsynchronizowane z katalogu Portugalii.", "Zobacz nieruchomosci"],
-    georgia: ["Gruzja", "Wkrotce", "Katalog czeka na aktywacje feedu XML.", "Wkrotce"],
+    portugal: ["Portugalia", "Aktywny katalog", "Algarve, Lizbona, Porto, Silver Coast i Madera.", "Odkryj regiony"],
+    georgia: ["Gruzja", "Wkrotce", "Katalog bedzie wkrotce dostepny.", "Wkrotce"],
+  },
+  pt: {
+    eyebrow: "Catalogos internacionais",
+    title: "Escolha o seu destino",
+    description: "Explore os paises onde a Amaru Homes tem um catalogo imobiliario ativo ou em preparacao.",
+    spain: ["Espanha", "Catalogo ativo", "Costa Blanca, Costa del Sol, Costa Calida e Costa Almeria.", "Explorar regioes"],
+    portugal: ["Portugal", "Catalogo ativo", "Algarve, Lisboa, Porto, Silver Coast e Madeira.", "Explorar regioes"],
+    georgia: ["Georgia", "Em breve", "Catalogo em breve disponivel.", "Em breve"],
   },
   ar: {
     eyebrow: "كتالوجات دولية",
@@ -215,6 +223,13 @@ const PORTUGAL_AREAS = [
     description: "Ile, climat doux et biens avec fort attrait lifestyle.",
   },
 ];
+
+const PORTUGAL_REGION_DISPLAY = PORTUGAL_AREAS.map((area, index) => ({
+  name: area.name,
+  image: area.image,
+  description: area.description,
+  size: index === 0 ? "md:col-span-2 md:row-span-1" : "md:col-span-1 md:row-span-1",
+}));
 
 function HomeContent() {
   const router = useRouter();
@@ -383,7 +398,7 @@ function HomeContent() {
   const portugalAreaCounts = useMemo(() => {
     const counts: Record<string, number> = {};
     PORTUGAL_AREAS.forEach((area) => {
-      counts[area.id] = allProperties.filter((property) =>
+      counts[area.name] = allProperties.filter((property) =>
         property?.region === "Portugal" &&
         area.towns.some((town) => normalizeLocation(town) === normalizeLocation(property.town || property.ville))
       ).length;
@@ -473,12 +488,15 @@ function HomeContent() {
     handleSpainCatalogClick();
   };
 
-  const handlePortugalAreaClick = (areaId: string) => {
+  const handlePortugalAreaClick = (areaName: string) => {
+    const area = PORTUGAL_AREAS.find((item) => item.name === areaName || item.id === areaName);
+    if (!area) return;
+
     setFilters((prev) => ({
       ...prev,
       region: "Portugal",
       town: "",
-      portugalArea: areaId,
+      portugalArea: area.id,
     }));
     setVisibleCount(12);
     const section = document.getElementById("collection");
@@ -621,72 +639,17 @@ function HomeContent() {
       {/* GRILLE DES RÉGIONS */}
       {filters.region === "Portugal" && (
         <section id="portugal-regions" className={`py-12 transition-colors duration-500 ${bgColor}`}>
-          <div className="max-w-[1600px] mx-auto px-6 py-12">
-            <div className="mb-12 flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
-              <div className="max-w-2xl">
-                <span className="text-[#D8C9B6] text-[10px] font-black uppercase tracking-[0.4em] mb-3 block">
-                  Portugal
-                </span>
-                <h2 className={`text-4xl md:text-6xl font-serif italic leading-tight ${textColor}`}>
-                  Regions du Portugal
-                </h2>
-              </div>
-              <p
-                className={`max-w-sm border-l pl-6 text-xs font-light italic leading-relaxed ${mutedText}`}
-                style={{ borderColor: isDarkVisual ? 'color-mix(in srgb, #FAFAFA 10%, transparent)' : '#D8C9B6' }}
-              >
-                Explorez les zones actuellement disponibles dans le catalogue Portugal synchronise.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:auto-rows-[360px]">
-              {PORTUGAL_AREAS.map((area, index) => {
-                const count = portugalAreaCounts[area.id] || 0;
-                const isSelected = filters.portugalArea === area.id;
-                return (
-                  <button
-                    key={area.id}
-                    type="button"
-                    onClick={() => handlePortugalAreaClick(area.id)}
-                    className={`group relative min-h-[320px] overflow-hidden bg-slate-900 text-left md:min-h-0 ${index === 0 ? "md:col-span-2" : ""}`}
-                  >
-                    <div className="absolute inset-0">
-                      <img
-                        src={area.image}
-                        alt={area.name}
-                        className="h-full w-full object-cover opacity-90 transition-transform duration-[4s] ease-out group-hover:scale-105 group-hover:opacity-80"
-                      />
-                      <div className={`absolute inset-0 bg-gradient-to-t from-black/90 via-black/25 to-transparent ${isSelected ? "opacity-95" : "opacity-80"}`} />
-                    </div>
-
-                    <div className="absolute inset-0 flex flex-col justify-end p-8 text-white">
-                      <div className="space-y-3">
-                        <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-[#D8C9B6]">
-                          {count} biens
-                        </p>
-                        <h3 className="font-serif text-3xl italic leading-none text-white md:text-4xl">
-                          {area.name}
-                        </h3>
-                        <p className="max-w-sm text-xs leading-6 text-white/75">
-                          {area.description}
-                        </p>
-                        <div className="relative pt-4">
-                          <div className="absolute left-0 top-0 h-px w-8 bg-white/40 transition-all duration-700 group-hover:w-full" />
-                          <span className="block pt-3 text-[8px] font-light uppercase tracking-[0.4em] text-white">
-                            Voir les biens
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className={`absolute inset-0 border pointer-events-none ${isSelected ? "border-[#D8C9B6]" : "border-white/5"}`} />
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+          <RegionGrid
+            properties={allProperties}
+            regionCounts={portugalAreaCounts}
+            regions={PORTUGAL_REGION_DISPLAY}
+            eyebrow="Portugal"
+            title="Regions du Portugal"
+            description="Explorez les zones actuellement disponibles dans le catalogue Portugal synchronise."
+            onRegionClick={handlePortugalAreaClick}
+          />
         </section>
       )}
-
       {filters.region !== "Portugal" && (
         <section id="spain-regions" className={`py-12 transition-colors duration-500 ${bgColor}`}>
           <RegionGrid properties={allProperties} regionCounts={regionCounts} onRegionClick={handleRegionClick} />

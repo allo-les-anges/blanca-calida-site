@@ -157,7 +157,7 @@ export default function DevelopmentPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
             {devUnits.map((unit) => (
-              <div key={unit.id} className={`group rounded-[2.5rem] overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border ${borderColor} ${cardColor}`}>
+              <div key={unit.id} className={`group rounded-none overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border ${borderColor} ${cardColor}`}>
                 <div className="relative h-64 overflow-hidden">
                   <img 
                     src={Array.isArray(unit.images) ? (unit.images[0]?.url || unit.images[0]) : "/placeholder.jpg"} 

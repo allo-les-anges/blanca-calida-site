@@ -209,7 +209,7 @@ async function syncSources(sources: SyncSource[]) {
     let translationSkipped = 0;
     let translationFieldsUsed = 0;
     const syncErrors: string[] = [];
-    const languages = ['fr', 'en', 'es', 'nl', 'pl'];
+    const languages = ['fr', 'en', 'es', 'nl', 'pt', 'pl'];
 
     for (const source of sources) {
       const response = await fetch(source.url, { cache: 'no-store' });

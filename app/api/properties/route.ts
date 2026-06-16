@@ -138,7 +138,7 @@ export async function GET(request: Request) {
     
     // 1. Paramètres de langue
     const lang = searchParams.get('lang') || 'fr';
-    const supportedLangs = ['fr', 'en', 'es', 'nl', 'pl', 'ar', 'ka'];
+    const supportedLangs = ['fr', 'en', 'es', 'nl', 'pt', 'pl', 'ar', 'ka'];
     const selectedLang = supportedLangs.includes(lang) ? lang : 'fr';
 
     // 2. Nouveaux paramètres de filtrage admin
@@ -286,9 +286,9 @@ export async function GET(request: Request) {
       
       // Nettoyage des champs linguistiques bruts pour alléger le JSON
       titre_fr: undefined, titre_en: undefined, titre_es: undefined, 
-      titre_nl: undefined, titre_pl: undefined, titre_ar: undefined, titre_ka: undefined,
+      titre_nl: undefined, titre_pt: undefined, titre_pl: undefined, titre_ar: undefined, titre_ka: undefined,
       description_fr: undefined, description_en: undefined, description_es: undefined, 
-      description_nl: undefined, description_pl: undefined, description_ar: undefined, description_ka: undefined,
+      description_nl: undefined, description_pt: undefined, description_pl: undefined, description_ar: undefined, description_ka: undefined,
     }));
 
     return NextResponse.json(formatted);

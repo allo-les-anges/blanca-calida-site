@@ -18,6 +18,15 @@ interface RegionGridProps {
   properties: Property[];
   regionCounts?: Record<string, number>;
   onRegionClick: (regionName: string) => void;
+  regions?: Array<{
+    name: string;
+    image: string;
+    size?: string;
+    description?: string;
+  }>;
+  eyebrow?: string;
+  title?: string;
+  description?: string;
 }
 
 const CITY_TO_REGION_MAP: Record<string, string> = {
@@ -71,7 +80,15 @@ const REGIONS_DISPLAY = [
   { name: "Costa Almeria", image: "/images/regions/4.jpg", size: "md:col-span-1 md:row-span-1" }
 ];
 
-export default function RegionGrid({ properties, regionCounts: serverRegionCounts, onRegionClick }: RegionGridProps) {
+export default function RegionGrid({
+  properties,
+  regionCounts: serverRegionCounts,
+  onRegionClick,
+  regions = REGIONS_DISPLAY,
+  eyebrow,
+  title,
+  description,
+}: RegionGridProps) {
   const { resolvedTheme } = useTheme();
   const { t } = useTranslation();
   const searchParams = useSearchParams();
@@ -112,13 +129,13 @@ export default function RegionGrid({ properties, regionCounts: serverRegionCount
         <div className="max-w-2xl">
           <motion.div initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
             <span className="text-[#D8C9B6] text-[10px] font-black uppercase tracking-[0.4em] mb-3 block">
-              {t('home.regionGrid.ourDestinations')}
+              {eyebrow || t('home.regionGrid.ourDestinations')}
             </span>
             <h2 
               className="text-4xl md:text-6xl font-serif italic leading-tight"
               style={{ color: isDarkVisual ? '#FAFAFA' : '#171716' }}
             >
-              {t('home.regionGrid.exceptionalPlaces')}
+              {title || t('home.regionGrid.exceptionalPlaces')}
             </h2>
           </motion.div>
         </div>
@@ -134,14 +151,14 @@ export default function RegionGrid({ properties, regionCounts: serverRegionCount
             className="text-xs font-light leading-relaxed italic"
             style={{ color: isDarkVisual ? '#D8C9B6' : '#171716' }}
           >
-            {t('home.regionGrid.description')}
+            {description || t('home.regionGrid.description')}
           </p>
         </motion.div>
       </div>
 
       {/* GRILLE */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 auto-rows-[300px] md:auto-rows-[400px]">
-        {REGIONS_DISPLAY.map((region, index) => {
+        {regions.map((region, index) => {
           const count = regionCounts[region.name] || 0;
           return (
             <motion.div

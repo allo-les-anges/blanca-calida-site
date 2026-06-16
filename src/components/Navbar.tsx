@@ -84,6 +84,7 @@ export default function Navbar() {
     { code: "fr", label: "FR" },
     { code: "en", label: "EN" },
     { code: "es", label: "ES" },
+    { code: "pt", label: "PT" },
     { code: "nl", label: "NL" },
     { code: "ar", label: "AR" },
     { code: "pl", label: "PL" },
