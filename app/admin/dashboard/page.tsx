@@ -1270,6 +1270,9 @@ export default function AdminDashboard() {
                     const checked = featuredPropertyIds.includes(propertyId);
                     const disabled = !checked && featuredPropertyIds.length >= 5;
                     const price = Number(property.price || 0).toLocaleString("fr-FR");
+                    const listedDate = property.created_at
+                      ? new Date(property.created_at).toLocaleDateString("fr-FR")
+                      : "";
 
                     return (
                       <label
@@ -1289,6 +1292,11 @@ export default function AdminDashboard() {
                           <span className={`mt-1 block text-[9px] font-bold uppercase tracking-wider truncate ${isDarkVisual ? "text-slate-500" : "text-slate-600"}`}>
                             REF {property.ref || propertyId} · {property.town || property.ville || "Localisation"} · {price} €
                           </span>
+                          {listedDate && (
+                            <span className="mt-1 block text-[8px] font-black uppercase tracking-widest text-[#D8C9B6]">
+                              Mis en ligne le {listedDate}
+                            </span>
+                          )}
                         </span>
                         <input
                           type="checkbox"
