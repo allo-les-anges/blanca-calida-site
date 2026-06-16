@@ -15,7 +15,7 @@ export default function DevelopmentPage() {
   useEffect(() => {
     async function load() {
       try {
-        const res = await fetch("/api/properties");
+        const res = await fetch("/api/properties?limit=200");
         const data = await res.json();
         setProperties(data);
       } catch (err) {
@@ -34,8 +34,9 @@ export default function DevelopmentPage() {
 
   const devUnits = properties.filter((p) => {
     const nameInJson = slugify(p.development_name || "");
+    const refPrefix = String(p.ref || "").split("-")[0]?.toLowerCase();
     const idInUrl = String(devId).toLowerCase();
-    return nameInJson === idInUrl;
+    return nameInJson === idInUrl || refPrefix === idInUrl;
   });
 
   if (loading) return (
