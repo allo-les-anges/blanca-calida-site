@@ -7,9 +7,16 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-const SOURCES = [
+type SyncSource = {
+  defaultRegion: string;
+  defaultTown?: string;
+  url: string;
+};
+
+const SOURCES: SyncSource[] = [
   { defaultRegion: "Costa Blanca", url: "https://medianewbuild.com/file/hh-media-bucket/agents/7b38827b-c741-4817-a35c-b4e886e7ff6d/feed_blanca_calida.xml" },
-  { defaultRegion: "Costa del Sol", url: "https://medianewbuild.com/file/hh-media-bucket/agents/6d5cb68a-3636-4095-b0ce-7dc9ec2df2d2/feed_sol.xml" }
+  { defaultRegion: "Costa del Sol", url: "https://medianewbuild.com/file/hh-media-bucket/agents/6d5cb68a-3636-4095-b0ce-7dc9ec2df2d2/feed_sol.xml" },
+  { defaultRegion: "Portugal", defaultTown: "Portugal", url: "https://medianewbuild.com/file/hh-media-bucket/agents/6d5cb68a-3636-4095-b0ce-7dc9ec2df2d2/feed_portugal.xml" }
 ];
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
@@ -70,6 +77,35 @@ function normalizePositiveNumberText(value: unknown) {
 
 function pickSurfaceValue(xmlValue: unknown, existingValue: unknown) {
   return normalizePositiveNumberText(xmlValue) || normalizePositiveNumberText(existingValue) || "0";
+}
+
+function getXmlPropertyId(property: any) {
+  return String(property?.id || property?.$?.id || "").trim();
+}
+
+function getXmlPropertyRef(property: any) {
+  return String(property?.ref || property?.$?.ref || getXmlPropertyId(property)).trim();
+}
+
+function extractPropertiesFromParsedXml(result: any) {
+  const rootKey = Object.keys(result || {})[0];
+  const root = rootKey ? result[rootKey] : {};
+  let properties = root?.property || root?.ad || [];
+  if (!Array.isArray(properties)) properties = [properties];
+  return properties.filter((property: any) => getXmlPropertyId(property));
+}
+
+function extractImageUrls(images: any): string[] {
+  if (!images?.image) return [];
+  const rawImages = Array.isArray(images.image) ? images.image : [images.image];
+  return rawImages
+    .map((img: any) => (typeof img === 'string' ? img : img?.url))
+    .filter((url: any): url is string => typeof url === 'string' && /^https?:\/\//i.test(url))
+    .slice(0, 20);
+}
+
+function inferDefaultRegion(xmlUrl: string) {
+  return /portugal/i.test(xmlUrl) ? "Portugal" : "Espagne";
 }
 
 async function translateText(text: string, target: keyof typeof TRANSLATION_TARGETS, isHtml = false) {
@@ -166,7 +202,7 @@ async function upsertVillasInBatches(updates: any[]) {
   return synced;
 }
 
-export async function GET() {
+async function syncSources(sources: SyncSource[]) {
   try {
     let totalSynced = 0;
     let totalTranslated = 0;
@@ -175,17 +211,19 @@ export async function GET() {
     const syncErrors: string[] = [];
     const languages = ['fr', 'en', 'es', 'nl', 'pl'];
 
-    for (const source of SOURCES) {
+    for (const source of sources) {
       const response = await fetch(source.url, { cache: 'no-store' });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
       const xmlText = await response.text();
       
       const parser = new xml2js.Parser({ explicitArray: false, mergeAttrs: true, trim: true });
       const result = await parser.parseStringPromise(xmlText);
-      const rootKey = Object.keys(result)[0];
-      let properties = result[rootKey].property || [];
-      if (!Array.isArray(properties)) properties = [properties];
+      const properties = extractPropertiesFromParsedXml(result);
 
-      const externalIds = properties.map((p: any) => String(p.id)).filter(Boolean);
+      const externalIds = properties.map((p: any) => getXmlPropertyId(p)).filter(Boolean);
       let existingRows: any[] = [];
       try {
         existingRows = await fetchExistingTranslations(externalIds);
@@ -202,54 +240,49 @@ export async function GET() {
         const loc = p.location || {};
         const dists = p.distances || {};
         const features = normalizeFeatureList(p.features);
-        const existing = existingByExternalId.get(String(p.id)) || {};
-        const isNewProperty = !existingByExternalId.has(String(p.id));
+        const idExterne = getXmlPropertyId(p);
+        const existing = existingByExternalId.get(idExterne) || {};
+        const isNewProperty = !existingByExternalId.has(idExterne);
         
         // Gestion des images (extraction de l'URL si objet ou string)
-        let imagesArray: string[] = [];
-        if (p.images && p.images.image) {
-          const rawImages = Array.isArray(p.images.image) ? p.images.image : [p.images.image];
-          imagesArray = rawImages
-            .map((img: any) => (typeof img === 'string' ? img : img.url))
-            .filter((u: any) => typeof u === 'string');
-        }
+        const imagesArray = extractImageUrls(p.images);
 
         // Objet de base mappé sur vos colonnes SQL exactes
         const base: any = {
-          id_externe: String(p.id),
-          ref: String(p.ref || p.id),
-          town: String(p.town || loc.town || "Espagne"),
-          ville: String(p.town || loc.town || "Espagne"),
-          province: String(p.province || ""),
+          id_externe: idExterne,
+          ref: getXmlPropertyRef(p),
+          town: String(p.town || p.city || loc.town || source.defaultTown || source.defaultRegion),
+          ville: String(p.town || p.city || loc.town || source.defaultTown || source.defaultRegion),
+          province: String(p.province || loc.province || ""),
           region: source.defaultRegion,
           latitude: loc.latitude ? parseFloat(loc.latitude) : null,
           longitude: loc.longitude ? parseFloat(loc.longitude) : null,
-          type: String(p.type || "Villa"),
-          beds: String(p.beds || "0"),
-          baths: String(p.baths || "0"),
+          type: String(p.type || p.property_type || "Villa"),
+          beds: String(p.beds || p.bedrooms || "0"),
+          baths: String(p.baths || p.bathrooms || "0"),
           pool: (p.pool === "1" || JSON.stringify(p.features).includes("pool")) ? "Oui" : "Non",
-          price: parseFloat(p.price) || 0,
-          prix: parseFloat(p.price) || 0,
+          price: parseFloat(p.price || p.prix) || 0,
+          prix: parseFloat(p.price || p.prix) || 0,
           currency: String(p.currency || "EUR"),
           distance_beach: dists.beach ? String(dists.beach) : extractFeatureDistance(features, "Sea distance") || null,
           distance_golf: dists.golf ? String(dists.golf) : null,
           distance_town: dists.town_distance || dists.town || null,
-          surface_built: pickSurfaceValue(surf.built, existing.surface_built),
-          surface_plot: pickSurfaceValue(surf.plot, existing.surface_plot),
-          surface_useful: pickSurfaceValue(surf.useful, existing.surface_useful),
+          surface_built: pickSurfaceValue(surf.built || p.surface_built || p.built_surface || p.surface?.built, existing.surface_built),
+          surface_plot: pickSurfaceValue(surf.plot || p.surface_plot || p.plot_surface || p.surface?.plot, existing.surface_plot),
+          surface_useful: pickSurfaceValue(surf.useful || p.surface_useful || p.useful_surface || p.surface?.useful, existing.surface_useful),
           images: imagesArray,
           plans: extractPlanUrls(p.plans),
           updated_at: new Date().toISOString(),
           
           // MAPPING CORRIGÉ SELON VOTRE SQL :
-          promoteur_name: p.development_name ? String(p.development_name) : null,
-          commission_percentage: p.commission?.quantity ? parseFloat(p.commission.quantity) : 0,
+          promoteur_name: p.development_name || p.promoter_name ? String(p.development_name || p.promoter_name) : null,
+          commission_percentage: parseFloat(p.commission_percentage || p.commission?.quantity) || 0,
           is_excluded: false // Valeur par défaut
         };
 
         // Titres et descriptions multilingues fournis par le XML.
         const titleObj = p.title || {};
-        const descObj = p.desc || {};
+        const descObj = p.desc || p.description || {};
         const sourceTitle = pickSourceText(p.development_name, titleObj.fr, titleObj.en, "Villa Moderne");
         const sourceDescription = pickSourceText(descObj.fr, descObj.en);
 
@@ -331,5 +364,30 @@ export async function GET() {
   } catch (error: any) {
     console.error("Erreur de synchronisation:", error.message);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  }
+}
+
+export async function GET() {
+  return syncSources(SOURCES);
+}
+
+export async function POST(req: Request) {
+  try {
+    const body = await req.json();
+    const xmlUrl = String(body.xmlUrl || body.xml_url || "").trim();
+
+    if (!xmlUrl) {
+      return NextResponse.json({ success: false, error: "xmlUrl requis" }, { status: 400 });
+    }
+
+    return syncSources([
+      {
+        url: xmlUrl,
+        defaultRegion: String(body.defaultRegion || body.region || inferDefaultRegion(xmlUrl)),
+        defaultTown: body.defaultTown ? String(body.defaultTown) : undefined,
+      },
+    ]);
+  } catch (error: any) {
+    return NextResponse.json({ success: false, error: error.message || "Erreur inconnue" }, { status: 500 });
   }
 }
