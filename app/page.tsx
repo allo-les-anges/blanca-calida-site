@@ -238,22 +238,6 @@ function HomeContent() {
     });
   }, [allProperties, filters, portfolioMinPrice]);
 
-  const hasActiveFilters = Object.entries(filters).some(([key, value]) => {
-    if (key === "minPrice") return value !== portfolioMinPrice;
-    return value !== "" && value !== false;
-  });
-
-  const orderedProperties = useMemo(() => {
-    if (hasActiveFilters || featuredPropertyIds.length === 0) return filteredProperties;
-
-    const featuredRank = new Map(featuredPropertyIds.map((id, index) => [id, index]));
-    return [...filteredProperties].sort((a, b) => {
-      const rankA = featuredRank.get(getPropertyExternalId(a)) ?? Number.MAX_SAFE_INTEGER;
-      const rankB = featuredRank.get(getPropertyExternalId(b)) ?? Number.MAX_SAFE_INTEGER;
-      return rankA - rankB;
-    });
-  }, [featuredPropertyIds, filteredProperties, hasActiveFilters]);
-
   const monthlySelection = useMemo(() => {
     if (featuredPropertyIds.length === 0) return [];
 
@@ -267,8 +251,18 @@ function HomeContent() {
       });
   }, [allProperties, featuredPropertyIds]);
 
-  const propertiesToShow = orderedProperties.slice(0, visibleCount);
-  const hasMoreProperties = orderedProperties.length > propertiesToShow.length;
+  const monthlySelectionIds = useMemo(
+    () => new Set(monthlySelection.map((property) => getPropertyExternalId(property))),
+    [monthlySelection]
+  );
+
+  const portfolioProperties = useMemo(
+    () => filteredProperties.filter((property) => !monthlySelectionIds.has(getPropertyExternalId(property))),
+    [filteredProperties, monthlySelectionIds]
+  );
+
+  const propertiesToShow = portfolioProperties.slice(0, visibleCount);
+  const hasMoreProperties = portfolioProperties.length > propertiesToShow.length;
 
   const handleSearch = async (newFilters: any) => {
     const nextFilters = { ...filters, ...newFilters };
