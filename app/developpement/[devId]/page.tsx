@@ -15,7 +15,7 @@ export default function DevelopmentPage() {
   useEffect(() => {
     async function load() {
       try {
-        const res = await fetch("/api/properties?limit=200");
+        const res = await fetch(`/api/properties?development=${encodeURIComponent(String(devId))}&limit=200`);
         const data = await res.json();
         setProperties(data);
       } catch (err) {
@@ -25,7 +25,7 @@ export default function DevelopmentPage() {
       }
     }
     load();
-  }, []);
+  }, [devId]);
 
   const slugify = (text: string) =>
     text?.toString().toLowerCase().trim()
@@ -34,9 +34,10 @@ export default function DevelopmentPage() {
 
   const devUnits = properties.filter((p) => {
     const nameInJson = slugify(p.development_name || "");
+    const promoterInJson = slugify(p.promoteur_name || "");
     const refPrefix = String(p.ref || "").split("-")[0]?.toLowerCase();
     const idInUrl = String(devId).toLowerCase();
-    return nameInJson === idInUrl || refPrefix === idInUrl;
+    return nameInJson === idInUrl || promoterInJson === idInUrl || refPrefix === idInUrl;
   });
 
   if (loading) return (
@@ -49,6 +50,7 @@ export default function DevelopmentPage() {
   if (!devUnits.length) return <div>Projet introuvable.</div>;
 
   const dev = devUnits[0];
+  const developmentName = dev.development_name || dev.promoteur_name || `Programme ${devId}`;
 
   return (
     <main className="bg-white min-h-screen">
@@ -67,7 +69,7 @@ export default function DevelopmentPage() {
                 <Building2 size={20} />
                 <span className="text-[10px] font-black uppercase tracking-[0.3em]">Développement Exclusif</span>
               </div>
-              <h1 className="text-6xl md:text-8xl font-serif italic leading-tight">{dev.development_name}</h1>
+              <h1 className="text-6xl md:text-8xl font-serif italic leading-tight">{developmentName}</h1>
               <p className="text-xl text-slate-400 mt-4 flex items-center gap-2">
                 <MapPin size={20} className="text-emerald-500" /> {dev.town}, {dev.province}
               </p>

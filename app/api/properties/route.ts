@@ -44,6 +44,12 @@ function normalizeLocation(value: unknown) {
     : "";
 }
 
+function slugify(value: unknown) {
+  return typeof value === "string"
+    ? value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim().replace(/\s+/g, "-").replace(/[^\w-]+/g, "")
+    : "";
+}
+
 function getPropertyRegion(property: any) {
   const directRegion = property.region?.trim();
   if (directRegion) return directRegion;
@@ -139,6 +145,7 @@ export async function GET(request: Request) {
     const region = searchParams.get('region');
     const town = searchParams.get('town');
     const reference = searchParams.get('reference');
+    const development = searchParams.get('development') || '';
     const id = searchParams.get('id');
     const featuredIds = searchParams
       .get('featuredIds')
@@ -148,6 +155,7 @@ export async function GET(request: Request) {
       .slice(0, 6) || [];
     const limitParam = Number(searchParams.get('limit') || 24);
     const limit = Number.isFinite(limitParam) ? Math.min(Math.max(limitParam, 1), 200) : 24;
+    const isDevelopmentLookup = Boolean(development);
 
     // Initialisation de la requête Supabase
     let query = supabase
@@ -214,12 +222,42 @@ export async function GET(request: Request) {
       }
     }
 
-    const { data: properties, error } = await query.order('price', { ascending: true }).limit(limit);
+    let rawProperties: any[] = [];
+    let error: any = null;
+
+    if (isDevelopmentLookup) {
+      const pageSize = 1000;
+      for (let from = 0; ; from += pageSize) {
+        const result = await query.order('price', { ascending: true }).range(from, from + pageSize - 1);
+        if (result.error) {
+          error = result.error;
+          break;
+        }
+        rawProperties.push(...(result.data || []));
+        if (!result.data || result.data.length < pageSize) break;
+      }
+    } else {
+      const result = await query.order('price', { ascending: true }).limit(limit);
+      rawProperties = result.data || [];
+      error = result.error;
+    }
 
     if (error) {
       console.error("Erreur Supabase:", error.message);
       return NextResponse.json({ error: "Erreur base de données" }, { status: 500 });
     }
+
+    const properties = isDevelopmentLookup
+      ? (rawProperties || []).filter((property: any) => {
+          const target = slugify(development);
+          const refPrefix = String(property.ref || '').split('-')[0]?.toLowerCase();
+          return (
+            slugify(property.development_name) === target ||
+            slugify(property.promoteur_name) === target ||
+            refPrefix === target
+          );
+        })
+      : rawProperties;
 
     // 5. Transformation pour renvoyer les champs dans la bonne langue
     const formatted = properties.map((p: any) => ({
