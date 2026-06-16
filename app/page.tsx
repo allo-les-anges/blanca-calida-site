@@ -100,6 +100,35 @@ function mergeProperties(primary: Property[], secondary: Property[]) {
   });
 }
 
+const PORTUGAL_FEED_URL = "https://medianewbuild.com/file/hh-media-bucket/agents/6d5cb68a-3636-4095-b0ce-7dc9ec2df2d2/feed_portugal.xml";
+const COUNTRY_CATALOGS = [
+  {
+    name: "Espagne",
+    image: "/images/countries/spain.jpg",
+    status: "Catalogue actif",
+    description: "Costa Blanca, Costa del Sol, Costa Calida et Costa Almeria.",
+    action: "Explorer les regions",
+    type: "scroll",
+  },
+  {
+    name: "Portugal",
+    image: "/images/countries/portugal.jpg",
+    status: "Flux XML disponible",
+    description: "Catalogue Portugal en preparation avant integration dans la base.",
+    action: "Voir le flux XML",
+    type: "external",
+    href: PORTUGAL_FEED_URL,
+  },
+  {
+    name: "Georgie",
+    image: "/images/countries/georgia.jpg",
+    status: "Bientot disponible",
+    description: "Catalogue en attente du flux XML pour activer la destination.",
+    action: "Bientot disponible",
+    type: "disabled",
+  },
+];
+
 function HomeContent() {
   const router = useRouter();
   const searchParamsOrigin = useSearchParams();
@@ -300,6 +329,11 @@ function HomeContent() {
     if (section) setTimeout(() => section.scrollIntoView({ behavior: "smooth" }), 100);
   };
 
+  const handleSpainCatalogClick = () => {
+    const section = document.getElementById("spain-regions");
+    if (section) section.scrollIntoView({ behavior: "smooth" });
+  };
+
   if (!mounted) return null;
 
   // Couleurs dynamiques : le mode jour dépend du thème, pas seulement du pack light.
@@ -346,8 +380,108 @@ function HomeContent() {
 
       <ScrollingBanner />
 
+      {/* CATALOGUES PAYS */}
+      <section className={`py-16 md:py-20 transition-colors duration-500 ${bgColor}`}>
+        <div className="max-w-[1600px] mx-auto px-6">
+          <div className="mb-12 flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
+            <div className="max-w-2xl">
+              <span className="text-[#D8C9B6] text-[10px] font-black uppercase tracking-[0.4em] mb-3 block">
+                Catalogues internationaux
+              </span>
+              <h2 className={`text-4xl md:text-6xl font-serif italic leading-tight ${textColor}`}>
+                Choisissez votre destination
+              </h2>
+            </div>
+            <p
+              className={`max-w-sm border-l pl-6 text-xs font-light italic leading-relaxed ${mutedText}`}
+              style={{ borderColor: isDarkVisual ? 'color-mix(in srgb, #FAFAFA 10%, transparent)' : '#D8C9B6' }}
+            >
+              Retrouvez les pays pour lesquels Amaru Homes dispose d'un catalogue immobilier, actif ou en cours de preparation.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:auto-rows-[420px]">
+            {COUNTRY_CATALOGS.map((country, index) => {
+              const content = (
+                <>
+                  <div className="absolute inset-0">
+                    <img
+                      src={country.image}
+                      alt={country.name}
+                      className="h-full w-full object-cover opacity-90 transition-transform duration-[4s] ease-out group-hover:scale-105 group-hover:opacity-80"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/25 to-transparent opacity-85" />
+                  </div>
+
+                  <div className="absolute inset-0 flex flex-col justify-end p-8 text-white">
+                    <div className="space-y-3">
+                      <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-[#D8C9B6]">
+                        {country.status}
+                      </p>
+                      <h3 className="font-serif text-4xl italic leading-none text-white">
+                        {country.name}
+                      </h3>
+                      <p className="max-w-sm text-xs leading-6 text-white/75">
+                        {country.description}
+                      </p>
+                      <div className="relative pt-4">
+                        <div className="absolute left-0 top-0 h-px w-8 bg-white/40 transition-all duration-700 group-hover:w-full" />
+                        <span className="block pt-3 text-[8px] font-light uppercase tracking-[0.4em] text-white">
+                          {country.action}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="absolute inset-0 border border-white/5 pointer-events-none" />
+                </>
+              );
+
+              if (country.type === "external" && country.href) {
+                return (
+                  <a
+                    key={country.name}
+                    href={country.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="group relative min-h-[360px] overflow-hidden bg-slate-900 md:min-h-0"
+                    style={{ transitionDelay: `${index * 50}ms` }}
+                  >
+                    {content}
+                  </a>
+                );
+              }
+
+              if (country.type === "disabled") {
+                return (
+                  <div
+                    key={country.name}
+                    className="group relative min-h-[360px] overflow-hidden bg-slate-900 opacity-80 md:min-h-0"
+                    aria-disabled="true"
+                    style={{ transitionDelay: `${index * 50}ms` }}
+                  >
+                    {content}
+                  </div>
+                );
+              }
+
+              return (
+                <button
+                  key={country.name}
+                  type="button"
+                  onClick={handleSpainCatalogClick}
+                  className="group relative min-h-[360px] overflow-hidden bg-slate-900 text-left md:min-h-0"
+                  style={{ transitionDelay: `${index * 50}ms` }}
+                >
+                  {content}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
       {/* GRILLE DES RÉGIONS */}
-      <section className={`py-12 transition-colors duration-500 ${bgColor}`}>
+      <section id="spain-regions" className={`py-12 transition-colors duration-500 ${bgColor}`}>
           <RegionGrid properties={allProperties} regionCounts={regionCounts} onRegionClick={handleRegionClick} />
       </section>
 
