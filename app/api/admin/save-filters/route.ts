@@ -128,7 +128,7 @@ export async function POST(req: Request) {
       ? body.featuredPropertyIds
           .map((value: unknown) => String(value || "").trim())
           .filter(Boolean)
-          .slice(0, 5)
+          .slice(0, 6)
       : [];
     const nextFilterConfig = {
       ...currentFilterConfig,

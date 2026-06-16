@@ -145,7 +145,7 @@ export async function GET(request: Request) {
       ?.split(',')
       .map((value) => value.trim())
       .filter(Boolean)
-      .slice(0, 5) || [];
+      .slice(0, 6) || [];
     const limitParam = Number(searchParams.get('limit') || 24);
     const limit = Number.isFinite(limitParam) ? Math.min(Math.max(limitParam, 1), 200) : 24;
 

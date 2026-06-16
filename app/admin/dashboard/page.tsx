@@ -193,7 +193,7 @@ export default function AdminDashboard() {
         setMinPropertyPrice(Number(currentFilterConfig.minPropertyPrice || 20000));
         setFeaturedPropertyIds(
           Array.isArray(currentFilterConfig.featuredPropertyIds)
-            ? currentFilterConfig.featuredPropertyIds.map((id: unknown) => String(id || "").trim()).filter(Boolean).slice(0, 5)
+            ? currentFilterConfig.featuredPropertyIds.map((id: unknown) => String(id || "").trim()).filter(Boolean).slice(0, 6)
             : []
         );
       }
@@ -1230,11 +1230,11 @@ export default function AdminDashboard() {
                     <h3 className="text-[10px] font-black uppercase tracking-widest text-[#D8C9B6]">Propriétés à la une</h3>
                   </div>
                   <span className="text-[10px] font-black text-white bg-black/30 border border-white/10 rounded-full px-3 py-1">
-                    {featuredPropertyIds.length}/5
+                    {featuredPropertyIds.length}/6
                   </span>
                 </div>
                 <p className="text-[9px] text-slate-500 italic leading-relaxed">
-                  Choisissez jusqu'à 5 biens qui apparaîtront en premier sur la home page lorsqu'aucun filtre n'est actif.
+                  Choisissez jusqu'à 6 biens qui apparaîtront en premier sur la home page lorsqu'aucun filtre n'est actif.
                 </p>
                 <div className="space-y-2">
                   <label className="text-[9px] font-black uppercase tracking-widest text-slate-500">
@@ -1268,7 +1268,7 @@ export default function AdminDashboard() {
                   {featuredPropertyOptions.map((property) => {
                     const propertyId = String(property.id_externe || "").trim();
                     const checked = featuredPropertyIds.includes(propertyId);
-                    const disabled = !checked && featuredPropertyIds.length >= 5;
+                    const disabled = !checked && featuredPropertyIds.length >= 6;
                     const price = Number(property.price || 0).toLocaleString("fr-FR");
                     const listedDate = property.updated_at
                       ? new Date(property.updated_at).toLocaleDateString("fr-FR")
@@ -1305,7 +1305,7 @@ export default function AdminDashboard() {
                           onChange={() => {
                             setFeaturedPropertyIds((prev) => {
                               if (prev.includes(propertyId)) return prev.filter((id) => id !== propertyId);
-                              if (prev.length >= 5) return prev;
+                              if (prev.length >= 6) return prev;
                               return [...prev, propertyId];
                             });
                           }}

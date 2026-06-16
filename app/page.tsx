@@ -82,7 +82,7 @@ function getConfiguredMinPrice(config: any) {
 function getConfiguredFeaturedPropertyIds(config: any) {
   const ids = config?.filter_config?.featuredPropertyIds;
   return Array.isArray(ids)
-    ? ids.map((id) => String(id || "").trim()).filter(Boolean).slice(0, 5)
+    ? ids.map((id) => String(id || "").trim()).filter(Boolean).slice(0, 6)
     : [];
 }
 
