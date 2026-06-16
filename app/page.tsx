@@ -79,6 +79,27 @@ function getConfiguredMinPrice(config: any) {
   return String(Math.max(minPrice, Number(DEFAULT_MIN_PRICE)));
 }
 
+function getConfiguredFeaturedPropertyIds(config: any) {
+  const ids = config?.filter_config?.featuredPropertyIds;
+  return Array.isArray(ids)
+    ? ids.map((id) => String(id || "").trim()).filter(Boolean).slice(0, 5)
+    : [];
+}
+
+function getPropertyExternalId(property: Property) {
+  return String(property?.id_externe || property?.ref || property?.id || "").trim();
+}
+
+function mergeProperties(primary: Property[], secondary: Property[]) {
+  const seen = new Set<string>();
+  return [...primary, ...secondary].filter((property) => {
+    const key = getPropertyExternalId(property);
+    if (!key || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
 function HomeContent() {
   const router = useRouter();
   const searchParamsOrigin = useSearchParams();
@@ -90,6 +111,7 @@ function HomeContent() {
   const [regionCounts, setRegionCounts] = useState<Record<string, number>>({});
   const [visibleCount, setVisibleCount] = useState(12);
   const [portfolioMinPrice, setPortfolioMinPrice] = useState(DEFAULT_MIN_PRICE);
+  const [featuredPropertyIds, setFeaturedPropertyIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
@@ -113,7 +135,9 @@ function HomeContent() {
         const configRes = await fetch(`/api/config?slug=${AGENCY_CONFIG_SLUG}`);
         const config = configRes.ok ? await configRes.json() : null;
         const configuredMinPrice = getConfiguredMinPrice(config);
+        const configuredFeaturedIds = getConfiguredFeaturedPropertyIds(config);
         setPortfolioMinPrice(configuredMinPrice);
+        setFeaturedPropertyIds(configuredFeaturedIds);
 
         const propertyQuery = new URLSearchParams({
           limit: "200",
@@ -124,20 +148,30 @@ function HomeContent() {
           regionCounts: "true",
           minPrice: configuredMinPrice,
         });
+        const featuredQuery = new URLSearchParams({
+          limit: "5",
+          lang: locale,
+          featuredIds: configuredFeaturedIds.join(","),
+        });
+        const featuredRequest = configuredFeaturedIds.length > 0
+          ? fetch(`/api/properties?${featuredQuery.toString()}`)
+          : Promise.resolve(null);
 
-        const [propertiesRes, regionCountsRes] = await Promise.all([
+        const [propertiesRes, regionCountsRes, featuredRes] = await Promise.all([
           fetch(`/api/properties?${propertyQuery.toString()}`),
           fetch(`/api/properties?${regionQuery.toString()}`),
+          featuredRequest,
         ]);
         const data = await propertiesRes.json();
         const countsData = await regionCountsRes.json();
+        const featuredData = featuredRes?.ok ? await featuredRes.json() : [];
         
         // CORRECTION : On s'assure que data est bien un tableau pour éviter "filter is not a function"
         if (data && Array.isArray(data)) {
-          setAllProperties(data);
+          setAllProperties(Array.isArray(featuredData) ? mergeProperties(featuredData, data) : data);
         } else {
           console.error("Format de données invalide reçu de l'API");
-          setAllProperties([]);
+          setAllProperties(Array.isArray(featuredData) ? featuredData : []);
         }
         if (countsData && !Array.isArray(countsData)) {
           setRegionCounts(countsData);
@@ -208,8 +242,20 @@ function HomeContent() {
     if (key === "minPrice") return value !== portfolioMinPrice;
     return value !== "" && value !== false;
   });
-  const propertiesToShow = filteredProperties.slice(0, visibleCount);
-  const hasMoreProperties = filteredProperties.length > propertiesToShow.length;
+
+  const orderedProperties = useMemo(() => {
+    if (hasActiveFilters || featuredPropertyIds.length === 0) return filteredProperties;
+
+    const featuredRank = new Map(featuredPropertyIds.map((id, index) => [id, index]));
+    return [...filteredProperties].sort((a, b) => {
+      const rankA = featuredRank.get(getPropertyExternalId(a)) ?? Number.MAX_SAFE_INTEGER;
+      const rankB = featuredRank.get(getPropertyExternalId(b)) ?? Number.MAX_SAFE_INTEGER;
+      return rankA - rankB;
+    });
+  }, [featuredPropertyIds, filteredProperties, hasActiveFilters]);
+
+  const propertiesToShow = orderedProperties.slice(0, visibleCount);
+  const hasMoreProperties = orderedProperties.length > propertiesToShow.length;
 
   const handleSearch = async (newFilters: any) => {
     const nextFilters = { ...filters, ...newFilters };

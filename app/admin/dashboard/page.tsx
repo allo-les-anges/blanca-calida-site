@@ -10,7 +10,7 @@ import {
   CheckCircle2, Clock, Phone, Globe, Hash,
   LayoutDashboard, Database, Eye, EyeOff, ArrowRight, Settings,
   AlertCircle, Paperclip, HardDrive, Key, Menu, Construction, Briefcase,
-  Percent, Ban
+  Percent, Ban, Star
 } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
 import jsPDF from 'jspdf';
@@ -56,6 +56,8 @@ export default function AdminDashboard() {
   const [minPropertyPrice, setMinPropertyPrice] = useState(20000);
   const [excludedPromoters, setExcludedPromoters] = useState<string[]>([]);
   const [availablePromoters, setAvailablePromoters] = useState<string[]>([]);
+  const [availableFeaturedProperties, setAvailableFeaturedProperties] = useState<any[]>([]);
+  const [featuredPropertyIds, setFeaturedPropertyIds] = useState<string[]>([]);
   const [filterConfig, setFilterConfig] = useState<Record<string, any>>({});
   const [savingFilters, setSavingFilters] = useState(false);
 
@@ -156,6 +158,11 @@ export default function AdminDashboard() {
         setMinCommission(Number(currentFilterConfig.minCommission || 0));
         setExcludedPromoters(Array.isArray(currentFilterConfig.excludedPromoters) ? currentFilterConfig.excludedPromoters : []);
         setMinPropertyPrice(Number(currentFilterConfig.minPropertyPrice || 20000));
+        setFeaturedPropertyIds(
+          Array.isArray(currentFilterConfig.featuredPropertyIds)
+            ? currentFilterConfig.featuredPropertyIds.map((id: unknown) => String(id || "").trim()).filter(Boolean).slice(0, 5)
+            : []
+        );
       }
 
       // 4. Charger les Promoteurs uniques pour le filtre d'exclusion
@@ -168,6 +175,18 @@ export default function AdminDashboard() {
         // Crée une liste sans doublons
         const uniquePromoters = Array.from(new Set(villas.map(v => v.development_name)));
         setAvailablePromoters(uniquePromoters as string[]);
+      }
+
+      const { data: featuredCandidates } = await supabase
+        .from('villas')
+        .select('id,id_externe,ref,titre_fr,town,ville,price,type')
+        .eq('is_excluded', false)
+        .not('id_externe', 'is', null)
+        .order('price', { ascending: false })
+        .limit(1000);
+
+      if (featuredCandidates) {
+        setAvailableFeaturedProperties(featuredCandidates);
       }
 
     } catch (error) {
@@ -227,6 +246,7 @@ export default function AdminDashboard() {
           minCommission,
           excludedPromoters,
           minPropertyPrice,
+          featuredPropertyIds,
         }),
       });
       const result = await response.json();
@@ -1016,6 +1036,25 @@ export default function AdminDashboard() {
 
   const isDarkVisual = resolvedTheme === "dark";
   const dashboardThemeClass = isDarkVisual ? "" : "admin-dashboard-light";
+  const featuredPropertyOptions = useMemo(() => {
+    const query = searchTerm.toLowerCase().trim();
+    const selected = new Set(featuredPropertyIds);
+    return availableFeaturedProperties
+      .filter((property) => {
+        if (!query) return true;
+        const haystack = [
+          property.id_externe,
+          property.ref,
+          property.titre_fr,
+          property.town,
+          property.ville,
+          property.type,
+        ].join(" ").toLowerCase();
+        return haystack.includes(query);
+      })
+      .sort((a, b) => Number(selected.has(String(b.id_externe || ""))) - Number(selected.has(String(a.id_externe || ""))))
+      .slice(0, 80);
+  }, [availableFeaturedProperties, featuredPropertyIds, searchTerm]);
 
   if (loading) return (
     <div className={`h-screen bg-[#010101] flex flex-col items-center justify-center ${dashboardThemeClass}`}>
@@ -1149,6 +1188,65 @@ export default function AdminDashboard() {
                 <p className="text-[9px] text-slate-500 italic leading-relaxed">
                   {t('adminDashboard.filters.minPropertyPriceHelp')}
                 </p>
+              </div>
+
+              {/* Propriétés à la une */}
+              <div className="p-5 rounded-2xl bg-white/5 border border-white/5 space-y-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-2 text-[#D8C9B6]">
+                    <Star size={14} />
+                    <h3 className="text-[10px] font-black uppercase tracking-widest text-[#D8C9B6]">Propriétés à la une</h3>
+                  </div>
+                  <span className="text-[10px] font-black text-white bg-black/30 border border-white/10 rounded-full px-3 py-1">
+                    {featuredPropertyIds.length}/5
+                  </span>
+                </div>
+                <p className="text-[9px] text-slate-500 italic leading-relaxed">
+                  Choisissez jusqu'à 5 biens qui apparaîtront en premier sur la home page lorsqu'aucun filtre n'est actif.
+                </p>
+                <div className="flex flex-col gap-2 max-h-[360px] overflow-y-auto pr-2 custom-scrollbar">
+                  {featuredPropertyOptions.map((property) => {
+                    const propertyId = String(property.id_externe || "").trim();
+                    const checked = featuredPropertyIds.includes(propertyId);
+                    const disabled = !checked && featuredPropertyIds.length >= 5;
+                    const price = Number(property.price || 0).toLocaleString("fr-FR");
+
+                    return (
+                      <label
+                        key={property.id || propertyId}
+                        className={`flex items-center justify-between gap-3 p-3 rounded-xl border transition-all ${
+                          checked
+                            ? "bg-[#D8C9B6]/10 border-[#D8C9B6]/40"
+                            : disabled
+                              ? "bg-black/10 border-white/5 opacity-50 cursor-not-allowed"
+                              : "bg-black/20 border-white/5 cursor-pointer hover:bg-white/5"
+                        }`}
+                      >
+                        <span className="min-w-0">
+                          <span className="block text-[10px] font-black text-white uppercase truncate">
+                            {property.titre_fr || property.ref || propertyId}
+                          </span>
+                          <span className="mt-1 block text-[9px] font-bold text-slate-500 uppercase tracking-wider truncate">
+                            REF {property.ref || propertyId} · {property.town || property.ville || "Localisation"} · {price} €
+                          </span>
+                        </span>
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          disabled={disabled}
+                          onChange={() => {
+                            setFeaturedPropertyIds((prev) => {
+                              if (prev.includes(propertyId)) return prev.filter((id) => id !== propertyId);
+                              if (prev.length >= 5) return prev;
+                              return [...prev, propertyId];
+                            });
+                          }}
+                          className="w-4 h-4 rounded border-white/10 bg-white/5 text-[#D8C9B6] focus:ring-0 accent-[#D8C9B6]"
+                        />
+                      </label>
+                    );
+                  })}
+                </div>
               </div>
 
               {/* Filtre Promoteurs */}

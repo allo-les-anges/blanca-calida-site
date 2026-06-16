@@ -16,6 +16,7 @@ import {
   Home,
   Waves,
   Car,
+  MapPin,
   ShieldCheck,
   Download,
   Calendar,
@@ -132,6 +133,74 @@ function formatEditorialHeading(heading: string) {
   return heading
     .toLowerCase()
     .replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+function normalizeFeatureList(rawFeatures: unknown) {
+  if (!rawFeatures) return [];
+  if (Array.isArray(rawFeatures)) {
+    return rawFeatures
+      .map((feature) => {
+        if (typeof feature === "string") return feature;
+        if (typeof feature?.feature === "string") return feature.feature;
+        return "";
+      })
+      .map((feature) => feature.trim())
+      .filter(Boolean);
+  }
+
+  if (typeof rawFeatures === "object" && rawFeatures !== null) {
+    const feature = (rawFeatures as any).feature;
+    return normalizeFeatureList(feature);
+  }
+
+  if (typeof rawFeatures === "string") {
+    const trimmed = rawFeatures.trim();
+    if (!trimmed) return [];
+    try {
+      return normalizeFeatureList(JSON.parse(trimmed));
+    } catch {
+      return trimmed
+        .split(/[,;\n]/)
+        .map((feature) => feature.trim())
+        .filter(Boolean);
+    }
+  }
+
+  return [];
+}
+
+function extractFeatureDistance(features: string[], label: string) {
+  const match = features.find((feature) => feature.toLowerCase().startsWith(label.toLowerCase()));
+  const value = match?.match(/:\s*([\d.,]+)\s*(m|km)?/i);
+  if (!value) return null;
+  const amount = Number(value[1].replace(",", "."));
+  if (!Number.isFinite(amount) || amount <= 0) return null;
+  const unit = value[2]?.toLowerCase() || "m";
+  return unit === "km" ? amount * 1000 : amount;
+}
+
+function parseDistanceMeters(value: unknown) {
+  if (value === null || value === undefined) return null;
+  if (typeof value === "number") return Number.isFinite(value) && value > 0 ? value : null;
+
+  const raw = String(value).trim();
+  if (!raw || raw === "0") return null;
+  const match = raw.match(/([\d.,]+)\s*(km|m)?/i);
+  if (!match) return null;
+
+  const amount = Number(match[1].replace(",", "."));
+  if (!Number.isFinite(amount) || amount <= 0) return null;
+  return match[2]?.toLowerCase() === "km" ? amount * 1000 : amount;
+}
+
+function formatDistance(value: unknown) {
+  const meters = parseDistanceMeters(value);
+  if (!meters) return null;
+  if (meters >= 1000) {
+    const km = meters / 1000;
+    return `${Number.isInteger(km) ? km.toFixed(0) : km.toFixed(1)} km`;
+  }
+  return `${Math.round(meters)} m`;
 }
 
 function WhatsAppIcon({ className = "" }: { className?: string }) {
@@ -274,6 +343,25 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
   const mapQuery = encodeURIComponent(`${town}, ${region}, Espagne`);
   const fallbackMapUrl = `https://maps.google.com/maps?q=${mapQuery}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
   const downloadBrochureUrl = brochureUrl ? `/api/download-brochure?url=${encodeURIComponent(brochureUrl)}` : "";
+  const propertyFeatures = normalizeFeatureList(property.features);
+  const seaDistance = formatDistance(property.distance_beach || extractFeatureDistance(propertyFeatures, "Sea distance"));
+  const golfDistance = formatDistance(property.distance_golf || extractFeatureDistance(propertyFeatures, "Golf distance"));
+  const townDistance = formatDistance(property.distance_town || extractFeatureDistance(propertyFeatures, "Town distance"));
+  const airportDistance = formatDistance(property.distance_airport || extractFeatureDistance(propertyFeatures, "Airport distance"));
+  const hasNearSea = propertyFeatures.some((feature) => /^near sea$/i.test(feature));
+  const hasGolf = propertyFeatures.some((feature) => /^golf$/i.test(feature));
+  const hasSchool = propertyFeatures.some((feature) => /^school$/i.test(feature));
+  const hasHospital = propertyFeatures.some((feature) => /^hospital$/i.test(feature));
+  const proximityItems = [
+    seaDistance ? { icon: Waves, label: t("propertyDetail.distanceSea", { distance: seaDistance }), value: seaDistance } : null,
+    airportDistance ? { icon: Car, label: t("development.airport"), value: airportDistance } : null,
+    golfDistance ? { icon: MapPin, label: t("propertyDetail.golf", { distance: golfDistance }), value: golfDistance } : null,
+    townDistance ? { icon: Home, label: town, value: townDistance } : null,
+    !seaDistance && hasNearSea ? { icon: Waves, label: t("propertyDetail.lifestyle.sea"), value: t("propertyDetail.privilege") } : null,
+    !golfDistance && hasGolf ? { icon: MapPin, label: t("propertyDetail.lifestyle.golf"), value: t("propertyDetail.privilege") } : null,
+    hasSchool ? { icon: ShieldCheck, label: "School", value: t("propertyDetail.privilege") } : null,
+    hasHospital ? { icon: ShieldCheck, label: "Hospital", value: t("propertyDetail.privilege") } : null,
+  ].filter(Boolean) as FactItem[];
 
   const handleBrochureLeadSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -541,6 +629,19 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
               <p className="text-[10px] font-black uppercase tracking-[0.28em] text-[#171716]/60">{region}</p>
               <p className="text-sm leading-7 text-[#171716]/70">{t("propertyDetail.locationIntro", { town, region })}</p>
             </div>
+            {proximityItems.length > 0 && (
+              <div className="mt-10 grid gap-3 sm:grid-cols-2">
+                {proximityItems.map((item) => (
+                  <div key={`${item.label}-${item.value}`} className="border border-[#D8C9B6]/35 bg-[#F2EFEA] p-4">
+                    <div className="mb-3 flex items-center gap-3 text-[#D8C9B6]">
+                      <item.icon size={16} />
+                      <span className="text-[9px] font-black uppercase tracking-[0.24em] text-[#171716]/50">{item.label}</span>
+                    </div>
+                    <p className="font-serif text-2xl text-[#010101]">{item.value}</p>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
           <div className="relative h-[420px] overflow-hidden border border-[#D8C9B6]/40 bg-[#F2EFEA] md:h-[520px]">
             <iframe title={t("propertyDetail.location")} width="100%" height="100%" frameBorder="0" scrolling="no" src={fallbackMapUrl} className="grayscale" />

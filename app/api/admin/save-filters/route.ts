@@ -71,11 +71,18 @@ export async function POST(req: Request) {
     }
 
     const currentFilterConfig = currentSettings.filter_config || {};
+    const featuredPropertyIds = Array.isArray(body.featuredPropertyIds)
+      ? body.featuredPropertyIds
+          .map((value: unknown) => String(value || "").trim())
+          .filter(Boolean)
+          .slice(0, 5)
+      : [];
     const nextFilterConfig = {
       ...currentFilterConfig,
       minCommission: Math.max(0, Number(body.minCommission) || 0),
       excludedPromoters: Array.isArray(body.excludedPromoters) ? body.excludedPromoters : [],
       minPropertyPrice: Math.max(0, Number(body.minPropertyPrice) || 0),
+      featuredPropertyIds,
     };
 
     const { error } = await supabaseAdmin

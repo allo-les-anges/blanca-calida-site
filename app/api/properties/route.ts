@@ -138,6 +138,12 @@ export async function GET(request: Request) {
     const type = searchParams.get('type');
     const reference = searchParams.get('reference');
     const id = searchParams.get('id');
+    const featuredIds = searchParams
+      .get('featuredIds')
+      ?.split(',')
+      .map((value) => value.trim())
+      .filter(Boolean)
+      .slice(0, 5) || [];
     const limitParam = Number(searchParams.get('limit') || 24);
     const limit = Number.isFinite(limitParam) ? Math.min(Math.max(limitParam, 1), 200) : 24;
 
@@ -147,7 +153,7 @@ export async function GET(request: Request) {
       .select('*')
       .eq('is_excluded', false); // On exclut d'office les biens marqués "is_excluded" manuellement
 
-    if (!id) {
+    if (!id && featuredIds.length === 0) {
       query = query.gte('price', MIN_PUBLIC_PROPERTY_PRICE);
     }
 
@@ -156,38 +162,42 @@ export async function GET(request: Request) {
       query = isUuid ? query.or(`id.eq.${id},id_externe.eq.${id}`) : query.eq('id_externe', id);
     }
 
+    if (!id && featuredIds.length > 0) {
+      query = query.in('id_externe', featuredIds);
+    }
+
     // 3. Application du filtre de commission minimale
-    if (!id && minCommission) {
+    if (!id && featuredIds.length === 0 && minCommission) {
       const minCommValue = parseFloat(minCommission);
       if (!isNaN(minCommValue)) {
         query = query.gte('commission_quantity', minCommValue);
       }
     }
 
-    if (!id && minPrice) {
+    if (!id && featuredIds.length === 0 && minPrice) {
       const minPriceValue = parseFloat(minPrice);
       if (!isNaN(minPriceValue)) {
         query = query.gte('price', minPriceValue);
       }
     }
 
-    if (!id && maxPrice) {
+    if (!id && featuredIds.length === 0 && maxPrice) {
       const maxPriceValue = parseFloat(maxPrice);
       if (!isNaN(maxPriceValue)) {
         query = query.lte('price', maxPriceValue);
       }
     }
 
-    if (!id && type) {
+    if (!id && featuredIds.length === 0 && type) {
       query = query.ilike('type', `%${type}%`);
     }
 
-    if (!id && reference) {
+    if (!id && featuredIds.length === 0 && reference) {
       query = query.ilike('ref', `%${reference}%`);
     }
 
     // 4. Application du filtre d'exclusion par nom de promotion/promoteur
-    if (!id && excludedDevelopments) {
+    if (!id && featuredIds.length === 0 && excludedDevelopments) {
       const excludedList = excludedDevelopments.split(',').map(s => s.trim());
       if (excludedList.length > 0) {
         query = query.not('development_name', 'in', `(${excludedList.join(',')})`);

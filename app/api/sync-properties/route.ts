@@ -27,6 +27,26 @@ function extractPlanUrls(plans: any): string[] {
     .filter((url: any): url is string => typeof url === 'string' && /^https?:\/\//i.test(url));
 }
 
+function normalizeFeatureList(rawFeatures: any): string[] {
+  const rawList = rawFeatures?.feature ? (Array.isArray(rawFeatures.feature) ? rawFeatures.feature : [rawFeatures.feature]) : [];
+  return rawList
+    .map((feature: any) => (typeof feature === "string" ? feature : ""))
+    .map((feature: string) => feature.trim())
+    .filter(Boolean);
+}
+
+function extractFeatureDistance(features: string[], label: string) {
+  const match = features.find((feature) => feature.toLowerCase().startsWith(label.toLowerCase()));
+  const value = match?.match(/:\s*([\d.,]+)\s*(m|km)?/i);
+  if (!value) return "";
+
+  const amount = Number(value[1].replace(",", "."));
+  if (!Number.isFinite(amount) || amount <= 0) return "";
+
+  const meters = value[2]?.toLowerCase() === "km" ? amount * 1000 : amount;
+  return Number.isInteger(meters) ? String(meters) : String(meters).replace(/\.0+$/, "");
+}
+
 function normalizeText(value: unknown) {
   return typeof value === "string" ? value.trim() : "";
 }
@@ -128,12 +148,31 @@ async function fetchExistingTranslations(externalIds: string[]) {
   return rows;
 }
 
+async function upsertVillasInBatches(updates: any[]) {
+  let synced = 0;
+  const batchSize = 25;
+
+  for (let index = 0; index < updates.length; index += batchSize) {
+    const batch = updates.slice(index, index + batchSize);
+    const { error, data } = await supabase
+      .from('villas')
+      .upsert(batch, { onConflict: 'id_externe' })
+      .select('id_externe');
+
+    if (error) throw error;
+    synced += data?.length || 0;
+  }
+
+  return synced;
+}
+
 export async function GET() {
   try {
     let totalSynced = 0;
     let totalTranslated = 0;
     let translationSkipped = 0;
     let translationFieldsUsed = 0;
+    const syncErrors: string[] = [];
     const languages = ['fr', 'en', 'es', 'nl', 'pl'];
 
     for (const source of SOURCES) {
@@ -161,7 +200,8 @@ export async function GET() {
       const updates = await Promise.all(properties.map(async (p: any) => {
         const surf = p.surface_area || {};
         const loc = p.location || {};
-        const dists = p.distances || {}; 
+        const dists = p.distances || {};
+        const features = normalizeFeatureList(p.features);
         const existing = existingByExternalId.get(String(p.id)) || {};
         const isNewProperty = !existingByExternalId.has(String(p.id));
         
@@ -191,7 +231,7 @@ export async function GET() {
           price: parseFloat(p.price) || 0,
           prix: parseFloat(p.price) || 0,
           currency: String(p.currency || "EUR"),
-          distance_beach: dists.beach ? String(dists.beach) : null,
+          distance_beach: dists.beach ? String(dists.beach) : extractFeatureDistance(features, "Sea distance") || null,
           distance_golf: dists.golf ? String(dists.golf) : null,
           distance_town: dists.town_distance || dists.town || null,
           surface_built: pickSurfaceValue(surf.built, existing.surface_built),
@@ -271,20 +311,23 @@ export async function GET() {
         return base;
       }));
 
-      // Upsert vers Supabase
-      const { error, data } = await supabase
-        .from('villas')
-        .upsert(updates, { onConflict: 'id_externe' })
-        .select('id_externe');
-
-      if (error) {
-        console.error(`Erreur d'insertion pour ${source.url}:`, error.message);
-      } else {
-        totalSynced += data?.length || 0;
+      try {
+        totalSynced += await upsertVillasInBatches(updates);
+      } catch (error: any) {
+        const message = `Erreur d'insertion pour ${source.url}: ${error.message}`;
+        syncErrors.push(message);
+        console.error(message);
       }
     }
 
-    return NextResponse.json({ success: true, totalSynced, totalTranslated, translationSkipped, translationFieldsUsed });
+    return NextResponse.json({
+      success: syncErrors.length === 0,
+      totalSynced,
+      totalTranslated,
+      translationSkipped,
+      translationFieldsUsed,
+      syncErrors,
+    });
   } catch (error: any) {
     console.error("Erreur de synchronisation:", error.message);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
