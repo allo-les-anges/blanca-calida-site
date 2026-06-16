@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
+import { useTheme } from "next-themes";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Bed, Bath, Maximize, ArrowLeft, Building2, MapPin, ChevronRight, Hash, CheckCircle } from "lucide-react";
@@ -9,8 +10,15 @@ import Link from "next/link";
 
 export default function DevelopmentPage() {
   const { devId } = useParams();
+  const searchParams = useSearchParams();
+  const { resolvedTheme } = useTheme();
   const [properties, setProperties] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     async function load() {
@@ -32,6 +40,17 @@ export default function DevelopmentPage() {
       .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
       .replace(/\s+/g, "-").replace(/[^\w-]+/g, "");
 
+  const isLight = searchParams.get("pack") === "light";
+  const isDarkVisual = resolvedTheme === "dark" && !isLight;
+  const bgColor = isDarkVisual ? "bg-[#010101]" : "bg-[#FAFAFA]";
+  const panelColor = isDarkVisual ? "bg-[#171716]" : "bg-[#F2EFEA]";
+  const cardColor = isDarkVisual ? "bg-[#010101]" : "bg-white";
+  const textColor = isDarkVisual ? "text-[#FAFAFA]" : "text-[#171716]";
+  const mutedText = isDarkVisual ? "text-[#D8C9B6]" : "text-slate-600";
+  const subtleText = isDarkVisual ? "text-[#D8C9B6]/75" : "text-slate-500";
+  const borderColor = isDarkVisual ? "border-white/10" : "border-[#D8C9B6]/60";
+  const iconColor = isDarkVisual ? "text-[#D8C9B6]" : "text-slate-400";
+
   const devUnits = properties.filter((p) => {
     const nameInJson = slugify(p.development_name || "");
     const promoterInJson = slugify(p.promoteur_name || "");
@@ -40,26 +59,40 @@ export default function DevelopmentPage() {
     return nameInJson === idInUrl || promoterInJson === idInUrl || refPrefix === idInUrl;
   });
 
+  if (!mounted) return <main className="min-h-screen bg-[#010101]" />;
+
   if (loading) return (
-    <div className="h-screen flex flex-col items-center justify-center bg-white">
-      <div className="w-12 h-12 border-4 border-slate-200 border-t-emerald-600 rounded-full animate-spin mb-4"></div>
-      <p className="text-[10px] uppercase font-black tracking-widest text-slate-400">Chargement...</p>
+    <div className={`h-screen flex flex-col items-center justify-center ${bgColor}`}>
+      <div className="w-12 h-12 border-4 border-[#D8C9B6]/20 border-t-[#D8C9B6] rounded-full animate-spin mb-4"></div>
+      <p className="text-[10px] uppercase font-black tracking-widest text-[#D8C9B6]">Chargement...</p>
     </div>
   );
 
-  if (!devUnits.length) return <div>Projet introuvable.</div>;
+  if (!devUnits.length) return (
+    <main className={`min-h-screen ${bgColor} ${textColor}`}>
+      <Navbar />
+      <section className="min-h-[60vh] flex flex-col items-center justify-center px-6 text-center">
+        <p className="text-[10px] uppercase font-black tracking-[0.3em] text-[#D8C9B6] mb-4">Developpement</p>
+        <h1 className="text-4xl md:text-6xl font-serif italic mb-8">Projet introuvable.</h1>
+        <Link href="/developpements" className="inline-flex items-center gap-2 text-[10px] uppercase font-black tracking-widest text-[#D8C9B6] hover:text-[#8A6A4F] transition-colors">
+          <ArrowLeft size={12} /> Retour aux developpements
+        </Link>
+      </section>
+      <Footer isLight={!isDarkVisual} />
+    </main>
+  );
 
   const dev = devUnits[0];
   const developmentName = dev.development_name || dev.promoteur_name || `Programme ${devId}`;
 
   return (
-    <main className="bg-white min-h-screen">
+    <main className={`min-h-screen ${bgColor} ${textColor}`}>
       <Navbar />
       
       {/* HEADER DU PROGRAMME */}
       <section className="relative pt-40 pb-24 bg-slate-950 text-white overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 relative z-10">
-          <Link href="/" className="inline-flex items-center gap-2 text-slate-500 hover:text-white transition-colors mb-12 text-[10px] uppercase font-black tracking-widest">
+          <Link href="/developpements" className="inline-flex items-center gap-2 text-slate-500 hover:text-white transition-colors mb-12 text-[10px] uppercase font-black tracking-widest">
             <ArrowLeft size={12} /> Retour à la sélection
           </Link>
           
@@ -83,25 +116,25 @@ export default function DevelopmentPage() {
       </section>
 
       {/* SECTION PRÉSENTATION (L'Art de Vivre) */}
-      <section className="py-24 bg-white">
+      <section className={`py-24 ${bgColor}`}>
         <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-20 items-start">
           <div>
             <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-emerald-600 mb-6 flex items-center gap-2">
               <span className="w-8 h-[1px] bg-emerald-600"></span> L'Art de Vivre
             </h2>
             <div 
-              className="prose prose-slate prose-lg max-w-none text-slate-600 font-light leading-relaxed"
+              className={`prose prose-lg max-w-none font-light leading-relaxed ${isDarkVisual ? "prose-invert" : "prose-slate"} ${mutedText}`}
               dangerouslySetInnerHTML={{ __html: dev.description_fr || dev.description }}
             />
           </div>
           <div className="space-y-8">
              {/* Box Infos Techniques Rapides */}
              <div className="grid grid-cols-2 gap-4">
-                <div className="p-8 bg-slate-50 rounded-[2rem]">
-                  <p className="text-[9px] font-black uppercase text-slate-400 mb-2">Distance Mer</p>
-                  <p className="text-2xl font-serif">5 000 m</p>
+                <div className={`p-8 rounded-[2rem] border ${borderColor} ${panelColor}`}>
+                  <p className={`text-[9px] font-black uppercase mb-2 ${subtleText}`}>Distance Mer</p>
+                  <p className={`text-2xl font-serif ${textColor}`}>{dev.distance_beach ? `${Number(dev.distance_beach).toLocaleString("fr-FR")} m` : "Sur demande"}</p>
                 </div>
-                <div className="p-8 bg-slate-50 rounded-[2rem]">
+                <div className={`p-8 rounded-[2rem] border ${borderColor} ${panelColor}`}>
                   <p className="text-[9px] font-black uppercase text-slate-400 mb-2">Aéroport</p>
                   <p className="text-2xl font-serif">38 km</p>
                 </div>
@@ -115,16 +148,16 @@ export default function DevelopmentPage() {
       </section>
 
       {/* GRILLE DE SÉLECTION DES UNITÉS (LE STOCK REEL) */}
-      <section className="py-24 bg-slate-50">
+      <section className={`py-24 ${panelColor}`}>
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-serif italic text-slate-900 mb-4">Unités disponibles & Plans</h2>
-            <p className="text-slate-500 text-sm uppercase font-bold tracking-widest">Sélectionnez un lot pour voir les détails et plans d'étage</p>
+            <h2 className={`text-4xl font-serif italic mb-4 ${textColor}`}>Unités disponibles & Plans</h2>
+            <p className={`${subtleText} text-sm uppercase font-bold tracking-widest`}>Sélectionnez un lot pour voir les détails et plans d'étage</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
             {devUnits.map((unit) => (
-              <div key={unit.id} className="group bg-white rounded-[2.5rem] overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-slate-100">
+              <div key={unit.id} className={`group rounded-[2.5rem] overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border ${borderColor} ${cardColor}`}>
                 <div className="relative h-64 overflow-hidden">
                   <img 
                     src={Array.isArray(unit.images) ? (unit.images[0]?.url || unit.images[0]) : "/placeholder.jpg"} 
@@ -137,26 +170,26 @@ export default function DevelopmentPage() {
                 </div>
 
                 <div className="p-8">
-                  <h3 className="text-xl font-bold text-slate-900 mb-4">{unit.titre}</h3>
+                  <h3 className={`text-xl font-bold mb-4 ${textColor}`}>{unit.titre}</h3>
                   <div className="flex justify-between items-end mb-8">
-                    <p className="text-3xl font-serif text-slate-900">{Number(unit.price).toLocaleString("fr-FR")} €</p>
+                    <p className={`text-3xl font-serif ${textColor}`}>{Number(unit.price).toLocaleString("fr-FR")} €</p>
                     <span className="text-[10px] text-emerald-600 font-black uppercase flex items-center gap-1">
                       <CheckCircle size={12} /> Disponible
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-2 border-t border-slate-50 pt-6 mb-8 text-slate-500">
+                  <div className={`grid grid-cols-3 gap-2 border-t ${borderColor} pt-6 mb-8 ${subtleText}`}>
                     <div className="text-center">
-                      <Bed size={18} className="mx-auto mb-1 text-slate-300" />
-                      <span className="text-xs font-bold text-slate-900">{unit.beds}</span>
+                      <Bed size={18} className={`mx-auto mb-1 ${iconColor}`} />
+                      <span className={`text-xs font-bold ${textColor}`}>{unit.beds}</span>
                     </div>
-                    <div className="text-center border-x border-slate-50">
-                      <Bath size={18} className="mx-auto mb-1 text-slate-300" />
-                      <span className="text-xs font-bold text-slate-900">{unit.baths}</span>
+                    <div className={`text-center border-x ${borderColor}`}>
+                      <Bath size={18} className={`mx-auto mb-1 ${iconColor}`} />
+                      <span className={`text-xs font-bold ${textColor}`}>{unit.baths}</span>
                     </div>
                     <div className="text-center">
-                      <Maximize size={18} className="mx-auto mb-1 text-slate-300" />
-                      <span className="text-xs font-bold text-slate-900">{unit.surface_area?.built || unit.sqft}m²</span>
+                      <Maximize size={18} className={`mx-auto mb-1 ${iconColor}`} />
+                      <span className={`text-xs font-bold ${textColor}`}>{unit.surface_area?.built || unit.sqft}m²</span>
                     </div>
                   </div>
 
@@ -171,7 +204,7 @@ export default function DevelopmentPage() {
         </div>
       </section>
 
-      <Footer />
+      <Footer isLight={!isDarkVisual} />
     </main>
   );
 }

@@ -50,6 +50,10 @@ function slugify(value: unknown) {
     : "";
 }
 
+function unslugify(value: string) {
+  return slugify(value).replace(/-/g, " ");
+}
+
 function getPropertyRegion(property: any) {
   const directRegion = property.region?.trim();
   if (directRegion) return directRegion;
@@ -226,15 +230,30 @@ export async function GET(request: Request) {
     let error: any = null;
 
     if (isDevelopmentLookup) {
-      const pageSize = 1000;
-      for (let from = 0; ; from += pageSize) {
-        const result = await query.order('price', { ascending: true }).range(from, from + pageSize - 1);
-        if (result.error) {
-          error = result.error;
-          break;
+      const target = slugify(development);
+      const readableTarget = unslugify(development);
+      const targetedResult = await query
+        .or(`development_name.ilike.%${readableTarget}%,promoteur_name.ilike.%${readableTarget}%,ref.ilike.${target}-%`)
+        .order('price', { ascending: true })
+        .limit(limit);
+
+      if (targetedResult.error) {
+        error = targetedResult.error;
+      } else {
+        rawProperties = targetedResult.data || [];
+      }
+
+      if (!error && rawProperties.length === 0) {
+        const pageSize = 1000;
+        for (let from = 0; ; from += pageSize) {
+          const result = await query.order('price', { ascending: true }).range(from, from + pageSize - 1);
+          if (result.error) {
+            error = result.error;
+            break;
+          }
+          rawProperties.push(...(result.data || []));
+          if (!result.data || result.data.length < pageSize) break;
         }
-        rawProperties.push(...(result.data || []));
-        if (!result.data || result.data.length < pageSize) break;
       }
     } else {
       const result = await query.order('price', { ascending: true }).limit(limit);
