@@ -79,18 +79,18 @@ export async function GET(req: Request) {
     const reference = (searchParams.get("reference") || "").trim().replace(/[,%]/g, "");
     let query = supabaseAdmin
       .from("villas")
-      .select("id,id_externe,ref,titre_fr,town,ville,price,type,created_at")
+      .select("id,id_externe,ref,titre_fr,town,ville,price,type,updated_at")
       .eq("is_excluded", false)
       .not("id_externe", "is", null);
 
     if (reference) {
       query = query
         .or(`ref.ilike.%${reference}%,id_externe.ilike.%${reference}%`)
-        .order("created_at", { ascending: false })
+        .order("updated_at", { ascending: false })
         .limit(25);
     } else {
       query = query
-        .order("created_at", { ascending: false })
+        .order("updated_at", { ascending: false })
         .limit(10);
     }
 

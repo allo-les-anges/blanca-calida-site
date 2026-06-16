@@ -1270,8 +1270,8 @@ export default function AdminDashboard() {
                     const checked = featuredPropertyIds.includes(propertyId);
                     const disabled = !checked && featuredPropertyIds.length >= 5;
                     const price = Number(property.price || 0).toLocaleString("fr-FR");
-                    const listedDate = property.created_at
-                      ? new Date(property.created_at).toLocaleDateString("fr-FR")
+                    const listedDate = property.updated_at
+                      ? new Date(property.updated_at).toLocaleDateString("fr-FR")
                       : "";
 
                     return (
