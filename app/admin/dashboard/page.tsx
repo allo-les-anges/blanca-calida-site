@@ -58,6 +58,8 @@ export default function AdminDashboard() {
   const [availablePromoters, setAvailablePromoters] = useState<string[]>([]);
   const [availableFeaturedProperties, setAvailableFeaturedProperties] = useState<any[]>([]);
   const [featuredPropertyIds, setFeaturedPropertyIds] = useState<string[]>([]);
+  const [featuredReferenceSearch, setFeaturedReferenceSearch] = useState("");
+  const [featuredPropertiesLoading, setFeaturedPropertiesLoading] = useState(false);
   const [filterConfig, setFilterConfig] = useState<Record<string, any>>({});
   const [savingFilters, setSavingFilters] = useState(false);
 
@@ -103,6 +105,37 @@ export default function AdminDashboard() {
   });
 
   // --- CHARGEMENT DES DONNÉES ---
+
+  const loadFeaturedPropertyOptions = useCallback(async (reference = "") => {
+    setFeaturedPropertiesLoading(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const query = new URLSearchParams({ featuredProperties: "true" });
+      const trimmedReference = reference.trim();
+      if (trimmedReference) query.set("reference", trimmedReference);
+
+      const response = await fetch(`/api/admin/save-filters?${query.toString()}`, {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+      const payload = await response.json();
+
+      if (response.ok && Array.isArray(payload.properties)) {
+        setAvailableFeaturedProperties(payload.properties);
+      } else {
+        console.error("Erreur chargement propriétés à la une:", payload?.error);
+        setAvailableFeaturedProperties([]);
+      }
+    } catch (error) {
+      console.error("Erreur chargement propriétés à la une:", error);
+      setAvailableFeaturedProperties([]);
+    } finally {
+      setFeaturedPropertiesLoading(false);
+    }
+  }, []);
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -201,6 +234,16 @@ export default function AdminDashboard() {
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  useEffect(() => {
+    if (loading) return;
+
+    const timer = window.setTimeout(() => {
+      loadFeaturedPropertyOptions(featuredReferenceSearch);
+    }, 350);
+
+    return () => window.clearTimeout(timer);
+  }, [featuredReferenceSearch, loadFeaturedPropertyOptions, loading]);
 
   // Chargement spécifique au projet sélectionné
   useEffect(() => {
@@ -1039,24 +1082,11 @@ export default function AdminDashboard() {
   const isDarkVisual = resolvedTheme === "dark";
   const dashboardThemeClass = isDarkVisual ? "" : "admin-dashboard-light";
   const featuredPropertyOptions = useMemo(() => {
-    const query = searchTerm.toLowerCase().trim();
     const selected = new Set(featuredPropertyIds);
     return availableFeaturedProperties
-      .filter((property) => {
-        if (!query) return true;
-        const haystack = [
-          property.id_externe,
-          property.ref,
-          property.titre_fr,
-          property.town,
-          property.ville,
-          property.type,
-        ].join(" ").toLowerCase();
-        return haystack.includes(query);
-      })
       .sort((a, b) => Number(selected.has(String(b.id_externe || ""))) - Number(selected.has(String(a.id_externe || ""))))
-      .slice(0, 80);
-  }, [availableFeaturedProperties, featuredPropertyIds, searchTerm]);
+      .slice(0, 25);
+  }, [availableFeaturedProperties, featuredPropertyIds]);
 
   if (loading) return (
     <div className={`h-screen bg-[#010101] flex flex-col items-center justify-center ${dashboardThemeClass}`}>
@@ -1206,6 +1236,27 @@ export default function AdminDashboard() {
                 <p className="text-[9px] text-slate-500 italic leading-relaxed">
                   Choisissez jusqu'à 5 biens qui apparaîtront en premier sur la home page lorsqu'aucun filtre n'est actif.
                 </p>
+                <div className="space-y-2">
+                  <label className="text-[9px] font-black uppercase tracking-widest text-slate-500">
+                    Chercher par référence
+                  </label>
+                  <div className="relative">
+                    <Hash className="absolute left-3 top-1/2 -translate-y-1/2 text-[#D8C9B6]" size={13} />
+                    <input
+                      type="text"
+                      value={featuredReferenceSearch}
+                      onChange={(event) => setFeaturedReferenceSearch(event.target.value)}
+                      placeholder="Ex: 10810744-01"
+                      className="w-full rounded-xl border border-white/10 bg-black/20 px-9 py-3 text-[10px] font-black uppercase tracking-widest text-white outline-none transition-all placeholder:text-slate-600 focus:border-[#D8C9B6]"
+                    />
+                    {featuredPropertiesLoading && (
+                      <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 animate-spin text-[#D8C9B6]" size={13} />
+                    )}
+                  </div>
+                  <p className="text-[8px] font-bold uppercase tracking-widest text-slate-500">
+                    {featuredReferenceSearch.trim() ? "Résultats correspondant à la référence" : "Les 10 villas les plus récentes sont affichées ci-dessous"}
+                  </p>
+                </div>
                 <div className="flex flex-col gap-2 max-h-[360px] overflow-y-auto pr-2 custom-scrollbar">
                   {featuredPropertyOptions.length === 0 && (
                     <div className="rounded-xl border border-white/5 bg-black/10 p-4">

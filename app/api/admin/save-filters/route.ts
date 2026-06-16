@@ -76,13 +76,25 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "Requete invalide" }, { status: 400 });
     }
 
-    const { data, error: villasError } = await supabaseAdmin
+    const reference = (searchParams.get("reference") || "").trim().replace(/[,%]/g, "");
+    let query = supabaseAdmin
       .from("villas")
-      .select("id,id_externe,ref,titre_fr,town,ville,price,type")
+      .select("id,id_externe,ref,titre_fr,town,ville,price,type,created_at")
       .eq("is_excluded", false)
-      .not("id_externe", "is", null)
-      .order("price", { ascending: false })
-      .limit(1000);
+      .not("id_externe", "is", null);
+
+    if (reference) {
+      query = query
+        .or(`ref.ilike.%${reference}%,id_externe.ilike.%${reference}%`)
+        .order("created_at", { ascending: false })
+        .limit(25);
+    } else {
+      query = query
+        .order("created_at", { ascending: false })
+        .limit(10);
+    }
+
+    const { data, error: villasError } = await query;
 
     if (villasError) {
       return NextResponse.json({ error: villasError.message }, { status: 500 });
@@ -91,6 +103,7 @@ export async function GET(req: Request) {
     return NextResponse.json({
       success: true,
       properties: data || [],
+      mode: reference ? "reference" : "recent",
       agencyId: profile?.agency_id || null,
     });
   } catch (err: any) {
