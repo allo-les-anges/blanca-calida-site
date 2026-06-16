@@ -31,7 +31,7 @@ export default function AdvancedSearch({
   };
 
   // --- LOGIQUE DE DONNÉES ---
-  const regions = ["Costa Blanca", "Costa Calida", "Costa del Sol", "Costa Almeria"];
+  const regions = ["Costa Blanca", "Costa Calida", "Costa del Sol", "Costa Almeria", "Portugal"];
   
   const types = useMemo(() => {
     const translation: { [key: string]: string } = {
@@ -147,7 +147,7 @@ export default function AdvancedSearch({
                 onChange={(e) => setLocalFilters({ ...localFilters, region: e.target.value })}
                 className={`w-full bg-transparent text-[13px] font-bold outline-none cursor-pointer appearance-none uppercase ${textColor}`}
               >
-                <option value="" className={optionBg}>Espagne (Toutes)</option>
+                <option value="" className={optionBg}>Toutes destinations</option>
                 {regions.map(r => <option key={r} value={r} className={optionBg}>{r}</option>)}
               </select>
             </div>

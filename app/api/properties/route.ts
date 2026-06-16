@@ -136,6 +136,8 @@ export async function GET(request: Request) {
     const excludedDevelopments = searchParams.get('excluded'); // Format attendu: "Promotion A,Promotion B"
     const maxPrice = searchParams.get('maxPrice');
     const type = searchParams.get('type');
+    const region = searchParams.get('region');
+    const town = searchParams.get('town');
     const reference = searchParams.get('reference');
     const id = searchParams.get('id');
     const featuredIds = searchParams
@@ -190,6 +192,14 @@ export async function GET(request: Request) {
 
     if (!id && featuredIds.length === 0 && type) {
       query = query.ilike('type', `%${type}%`);
+    }
+
+    if (!id && featuredIds.length === 0 && region) {
+      query = query.eq('region', region);
+    }
+
+    if (!id && featuredIds.length === 0 && town) {
+      query = query.ilike('town', `%${town}%`);
     }
 
     if (!id && featuredIds.length === 0 && reference) {

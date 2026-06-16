@@ -100,32 +100,119 @@ function mergeProperties(primary: Property[], secondary: Property[]) {
   });
 }
 
-const PORTUGAL_FEED_URL = "https://medianewbuild.com/file/hh-media-bucket/agents/6d5cb68a-3636-4095-b0ce-7dc9ec2df2d2/feed_portugal.xml";
 const COUNTRY_CATALOGS = [
   {
-    name: "Espagne",
+    id: "spain",
     image: "/images/countries/spain.jpg",
-    status: "Catalogue actif",
-    description: "Costa Blanca, Costa del Sol, Costa Calida et Costa Almeria.",
-    action: "Explorer les regions",
     type: "scroll",
   },
   {
-    name: "Portugal",
+    id: "portugal",
     image: "/images/countries/portugal.jpg",
-    status: "Flux XML disponible",
-    description: "Catalogue Portugal en preparation avant integration dans la base.",
-    action: "Voir le flux XML",
-    type: "external",
-    href: PORTUGAL_FEED_URL,
+    type: "portfolio",
+    region: "Portugal",
   },
   {
-    name: "Georgie",
+    id: "georgia",
     image: "/images/countries/georgia.jpg",
-    status: "Bientot disponible",
-    description: "Catalogue en attente du flux XML pour activer la destination.",
-    action: "Bientot disponible",
     type: "disabled",
+  },
+];
+
+const COUNTRY_COPY = {
+  fr: {
+    eyebrow: "Catalogues internationaux",
+    title: "Choisissez votre destination",
+    description: "Retrouvez les pays pour lesquels Amaru Homes dispose d'un catalogue immobilier, actif ou en cours de preparation.",
+    spain: ["Espagne", "Catalogue actif", "Costa Blanca, Costa del Sol, Costa Calida et Costa Almeria.", "Explorer les regions"],
+    portugal: ["Portugal", "Catalogue actif", "Biens synchronises depuis le catalogue Portugal.", "Voir les biens"],
+    georgia: ["Georgie", "Bientot disponible", "Catalogue en attente du flux XML pour activer la destination.", "Bientot disponible"],
+  },
+  en: {
+    eyebrow: "International catalogues",
+    title: "Choose your destination",
+    description: "Browse the countries where Amaru Homes has an active or upcoming property catalogue.",
+    spain: ["Spain", "Active catalogue", "Costa Blanca, Costa del Sol, Costa Calida and Costa Almeria.", "Explore regions"],
+    portugal: ["Portugal", "Active catalogue", "Properties synchronized from the Portugal catalogue.", "View properties"],
+    georgia: ["Georgia", "Coming soon", "Catalogue pending XML feed activation.", "Coming soon"],
+  },
+  es: {
+    eyebrow: "Catalogos internacionales",
+    title: "Elija su destino",
+    description: "Consulte los paises donde Amaru Homes tiene un catalogo inmobiliario activo o en preparacion.",
+    spain: ["Espana", "Catalogo activo", "Costa Blanca, Costa del Sol, Costa Calida y Costa Almeria.", "Explorar regiones"],
+    portugal: ["Portugal", "Catalogo activo", "Propiedades sincronizadas desde el catalogo de Portugal.", "Ver propiedades"],
+    georgia: ["Georgia", "Proximamente", "Catalogo pendiente de activacion del feed XML.", "Proximamente"],
+  },
+  nl: {
+    eyebrow: "Internationale catalogi",
+    title: "Kies uw bestemming",
+    description: "Bekijk de landen waarvoor Amaru Homes een actieve of aankomende vastgoedcatalogus heeft.",
+    spain: ["Spanje", "Actieve catalogus", "Costa Blanca, Costa del Sol, Costa Calida en Costa Almeria.", "Regio's bekijken"],
+    portugal: ["Portugal", "Actieve catalogus", "Woningen gesynchroniseerd vanuit de Portugal-catalogus.", "Woningen bekijken"],
+    georgia: ["Georgie", "Binnenkort", "Catalogus wacht op activering van de XML-feed.", "Binnenkort"],
+  },
+  pl: {
+    eyebrow: "Katalogi miedzynarodowe",
+    title: "Wybierz kierunek",
+    description: "Zobacz kraje, dla ktorych Amaru Homes ma aktywny lub przygotowywany katalog nieruchomosci.",
+    spain: ["Hiszpania", "Aktywny katalog", "Costa Blanca, Costa del Sol, Costa Calida i Costa Almeria.", "Odkryj regiony"],
+    portugal: ["Portugalia", "Aktywny katalog", "Nieruchomosci zsynchronizowane z katalogu Portugalii.", "Zobacz nieruchomosci"],
+    georgia: ["Gruzja", "Wkrotce", "Katalog czeka na aktywacje feedu XML.", "Wkrotce"],
+  },
+  ar: {
+    eyebrow: "كتالوجات دولية",
+    title: "اختر وجهتك",
+    description: "استكشف البلدان التي لدى Amaru Homes كتالوج عقاري نشط أو قيد التحضير لها.",
+    spain: ["إسبانيا", "كتالوج نشط", "كوستا بلانكا وكوستا ديل سول وكوستا كاليدا وكوستا ألميريا.", "استكشف المناطق"],
+    portugal: ["البرتغال", "كتالوج نشط", "عقارات تمت مزامنتها من كتالوج البرتغال.", "عرض العقارات"],
+    georgia: ["جورجيا", "قريبا", "الكتالوج بانتظار تفعيل ملف XML.", "قريبا"],
+  },
+  ka: {
+    eyebrow: "საერთაშორისო კატალოგები",
+    title: "აირჩიეთ მიმართულება",
+    description: "იხილეთ ქვეყნები, სადაც Amaru Homes-ს აქვს აქტიური ან მოსამზადებელი უძრავი ქონების კატალოგი.",
+    spain: ["ესპანეთი", "აქტიური კატალოგი", "Costa Blanca, Costa del Sol, Costa Calida და Costa Almeria.", "რეგიონების ნახვა"],
+    portugal: ["პორტუგალია", "აქტიური კატალოგი", "პორტუგალიის კატალოგიდან სინქრონიზებული ობიექტები.", "ობიექტების ნახვა"],
+    georgia: ["საქართველო", "მალე", "კატალოგი ელოდება XML feed-ის აქტივაციას.", "მალე"],
+  },
+} as const;
+
+const PORTUGAL_AREAS = [
+  {
+    id: "algarve",
+    name: "Algarve",
+    image: "/images/countries/portugal.jpg",
+    towns: ["Portimao", "Portimão", "Tavira", "Quarteira", "Vilamoura", "Lagos", "Loule", "Loulé", "Altura", "Castro Marim", "Carvoeiro", "Parchal", "Lagoa"],
+    description: "Littoral sud, golf, marinas et appartements de vacances.",
+  },
+  {
+    id: "lisbon",
+    name: "Lisbonne & Cascais",
+    image: "/images/countries/portugal-city.jpg",
+    towns: ["Lisboa", "Cascais", "Oeiras", "Algés", "Alges", "Loures", "Moscavide", "Montijo"],
+    description: "Capitale, front de mer et adresses urbaines premium.",
+  },
+  {
+    id: "porto",
+    name: "Porto & Nord",
+    image: "/images/countries/portugal-city.jpg",
+    towns: ["Porto", "Gondomar", "São Pedro da Cova", "Sao Pedro da Cova", "Vila Nova de Gaia", "Maia", "Moreira", "Senhora da Hora", "Matosinhos"],
+    description: "Metropole nord, rendement urbain et proximite ocean.",
+  },
+  {
+    id: "silver-coast",
+    name: "Silver Coast",
+    image: "/images/countries/portugal.jpg",
+    towns: ["Nadadouro", "Óbidos", "Obidos", "Caldas da Rainha"],
+    description: "Cote Atlantique, lagunes, villages et residences recentes.",
+  },
+  {
+    id: "madeira",
+    name: "Madere",
+    image: "/images/countries/portugal.jpg",
+    towns: ["Funchal"],
+    description: "Ile, climat doux et biens avec fort attrait lifestyle.",
   },
 ];
 
@@ -217,7 +304,7 @@ function HomeContent() {
 
   const [filters, setFilters] = useState({
     type: "", town: "", region: "", beds: "",
-    minPrice: DEFAULT_MIN_PRICE, maxPrice: "", reference: "", development: "", availableOnly: false,
+    minPrice: DEFAULT_MIN_PRICE, maxPrice: "", reference: "", development: "", portugalArea: "", availableOnly: false,
   });
   const filterQueryString = searchParamsOrigin.toString();
 
@@ -242,6 +329,7 @@ function HomeContent() {
       maxPrice: "",
       reference: "",
       development: "",
+      portugalArea: "",
       availableOnly: false,
     });
     setVisibleCount(12);
@@ -256,6 +344,8 @@ function HomeContent() {
       const matchDev = !filters.development || p.development_name?.toLowerCase().trim() === filters.development.toLowerCase().trim();
       const matchTown = !filters.town || normalizeLocation(p.town || p.ville) === normalizeLocation(filters.town);
       const matchRegion = !filters.region || getPropertyRegion(p) === filters.region;
+      const selectedPortugalArea = PORTUGAL_AREAS.find((area) => area.id === filters.portugalArea);
+      const matchPortugalArea = !selectedPortugalArea || selectedPortugalArea.towns.some((town) => normalizeLocation(town) === normalizeLocation(p.town || p.ville));
       const matchType = !filters.type || p.type?.toLowerCase().includes(filters.type.toLowerCase());
       const matchBeds = !filters.beds || Number(p.beds) >= Number(filters.beds);
       const price = parsePropertyPrice(p.price);
@@ -263,7 +353,7 @@ function HomeContent() {
       const matchMin = !effectiveMinPrice || price >= Number(effectiveMinPrice);
       const matchMax = !filters.maxPrice || price <= Number(filters.maxPrice);
       const matchRef = !filters.reference || p.ref?.toLowerCase().includes(filters.reference.toLowerCase());
-      return matchDev && matchTown && matchRegion && matchType && matchBeds && matchMin && matchMax && matchRef;
+      return matchDev && matchTown && matchRegion && matchPortugalArea && matchType && matchBeds && matchMin && matchMax && matchRef;
     });
   }, [allProperties, filters, portfolioMinPrice]);
 
@@ -290,10 +380,21 @@ function HomeContent() {
     [filteredProperties, monthlySelectionIds]
   );
 
+  const portugalAreaCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    PORTUGAL_AREAS.forEach((area) => {
+      counts[area.id] = allProperties.filter((property) =>
+        property?.region === "Portugal" &&
+        area.towns.some((town) => normalizeLocation(town) === normalizeLocation(property.town || property.ville))
+      ).length;
+    });
+    return counts;
+  }, [allProperties]);
+
   const propertiesToShow = portfolioProperties.slice(0, visibleCount);
   const hasMoreProperties = portfolioProperties.length > propertiesToShow.length;
 
-  const handleSearch = async (newFilters: any) => {
+  const handleSearch = async (newFilters: any, scrollTargetId = "collection") => {
     const nextFilters = { ...filters, ...newFilters };
     const query = new URLSearchParams({
       limit: "200",
@@ -302,6 +403,8 @@ function HomeContent() {
 
     query.set("minPrice", nextFilters.minPrice || portfolioMinPrice);
     if (nextFilters.maxPrice) query.set("maxPrice", nextFilters.maxPrice);
+    if (nextFilters.region) query.set("region", nextFilters.region);
+    if (nextFilters.town) query.set("town", nextFilters.town);
     if (nextFilters.type) query.set("type", nextFilters.type);
     if (nextFilters.beds) query.set("beds", nextFilters.beds);
     if (nextFilters.reference) query.set("reference", nextFilters.reference);
@@ -318,20 +421,68 @@ function HomeContent() {
     setFilters(nextFilters);
     setVisibleCount(12);
     setIsSearchOpen(false);
-    const section = document.getElementById("collection");
+    const section = document.getElementById(scrollTargetId);
     if (section) setTimeout(() => section.scrollIntoView({ behavior: "smooth" }), 100);
   };
 
   const handleRegionClick = (regionName: string) => {
-    setFilters({ type: "", town: "", region: regionName, beds: "", minPrice: portfolioMinPrice, maxPrice: "", reference: "", development: "", availableOnly: false });
+    setFilters({ type: "", town: "", region: regionName, beds: "", minPrice: portfolioMinPrice, maxPrice: "", reference: "", development: "", portugalArea: "", availableOnly: false });
     setVisibleCount(12);
     const section = document.getElementById("collection");
     if (section) setTimeout(() => section.scrollIntoView({ behavior: "smooth" }), 100);
   };
 
   const handleSpainCatalogClick = () => {
+    if (filters.region === "Portugal") {
+      handleSearch({
+        type: "",
+        town: "",
+        region: "",
+        beds: "",
+        minPrice: portfolioMinPrice,
+        maxPrice: "",
+        reference: "",
+        development: "",
+        portugalArea: "",
+        availableOnly: false,
+      }, "spain-regions");
+      return;
+    }
+
     const section = document.getElementById("spain-regions");
     if (section) section.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const handleCountryCatalogClick = (country: (typeof COUNTRY_CATALOGS)[number]) => {
+    if (country.type === "portfolio" && country.region) {
+      handleSearch({
+        type: "",
+        town: "",
+        region: country.region,
+        beds: "",
+        minPrice: portfolioMinPrice,
+        maxPrice: "",
+        reference: "",
+        development: "",
+        portugalArea: "",
+        availableOnly: false,
+      }, "portugal-regions");
+      return;
+    }
+
+    handleSpainCatalogClick();
+  };
+
+  const handlePortugalAreaClick = (areaId: string) => {
+    setFilters((prev) => ({
+      ...prev,
+      region: "Portugal",
+      town: "",
+      portugalArea: areaId,
+    }));
+    setVisibleCount(12);
+    const section = document.getElementById("collection");
+    if (section) setTimeout(() => section.scrollIntoView({ behavior: "smooth" }), 100);
   };
 
   if (!mounted) return null;
@@ -341,6 +492,7 @@ function HomeContent() {
   const bgColor = isDarkVisual ? 'bg-[#010101]' : 'bg-[#FAFAFA]';
   const textColor = isDarkVisual ? 'text-[#FAFAFA]' : 'text-[#171716]';
   const mutedText = isDarkVisual ? 'text-[#F2EFEA]' : 'text-[#171716]';
+  const countryCopy = COUNTRY_COPY[locale as keyof typeof COUNTRY_COPY] || COUNTRY_COPY.en;
 
   if (loading) {
     return (
@@ -386,28 +538,29 @@ function HomeContent() {
           <div className="mb-12 flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
             <div className="max-w-2xl">
               <span className="text-[#D8C9B6] text-[10px] font-black uppercase tracking-[0.4em] mb-3 block">
-                Catalogues internationaux
+                {countryCopy.eyebrow}
               </span>
               <h2 className={`text-4xl md:text-6xl font-serif italic leading-tight ${textColor}`}>
-                Choisissez votre destination
+                {countryCopy.title}
               </h2>
             </div>
             <p
               className={`max-w-sm border-l pl-6 text-xs font-light italic leading-relaxed ${mutedText}`}
               style={{ borderColor: isDarkVisual ? 'color-mix(in srgb, #FAFAFA 10%, transparent)' : '#D8C9B6' }}
             >
-              Retrouvez les pays pour lesquels Amaru Homes dispose d'un catalogue immobilier, actif ou en cours de preparation.
+              {countryCopy.description}
             </p>
           </div>
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:auto-rows-[420px]">
             {COUNTRY_CATALOGS.map((country, index) => {
+              const [countryName, countryStatus, countryDescription, countryAction] = countryCopy[country.id as keyof typeof countryCopy] as readonly string[];
               const content = (
                 <>
                   <div className="absolute inset-0">
                     <img
                       src={country.image}
-                      alt={country.name}
+                      alt={countryName}
                       className="h-full w-full object-cover opacity-90 transition-transform duration-[4s] ease-out group-hover:scale-105 group-hover:opacity-80"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/25 to-transparent opacity-85" />
@@ -416,18 +569,18 @@ function HomeContent() {
                   <div className="absolute inset-0 flex flex-col justify-end p-8 text-white">
                     <div className="space-y-3">
                       <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-[#D8C9B6]">
-                        {country.status}
+                        {countryStatus}
                       </p>
                       <h3 className="font-serif text-4xl italic leading-none text-white">
-                        {country.name}
+                        {countryName}
                       </h3>
                       <p className="max-w-sm text-xs leading-6 text-white/75">
-                        {country.description}
+                        {countryDescription}
                       </p>
                       <div className="relative pt-4">
                         <div className="absolute left-0 top-0 h-px w-8 bg-white/40 transition-all duration-700 group-hover:w-full" />
                         <span className="block pt-3 text-[8px] font-light uppercase tracking-[0.4em] text-white">
-                          {country.action}
+                          {countryAction}
                         </span>
                       </div>
                     </div>
@@ -436,25 +589,10 @@ function HomeContent() {
                 </>
               );
 
-              if (country.type === "external" && country.href) {
-                return (
-                  <a
-                    key={country.name}
-                    href={country.href}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="group relative min-h-[360px] overflow-hidden bg-slate-900 md:min-h-0"
-                    style={{ transitionDelay: `${index * 50}ms` }}
-                  >
-                    {content}
-                  </a>
-                );
-              }
-
               if (country.type === "disabled") {
                 return (
                   <div
-                    key={country.name}
+                    key={country.id}
                     className="group relative min-h-[360px] overflow-hidden bg-slate-900 opacity-80 md:min-h-0"
                     aria-disabled="true"
                     style={{ transitionDelay: `${index * 50}ms` }}
@@ -466,9 +604,9 @@ function HomeContent() {
 
               return (
                 <button
-                  key={country.name}
+                  key={country.id}
                   type="button"
-                  onClick={handleSpainCatalogClick}
+                  onClick={() => handleCountryCatalogClick(country)}
                   className="group relative min-h-[360px] overflow-hidden bg-slate-900 text-left md:min-h-0"
                   style={{ transitionDelay: `${index * 50}ms` }}
                 >
@@ -481,9 +619,79 @@ function HomeContent() {
       </section>
 
       {/* GRILLE DES RÉGIONS */}
-      <section id="spain-regions" className={`py-12 transition-colors duration-500 ${bgColor}`}>
+      {filters.region === "Portugal" && (
+        <section id="portugal-regions" className={`py-12 transition-colors duration-500 ${bgColor}`}>
+          <div className="max-w-[1600px] mx-auto px-6 py-12">
+            <div className="mb-12 flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
+              <div className="max-w-2xl">
+                <span className="text-[#D8C9B6] text-[10px] font-black uppercase tracking-[0.4em] mb-3 block">
+                  Portugal
+                </span>
+                <h2 className={`text-4xl md:text-6xl font-serif italic leading-tight ${textColor}`}>
+                  Regions du Portugal
+                </h2>
+              </div>
+              <p
+                className={`max-w-sm border-l pl-6 text-xs font-light italic leading-relaxed ${mutedText}`}
+                style={{ borderColor: isDarkVisual ? 'color-mix(in srgb, #FAFAFA 10%, transparent)' : '#D8C9B6' }}
+              >
+                Explorez les zones actuellement disponibles dans le catalogue Portugal synchronise.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:auto-rows-[360px]">
+              {PORTUGAL_AREAS.map((area, index) => {
+                const count = portugalAreaCounts[area.id] || 0;
+                const isSelected = filters.portugalArea === area.id;
+                return (
+                  <button
+                    key={area.id}
+                    type="button"
+                    onClick={() => handlePortugalAreaClick(area.id)}
+                    className={`group relative min-h-[320px] overflow-hidden bg-slate-900 text-left md:min-h-0 ${index === 0 ? "md:col-span-2" : ""}`}
+                  >
+                    <div className="absolute inset-0">
+                      <img
+                        src={area.image}
+                        alt={area.name}
+                        className="h-full w-full object-cover opacity-90 transition-transform duration-[4s] ease-out group-hover:scale-105 group-hover:opacity-80"
+                      />
+                      <div className={`absolute inset-0 bg-gradient-to-t from-black/90 via-black/25 to-transparent ${isSelected ? "opacity-95" : "opacity-80"}`} />
+                    </div>
+
+                    <div className="absolute inset-0 flex flex-col justify-end p-8 text-white">
+                      <div className="space-y-3">
+                        <p className="text-[9px] font-bold uppercase tracking-[0.3em] text-[#D8C9B6]">
+                          {count} biens
+                        </p>
+                        <h3 className="font-serif text-3xl italic leading-none text-white md:text-4xl">
+                          {area.name}
+                        </h3>
+                        <p className="max-w-sm text-xs leading-6 text-white/75">
+                          {area.description}
+                        </p>
+                        <div className="relative pt-4">
+                          <div className="absolute left-0 top-0 h-px w-8 bg-white/40 transition-all duration-700 group-hover:w-full" />
+                          <span className="block pt-3 text-[8px] font-light uppercase tracking-[0.4em] text-white">
+                            Voir les biens
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className={`absolute inset-0 border pointer-events-none ${isSelected ? "border-[#D8C9B6]" : "border-white/5"}`} />
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {filters.region !== "Portugal" && (
+        <section id="spain-regions" className={`py-12 transition-colors duration-500 ${bgColor}`}>
           <RegionGrid properties={allProperties} regionCounts={regionCounts} onRegionClick={handleRegionClick} />
-      </section>
+        </section>
+      )}
 
       {/* SECTION ESPACE PROPRIÉTAIRE (Masquée en mode Light) */}
       {!isLight && (
