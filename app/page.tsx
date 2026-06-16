@@ -254,6 +254,19 @@ function HomeContent() {
     });
   }, [featuredPropertyIds, filteredProperties, hasActiveFilters]);
 
+  const monthlySelection = useMemo(() => {
+    if (featuredPropertyIds.length === 0) return [];
+
+    const featuredRank = new Map(featuredPropertyIds.map((id, index) => [id, index]));
+    return allProperties
+      .filter((property) => featuredRank.has(getPropertyExternalId(property)))
+      .sort((a, b) => {
+        const rankA = featuredRank.get(getPropertyExternalId(a)) ?? Number.MAX_SAFE_INTEGER;
+        const rankB = featuredRank.get(getPropertyExternalId(b)) ?? Number.MAX_SAFE_INTEGER;
+        return rankA - rankB;
+      });
+  }, [allProperties, featuredPropertyIds]);
+
   const propertiesToShow = orderedProperties.slice(0, visibleCount);
   const hasMoreProperties = orderedProperties.length > propertiesToShow.length;
 
@@ -386,6 +399,32 @@ function HomeContent() {
                 </form>
               </div>
             </div>
+          </div>
+        </section>
+      )}
+
+      {monthlySelection.length > 0 && (
+        <section id="monthly-selection" className={`relative overflow-hidden border-y border-[#D8C9B6]/25 py-16 md:py-20 transition-colors duration-500 ${isDarkVisual ? "bg-[#171716]" : "bg-[#F2EFEA]"}`}>
+          <div className="max-w-7xl mx-auto px-6">
+            <header className="mb-12 grid gap-6 lg:grid-cols-[0.75fr_1.25fr] lg:items-end">
+              <div>
+                <p className="mb-4 text-[10px] font-black uppercase tracking-[0.4em] text-[#D8C9B6]">
+                  Amaru Homes
+                </p>
+                <h2 className={`font-serif text-4xl italic leading-tight md:text-6xl ${textColor}`}>
+                  Notre sélection du mois
+                </h2>
+              </div>
+              <p className={`max-w-2xl text-sm leading-7 lg:justify-self-end ${mutedText}`}>
+                Une sélection courte de biens mis en avant par l'équipe Amaru pour leur emplacement, leur potentiel et leur qualité de vie.
+              </p>
+            </header>
+
+            <PropertyGrid
+              activeFilters={{ type: "", town: "", region: "", beds: "", minPrice: "", maxPrice: "", reference: "" }}
+              properties={monthlySelection}
+              isLight={isLight}
+            />
           </div>
         </section>
       )}
