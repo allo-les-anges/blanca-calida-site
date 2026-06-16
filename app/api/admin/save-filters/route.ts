@@ -42,27 +42,67 @@ async function findAgencySettings(profile: any) {
   return data;
 }
 
+async function getAdminProfile(req: Request) {
+  const token = req.headers.get("authorization")?.replace("Bearer ", "");
+  if (!token) {
+    return { error: NextResponse.json({ error: "Session admin requise" }, { status: 401 }) };
+  }
+
+  const { data: authSession, error: sessionError } = await supabaseAdmin.auth.getUser(token);
+  if (sessionError || !authSession.user) {
+    return { error: NextResponse.json({ error: "Session invalide" }, { status: 401 }) };
+  }
+
+  const { data: profile } = await supabaseAdmin
+    .from("profiles")
+    .select("role, company_name, agency_id")
+    .eq("id", authSession.user.id)
+    .single();
+
+  if (!profile || !["admin", "staff", "super_admin"].includes(profile.role)) {
+    return { error: NextResponse.json({ error: "Acces admin requis" }, { status: 403 }) };
+  }
+
+  return { profile };
+}
+
+export async function GET(req: Request) {
+  try {
+    const { profile, error: authError } = await getAdminProfile(req);
+    if (authError) return authError;
+
+    const { searchParams } = new URL(req.url);
+    if (searchParams.get("featuredProperties") !== "true") {
+      return NextResponse.json({ error: "Requete invalide" }, { status: 400 });
+    }
+
+    const { data, error: villasError } = await supabaseAdmin
+      .from("villas")
+      .select("id,id_externe,ref,titre_fr,town,ville,price,type")
+      .eq("is_excluded", false)
+      .not("id_externe", "is", null)
+      .order("price", { ascending: false })
+      .limit(1000);
+
+    if (villasError) {
+      return NextResponse.json({ error: villasError.message }, { status: 500 });
+    }
+
+    return NextResponse.json({
+      success: true,
+      properties: data || [],
+      agencyId: profile?.agency_id || null,
+    });
+  } catch (err: any) {
+    console.error("Erreur featured-properties:", err);
+    return NextResponse.json({ error: err.message || "Erreur serveur interne" }, { status: 500 });
+  }
+}
+
 export async function POST(req: Request) {
   try {
-    const token = req.headers.get("authorization")?.replace("Bearer ", "");
-    if (!token) {
-      return NextResponse.json({ error: "Session admin requise" }, { status: 401 });
-    }
-
-    const { data: authSession, error: sessionError } = await supabaseAdmin.auth.getUser(token);
-    if (sessionError || !authSession.user) {
-      return NextResponse.json({ error: "Session invalide" }, { status: 401 });
-    }
-
-    const { data: profile } = await supabaseAdmin
-      .from("profiles")
-      .select("role, company_name, agency_id")
-      .eq("id", authSession.user.id)
-      .single();
-
-    if (!profile || !["admin", "staff", "super_admin"].includes(profile.role)) {
-      return NextResponse.json({ error: "Acces admin requis" }, { status: 403 });
-    }
+    const { profile, error } = await getAdminProfile(req);
+    if (error) return error;
 
     const body = await req.json();
     const currentSettings = await findAgencySettings(profile);
@@ -85,13 +125,13 @@ export async function POST(req: Request) {
       featuredPropertyIds,
     };
 
-    const { error } = await supabaseAdmin
+    const { error: updateError } = await supabaseAdmin
       .from("agency_settings")
       .update({ filter_config: nextFilterConfig })
       .eq("id", currentSettings.id);
 
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+    if (updateError) {
+      return NextResponse.json({ error: updateError.message }, { status: 500 });
     }
 
     return NextResponse.json({ success: true, filterConfig: nextFilterConfig });

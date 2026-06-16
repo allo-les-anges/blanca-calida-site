@@ -177,16 +177,18 @@ export default function AdminDashboard() {
         setAvailablePromoters(uniquePromoters as string[]);
       }
 
-      const { data: featuredCandidates } = await supabase
-        .from('villas')
-        .select('id,id_externe,ref,titre_fr,town,ville,price,type')
-        .eq('is_excluded', false)
-        .not('id_externe', 'is', null)
-        .order('price', { ascending: false })
-        .limit(1000);
+      const featuredResponse = await fetch('/api/admin/save-filters?featuredProperties=true', {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+      const featuredPayload = await featuredResponse.json();
 
-      if (featuredCandidates) {
-        setAvailableFeaturedProperties(featuredCandidates);
+      if (featuredResponse.ok && Array.isArray(featuredPayload.properties)) {
+        setAvailableFeaturedProperties(featuredPayload.properties);
+      } else {
+        console.error("Erreur chargement propriétés à la une:", featuredPayload?.error);
+        setAvailableFeaturedProperties([]);
       }
 
     } catch (error) {
@@ -1205,6 +1207,13 @@ export default function AdminDashboard() {
                   Choisissez jusqu'à 5 biens qui apparaîtront en premier sur la home page lorsqu'aucun filtre n'est actif.
                 </p>
                 <div className="flex flex-col gap-2 max-h-[360px] overflow-y-auto pr-2 custom-scrollbar">
+                  {featuredPropertyOptions.length === 0 && (
+                    <div className="rounded-xl border border-white/5 bg-black/10 p-4">
+                      <p className="text-[9px] font-bold uppercase tracking-widest text-slate-500">
+                        Aucune propriété disponible. Vérifiez que les biens sont bien synchronisés.
+                      </p>
+                    </div>
+                  )}
                   {featuredPropertyOptions.map((property) => {
                     const propertyId = String(property.id_externe || "").trim();
                     const checked = featuredPropertyIds.includes(propertyId);
@@ -1223,10 +1232,10 @@ export default function AdminDashboard() {
                         }`}
                       >
                         <span className="min-w-0">
-                          <span className="block text-[10px] font-black text-white uppercase truncate">
+                          <span className={`block text-[10px] font-black uppercase truncate ${isDarkVisual ? "text-white" : "text-slate-950"}`}>
                             {property.titre_fr || property.ref || propertyId}
                           </span>
-                          <span className="mt-1 block text-[9px] font-bold text-slate-500 uppercase tracking-wider truncate">
+                          <span className={`mt-1 block text-[9px] font-bold uppercase tracking-wider truncate ${isDarkVisual ? "text-slate-500" : "text-slate-600"}`}>
                             REF {property.ref || propertyId} · {property.town || property.ville || "Localisation"} · {price} €
                           </span>
                         </span>
