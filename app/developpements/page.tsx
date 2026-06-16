@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useTheme } from "next-themes";
@@ -10,6 +10,7 @@ import Navbar from "@/components/Navbar";
 import { useTranslation } from "@/contexts/I18nContext";
 
 type Status = "loading" | "ready" | "error";
+const PAGE_SIZE = 12;
 
 interface UnitOption {
   beds: number;
@@ -89,6 +90,9 @@ function localizedCopy(locale: string) {
     view: isFr ? "Voir le programme" : "View development",
     noResults: isFr ? "Aucun programme ne correspond a ces filtres." : "No development matches these filters.",
     reset: isFr ? "Reinitialiser" : "Reset",
+    previous: isFr ? "Precedent" : "Previous",
+    next: isFr ? "Suivant" : "Next",
+    page: isFr ? "Page" : "Page",
     pool: isFr ? "Piscine" : "Pool",
     sea: isFr ? "Mer" : "Sea",
     golf: "Golf",
@@ -104,6 +108,10 @@ export default function DevelopmentsPage() {
   const [mounted, setMounted] = useState(false);
   const [status, setStatus] = useState<Status>("loading");
   const [developments, setDevelopments] = useState<DevelopmentSummary[]>([]);
+  const [regions, setRegions] = useState<string[]>([]);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
   const [search, setSearch] = useState("");
   const [region, setRegion] = useState("");
   const isLight = searchParams.get("pack") === "light";
@@ -119,10 +127,21 @@ export default function DevelopmentsPage() {
     async function loadDevelopments() {
       try {
         setStatus("loading");
-        const response = await fetch("/api/developments");
+        const query = new URLSearchParams({
+          page: String(page),
+          pageSize: String(PAGE_SIZE),
+        });
+        if (search.trim()) query.set("search", search.trim());
+        if (region) query.set("region", region);
+
+        const response = await fetch(`/api/developments?${query.toString()}`);
         const data = await response.json();
         if (!cancelled) {
           setDevelopments(Array.isArray(data.developments) ? data.developments : []);
+          setRegions(Array.isArray(data.regions) ? data.regions : []);
+          setPage(Number(data.page || page));
+          setTotal(Number(data.total || 0));
+          setTotalPages(Number(data.totalPages || 1));
           setStatus("ready");
         }
       } catch (error) {
@@ -135,27 +154,7 @@ export default function DevelopmentsPage() {
     return () => {
       cancelled = true;
     };
-  }, []);
-
-  const regions = useMemo(
-    () => Array.from(new Set(developments.map((development) => development.region).filter(Boolean))).sort(),
-    [developments]
-  );
-
-  const filteredDevelopments = useMemo(() => {
-    const query = search.trim().toLowerCase();
-
-    return developments.filter((development) => {
-      const matchesSearch = !query || [
-        development.name,
-        development.town,
-        development.region,
-        ...development.types,
-      ].some((value) => String(value || "").toLowerCase().includes(query));
-      const matchesRegion = !region || development.region === region;
-      return matchesSearch && matchesRegion;
-    });
-  }, [developments, region, search]);
+  }, [page, region, search]);
 
   const bgColor = isDarkVisual ? "bg-[#010101]" : "bg-[#FAFAFA]";
   const panelColor = isDarkVisual ? "bg-[#171716]" : "bg-[#F2EFEA]";
@@ -205,7 +204,10 @@ export default function DevelopmentsPage() {
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#D8C9B6]" size={16} />
             <input
               value={search}
-              onChange={(event) => setSearch(event.target.value)}
+              onChange={(event) => {
+                setSearch(event.target.value);
+                setPage(1);
+              }}
               placeholder={copy.search}
               className={`w-full border bg-transparent py-4 pl-12 pr-4 text-xs font-bold uppercase tracking-[0.18em] outline-none transition-colors placeholder:text-current placeholder:opacity-35 focus:border-[#D8C9B6] ${textColor}`}
               style={{ borderColor: isDarkVisual ? "color-mix(in srgb, #FAFAFA 10%, transparent)" : "#D8C9B6" }}
@@ -215,7 +217,10 @@ export default function DevelopmentsPage() {
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
-              onClick={() => setRegion("")}
+              onClick={() => {
+                setRegion("");
+                setPage(1);
+              }}
               className={`border px-4 py-3 text-[9px] font-black uppercase tracking-[0.24em] transition-colors ${!region ? "bg-[#D8C9B6] text-[#010101]" : ""}`}
               style={{ borderColor: "#D8C9B6" }}
             >
@@ -225,7 +230,10 @@ export default function DevelopmentsPage() {
               <button
                 key={item}
                 type="button"
-                onClick={() => setRegion(item)}
+                onClick={() => {
+                  setRegion(item);
+                  setPage(1);
+                }}
                 className={`border px-4 py-3 text-[9px] font-black uppercase tracking-[0.24em] transition-colors ${region === item ? "bg-[#D8C9B6] text-[#010101]" : ""}`}
                 style={{ borderColor: "#D8C9B6" }}
               >
@@ -251,7 +259,7 @@ export default function DevelopmentsPage() {
           </div>
         )}
 
-        {status === "ready" && filteredDevelopments.length === 0 && (
+        {status === "ready" && developments.length === 0 && (
           <div className={`border border-[#D8C9B6]/30 p-10 text-center ${panelColor}`}>
             <p className="mb-6 text-xs font-black uppercase tracking-[0.3em] text-[#D8C9B6]">
               {copy.noResults}
@@ -261,6 +269,7 @@ export default function DevelopmentsPage() {
               onClick={() => {
                 setSearch("");
                 setRegion("");
+                setPage(1);
               }}
               className="border border-[#D8C9B6] px-6 py-3 text-[10px] font-black uppercase tracking-[0.28em] text-[#D8C9B6]"
             >
@@ -269,9 +278,19 @@ export default function DevelopmentsPage() {
           </div>
         )}
 
-        {status === "ready" && filteredDevelopments.length > 0 && (
+        {status === "ready" && developments.length > 0 && (
+          <>
+          <div className="mb-8 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <p className="text-[10px] font-black uppercase tracking-[0.28em] text-[#D8C9B6]">
+              {total.toLocaleString("fr-FR")} programmes
+            </p>
+            <p className={`text-[10px] font-black uppercase tracking-[0.28em] ${mutedText}`}>
+              {copy.page} {page} / {totalPages}
+            </p>
+          </div>
+
           <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
-            {filteredDevelopments.map((development) => (
+            {developments.map((development) => (
               <article
                 key={development.slug}
                 className={`group overflow-hidden border transition-all duration-500 hover:-translate-y-1 ${panelColor}`}
@@ -357,6 +376,27 @@ export default function DevelopmentsPage() {
               </article>
             ))}
           </div>
+          {totalPages > 1 && (
+            <div className="mt-12 flex items-center justify-center gap-3">
+              <button
+                type="button"
+                disabled={page <= 1}
+                onClick={() => setPage((currentPage) => Math.max(1, currentPage - 1))}
+                className="border border-[#D8C9B6] px-5 py-3 text-[9px] font-black uppercase tracking-[0.25em] text-[#D8C9B6] transition-colors disabled:cursor-not-allowed disabled:opacity-35 hover:bg-[#D8C9B6] hover:text-[#010101]"
+              >
+                {copy.previous}
+              </button>
+              <button
+                type="button"
+                disabled={page >= totalPages}
+                onClick={() => setPage((currentPage) => Math.min(totalPages, currentPage + 1))}
+                className="border border-[#D8C9B6] px-5 py-3 text-[9px] font-black uppercase tracking-[0.25em] text-[#D8C9B6] transition-colors disabled:cursor-not-allowed disabled:opacity-35 hover:bg-[#D8C9B6] hover:text-[#010101]"
+              >
+                {copy.next}
+              </button>
+            </div>
+          )}
+          </>
         )}
       </section>
 

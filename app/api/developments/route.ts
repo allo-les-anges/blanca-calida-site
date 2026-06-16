@@ -62,8 +62,15 @@ function normalizeImage(image: unknown) {
   return "";
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const page = Math.max(1, Number(searchParams.get("page") || 1) || 1);
+    const pageSizeParam = Number(searchParams.get("pageSize") || 12);
+    const pageSize = Number.isFinite(pageSizeParam) ? Math.min(Math.max(pageSizeParam, 1), 24) : 12;
+    const search = String(searchParams.get("search") || "").trim().toLowerCase();
+    const selectedRegion = String(searchParams.get("region") || "").trim();
+
     const baseSelect = [
       "id",
       "ref",
@@ -233,9 +240,33 @@ export async function GET() {
       development.isNew = true;
     });
 
-    return NextResponse.json({ developments, total: developments.length });
+    const regions = Array.from(new Set(developments.map((development) => development.region).filter(Boolean))).sort();
+    const filteredDevelopments = developments.filter((development) => {
+      const matchesSearch = !search || [
+        development.name,
+        development.town,
+        development.region,
+        ...development.types,
+      ].some((value) => String(value || "").toLowerCase().includes(search));
+      const matchesRegion = !selectedRegion || development.region === selectedRegion;
+      return matchesSearch && matchesRegion;
+    });
+
+    const total = filteredDevelopments.length;
+    const totalPages = Math.max(1, Math.ceil(total / pageSize));
+    const safePage = Math.min(page, totalPages);
+    const from = (safePage - 1) * pageSize;
+
+    return NextResponse.json({
+      developments: filteredDevelopments.slice(from, from + pageSize),
+      page: safePage,
+      pageSize,
+      total,
+      totalPages,
+      regions,
+    });
   } catch (error: any) {
     console.error("Erreur API Developments:", error.message);
-    return NextResponse.json({ developments: [], total: 0, error: "Internal server error" }, { status: 500 });
+    return NextResponse.json({ developments: [], page: 1, pageSize: 12, total: 0, totalPages: 1, regions: [], error: "Internal server error" }, { status: 500 });
   }
 }
