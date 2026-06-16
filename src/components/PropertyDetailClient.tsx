@@ -26,6 +26,7 @@ import {
   Expand,
 } from "lucide-react";
 import Link from "next/link";
+import { useTheme } from "next-themes";
 import { useTranslation } from "@/contexts/I18nContext";
 import { useSearchParams } from "next/navigation";
 
@@ -146,6 +147,7 @@ function WhatsAppIcon({ className = "" }: { className?: string }) {
 
 export default function PropertyDetailClient({ id }: PropertyDetailClientProps) {
   const { t, locale } = useTranslation();
+  const { resolvedTheme } = useTheme();
   const searchParams = useSearchParams();
   const [property, setProperty] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -161,6 +163,7 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
   const galleryRef = useRef<HTMLDivElement>(null);
 
   const isLight = searchParams.get("pack") === "light";
+  const isDarkVisual = resolvedTheme === "dark" && !isLight;
 
   const currentAgency = {
     id: "AGENCE_HANNIBAL_001",
@@ -612,7 +615,7 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
         </div>
       </section>
 
-      <Footer isLight={isLight} />
+      <Footer isLight={!isDarkVisual} />
 
       {brochureModalOpen && (
         <div className="fixed inset-0 z-[190] flex items-center justify-center bg-[#010101]/70 px-5 py-8 backdrop-blur-sm">
