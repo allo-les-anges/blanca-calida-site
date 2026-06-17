@@ -16,6 +16,7 @@ import {
   Waves,
   X,
 } from "lucide-react";
+import { useTranslation } from "@/contexts/I18nContext";
 
 const DEFAULT_MIN_PRICE = "";
 
@@ -41,9 +42,9 @@ function normalizePrice(value: unknown) {
   return digitsOnly ? Number(digitsOnly) : 0;
 }
 
-function formatPrice(value: unknown) {
+function formatPrice(value: unknown, locale = "fr-FR") {
   const price = normalizePrice(value);
-  return price ? price.toLocaleString("fr-FR") : "";
+  return price ? price.toLocaleString(locale) : "";
 }
 
 export default function AdvancedSearch({
@@ -54,6 +55,7 @@ export default function AdvancedSearch({
   onClose,
   isLight = false,
 }: AdvancedSearchProps) {
+  const { t, locale } = useTranslation();
   const [localFilters, setLocalFilters] = useState(activeFilters);
   const [showAdvanced, setShowAdvanced] = useState(false);
 
@@ -79,18 +81,18 @@ export default function AdvancedSearch({
 
   const types = useMemo(() => {
     const translation: Record<string, string> = {
-      villa: "Villa",
-      apartment: "Appartement",
-      penthouse: "Penthouse",
-      bungalow: "Bungalow",
-      townhouse: "Maison de ville",
+      villa: t("advancedSearch.types.villa"),
+      apartment: t("advancedSearch.types.apartment"),
+      penthouse: t("advancedSearch.types.penthouse"),
+      bungalow: t("advancedSearch.types.bungalow"),
+      townhouse: t("advancedSearch.types.townhouse"),
     };
 
     return Array.from(new Set(safeProps.map((property) => String(property.type || "").trim())))
       .filter((type) => type && type.toLowerCase() !== "property")
       .sort((a, b) => a.localeCompare(b))
       .map((type) => ({ id: type.toLowerCase(), label: translation[type.toLowerCase()] || type }));
-  }, [safeProps]);
+  }, [safeProps, t]);
 
   const availableCount = useMemo(() => {
     return safeProps.filter((property) => {
@@ -196,7 +198,7 @@ export default function AdvancedSearch({
         <button
           onClick={onClose}
           className={`absolute -right-1 -top-5 z-[110] flex h-12 w-12 items-center justify-center border transition-all hover:bg-[#D8C9B6] hover:text-[#010101] md:right-2 ${panelBg} ${textColor} ${borderColor}`}
-          aria-label="Fermer la recherche"
+          aria-label={t("advancedSearch.closeAria")}
         >
           <X size={22} />
         </button>
@@ -208,18 +210,18 @@ export default function AdvancedSearch({
             <div>
               <p className="mb-3 flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.35em] text-[#D8C9B6]">
                 <SlidersHorizontal size={14} />
-                Recherche privee
+                {t("advancedSearch.privateSearch")}
               </p>
               <h2 className={`font-serif text-3xl italic leading-none md:text-5xl ${textColor}`}>
-                Affiner votre selection
+                {t("advancedSearch.refineTitle")}
               </h2>
             </div>
             <div className="flex flex-col gap-3 lg:items-end">
               <p className={`max-w-xl text-sm leading-6 ${softText}`}>
-                Definissez vos criteres pour reveler les biens les plus adaptes a votre projet.
+                {t("advancedSearch.description")}
               </p>
               <span className={`w-fit border px-4 py-2 text-[10px] font-black uppercase tracking-[0.25em] ${borderColor} ${mutedText}`}>
-                {catalogueCount.toLocaleString("fr-FR")} biens au catalogue
+                {t("advancedSearch.catalogueCount", { count: catalogueCount.toLocaleString(locale) })}
               </span>
             </div>
           </div>
@@ -227,49 +229,49 @@ export default function AdvancedSearch({
 
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_220px]">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <Field label="Destination" icon={<Map size={14} />} mutedText={mutedText} borderColor={borderColor} bg={cardBg}>
+            <Field label={t("advancedSearch.destination")} icon={<Map size={14} />} mutedText={mutedText} borderColor={borderColor} bg={cardBg}>
               <select
                 value={localFilters.region || ""}
                 onChange={(event) => updateFilter("region", event.target.value)}
                 className={`w-full bg-transparent text-sm font-black uppercase outline-none ${textColor}`}
               >
-                <option value="" className={optionBg}>Toutes destinations</option>
+                <option value="" className={optionBg}>{t("advancedSearch.allDestinations")}</option>
                 {regions.map((region) => (
                   <option key={region} value={region} className={optionBg}>{region}</option>
                 ))}
               </select>
             </Field>
 
-            <Field label="Ville" icon={<MapPin size={14} />} mutedText={mutedText} borderColor={borderColor} bg={cardBg}>
+            <Field label={t("advancedSearch.city")} icon={<MapPin size={14} />} mutedText={mutedText} borderColor={borderColor} bg={cardBg}>
               <select
                 value={localFilters.town || ""}
                 onChange={(event) => updateFilter("town", event.target.value)}
                 className={`w-full bg-transparent text-sm font-black uppercase outline-none ${textColor}`}
               >
-                <option value="" className={optionBg}>Toutes les villes</option>
+                <option value="" className={optionBg}>{t("advancedSearch.allCities")}</option>
                 {towns.map((town) => (
                   <option key={town} value={town} className={optionBg}>{town}</option>
                 ))}
               </select>
             </Field>
 
-            <Field label="Type de bien" icon={<Home size={14} />} mutedText={mutedText} borderColor={borderColor} bg={cardBg}>
+            <Field label={t("advancedSearch.propertyType")} icon={<Home size={14} />} mutedText={mutedText} borderColor={borderColor} bg={cardBg}>
               <select
                 value={localFilters.type || ""}
                 onChange={(event) => updateFilter("type", event.target.value)}
                 className={`w-full bg-transparent text-sm font-black uppercase outline-none ${textColor}`}
               >
-                <option value="" className={optionBg}>Indifferent</option>
+                <option value="" className={optionBg}>{t("advancedSearch.indifferent")}</option>
                 {types.map((type) => (
                   <option key={type.id} value={type.id} className={optionBg}>{type.label}</option>
                 ))}
               </select>
             </Field>
 
-            <Field label="Reference" icon={<Hash size={14} />} mutedText={mutedText} borderColor={borderColor} bg={cardBg}>
+            <Field label={t("advancedSearch.reference")} icon={<Hash size={14} />} mutedText={mutedText} borderColor={borderColor} bg={cardBg}>
               <input
                 type="text"
-                placeholder="Ex: REF-1234"
+                placeholder={t("advancedSearch.referencePlaceholder")}
                 value={localFilters.reference || ""}
                 onChange={(event) => updateFilter("reference", event.target.value)}
                 className={`w-full bg-transparent font-serif text-lg italic outline-none ${inputText}`}
@@ -283,21 +285,21 @@ export default function AdvancedSearch({
             className="group flex min-h-[108px] items-center justify-center gap-4 bg-[#D8C9B6] px-8 py-6 text-[#010101] transition-all hover:bg-[#FAFAFA] lg:flex-col"
           >
             <Search size={30} strokeWidth={1.8} />
-            <span className="text-[10px] font-black uppercase tracking-[0.3em]">Afficher</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.3em]">{t("advancedSearch.show")}</span>
           </button>
         </div>
 
         <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
           <div className={`border ${borderColor} ${panelBg} p-5`}>
             <div className="mb-5 flex items-center justify-between">
-              <p className={`text-[10px] font-black uppercase tracking-[0.28em] ${mutedText}`}>Budget</p>
+              <p className={`text-[10px] font-black uppercase tracking-[0.28em] ${mutedText}`}>{t("advancedSearch.budget")}</p>
               <p className={`text-[10px] font-bold uppercase tracking-widest ${softText}`}>
-                {formatPrice(localFilters.minPrice) || "0"} € - {formatPrice(localFilters.maxPrice) || "75 000 000"} €
+                {formatPrice(localFilters.minPrice, locale) || "0"} € - {formatPrice(localFilters.maxPrice, locale) || "75 000 000"} €
               </p>
             </div>
             <div className="grid gap-5 md:grid-cols-2">
               <PriceInput
-                label="Min"
+                label={t("advancedSearch.min")}
                 value={localFilters.minPrice || ""}
                 placeholder="0"
                 inputText={inputText}
@@ -307,7 +309,7 @@ export default function AdvancedSearch({
                 onChange={(value) => updatePriceFilter("minPrice", value)}
               />
               <PriceInput
-                label="Max"
+                label={t("advancedSearch.max")}
                 value={localFilters.maxPrice || ""}
                 placeholder="75000000"
                 inputText={inputText}
@@ -341,7 +343,7 @@ export default function AdvancedSearch({
 
           <div className={`border ${borderColor} ${panelBg} p-5`}>
             <div className="mb-5 flex items-center justify-between">
-              <p className={`text-[10px] font-black uppercase tracking-[0.28em] ${mutedText}`}>Pieces & confort</p>
+              <p className={`text-[10px] font-black uppercase tracking-[0.28em] ${mutedText}`}>{t("advancedSearch.roomsComfort")}</p>
               <button
                 type="button"
                 onClick={() => setShowAdvanced((value) => !value)}
@@ -352,12 +354,12 @@ export default function AdvancedSearch({
                 }`}
               >
                 <SlidersHorizontal size={13} />
-                {showAdvanced ? "Masquer" : "Plus de criteres"}
+                {showAdvanced ? t("advancedSearch.hide") : t("advancedSearch.moreCriteria")}
               </button>
             </div>
             <div className="grid gap-5 md:grid-cols-2">
               <ChipGroup
-                label="Chambres"
+                label={t("advancedSearch.bedrooms")}
                 icon={<Bed size={14} />}
                 value={localFilters.beds || ""}
                 options={["2", "3", "4", "5"]}
@@ -368,7 +370,7 @@ export default function AdvancedSearch({
                 inactiveChip={inactiveChip}
               />
               <ChipGroup
-                label="Salles de bain"
+                label={t("advancedSearch.bathrooms")}
                 icon={<Bath size={14} />}
                 value={localFilters.baths || ""}
                 options={["2", "3", "4", "5"]}
@@ -384,15 +386,15 @@ export default function AdvancedSearch({
 
         {showAdvanced && (
           <div className={`mt-4 grid grid-cols-1 gap-4 border ${borderColor} ${panelBg} p-5 md:grid-cols-3`}>
-            <Field label="Surface construite min." icon={<Maximize size={14} />} mutedText={mutedText} borderColor={borderColor} bg={cardBg}>
+            <Field label={t("advancedSearch.minBuiltSurface")} icon={<Maximize size={14} />} mutedText={mutedText} borderColor={borderColor} bg={cardBg}>
               <select
                 value={localFilters.surfaceMin || ""}
                 onChange={(event) => updateFilter("surfaceMin", event.target.value)}
                 className={`w-full bg-transparent text-sm font-black uppercase outline-none ${textColor}`}
               >
-                <option value="" className={optionBg}>Indifferent</option>
+                <option value="" className={optionBg}>{t("advancedSearch.indifferent")}</option>
                 {[80, 120, 160, 200, 300, 500].map((surface) => (
-                  <option key={surface} value={String(surface)} className={optionBg}>{surface} m²+</option>
+                  <option key={surface} value={String(surface)} className={optionBg}>{t("advancedSearch.squareMetersPlus", { surface })}</option>
                 ))}
               </select>
             </Field>
@@ -404,19 +406,19 @@ export default function AdvancedSearch({
             >
               <span>
                 <span className="mb-2 flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.25em]">
-                  <Waves size={14} /> Piscine
+                  <Waves size={14} /> {t("advancedSearch.pool")}
                 </span>
-                <span className="font-serif text-xl italic">{localFilters.pool ? "Requise" : "Indifferente"}</span>
+                <span className="font-serif text-xl italic">{localFilters.pool ? t("advancedSearch.required") : t("advancedSearch.indifferent")}</span>
               </span>
             </button>
 
-            <Field label="Programme neuf" icon={<Building2 size={14} />} mutedText={mutedText} borderColor={borderColor} bg={cardBg}>
+            <Field label={t("advancedSearch.newDevelopment")} icon={<Building2 size={14} />} mutedText={mutedText} borderColor={borderColor} bg={cardBg}>
               <select
                 value={localFilters.development || ""}
                 onChange={(event) => updateFilter("development", event.target.value)}
                 className={`w-full bg-transparent text-sm font-black uppercase outline-none ${textColor}`}
               >
-                <option value="" className={optionBg}>Tous les programmes</option>
+                <option value="" className={optionBg}>{t("advancedSearch.allDevelopments")}</option>
                 {Array.from(new Set(safeProps.map((property) => String(property.development_name || "").trim()).filter(Boolean)))
                   .sort((a, b) => a.localeCompare(b))
                   .slice(0, 40)
@@ -430,20 +432,20 @@ export default function AdvancedSearch({
 
         <footer className="mt-5 flex flex-col gap-4 px-1 md:flex-row md:items-center md:justify-between">
           <p className={`text-[10px] font-medium italic ${softText}`}>
-            Collection Amaru - selection exclusive
+            {t("advancedSearch.collection")}
           </p>
           <div className="flex flex-wrap items-center gap-3">
             <span className={`text-[10px] font-black uppercase tracking-[0.22em] ${mutedText}`}>
-              {[localFilters.region, localFilters.town, localFilters.type, localFilters.beds ? `${localFilters.beds}+ chambres` : ""]
+              {[localFilters.region, localFilters.town, localFilters.type, localFilters.beds ? t("advancedSearch.bedroomsSummary", { count: localFilters.beds }) : ""]
                 .filter(Boolean)
-                .join(" / ") || "Tous les biens"}
+                .join(" / ") || t("advancedSearch.allProperties")}
             </span>
             <button
               type="button"
               onClick={reset}
               className={`flex items-center gap-2 border px-4 py-3 text-[10px] font-black uppercase tracking-[0.22em] transition-all ${borderColor} ${softText} hover:border-[#D8C9B6] hover:text-[#D8C9B6]`}
             >
-              <RotateCcw size={13} /> Reinitialiser
+              <RotateCcw size={13} /> {t("advancedSearch.reset")}
             </button>
           </div>
         </footer>

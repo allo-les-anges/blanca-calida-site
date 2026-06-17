@@ -262,7 +262,11 @@
         "role": "Operational Excellence & Client Experience",
         "worldRegion": "Global Operations",
         "background": "Garante de la fluidité des processus et de la satisfaction client. Elle assure le suivi opérationnel quotidien pour garantir que chaque projet reçoive une attention personnalisée et une rigueur d'exécution maximale.",
-        "skills": ["Processus", "Expérience Client", "Rigueur"],
+        "skills": [
+          "Processus",
+          "Expérience Client",
+          "Rigueur"
+        ],
         "market": "Siège Amaru"
       },
       {
@@ -270,23 +274,35 @@
         "role": "Benelux, DACH & UK Expert",
         "worldRegion": "Europe du Nord & UK",
         "background": "Spécialiste des marchés à fort pouvoir d'achat, notamment la Belgique, les Pays-Bas, l'Allemagne et le Royaume-Uni. Il assure le lien stratégique entre les investisseurs d'Europe du Nord et les opportunités internationales.",
-        "skills": ["Investissement", "DACH Region", "Stratégie"],
+        "skills": [
+          "Investissement",
+          "DACH Region",
+          "Stratégie"
+        ],
         "market": "International"
       },
       {
-      "name": "Joanna Pawelek",
-      "role": "Eastern Europe & International Strategist",
-      "worldRegion": "Europe de l'Est & anglophone",
-      "background": "Experte du marché d'Alicante. Elle agit comme un pont stratégique pour les investisseurs d'Europe de l'Est et du monde anglophone grâce à sa maîtrise parfaite du polonais, de l'anglais et de l'espagnol.",
-      "skills": ["Expertise Multilingue", "Marché International", "Alicante"],
-      "market": "Alicante / Costa Blanca"
-    },
+        "name": "Joanna Pawelek",
+        "role": "Eastern Europe & International Strategist",
+        "worldRegion": "Europe de l'Est & anglophone",
+        "background": "Experte du marché d'Alicante. Elle agit comme un pont stratégique pour les investisseurs d'Europe de l'Est et du monde anglophone grâce à sa maîtrise parfaite du polonais, de l'anglais et de l'espagnol.",
+        "skills": [
+          "Expertise Multilingue",
+          "Marché International",
+          "Alicante"
+        ],
+        "market": "Alicante / Costa Blanca"
+      },
       {
         "name": "Abdellah Touati",
         "role": "MENA & Americas Expert",
         "worldRegion": "Moyen-Orient & Amériques",
         "background": "Fort d'un parcours technique en génie civil et d'une expertise sur le marché de Dubaï, il pilote l'expansion vers les marchés émergents et l'Amérique du Nord, connectant les développeurs aux réseaux d'investisseurs globaux.",
-        "skills": ["Génie Civil", "Dubai Market", "Global Networks"],
+        "skills": [
+          "Génie Civil",
+          "Dubai Market",
+          "Global Networks"
+        ],
         "market": "MENA / USA / Canada"
       },
       {
@@ -294,7 +310,11 @@
         "role": "Francophonie & Global Strategy",
         "worldRegion": "Monde Francophone",
         "background": "Architecte de la stratégie commerciale, il assure la cohérence des partenariats avec les acteurs institutionnels (notaires, avocats, promoteurs) et l'expansion sur le marché francophone mondial, incluant l'Europe et le Canada.",
-        "skills": ["Partenariats B2B", "Stratégie", "Expansion"],
+        "skills": [
+          "Partenariats B2B",
+          "Stratégie",
+          "Expansion"
+        ],
         "market": "Global Francophonie"
       }
     ]
@@ -652,26 +672,45 @@
     "golf": "Golf à {distance}"
   },
   "advancedSearch": {
-    "propertyRef": "Référence Propriété",
-    "refPlaceholder": "Ex: REF-1234",
-    "region": "Région",
-    "allSpain": "Espagne (Toutes)",
-    "costaBlanca": "Costa Blanca",
-    "costaCalida": "Costa Calida",
-    "costaDelSol": "Costa del Sol",
-    "costaAlmeria": "Costa Almeria",
-    "type": "Type",
-    "anyType": "Indifférent",
-    "villa": "Villa",
-    "apartment": "Appartement",
-    "penthouse": "Penthouse",
-    "bungalow": "Bungalow",
-    "townhouse": "Maison de ville",
+    "privateSearch": "Recherche privee",
+    "refineTitle": "Affiner votre selection",
+    "description": "Definissez vos criteres pour reveler les biens les plus adaptes a votre projet.",
+    "catalogueCount": "{count} biens au catalogue",
+    "destination": "Destination",
+    "allDestinations": "Toutes destinations",
+    "city": "Ville",
+    "allCities": "Toutes les villes",
+    "propertyType": "Type de bien",
+    "indifferent": "Indifferent",
+    "reference": "Reference",
+    "referencePlaceholder": "Ex: REF-1234",
+    "show": "Afficher",
+    "budget": "Budget",
+    "roomsComfort": "Pieces & confort",
+    "moreCriteria": "Plus de criteres",
+    "hide": "Masquer",
+    "bedrooms": "Chambres",
+    "bathrooms": "Salles de bain",
+    "minBuiltSurface": "Surface construite min.",
+    "pool": "Piscine",
+    "required": "Requise",
+    "newDevelopment": "Programme neuf",
+    "allDevelopments": "Tous les programmes",
+    "collection": "Collection Amaru - selection exclusive",
+    "allProperties": "Tous les biens",
+    "reset": "Reinitialiser",
     "min": "Min",
     "max": "Max",
-    "bedrooms": "Chambres",
-    "collection": "Collection Amaru • Sélection Exclusive",
-    "reset": "Réinitialiser"
+    "squareMetersPlus": "{surface} m2+",
+    "bedroomsSummary": "{count}+ chambres",
+    "closeAria": "Fermer la recherche",
+    "types": {
+      "villa": "Villa",
+      "apartment": "Appartement",
+      "penthouse": "Penthouse",
+      "bungalow": "Bungalow",
+      "townhouse": "Maison de ville"
+    }
   },
   "scrollingBanner": {
     "portfolioExclusif": "Portfolio Exclusif",

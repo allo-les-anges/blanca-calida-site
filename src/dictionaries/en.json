@@ -262,7 +262,11 @@
         "role": "Operational Excellence & Client Experience",
         "worldRegion": "Global Operations",
         "background": "Guarantor of process fluidity and client satisfaction. She ensures daily operational monitoring to guarantee that each project receives personalized attention and maximum execution rigor.",
-        "skills": ["Processes", "Client Experience", "Rigor"],
+        "skills": [
+          "Processes",
+          "Client Experience",
+          "Rigor"
+        ],
         "market": "Amaru Headquarters"
       },
       {
@@ -270,7 +274,11 @@
         "role": "Benelux, DACH & UK Expert",
         "worldRegion": "Northern Europe & UK",
         "background": "Specialist in high-purchasing-power markets, particularly Belgium, the Netherlands, Germany, and the UK. He ensures the strategic link between Northern European investors and international opportunities.",
-        "skills": ["Investment", "DACH Region", "Strategy"],
+        "skills": [
+          "Investment",
+          "DACH Region",
+          "Strategy"
+        ],
         "market": "International"
       },
       {
@@ -278,7 +286,11 @@
         "role": "Eastern Europe & International Strategist",
         "worldRegion": "Eastern Europe & Anglophone",
         "background": "Expert in the Alicante market. She acts as a strategic bridge for investors from Eastern Europe and the English-speaking world thanks to her perfect command of Polish, English, and Spanish.",
-        "skills": ["Multilingual Expertise", "International Market", "Alicante"],
+        "skills": [
+          "Multilingual Expertise",
+          "International Market",
+          "Alicante"
+        ],
         "market": "Alicante / Costa Blanca"
       },
       {
@@ -286,7 +298,11 @@
         "role": "MENA & Americas Expert",
         "worldRegion": "Middle East & Americas",
         "background": "With a technical background in civil engineering and expertise in the Dubai market, he leads expansion into emerging markets and North America, connecting developers to global investor networks.",
-        "skills": ["Civil Engineering", "Dubai Market", "Global Networks"],
+        "skills": [
+          "Civil Engineering",
+          "Dubai Market",
+          "Global Networks"
+        ],
         "market": "MENA / USA / Canada"
       },
       {
@@ -294,7 +310,11 @@
         "role": "Francophonie & Global Strategy",
         "worldRegion": "Francophone World",
         "background": "Architect of the commercial strategy, he ensures the coherence of partnerships with institutional players (notaries, lawyers, developers) and expansion into the global Francophone market, including Europe and Canada.",
-        "skills": ["B2B Partnerships", "Strategy", "Expansion"],
+        "skills": [
+          "B2B Partnerships",
+          "Strategy",
+          "Expansion"
+        ],
         "market": "Global Francophonie"
       }
     ]
@@ -652,26 +672,45 @@
     "golf": "{distance} to golf"
   },
   "advancedSearch": {
-    "propertyRef": "Property Reference",
-    "refPlaceholder": "Ex: REF-1234",
-    "region": "Region",
-    "allSpain": "Spain (All)",
-    "costaBlanca": "Costa Blanca",
-    "costaCalida": "Costa Calida",
-    "costaDelSol": "Costa del Sol",
-    "costaAlmeria": "Costa Almeria",
-    "type": "Type",
-    "anyType": "Any",
-    "villa": "Villa",
-    "apartment": "Apartment",
-    "penthouse": "Penthouse",
-    "bungalow": "Bungalow",
-    "townhouse": "Townhouse",
+    "privateSearch": "Private search",
+    "refineTitle": "Refine your selection",
+    "description": "Define your criteria to reveal the properties best suited to your project.",
+    "catalogueCount": "{count} properties in the catalogue",
+    "destination": "Destination",
+    "allDestinations": "All destinations",
+    "city": "City",
+    "allCities": "All cities",
+    "propertyType": "Property type",
+    "indifferent": "Any",
+    "reference": "Reference",
+    "referencePlaceholder": "Ex: REF-1234",
+    "show": "Show",
+    "budget": "Budget",
+    "roomsComfort": "Rooms & comfort",
+    "moreCriteria": "More criteria",
+    "hide": "Hide",
+    "bedrooms": "Bedrooms",
+    "bathrooms": "Bathrooms",
+    "minBuiltSurface": "Min. built surface",
+    "pool": "Pool",
+    "required": "Required",
+    "newDevelopment": "New development",
+    "allDevelopments": "All developments",
+    "collection": "Amaru Collection - exclusive selection",
+    "allProperties": "All properties",
+    "reset": "Reset",
     "min": "Min",
     "max": "Max",
-    "bedrooms": "Bedrooms",
-    "collection": "Amaru Collection • Exclusive Selection",
-    "reset": "Reset"
+    "squareMetersPlus": "{surface} m2+",
+    "bedroomsSummary": "{count}+ bedrooms",
+    "closeAria": "Close search",
+    "types": {
+      "villa": "Villa",
+      "apartment": "Apartment",
+      "penthouse": "Penthouse",
+      "bungalow": "Bungalow",
+      "townhouse": "Townhouse"
+    }
   },
   "scrollingBanner": {
     "portfolioExclusif": "Exclusive Portfolio",

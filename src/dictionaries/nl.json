@@ -262,7 +262,11 @@
         "role": "Operationele Excellentie & Cliëntervaring",
         "worldRegion": "Mondiale Operaties",
         "background": "Garant van de vloeiendheid van processen en klanttevredenheid. Ze zorgt voor de dagelijkse operationele opvolging om te garanderen dat elk project persoonlijke aandacht en maximale uitvoeringsnauwkeurigheid krijgt.",
-        "skills": ["Processen", "Cliëntervaring", "Nauwkeurigheid"],
+        "skills": [
+          "Processen",
+          "Cliëntervaring",
+          "Nauwkeurigheid"
+        ],
         "market": "Amaru Hoofdkantoor"
       },
       {
@@ -270,7 +274,11 @@
         "role": "Benelux, DACH & VK Expert",
         "worldRegion": "Noord-Europa & VK",
         "background": "Specialist in markten met hoge koopkracht, met name België, Nederland, Duitsland en het Verenigd Koninkrijk. Hij zorgt voor de strategische link tussen investeerders uit Noord-Europa en internationale kansen.",
-        "skills": ["Investering", "DACH-regio", "Strategie"],
+        "skills": [
+          "Investering",
+          "DACH-regio",
+          "Strategie"
+        ],
         "market": "Internationaal"
       },
       {
@@ -278,7 +286,11 @@
         "role": "Oost-Europa & Internationale Strategist",
         "worldRegion": "Oost-Europa & Engelstalig",
         "background": "Expert in de Alicante-markt. Ze fungeert als een strategische brug voor investeerders uit Oost-Europa en de Engelstalige wereld dankzij haar perfecte beheersing van het Pools, Engels en Spaans.",
-        "skills": ["Meertalige expertise", "Internationale markt", "Alicante"],
+        "skills": [
+          "Meertalige expertise",
+          "Internationale markt",
+          "Alicante"
+        ],
         "market": "Alicante / Costa Blanca"
       },
       {
@@ -286,7 +298,11 @@
         "role": "MENA & Amerika's Expert",
         "worldRegion": "Midden-Oosten & Amerika's",
         "background": "Met een technische achtergrond in civiele techniek en expertise in de Dubai-markt, leidt hij de expansie naar opkomende markten en Noord-Amerika, waarbij hij ontwikkelaars verbindt met mondiale investeerdersnetwerken.",
-        "skills": ["Civiele techniek", "Dubai-markt", "Mondiale netwerken"],
+        "skills": [
+          "Civiele techniek",
+          "Dubai-markt",
+          "Mondiale netwerken"
+        ],
         "market": "MENA / VS / Canada"
       },
       {
@@ -294,7 +310,11 @@
         "role": "Francofonie & Mondiale Strategie",
         "worldRegion": "Franstalige Wereld",
         "background": "Architect van de commerciële strategie, hij zorgt voor de samenhang van partnerschappen met institutionele spelers (notarissen, advocaten, ontwikkelaars) en de expansie op de mondiale Franstalige markt, inclusief Europa en Canada.",
-        "skills": ["B2B-partnerschappen", "Strategie", "Expansie"],
+        "skills": [
+          "B2B-partnerschappen",
+          "Strategie",
+          "Expansie"
+        ],
         "market": "Mondiale Francofonie"
       }
     ]
@@ -652,26 +672,45 @@
     "golf": "{distance} naar golf"
   },
   "advancedSearch": {
-    "propertyRef": "Eigendomsreferentie",
-    "refPlaceholder": "Bijv: REF-1234",
-    "region": "Regio",
-    "allSpain": "Spanje (Alle)",
-    "costaBlanca": "Costa Blanca",
-    "costaCalida": "Costa Cálida",
-    "costaDelSol": "Costa del Sol",
-    "costaAlmeria": "Costa Almería",
-    "type": "Type",
-    "anyType": "Onverschillig",
-    "villa": "Villa",
-    "apartment": "Appartement",
-    "penthouse": "Penthouse",
-    "bungalow": "Bungalow",
-    "townhouse": "Rijtjeshuis",
+    "privateSearch": "Privezoekopdracht",
+    "refineTitle": "Verfijn uw selectie",
+    "description": "Definieer uw criteria om de woningen te tonen die het best bij uw project passen.",
+    "catalogueCount": "{count} woningen in de catalogus",
+    "destination": "Bestemming",
+    "allDestinations": "Alle bestemmingen",
+    "city": "Stad",
+    "allCities": "Alle steden",
+    "propertyType": "Type woning",
+    "indifferent": "Geen voorkeur",
+    "reference": "Referentie",
+    "referencePlaceholder": "Bijv: REF-1234",
+    "show": "Tonen",
+    "budget": "Budget",
+    "roomsComfort": "Kamers & comfort",
+    "moreCriteria": "Meer criteria",
+    "hide": "Verbergen",
+    "bedrooms": "Slaapkamers",
+    "bathrooms": "Badkamers",
+    "minBuiltSurface": "Min. bebouwde opp.",
+    "pool": "Zwembad",
+    "required": "Vereist",
+    "newDevelopment": "Nieuwbouwproject",
+    "allDevelopments": "Alle projecten",
+    "collection": "Amaru Collectie - exclusieve selectie",
+    "allProperties": "Alle woningen",
+    "reset": "Resetten",
     "min": "Min",
     "max": "Max",
-    "bedrooms": "Slaapkamers",
-    "collection": "Amaru Collectie • Exclusieve Selectie",
-    "reset": "Resetten"
+    "squareMetersPlus": "{surface} m2+",
+    "bedroomsSummary": "{count}+ slaapkamers",
+    "closeAria": "Zoeken sluiten",
+    "types": {
+      "villa": "Villa",
+      "apartment": "Appartement",
+      "penthouse": "Penthouse",
+      "bungalow": "Bungalow",
+      "townhouse": "Rijwoning"
+    }
   },
   "scrollingBanner": {
     "portfolioExclusif": "Exclusief Portfolio",

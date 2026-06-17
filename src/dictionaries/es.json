@@ -262,7 +262,11 @@
         "role": "Excelencia Operativa y Experiencia del Cliente",
         "worldRegion": "Operaciones Globales",
         "background": "Garante de la fluidez de los procesos y la satisfacción del cliente. Asegura el seguimiento operativo diario para garantizar que cada proyecto reciba una atención personalizada y un rigor de ejecución máximo.",
-        "skills": ["Procesos", "Experiencia del Cliente", "Rigor"],
+        "skills": [
+          "Procesos",
+          "Experiencia del Cliente",
+          "Rigor"
+        ],
         "market": "Sede Amaru"
       },
       {
@@ -270,7 +274,11 @@
         "role": "Experto en Benelux, DACH y Reino Unido",
         "worldRegion": "Europa del Norte y Reino Unido",
         "background": "Especialista en mercados de alto poder adquisitivo, especialmente Bélgica, Países Bajos, Alemania y Reino Unido. Asegura el vínculo estratégico entre los inversores del norte de Europa y las oportunidades internacionales.",
-        "skills": ["Inversión", "Región DACH", "Estrategia"],
+        "skills": [
+          "Inversión",
+          "Región DACH",
+          "Estrategia"
+        ],
         "market": "Internacional"
       },
       {
@@ -278,7 +286,11 @@
         "role": "Europa del Este y Estratega Internacional",
         "worldRegion": "Europa del Este y angloparlante",
         "background": "Experta en el mercado de Alicante. Actúa como puente estratégico para inversores de Europa del Este y el mundo angloparlante gracias a su perfecto dominio del polaco, inglés y español.",
-        "skills": ["Experiencia multilingüe", "Mercado internacional", "Alicante"],
+        "skills": [
+          "Experiencia multilingüe",
+          "Mercado internacional",
+          "Alicante"
+        ],
         "market": "Alicante / Costa Blanca"
       },
       {
@@ -286,7 +298,11 @@
         "role": "Experto en MENA y Américas",
         "worldRegion": "Oriente Medio y Américas",
         "background": "Con una trayectoria técnica en ingeniería civil y experiencia en el mercado de Dubái, lidera la expansión hacia mercados emergentes y América del Norte, conectando a los promotores con redes globales de inversores.",
-        "skills": ["Ingeniería Civil", "Mercado de Dubái", "Redes Globales"],
+        "skills": [
+          "Ingeniería Civil",
+          "Mercado de Dubái",
+          "Redes Globales"
+        ],
         "market": "MENA / EE. UU. / Canadá"
       },
       {
@@ -294,7 +310,11 @@
         "role": "Francofonía y Estrategia Global",
         "worldRegion": "Mundo Francófono",
         "background": "Arquitecto de la estrategia comercial, asegura la coherencia de las alianzas con actores institucionales (notarios, abogados, promotores) y la expansión en el mercado francófono global, incluyendo Europa y Canadá.",
-        "skills": ["Alianzas B2B", "Estrategia", "Expansión"],
+        "skills": [
+          "Alianzas B2B",
+          "Estrategia",
+          "Expansión"
+        ],
         "market": "Francofonía Global"
       }
     ]
@@ -652,26 +672,45 @@
     "golf": "Golf a {distance}"
   },
   "advancedSearch": {
-    "propertyRef": "Referencia de Propiedad",
-    "refPlaceholder": "Ej: REF-1234",
-    "region": "Región",
-    "allSpain": "España (Todas)",
-    "costaBlanca": "Costa Blanca",
-    "costaCalida": "Costa Cálida",
-    "costaDelSol": "Costa del Sol",
-    "costaAlmeria": "Costa Almería",
-    "type": "Tipo",
-    "anyType": "Indiferente",
-    "villa": "Villa",
-    "apartment": "Apartamento",
-    "penthouse": "Ático",
-    "bungalow": "Bungalow",
-    "townhouse": "Casa adosada",
-    "min": "Mín",
-    "max": "Máx",
+    "privateSearch": "Busqueda privada",
+    "refineTitle": "Afinar su seleccion",
+    "description": "Defina sus criterios para revelar las propiedades mas adaptadas a su proyecto.",
+    "catalogueCount": "{count} propiedades en catalogo",
+    "destination": "Destino",
+    "allDestinations": "Todos los destinos",
+    "city": "Ciudad",
+    "allCities": "Todas las ciudades",
+    "propertyType": "Tipo de propiedad",
+    "indifferent": "Indiferente",
+    "reference": "Referencia",
+    "referencePlaceholder": "Ej: REF-1234",
+    "show": "Mostrar",
+    "budget": "Presupuesto",
+    "roomsComfort": "Habitaciones y confort",
+    "moreCriteria": "Mas criterios",
+    "hide": "Ocultar",
     "bedrooms": "Dormitorios",
-    "collection": "Colección Amaru • Selección Exclusiva",
-    "reset": "Reiniciar"
+    "bathrooms": "Banos",
+    "minBuiltSurface": "Superficie construida min.",
+    "pool": "Piscina",
+    "required": "Requerida",
+    "newDevelopment": "Obra nueva",
+    "allDevelopments": "Todos los programas",
+    "collection": "Coleccion Amaru - seleccion exclusiva",
+    "allProperties": "Todas las propiedades",
+    "reset": "Restablecer",
+    "min": "Min",
+    "max": "Max",
+    "squareMetersPlus": "{surface} m2+",
+    "bedroomsSummary": "{count}+ dormitorios",
+    "closeAria": "Cerrar busqueda",
+    "types": {
+      "villa": "Villa",
+      "apartment": "Apartamento",
+      "penthouse": "Atico",
+      "bungalow": "Bungalow",
+      "townhouse": "Casa adosada"
+    }
   },
   "scrollingBanner": {
     "portfolioExclusif": "Portafolio Exclusivo",
