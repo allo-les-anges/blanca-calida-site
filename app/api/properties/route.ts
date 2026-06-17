@@ -126,14 +126,30 @@ async function getRegionCounts(minPrice: number) {
   return counts;
 }
 
+async function getTotalPublicPropertyCount(minPrice: number) {
+  const { count, error } = await supabase
+    .from('villas')
+    .select('id', { count: 'exact', head: true })
+    .eq('is_excluded', false)
+    .gte('price', minPrice);
+
+  if (error) throw error;
+  return count || 0;
+}
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const regionCounts = searchParams.get('regionCounts') === 'true';
+    const totalCount = searchParams.get('totalCount') === 'true';
     const minPrice = searchParams.get('minPrice');
 
     if (regionCounts) {
       return NextResponse.json(await getRegionCounts(parseMinPublicPrice(minPrice)));
+    }
+
+    if (totalCount) {
+      return NextResponse.json({ count: await getTotalPublicPropertyCount(parseMinPublicPrice(minPrice)) });
     }
     
     // 1. Paramètres de langue

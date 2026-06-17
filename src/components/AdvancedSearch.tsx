@@ -22,6 +22,7 @@ const DEFAULT_MIN_PRICE = "";
 interface AdvancedSearchProps {
   onSearch: (filters: any) => void;
   properties: any[];
+  totalCount?: number;
   activeFilters: any;
   onClose?: () => void;
   isLight?: boolean;
@@ -48,6 +49,7 @@ function formatPrice(value: unknown) {
 export default function AdvancedSearch({
   onSearch,
   properties = [],
+  totalCount = 0,
   activeFilters,
   onClose,
   isLight = false,
@@ -106,6 +108,8 @@ export default function AdvancedSearch({
       return matchRegion && matchTown && matchType && matchBeds && matchBaths && matchSurface && matchPool && matchMin && matchMax && matchRef;
     }).length;
   }, [safeProps, localFilters]);
+
+  const catalogueCount = totalCount || availableCount;
 
   const updatePriceFilter = (key: "minPrice" | "maxPrice", value: string) => {
     setLocalFilters({ ...localFilters, [key]: value.replace(/[^\d]/g, "") });
@@ -215,7 +219,7 @@ export default function AdvancedSearch({
                 Definissez vos criteres pour reveler les biens les plus adaptes a votre projet.
               </p>
               <span className={`w-fit border px-4 py-2 text-[10px] font-black uppercase tracking-[0.25em] ${borderColor} ${mutedText}`}>
-                {availableCount} biens disponibles
+                {catalogueCount.toLocaleString("fr-FR")} biens au catalogue
               </span>
             </div>
           </div>
@@ -341,8 +345,13 @@ export default function AdvancedSearch({
               <button
                 type="button"
                 onClick={() => setShowAdvanced((value) => !value)}
-                className={`text-[10px] font-black uppercase tracking-[0.2em] transition-colors ${mutedText}`}
+                className={`inline-flex items-center gap-2 border px-4 py-2 text-[10px] font-black uppercase tracking-[0.18em] transition-all ${
+                  showAdvanced
+                    ? "border-[#D8C9B6] bg-[#D8C9B6] text-[#010101]"
+                    : `${borderColor} ${mutedText} hover:border-[#D8C9B6] hover:bg-[#D8C9B6] hover:text-[#010101]`
+                }`}
               >
+                <SlidersHorizontal size={13} />
                 {showAdvanced ? "Masquer" : "Plus de criteres"}
               </button>
             </div>

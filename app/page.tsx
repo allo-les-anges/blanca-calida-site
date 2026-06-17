@@ -240,6 +240,7 @@ function HomeContent() {
   const [mounted, setMounted] = useState(false);
   const [allProperties, setAllProperties] = useState<Property[]>([]);
   const [regionCounts, setRegionCounts] = useState<Record<string, number>>({});
+  const [catalogueCount, setCatalogueCount] = useState(0);
   const [visibleCount, setVisibleCount] = useState(12);
   const [portfolioMinPrice, setPortfolioMinPrice] = useState(DEFAULT_MIN_PRICE);
   const [featuredPropertyIds, setFeaturedPropertyIds] = useState<string[]>([]);
@@ -279,6 +280,9 @@ function HomeContent() {
           regionCounts: "true",
           minPrice: configuredMinPrice,
         });
+        const totalCountQuery = new URLSearchParams({
+          totalCount: "true",
+        });
         const featuredQuery = new URLSearchParams({
           limit: "6",
           lang: locale,
@@ -288,13 +292,15 @@ function HomeContent() {
           ? fetch(`/api/properties?${featuredQuery.toString()}`)
           : Promise.resolve(null);
 
-        const [propertiesRes, regionCountsRes, featuredRes] = await Promise.all([
+        const [propertiesRes, regionCountsRes, totalCountRes, featuredRes] = await Promise.all([
           fetch(`/api/properties?${propertyQuery.toString()}`),
           fetch(`/api/properties?${regionQuery.toString()}`),
+          fetch(`/api/properties?${totalCountQuery.toString()}`),
           featuredRequest,
         ]);
         const data = await propertiesRes.json();
         const countsData = await regionCountsRes.json();
+        const totalCountData = totalCountRes.ok ? await totalCountRes.json() : null;
         const featuredData = featuredRes?.ok ? await featuredRes.json() : [];
         
         // CORRECTION : On s'assure que data est bien un tableau pour éviter "filter is not a function"
@@ -306,6 +312,9 @@ function HomeContent() {
         }
         if (countsData && !Array.isArray(countsData)) {
           setRegionCounts(countsData);
+        }
+        if (typeof totalCountData?.count === "number") {
+          setCatalogueCount(totalCountData.count);
         }
       } catch (err) {
         console.error("Erreur API:", err);
@@ -787,11 +796,11 @@ function HomeContent() {
 
       {/* MODAL DE RECHERCHE */}
       <div className={`fixed inset-0 z-[100] flex items-center justify-center p-4 transition-all duration-500 ${isSearchOpen ? 'visible opacity-100' : 'invisible opacity-0'}`}>
-        <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-md" onClick={() => setIsSearchOpen(false)} />
-        <div className={`relative w-full max-w-5xl overflow-hidden shadow-2xl transition-all duration-500 ${isSearchOpen ? 'scale-100' : 'scale-95'} ${bgColor}`}>
-          <button onClick={() => setIsSearchOpen(false)} className="absolute top-5 right-5 w-10 h-10 bg-black text-[#D8C9B6] flex items-center justify-center hover:bg-[#D8C9B6] hover:text-black z-50 transition-all"><X size={20} /></button>
-          <div className="p-8 md:p-12 max-h-[85vh] overflow-y-auto">
-            <AdvancedSearch properties={allProperties} onSearch={handleSearch} activeFilters={filters} isLight={isLight} />
+        <div className="absolute inset-0 bg-[#010101]/75 backdrop-blur-xl" onClick={() => setIsSearchOpen(false)} />
+        <div className={`relative w-full max-w-6xl transition-all duration-500 ${isSearchOpen ? 'scale-100' : 'scale-95'}`}>
+          <button onClick={() => setIsSearchOpen(false)} className="absolute -top-3 right-1 z-50 flex h-12 w-12 items-center justify-center border border-[#D8C9B6]/40 bg-[#010101] text-[#D8C9B6] transition-all hover:bg-[#D8C9B6] hover:text-black"><X size={20} /></button>
+          <div className="max-h-[88vh] overflow-y-auto">
+            <AdvancedSearch properties={allProperties} totalCount={catalogueCount} onSearch={handleSearch} activeFilters={filters} isLight={isLight} />
           </div>
         </div>
       </div>
