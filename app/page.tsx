@@ -319,6 +319,7 @@ function HomeContent() {
 
   const [filters, setFilters] = useState({
     type: "", town: "", region: "", beds: "",
+    baths: "", surfaceMin: "", pool: false,
     minPrice: DEFAULT_MIN_PRICE, maxPrice: "", reference: "", development: "", portugalArea: "", availableOnly: false,
   });
   const filterQueryString = searchParamsOrigin.toString();
@@ -340,6 +341,9 @@ function HomeContent() {
       town,
       region,
       beds: "",
+      baths: "",
+      surfaceMin: "",
+      pool: false,
       minPrice: portfolioMinPrice,
       maxPrice: "",
       reference: "",
@@ -363,12 +367,15 @@ function HomeContent() {
       const matchPortugalArea = !selectedPortugalArea || selectedPortugalArea.towns.some((town) => normalizeLocation(town) === normalizeLocation(p.town || p.ville));
       const matchType = !filters.type || p.type?.toLowerCase().includes(filters.type.toLowerCase());
       const matchBeds = !filters.beds || Number(p.beds) >= Number(filters.beds);
+      const matchBaths = !filters.baths || Number(p.baths) >= Number(filters.baths);
+      const matchSurface = !filters.surfaceMin || Number(p.surface_built || p.surface_area?.built || 0) >= Number(filters.surfaceMin);
+      const matchPool = !filters.pool || p.pool === "Oui" || p.pool === true || p.pool === "1";
       const price = parsePropertyPrice(p.price);
       const effectiveMinPrice = filters.minPrice || portfolioMinPrice;
       const matchMin = !effectiveMinPrice || price >= Number(effectiveMinPrice);
       const matchMax = !filters.maxPrice || price <= Number(filters.maxPrice);
       const matchRef = !filters.reference || p.ref?.toLowerCase().includes(filters.reference.toLowerCase());
-      return matchDev && matchTown && matchRegion && matchPortugalArea && matchType && matchBeds && matchMin && matchMax && matchRef;
+      return matchDev && matchTown && matchRegion && matchPortugalArea && matchType && matchBeds && matchBaths && matchSurface && matchPool && matchMin && matchMax && matchRef;
     });
   }, [allProperties, filters, portfolioMinPrice]);
 
@@ -441,7 +448,7 @@ function HomeContent() {
   };
 
   const handleRegionClick = (regionName: string) => {
-    setFilters({ type: "", town: "", region: regionName, beds: "", minPrice: portfolioMinPrice, maxPrice: "", reference: "", development: "", portugalArea: "", availableOnly: false });
+    setFilters({ type: "", town: "", region: regionName, beds: "", baths: "", surfaceMin: "", pool: false, minPrice: portfolioMinPrice, maxPrice: "", reference: "", development: "", portugalArea: "", availableOnly: false });
     setVisibleCount(12);
     const section = document.getElementById("collection");
     if (section) setTimeout(() => section.scrollIntoView({ behavior: "smooth" }), 100);
@@ -454,6 +461,9 @@ function HomeContent() {
         town: "",
         region: "",
         beds: "",
+        baths: "",
+        surfaceMin: "",
+        pool: false,
         minPrice: portfolioMinPrice,
         maxPrice: "",
         reference: "",
@@ -475,6 +485,9 @@ function HomeContent() {
         town: "",
         region: country.region,
         beds: "",
+        baths: "",
+        surfaceMin: "",
+        pool: false,
         minPrice: portfolioMinPrice,
         maxPrice: "",
         reference: "",
@@ -720,7 +733,7 @@ function HomeContent() {
             </header>
 
             <PropertyGrid
-              activeFilters={{ type: "", town: "", region: "", beds: "", minPrice: "", maxPrice: "", reference: "" }}
+              activeFilters={{ type: "", town: "", region: "", beds: "", baths: "", surfaceMin: "", pool: false, minPrice: "", maxPrice: "", reference: "" }}
               properties={monthlySelection}
               isLight={isLight}
             />

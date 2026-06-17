@@ -100,11 +100,14 @@ export default function PropertyGrid({
       const matchTown = !activeFilters.town || p.town?.toLowerCase().includes(activeFilters.town.toLowerCase());
       const matchRegion = !activeFilters.region || getPropertyRegion(p) === activeFilters.region;
       const matchBeds = !activeFilters.beds || Number(p.beds) >= Number(activeFilters.beds);
+      const matchBaths = !activeFilters.baths || Number(p.baths) >= Number(activeFilters.baths);
+      const matchSurface = !activeFilters.surfaceMin || Number(p.surface_built || p.surface_area?.built || 0) >= Number(activeFilters.surfaceMin);
+      const matchPool = !activeFilters.pool || p.pool === "Oui" || p.pool === true || p.pool === "1";
       const price = parsePropertyPrice(p.price || p.prix);
       const matchMin = !activeFilters.minPrice || price >= Number(activeFilters.minPrice);
       const matchMax = !activeFilters.maxPrice || price <= Number(activeFilters.maxPrice);
       const matchRef = !activeFilters.reference || p.ref?.toLowerCase().includes(activeFilters.reference.toLowerCase());
-      return matchType && matchTown && matchRegion && matchMin && matchMax && matchBeds && matchRef;
+      return matchType && matchTown && matchRegion && matchMin && matchMax && matchBeds && matchBaths && matchSurface && matchPool && matchRef;
     });
 
     const timer = setTimeout(() => {
