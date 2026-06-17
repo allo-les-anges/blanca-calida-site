@@ -1079,8 +1079,8 @@ export default function AdminDashboard() {
     }
   };
 
-  const isDarkVisual = resolvedTheme === "dark";
-  const dashboardThemeClass = isDarkVisual ? "" : "admin-dashboard-light";
+  const isDarkVisual = resolvedTheme !== "light";
+  const dashboardThemeClass = isDarkVisual ? "admin-dashboard-dark" : "admin-dashboard-light";
   const featuredPropertyOptions = useMemo(() => {
     const selected = new Set(featuredPropertyIds);
     return availableFeaturedProperties
@@ -1892,7 +1892,7 @@ export default function AdminDashboard() {
                 </div>
               </div>
               
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 tracking-tighter italic uppercase mb-6 leading-none">
+              <h2 className={`text-3xl sm:text-4xl lg:text-5xl font-black tracking-tighter italic uppercase mb-6 leading-none ${isDarkVisual ? "text-white" : "text-slate-900"}`}>
                 {t('adminDashboard.emptyState.line1')} <br/>
                 <span className="text-emerald-600">{t('adminDashboard.emptyState.line2')}</span>
               </h2>
@@ -1909,7 +1909,7 @@ export default function AdminDashboard() {
                  </button>
                  <button 
                   onClick={() => setActiveTab('staff')} 
-                  className="px-10 sm:px-16 py-5 sm:py-7 bg-white text-slate-900 border-2 border-slate-100 rounded-[2rem] sm:rounded-[2.5rem] font-black uppercase text-xs tracking-[0.3em] sm:tracking-[0.4em] hover:bg-slate-50 transition-all duration-500 shadow-lg hover:-translate-y-2"
+                  className={`px-10 sm:px-16 py-5 sm:py-7 border-2 rounded-[2rem] sm:rounded-[2.5rem] font-black uppercase text-xs tracking-[0.3em] sm:tracking-[0.4em] transition-all duration-500 shadow-lg hover:-translate-y-2 ${isDarkVisual ? "bg-white/5 text-white border-white/10 hover:bg-white/10" : "bg-white text-slate-900 border-slate-100 hover:bg-slate-50"}`}
                  >
                    {t('adminDashboard.manageStaff')}
                  </button>

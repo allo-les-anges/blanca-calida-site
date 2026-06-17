@@ -231,6 +231,28 @@ html.dark:not([data-package="light"]) .guide-shell .guide-surface p {
   color: #FAFAFA !important;
 }
 
+.admin-dashboard-dark [class*="text-slate-900"],
+.admin-dashboard-dark [class*="text-slate-950"] {
+  color: #FAFAFA !important;
+}
+
+.admin-dashboard-dark [class*="text-slate-500"],
+.admin-dashboard-dark [class*="text-slate-600"],
+.admin-dashboard-dark [class*="text-slate-700"] {
+  color: #D8C9B6 !important;
+}
+
+.admin-dashboard-dark input,
+.admin-dashboard-dark textarea,
+.admin-dashboard-dark select {
+  color: #FAFAFA !important;
+}
+
+.admin-dashboard-dark ::placeholder {
+  color: #D8C9B6 !important;
+  opacity: 0.75 !important;
+}
+
 .admin-dashboard-light,
 .admin-dashboard-light [class*="bg-[#010101]"],
 .admin-dashboard-light [class*="bg-[#171716]"],
