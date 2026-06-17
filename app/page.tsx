@@ -280,7 +280,7 @@ function HomeContent() {
           minPrice: configuredMinPrice,
         });
         const featuredQuery = new URLSearchParams({
-          limit: "5",
+          limit: "6",
           lang: locale,
           featuredIds: configuredFeaturedIds.join(","),
         });
