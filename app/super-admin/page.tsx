@@ -9,6 +9,7 @@ import {
   Copy, CheckCircle2, LayoutDashboard, Globe
 } from 'lucide-react'; // Correction effectuée ici : lucide-react
 import { supabase } from "../../lib/supabase";
+import AmaruLoader from "@/components/AmaruLoader";
 
 export default function SuperAdminDashboard() {
   const router = useRouter();
@@ -196,9 +197,7 @@ export default function SuperAdminDashboard() {
 
   // RENDUS CONDITIONNELS
   if (authStatus === 'loading') return (
-    <div className="min-h-screen bg-[#010101] flex items-center justify-center text-white font-mono text-xs uppercase tracking-widest">
-      <Loader2 className="animate-spin text-red-600 mr-3" /> Initialisation du terminal...
-    </div>
+    <AmaruLoader fullScreen size="lg" label="Initialisation du terminal..." />
   );
 
   if (authStatus === 'denied') return (

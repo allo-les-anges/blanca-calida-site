@@ -3,12 +3,13 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { 
-  HardHat, Loader2, LogOut, X, ChevronRight, CheckCircle2,
+  HardHat, LogOut, X, ChevronRight, CheckCircle2,
   Printer, Eye, Save, FileText, Download, ShieldCheck, MapPin
 } from "lucide-react";
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { useTranslation } from "@/contexts/I18nContext";
+import AmaruLoader from "@/components/AmaruLoader";
 
 const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL || "", process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "");
 
@@ -171,7 +172,7 @@ export default function ProjectTracker() {
     }
   };
 
-  if (loading) return <div className="h-screen flex items-center justify-center bg-[#010101]"><Loader2 className="animate-spin text-emerald-500" size={40} /></div>;
+  if (loading) return <AmaruLoader fullScreen size="lg" label={t('common.loading')} />;
 
   return (
     <div className="min-h-screen bg-[#010101] text-slate-200 p-6 md:p-12">

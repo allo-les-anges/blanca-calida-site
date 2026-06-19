@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { 
-  Search, Loader2, ArrowRight, X, Mail
+  Search, ArrowRight, X, Mail
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useTranslation } from "@/contexts/I18nContext";
@@ -16,6 +16,7 @@ import RegionGrid from "@/components/RegionGrid";
 import PropertyGrid from "@/components/PropertyGrid";
 import Footer from "@/components/Footer";
 import IntroGate from "@/components/IntroGate";
+import AmaruLoader from "@/components/AmaruLoader";
 
 type Property = any;
 const DEFAULT_MIN_PRICE = "20000";
@@ -536,12 +537,7 @@ function HomeContent() {
 
   if (loading) {
     return (
-      <div className={`h-screen flex flex-col items-center justify-center ${bgColor}`}>
-        <Loader2 className="animate-spin text-[#D8C9B6] mb-8" size={48} />
-        <span className={`text-[10px] font-bold uppercase tracking-[0.5em] animate-pulse ${isDarkVisual ? 'text-[#D8C9B6]' : 'text-[#171716]'}`}>
-          {t('home.loading.amaruExcellence')}
-        </span>
-      </div>
+      <AmaruLoader fullScreen isLight={!isDarkVisual} size="lg" label={t('home.loading.amaruExcellence')} />
     );
   }
 
@@ -814,7 +810,7 @@ export default function Home() {
   return (
     <>
       <IntroGate />
-      <Suspense fallback={<div className="h-screen bg-[#010101] flex items-center justify-center"><Loader2 className="animate-spin text-[#D8C9B6]" size={48} /></div>}>
+      <Suspense fallback={<AmaruLoader fullScreen size="lg" />}>
         <HomeContent />
       </Suspense>
     </>

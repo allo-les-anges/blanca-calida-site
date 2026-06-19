@@ -17,6 +17,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { useTranslation } from '@/contexts/I18nContext';
 import { useTheme } from "next-themes";
+import AmaruLoader from "@/components/AmaruLoader";
 
 const PHASES_CHANTIER = [
   "0. Signature & Réservation", 
@@ -1089,13 +1090,7 @@ export default function AdminDashboard() {
   }, [availableFeaturedProperties, featuredPropertyIds]);
 
   if (loading) return (
-    <div className={`h-screen bg-[#010101] flex flex-col items-center justify-center ${dashboardThemeClass}`}>
-      <div className="relative">
-        <Loader2 className="animate-spin text-emerald-500" size={48} />
-        <div className="absolute inset-0 blur-2xl bg-emerald-500/20 animate-pulse"></div>
-      </div>
-      <span className="text-[10px] font-black uppercase tracking-[0.3em] text-emerald-500 mt-8 animate-pulse">{t('adminDashboard.initializing')}</span>
-    </div>
+    <AmaruLoader fullScreen isLight={!isDarkVisual} size="lg" label={t('adminDashboard.initializing')} className={dashboardThemeClass} />
   );
 
   return (

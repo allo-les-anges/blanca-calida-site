@@ -3,9 +3,10 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import PropertyCard from "./PropertyCard";
-import { Loader2, SearchX } from "lucide-react";
+import { SearchX } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useTranslation } from "@/contexts/I18nContext";
+import AmaruLoader from "@/components/AmaruLoader";
 
 interface PropertyGridProps {
   activeFilters: any;
@@ -127,12 +128,7 @@ export default function PropertyGrid({
     <div className="w-full max-w-7xl mx-auto px-4 md:px-0 transition-colors duration-500">
       
       {isAnimating && filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-40 space-y-4">
-          <Loader2 className="animate-spin text-[#D8C9B6]" size={40} />
-          <p className="text-[#D8C9B6] text-[10px] font-bold uppercase tracking-[0.4em] animate-pulse">
-            {t('home.loading.updating')}
-          </p>
-        </div>
+        <AmaruLoader className="py-40" isLight={!isDarkVisual} label={t('home.loading.updating')} />
       ) : filtered.length === 0 && !isAnimating ? (
         <div className="flex flex-col items-center justify-center py-24 md:py-40 px-6 space-y-6">
           <div className="w-16 h-16 md:w-20 md:h-20 rounded-none bg-[#D8C9B6]/10 flex items-center justify-center border border-[#D8C9B6]/20">

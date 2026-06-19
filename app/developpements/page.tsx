@@ -4,9 +4,10 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useTheme } from "next-themes";
-import { ArrowRight, Bath, Bed, Building2, Loader2, MapPin, Search, Waves } from "lucide-react";
+import { ArrowRight, Bath, Bed, Building2, MapPin, Search, Waves } from "lucide-react";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
+import AmaruLoader from "@/components/AmaruLoader";
 import { useTranslation } from "@/contexts/I18nContext";
 
 type Status = "loading" | "ready" | "error";
@@ -93,6 +94,7 @@ function localizedCopy(locale: string) {
     previous: isFr ? "Precedent" : "Previous",
     next: isFr ? "Suivant" : "Next",
     page: isFr ? "Page" : "Page",
+    loading: isFr ? "Chargement des programmes" : "Loading developments",
     pool: isFr ? "Piscine" : "Pool",
     sea: isFr ? "Mer" : "Sea",
     golf: "Golf",
@@ -246,9 +248,7 @@ export default function DevelopmentsPage() {
 
       <section className="mx-auto max-w-[1600px] px-6 py-14 md:py-20">
         {status === "loading" && (
-          <div className="flex min-h-[320px] items-center justify-center">
-            <Loader2 className="animate-spin text-[#D8C9B6]" size={44} />
-          </div>
+          <AmaruLoader className="min-h-[320px]" isLight={!isDarkVisual} label={copy.loading} />
         )}
 
         {status === "error" && (

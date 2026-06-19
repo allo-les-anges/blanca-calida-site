@@ -7,6 +7,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Bed, Bath, Maximize, ArrowLeft, Building2, MapPin, ChevronRight, Hash, CheckCircle } from "lucide-react";
 import Link from "next/link";
+import AmaruLoader from "@/components/AmaruLoader";
 
 export default function DevelopmentPage() {
   const { devId } = useParams();
@@ -62,10 +63,7 @@ export default function DevelopmentPage() {
   if (!mounted) return <main className="min-h-screen bg-[#010101]" />;
 
   if (loading) return (
-    <div className={`h-screen flex flex-col items-center justify-center ${bgColor}`}>
-      <div className="w-12 h-12 border-4 border-[#D8C9B6]/20 border-t-[#D8C9B6] rounded-full animate-spin mb-4"></div>
-      <p className="text-[10px] uppercase font-black tracking-widest text-[#D8C9B6]">Chargement...</p>
-    </div>
+    <AmaruLoader fullScreen isLight={!isDarkVisual} size="lg" label="Chargement..." />
   );
 
   if (!devUnits.length) return (

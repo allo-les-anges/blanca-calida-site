@@ -5,6 +5,7 @@ import type { ElementType } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ContactForm from "@/components/ContactForm";
+import AmaruLoader from "@/components/AmaruLoader";
 import {
   Bed,
   Bath,
@@ -295,10 +296,7 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
 
   if (loading) {
     return (
-      <div className="flex h-screen flex-col items-center justify-center bg-[#010101] text-[#D8C9B6]">
-        <Loader2 className="mb-4 animate-spin" size={40} />
-        <span className="font-serif text-xl italic">{t("propertyDetail.loading")}</span>
-      </div>
+      <AmaruLoader fullScreen isLight={!isDarkVisual} size="lg" label={t("propertyDetail.loading")} />
     );
   }
 
