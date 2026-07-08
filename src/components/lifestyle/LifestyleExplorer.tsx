@@ -402,26 +402,29 @@ export default function LifestyleExplorer({
   const [nearbyPoisStatus, setNearbyPoisStatus] = useState<"idle" | "loading" | "ready" | "error">("idle");
   const requestedProvider = process.env.NEXT_PUBLIC_LIFESTYLE_3D_PROVIDER;
   const lifestyle3dVersion = process.env.NEXT_PUBLIC_LIFESTYLE_3D_VERSION;
-  // NEXT_PUBLIC_LIFESTYLE_3D_VERSION is unset ("") on Vercel preview/production today.
-  // V7 is the only actively maintained viewer, so it's the default for anything other
-  // than an explicit "v6" — otherwise this silently falls through to the legacy base
-  // CesiumLifestyleViewer, which nobody has fixed and still renders every POI on load.
-  const useCesiumV6 = lifestyle3dVersion === "v6";
-  const useCesiumV7 = !useCesiumV6;
-  const isProductionRuntime = process.env.NODE_ENV === "production";
-  const configuredProvider = (requestedProvider === "google-photorealistic-3d" && !isProductionRuntime
+  // V6 owns the Google Photorealistic 3D Tiles path. V7 remains the default for
+  // the Cesium architectural mode.
+  const googleMapsKey =
+    process.env.NEXT_PUBLIC_GOOGLE_MAPS_3D_TILE_KEY ||
+    process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ||
+    process.env.NEXT_PUBLIC_GOOGLE_MAPS_EMBED_API_KEY ||
+    process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY ||
+    "";
+  const hasGoogleMapsKey = Boolean(googleMapsKey.trim());
+  const wantsGooglePhotorealistic =
+    requestedProvider === "google-photorealistic-3d" ||
+    requestedProvider === "google-photorealistic" ||
+    requestedProvider === "google";
+  const shouldUseGooglePhotorealistic = hasGoogleMapsKey && (wantsGooglePhotorealistic || !requestedProvider);
+  const configuredProvider = (shouldUseGooglePhotorealistic
     ? "google-photorealistic-3d"
     : requestedProvider === "maptiler-3d"
       ? "maptiler-3d"
       : "cesium-architectural") as "cesium-architectural" | "google-photorealistic-3d" | "maptiler-3d";
   const configuredProviderV6 = configuredProvider === "google-photorealistic-3d" ? "google-photorealistic" : "cesium-architectural";
-  const googleMapsKey =
-    process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ||
-    process.env.NEXT_PUBLIC_GOOGLE_MAPS_EMBED_API_KEY ||
-    process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY ||
-    process.env.NEXT_PUBLIC_GOOGLE_MAPS_3D_TILE_KEY ||
-    "";
-  const hasStreetViewEmbedKey = Boolean(googleMapsKey);
+  const useCesiumV6 = lifestyle3dVersion === "v6" || configuredProvider === "google-photorealistic-3d";
+  const useCesiumV7 = !useCesiumV6;
+  const hasStreetViewEmbedKey = hasGoogleMapsKey;
   const [streetViewOpen, setStreetViewOpen] = useState(false);
   const coordinates = useMemo(() => normalizeGeoPoint({ latitude, longitude }), [latitude, longitude]);
   const effectiveLatitude = coordinates.latitude;
@@ -553,6 +556,8 @@ export default function LifestyleExplorer({
     console.info("[LifestyleExplorer] Launch premium 3D", {
       configuredProvider,
       hasStreetViewEmbedKey,
+      hasGoogleMapsKey,
+      shouldUseGooglePhotorealistic,
       hasCoordinates,
     });
     setShowCesiumViewer(true);

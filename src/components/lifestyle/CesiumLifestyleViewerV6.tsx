@@ -174,7 +174,12 @@ export default function CesiumLifestyleViewerV6({
   const isMountedRef = useRef(false);
   const isDestroyedRef = useRef(false);
   const ionToken = process.env.NEXT_PUBLIC_CESIUM_ION_TOKEN || "";
-  const googleTilesKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_3D_TILE_KEY || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
+  const googleTilesKey =
+    process.env.NEXT_PUBLIC_GOOGLE_MAPS_3D_TILE_KEY ||
+    process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ||
+    process.env.NEXT_PUBLIC_GOOGLE_MAPS_EMBED_API_KEY ||
+    process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY ||
+    "";
   const rawProvider = process.env.NEXT_PUBLIC_LIFESTYLE_3D_PROVIDER;
   const requestedProvider = provider || normalizeProvider(rawProvider);
   const hasIonToken = ionToken.trim().length > 0;
@@ -332,7 +337,7 @@ export default function CesiumLifestyleViewerV6({
 
         if (requestedProvider === "google-photorealistic") {
           if (!hasGoogleTilesKey) {
-            console.warn("[LifestyleExplorerV6] Google Photorealistic requested but NEXT_PUBLIC_GOOGLE_MAPS_3D_TILE_KEY/NEXT_PUBLIC_GOOGLE_MAPS_API_KEY is missing; using OSM Buildings fallback.");
+            console.warn("[LifestyleExplorerV6] Google Photorealistic requested but no compatible NEXT_PUBLIC_GOOGLE_MAPS_* key is configured; using OSM Buildings fallback.");
             activeProvider = "cesium-architectural";
             googleSkipped = false;
           } else {
