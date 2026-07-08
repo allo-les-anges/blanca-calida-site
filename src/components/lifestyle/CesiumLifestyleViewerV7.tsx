@@ -317,6 +317,7 @@ export default function CesiumLifestyleViewerV7({
   const clickHandlerRef = useRef<{ destroy: () => void; isDestroyed?: () => boolean } | null>(null);
   const isMountedRef = useRef(false);
   const isDestroyedRef = useRef(false);
+  const isClosingRef = useRef(false);
   const ionToken = process.env.NEXT_PUBLIC_CESIUM_ION_TOKEN || "";
   const poiAssetId = process.env.NEXT_PUBLIC_LIFESTYLE_POI_ASSET_ID || "";
   const effectiveProvider = normalizeProvider(provider || process.env.NEXT_PUBLIC_LIFESTYLE_3D_PROVIDER);
@@ -380,7 +381,9 @@ export default function CesiumLifestyleViewerV7({
   useEffect(() => {
     isMountedRef.current = true;
     isDestroyedRef.current = false;
+    isClosingRef.current = false;
     return () => {
+      isClosingRef.current = true;
       isMountedRef.current = false;
       isDestroyedRef.current = true;
       stopDiscovery(discoveryTimeoutRef);
@@ -612,6 +615,7 @@ export default function CesiumLifestyleViewerV7({
 
   useEffect(() => {
     function handleFullscreenChange() {
+      if (!isMountedRef.current || isDestroyedRef.current || isClosingRef.current) return;
       setIsFullscreen(Boolean(document.fullscreenElement));
     }
     document.addEventListener("fullscreenchange", handleFullscreenChange);
@@ -624,20 +628,27 @@ export default function CesiumLifestyleViewerV7({
   useEffect(() => {
     const runtime = runtimeRef.current;
     if (!runtime || !isViewerUsable(runtime.viewer) || !selectedPoi) {
-      setPoiScreenPosition(null);
+      if (!isClosingRef.current) setPoiScreenPosition(null);
       return;
     }
     const cartesian = runtime.Cesium.Cartesian3.fromDegrees(selectedPoi.longitude, selectedPoi.latitude);
+    const postRender = runtime.viewer.scene.postRender;
     function updatePosition() {
-      if (!runtime || !isViewerUsable(runtime.viewer)) return;
+      if (isClosingRef.current || !runtime || !isViewerUsable(runtime.viewer)) return;
       const windowPosition = runtime.Cesium.SceneTransforms.worldToWindowCoordinates(runtime.viewer.scene, cartesian);
       setPoiScreenPosition(windowPosition ? { x: windowPosition.x, y: windowPosition.y } : null);
     }
     updatePosition();
-    runtime.viewer.scene.postRender?.addEventListener(updatePosition);
+    postRender?.addEventListener(updatePosition);
     return () => {
-      runtime.viewer.scene.postRender?.removeEventListener(updatePosition);
-      setPoiScreenPosition(null);
+      try {
+        postRender?.removeEventListener(updatePosition);
+      } catch {
+        // Cesium may already have torn down the scene during close.
+      }
+      if (isMountedRef.current && !isDestroyedRef.current && !isClosingRef.current) {
+        setPoiScreenPosition(null);
+      }
     };
   }, [selectedPoi]);
 
@@ -705,6 +716,16 @@ export default function CesiumLifestyleViewerV7({
     } else {
       rootRef.current.requestFullscreen().catch(() => {});
     }
+  }
+
+  function closeViewer() {
+    isClosingRef.current = true;
+    stopDiscovery(discoveryTimeoutRef);
+    setPoiScreenPosition(null);
+    if (document.fullscreenElement) {
+      document.exitFullscreen().catch(() => {});
+    }
+    onClose?.();
   }
 
   function toggleDiscovery() {
@@ -952,7 +973,7 @@ export default function CesiumLifestyleViewerV7({
       </div>
 
       <div className="absolute right-4 top-4 z-20 flex gap-2">
-        <button type="button" onClick={onClose} className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-white/12 bg-slate-950/72 px-4 text-sm font-medium text-white shadow-xl backdrop-blur-md transition hover:bg-white/14">
+        <button type="button" onClick={closeViewer} className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-white/12 bg-slate-950/72 px-4 text-sm font-medium text-white shadow-xl backdrop-blur-md transition hover:bg-white/14">
           <X size={16} />
           <span>{copy.close}</span>
         </button>
