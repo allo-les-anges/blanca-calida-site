@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useTheme } from "next-themes";
-import { ArrowRight, Bath, Bed, Building2, MapPin, Search, Waves } from "lucide-react";
+import { ArrowRight, Bath, Bed, Building2, MapPin, Maximize, Search } from "lucide-react";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import AmaruLoader from "@/components/AmaruLoader";
@@ -48,12 +48,6 @@ function formatPrice(value: number) {
   return `${value.toLocaleString("fr-FR")} EUR`;
 }
 
-function formatDistance(value: number | null, fallback: string) {
-  if (!value) return fallback;
-  if (value >= 100) return `${Math.round(value).toLocaleString("fr-FR")} m`;
-  return `${value.toLocaleString("fr-FR")} km`;
-}
-
 function imageFor(development: DevelopmentSummary) {
   return development.images[0] || fallbackImageFor(development);
 }
@@ -73,6 +67,20 @@ function optionLabel(development: DevelopmentSummary) {
   if (beds.length === 0) return "Typologies sur demande";
   if (beds.length === 1) return `${beds[0]} chambre${beds[0] > 1 ? "s" : ""}`;
   return `${beds[0]} a ${beds[beds.length - 1]} chambres`;
+}
+
+function bathroomLabel(development: DevelopmentSummary) {
+  const baths = Array.from(new Set(development.options.map((option) => option.baths).filter(Boolean))).sort((a, b) => a - b);
+  if (baths.length === 0) return "Bains sur demande";
+  if (baths.length === 1) return `${baths[0]} bain${baths[0] > 1 ? "s" : ""}`;
+  return `${baths[0]} a ${baths[baths.length - 1]} bains`;
+}
+
+function surfaceLabel(development: DevelopmentSummary) {
+  const surfaces = Array.from(new Set(development.options.map((option) => option.surface).filter(Boolean))).sort((a, b) => a - b);
+  if (surfaces.length === 0) return "Surface sur demande";
+  if (surfaces.length === 1) return `${surfaces[0].toLocaleString("fr-FR")} m2`;
+  return `${surfaces[0].toLocaleString("fr-FR")} a ${surfaces[surfaces.length - 1].toLocaleString("fr-FR")} m2`;
 }
 
 function localizedCopy(locale: string) {
@@ -96,8 +104,6 @@ function localizedCopy(locale: string) {
     page: isFr ? "Page" : "Page",
     loading: isFr ? "Chargement des programmes" : "Loading developments",
     pool: isFr ? "Piscine" : "Pool",
-    sea: isFr ? "Mer" : "Sea",
-    golf: "Golf",
   };
 }
 
@@ -356,10 +362,10 @@ export default function DevelopmentsPage() {
                         <Bed size={14} className="text-[#D8C9B6]" /> {optionLabel(development)}
                       </span>
                       <span className="flex items-center justify-center gap-2">
-                        <Waves size={14} className="text-[#D8C9B6]" /> {formatDistance(development.minDistanceBeach, copy.sea)}
+                        <Bath size={14} className="text-[#D8C9B6]" /> {bathroomLabel(development)}
                       </span>
                       <span className="flex items-center justify-center gap-2">
-                        <Bath size={14} className="text-[#D8C9B6]" /> {formatDistance(development.minDistanceGolf, copy.golf)}
+                        <Maximize size={14} className="text-[#D8C9B6]" /> {surfaceLabel(development)}
                       </span>
                     </div>
 
