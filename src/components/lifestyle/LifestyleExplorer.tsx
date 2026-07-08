@@ -415,8 +415,13 @@ export default function LifestyleExplorer({
       ? "maptiler-3d"
       : "cesium-architectural") as "cesium-architectural" | "google-photorealistic-3d" | "maptiler-3d";
   const configuredProviderV6 = configuredProvider === "google-photorealistic-3d" ? "google-photorealistic" : "cesium-architectural";
-  const googleMapsKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_3D_TILE_KEY;
-  const hasGoogleTilesKey = Boolean(googleMapsKey);
+  const googleMapsKey =
+    process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ||
+    process.env.NEXT_PUBLIC_GOOGLE_MAPS_EMBED_API_KEY ||
+    process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY ||
+    process.env.NEXT_PUBLIC_GOOGLE_MAPS_3D_TILE_KEY ||
+    "";
+  const hasStreetViewEmbedKey = Boolean(googleMapsKey);
   const [streetViewOpen, setStreetViewOpen] = useState(false);
   const coordinates = useMemo(() => normalizeGeoPoint({ latitude, longitude }), [latitude, longitude]);
   const effectiveLatitude = coordinates.latitude;
@@ -547,7 +552,7 @@ export default function LifestyleExplorer({
   async function launchPremium3D() {
     console.info("[LifestyleExplorer] Launch premium 3D", {
       configuredProvider,
-      hasGoogleTilesKey,
+      hasStreetViewEmbedKey,
       hasCoordinates,
     });
     setShowCesiumViewer(true);
@@ -663,7 +668,7 @@ export default function LifestyleExplorer({
                     {copy.launch}
                   </button>
                   <p className="max-w-sm text-xs leading-5 text-slate-500">
-                    {hasGoogleTilesKey ? copy.experienceReady : copy.experienceLimited}
+                    {hasStreetViewEmbedKey ? copy.experienceReady : copy.experienceLimited}
                   </p>
                 </div>
               </div>
@@ -747,7 +752,7 @@ export default function LifestyleExplorer({
                 <p className="mt-1 text-lg font-medium text-slate-950">{locationLabel}</p>
               </div>
               <div className="flex items-center gap-2">
-                {hasCoordinates && hasGoogleTilesKey && (
+                {hasCoordinates && hasStreetViewEmbedKey && (
                   <button
                     type="button"
                     onClick={() => setStreetViewOpen(true)}
@@ -757,7 +762,7 @@ export default function LifestyleExplorer({
                     {copy.streetView}
                   </button>
                 )}
-                {hasCoordinates && !hasGoogleTilesKey && (
+                {hasCoordinates && !hasStreetViewEmbedKey && (
                   <a
                     href={buildStreetViewUrl(effectiveLatitude as number, effectiveLongitude as number)}
                     target="_blank"
@@ -779,7 +784,7 @@ export default function LifestyleExplorer({
               primaryColor={primaryColor}
               locationLabel={locationLabel}
               locale={locale}
-              onMarkerClick={hasGoogleTilesKey ? () => setStreetViewOpen(true) : undefined}
+              onMarkerClick={hasStreetViewEmbedKey ? () => setStreetViewOpen(true) : undefined}
             />
           </div>
 
@@ -826,7 +831,7 @@ export default function LifestyleExplorer({
         </div>
       </div>
 
-      {streetViewOpen && hasCoordinates && hasGoogleTilesKey && (
+      {streetViewOpen && hasCoordinates && hasStreetViewEmbedKey && (
         <div className="fixed inset-0 z-[2147483647] flex flex-col bg-black">
           <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-32 bg-gradient-to-b from-black/55 via-black/22 to-transparent" />
           <div className="absolute inset-x-4 top-4 z-20 flex items-start justify-between gap-4">
