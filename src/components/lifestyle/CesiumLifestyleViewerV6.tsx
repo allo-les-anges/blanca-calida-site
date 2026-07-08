@@ -94,6 +94,7 @@ type CesiumRuntimeV6 = {
     BOTTOM: unknown;
   };
   OpenStreetMapImageryProvider: new (options: { url: string }) => unknown;
+  UrlTemplateImageryProvider: new (options: { url: string; credit?: string; maximumLevel?: number }) => unknown;
   createOsmBuildingsAsync: (options?: Record<string, unknown>) => Promise<unknown>;
 };
 
@@ -553,27 +554,34 @@ async function loadBaseImageryLayer(Cesium: CesiumRuntimeV6, hasIonToken: boolea
         imageryProviderName: "Cesium World Imagery",
       };
     } catch (error) {
-      console.warn("[LifestyleExplorerV6] Cesium World Imagery unavailable; using OpenStreetMap imagery fallback.", describeErrorForLog(error));
+      console.warn("[LifestyleExplorerV6] Cesium World Imagery unavailable; using satellite imagery fallback.", describeErrorForLog(error));
     }
   }
 
   try {
-    const imageryProvider = new Cesium.OpenStreetMapImageryProvider({
-      url: "https://tile.openstreetmap.org/",
-    });
+    const imageryProvider = createSatelliteFallbackImageryProvider(Cesium);
+    return {
+      baseLayer: new Cesium.ImageryLayer(imageryProvider),
+      imageryProviderLoaded: true,
+      imageryProviderName: "Esri World Imagery",
+    };
+  } catch (error) {
+    console.warn("[LifestyleExplorerV6] Satellite imagery fallback unavailable; using OpenStreetMap imagery.", describeErrorForLog(error));
+    const imageryProvider = new Cesium.OpenStreetMapImageryProvider({ url: "https://tile.openstreetmap.org/" });
     return {
       baseLayer: new Cesium.ImageryLayer(imageryProvider),
       imageryProviderLoaded: true,
       imageryProviderName: "OpenStreetMap",
     };
-  } catch (error) {
-    console.warn("[LifestyleExplorerV6] OpenStreetMap imagery unavailable", describeErrorForLog(error));
-    return {
-      baseLayer: undefined,
-      imageryProviderLoaded: false,
-      imageryProviderName: "none",
-    };
   }
+}
+
+function createSatelliteFallbackImageryProvider(Cesium: CesiumRuntimeV6) {
+  return new Cesium.UrlTemplateImageryProvider({
+    url: "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+    credit: "Tiles © Esri",
+    maximumLevel: 19,
+  });
 }
 
 function logImageryState(options: {
@@ -681,6 +689,7 @@ async function loadCesiumRuntimeV6(): Promise<CesiumRuntimeV6> {
     { default: LabelStyle },
     { default: VerticalOrigin },
     { default: OpenStreetMapImageryProvider },
+    { default: UrlTemplateImageryProvider },
     { default: createOsmBuildingsAsync },
   ] = await Promise.all([
     import("@cesium/widgets/Source/Viewer/Viewer.js"),
@@ -701,6 +710,7 @@ async function loadCesiumRuntimeV6(): Promise<CesiumRuntimeV6> {
     import("@cesium/engine/Source/Scene/LabelStyle.js"),
     import("@cesium/engine/Source/Scene/VerticalOrigin.js"),
     import("@cesium/engine/Source/Scene/OpenStreetMapImageryProvider.js"),
+    import("@cesium/engine/Source/Scene/UrlTemplateImageryProvider.js"),
     import("@cesium/engine/Source/Scene/createOsmBuildingsAsync.js"),
   ]);
 
@@ -723,6 +733,7 @@ async function loadCesiumRuntimeV6(): Promise<CesiumRuntimeV6> {
     LabelStyle,
     VerticalOrigin,
     OpenStreetMapImageryProvider,
+    UrlTemplateImageryProvider,
     createOsmBuildingsAsync,
   };
 }

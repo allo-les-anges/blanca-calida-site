@@ -132,6 +132,7 @@ type CesiumRuntimeV7 = {
   KmlDataSource: { load: (resource: unknown, options?: Record<string, unknown>) => Promise<CesiumDataSourceLike> };
   LabelStyle: { FILL_AND_OUTLINE: unknown };
   OpenStreetMapImageryProvider: new (options: { url: string }) => unknown;
+  UrlTemplateImageryProvider: new (options: { url: string; credit?: string; maximumLevel?: number }) => unknown;
   PolylineDashMaterialProperty: new (options: Record<string, unknown>) => unknown;
   ScreenSpaceEventHandler: new (canvas: HTMLCanvasElement) => {
     setInputAction: (callback: (movement: { position: unknown }) => void, type: unknown) => void;
@@ -1485,14 +1486,28 @@ async function loadBaseImageryLayer(Cesium: CesiumRuntimeV7, hasIonToken: boolea
         provider: "Cesium World Imagery",
       };
     } catch (error) {
-      console.warn("[LifestyleExplorerV7] Cesium World Imagery unavailable; using OSM fallback.", error);
+      console.warn("[LifestyleExplorerV7] Cesium World Imagery unavailable; using satellite fallback.", error);
     }
   }
   return {
-    baseLayer: new Cesium.ImageryLayer(new Cesium.OpenStreetMapImageryProvider({ url: "https://tile.openstreetmap.org/" })),
-    provider: "OpenStreetMap",
+    baseLayer: new Cesium.ImageryLayer(createSatelliteFallbackImageryProvider(Cesium)),
+    provider: "Esri World Imagery",
   };
 }
+
+function createSatelliteFallbackImageryProvider(Cesium: CesiumRuntimeV7) {
+  try {
+    return new Cesium.UrlTemplateImageryProvider({
+      url: "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+      credit: "Tiles © Esri",
+      maximumLevel: 19,
+    });
+  } catch (error) {
+    console.warn("[LifestyleExplorerV7] Satellite imagery fallback unavailable; using OpenStreetMap.", error);
+    return new Cesium.OpenStreetMapImageryProvider({ url: "https://tile.openstreetmap.org/" });
+  }
+}
+
 async function loadOsmArchitecturalScene(Cesium: CesiumRuntimeV7, viewer: CesiumViewerV7Like, isCancelled: () => boolean) {
   try {
     const buildings = await Cesium.createOsmBuildingsAsync();
@@ -1538,6 +1553,7 @@ async function loadCesiumRuntimeV7(): Promise<CesiumRuntimeV7> {
     { default: KmlDataSource },
     { default: LabelStyle },
     { default: OpenStreetMapImageryProvider },
+    { default: UrlTemplateImageryProvider },
     { default: PolylineDashMaterialProperty },
     { default: ScreenSpaceEventHandler },
     { default: ScreenSpaceEventType },
@@ -1568,6 +1584,7 @@ async function loadCesiumRuntimeV7(): Promise<CesiumRuntimeV7> {
     import("@cesium/engine/Source/DataSources/KmlDataSource.js"),
     import("@cesium/engine/Source/Scene/LabelStyle.js"),
     import("@cesium/engine/Source/Scene/OpenStreetMapImageryProvider.js"),
+    import("@cesium/engine/Source/Scene/UrlTemplateImageryProvider.js"),
     import("@cesium/engine/Source/DataSources/PolylineDashMaterialProperty.js"),
     import("@cesium/engine/Source/Core/ScreenSpaceEventHandler.js"),
     import("@cesium/engine/Source/Core/ScreenSpaceEventType.js"),
@@ -1600,6 +1617,7 @@ async function loadCesiumRuntimeV7(): Promise<CesiumRuntimeV7> {
     KmlDataSource,
     LabelStyle,
     OpenStreetMapImageryProvider,
+    UrlTemplateImageryProvider,
     PolylineDashMaterialProperty,
     ScreenSpaceEventHandler,
     ScreenSpaceEventType,
