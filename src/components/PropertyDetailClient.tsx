@@ -6,6 +6,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ContactForm from "@/components/ContactForm";
 import AmaruLoader from "@/components/AmaruLoader";
+import LifestyleExplorer from "@/components/lifestyle/LifestyleExplorer";
 import {
   Bed,
   Bath,
@@ -204,6 +205,15 @@ function formatDistance(value: unknown) {
   return `${Math.round(meters)} m`;
 }
 
+function nullableNumber(...values: unknown[]) {
+  for (const value of values) {
+    if (value === null || value === undefined || value === "") continue;
+    const numeric = typeof value === "number" ? value : Number(String(value).replace(",", "."));
+    if (Number.isFinite(numeric)) return numeric;
+  }
+  return null;
+}
+
 function WhatsAppIcon({ className = "" }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 32 32" aria-hidden="true" focusable="false">
@@ -227,6 +237,7 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
   const [mounted, setMounted] = useState(false);
   const [brochureModalOpen, setBrochureModalOpen] = useState(false);
+  const [lifestyleExplorerOpen, setLifestyleExplorerOpen] = useState(false);
   const [brochureLead, setBrochureLead] = useState({ firstName: "", lastName: "", email: "" });
   const [brochureStatus, setBrochureStatus] = useState<"idle" | "sending" | "error">("idle");
   const [brochureError, setBrochureError] = useState("");
@@ -340,6 +351,8 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
   const editorialSections = hasDescription ? parseEditorialDescription(description) : [];
   const mapQuery = encodeURIComponent(`${town}, ${region}, Espagne`);
   const fallbackMapUrl = `https://maps.google.com/maps?q=${mapQuery}&t=&z=13&ie=UTF8&iwloc=&output=embed`;
+  const latitude = nullableNumber(property.latitude, property.lat, property.latitude_decimal, property.gps_lat, property.gps?.lat);
+  const longitude = nullableNumber(property.longitude, property.lng, property.lon, property.longitude_decimal, property.gps_lng, property.gps?.lng);
   const downloadBrochureUrl = brochureUrl ? `/api/download-brochure?url=${encodeURIComponent(brochureUrl)}` : "";
   const propertyFeatures = normalizeFeatureList(property.features);
   const seaDistance = formatDistance(property.distance_beach || extractFeatureDistance(propertyFeatures, "Sea distance"));
@@ -627,6 +640,13 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
               <p className="text-[10px] font-black uppercase tracking-[0.28em] text-[#171716]/60">{region}</p>
               <p className="text-sm leading-7 text-[#171716]/70">{t("propertyDetail.locationIntro", { town, region })}</p>
             </div>
+            <button
+              type="button"
+              onClick={() => setLifestyleExplorerOpen(true)}
+              className="mt-8 inline-flex w-full items-center justify-center gap-3 border border-[#171716] bg-[#171716] px-7 py-4 text-[10px] font-black uppercase tracking-[0.24em] text-[#FAFAFA] transition-colors hover:border-[#D8C9B6] hover:bg-[#D8C9B6] hover:text-[#010101] sm:w-auto"
+            >
+              <MapPin size={15} /> Lifestyle Explorer
+            </button>
             {proximityItems.length > 0 && (
               <div className="mt-10 grid gap-3 sm:grid-cols-2">
                 {proximityItems.map((item) => (
@@ -715,6 +735,25 @@ export default function PropertyDetailClient({ id }: PropertyDetailClientProps) 
       </section>
 
       <Footer isLight={!isDarkVisual} />
+
+      {lifestyleExplorerOpen && (
+        <LifestyleExplorer
+          latitude={latitude}
+          longitude={longitude}
+          propertyTitle={title}
+          town={town}
+          region={region}
+          country="Espagne"
+          price={formattedPrice}
+          images={galleryImages}
+          primaryColor="#D8C9B6"
+          isLight
+          agencyId={currentAgency.id}
+          propertyId={String(property.id_externe || property.id || reference)}
+          locale={locale}
+          onClose={() => setLifestyleExplorerOpen(false)}
+        />
+      )}
 
       {brochureModalOpen && (
         <div className="fixed inset-0 z-[190] flex items-center justify-center bg-[#010101]/70 px-5 py-8 backdrop-blur-sm">
