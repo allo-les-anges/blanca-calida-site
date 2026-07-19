@@ -763,7 +763,7 @@ export default function CesiumLifestyleViewerV7({
       <div ref={containerRef} className={`absolute inset-0 z-0 h-full w-full ${IS_DEVELOPMENT ? "outline outline-2 outline-cyan-400" : ""}`} />
       <div className={`pointer-events-none absolute inset-0 z-[1] bg-[radial-gradient(circle_at_72%_18%,rgba(45,212,191,0.08),transparent_28%),linear-gradient(90deg,rgba(2,6,23,0.34),rgba(2,6,23,0.04)_38%,rgba(2,6,23,0.08))] ${IS_DEVELOPMENT ? "outline outline-2 outline-red-500" : ""}`} />
 
-      <aside className="absolute left-4 top-4 z-20 flex max-h-[calc(100vh-2rem)] w-[350px] flex-col overflow-hidden rounded-[1.15rem] border border-white/12 bg-slate-950/62 shadow-2xl backdrop-blur-xl">
+      <aside className="absolute inset-x-3 top-20 z-20 flex max-h-[calc(100dvh-10rem)] flex-col overflow-hidden rounded-[1.15rem] border border-white/12 bg-slate-950/62 shadow-2xl backdrop-blur-xl md:inset-x-auto md:left-4 md:top-4 md:max-h-[calc(100vh-2rem)] md:w-[350px]">
         <div className="border-b border-white/10 p-4">
           <div className="inline-flex items-center gap-2 rounded-full border border-teal-300/20 bg-teal-300/10 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.18em] text-teal-100">
             <Sparkles size={13} />
@@ -875,25 +875,25 @@ export default function CesiumLifestyleViewerV7({
         </div>
       </aside>
 
-      <div className="absolute bottom-5 left-[380px] right-5 z-20 flex items-center justify-end gap-3">
+      <div className="absolute inset-x-3 bottom-[max(1rem,env(safe-area-inset-bottom))] z-30 flex items-center gap-2 overflow-x-auto pb-1 md:left-[380px] md:right-5 md:bottom-5 md:justify-end md:gap-3 md:overflow-visible md:pb-0">
         {[
           { label: "Area Insights", category: "viewpoint" as const, icon: Building2 },
           { label: "Amenities", category: "shop" as const, icon: ShoppingBag },
           { label: "Transport", category: "transport" as const, icon: Train },
           { label: "Schools", category: "school" as const, icon: School },
         ].map(({ label, category, icon: Icon }) => (
-          <button key={label} type="button" onClick={() => setActiveCategory(category)} className={`inline-flex h-12 min-w-[140px] items-center justify-center gap-2 rounded-xl border px-4 text-sm font-medium shadow-2xl backdrop-blur-xl transition ${activeCategory === category ? "border-teal-300/45 bg-teal-300/18 text-teal-50" : "border-white/12 bg-slate-950/58 text-white/72 hover:bg-white/12 hover:text-white"}`}>
+          <button key={label} type="button" onClick={() => setActiveCategory(category)} className={`hidden h-12 min-w-[140px] items-center justify-center gap-2 rounded-xl border px-4 text-sm font-medium shadow-2xl backdrop-blur-xl transition md:inline-flex ${activeCategory === category ? "border-teal-300/45 bg-teal-300/18 text-teal-50" : "border-white/12 bg-slate-950/58 text-white/72 hover:bg-white/12 hover:text-white"}`}>
             <Icon size={16} />
             {label}
           </button>
         ))}
-        <button type="button" onClick={toggleDiscovery} className="inline-flex h-12 items-center gap-2 rounded-xl bg-teal-400 px-4 text-sm font-medium text-slate-950 shadow-2xl transition hover:bg-teal-300">
+        <button type="button" onClick={toggleDiscovery} className="ml-auto inline-flex h-12 min-w-[11rem] items-center justify-center gap-2 rounded-xl bg-teal-400 px-4 text-sm font-medium text-slate-950 shadow-2xl transition hover:bg-teal-300 md:ml-0 md:min-w-0">
           {isDiscovering ? <Pause size={16} /> : <Play size={16} />}
           {isDiscovering ? copy.stop : copy.discover}
         </button>
       </div>
 
-      <div className="absolute right-4 top-20 z-20 w-[230px] rounded-[1.25rem] border border-white/12 bg-slate-950/66 p-4 shadow-2xl backdrop-blur-xl">
+      <div className="absolute right-4 top-20 z-20 hidden w-[230px] rounded-[1.25rem] border border-white/12 bg-slate-950/66 p-4 shadow-2xl backdrop-blur-xl md:block">
         <div className="flex items-center gap-3">
           <CloudSun size={34} className="text-amber-300" />
           <div>
@@ -908,7 +908,7 @@ export default function CesiumLifestyleViewerV7({
       </div>
 
       {selectedPoi && (
-        <div className="absolute right-4 top-[270px] z-20 w-[300px] rounded-[1.35rem] border border-white/12 bg-slate-950/72 p-4 shadow-2xl backdrop-blur-xl">
+        <div className="absolute right-4 top-[270px] z-20 hidden w-[300px] rounded-[1.35rem] border border-white/12 bg-slate-950/72 p-4 shadow-2xl backdrop-blur-xl md:block">
           <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-teal-100/70">{copy.selected}</p>
           <h3 className="mt-2 text-lg font-medium text-white">{selectedPoi.name}</h3>
           <p className="mt-1 text-sm text-white/58">{CATEGORY_META[selectedPoi.category].label}</p>
@@ -922,14 +922,14 @@ export default function CesiumLifestyleViewerV7({
       )}
 
       {!selectedPoi && status === "ready" && (
-        <div className="absolute right-4 top-[270px] z-20 w-[300px] rounded-[1.35rem] border border-white/12 bg-slate-950/62 p-4 text-sm leading-6 text-white/62 shadow-2xl backdrop-blur-xl">
+        <div className="absolute right-4 top-[270px] z-20 hidden w-[300px] rounded-[1.35rem] border border-white/12 bg-slate-950/62 p-4 text-sm leading-6 text-white/62 shadow-2xl backdrop-blur-xl md:block">
           {copy.selectHint}
         </div>
       )}
 
       {selectedPoi && poiScreenPosition && (
         <div
-          className="pointer-events-none absolute z-30 -translate-x-1/2 -translate-y-[calc(100%+14px)]"
+          className="pointer-events-none absolute z-30 hidden -translate-x-1/2 -translate-y-[calc(100%+14px)] md:block"
           style={{ left: poiScreenPosition.x, top: poiScreenPosition.y }}
         >
           <div className="flex items-center gap-2.5 rounded-2xl border border-white/15 bg-slate-950/80 py-2 pl-2 pr-3.5 shadow-2xl backdrop-blur-xl">
@@ -951,7 +951,7 @@ export default function CesiumLifestyleViewerV7({
         </div>
       )}
 
-      <div className="absolute bottom-20 right-4 z-20 flex flex-col gap-1">
+      <div className="absolute bottom-24 right-3 z-20 flex flex-col gap-1 md:bottom-20 md:right-4">
         <button type="button" onClick={resetNorth} title="North" className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/12 bg-slate-950/72 text-white shadow-xl backdrop-blur-md transition hover:bg-white/14">
           <Compass size={15} />
         </button>
@@ -972,7 +972,7 @@ export default function CesiumLifestyleViewerV7({
         </button>
       </div>
 
-      <div className="absolute right-4 top-4 z-20 flex gap-2">
+      <div className="absolute right-3 top-[max(1rem,env(safe-area-inset-top))] z-30 flex gap-2 md:right-4 md:top-4">
         <button type="button" onClick={closeViewer} className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-white/12 bg-slate-950/72 px-4 text-sm font-medium text-white shadow-xl backdrop-blur-md transition hover:bg-white/14">
           <X size={16} />
           <span>{copy.close}</span>
@@ -980,7 +980,7 @@ export default function CesiumLifestyleViewerV7({
       </div>
 
       {(status === "loading" || status === "missing" || status === "error") && (
-        <div className="pointer-events-none absolute left-[380px] top-5 z-20 max-w-sm rounded-2xl border border-white/12 bg-slate-950/72 p-4 shadow-2xl backdrop-blur-md">
+        <div className="pointer-events-none absolute left-3 right-3 top-20 z-20 rounded-2xl border border-white/12 bg-slate-950/72 p-4 shadow-2xl backdrop-blur-md md:left-[380px] md:right-auto md:top-5 md:max-w-sm">
           {status === "loading" && <p className="inline-flex items-center gap-2 text-sm text-white/70"><Loader2 size={15} className="animate-spin" /> {copy.loading}</p>}
           {status === "missing" && <p className="text-sm text-amber-200">{copy.missing}</p>}
           {status === "error" && <p className="text-sm text-rose-200">Vue 3D indisponible.</p>}
